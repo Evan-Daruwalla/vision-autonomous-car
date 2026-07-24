@@ -1,0 +1,9 @@
+# OS junk
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Slicer output — regenerate from source models, don't version
+*.gcode
+*.bgcode
+*.3mf.backup
