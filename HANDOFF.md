@@ -44,7 +44,8 @@ lives in the record.
 | Drive motor selection | M1.1b | **Done (purchase pending)** | 2026-07-23: Pololu #1093 N20 30:1 HP 6V, $23.95; docs/research/2026-07-23_drive-motor-selection.md |
 | Power system selection | M1.1c | **Done (purchase pending)** | 2026-07-23: split source, power bank owned; docs/research/2026-07-23_power-system.md |
 | BOM | M2.8 | **Final; BLOCKED-ON-EVAN** | `docs/BOM.md`, ≈$176-179 + shipping |
-| Chassis CAD + print | M1 | **Not started** | tasks 2-5 and 7 runnable now; task 6 waits on M1.1b |
+| Chassis CAD + print | M1 | **Started** | M1.3 coupon generated + validated 2026-07-23; awaiting Evan's print + measurements |
+| Tolerance coupon | M1.3 | **Ready to print** | `cad/tolerance_coupon_v1.stl` + `cad/README.md`; gates every chassis dimension |
 | Electronics + teleop | M2 | **Not started** | purchase list is task 8 |
 | Behavioral cloning | M3 | **Not started** | |
 | M4 architecture gate | M4.16a | **Done** | 2026-07-23: feasible w/ constraints; docs/research/2026-07-23_world-model-8gb-vram.md |
@@ -119,12 +120,20 @@ lives in the record.
 
 ## BLOCKED-ON-EVAN
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
-- **M1.1b drive-motor purchase** — research in flight; needs Evan's pick +
-  go before ordering.
+- ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
+  2026-07-23**; the motor is in the BOM below.
 - **THE ORDER (`docs/BOM.md`, ≈$176-179).** Nothing is bought. Everything
   downstream of M1.5 waits on parts. Before ordering Evan should check the
   four items in the BOM's "Verify before ordering" section — most
   importantly that his power bank's label reads **5V/3A**.
+- **PRINT THE COUPON (M1.3)** — needs NO parts, only his printer and Lego.
+  `cad/tolerance_coupon_v1.stl`, once in PLA and once in PETG, using the
+  settings he intends for the chassis. Every chassis dimension in M1.5–M1.7
+  waits on these measurements, so this is the critical path while the order
+  ships. Procedure + results table: `cad/README.md`.
+- **Which printer?** PrusaSlicer and Bambu Studio are both installed on this
+  machine, but the actual printer model and filament stock are uncatalogued
+  (M1.2). The coupon's print settings must be recorded with its measurements.
 - **Open question for Evan:** does "no Lego motors" mean none at all, or
   none of the PF/Powered-Up families? EV3/NXT/9V-Technic motors, if owned,
   would reopen the free-encoder odometry path. Confirm at M1.2 inventory.

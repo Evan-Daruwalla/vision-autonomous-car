@@ -43,6 +43,7 @@ the dated entry, not the digest.
 - [F — Drive motor resolved; Lego motors rejected on physics; coupler-torque premise corrected](#appendix-f---drive-motor-resolved-lego-motors-rejected-on-physics-coupler-torque-premise-corrected-2026-07-23-1747-cdt) (07-23)
 - [G — Power system resolved; Pi 5A premise overturned; budget forces a cut](#appendix-g---power-system-resolved-pi-5a-premise-overturned-budget-forces-a-cut-2026-07-23-1759-cdt) (07-23)
 - [H — Budget settled (4GB + owned bank); BOM final; missing camera cable caught](#appendix-h---budget-settled-4gb--owned-bank-bom-final-missing-camera-cable-caught-2026-07-23-2046-cdt) (07-23)
+- [I — Repo initialized; M1.3 tolerance coupon generated and validated](#appendix-i---repo-initialized-m13-tolerance-coupon-generated-and-validated-2026-07-23-2110-cdt) (07-23)
 
 ---
 
@@ -692,3 +693,92 @@ only Evan's existing printer and Lego and can start before the order
 arrives; task 6 (rear drive module) still waits on the motor's real measured
 dimensions. (4) The M4 task list (16-20) is concrete but its detail should
 be revisited once M3's dataset format and eval harness actually exist.
+
+# Appendix I - Repo initialized; M1.3 tolerance coupon generated and validated (2026-07-23, ~21:10 CDT)
+
+**WHAT:** Two tasks at Evan's instruction ("2 then 3"): git repository
+initialized with the doc scaffold committed, then PRD task M1.3 (print
+tolerance coupons) prepared to the point where only Evan's printer is needed.
+
+**GIT.** `git init` in the project root; minimal `.gitignore` (OS junk +
+slicer gcode output only - no speculative language ignores, since no code
+existed yet). 23 files staged, initial commit **6829d51**, working tree clean.
+NOT pushed - Evan did not ask, and there is no remote. Note for future
+sessions: the commit message was written to a file and passed with
+`git commit -F` after a PowerShell here-string mangled the embedded double
+quotes into pathspec arguments (`error: pathspec 'VRAM' did not match...`).
+Use `-F` with a message file for any multi-line commit message on this
+machine.
+
+**M1.3 - DEVIATION FROM THE PRD, dated and justified.** The task as written
+said to print "the Printables 660885 test board (or equivalent self-modeled
+coupon)". A self-generated coupon was built instead. Reasons: the Printables
+page 403s to automated fetch so its actual contents could never be verified
+(the drive-motor research hit the same wall on Printables/Thingiverse), a
+downloaded STL cannot be re-parameterized when the sweep turns out to bracket
+nothing, and a generator script is a better portfolio artifact than a
+download. The PRD task text was struck in place with this reason rather than
+rewritten.
+
+**Environment discovered** (feeds M1.2 inventory): git 2.53.0 with Evan's
+identity configured; **real Python 3.14.4** (not the Microsoft Store stub);
+**OpenSCAD NOT installed**; **both PrusaSlicer and Bambu Studio installed** -
+the actual printer model and filament stock are still uncatalogued. Python
+being real is what made a zero-dependency generator the right call over an
+OpenSCAD file Evan would have had to install a tool to open.
+
+**The artifact:** `scripts/gen_tolerance_coupon.py` ->
+`cad/tolerance_coupon_v1.stl`. A 104 x 56 x 8 mm plate on the real 8 mm Lego
+beam pitch, 20 holes, 18,048 triangles. Three test features: a PITCH row of 5
+holes at exactly 8.00 mm centres (catches printer dimensional scaling, which
+a single hole cannot), a PIN-fit sweep 4.80-5.30 mm, and an AXLE-bore sweep
+5.20-5.70 mm. Rows are identified by marker-hole count (1 = pin, 2 = axle,
+none = pitch) because embossed text would need a font engine. Plate thickness
+is 8 mm deliberately - it matches a real Lego beam, and hole shrinkage is
+depth-dependent, so a thin coupon would report optimistic numbers. Circle
+facets use a circumscribed polygon (radius / cos(pi/n)) so the polygonal
+approximation does not itself bias a tolerance measurement.
+
+**TWO REAL DEFECTS WERE CAUGHT BY THE GENERATOR'S OWN CHECKS, not by
+inspection.** This is the part worth recording:
+
+1. **First run: `manifold FAIL`, 2560 duplicate + 4880 unmatched directed
+   edges.** Cause: cells containing a hole subdivided their square boundary
+   into 64 segments, while hole-less cells emitted a single quad - leaving
+   T-junctions along every shared edge, and the outer walls did not match
+   either. Fix: subdivide EVERY cell boundary identically and generate the
+   perimeter walls at the same pitch.
+2. **Second run: `manifold FAIL` (2560 unmatched) and `volume FAIL` -
+   47616 mm3 against an expected 43519.** The volume number is what localized
+   it: the mesh measured LARGER than a solid plate, so the holes were adding
+   material instead of removing it. The hole walls were wound inside-out, and
+   2560 = 20 holes x 64 segments x 2 rims pinned it exactly. Fix: reverse the
+   wall traversal so each rim edge runs opposite to the face triangulation
+   sharing it.
+3. **Third run: `manifold PASS` (0 duplicate, 0 unmatched), `volume PASS`
+   at 6.69e-16 relative error, `OVERALL PASS`.**
+
+The signed-volume check was added specifically because edge-pairing proves
+topology and winding consistency but would still pass a fully inverted mesh -
+and it is what turned "something is wrong" into "the hole walls are
+backwards" in one step. Neither defect would have been visible in a slicer
+preview; both would have produced a subtly wrong physical part, on the one
+artifact whose entire job is dimensional accuracy.
+
+**Bench documentation:** `cad/README.md` carries the print guidance (same
+settings as the eventual chassis, or the numbers do not transfer; no supports;
+print BOTH PLA and PETG since the research calls for PETG on rotating bores
+and PLA is fine for static holes), the pass criteria for each row (pin = seats
+with firm thumb pressure and HOLDS; axle = spins FREELY with no radial slop;
+pitch = a real Lego beam spans all 5 holes, else measure the 32.00 mm nominal
+span and derive the printer's scale factor), and an empty results table for
+the measurements.
+
+**HONEST OPEN ITEMS:** (1) **The coupon has NOT been printed** - it is
+validated geometry only, and no dimension in it has touched a real Lego part.
+Every tolerance figure in the docs remains the unverified community starting
+point until Evan prints and measures. (2) The printer model and filament stock
+are still uncatalogued (M1.2). (3) Nothing has been ordered. (4) Not pushed -
+no remote exists. (5) If the sweep brackets nothing at either end, the
+generator constants need widening and a re-print, which is exactly why the
+generator exists rather than a downloaded STL.

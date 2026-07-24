@@ -252,11 +252,20 @@ transfer gap) must not block the capstone.
    diff type, steering parts), printer model, filament on hand; pick CAD
    tool (recommend Onshape free tier unless Evan prefers Fusion). Done:
    `tooling.md` bin + record entry updated. (Not blocked — can run before 1.)
-3. **Print tolerance coupons.** Print the Printables 660885 test board (or
-   equivalent self-modeled coupon) in the chassis filament(s); measure pin
-   hole, axle bore, and beam-pitch fits with calipers. Done: measured table
-   (nominal vs printed vs fit verdict) in the record; chosen offsets written
-   into `gotchas.md`.
+3. **Print tolerance coupons.** ~~Print the Printables 660885 test board (or
+   equivalent self-modeled coupon)~~ (changed 2026-07-23 ~20:46: a
+   self-generated coupon replaces the third-party download — its contents
+   couldn't be verified, the source page 403s, and a parametric generator can
+   be re-run when the sweep needs widening). **Coupon generated and validated
+   2026-07-23:** `scripts/gen_tolerance_coupon.py` →
+   `cad/tolerance_coupon_v1.stl` (104×56×8 mm, 20 holes; generator's manifold
+   and signed-volume self-checks both PASS). Bench procedure, print settings
+   guidance, and the results table are in `cad/README.md`. **Print in BOTH
+   PLA and PETG** using the exact settings intended for the chassis.
+   Done: measured table (commanded Ø vs measured Ø vs fit verdict) + print
+   settings in the record; chosen offsets written into `gotchas.md`,
+   replacing the unverified community figures. **Runnable NOW — needs only
+   Evan's printer and Lego, not the parts order.**
 4. **Measure donor geometry.** Calipers on the donor steering assembly +
    diff: kingpin spacing, steering arm lengths, axle spans, wheel hub
    interfaces. Done: dimensioned sketch (photo or CAD screenshot) in
