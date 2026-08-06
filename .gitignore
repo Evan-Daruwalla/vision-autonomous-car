@@ -7,3 +7,20 @@ desktop.ini
 *.gcode
 *.bgcode
 *.3mf.backup
+
+# Python environment — rebuild from ml/requirements.txt, never commit
+.venv/
+__pycache__/
+*.pyc
+
+# Simulator binary (~236 MB) — download from the gym-donkeycar GitHub release
+sim/
+# ...and the log the Unity sim drops in the working directory when it runs
+unitylog.txt
+
+# Training data, checkpoints, runs — large and regenerable
+ml/data/
+ml/runs/
+ml/checkpoints/
+*.pt
+*.ckpt

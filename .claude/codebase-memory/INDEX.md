@@ -13,7 +13,7 @@ Standards bins (only those the codebase actually commits to):
 - ui.md — N/A, no frontend planned; teleop UI TBD at M2 (updated 2026-07-23)
 - testing.md — empty, no code yet (updated 2026-07-23)
 - data.md — empty; driving-log format lands at M3 (updated 2026-07-23)
-- tooling.md — empty; CAD tool choice lands at M1.2 (updated 2026-07-23)
+- tooling.md — Python 3.11 venv rule, machine facts, git -F quirk (updated 2026-08-05)
 
 Cross-bin invariants:
 - No hardware purchase without Evan's explicit go (BLOCKED-ON-EVAN).

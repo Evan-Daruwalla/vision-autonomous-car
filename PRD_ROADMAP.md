@@ -388,6 +388,119 @@ dataset format and eval harness exist)
 20. **gym-donkeycar PPO baseline; honest transfer attempt + report.** The
     report's value is the measured transfer gap itself.
 
+### SIM-POC — simulated proof of concept of the M4 pipeline (ADDED 2026-08-05, parallel track, runnable before any hardware exists)
+
+**What this is (and is not).** Asked by Evan 2026-08-05: "can we train the
+model in a simulated space first as a proof of concept?" Yes — as a POC of
+the PIPELINE, not of transfer. The M4 world-model stack is trained on
+simulated driving data and evaluated IN SIM, proving the code path end to
+end while parts ship. This is NOT M5 (no online RL, no PPO, no sim2real
+claim), and the scope guard stands: **the sim-trained policy is never
+claimed as the real car's policy; M4's capstone remains offline training on
+the car's own real logs.** What it retires early, from the 2026-07-23
+research's own flagged unknowns: (a) whether dreamerv3-torch's
+`offline_traindir` runs end-to-end with zero env instantiation; (b) the real
+8GB OOM boundary on the actual 3060 Ti — the number nobody has published;
+(c) the episode format / frame-action sync / held-out split / eval harness
+that M3-M4 then inherit proven. Sim: **gym-donkeycar v25.10.06** — Windows
+binary verified to exist 2026-08-05 (DonkeySimWin.zip, 236,059,289 bytes,
+GitHub API).
+
+P1. **ML environment.** ~~Pinned **Python 3.11 venv** (matches DonkeyCar
+    5.x; system 3.14.4 is too new to assume ML wheels)~~ (amended
+    2026-08-05 ~21:42: **3.11 is not installed on this machine; 3.12.10 is**,
+    and it was the pre-declared fallback. Verified before switching: torch
+    2.13.0 classifies 3.10-3.14, and gym-donkeycar needs only
+    gymnasium>=0.29/numpy/pillow at python_requires>=3.7 — so 3.12 is
+    covered and no 3.11 install is warranted.) **Python 3.12 venv at
+    `.venv/`** + PyTorch CUDA + gym-donkeycar **installed from GitHub, NOT
+    PyPI** (PyPI's gym-donkeycar is 1.0.13 from 2019-08-04 — six years
+    stale; GitHub is v25.10.06) + the DonkeySimWin binary (~236 MB). Done:
+    `torch.cuda.is_available()` prints True from the venv AND a
+    gym-donkeycar env connects to the sim and returns a camera frame.
+P2. **Sim data corpus.** Drive the sim (scripted PID lane-follower or
+    keyboard) and record camera + steering/throttle into the
+    dreamerv3-torch episode format; ~100k frames; held-out split defined
+    here. Done: corpus on disk + N random frames spot-checked against their
+    recorded actions + split documented.
+P3. **Small world model first (Ha & Schmidhuber V+M+C).** Conv-VAE →
+    z∈R^32; MDN-RNN over (z_t, a_t, h_t). Done: multi-step latent rollouts
+    on held-out sim data are recognisably track-like; rollout frames saved.
+P4. **DreamerV3-S offline on the same corpus.** dreamerv3-torch repo
+    defaults, `offline_traindir`, imag_horizon 5, fp32 first; **Sysmem
+    Fallback disabled before the first run**; log
+    `torch.cuda.max_memory_allocated()` every epoch. Done: a trained model
+    OR a documented OOM boundary with the measured number — both pass.
+P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
+    through the learned dynamics; evaluate in sim against the P2 scripted
+    driver. Done: eval table in the record + the explicit no-transfer-claim
+    note.
+
+## 6b. EXECUTION PLAN (dated 2026-08-05, approved by Evan — schedules the tasks above; adds no new milestones)
+
+**Why this exists:** §6 says WHAT to build and in what order. This says WHEN,
+against a real deadline, and who does which part. Approved 2026-08-05 after
+Evan set the deadline and confirmed the portfolio context.
+
+**THE DEADLINE (new constraint, 2026-08-05): EA/ED college applications,
+~Nov 1 2026** — 12.5 weeks out. **Nov 1 requires SIM-POC + M3 only** (a real
+BC-driving car + a sim-trained world model is a complete application story).
+**M4-on-real-logs is explicitly a STRETCH for Nov 1 and COMMITTED for RD
+(Jan 2027)** — it lands as an application update or interview material if it
+slips. Anything that threatens M3-by-mid-October is escalated to Evan, not
+absorbed silently.
+
+**PORTFOLIO CONTEXT (2026-08-05):** this is **1 of 5 concurrent portfolio
+projects** (ServeLocal, two trading projects, this, a World Models research
+project). Consequences that bind execution:
+- Assume **~2-3 sittings/week here**, not full attention. One task per
+  sitting, always ending at a done-check — nothing left half-open.
+- **Evidence banks at milestone completion, not in October.** Photos, video,
+  measured tables go into the record the day they happen; nothing is
+  reconstructed from memory at application time.
+- **C3-C5 and M4 double as World-Models-research substrate** — capture
+  configs, measured numbers, and limitations in the record so that project
+  consumes them without re-running anything.
+
+**THREE PARALLEL LANES.** A = procurement (Evan) · B = physical/CAD (Evan's
+hands, my CAD support) · C = software/SIM-POC (me; costs Evan no sittings).
+Lane C is why the shipping window isn't dead time.
+
+| Week | Dates | Targets |
+|---|---|---|
+| 0 | Aug 5-10 | A1 checklist + A2 orders · **B1 coupon printed+measured** · C1 venv+sim |
+| 1 | Aug 10-17 | B2 inventory · B3 donor measured · B4 CAD starts · C2 corpus · C3 V+M+C |
+| 2 | Aug 17-24 | Parts arrive · motor calipered → B5 · B4 printed+fitted · **C4 VRAM boundary measured** |
+| 3 | Aug 24-31 | B6 assembly → **M1 done** · C5 → **SIM-POC done (portfolio piece banked)** |
+| 4 | Aug 31-Sep 7 | B7 bench bring-up + power integration (school starts — weekend cadence) |
+| 5-6 | Sep 7-21 | Teleop + logging → **M2 done**; track defined; first real laps |
+| 7-9 | Sep 21-Oct 12 | M3 baseline + PyTorch BC + lane-seg + 3-lap eval → **M3 done = Nov-1 story complete** |
+| 10-12 | Oct 12-Nov 1 | **M4 stretch window** (code already exists from lane C) |
+| post | Nov-Jan | M4 for RD update · task 20 writeup · M5 optional |
+
+**Float ≈1-2 weeks, in weeks 4-6, shared with four other projects.** The
+design absorbs it: Nov 1 needs only weeks 0-9.
+
+**Lane A — procurement (Evan, ~45 min then waiting).** A1 pre-order checks
+BEFORE checkout: power bank label reads 5V/3A · **count the diff ring teeth
+(28 = 62821, 24+16 = 6573)** — sets CAD mesh centres · confirm a 12-tooth
+bevel (ideally also a 20t double-bevel) is in the bin, else ~$3 add · which
+tires · **ask dad re: soldering iron+solder, multimeter, SD reader**
+(assumed owned 2026-08-05; any "no" is +$8-40 and is SHOP TOOLING, not car
+BOM — Evan decides whether the $200 ceiling covers it) · re-check prices.
+A2 consolidated orders (target Fri Aug 7), 4 vendors, $15-25 shipping. A3
+log arrivals + price deltas.
+
+**Lane B** = existing tasks 2-11, re-ordered so B1(=task 3, the coupon) runs
+FIRST because it gates every printed dimension, and task 6's motor cradle
+stays parametric until the real motor is calipered.
+
+**Lane C** = SIM-POC P1-P5 below, then the same code serves M3 and M4.
+
+**COMMIT AUTHORIZATION (granted by Evan with this plan, 2026-08-05):** commit
+at each task's done-check, per-task, message naming the task ID and its
+verification result. **Push still requires Evan's explicit say-so.**
+
 ## 7. HANDOFF NOTES
 
 **Read first, in order:** `HANDOFF.md` → this file →

@@ -44,6 +44,8 @@ the dated entry, not the digest.
 - [G — Power system resolved; Pi 5A premise overturned; budget forces a cut](#appendix-g---power-system-resolved-pi-5a-premise-overturned-budget-forces-a-cut-2026-07-23-1759-cdt) (07-23)
 - [H — Budget settled (4GB + owned bank); BOM final; missing camera cable caught](#appendix-h---budget-settled-4gb--owned-bank-bom-final-missing-camera-cable-caught-2026-07-23-2046-cdt) (07-23)
 - [I — Repo initialized; M1.3 tolerance coupon generated and validated](#appendix-i---repo-initialized-m13-tolerance-coupon-generated-and-validated-2026-07-23-2110-cdt) (07-23)
+- [J — Sim-first POC question; SIM-POC track added to the PRD](#appendix-j---sim-first-poc-question-sim-poc-track-added-to-the-prd-2026-08-05-2127-cdt) (08-05)
+- [K — Nov-1 deadline set; execution plan approved; C1 environment started](#appendix-k---nov-1-deadline-set-execution-plan-approved-c1-environment-started-2026-08-05-2142-cdt) (08-05)
 
 ---
 
@@ -782,3 +784,164 @@ are still uncatalogued (M1.2). (3) Nothing has been ordered. (4) Not pushed -
 no remote exists. (5) If the sweep brackets nothing at either end, the
 generator constants need widening and a re-print, which is exactly why the
 generator exists rather than a downloaded STL.
+
+# Appendix J - Sim-first POC question; SIM-POC track added to the PRD (2026-08-05, ~21:27 CDT)
+
+**WHAT:** Evan asked: "can we train the model in a simulated space first as a
+proof of concept?" Answered yes, with a scope clarification that keeps the
+ratified staging intact, and a new parallel SIM-POC task block appended to
+the PRD (dated 2026-08-05). Cadence: this entry fires on the prompt-#12 hook.
+
+**THE 13-DAY GAP, stated honestly:** the previous entry (Appendix I) is
+2026-07-23; today is 2026-08-05. Whether the tolerance coupon was printed or
+the BOM order was placed in between is UNKNOWN to this session - Evan has not
+reported either, and nothing in the repo records it. Both remain open items;
+if either happened, the results belong in the record and Evan has been asked.
+
+**THE DISTINCTION THAT MAKES THE ANSWER YES.** The 2026-07-23 research
+demoted sim-RL because sim-trained policies transfer badly to real hardware
+(F1TENTH/RoboRacer, Appendix B/E) - that is a claim about TRANSFER. Evan's
+question is about a PROOF OF CONCEPT - a claim about the PIPELINE. Training
+the M4 world-model stack on simulated driving data proves the code path
+(data format -> VAE+MDN-RNN -> DreamerV3-S -> policy extraction -> eval)
+without touching the transfer bet at all, and evaluation in sim is free and
+safe. The ratified scope guard is untouched: the sim-trained policy is NEVER
+claimed as the real car's policy, and M4's capstone remains offline training
+on the car's OWN real logs. SIM-POC de-risks M4; it does not replace it.
+
+**Why now is exactly the right time:** nothing physical exists yet (order
+status unknown, coupon unprinted), so the software pipeline is the only
+workable critical path from this chair. The POC retires three explicitly
+flagged unknowns from the 2026-07-23 research while hardware waits:
+1. Whether `NM512/dreamerv3-torch`'s offline_traindir path actually runs
+   end-to-end with zero environment instantiation (Appendix E flagged this
+   verified-in-source but never verified-to-run).
+2. WHERE THE REAL 8GB OOM BOUNDARY IS on Evan's actual 3060 Ti - the number
+   the VRAM research said nobody has published. Sim data makes this
+   measurable today (task P4's done-check: a trained model OR a documented
+   OOM boundary, both pass).
+3. Whether the episode format, frame/action sync, held-out split, and eval
+   harness hold together - so M3/M4 on real data inherit a proven pipeline.
+
+**Sim choice:** gym-donkeycar (already the research's low-friction pick for
+M5). Reviewer verified 2026-08-05 via the GitHub API that the current
+release v25.10.06 ships a Windows simulator binary - DonkeySimWin.zip,
+236,059,289 bytes - so the POC runs on this machine. (The releases HTML page
+failed to render its asset list; the API answered.)
+
+**Environment caveat recorded to tooling.md:** system Python is 3.14.4 -
+bleeding-edge for the ML ecosystem; PyTorch/gym wheel availability is
+unverified there. All ML work runs in a PINNED PYTHON 3.11 VENV, matching
+DonkeyCar 5.x's own requirement so the machine carries one toolchain
+convention. Wheel availability is P1's done-check, not an assumption.
+
+**PRD change under the mutability rules:** SIM-POC P1-P5 APPENDED as a
+parallel track (environment/venv -> sim data corpus in dreamerv3-torch
+episode format -> VAE+MDN-RNN small world model -> DreamerV3-S + measured
+VRAM boundary -> policy extraction + in-sim eval vs a scripted baseline).
+Nothing struck, nothing re-ordered; M1-M5 stand as ratified. Explicitly
+noted in the PRD: SIM-POC is not M5 (no online RL, no PPO, no transfer
+claim) - it is the M4 pipeline rehearsed on free data.
+
+**Model-routing note:** session model switched back to Fable 5 this prompt
+(was Opus 4.8 since ~17:21 on 07-23), so the opus-workers cheaper-tier
+rationale applies again to any future worker spawns.
+
+**HONEST OPEN ITEMS:** (1) Coupon print status and order status unknown -
+asked. (2) The sim binary is NOT downloaded and no venv exists; SIM-POC P1
+needs Evan's go (a ~236 MB download). (3) Python 3.11 wheel availability for
+torch/gym-donkeycar is assumed-reasonable, verified only when P1 runs.
+(4) Docs updated this entry: PRD SIM-POC block, tooling.md first real fact,
+dependencies.md gym-donkeycar moved from "optional M5" to "SIM-POC + M5",
+HANDOFF workstream row. Not committed - Evan has not asked for a commit.
+
+# Appendix K - Nov-1 deadline set; execution plan approved; C1 environment started (2026-08-05, ~21:42 CDT)
+
+**WHAT:** Evan reported nothing printed and nothing ordered, and asked for a
+full thought-out plan before any execution. Planning session produced a
+three-lane execution plan, approved, then appended to the PRD as section 6b.
+Lane C (software) started immediately.
+
+**THREE NEW CONSTRAINTS Evan supplied that reshaped the plan:**
+
+1. **HARD DEADLINE: EA/ED college applications ~Nov 1 2026** - 12.5 weeks
+   out. This is the first real deadline the project has had; every prior doc
+   was dependency-ordered only.
+2. **CAD tool: Onshape** (free public docs, browser-based, built-in version
+   control matching the documentation-trail ethos). Resolves the M1.2 open
+   question.
+3. **PORTFOLIO CONTEXT, volunteered on plan review: this is 1 of 5
+   concurrent portfolio projects** (ServeLocal, two trading projects, this,
+   and a World Models research project), all documenting process for the
+   same applications. This materially changed the plan rather than being a
+   footnote - see below.
+
+**Tools:** calipers confirmed owned; soldering iron+solder, multimeter, and
+USB SD reader ASSUMED owned pending Evan asking his dad. Recorded as an
+assumption with a $8-40 contingency, and flagged as SHOP TOOLING rather than
+car BOM so it does not silently breach the $200 ceiling.
+
+**HOW THE PORTFOLIO CONTEXT CHANGED THE PLAN (the substantive edit):** the
+first draft implicitly assumed this project had Evan's full attention and
+scheduled M4-on-real-logs to land Oct 19-26, before Nov 1. Five concurrent
+projects makes that schedule dishonest. Revised:
+- Bandwidth assumption stated explicitly: **~2-3 sittings/week here**, and
+  the one-task-per-sitting design is what makes five-way juggling survivable
+  (every sitting ends at a done-check; nothing left half-open).
+- **Nov 1 now requires only SIM-POC + M3** - a real BC-driving car plus a
+  sim-trained world model is a complete application story. **M4-on-real is
+  reframed as STRETCH for Nov 1 and COMMITTED for RD (Jan 2027)**, landing
+  as an application update or interview material if it slips. Pre-declaring
+  this beats discovering it in late October.
+- **Evidence banks at milestone completion, never at application season** -
+  photos, video, measured tables into the record the day they happen. This
+  was already the record discipline; it is now also a portfolio requirement.
+- **C3-C5 and M4 double as substrate for the World Models research
+  project** - the two-architecture comparison on one dataset, the
+  unpublished 8GB DreamerV3-S boundary, and any honest negative results get
+  captured with configs and limitations so that project consumes them
+  without re-running anything. One build, two portfolio entries.
+
+**Three lanes** so the shipping window is not dead time: A procurement
+(Evan, ~45 min then waiting) - B physical/CAD (Evan's hands, my CAD support,
+gated by the coupon then by parts) - C software/SIM-POC (me, costs Evan zero
+sittings, starts now). Float is ~1-2 weeks concentrated in weeks 4-6 and is
+shared with four other projects, which the design absorbs because Nov 1
+needs only weeks 0-9.
+
+**PRD updated under the mutability rules:** new **section 6b EXECUTION PLAN**
+appended (schedule table, lane definitions, the A1 pre-order checklist,
+deadline and portfolio constraints). No milestone was struck or re-ordered;
+M1-M5 and SIM-POC P1-P5 stand as ratified. **Per-task commit authorization
+granted by Evan with the plan approval** - commit at each done-check, naming
+the task ID and its verification result; push still requires his explicit
+say-so.
+
+**C1 STARTED - two findings already, both recorded:**
+
+1. **Python 3.11 is NOT installed on this machine** (`py -0p` shows 3.14.4
+   and 3.12.10 only). 3.12 was the pre-declared fallback, and it was
+   verified BEFORE switching rather than assumed: torch 2.13.0 classifies
+   Python 3.10-3.14, and gym-donkeycar's GitHub setup.py needs only
+   gymnasium>=0.29.0 / numpy / pillow at python_requires>=3.7. So 3.12 is
+   covered and installing 3.11 would have been unjustified work. **Venv
+   created at `.venv/` on Python 3.12.10**, pip 26.2.1.
+2. **PyPI's `gym-donkeycar` is SIX YEARS STALE - 1.0.13, released
+   2019-08-04** - while the GitHub repo ships v25.10.06 (2025-10-06). A
+   naive `pip install gym-donkeycar` would have silently installed a 2019
+   package against a 2025 simulator binary. **Install source is GitHub, not
+   PyPI**, now written into the PRD's P1 task text and the dependencies bin.
+
+**Hardware confirmed for the record:** `nvidia-smi` reports **NVIDIA GeForce
+RTX 3060 Ti, 8192 MiB, driver 610.62** - the 8GB figure Evan gave on 07-23
+is now machine-verified rather than reported. PyTorch cu126 wheel install
+running at time of writing.
+
+**HONEST OPEN ITEMS:** (1) PyTorch install not finished;
+`cuda.is_available()` NOT yet verified - C1's done-check is unmet until it
+prints True. (2) The DonkeySimWin binary (~236 MB) is not downloaded yet.
+(3) Coupon still unprinted and order still unplaced - both are Evan's
+actions this week, and both were confirmed outstanding at the top of this
+session. (4) The soldering-iron/multimeter/SD-reader assumption is
+unconfirmed until Evan asks his dad. (5) Nothing committed yet this session.
+

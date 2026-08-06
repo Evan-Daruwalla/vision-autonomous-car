@@ -10,10 +10,17 @@ the car's own logged real driving. The process is the product: every stage
 verified on the physical car and documented as a college-portfolio
 engineering artifact.
 
-## Current state — All research complete; BOM final; waiting on Evan's order
+## Current state — BOM final + SIM-POC track added; waiting on Evan's order, coupon print, and SIM-POC go
 
-**Last updated: 2026-07-23** — this file is the only live snapshot; history
+**Last updated: 2026-08-05** — this file is the only live snapshot; history
 lives in the record.
+
+> **2026-08-05 — SIM-POC added (record Appendix J).** Evan asked to train in
+> sim first as a proof of concept — yes, as a POC of the M4 PIPELINE, not of
+> transfer (scope guard intact; the sim policy is never the car's policy).
+> PRD tasks P1-P5: Py3.11 venv → sim corpus → V+M+C → DreamerV3-S with the
+> measured 8GB boundary → in-sim eval. **Coupon-print and order status
+> after 2026-07-23 are unknown to the docs — Evan asked to report.**
 
 > **2026-07-23 — Research brief + PRD written, then M1.1 gate answered
 > (record Phase 0, Appendix A-C).** Four-worker research settled the stack:
@@ -51,6 +58,7 @@ lives in the record.
 | M4 architecture gate | M4.16a | **Done** | 2026-07-23: feasible w/ constraints; docs/research/2026-07-23_world-model-8gb-vram.md |
 | Offline world model | M4 | **Not started** | tasks 16-20 now concrete (two architectures, one dataset) |
 | Sim-RL (optional) | M5 | **Not started** | never blocks M4 |
+| SIM-POC (M4 pipeline in sim) | P1-P5 | **Added 2026-08-05** | proves the pipeline + measures the 8GB boundary before hardware; P1 needs Evan's go (~236 MB sim download) |
 
 ## Hardware & stack facts (from the 2026-07-23 brief — re-verify prices at purchase)
 
