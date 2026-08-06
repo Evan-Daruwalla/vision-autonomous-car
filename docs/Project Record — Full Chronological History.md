@@ -47,6 +47,7 @@ the dated entry, not the digest.
 - [J — Sim-first POC question; SIM-POC track added to the PRD](#appendix-j---sim-first-poc-question-sim-poc-track-added-to-the-prd-2026-08-05-2127-cdt) (08-05)
 - [K — Nov-1 deadline set; execution plan approved; C1 environment started](#appendix-k---nov-1-deadline-set-execution-plan-approved-c1-environment-started-2026-08-05-2142-cdt) (08-05)
 - [L — Track design settled: print markings not roads; figure-8; stop signs reframed as the M4 showcase](#appendix-l---track-design-settled-print-markings-not-roads-figure-8-stop-signs-reframed-as-the-m4-showcase-2026-08-05-2218-cdt) (08-05)
+- [M — SIM-POC P2: expert driver tuned by measurement; alignment gate rebuilt after the first one proved wrong](#appendix-m---sim-poc-p2-expert-driver-tuned-by-measurement-alignment-gate-rebuilt-after-the-first-one-proved-wrong-2026-08-05-2310-cdt) (08-05)
 
 ---
 
@@ -1066,4 +1067,127 @@ traffic-light hardware are unbuilt and unpriced beyond a ~$5-10 estimate.
 (4) The gym-donkeycar sim tracks look nothing like a 1:14 American-marked
 road - irrelevant for SIM-POC, which proves the pipeline and makes no
 transfer claim, but it does mean sim and real data can never be pooled.
+
+
+# Appendix M - SIM-POC P2: expert driver tuned by measurement; alignment gate rebuilt after the first one proved wrong (2026-08-05, ~23:10 CDT)
+
+**WHAT:** SIM-POC P2 built and validated: `ml/episode_writer.py` (writes the
+NM512/dreamerv3-torch on-disk episode format), `ml/collect_sim_data.py`
+(scripted PID expert driving the Donkey simulator, layout-split corpus),
+`ml/verify_corpus.py` (the P2 done-check). Committed as 6d6bd8f. Corpus
+collection to the ~100k-frame target launched 2026-08-05 ~23:12 CDT.
+
+**THE LAYOUT SPLIT IS IN THE CODE, NOT THE INTENTIONS.** Per Appendix L,
+`TRAIN_TRACKS` (generated-track, generated-roads, mountain-track,
+roboracingleague-track) and `HOLDOUT_TRACKS` (waveshare) are module
+constants, fixed BEFORE any data was collected so the split cannot later be
+tuned to flatter a result. The verifier reads `log_track` back out of every
+saved episode and fails on any track appearing in both splits, so leakage is
+a test failure rather than a thing to remember. The 11 registered Donkey
+tracks are the simulator's analogue of the physical tile configurations.
+
+**FIRST SMOKE RUN FAILED, AND THE QUALITY FILTER IS WHY THAT WAS VISIBLE.**
+Both smoke episodes were REJECTED and not written - "too short (65 steps)"
+and "(99 steps)" against a 300-step request - because the car left the road
+almost immediately. Had the collector saved whatever it produced, the corpus
+would have silently filled with off-road frames labelled as expert
+demonstration. The filter (min 150 steps, mean|cte| <= 1.2) turned a data-
+poisoning bug into a loud rejection.
+
+**DIAGNOSED, NOT GUESSED.** An open-loop probe held steer at +0.35 for 40
+steps and logged cte: **+0.005 -> +4.224**. So positive steering INCREASES
+cross-track error on this simulator, and the correction must be negative -
+`STEER_SIGN = -1.0` is now a measurement, not a coin flip. A gain sweep on
+donkey-generated-track-v0 then produced the finding that actually mattered:
+
+| throttle | kp / kd | survived | mean abs cte |
+|---|---|---|---|
+| 0.32 | 0.32 / 0.28 | 191/400 | off-road |
+| 0.32 | 0.6 / 0.4 | 218/400 | off-road |
+| 0.32 | 1.0 / 0.6 | 203/400 | off-road |
+| 0.20 | 1.2 / 0.6 | **400/400** | 0.53 |
+| 0.20 | 1.8 / 0.9 | **400/400** | 0.41 |
+| 0.20 | **2.4 / 1.2** | **400/400** | **0.36** |
+
+**THROTTLE dominated the gains.** At 0.32 the car left the road in 191-218
+steps under every gain setting tried; at 0.20 every setting survived the full
+400. Tuning gains at the original throttle would have been chasing the wrong
+knob indefinitely. Adopted: KP 2.4, KD 1.2, KI 0.0, THROTTLE 0.20,
+THROTTLE_CORNER 0.14.
+
+**THE PART WORTH RECORDING: THE FIRST ALIGNMENT CHECK WAS WRONG, AND THE
+CORPUS IT WOULD HAVE FAILED WAS FINE.** An off-by-one between frames and
+actions is the failure mode that does not announce itself - training still
+converges, the curves still look healthy, and the model quietly learns to
+predict the PREVIOUS action from the current frame. So `verify_corpus.py`
+was built to re-derive alignment from pixels: estimate the horizontal scene
+shift between consecutive frames by cross-correlating a band of road ahead,
+then check that `action[i]` correlates with that shift better than
+`action[i+1]` does.
+
+It ran on a known-good corpus and reported the correlation peaking at **lag
+-1**, not 0. Taken at face value that says the data is misaligned. It is not
+- **it is vehicle physics.** Steering commands a heading RATE, not a heading,
+so the scene shift produced by a steering input necessarily appears a step
+or so after the command. Peak-correlation-at-lag-zero was simply the wrong
+test, and shipping it would have meant a permanent false alarm on correct
+data - or worse, "fixing" a correct writer to satisfy a broken check.
+
+**Replaced with an exact algebraic identity.** The expert driver is a
+deterministic function of cross-track error, so the collector now logs
+`log_cte` (recorded at the same instant as each frame) plus the PID
+parameters actually in force. The verifier recomputes every action from
+scratch:
+
+    action[i] == clip(sign * (kp*e + kd*(e - e_prev)), -limit, +limit)
+    where e = cte[i-1], e_prev = cte[i-2]
+
+No thresholds, no assumptions about dynamics, and rolling the action array by
+a single step breaks it immediately. The pixel-motion check was kept but
+DEMOTED to informational, printing the whole lag profile - it is genuinely
+useful for spotting a dead or frozen camera feed, it is just not an alignment
+gate. Logging the PID parameters per-episode rather than reading module
+constants also means re-tuning the driver later cannot retroactively
+invalidate an older corpus.
+
+**Verifier output on the corpus as it stood (2026-08-05 ~23:08 CDT), real
+output pasted:**
+
+    holdout  :   1 episodes,     401 frames, tracks ['donkey-waveshare-v0']
+    train    :   6 episodes,    3381 frames, tracks ['donkey-generated-roads-v0',
+                 'donkey-generated-track-v0', 'donkey-mountain-track-v0',
+                 'donkey-roboracingleague-track-v0']
+      split is disjoint      : no track appears on both sides
+    total frames: 3782
+    alignment:
+      exact PID identity     : verified on 7 episode(s), every action reproduced from log_cte
+      pixel-motion profile   : -3:0.57 -2:0.67 -1:0.72 +0:0.66 +1:0.51 +2:0.34  (n=3388, peak -1)
+    P2 CORPUS CHECK: PASS
+
+**Structural checks the verifier also enforces** (each one a bug that would
+otherwise surface much later): filename step-count must match the array
+length, since dreamerv3-torch's loader trusts the filename; `is_first` true
+only at t=0 and `is_last` only at the end; `action[0]` all zeros and
+`reward[0]` zero, because no action caused the reset frame; `discount == 0`
+exactly where `is_terminal` is true, so a time-limit truncation is never
+encoded as "the future ceased to exist"; no NaN or inf; steering within
+[-1, 1]; image arrays uint8 and (T, H, W, 3).
+
+**A `--holdout-episodes` flag was added 2026-08-05 ~23:12** so the held-out
+track is not over-sampled at the training track's episode count - the holdout
+sizes an evaluation, not a training set.
+
+**HONEST OPEN ITEMS:** (1) The corpus at time of writing is **3,782 frames
+against a ~100k target** - the full run is in flight and P2 is NOT done until
+it lands and re-verifies. (2) roboracingleague-track yielded only a 176-frame
+episode, so the expert may be marginal on that geometry; if it keeps
+under-producing it should be dropped from TRAIN_TRACKS with a dated note
+rather than left to quietly skew the corpus toward the easy tracks. (3) The
+expert drives on privileged simulator state (`cte`); this is deliberate and
+matches Evan later hand-driving the real car, and nothing downstream ever
+sees `cte` - the models get pixels only. (4) Episode lengths in the existing
+corpus are inconsistent (176/401/1001) because they span runs made with
+different `--max-steps`; harmless for training, but the final corpus summary
+should report the distribution rather than an average that hides it.
+(5) Still nothing physical printed, ordered, or built.
 

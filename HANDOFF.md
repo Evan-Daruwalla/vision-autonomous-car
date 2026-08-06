@@ -21,8 +21,17 @@ lives in the record.
 > requires only SIM-POC + M3; M4-on-real-logs is an explicit stretch for
 > Nov 1 and committed for RD (Jan 2027).** PRD §6b holds the three-lane
 > schedule. **Nothing printed and nothing ordered as of 2026-08-05** — those
-> are Evan's two actions this week. P1 (ML environment) is verified and
-> committed; P2 is next.
+> are Evan's two actions this week.
+>
+> **2026-08-05 ~23:10 — track design settled + P2 code done (Appendices L,
+> M).** Track: **print MARKINGS, not the road surface** (97% less filament
+> for identical camera input), **figure-8 not an oval** (an oval teaches
+> "always steer left"), 1:14 scale in the confirmed 1.6 × 2.8 m space,
+> MUTCD-verified markings. **A stop sign is provably unlearnable by plain
+> BC** — that makes it the M4 world-model showcase, not an M3 feature.
+> P2's expert driver was tuned by measurement (throttle, not gains, was the
+> binding constraint) and its alignment gate is an exact algebraic identity
+> after the first pixel-based gate proved to be a false alarm on good data.
 >
 > **Per-task commits are authorized** (plan approval, 2026-08-05). Push
 > still requires Evan's explicit say-so.

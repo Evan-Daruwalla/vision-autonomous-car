@@ -193,7 +193,11 @@ def main():
     ap.add_argument("--smoke", action="store_true",
                     help="tiny run to validate the pipeline before the real one")
     ap.add_argument("--episodes", type=int, default=6,
-                    help="episodes per track")
+                    help="episodes per TRAIN track")
+    ap.add_argument("--holdout-episodes", type=int, default=None,
+                    help="episodes per HOLDOUT track (default: same as --episodes). "
+                         "The holdout only has to size an evaluation, not a "
+                         "training set, so it is usually smaller.")
     ap.add_argument("--max-steps", type=int, default=MAX_EPISODE_STEPS)
     ap.add_argument("--port", type=int, default=9091)
     args = ap.parse_args()
@@ -201,23 +205,27 @@ def main():
     if args.smoke:
         train_tracks = TRAIN_TRACKS[:1]
         holdout_tracks = HOLDOUT_TRACKS[:1]
-        episodes, max_steps = 1, 300
+        episodes = holdout_episodes = 1
+        max_steps = 300
         root = DATA.parent / "sim_smoke"
     else:
         train_tracks, holdout_tracks = TRAIN_TRACKS, HOLDOUT_TRACKS
         episodes, max_steps = args.episodes, args.max_steps
+        holdout_episodes = (args.holdout_episodes if args.holdout_episodes
+                            is not None else args.episodes)
         root = DATA
 
     print(f"corpus root : {root}")
-    print(f"train tracks: {train_tracks}")
-    print(f"holdout     : {holdout_tracks}  (never trained on)")
+    print(f"train tracks: {train_tracks}  ({episodes} ep each)")
+    print(f"holdout     : {holdout_tracks}  ({holdout_episodes} ep each, never trained on)")
     print()
 
     all_stats = []
-    for split, tracks in (("train", train_tracks), ("holdout", holdout_tracks)):
+    for split, tracks, n_ep in (("train", train_tracks, episodes),
+                                ("holdout", holdout_tracks, holdout_episodes)):
         for track in tracks:
             print(f"[{split}] {track}")
-            st = collect_track(track, root / split, episodes, max_steps, args.port)
+            st = collect_track(track, root / split, n_ep, max_steps, args.port)
             st["split"] = split
             all_stats.append(st)
 
