@@ -46,5 +46,5 @@ Remaining planned stack from the 2026-07-23 research brief:
   (DonkeySimWin.zip, 236,059,289 bytes, GitHub API 2026-08-05). Also serves
   M5 if that track ever runs. Isaac Lab / Wheeled Lab (arXiv:2502.07380)
   remains optional-M5-only.
-- Environment rule: everything ML installs into the pinned Python 3.11
+- Environment rule: everything ML installs into the pinned Python 3.12.10
   venv, never system 3.14 — see tooling.md (2026-08-05).

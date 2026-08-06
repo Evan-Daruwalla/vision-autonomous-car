@@ -55,7 +55,7 @@ lives in the record.
 >
 > **2026-07-23 ~20:46 — all six research workers complete; BOM final.**
 > Evan chose **Pi 5 4GB** (down from 8GB) and **owns a USB power bank**, so
-> the build lands at **≈$176-179 + shipping**, inside the $200 ceiling.
+> the build lands at **≈$178-181 + shipping**, inside the $200 ceiling.
 > `docs/BOM.md` is the order list. **Nothing is bought yet.**
 >
 > **Three claims were overturned during research and are recorded as dated
@@ -74,7 +74,7 @@ lives in the record.
 | Decision gate | M1.1 | **Done** | 2026-07-23: 8GB · no Lego motors · 3060 Ti 8GB · ~$200 · ratified |
 | Drive motor selection | M1.1b | **Done (purchase pending)** | 2026-07-23: Pololu #1093 N20 30:1 HP 6V, $23.95; docs/research/2026-07-23_drive-motor-selection.md |
 | Power system selection | M1.1c | **Done (purchase pending)** | 2026-07-23: split source, power bank owned; docs/research/2026-07-23_power-system.md |
-| BOM | M2.8 | **Final; BLOCKED-ON-EVAN** | `docs/BOM.md`, ≈$176-179 + shipping |
+| BOM | M2.8 | **Final; BLOCKED-ON-EVAN** | `docs/BOM.md`, ≈$178-181 + shipping |
 | Chassis CAD + print | M1 | **Started** | M1.3 coupon generated + validated 2026-07-23; awaiting Evan's print + measurements |
 | Tolerance coupon | M1.3 | **Ready to print** | `cad/tolerance_coupon_v1.stl` + `cad/README.md`; gates every chassis dimension |
 | Electronics + teleop | M2 | **Not started** | purchase list is task 8 |
@@ -125,7 +125,7 @@ lives in the record.
 - **Actuators: TWO — one drive motor + one MG90S steering SERVO.** Steering
   is never a plain DC motor (no position feedback ⇒ no commandable angle;
   see `gotchas.md`).
-- Budget: **SETTLED at ≈$176-179 + shipping**, inside the ~$200 ceiling
+- Budget: **SETTLED at ≈$178-181 + shipping**, inside the ~$200 ceiling
   (Evan took the 4GB downgrade and owns the power bank, 2026-07-23 ~20:46).
   Shipping across 3-4 vendors could add $15-25 — **consolidate vendors**;
   most small parts are generic. Full list: `docs/BOM.md`.
@@ -169,7 +169,7 @@ provably cannot learn it and the world model can.
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.
-- **THE ORDER (`docs/BOM.md`, ≈$176-179).** Nothing is bought. Everything
+- **THE ORDER (`docs/BOM.md`, ≈$178-181).** Nothing is bought. Everything
   downstream of M1.5 waits on parts. Before ordering Evan should check the
   four items in the BOM's "Verify before ordering" section — most
   importantly that his power bank's label reads **5V/3A**.

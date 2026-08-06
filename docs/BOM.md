@@ -34,7 +34,11 @@ split-source power path costs almost nothing.
 | 14 | SPST rocker switch, 10A | Main switch on the motor pack | **$0.75** | sparkfun.com |
 | 15 | Inline ATO/ATC fuse holder + 3A fuse | **Mandatory** — unprotected 18650s can deliver enormous short-circuit current | **~$2.15** | bc-robotics.com |
 | 16 | Wire, heat-shrink, bulk caps, headers | ~22AWG for motor, ~26AWG signal; 470–1000µF across the motor rail | **~$8.00** | any |
-| | | **TOTAL** | **≈ $176–179** | |
+| | | **TOTAL** | **≈ $178–181** | |
+
+*(Total corrected 2026-08-06 from "≈$176–179" — the cold audit found it
+excluded row 3, the camera cable, i.e. the very item this BOM was written to
+catch. Fixed rows sum to $176.32; + $2–5 cable = $178.32–$181.32.)*
 
 **Plus shipping**, which is the real risk: spread across Pololu, Adafruit /
 Raspberry Pi, 18650BatteryStore, Addicore, Adeept, Aloft, SparkFun and BC

@@ -49,6 +49,7 @@ the dated entry, not the digest.
 - [L — Track design settled: print markings not roads; figure-8; stop signs reframed as the M4 showcase](#appendix-l---track-design-settled-print-markings-not-roads-figure-8-stop-signs-reframed-as-the-m4-showcase-2026-08-05-2218-cdt) (08-05)
 - [M — SIM-POC P2: expert driver tuned by measurement; alignment gate rebuilt after the first one proved wrong](#appendix-m---sim-poc-p2-expert-driver-tuned-by-measurement-alignment-gate-rebuilt-after-the-first-one-proved-wrong-2026-08-05-2310-cdt) (08-05)
 - [N — Deadline moved to Regular Decision; grid/routing scope proposed; collection interrupted at 30k frames](#appendix-n---deadline-moved-to-regular-decision-gridrouting-scope-proposed-collection-interrupted-at-30k-frames-2026-08-05-2310-cdt) (08-05)
+- [O — Cold audit finds the alignment gate was a fake; both the audit's fix and mine were wrong; routing research lands](#appendix-o---cold-audit-finds-the-alignment-gate-was-a-fake-both-the-audits-fix-and-mine-were-wrong-routing-research-lands-2026-08-05-2354-cdt) (08-05)
 
 ---
 
@@ -1306,4 +1307,228 @@ lands and re-verifies. (5) **Still nothing printed and nothing ordered** -
 unchanged since 2026-07-23, now the longest-standing open item in the
 project. (6) The audit had not returned at time of writing; its findings are
 not represented here.
+
+
+# Appendix O - Cold audit finds the alignment gate was a fake; both the audit's fix and mine were wrong; routing research lands (2026-08-05, ~23:54 CDT)
+
+**WHAT:** The cold audit (launched ~23:12, findings-only, no conversation
+history, docs handed to it as claims under test) returned **22 findings and
+12 edge cases**. Separately the routing/scope research returned. Both are
+summarised here; the audit's fixes 1-6 are APPLIED and re-verified.
+
+## O.1 - The headline finding, and it is mine to own
+
+**The alignment gate did not gate what its own docstring claimed.**
+`check_pid_identity` relates `action[i]` to `log_cte[i-1]` and **never opens
+an image**. So a corpus whose IMAGE array is rolled passes cleanly - which is
+exactly the bug Appendix M says the check exists to catch.
+
+Reviewer-verified independently before accepting the finding (sandbox copies,
+real verifier, 2026-08-06 ~23:30 CDT):
+
+| Manipulation | Result |
+|---|---|
+| baseline, untouched | PASS |
+| **images rolled +1** | **PASS** <- should fail |
+| **images rolled +3** | **PASS** <- should fail |
+| actions rolled +1 (control) | FAIL |
+
+**How it happened, stated plainly:** Appendix M records replacing the
+pixel-motion check with the PID identity after the pixel check reported peak
+correlation at lag -1 on good data. Diagnosing that -1 as physics was
+correct. **Demoting the check was not.** The right move was to gate on the
+measured baseline; instead the only check that could see the image axis was
+removed, and Appendix M went on to describe the remaining check in language
+that implied it covered both axes. The docs overclaimed relative to the code,
+which is precisely the class of drift the audit was commissioned to find.
+
+## O.2 - The audit's recommended fix was ALSO wrong, and the data says so
+
+The audit proposed re-promoting the pixel check with a gate on **peak lag ==
+-1**. Implemented, then measured across all 49 episodes - and it produced
+**false failures on 11 legitimate episodes**. Diagnosis run
+(`scratchpad/diag_lag.py`, per-episode lag vs pixel speed):
+
+| Group | n | mean abs pixel shift | mean abs steer |
+|---|---|---|---|
+| peak **-2** | 11 | **4.23 px** | 0.655 |
+| peak **-1** | 38 | **3.40 px** | 0.614 |
+
+The -2 episodes are **interleaved through every collection run** (22:37,
+22:45, 22:49, 22:59, 23:01, 23:04, 23:06, 23:24, 23:26, 23:30, 23:32) - not
+clustered, so not a collector-version artifact - and they are systematically
+the **faster-moving** ones. Every holdout episode on the slower waveshare
+track (mean shift 2.15 px) sits at -1. **The visual lag is speed-dependent:
+faster scene motion pushes the apparent lag from -1 to -2.** Physics plus
+discrete sampling, not misalignment.
+
+So an exact-equality gate is wrong for the same underlying reason the
+original peak-at-zero gate was wrong: **it assumes a constant that is not
+constant.** Two different people (the auditor, and me) reached for the same
+wrong shape of fix; only measuring across the whole corpus exposed it.
+
+**What shipped instead - and what it can and cannot prove:**
+- per-episode peak must lie in the **plausible band {-2, -1}** -> catches any
+  offset of >=2 frames
+- the corpus **MODE** must equal -1 -> catches a whole-corpus 1-frame roll,
+  since that shifts every episode together
+- **CANNOT** catch a 1-frame roll of a *minority* of already-at--1 episodes,
+  because real physics produces that exact signature at -2. **Documented in
+  the constants block rather than papered over.** The action axis remains
+  covered exactly by the PID identity; the image axis is now covered
+  approximately, with the limit stated.
+
+## O.3 - Fixes applied and re-verified
+
+| # | Fix | Verification |
+|---|---|---|
+| 1 | Image-axis gate restored (band + mode, per-episode not pooled) | images rolled +1 -> FAIL, +3 -> FAIL, baseline -> PASS |
+| 2 | Empty corpus fails (`total_frames == 0`, and a bare dir with no split subdirs) | both -> FAIL |
+| 3 | Missing-split fails instead of silently skipping the leakage check | train-only -> FAIL |
+| 4 | Partial verification fails (`checked != len(episodes)`) | a mixed-format corpus can no longer report success |
+| 5 | `log_ki` added to the PID identity, integral clamp mirrored | a non-zero KI would have failed a CORRECT corpus with the actively misleading message "the frame/action indexing is wrong" |
+| 6 | Atomic episode write (`os.replace`) + guarded load + `_steps` cleared in `finally` | a reader racing the collector can no longer hit a truncated npz and abort the whole run |
+
+**Per-episode, not pooled, matters:** the first attempt pooled all episodes
+and passed a sandbox corpus with 2 of 3 episodes rolled by +1 - the clean
+minority averaged out the corrupted majority.
+
+**Full corpus after fixes (real output, ~23:52 CDT):**
+
+    holdout  :  10 episodes,   11210 frames, tracks ['donkey-waveshare-v0']
+    train    :  41 episodes,   45416 frames, tracks [4 tracks]
+      split is disjoint      : no track appears on both sides
+    total frames: 56626
+      exact PID identity     : verified on 51/51 episode(s)
+      image-axis gate        : 51/51 in band (-2, -1), distribution {-2: 11, -1: 40}, mode -1 (|r| 0.39-0.95)
+    P2 CORPUS CHECK: PASS
+
+## O.4 - The rest of the audit, not yet actioned
+
+Verified-clean by the auditor re-running them: the coupon generator
+reproduces `manifold PASS` / `volume PASS at 6.69e-16` / 18,048 triangles and
+rewrites the STL byte-identically; **all six MUTCD 1:14 numbers reproduce
+exactly**; "97% filament reduction" is 97.66%, correctly and conservatively
+rounded; no secrets; `.gitignore` has no malformed `{`/`}` globs, so empty
+searches are trustworthy.
+
+Outstanding, by class:
+- **Doc drift (F4, F15-F17):** HANDOFF and PRD still carried the Nov-1
+  deadline and "~100k-frame run in progress"; the PRD still carries the
+  **retracted** "never a phone power bank" gotcha un-struck in a "read first"
+  section, still says Pi 5 **8GB**, and three docs claim a **Python 3.11**
+  venv when it is **3.12.10**.
+- **Data quality (F7, F8):** the quality gate (mean|cte| <= 1.2, >= 150
+  steps) is enforced only in the collector and is **unenforceable at rest** -
+  `log_mean_abs_cte` is written and never read. One train episode sits at
+  mean|cte| 1.13 (94% of the reject limit) with **69.6% of frames at full
+  steering lock**, labelled expert data. Separately, the train split is
+  **41 episodes but heavily skewed to one track** - the interrupt hit
+  mid-run, so `generated-track` dominates. That undercuts "train on a subset
+  of layouts" and needs round-robin collection.
+- **Scaling (F9/E7):** `verify_corpus` holds every episode's images in RAM -
+  **2.57 GB at 44.6k frames, ~5.8 GB at the PRD's own 100k target.** The
+  done-check will OOM exactly when P2 becomes finishable.
+- **Bins (F18):** `data.md` is still "empty, no code yet" while the npz
+  schema IS the ML data contract.
+- Minor: BOM total is light by $2.32 (excludes the camera cable it
+  celebrates catching); two record timestamps are misattributed against file
+  mtimes; Appendix L's "3.5 dashes" should be 5.7.
+
+## O.5 - Routing research: the scope expansion is real but must shrink
+
+**BC cannot route - CONFIRMED, with a refinement.** Codevilla et al. (ICRA
+2018) state it directly: *"when a car approaches an intersection, the camera
+input is not sufficient... the mapping from the image to the control command
+is no longer a function."* Refinement worth keeping honest: what fails is
+**direction, not representation** - a multimodal head can represent both
+branches, it just cannot *select* one. Frame history does not help; the
+destination was never in any pixel. **Conditioning is necessary.**
+
+**Architecture: branched conditional imitation learning.** Shared conv trunk,
+one head per discrete command, command as a one-hot switch. Measured:
+CARLA 88% vs 78% (branched vs command-as-input), 64% vs 52% on an unseen
+town; on a 1/5-scale physical truck over a **14-intersection route, 0% vs
+11.1% missed turns** - trained on **2 hours of teleop**. That 2-hour figure
+is what makes this scope plausible at all.
+
+**Three findings that change the plan:**
+1. **Modern target-point conditioning has a pathology the 2018 discrete-
+   command form does not** (ICCV 2023): TP-conditioned models extrapolate
+   toward a point behind a turn and cut into the oncoming lane. A one-hot
+   "turn left" carries no geometry to over-extrapolate. **The older, simpler
+   formulation is the safer one here.**
+2. **The inertia problem is guaranteed to bite**, because stop lines are
+   being added: stopped frames dominate, producing *"excessive stopping and
+   difficult restarting."* Mitigation is known - a speed-prediction auxiliary
+   head, and classifying target speed rather than regressing it.
+3. **More data can make it worse** - CILRS found 10 h beat 100 h on dense
+   traffic. Coverage of rare events, not volume, is the lever. Also: **seed
+   variance up to 42 points**, so one trained model is not a measurement -
+   >=3 seeds or the numbers are noise.
+
+**GEOMETRY: the current track spec is over-constrained and cannot be built.**
+- Duckietown tiles are **61 cm**; its minimum loop with intersections is
+  **3x3 = 1.84 m**, which **fails the 1.6 m width**. The largest
+  Duckietown-spec layout fitting 1.6 x 2.8 m is a **2x4 plain loop with zero
+  possible intersections.**
+- At **1:14**, a two-lane road is 522 mm and 1.6 m holds **3.07 lane-widths**
+  - one road plus margin. **A grid with two parallel roads is impossible at
+  1:14**, confirming the Appendix N arithmetic from a second direction.
+- To fit a **3x5 grid**: tile <= 533 mm, lane 182 mm, effective scale
+  **~1:20, not 1:14**. Car at 130 mm then occupies 71% of the lane - **26 mm
+  clearance per side, about half a Duckiebot's margin.**
+- **True MUTCD dash proportions (1:3) do not survive tiling at any scale that
+  fits.** Duckietown uses ~2:1. This must be recorded as a deliberate
+  deviation, not claimed as MUTCD compliance.
+
+**BOM: buy the encoder motor (#5159, +$6). Not close.** The decisive argument
+is not odometry in general but **the intersection blind zone**: inside an
+intersection there are no lane markings, the camera provides nothing for
+40-60 cm, and **that is the piece that broke in all four prior attempts**
+found (2018 Unicorn, 2019 proj-goto-n, 2023 student writeup, 2024 GOTO-1) -
+two of them resorted to open-loop hardcoded timing. Calibrated encoder drift
+over 0.6 m is ~1-6 mm. Secondary wins: ground-truth speed labels (PWM->speed
+drifts with battery voltage, making the action space non-stationary), and
+closed-loop restart from stop lines. **Order the 6-pin JST SH cable in the
+same purchase - it is sold separately.** Honest arguments against, recorded:
+the encoder adds 3-4 mm on the connector side of a 10x12 mm gearbox, and it
+counts the MOTOR shaft, upstream of a backlash-heavy Lego differential.
+Also flagged: **pigpio does not work on Pi 5** (RP1 south bridge) - use lgpio
+/ libgpiod.
+
+**Parking: forward pull-in ONLY.** Reverse perpendicular and parallel both
+need rear sensing this car does not have, and **nobody has published either
+on a sub-1/10 car with a single forward camera.** The one quantitative prior
+record is a **failure**: Duckietown's 2017 parking project planned fine
+(Dubins in <0.2 s, localization +/-0.5 mm within 0.3 m) but *"was unable to
+park"* because AprilTag detection ran at ~0.34 Hz. That specific number is
+Pi-2/3-era lore and is obsolete - a Pi 5 does ~20 FPS - but the architectural
+lesson (tag-in-the-control-loop is latency-critical) stands.
+
+**AprilTag sizing - the single most actionable derived number.** With a 120
+deg lens the pixels spread thin: at 640 px wide, a 40 mm tag36h11 is
+**unreadable beyond 26 cm**. Switching to **tag41h12** buys ~60% range free,
+and detection should run on a **1280-wide crop**. At 60 mm / 1280 px that is
+1.24 m of range instead of 0.52 m.
+
+**Scope verdict: the full "lane following + routing + parking" is NOT
+realistic** at ~2-3 sittings/week as 1 of 5 projects; a staged subset is.
+Recommended order, each stage shipping a measurable artifact: **Stage 0 track
+re-spec (BLOCKING, before any printing)** -> lane-following BC -> stop-line
+detection -> topological localization (AprilTag + encoder) -> branched
+command-conditioned BC + Dijkstra routing -> forward pull-in parking ->
+world model kept OFF the control path as an offline prediction artifact.
+**Cut line: drop parking before dropping routing** - routing is the
+distinctive claim nobody has published at this scale; parking would be a weak
+version of a solved problem.
+
+**HONEST OPEN ITEMS:** (1) Audit findings F4, F7-F9, F15-F18 and edge cases
+E7-E12 are NOT fixed - only fixes 1-6 are. (2) The track geometry is now
+known-unbuildable as specified and Stage 0 blocks all printing; **this is
+good news only because nothing has been printed.** (3) The scope expansion is
+still Evan's decision - nothing was adopted into the PRD beyond this record.
+(4) The encoder-motor recommendation is not an order; nothing is bought.
+(5) `verify_corpus` will OOM near the 100k target and must be streamed first.
+(6) Corpus is 56,626 frames and still collecting.
 

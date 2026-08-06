@@ -34,6 +34,7 @@ time-limit boundaries are catastrophes.
 from __future__ import annotations
 
 import io
+import os
 import uuid
 from pathlib import Path
 
@@ -117,14 +118,29 @@ class EpisodeWriter:
         stem = f"{self.prefix}{uuid.uuid4().hex}"
         path = self.directory / f"{stem}-{length}.npz"
 
-        # Build in memory first so an interrupted write can't leave a
-        # truncated npz that the loader will choke on later.
-        with io.BytesIO() as buf:
-            np.savez_compressed(buf, **episode)
-            buf.seek(0)
-            path.write_bytes(buf.read())
-
-        self._steps = []
+        # Build in memory, write to a temp name, then rename. os.replace is
+        # atomic within a filesystem, so a reader scanning this directory
+        # only ever sees the complete file or no file -- never a half one.
+        # (Building in a BytesIO alone does NOT give this: the write to disk
+        # is still interruptible, and a verifier racing the collector then
+        # hits a truncated npz. Observed 2026-08-06.)
+        tmp = path.with_suffix(".npz.tmp")
+        try:
+            with io.BytesIO() as buf:
+                np.savez_compressed(buf, **episode)
+                buf.seek(0)
+                tmp.write_bytes(buf.read())
+            os.replace(tmp, path)
+        finally:
+            # Clear the buffer even if the write failed, or the next
+            # add_reset() raises "non-empty episode" and kills the whole run
+            # over one bad write.
+            self._steps = []
+            if tmp.exists():
+                try:
+                    tmp.unlink()
+                except OSError:
+                    pass
         return path
 
 

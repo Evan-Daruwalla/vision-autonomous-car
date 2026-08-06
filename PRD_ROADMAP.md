@@ -508,13 +508,15 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
 against a real deadline, and who does which part. Approved 2026-08-05 after
 Evan set the deadline and confirmed the portfolio context.
 
-**THE DEADLINE (new constraint, 2026-08-05): EA/ED college applications,
-~Nov 1 2026** — 12.5 weeks out. **Nov 1 requires SIM-POC + M3 only** (a real
-BC-driving car + a sim-trained world model is a complete application story).
-**M4-on-real-logs is explicitly a STRETCH for Nov 1 and COMMITTED for RD
-(Jan 2027)** — it lands as an application update or interview material if it
-slips. Anything that threatens M3-by-mid-October is escalated to Evan, not
-absorbed silently.
+~~**THE DEADLINE (new constraint, 2026-08-05): EA/ED college applications,
+~Nov 1 2026** — 12.5 weeks out.~~ **SUPERSEDED 2026-08-05 ~23:10 (Appendix
+N): the hard deadline is REGULAR DECISION, ~Jan 1-15 2027; Nov 1 2026 is a
+SOFT milestone.** **Nov 1 still targets SIM-POC + M3** (a real BC-driving car
++ a sim-trained world model is a complete application story), and
+**M4-on-real-logs moves from STRETCH to comfortably in scope for RD** — it
+lands as an application update or interview material if it slips past Nov 1.
+Anything that threatens M3-by-mid-October is escalated to Evan, not absorbed
+silently.
 
 **PORTFOLIO CONTEXT (2026-08-05):** this is **1 of 5 concurrent portfolio
 projects** (ServeLocal, two trading projects, this, a World Models research
@@ -574,9 +576,15 @@ verification result. **Push still requires Evan's explicit say-so.**
 **Work order:** M1 → M4 strictly (M5 parallel-optional). One task per
 sitting; finish (done-check + record entry) before the next.
 **Gotchas that will bite you:**
-- Pi 5 + battery: standard USB-PD won't give 5V/5A (PMIC PPS bug,
+- ~~Pi 5 + battery: standard USB-PD won't give 5V/5A (PMIC PPS bug,
   rpi-eeprom #497) — UBEC into GPIO is the path; it bypasses the input
-  fuse, so the buck must be clean. Never a phone power bank.
+  fuse, so the buck must be clean. Never a phone power bank.~~
+  **RETRACTED 2026-07-23 ~17:59, un-struck here until the 2026-08-06 cold
+  audit caught it (F15).** The Pi 5 accepts **5V/3A with only a 600 mA USB
+  peripheral cap**, and this build has no USB peripherals — so the chosen
+  architecture is the OPPOSITE of this line: a **USB power bank feeds the Pi
+  alone**, and a separate 2S pack feeds motor + servo, sharing only ground.
+  See `gotchas.md` and `docs/research/2026-07-23_power-system.md`.
 - Lego pin holes print tight: ~5.1mm pin fit / 5.3-5.6mm rotating bore,
   but CALIBRATE ON THIS PRINTER (task 3) before cutting chassis parts.
 - Don't drive Powered Up motors from a raw H-bridge (loses encoder, fights
