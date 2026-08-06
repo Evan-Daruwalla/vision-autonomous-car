@@ -46,6 +46,7 @@ the dated entry, not the digest.
 - [I — Repo initialized; M1.3 tolerance coupon generated and validated](#appendix-i---repo-initialized-m13-tolerance-coupon-generated-and-validated-2026-07-23-2110-cdt) (07-23)
 - [J — Sim-first POC question; SIM-POC track added to the PRD](#appendix-j---sim-first-poc-question-sim-poc-track-added-to-the-prd-2026-08-05-2127-cdt) (08-05)
 - [K — Nov-1 deadline set; execution plan approved; C1 environment started](#appendix-k---nov-1-deadline-set-execution-plan-approved-c1-environment-started-2026-08-05-2142-cdt) (08-05)
+- [L — Track design settled: print markings not roads; figure-8; stop signs reframed as the M4 showcase](#appendix-l---track-design-settled-print-markings-not-roads-figure-8-stop-signs-reframed-as-the-m4-showcase-2026-08-05-2218-cdt) (08-05)
 
 ---
 
@@ -944,4 +945,125 @@ prints True. (2) The DonkeySimWin binary (~236 MB) is not downloaded yet.
 actions this week, and both were confirmed outstanding at the top of this
 session. (4) The soldering-iron/multimeter/SD-reader assumption is
 unconfirmed until Evan asks his dad. (5) Nothing committed yet this session.
+
+
+# Appendix L - Track design settled: print markings not roads; figure-8; stop signs reframed as the M4 showcase (2026-08-05, ~22:18 CDT)
+
+**WHAT:** Evan described the intended real-world driving environment for the
+first time: **modular sectioned plastic tiles, 3D printed with American road
+markings and stop lines already in the surface, turns, with stop signs and
+traffic lights possibly later** ("I don't know how hard they will be to make,
+set up, and program yet"). Asked for suggestions. Analysis produced one hard
+pushback, one reversed assumption, and a set of specs. Evan then decided:
+**1.6 x 2.8 m floor space confirmed available; keep the 1:14 scale for the
+turns; encode into the PRD; start SIM-POC P2 with the layout-based split.**
+
+**THE PUSHBACK: printing the road SURFACE does not pencil out.** Estimated
+for a minimum two-lane loop, ~5 m path x 0.52 m wide = ~2.6 m2 of road:
+
+| Approach | Filament | Print time |
+|---|---|---|
+| Full surface, 220 mm tiles @ 2 mm | **~6.4 kg** (~$130-160) | **~150-250 h** (~100 on a fast Bambu) |
+| Markings only, 0.8 mm strips | **~0.15 kg** | **~6 h** |
+
+A **97% material reduction for identical camera input.** Three supporting
+reasons: the printer is committed to chassis parts in weeks 1-3 while the
+track is needed by ~week 5 for M2 data collection, so 150+ hours does not
+fit; large thin prints warp, and this is the one surface that must be flat;
+and warped tiles mean bumps, camera shake, and possible wheel lift.
+
+**The framing that decided it: the camera sees MARKINGS, not roads.** The
+road surface's entire job is to be flat, matte, and dark. At 120x160
+resolution, filament spent on road surface buys nothing visible. Filament
+spent on markings, signs, and stencils buys precision obtainable no other
+way. **Recommendation adopted: dark matte foam board / coroplast tiles
+(~$15 for the whole track) + printed marking strips glued flush + printed
+signs and stencils.** Keeps modularity, precision, and the printed-markings
+aesthetic; drops 6 kg of filament and ~5 days of printing.
+
+**LAYOUT: figure-8, not an oval.** A simple loop turns one direction only,
+and a behavioral-cloning model will learn "always steer left" - it would
+look excellent on the training track and fail on anything else. A figure-8
+gives both handednesses, a natural intersection for the stop sign / traffic
+light, and a comparable footprint. (Driving the loop in both directions is
+the cheap fix; the figure-8 is better and yields the intersection for free.)
+
+**REVERSED ASSUMPTION - traffic lights are EASIER to learn than stop signs,
+which is the opposite of the order Evan assumed:**
+- **Traffic light: easy to learn, harder to build.** The correct action is a
+  function of the CURRENT image (red visible -> stop, green -> go). A
+  memoryless CNN handles it. Hardware ~$5-10 (LEDs + any microcontroller);
+  for prototyping, a tablet displaying a red/green image needs no build at
+  all.
+- **Stop sign: trivial to build, PROVABLY impossible for plain BC.** Stopped
+  at the line, the image is identical whether the car should keep waiting or
+  go. The correct action depends on how long it has been stopped - history,
+  not the current observation. A feedforward policy pi(action|image) cannot
+  express it. Frame-stacking buys ~0.2 s of memory at 20 Hz; a stop is 2-3 s.
+
+**WHY THAT IS GOOD NEWS, and the strongest argument in the project so far:**
+DreamerV3's RSSM and the Ha & Schmidhuber MDN-RNN both carry recurrent latent
+state - real memory. So the stop sign yields a clean, principled experiment
+on one track and one dataset: **BC fails, the world model succeeds, for an
+explainable reason.** That is the sharpest available justification for M4
+existing at all, and it hands the separate World Models research project a
+genuine result. **Decision: build the stop sign into the track from the
+start, exercise it at M4, not M3.**
+
+**MARKING SPECS - verified against the FHWA MUTCD** (mutcd.fhwa.dot.gov
+Part 3B + MUTCD Part 3 general, accessed 2026-08-05), not recalled: normal
+longitudinal lines **4-6 in**; stop lines **12-24 in**; broken lines **10 ft
+segment / 30 ft gap**; **yellow separates opposing directions of travel,
+white separates same-direction**. Scaled at **1:14** (from an ESTIMATED
+130 mm car width - must be recomputed once the car is measured at B2/B3):
+
+| Feature | Full scale | At 1:14 |
+|---|---|---|
+| Lane width | 12 ft | 261 mm |
+| Normal line | 4 in | 7.3 mm |
+| Stop line | 12-24 in | 22-44 mm |
+| Dash cycle | 10 ft + 30 ft | 218 + 653 mm - PROBLEM |
+
+**The dash finding:** at true scale one dash cycle is ~871 mm, so a ~5 m loop
+shows only about 3.5 dashes - almost no signal for the CNN. The MUTCD itself
+permits "dimensions in a similar ratio of line segments to gaps as
+appropriate," so the 1:3 ratio is kept and the absolute size compressed to
+~60 mm dash / 180 mm gap. Faithful in spirit, far denser training signal,
+and the deviation is documented rather than silent.
+
+**FOUR PHYSICAL GOTCHAS recorded to gotchas.md:** (1) glare - glossy plastic
+under room lighting produces specular highlights that wash out markings;
+matte everything, print face-down on a textured plate if printing surface
+pieces. (2) **A seam running perpendicular to travel looks like a stop bar**
+to the model; run seams parallel to travel where possible and keep them
+tight. (3) Lock the camera pitch before data collection and record the
+angle - changing it mid-dataset silently splits the data into two
+incompatible distributions. (4) Vary lighting deliberately ACROSS sessions -
+the real-world analogue of the domain randomization that made DeepRacer
+transfer.
+
+**METHODOLOGY FINDING that applies to SIM-POC P2 and M3 alike: never split a
+driving dataset randomly by frame.** Frame t and t+1 are near-duplicates, so
+a random split leaks and massively overstates accuracy. Split by lap at
+minimum. Best: **split by LAYOUT** - train on configurations A+B, hold out
+configuration C entirely. The modular tile system makes that free, and it
+converts the fabrication choice into a scientific asset: a genuine
+generalization result rather than a memorization score. Adopted for P2 in
+sim (11 gym-donkeycar tracks are the sim analogue of tile layouts) and
+carried forward to M3/M4 on the real car.
+
+**Space:** Evan confirmed **1.6 x 2.8 m** available, which is what a
+1:14 figure-8 wants. Scale is therefore kept as-is rather than compressed.
+
+**HONEST OPEN ITEMS:** (1) The 1:14 scale rests on an ESTIMATED 130 mm car
+width - unmeasured until B2/B3, and the whole marking table shifts if the
+real car differs. (2) **Corner radius is still blocked on measuring the
+steering geometry** (min radius ~ wheelbase / tan(max steer) - estimated
+~330 mm, so corners want 500-670 mm centerline, but that is arithmetic on an
+estimate, not a measurement). Corner tiles must not be cut until B3 and an
+empirical turning-radius test on the rolling chassis. (3) Stop-sign and
+traffic-light hardware are unbuilt and unpriced beyond a ~$5-10 estimate.
+(4) The gym-donkeycar sim tracks look nothing like a 1:14 American-marked
+road - irrelevant for SIM-POC, which proves the pipeline and makes no
+transfer claim, but it does mean sim and real data can never be pooled.
 

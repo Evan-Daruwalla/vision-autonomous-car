@@ -388,6 +388,67 @@ dataset format and eval harness exist)
 20. **gym-donkeycar PPO baseline; honest transfer attempt + report.** The
     report's value is the measured transfer gap itself.
 
+### TRACK — the physical driving environment (ADDED 2026-08-05; needed before M2 data collection, i.e. by ~week 5)
+
+**Decided 2026-08-05 (Evan): 1.6 × 2.8 m floor space available · 1:14 scale
+kept · figure-8 layout · print MARKINGS, not the road surface.** Full
+reasoning, MUTCD verification, and the rejected alternative are in record
+Appendix L.
+
+**The core decision and why:** printing the road surface costs ~6.4 kg of
+filament and ~150-250 print-hours for a minimum two-lane loop; printing only
+the markings costs ~0.15 kg and ~6 hours — **a 97% reduction for identical
+camera input**, because at 120×160 the camera sees markings, not road. The
+printer is also committed to chassis parts in weeks 1-3, and large thin
+prints warp on the one surface that must be flat. **Substrate = dark matte
+foam board / coroplast tiles (~$15 total); markings = printed strips glued
+flush; printer is reserved for strips, signs, and stencils.**
+
+**Layout = FIGURE-8, never a plain oval** — a one-handed loop teaches the BC
+model "always steer left", which looks perfect on the training track and
+fails everywhere else. The figure-8 also yields the intersection for the
+stop sign / traffic light for free.
+
+**Scaled marking specs (MUTCD-verified 2026-08-05; scale from an ESTIMATED
+130 mm car width — recompute at T1):** lane 261 mm · normal line 7.3 mm ·
+stop line 22-44 mm · **dash compressed to ~60/180 mm** (true scale is
+218/653 mm, which shows only ~3.5 dashes on a 5 m loop — the MUTCD's own
+"similar ratio of line segments to gaps" latitude permits the compression;
+the deviation is deliberate and documented). Yellow separates opposing
+directions; white separates same-direction.
+
+T1. **Confirm scale.** Recompute the marking table from the MEASURED car
+    width (needs B2/B3). Done: table in the record with measured input.
+T2. **Measure minimum turning radius empirically** on the rolling chassis
+    (needs M1.7). Estimate is ~330 mm centerline (wheelbase ÷ tan(max
+    steer)) ⇒ corners want 500-670 mm, but that is arithmetic on an
+    estimate. **No corner tile is cut before this measurement.** Done:
+    measured radius in the record.
+T3. **Design the figure-8** to fit 1.6 × 2.8 m at the confirmed scale;
+    vector/CAD layout with tile boundaries chosen so **seams run parallel to
+    travel** where possible (a perpendicular seam reads as a stop bar to the
+    model). Done: layout drawing + tile cut list.
+T4. **Fabricate substrate** — dark matte tiles, cut to the T3 list. Done:
+    tiles laid out flat, photographed.
+T5. **Generate + print markings, sign, and stencils** — parametric generator
+    in the style of `scripts/gen_tolerance_coupon.py` (self-validating,
+    re-runnable when the scale changes), 0.8 mm strips + a scaled stop sign.
+    Done: generator self-check passes, parts printed and fitted.
+T6. **Assemble and define the layout configurations.** Build config A and B
+    for training and hold out **config C entirely** for testing. Done: three
+    configurations photographed and documented; C never driven for training
+    data.
+
+**Stop sign / traffic light — deferred to M4 by design, not by oversight.** A
+traffic light is EASY to learn (red/green is visible in the current frame, so
+a memoryless CNN suffices) but needs hardware. A stop sign is trivial to
+build but **provably impossible for plain BC** — stopped at the line, the
+image is identical whether to wait or go, so the correct action depends on
+history, which π(action|image) cannot express. That makes the stop sign the
+ideal M4 demonstration: same track, same dataset, **BC fails and the world
+model succeeds** because the RSSM / MDN-RNN carries recurrent state. Build
+the sign into the track from the start; exercise it at M4.
+
 ### SIM-POC — simulated proof of concept of the M4 pipeline (ADDED 2026-08-05, parallel track, runnable before any hardware exists)
 
 **What this is (and is not).** Asked by Evan 2026-08-05: "can we train the
@@ -421,8 +482,13 @@ P1. **ML environment.** ~~Pinned **Python 3.11 venv** (matches DonkeyCar
 P2. **Sim data corpus.** Drive the sim (scripted PID lane-follower or
     keyboard) and record camera + steering/throttle into the
     dreamerv3-torch episode format; ~100k frames; held-out split defined
-    here. Done: corpus on disk + N random frames spot-checked against their
-    recorded actions + split documented.
+    here. **Split by LAYOUT, never randomly by frame** (amended 2026-08-05):
+    frame t and t+1 are near-duplicates, so a random split leaks and
+    massively overstates accuracy. The 11 registered gym-donkeycar tracks
+    are the sim analogue of the physical tile configurations — train on a
+    subset, hold out whole tracks. Same rule carries to M3/M4 on real data.
+    Done: corpus on disk + N random frames spot-checked against their
+    recorded actions + the held-out track list documented.
 P3. **Small world model first (Ha & Schmidhuber V+M+C).** Conv-VAE →
     z∈R^32; MDN-RNN over (z_t, a_t, h_t). Done: multi-step latent rollouts
     on held-out sim data are recognisably track-like; rollout frames saved.

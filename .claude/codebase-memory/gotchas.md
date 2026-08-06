@@ -56,6 +56,35 @@ not yet verified on this car. Mark them verified when a build task confirms.
   Don't re-promote sim-RL without a dated PRD fork (2026-07-23).
 - Pi 5 prices are volatile (LPDDR4 shortage; two hikes in three months as of
   2026) — re-verify at purchase time, don't trust the brief's numbers blind.
+- **NEVER split a driving dataset randomly by frame** (2026-08-05). Frame t
+  and t+1 are near-duplicates, so a random split leaks and massively
+  overstates accuracy. Split by lap at minimum, **by LAYOUT ideally** (train
+  configs A+B, hold out C entirely). Applies to SIM-POC P2, M3, and M4.
+- **Track: print MARKINGS, not the road surface** (2026-08-05). Full-surface
+  printing is ~6.4 kg / ~150-250 h for a minimum loop vs ~0.15 kg / ~6 h for
+  markings — 97% less for identical camera input, because at 120×160 the
+  camera sees markings, not road. Substrate is dark matte foam board /
+  coroplast. Don't let a future session "improve" this back to printed tiles.
+- **Track layout must be a FIGURE-8, not an oval** (2026-08-05). A one-handed
+  loop teaches the BC model "always steer left" — perfect on the training
+  track, useless elsewhere. The figure-8 also provides the intersection for
+  the stop sign.
+- **A seam running perpendicular to travel reads as a stop bar** to the
+  model. Run tile seams parallel to travel where possible (2026-08-05).
+- **Lock the camera pitch before data collection and record the angle** —
+  changing it mid-dataset silently splits the data into two incompatible
+  distributions. Vary LIGHTING across sessions on purpose (real-world domain
+  randomization); never vary the camera geometry (2026-08-05).
+- **Glare:** glossy plastic under room lighting produces specular highlights
+  that wash out markings. Matte everything; if printing surface pieces, print
+  face-down on a textured plate (2026-08-05).
+- **A stop sign is provably unlearnable by plain BC** (2026-08-05). Stopped
+  at the line the image is identical whether to wait or go, so the action
+  depends on history, which π(action|image) cannot express (frame-stacking
+  gives ~0.2 s at 20 Hz; a stop is 2-3 s). This is a FEATURE of the plan —
+  it is the M4 world-model showcase, since the RSSM/MDN-RNN has recurrent
+  state. Traffic lights are the opposite: memoryless-learnable (state is
+  visible in the frame) but need hardware.
 - **Camera Module 3 ships with the WRONG cable for a Pi 5** (verified
   against Raspberry Pi docs 2026-07-23). The Pi 5 uses the **mini 22-pin**
   connector; the module includes a Standard-Standard cable. A **Standard-
