@@ -200,6 +200,11 @@ def main():
                          "training set, so it is usually smaller.")
     ap.add_argument("--max-steps", type=int, default=MAX_EPISODE_STEPS)
     ap.add_argument("--port", type=int, default=9091)
+    ap.add_argument("--only", choices=("train", "holdout"), default=None,
+                    help="collect only one split. Episodes carry uuid filenames "
+                         "so a repeat run always APPENDS -- this is how you "
+                         "resume after an interrupted collection instead of "
+                         "restarting the whole corpus.")
     args = ap.parse_args()
 
     if args.smoke:
@@ -223,6 +228,8 @@ def main():
     all_stats = []
     for split, tracks, n_ep in (("train", train_tracks, episodes),
                                 ("holdout", holdout_tracks, holdout_episodes)):
+        if args.only and split != args.only:
+            continue
         for track in tracks:
             print(f"[{split}] {track}")
             st = collect_track(track, root / split, n_ep, max_steps, args.port)

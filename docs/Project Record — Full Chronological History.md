@@ -48,6 +48,7 @@ the dated entry, not the digest.
 - [K — Nov-1 deadline set; execution plan approved; C1 environment started](#appendix-k---nov-1-deadline-set-execution-plan-approved-c1-environment-started-2026-08-05-2142-cdt) (08-05)
 - [L — Track design settled: print markings not roads; figure-8; stop signs reframed as the M4 showcase](#appendix-l---track-design-settled-print-markings-not-roads-figure-8-stop-signs-reframed-as-the-m4-showcase-2026-08-05-2218-cdt) (08-05)
 - [M — SIM-POC P2: expert driver tuned by measurement; alignment gate rebuilt after the first one proved wrong](#appendix-m---sim-poc-p2-expert-driver-tuned-by-measurement-alignment-gate-rebuilt-after-the-first-one-proved-wrong-2026-08-05-2310-cdt) (08-05)
+- [N — Deadline moved to Regular Decision; grid/routing scope proposed; collection interrupted at 30k frames](#appendix-n---deadline-moved-to-regular-decision-gridrouting-scope-proposed-collection-interrupted-at-30k-frames-2026-08-05-2310-cdt) (08-05)
 
 ---
 
@@ -1190,4 +1191,119 @@ corpus are inconsistent (176/401/1001) because they span runs made with
 different `--max-steps`; harmless for training, but the final corpus summary
 should report the distribution rather than an average that hides it.
 (5) Still nothing physical printed, ordered, or built.
+
+
+# Appendix N - Deadline moved to Regular Decision; grid/routing scope proposed; collection interrupted at 30k frames (2026-08-05, ~23:10 CDT)
+
+**CADENCE NOTE, logged not hidden:** this entry covers cadence hits at prompt
+#18 AND #21. The #18 entry was never written - the session was interrupted
+mid-turn (the tool layer became briefly unavailable, then the process exited)
+before it could be. Caught up here rather than silently skipped.
+
+**WHAT (1) - THE DEADLINE MOVED.** Evan: *"This may also go past the Nov 1
+deadline so the final deadline is now regular decision but I want to get as
+much done as possible before then."* So **the hard deadline is now Regular
+Decision, ~Jan 1-15 2027** (~5 months), with **Nov 1 2026 retained as a soft
+milestone** - whatever is finished by then strengthens the EA application,
+and the rest lands as an RD update or interview material. This RELAXES the
+Appendix K schedule, which had already been designed so Nov 1 needed only
+SIM-POC + M3, with M4 pre-declared an RD-safe stretch. That design now pays
+off: nothing has to be cut, and the M4 capstone moves from "stretch" to
+"comfortably in scope."
+
+**WHAT (2) - A SCOPE EXPANSION IS PROPOSED, NOT YET DECIDED.** Evan is
+considering scaling the grid up to support **real destinations, parking, and
+routing** - i.e. "drive from A to B, then park," rather than lane-following a
+loop. This is a genuine change in system CLASS, not a bigger version of the
+same thing, and it is under evaluation rather than adopted. Two reasons it
+needs care before it enters the PRD:
+
+**(a) End-to-end behavioural cloning cannot route - reasoning, pending
+verification.** At an intersection, two IDENTICAL camera images require
+different actions depending on the destination. A policy pi(action|image)
+has no term for the destination, so it cannot represent the difference. This
+is the same partial-observability class as the stop-sign finding in Appendix
+L, but strictly worse: the stop sign is resolvable by MEMORY (recurrent
+state), whereas routing additionally requires CONDITIONING ON A GOAL. The
+expected fix is a goal-conditioned policy pi(action|image, command) -
+conditional imitation learning - which is well-established in the literature
+but is an architecture change to every model in the plan, not a bolt-on. A
+research worker was launched 2026-08-05 ~23:12 to verify this and pin the
+canonical architecture; **nothing is being built against it until that
+returns.**
+
+**(b) THE GRID DOES NOT FIT THE CONFIRMED SPACE at 1:14 - arithmetic, done
+here, to be re-checked against the measured car width.** Using the Appendix
+L scale (lane 261 mm, two-lane road 522 mm) in the confirmed 1.6 x 2.8 m:
+
+| Layout | Required span | Fits 1.6 m? |
+|---|---|---|
+| Single 4-way intersection, 500 mm arms | 500 + 522 + 500 = **1522 mm** | YES |
+| 2x2 grid (4 intersections), 400 mm blocks, 300 mm stubs | 522 + 400 + 522 + 600 = **2044 mm** | **NO** |
+| Same grid, ONE-WAY single-lane roads (261 mm) | 261 + 400 + 261 + 600 = **1522 mm** | YES, but loses the yellow centreline |
+| 4-bay parking lot (196 x 392 mm bays + 522 mm aisle) | **784 x 914 mm** | fits alongside, in the 2.8 m axis |
+
+So there is a real tension: **American two-lane markings AND a
+multi-intersection grid cannot both fit 1.6 m at 1:14.** A single
+intersection plus a parking lot does fit - and a single 4-way intersection is
+already enough to demonstrate routing, since routing only requires that a
+CHOICE exists with more than one destination. The figure-8 already has a
+crossing. Levers if a true grid is wanted: one-way single-lane roads, a
+smaller scale (1:20 is still marginal at 1732 mm), or more floor space.
+Presented to Evan as options; not decided.
+
+**A LIVE, TIME-SENSITIVE BOM CONSEQUENCE.** Routing requires localization,
+and the chosen drive motor **Pololu #1093 has NO encoder**. The same motor
+with a 12 CPR magnetic encoder is **#5159 at $29.95 (+$6)**. **The order has
+not been placed**, so this is decidable now at zero cost and expensive later
+- retrofitting an encoder means replacing the motor and re-cutting the
+cradle. Flagged to the research worker as an explicit question rather than
+guessed at.
+
+**WHAT (3) - SIM-POC P2 COLLECTION WAS INTERRUPTED.** The ~100k-frame run
+launched 2026-08-05 ~23:12 was killed when the session process exited. It is
+NOT a code failure - the log shows clean laps (18.1-21.6 s) right up to the
+cut. Survived, verified on disk:
+
+| Split | Episodes | Frames |
+|---|---|---|
+| train | 28 | **29,803** |
+| holdout | 1 | **401** |
+
+**The holdout is the problem, and it is a structural one, not bad luck:** the
+collector runs all train tracks first and the holdout last, so an
+interruption takes out the evaluation split specifically. 401 frames cannot
+support a generalization claim. A `--only {train,holdout}` resume flag was
+added (episodes carry uuid filenames, so a repeat run APPENDS rather than
+restarting) and holdout collection relaunched at 9 episodes.
+
+**Honest note on the target:** the PRD says ~100k frames, from V-D4RL's
+offline-visual benchmark standard. 29,803 train frames is already above
+DonkeyCar's stated 10-20k guidance for behavioural cloning and above Ha &
+Schmidhuber's 10,000 rollouts, so P3 is not blocked. If the corpus is
+declared done below 100k, that is a DEVIATION FROM THE PRD and must be
+recorded as one - not quietly redefined as sufficient.
+
+**WHAT (4) - A COLD AUDIT WAS LAUNCHED.** Evan invoked `/audit`. Per the
+skill's step 0, a session that built the thing inherits its author's belief
+("that module is fine, I wrote it" is not a finding it can make), so a fresh
+auditor was spawned with the project path, the scope, and the docs handed to
+it **as claims under test** - and deliberately WITHOUT this conversation's
+history or any "this part is known-good". Findings-only; it is forbidden to
+change anything. Weighted toward ML-pipeline correctness and doc-vs-reality
+drift, because this project's portfolio value depends on its measured claims
+being true. It will specifically re-test the record's own numbers (the PID
+sweep table, "97% filament reduction", the coupon's manifold/volume PASS,
+the MUTCD scaling, the ~$176-179 budget).
+
+**HONEST OPEN ITEMS:** (1) Routing architecture UNVERIFIED - the claim that
+BC cannot route is reasoning, not yet sourced; the worker may refute it.
+(2) The grid arithmetic above uses an ESTIMATED 130 mm car width; the whole
+table shifts when the real car is measured (task T1). (3) The encoder-motor
+decision is open and blocks nothing yet, but closes cheaply only until the
+order is placed. (4) Holdout collection in flight; P2 is NOT done until it
+lands and re-verifies. (5) **Still nothing printed and nothing ordered** -
+unchanged since 2026-07-23, now the longest-standing open item in the
+project. (6) The audit had not returned at time of writing; its findings are
+not represented here.
 

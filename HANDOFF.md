@@ -15,12 +15,22 @@ engineering artifact.
 **Last updated: 2026-08-05** — this file is the only live snapshot; history
 lives in the record.
 
-> **2026-08-05 — deadline set, plan approved, SIM-POC P1 done (Appendices
-> J, K).** **HARD DEADLINE: EA/ED applications ~Nov 1 2026.** This is 1 of 5
-> concurrent portfolio projects (~2-3 sittings/week here), so **Nov 1
-> requires only SIM-POC + M3; M4-on-real-logs is an explicit stretch for
-> Nov 1 and committed for RD (Jan 2027).** PRD §6b holds the three-lane
-> schedule. **Nothing printed and nothing ordered as of 2026-08-05** — those
+> **2026-08-05 ~23:10 — DEADLINE MOVED (Appendix N).** **The hard deadline
+> is now REGULAR DECISION, ~Jan 1-15 2027** (~5 months); Nov 1 2026 is now a
+> SOFT milestone — whatever is done by then strengthens the EA application,
+> the rest lands as an RD update. The Appendix K schedule already assumed
+> Nov 1 needed only SIM-POC + M3, so nothing has to be cut and **M4 moves
+> from stretch to comfortably in scope.** This is 1 of 5 concurrent
+> portfolio projects (~2-3 sittings/week here). PRD §6b holds the schedule.
+>
+> **A SCOPE EXPANSION IS UNDER EVALUATION, NOT ADOPTED:** destinations,
+> parking, and routing on a bigger grid. Two blockers before it enters the
+> PRD — (1) end-to-end BC likely **cannot route** (identical intersection
+> images, different destinations ⇒ needs goal-conditioning, an architecture
+> change to every model in the plan); (2) **a 4-intersection grid does not
+> fit 1.6 m at 1:14** (needs ~2.04 m; a single intersection needs 1.52 m and
+> does fit). Research in flight. **Live BOM consequence: the encoder motor
+> (#5159, +$6) is decidable now at zero cost and expensive after ordering.** **Nothing printed and nothing ordered as of 2026-08-05** — those
 > are Evan's two actions this week.
 >
 > **2026-08-05 ~23:10 — track design settled + P2 code done (Appendices L,
@@ -73,7 +83,7 @@ lives in the record.
 | Offline world model | M4 | **Not started** | tasks 16-20 now concrete (two architectures, one dataset) |
 | Sim-RL (optional) | M5 | **Not started** | never blocks M4 |
 | SIM-POC P1 environment | P1 | **Done** | 2026-08-05, commit 83e966b — CUDA True + sim camera frame, `ml/verify_env.py` |
-| SIM-POC P2 corpus | P2 | **Code done, collecting** | 2026-08-05, commit 6d6bd8f — writer/collector/verifier pass both directions; ~100k-frame run in progress |
+| SIM-POC P2 corpus | P2 | **Collecting (interrupted once)** | 2026-08-05: 29,803 train frames survive; holdout was killed before it ran and is re-collecting. `--only` flag added to resume. Not done until it re-verifies |
 | SIM-POC P3-P5 | P3-P5 | **Next** | P3 = Ha & Schmidhuber V+M+C on the sim corpus |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
 
