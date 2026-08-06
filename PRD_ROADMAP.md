@@ -489,6 +489,16 @@ P2. **Sim data corpus.** Drive the sim (scripted PID lane-follower or
     subset, hold out whole tracks. Same rule carries to M3/M4 on real data.
     Done: corpus on disk + N random frames spot-checked against their
     recorded actions + the held-out track list documented.
+    **AMENDED 2026-08-06 (Evan's decision, record Appendix P/Q):
+    `mountain-track` and `roboracingleague-track` were QUARANTINED** - the
+    tuned expert cannot drive them (13/13 episodes rejected, and 303-frame
+    episodes against a 1200 request respectively); they supplied 7% of the
+    corpus and 100% of its verification failures. Their 15 episodes moved to
+    `ml/data/sim_quarantine/`, not deleted. **Consequence to state in any
+    writeup: SIM-POC trains on TWO layouts, not four.** The held-out-layout
+    design survives (2 train + 1 entirely unseen holdout) and remains far
+    stronger than a random frame split, but the phrase "four tracks" must
+    never be used. Layout diversity is properly an M3/M4 real-car concern.
 P3. **Small world model first (Ha & Schmidhuber V+M+C).** Conv-VAE →
     z∈R^32; MDN-RNN over (z_t, a_t, h_t). Done: multi-step latent rollouts
     on held-out sim data are recognisably track-like; rollout frames saved.

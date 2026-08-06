@@ -51,6 +51,7 @@ the dated entry, not the digest.
 - [N — Deadline moved to Regular Decision; grid/routing scope proposed; collection interrupted at 30k frames](#appendix-n---deadline-moved-to-regular-decision-gridrouting-scope-proposed-collection-interrupted-at-30k-frames-2026-08-05-2310-cdt) (08-05)
 - [O — Cold audit finds the alignment gate was a fake; both the audit's fix and mine were wrong; routing research lands](#appendix-o---cold-audit-finds-the-alignment-gate-was-a-fake-both-the-audits-fix-and-mine-were-wrong-routing-research-lands-2026-08-05-2354-cdt) (08-05)
 - [P — Verifier streamed (4.09 GB → 0.10 GB measured); a second false diagnosis caught; two sim tracks are unusable](#appendix-p---verifier-streamed-409-gb---010-gb-measured-a-second-false-diagnosis-caught-two-sim-tracks-are-unusable-2026-08-06-0020-cdt) (08-06)
+- [Q — Two sim tracks quarantined by Evan's decision; corpus verifies clean on both axes](#appendix-q---two-sim-tracks-quarantined-by-evans-decision-corpus-verifies-clean-on-both-axes-2026-08-06-0011-cdt) (08-06)
 
 ---
 
@@ -1648,4 +1649,68 @@ saw: 38 of 67 train episodes are one track), the empty `data.md` bin (F18),
 and edge cases E8-E12. (3) `MIN_PEAK_CORR = 0.50` is calibrated on 77
 episodes from one simulator; it must be re-measured for the real car along
 with the lag constants. (4) Nothing printed, nothing ordered - unchanged.
+
+
+# Appendix Q - Two sim tracks quarantined by Evan's decision; corpus verifies clean on both axes (2026-08-06, ~00:11 CDT)
+
+**WHAT:** Evan chose option (a) from Appendix P.3: **quarantine the two
+tracks the expert cannot drive**, rather than re-tuning the expert per-track.
+Applied, verified, and the consequence recorded rather than buried.
+
+**Action taken - MOVED, not deleted.** 15 episodes / 4,637 frames
+(`mountain-track` x1, `roboracingleague-track` x14) were moved from
+`ml/data/sim/train/` to **`ml/data/sim_quarantine/train/`**. Nothing was
+deleted, so the decision is reversible if the expert is ever re-tuned. Both
+tracks were struck from `TRAIN_TRACKS` in `collect_sim_data.py` with the
+reason, the numbers, and the quarantine path written into the code comment -
+so a future session cannot silently re-add them without reading why they
+went.
+
+**Corpus after quarantine, real output:**
+
+    holdout  :  10 episodes,   11210 frames, tracks ['donkey-waveshare-v0']
+    train    :  52 episodes,   60452 frames, tracks ['donkey-generated-roads-v0', 'donkey-generated-track-v0']
+      split is disjoint      : no track appears on both sides
+    total frames: 71662
+    alignment:
+      exact PID identity     : verified on 62/62 episode(s), every action reproduced from log_cte
+      image-axis gate        : 62/62 episodes in band (-2, -1), lag distribution {-2: 16, -1: 46}, mode -1 (|r| 0.74-0.96)
+    P2 CORPUS CHECK: PASS
+
+**Every episode now verifies on BOTH axes** - 62/62 on the action axis and
+62/62 on the image axis, against 77/77 and 65/77 before. The correlation
+floor also moved: the weakest surviving episode is **|r| 0.74**, where the
+previous corpus reached down to 0.35. Removing the two tracks did not just
+silence failures, it removed the only episodes whose alignment was
+genuinely indeterminate.
+
+**THE COST, stated plainly and to be repeated in any writeup: SIM-POC now
+trains on TWO layouts, not four.** The layout-split premise (Appendix L/M)
+survives - two training layouts and one entirely unseen holdout is a valid
+held-out-layout design, and far stronger than a random frame split - but it
+is thinner than "four tracks" and that phrase must never be used. Layout
+diversity is properly a REAL-CAR concern (M3/M4), where the physical tile
+configurations are the layouts that matter and where Evan controls how many
+exist.
+
+**Corpus-size deviation being closed rather than argued.** At 71,662 frames
+the corpus sat at 72% of the PRD's ~100k target (a figure inherited from
+V-D4RL's offline-visual benchmark standard). Rather than redefine the target
+as satisfied - the failure mode this record exists to prevent - a further
+13 episodes per healthy track were launched at ~00:11 CDT, projected to land
+near 101k. **P2 remains NOT done until that lands and re-verifies.** If it
+finishes below target for any reason, the shortfall gets recorded as a
+deviation, not absorbed.
+
+**HONEST OPEN ITEMS:** (1) Top-up collection in flight; P2 not closed.
+(2) Audit items still outstanding: quality thresholds unenforceable at rest
+(F7), the empty `data.md` bin (F18), edge cases E8-E12. (3) Per-track
+imbalance persists within the surviving two - `generated-track` supplies 38
+of 52 train episodes - so even the two-layout claim is unbalanced, and the
+top-up collects both tracks equally to narrow that. (4) The lag constants and
+`MIN_PEAK_CORR = 0.50` are calibrated on this simulator only and must be
+re-measured for the real car. (5) **Nothing printed, nothing ordered** - and
+two decisions remain open from Appendix O: the encoder motor (#5159, +$6,
+which unblocks ordering) and the ~1:20 track re-spec (which unblocks
+printing).
 

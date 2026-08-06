@@ -83,7 +83,7 @@ lives in the record.
 | Offline world model | M4 | **Not started** | tasks 16-20 now concrete (two architectures, one dataset) |
 | Sim-RL (optional) | M5 | **Not started** | never blocks M4 |
 | SIM-POC P1 environment | P1 | **Done** | 2026-08-05, commit 83e966b — CUDA True + sim camera frame, `ml/verify_env.py` |
-| SIM-POC P2 corpus | P2 | **Collecting (interrupted once)** | 2026-08-05: 29,803 train frames survive; holdout was killed before it ran and is re-collecting. `--only` flag added to resume. Not done until it re-verifies |
+| SIM-POC P2 corpus | P2 | **Verifies clean; topping up to target** | 2026-08-06: 71,662 frames, **62/62 episodes verified on BOTH axes**, split disjoint, PASS. Two unusable tracks quarantined (Appendix Q) ⇒ **2 train layouts, not 4**. Topping up toward the ~100k PRD target; not closed until that re-verifies |
 | SIM-POC P3-P5 | P3-P5 | **Next** | P3 = Ha & Schmidhuber V+M+C on the sim corpus |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
 

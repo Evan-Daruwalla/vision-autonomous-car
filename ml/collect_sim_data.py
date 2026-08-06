@@ -40,8 +40,20 @@ DATA = REPO / "ml" / "data" / "sim"
 TRAIN_TRACKS = [
     "donkey-generated-track-v0",
     "donkey-generated-roads-v0",
-    "donkey-mountain-track-v0",
-    "donkey-roboracingleague-track-v0",
+    # DROPPED 2026-08-06 (Evan's call, record Appendix P/Q) - the tuned expert
+    # cannot drive these two, and they supplied 7% of the corpus but 100% of
+    # its verification failures:
+    #   "donkey-mountain-track-v0"        13 of 13 episodes REJECTED on the
+    #                                     top-up run by the quality filter
+    #   "donkey-roboracingleague-track-v0" episodes averaged 303 frames against
+    #                                     a 1200 request (car leaves the road),
+    #                                     mean|cte| 0.68, and every one of the
+    #                                     12 unverifiable episodes came from
+    #                                     here or mountain-track
+    # Their 15 episodes / 4,637 frames were MOVED to ml/data/sim_quarantine/,
+    # not deleted, so this is reversible if the expert is ever re-tuned
+    # per-track. Consequence to state plainly in any writeup: SIM-POC trains
+    # on TWO layouts, not four.
 ]
 HOLDOUT_TRACKS = [
     "donkey-waveshare-v0",
