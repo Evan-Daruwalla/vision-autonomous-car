@@ -11,11 +11,15 @@ Core bins:
 Standards bins (only those the codebase actually commits to):
 - dependencies.md — planned stack (DonkeyCar 5.x plumbing + PyTorch models) (updated 2026-07-23)
 - ui.md — N/A, no frontend planned; teleop UI TBD at M2 (updated 2026-07-23)
-- testing.md — empty, no code yet (updated 2026-07-23)
-- data.md — THE episode data contract: npz schema, t=0 rule, both alignment gates, split rule (updated 2026-08-06)
+- testing.md — the runnable done-checks + verification rules (updated 2026-08-06)
+- data.md — THE episode data contract: npz schema, t=0 rule, both alignment gates, 3-way split rule (updated 2026-08-06)
 - tooling.md — Python 3.12.10 venv, machine facts, git -F quirk (updated 2026-08-06)
 
 Cross-bin invariants:
 - No hardware purchase without Evan's explicit go (BLOCKED-ON-EVAN).
 - Absolute dates in every entry; nothing invented; desk research is tagged
   as untested until a build task verifies it on the real car.
+- NEVER rewrite a UTF-8 file with PowerShell `Set-Content`/`-replace` — it
+  mangles em-dashes to mojibake. Use the Edit/Write tools. (Hit 2026-08-06 on
+  this very file; the global CLAUDE.md warns about it for JSON, and it
+  applies to markdown just as hard.)

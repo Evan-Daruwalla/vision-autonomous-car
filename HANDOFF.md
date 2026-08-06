@@ -84,7 +84,8 @@ lives in the record.
 | Sim-RL (optional) | M5 | **Not started** | never blocks M4 |
 | SIM-POC P1 environment | P1 | **Done** | 2026-08-05, commit 83e966b — CUDA True + sim camera frame, `ml/verify_env.py` |
 | SIM-POC P2 corpus | P2 | **DONE** | 2026-08-06, Appendix R: **102,888 frames**, 88/88 episodes verified on BOTH axes, split disjoint, PASS. Target met, not redefined. **2 train layouts, not 4** (Appendix Q), unbalanced 51:27 |
-| SIM-POC P3-P5 | P3-P5 | **P3 is next** | P3 = Ha & Schmidhuber V+M+C (~4.77M params) on the sim corpus. Nothing started |
+| SIM-POC P3 world model | P3 | **DONE** | 2026-08-06, Appendix S: V+M+C trained (VAE 4,348,547 params = exact paper match). 30-step imagination **beats a frozen-frame baseline 30/30 steps in-domain**, 0/30 cross-domain. Done-check PASS. ~6 min total training |
+| SIM-POC P4-P5 | P4-P5 | **P4 is next** | P4 = DreamerV3-S offline + the measured 8GB OOM boundary. P3 already banked the portfolio artifact, so P4 can fail safely |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
 
 ## Hardware & stack facts (from the 2026-07-23 brief — re-verify prices at purchase)

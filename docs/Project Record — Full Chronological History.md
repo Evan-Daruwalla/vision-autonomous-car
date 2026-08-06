@@ -53,6 +53,7 @@ the dated entry, not the digest.
 - [P — Verifier streamed (4.09 GB → 0.10 GB measured); a second false diagnosis caught; two sim tracks are unusable](#appendix-p---verifier-streamed-409-gb---010-gb-measured-a-second-false-diagnosis-caught-two-sim-tracks-are-unusable-2026-08-06-0020-cdt) (08-06)
 - [Q — Two sim tracks quarantined by Evan's decision; corpus verifies clean on both axes](#appendix-q---two-sim-tracks-quarantined-by-evans-decision-corpus-verifies-clean-on-both-axes-2026-08-06-0011-cdt) (08-06)
 - [R — SIM-POC P2 CLOSED: 102,888 frames, 88/88 verified on both axes](#appendix-r---sim-poc-p2-closed-102888-frames-8888-verified-on-both-axes-2026-08-06-0040-cdt) (08-06)
+- [S — SIM-POC P3 DONE: a working world model, and the domain gap it exposed](#appendix-s---sim-poc-p3-done-a-working-world-model-and-the-domain-gap-it-exposed-2026-08-06-0118-cdt) (08-06)
 
 ---
 
@@ -1778,4 +1779,136 @@ progress are still open: the encoder motor (#5159, +$6) and the ~1:20 track
 re-spec. The software lane has now run three milestones ahead of the
 hardware lane, which was the plan's intent while parts shipped - but no
 parts have been ordered to ship.
+
+
+# Appendix S - SIM-POC P3 DONE: a working world model, and the domain gap it exposed (2026-08-06, ~01:18 CDT)
+
+**WHAT:** P3 complete. The Ha & Schmidhuber V+M+C world model
+(arXiv:1803.10122) trains on the P2 corpus and produces **30-step imagination
+rollouts that are recognisably track-like and measurably better than a
+do-nothing baseline** - the PRD's done-check, met with a number rather than a
+vibe. Total training time on the RTX 3060 Ti: **VAE 198 s + MDN-RNN 140 s =
+under 6 minutes**, nowhere near the 8 GB ceiling.
+
+New files: `ml/preprocess.py`, `ml/splits.py`, `ml/models.py`,
+`ml/train_vae.py`, `ml/train_mdnrnn.py`, `ml/rollout_eval.py`.
+
+## S.1 - Architecture reproduces the paper exactly
+
+| Component | Params | Note |
+|---|---|---|
+| ConvVAE (V) | **4,348,547** | **exact match to the paper's published figure** |
+| MDN-RNN (M) | 382,533 | paper reports 422,368 for CarRacing, which used a 3-dim action; this uses 2, so smaller is expected and NOT claimed as a match |
+| total | 4,731,080 | |
+
+The VAE count is asserted in `models.self_check()`. Reproducing a published
+parameter count to the digit proves every kernel size and channel width is
+wired as specified - something reading the code cannot establish.
+
+## S.2 - THE METHODOLOGICAL CORRECTION (the most important part of P3)
+
+**A first VAE run reported what looked like textbook overfitting** - train
+reconstruction falling 221 -> 55 while holdout error bottomed at ~390 and
+then ROSE to ~415. That reading was WRONG, and it was wrong because the
+evaluation had only two splits.
+
+The holdout track (`waveshare`) is **indoor** - pale walls, a ladder, orange
+lane lines on a light floor - while both surviving training tracks are
+**outdoor** road scenes with trees and sky. So "unseen track" was silently
+also "unseen visual domain", and the two questions were confounded.
+
+Added a **third split** (`ml/splits.py`): `val_indomain`, held-out whole
+EPISODES of the training tracks - unseen trajectories, seen domain,
+stratified by track so no layout drops out of training. Re-run:
+
+| Split | epoch 1 | epoch 40 | question it answers |
+|---|---|---|---|
+| fit | 236.6 | **56.11** | did it fit |
+| val_indomain | 138.3 | **56.72** | did it learn, or memorise these runs |
+| holdout | 426.3 | **412.0** (flat) | does it transfer to a new domain |
+
+**val_indomain tracks fit almost exactly - a gap of 0.6.** There is no
+overfitting. The model generalises fine to unseen trajectories and simply
+cannot render a visual domain it has never seen. That is a domain gap, and
+the earlier entry's implied "overfitting" reading is corrected here.
+
+Worth stating plainly: **a random frame split would have shown fit == val and
+declared success; a two-way layout split showed what looked like a broken
+model; only the three-way split gives the true answer.** Both wrong readings
+were available and I published the second one before catching it.
+
+## S.3 - Rollout results: the done-check, with a baseline
+
+Protocol: warm the LSTM on 32 real frames (teacher forcing), then cut the
+frames off and imagine 30 steps, feeding predicted z back in **while
+following the real recorded actions** - so any divergence is the dynamics
+model failing, not a policy disagreeing. 8 episodes per split.
+
+**The baseline is what makes this a claim.** Every frame of a driving corpus
+looks vaguely road-like, so "the rollout looks like a track" proves nothing
+alone. Error is therefore reported against a *freeze the last real frame*
+predictor.
+
+| | step 1 | 5 | 10 | 15 | 30 | beats baseline |
+|---|---|---|---|---|---|---|
+| **val_indomain** image MSE | 0.0047 | 0.0057 | 0.0071 | 0.0066 | 0.0068 | **30/30 steps** |
+| val_indomain frozen baseline | 0.0102 | 0.0229 | 0.0281 | 0.0314 | 0.0313 | |
+| val_indomain latent L2 | 4.22 | 4.66 | 4.53 | 4.64 | 5.14 | |
+| **holdout** image MSE | 0.0416 | 0.0522 | 0.0645 | 0.0834 | 0.1052 | **0/30 steps** |
+| holdout frozen baseline | 0.0115 | 0.0349 | 0.0493 | 0.0520 | 0.0592 | |
+
+**In-domain: a real world model.** Image error is essentially FLAT across 30
+imagined steps (0.0047 -> 0.0068) while the frozen baseline degrades 3x. The
+latent trajectory grows slowly and does not diverge. Saved panels
+(`rollout_val_indomain.png`) show road geometry, the yellow centre line, the
+tree line and the horizon all surviving 30 steps of pure imagination -
+blurry, as a 32-dim latent must be, but structurally correct.
+
+**Cross-domain: actively worse than doing nothing.** On the holdout the model
+loses to the frozen-frame baseline at every single step, and the panel shows
+why - it hallucinates green trees and blue sky onto an indoor scene. The
+world model does not merely fail to transfer; it confidently predicts the
+wrong world.
+
+**P3 DONE-CHECK: PASS on val_indomain** ("multi-step latent rollouts on
+held-out data are recognisably track-like"), with the cross-domain failure
+recorded as the honest limit rather than omitted.
+
+## S.4 - A measurement inconsistency, flagged not hidden
+
+MDN-RNN final: fit NLL **27.52**, val_indomain **12.85**, holdout **64.24**
+(rising). Validation NLL being LOWER than training NLL is not a miracle - it
+is an artifact: training samples z ~ N(mu, sigma) for both input and target
+(a noisier target, hence higher NLL), while evaluation uses the posterior
+mean for both. **fit and val_indomain NLL are therefore not comparable to
+each other.** The val-vs-holdout comparison IS valid, since both use the
+mean. Fixing this would mean evaluating on sampled targets too; left as-is
+and documented, because the comparison P3 needs is val-vs-holdout.
+
+## S.5 - What this buys P4 and M4
+
+- The pipeline is proven end to end on real data: corpus -> 64x64 tensors ->
+  latents -> dynamics -> imagination -> decoded pictures -> a metric.
+- **Portfolio artifact #1 is banked** and it is independent of whether
+  DreamerV3-S fits in 8 GB at P4 - which was the entire point of building the
+  small model first.
+- The three-way split, the frozen-frame baseline, and the seeded determinism
+  are all reusable for P4 and for M3/M4 on the real car.
+- Headroom is enormous: under 6 minutes of training and a small fraction of
+  8 GB. P4 has room.
+- **The domain-gap result transfers as a warning to the real car:** two
+  training layouts were not enough to cover a third that merely looked
+  different. On the physical track, tile configurations that change the
+  *appearance* (lighting, surroundings) - not just the geometry - will need
+  to be in the training set, or the same failure recurs.
+
+**HONEST OPEN ITEMS:** (1) Rollouts are blurry - inherent to a 32-dim latent
+plus an L2 VAE, not a bug, but it caps how much fine road detail the model
+can represent. (2) Only ONE seed was trained. The routing research recorded
+that seed variance in driving policies can reach tens of points, so any
+comparison at P4/P5 needs >=3 seeds; P3 as a pipeline proof does not.
+(3) The MDN-RNN NLL inconsistency above. (4) `testing.md` bin still not
+populated. (5) Nothing printed, nothing ordered - the encoder-motor and
+~1:20 track re-spec decisions remain open and continue to block all physical
+progress.
 

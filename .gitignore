@@ -18,9 +18,14 @@ sim/
 # ...and the log the Unity sim drops in the working directory when it runs
 unitylog.txt
 
-# Training data, checkpoints, runs — large and regenerable
+# Training data and model weights — large and regenerable
 ml/data/
-ml/runs/
 ml/checkpoints/
 *.pt
 *.ckpt
+
+# ml/runs/ is deliberately NOT ignored wholesale. The weights are (above),
+# but the RESULTS — loss histories, reconstruction grids, rollout panels,
+# metrics — are the experiment evidence this project exists to produce, and
+# they are ~1 MB total. Versioning them means a claim in the record can
+# always be traced to the artifact that produced it.

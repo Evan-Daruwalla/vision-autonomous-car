@@ -62,12 +62,30 @@ verified on a 102,888-frame corpus 2026-08-06.
 for the real car** — they belong to the control rate and platform, not the
 track.
 
-## Splitting rule
+## Splitting rule — THREE splits, not two (revised 2026-08-06)
 
-**Split by LAYOUT, never randomly by frame.** Frame *t* and *t+1* are
-near-duplicates, so a random split leaks and massively overstates accuracy.
-Sim uses whole held-out tracks; the real car will use whole held-out tile
-configurations.
+**Never split randomly by frame.** Frames *t* and *t+1* are near-duplicates,
+so a random split leaks and massively overstates accuracy.
+
+`ml/splits.py` produces three sets, because two conflate two questions:
+
+| Split | What it is | Question |
+|---|---|---|
+| `fit` | episodes trained on | did it fit |
+| `val_indomain` | held-out EPISODES of the same tracks | did it learn, or memorise these runs |
+| `holdout` | an entirely unseen TRACK | does it transfer |
+
+**Why three.** Measured 2026-08-06 (record Appendix S): the training tracks
+are outdoor and the holdout track is indoor, so "unseen track" was also
+"unseen visual domain". With only fit-vs-holdout the VAE looked like it was
+overfitting badly; adding `val_indomain` showed fit 56.11 vs val 56.72 — no
+overfitting at all, just zero cross-domain transfer. **A random frame split
+would have declared success; a two-way split declared failure; only the
+three-way split is true.** `val_indomain` is stratified by track so no layout
+can silently drop out of training.
+
+Select checkpoints on `val_indomain`, not `holdout` — selecting on a domain
+the model was never meant to cover picks an underfit model.
 
 ## Current corpus (SIM-POC P2, closed 2026-08-06)
 
