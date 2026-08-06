@@ -1,0 +1,220 @@
+{
+  "size": "S",
+  "batch_size": 16,
+  "batch_length": 64,
+  "imag_horizon": 5,
+  "precision": 32,
+  "cap_gb": 7.0,
+  "params_world_model": 15685763,
+  "params_actor_critic": 3415554,
+  "params_total": 19101317,
+  "steps_requested": 2000,
+  "steps_completed": 2000,
+  "oom_at_step": null,
+  "peak_gb": 2.552,
+  "total_vram_gb": 7.999,
+  "episodes": 66,
+  "frames": 77266,
+  "history": [
+    {
+      "epoch": 1,
+      "step": 100,
+      "peak_gb": 2.552,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 588.31,
+      "kl": 8.996,
+      "seconds": 129.4
+    },
+    {
+      "epoch": 2,
+      "step": 200,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.225,
+      "reserved_gb": 2.842,
+      "image_loss": 194.98,
+      "kl": 5.76,
+      "seconds": 231.6
+    },
+    {
+      "epoch": 3,
+      "step": 300,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 147.72,
+      "kl": 5.744,
+      "seconds": 373.9
+    },
+    {
+      "epoch": 4,
+      "step": 400,
+      "peak_gb": 2.55,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 123.73,
+      "kl": 5.681,
+      "seconds": 265.7
+    },
+    {
+      "epoch": 5,
+      "step": 500,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.225,
+      "reserved_gb": 2.842,
+      "image_loss": 113.8,
+      "kl": 6.341,
+      "seconds": 262.1
+    },
+    {
+      "epoch": 6,
+      "step": 600,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 105.22,
+      "kl": 7.419,
+      "seconds": 527.0
+    },
+    {
+      "epoch": 7,
+      "step": 700,
+      "peak_gb": 2.55,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 95.56,
+      "kl": 8.118,
+      "seconds": 119.0
+    },
+    {
+      "epoch": 8,
+      "step": 800,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.225,
+      "reserved_gb": 2.842,
+      "image_loss": 93.62,
+      "kl": 8.589,
+      "seconds": 51.7
+    },
+    {
+      "epoch": 9,
+      "step": 900,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 86.19,
+      "kl": 8.81,
+      "seconds": 50.0
+    },
+    {
+      "epoch": 10,
+      "step": 1000,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 83.18,
+      "kl": 9.134,
+      "seconds": 48.7
+    },
+    {
+      "epoch": 11,
+      "step": 1100,
+      "peak_gb": 2.55,
+      "alloc_gb": 0.225,
+      "reserved_gb": 2.842,
+      "image_loss": 79.33,
+      "kl": 9.281,
+      "seconds": 50.5
+    },
+    {
+      "epoch": 12,
+      "step": 1200,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 76.09,
+      "kl": 9.345,
+      "seconds": 48.1
+    },
+    {
+      "epoch": 13,
+      "step": 1300,
+      "peak_gb": 2.55,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 74.81,
+      "kl": 9.563,
+      "seconds": 46.9
+    },
+    {
+      "epoch": 14,
+      "step": 1400,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.225,
+      "reserved_gb": 2.842,
+      "image_loss": 71.8,
+      "kl": 9.43,
+      "seconds": 46.7
+    },
+    {
+      "epoch": 15,
+      "step": 1500,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 69.9,
+      "kl": 9.46,
+      "seconds": 46.9
+    },
+    {
+      "epoch": 16,
+      "step": 1600,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 69.04,
+      "kl": 9.546,
+      "seconds": 49.1
+    },
+    {
+      "epoch": 17,
+      "step": 1700,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.225,
+      "reserved_gb": 2.842,
+      "image_loss": 66.03,
+      "kl": 9.46,
+      "seconds": 47.4
+    },
+    {
+      "epoch": 18,
+      "step": 1800,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 63.22,
+      "kl": 9.33,
+      "seconds": 46.6
+    },
+    {
+      "epoch": 19,
+      "step": 1900,
+      "peak_gb": 2.55,
+      "alloc_gb": 0.226,
+      "reserved_gb": 2.842,
+      "image_loss": 61.62,
+      "kl": 9.344,
+      "seconds": 46.6
+    },
+    {
+      "epoch": 20,
+      "step": 2000,
+      "peak_gb": 2.551,
+      "alloc_gb": 0.225,
+      "reserved_gb": 2.842,
+      "image_loss": 61.39,
+      "kl": 9.485,
+      "seconds": 46.2
+    }
+  ]
+}

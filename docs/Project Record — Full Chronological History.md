@@ -55,6 +55,7 @@ the dated entry, not the digest.
 - [R — SIM-POC P2 CLOSED: 102,888 frames, 88/88 verified on both axes](#appendix-r---sim-poc-p2-closed-102888-frames-8888-verified-on-both-axes-2026-08-06-0040-cdt) (08-06)
 - [S — SIM-POC P3 DONE: a working world model, and the domain gap it exposed](#appendix-s---sim-poc-p3-done-a-working-world-model-and-the-domain-gap-it-exposed-2026-08-06-0118-cdt) (08-06)
 - [T — SIM-POC P4: the 8GB DreamerV3 boundary measured; two task premises proved false; repo goes public](#appendix-t---sim-poc-p4-the-8gb-dreamerv3-boundary-measured-two-task-premises-proved-false-repo-goes-public-2026-08-06-1329-cdt) (08-06)
+- [U — SIM-POC P4 CLOSED: the model trains; the memory boundary holds over a long run](#appendix-u---sim-poc-p4-closed-the-model-trains-the-memory-boundary-holds-over-a-long-run-2026-08-06-1336-cdt) (08-06)
 
 ---
 
@@ -2097,3 +2098,93 @@ research to measured-and-still-enabled. `INDEX.md` updated.
 5. **Nothing printed, nothing ordered** - unchanged since 2026-07-23. The
    encoder-motor decision and the ~1:20 track re-spec still block all physical
    progress, and the public README now says so where anyone can read it.
+
+
+---
+
+# Appendix U - SIM-POC P4 CLOSED: the model trains; the memory boundary holds over a long run (2026-08-06, ~13:36 CDT)
+
+**WHAT:** Closes the one open item Appendix T left explicitly unresolved
+(T.8 item 1). The 2000-step DreamerV3-S offline run finished, exit 0.
+**P4's done-check now passes on BOTH halves, each verified.** Artifact:
+`ml/runs/dreamer_p4/S_b16_train2000/p4_result.json`.
+
+**Appendix T deliberately refused to write "a trained model" while that run
+was in flight.** This entry is what earns the word.
+
+## U.1 It trains
+
+DreamerV3-S, batch 16 x 64, imagination horizon 5, fp32, 7.0 GB allocator cap,
+on the full 66-episode / 77,266-frame fit split.
+
+| | epoch 1 | epoch 4 | epoch 10 | epoch 20 |
+|---|---|---|---|---|
+| image reconstruction loss | 588.31 | 123.73 | 83.18 | **61.39** |
+| kl | 8.996 | 5.681 | 9.134 | 9.485 |
+| peak VRAM (GB) | 2.552 | 2.550 | 2.551 | 2.551 |
+
+**Image reconstruction loss fell 588.31 -> 61.39, a 9.6x reduction**, and fell
+monotonically after the first epoch. The hand-written offline loop in
+`ml/run_dreamer_p4.py` - built because the vendored repo has none at all
+(Appendix T.2a) - genuinely trains the model rather than merely allocating
+memory on it. Total 2000 gradient steps, no OOM.
+
+**Not diagnosed, and stated as such:** `kl` fell to 5.68 by epoch 4, then rose
+and plateaued near 9.5 while reconstruction kept improving. That is consistent
+with the posterior encoding more information as the decoder sharpens
+(`kl_free` is 1.0, so the loss term itself is clamped), but no check was run.
+It must not be cited as evidence of healthy training without one.
+
+## U.2 The control that matters more than the loss curve
+
+**Peak VRAM held at 2.550-2.552 GB across all twenty epochs - a spread of
+0.002 GB - and is identical to the figure the 20-step sweep reported.**
+
+This is the result that hardens Appendix T.1's fitting table. A 20-step
+measurement could plausibly have been a warm-up artifact that crept upward
+once training ran for real; fragmentation and cache growth are exactly the
+kind of thing that makes short memory probes lie. It did not creep. The table
+is a steady-state measurement, and M4 can be planned against it.
+
+## U.3 Wall-clock from this run is unusable, and why that is recorded anyway
+
+Per-epoch time ran **119-527 s for the first seven epochs, then settled at
+46-52 s for the remaining thirteen** - a 10x swing within one run at constant
+configuration.
+
+**Suspected cause, not proven:** an orphaned child process left over from the
+sweep killed in Appendix T.3. `subprocess.run` children can outlive the shell
+task that spawned them, so the killed batch-64 run may have still been holding
+the GPU during this run's early epochs. No attempt was made to prove it after
+the fact, and it is not worth re-running to find out.
+
+The reason this is in the record rather than quietly dropped: it is a second,
+independent demonstration of the same lesson as T.3 and the warm/cold finding
+- **memory measurements survive GPU contention, timings do not.** Every
+throughput number this project publishes needs an otherwise-idle card and an
+`nvidia-smi` check first. Peak-allocated needs neither.
+
+## U.4 SIM-POC status after P4
+
+| task | state |
+|---|---|
+| P1 environment | DONE (2026-08-05) |
+| P2 corpus | DONE - 102,888 frames, 88/88 verified both axes (Appendix R) |
+| P3 Ha & Schmidhuber V+M+C | DONE - beats frozen-frame baseline 30/30 in-domain (Appendix S) |
+| P4 DreamerV3-S offline | **DONE - both halves (Appendices T, U)** |
+| P5 policy extraction + in-sim eval | not started |
+
+**P5 is the only remaining SIM-POC task.** Note the standing constraint from
+`testing.md`: P5 is a COMPARATIVE claim (learned policy vs the P2 scripted
+driver), so it needs **>=3 seeds**, not the single seed P3 and P4 used as
+pipeline proofs.
+
+## U.5 Open items
+
+1. `kl` behaviour undiagnosed (U.1).
+2. Wall-clock unmeasured on an idle card (U.3).
+3. XS/M/L size labels still unverified against the paper (T.1).
+4. Sysmem Fallback still ON; every future memory measurement needs `--cap-gb`.
+5. **Nothing printed, nothing ordered** - unchanged since 2026-07-23. The
+   encoder-motor decision and the ~1:20 track re-spec still block all physical
+   progress. Software is now four SIM-POC tasks ahead of hardware.

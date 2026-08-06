@@ -64,7 +64,18 @@ Only "S" is a verified size — it is the reference repo's default config.
 M and L are scaling steps I defined and have not checked against the paper's
 published size table, so cite the measured parameter counts, not the letters.
 
+A 2000-step run at the top config trained cleanly: image reconstruction loss
+fell **588.31 to 61.39**, and peak memory held between 2.550 and 2.552 GB
+across all twenty epochs. That 0.002 GB spread is the part that matters — it
+means the table above is a steady-state measurement rather than a warm-up
+number that would creep once training ran for real.
+
 Reproduce with `python ml/sweep_dreamer_p4.py`.
+
+The reference implementation ships no offline training loop, despite having an
+`offline_traindir` flag. The flag only warm-starts the replay buffer; training
+steps are still driven by environment steps. `ml/run_dreamer_p4.py` supplies a
+real offline loop over the unmodified library code.
 
 ---
 

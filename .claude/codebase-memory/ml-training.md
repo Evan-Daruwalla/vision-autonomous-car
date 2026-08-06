@@ -119,6 +119,33 @@ Activations dominate; weights are close to free at this scale.
 execution). Peak memory was byte-identical across both runs. Never quote
 absolute throughput from a first run; memory is stable, time is not.
 
+### The long run confirms the boundary, and that it learns
+
+2000 offline steps, DreamerV3-S, batch 16, horizon 5, fp32, 7.0 GB cap, on the
+full 66-episode / 77,266-frame fit split
+(`ml/runs/dreamer_p4/S_b16_train2000/p4_result.json`):
+
+- **Image reconstruction loss 588.31 -> 61.39, a 9.6x reduction**, falling
+  monotonically after the first epoch. The offline loop in
+  `run_dreamer_p4.py` genuinely trains — it is not just allocating memory.
+- **Peak VRAM 2.550-2.552 GB across all 20 epochs — a 0.002 GB spread**, and
+  identical to the 20-step sweep number. **This is the important control:** it
+  proves the fitting table above is a stable steady-state measurement, not a
+  warm-up artifact that would creep upward over a real training run.
+- The reported `kl` fell 8.996 -> 5.68 by epoch 4 then rose and plateaued near
+  9.5 while reconstruction kept improving. Consistent with the posterior
+  encoding more information as the decoder sharpens (`kl_free` is 1.0, so the
+  loss term is clamped), but **this was not diagnosed** — do not cite it as a
+  healthy-training indicator without checking.
+- **Wall-clock from this run is unusable.** Per-epoch time ran 119-527 s for
+  the first seven epochs, then settled at 46-52 s for the remaining thirteen.
+  Suspected cause: an orphaned child process from a `TaskStop`-ed sweep still
+  holding the GPU (`subprocess.run` children can outlive the parent shell).
+  Not proven, and not worth re-running to prove. Memory was unaffected, which
+  is the point — **memory measurements survive GPU contention; timings do
+  not.** If throughput ever matters, measure it on an otherwise idle card and
+  confirm with `nvidia-smi` first.
+
 ## Rules carried forward to M4 (real-car logs)
 
 - **Measure, never estimate, VRAM.** The retracted "~24 GB for DreamerV3"

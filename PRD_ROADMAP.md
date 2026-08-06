@@ -524,16 +524,18 @@ P4. **DreamerV3-S offline on the same corpus.** dreamerv3-torch repo
     (`--cap-gb`), verified to still raise OOM under active fallback. That is
     strictly better for this project: it lives in version control and is
     reproducible, where a control-panel checkbox is neither.
-    **STATUS 2026-08-06 ~13:20 CDT — the done-check's SECOND half is met and
-    verified; the first is still running.** Measured boundary table:
-    `ml/runs/dreamer_p4/sweep_summary.json` (regenerate with
+    **DONE 2026-08-06 ~13:36 CDT — BOTH halves, each verified (record
+    Appendices T and U).**
+    *Boundary half:* `ml/runs/dreamer_p4/sweep_summary.json` (regenerate with
     `python ml/sweep_dreamer_p4.py`). Headline: **batch size, not model size,
     is what breaks 8 GB** — a 69.7M-param model fits at batch 16 (5.238 GB)
-    while the 19.1M model at batch 64 does not fit in 7.0 GB. **NOT yet
-    claimed: a trained model.** A 2000-step run is in flight; until its loss
-    curve is read, P4 is DONE on the boundary half ONLY. The PRD accepts
-    either half alone, so P4's done-check already passes — but "trained" must
-    not be written down until the curve is seen.
+    while the 19.1M model at batch 64 does not fit in 7.0 GB.
+    *Trained half:* 2000 offline steps, no OOM, **image reconstruction loss
+    588.31 → 61.39, a 9.6x reduction** (`ml/runs/dreamer_p4/S_b16_train2000/
+    p4_result.json`). Peak VRAM held at **2.550-2.552 GB across all 20
+    epochs** — a 0.002 GB spread, and identical to the 20-step sweep figure,
+    so the boundary measurement is confirmed stable over a long run rather
+    than a warm-up artifact.
 P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
     through the learned dynamics; evaluate in sim against the P2 scripted
     driver. Done: eval table in the record + the explicit no-transfer-claim
