@@ -64,7 +64,9 @@ lives in the record.
 | Offline world model | M4 | **Not started** | tasks 16-20 now concrete (two architectures, one dataset) |
 | Sim-RL (optional) | M5 | **Not started** | never blocks M4 |
 | SIM-POC P1 environment | P1 | **Done** | 2026-08-05, commit 83e966b — CUDA True + sim camera frame, `ml/verify_env.py` |
-| SIM-POC P2-P5 | P2-P5 | **Next** | P2 = scripted driver logs ~100k frames to the dreamerv3-torch episode format |
+| SIM-POC P2 corpus | P2 | **Code done, collecting** | 2026-08-05, commit 6d6bd8f — writer/collector/verifier pass both directions; ~100k-frame run in progress |
+| SIM-POC P3-P5 | P3-P5 | **Next** | P3 = Ha & Schmidhuber V+M+C on the sim corpus |
+| Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
 
 ## Hardware & stack facts (from the 2026-07-23 brief — re-verify prices at purchase)
 
@@ -127,8 +129,20 @@ lives in the record.
   M1.1c or any wiring.
 - `docs/BOM.md` — the order list, with wiring architecture and the
   pre-order verification checklist.
-- `.claude/codebase-memory/` — bins (mostly stubs until code exists).
-  `gotchas.md` is the dense one — read it before any hardware or M4 work.
+- `.claude/codebase-memory/` — bins. `gotchas.md` is the dense one — read it
+  before any hardware, track, or ML work.
+- `ml/` — SIM-POC code. `requirements.txt` rebuilds the environment;
+  `verify_env.py` and `verify_corpus.py` are the P1/P2 done-checks and both
+  exit non-zero on failure.
+
+## Track (decided 2026-08-05, record Appendix L)
+Figure-8 (never an oval — a one-handed loop teaches "always steer left"),
+1.6 × 2.8 m, **1:14 scale**: lane 261 mm, line 7.3 mm, stop line 22-44 mm,
+dash compressed to ~60/180 mm. **Print MARKINGS, not the road surface** —
+full-surface printing is ~6.4 kg and 150-250 h versus ~0.15 kg and ~6 h for
+markings, for identical camera input. Substrate is dark matte foam board.
+Stop sign goes in from the start but is exercised at M4, because plain BC
+provably cannot learn it and the world model can.
 - `.claude/pm-cadence.json` — record entry every 3 prompts; handoff at
   session end.
 
