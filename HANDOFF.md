@@ -15,12 +15,17 @@ engineering artifact.
 **Last updated: 2026-08-05** — this file is the only live snapshot; history
 lives in the record.
 
-> **2026-08-05 — SIM-POC added (record Appendix J).** Evan asked to train in
-> sim first as a proof of concept — yes, as a POC of the M4 PIPELINE, not of
-> transfer (scope guard intact; the sim policy is never the car's policy).
-> PRD tasks P1-P5: Py3.11 venv → sim corpus → V+M+C → DreamerV3-S with the
-> measured 8GB boundary → in-sim eval. **Coupon-print and order status
-> after 2026-07-23 are unknown to the docs — Evan asked to report.**
+> **2026-08-05 — deadline set, plan approved, SIM-POC P1 done (Appendices
+> J, K).** **HARD DEADLINE: EA/ED applications ~Nov 1 2026.** This is 1 of 5
+> concurrent portfolio projects (~2-3 sittings/week here), so **Nov 1
+> requires only SIM-POC + M3; M4-on-real-logs is an explicit stretch for
+> Nov 1 and committed for RD (Jan 2027).** PRD §6b holds the three-lane
+> schedule. **Nothing printed and nothing ordered as of 2026-08-05** — those
+> are Evan's two actions this week. P1 (ML environment) is verified and
+> committed; P2 is next.
+>
+> **Per-task commits are authorized** (plan approval, 2026-08-05). Push
+> still requires Evan's explicit say-so.
 
 > **2026-07-23 — Research brief + PRD written, then M1.1 gate answered
 > (record Phase 0, Appendix A-C).** Four-worker research settled the stack:
@@ -58,7 +63,8 @@ lives in the record.
 | M4 architecture gate | M4.16a | **Done** | 2026-07-23: feasible w/ constraints; docs/research/2026-07-23_world-model-8gb-vram.md |
 | Offline world model | M4 | **Not started** | tasks 16-20 now concrete (two architectures, one dataset) |
 | Sim-RL (optional) | M5 | **Not started** | never blocks M4 |
-| SIM-POC (M4 pipeline in sim) | P1-P5 | **Added 2026-08-05** | proves the pipeline + measures the 8GB boundary before hardware; P1 needs Evan's go (~236 MB sim download) |
+| SIM-POC P1 environment | P1 | **Done** | 2026-08-05, commit 83e966b — CUDA True + sim camera frame, `ml/verify_env.py` |
+| SIM-POC P2-P5 | P2-P5 | **Next** | P2 = scripted driver logs ~100k frames to the dreamerv3-torch episode format |
 
 ## Hardware & stack facts (from the 2026-07-23 brief — re-verify prices at purchase)
 
@@ -142,6 +148,13 @@ lives in the record.
 - **Which printer?** PrusaSlicer and Bambu Studio are both installed on this
   machine, but the actual printer model and filament stock are uncatalogued
   (M1.2). The coupon's print settings must be recorded with its measurements.
+- **Ask dad: soldering iron + solder, multimeter, USB SD reader.** Assumed
+  owned 2026-08-05 (calipers confirmed). Any "no" is +$8-40 and counts as
+  shop tooling, not car BOM — Evan decides whether the $200 ceiling covers it.
+- **A1 pre-order checks** (PRD §6b): power-bank label reads 5V/3A · **count
+  the diff ring teeth** (28 = 62821, 24+16 = 6573 — sets the CAD mesh
+  centres) · confirm a 12-tooth bevel is in the parts bin · which tires ·
+  re-check prices.
 - **Open question for Evan:** does "no Lego motors" mean none at all, or
   none of the PF/Powered-Up families? EV3/NXT/9V-Technic motors, if owned,
   would reopen the free-encoder odometry path. Confirm at M1.2 inventory.
