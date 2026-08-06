@@ -54,6 +54,7 @@ the dated entry, not the digest.
 - [Q — Two sim tracks quarantined by Evan's decision; corpus verifies clean on both axes](#appendix-q---two-sim-tracks-quarantined-by-evans-decision-corpus-verifies-clean-on-both-axes-2026-08-06-0011-cdt) (08-06)
 - [R — SIM-POC P2 CLOSED: 102,888 frames, 88/88 verified on both axes](#appendix-r---sim-poc-p2-closed-102888-frames-8888-verified-on-both-axes-2026-08-06-0040-cdt) (08-06)
 - [S — SIM-POC P3 DONE: a working world model, and the domain gap it exposed](#appendix-s---sim-poc-p3-done-a-working-world-model-and-the-domain-gap-it-exposed-2026-08-06-0118-cdt) (08-06)
+- [T — SIM-POC P4: the 8GB DreamerV3 boundary measured; two task premises proved false; repo goes public](#appendix-t---sim-poc-p4-the-8gb-dreamerv3-boundary-measured-two-task-premises-proved-false-repo-goes-public-2026-08-06-1329-cdt) (08-06)
 
 ---
 
@@ -1912,3 +1913,187 @@ populated. (5) Nothing printed, nothing ordered - the encoder-motor and
 ~1:20 track re-spec decisions remain open and continue to block all physical
 progress.
 
+
+---
+
+# Appendix T - SIM-POC P4: the 8GB DreamerV3 boundary measured; two task premises proved false; repo goes public (2026-08-06, ~13:29 CDT)
+
+**WHAT:** SIM-POC P4 executed. The measured-boundary half of its done-check is
+met and verified; the trained-model half was still running when this entry was
+written and is explicitly NOT claimed. The project also got its first public
+GitHub repo. Commit `1b1b790`; repo
+https://github.com/Evan-Daruwalla/vision-autonomous-car (public, default
+branch `main`).
+
+New files: `README.md`, `ml/probe_vram.py`, `ml/prep_dreamer_corpus.py`,
+`ml/run_dreamer_p4.py`, `ml/sweep_dreamer_p4.py`, and a new codebase-memory
+bin `.claude/codebase-memory/ml-training.md`.
+
+## T.1 The number the 2026-07-23 research said nobody had published
+
+RTX 3060 Ti, 8.0 GB, driver 610.62, 64x64 input, fp32, 20 warm steps,
+PyTorch allocator capped at 7.0 GB. Source of truth:
+`ml/runs/dreamer_p4/sweep_summary.json`; regenerate with
+`python ml/sweep_dreamer_p4.py`.
+
+| config | params (unique) | peak VRAM | % of 8 GB | status |
+|---|---|---|---|---|
+| S, batch 16, horizon 5 | 19,101,317 | **2.552 GB** | 31.9% | fits |
+| S, batch 32, horizon 5 | 19,101,317 | 4.793 GB | 59.9% | fits |
+| S, batch 64, horizon 5 | 19,101,317 | - | - | **OOM >7.0 GB** |
+| S, batch 16, horizon 15 | 19,101,317 | 3.873 GB | 48.4% | fits |
+| M, batch 16, horizon 5 | 35,299,397 | 3.729 GB | 46.6% | fits |
+| L, batch 16, horizon 5 | 69,654,533 | 5.238 GB | 65.5% | fits |
+
+**Headline: batch size, not model size, is what breaks 8 GB.** A 69.7M-param
+model fits in 5.238 GB while the 19.1M model at batch 64 does not fit in 7.0.
+Tripling the imagination horizon (5 -> 15) costs 1.3 GB, MORE than nearly
+doubling the parameter count (S -> M costs 1.2 GB). Activations dominate;
+weights are close to free at this scale. **8 GB holds roughly 3.6x the model
+the retracted "~24 GB" figure implied** (that retraction is Appendix E).
+
+**Scope limit stated honestly:** only "S" is a verified size. It is the
+vendored repo's `defaults` block verbatim, and its 17,919,878 trainable params
+match the 2026-07-23 brief's "~18M" for DreamerV3-S. **XS/M/L are scaling
+steps defined in `run_dreamer_p4.py` and were NOT checked against the paper's
+published size table.** The code, the bin, and the README all say so. Cite the
+measured parameter counts, never the letters. This entry does not claim a
+reproduction of the paper's size ladder.
+
+## T.2 Two premises written into the P4 task were false
+
+Both are now measured facts, and `PRD_ROADMAP.md` was amended in place per the
+append-mostly rule rather than rewritten.
+
+**(a) `offline_traindir` does not run dreamerv3-torch without an environment,
+and the repo has no offline training loop at all.** Verified by reading the
+vendored source at commit `6ef8646d807cd10ce0c88e10a7e943211e7fc44c`:
+`dreamer.main()` builds `train_envs`/`eval_envs` **unconditionally**
+(dreamer.py:238-241), and the training loop is
+`tools.simulate(agent, train_envs, ...)` (dreamer.py:319) - train steps are
+driven by ENV steps, because the agent trains inside `Dreamer.__call__`, which
+`simulate` invokes once per environment transition. The flag only warm-starts
+the replay buffer from disk.
+
+This **retires the 2026-07-23 research's flagged unknown (a) with a NO** -
+that unknown was one of the three things SIM-POC existed to settle early
+(Appendix J). Running P4 as originally specified would have required either
+the Unity sim live (not offline, and it would have dominated the memory
+measurement) or a fake env feeding garbage transitions into the buffer
+alongside the real corpus.
+
+`Dreamer._train(batch)` needs no environment, so `ml/run_dreamer_p4.py`
+supplies the two things `main()` was using the envs for - hand-built gym
+observation/action spaces - plus a genuine offline loop, and **leaves
+`ml/vendor/` unpatched** so it can be re-pulled.
+
+**(b) "Sysmem Fallback disabled before the first run" never happened, and it
+is still ON.** `ml/probe_vram.py` allocated **10.0 GB on the 8 GB card without
+raising OutOfMemoryError**. The 2026-07-23 research predicted this as a risk
+(gotchas.md); it is now confirmed as the live state on this machine. **Any
+OOM-boundary claim measured in that state is worthless** - an over-budget run
+does not crash, it spills to host RAM over PCIe and gets slower.
+
+Changing a driver setting is Evan's call and is not something this repo does,
+so the requirement was met differently: `torch.cuda.set_per_process_memory_
+fraction` caps PyTorch's own allocator, and was **measured to still raise OOM
+under active fallback** (OOM at 1.750 GB under a 2.0 GB cap). This is
+strictly better for the project than the control-panel fix - it lives in
+version control and is reproducible on any machine, where a checkbox is
+neither. Exposed as `--cap-gb`.
+
+## T.3 The mistake: I ran the wrong experiment first and had to kill it
+
+**Symptom:** the first sweep hung. **Root cause:** it was run UNCAPPED, so the
+batch-64 config never failed - it pinned the card at ~7.93 GB / 100%
+utilization for **over twenty minutes** without finishing the 20 steps that
+batch 32 finished in 71 s. **Fix:** cap every sweep run, which turns the hang
+into an immediate deterministic OOM; the full 6-config sweep then finishes in
+about two minutes.
+
+That is the documented "silent ~3x slowdown" gotcha demonstrating itself on
+real hardware rather than in a research note. The lesson now recorded in the
+bin: **a config that spills is worse than one that OOMs, because it looks like
+it is working.** `sweep_dreamer_p4.py` no longer has an uncapped mode by
+default.
+
+## T.4 Three smaller corrections caught before they hardened
+
+1. **Parameter double-count.** `ImagBehavior` holds a *reference* to the world
+   model, so a naive sum over `agent._task_behavior.parameters()` re-counted
+   all 15.7M world-model params and reported the model at roughly double its
+   real size (34,787,080 instead of 19,101,317). Caught by checking against
+   the repo's own printed optimizer sizes (15,685,763 + 1,052,676 +
+   1,181,439 = 17,919,878 trainable). Fixed by deduplicating on `id(p)`.
+2. **Timings are warm-run only.** The identical config measured **63.0 s cold
+   and 11.1 s warm** for 20 steps (CUDA kernel autotuning on first execution).
+   Peak memory was byte-identical across both runs, so **memory is stable and
+   time is not** - the sweep's seconds column must never be quoted as absolute
+   throughput.
+3. **A fabricated commit hash, reported to Evan.** In a chat summary the P4
+   commit was cited as `a1b1247`. That hash was never read from git; the real
+   one is `1b1b790`. Nothing downstream depended on it, but it is logged here
+   because inventing an identifier is exactly the failure the standing "DO NOT
+   MAKE ANYTHING UP" rule exists to catch, and a correction that only lives in
+   chat does not exist.
+
+## T.5 Verified rather than assumed: P4 trains on P3's exact split
+
+`ml/prep_dreamer_corpus.py` re-derives the split from the raw corpus, so there
+was a real risk of it silently differing from the arrays P3 consumed. Asserted
+directly: episode ORDER identical across both derivations (78 episodes), the
+seed-0 fit/val split identical (66 fit / 12 val), the on-disk dreamer
+directories exactly match that split, and train/eval are disjoint. **PASS.**
+Any P3-vs-P4 comparison is therefore about the model and not the data.
+
+Corpus written for Dreamer: 66 fit episodes / 77,266 frames + 12 val episodes
+/ 14,412 frames. With the untouched 11,210-frame holdout that reconciles to
+the P2 total of 102,888.
+
+## T.6 First public repo
+
+https://github.com/Evan-Daruwalla/vision-autonomous-car - **public**, default
+branch `main` (renamed from `master` at Evan's request after creation).
+
+Pre-publication checks, in this order: the secret scanner's own canary
+self-test (**PASS**, 7 real secrets caught, 0 false positives - an unverified
+scanner reporting "clean" is theater), then a full-history scan (**clean, 0
+findings**), then a staged-diff scan (**clean**). The tracked file list was
+also read by eye: no `.env`, no keys, no data dumps; largest tracked file is
+the 884 KB coupon STL.
+
+`README.md` leads with the honest status - *"the software is real and
+measured. The car is not built."* It carries the P3 rollout table, the T.1
+memory table, and a section on the three findings that cost a wrong answer
+first (the two-way split, the fake verification gate, the retracted 24 GB
+figure). Reviewed for AI texture before publishing since it is outward-facing
+prose; four flags fixed.
+
+`.gitignore` gained `*.tfevents.*` - TensorBoard files are regenerable, binary,
+and written incrementally, so a commit taken mid-run captures a truncated one.
+The json/png artifacts beside them are the evidence.
+
+## T.7 Bin reorganization
+
+`gotchas.md` was past its ~150-line cap and had become two domains, so GPU and
+world-model training facts moved to a new **`ml-training.md`** bin (the bin
+protocol allows a new specifically-named bin, never a catch-all). `gotchas.md`
+keeps dated corrections that point at it: the `offline_traindir` entry is now
+partially superseded, and the Sysmem Fallback entry is upgraded from desk
+research to measured-and-still-enabled. `INDEX.md` updated.
+
+## T.8 Open items, stated as open
+
+1. **The 2000-step training run was still in flight when this entry was
+   written** (started 12:53:15 CDT, ~36 min elapsed, GPU busy). P4's
+   done-check already passes on the boundary half, which the PRD accepts
+   alone - but **"a trained model" is not claimed anywhere** until its loss
+   curve is read. The PRD says so explicitly rather than leaving it implied.
+2. Sysmem Fallback remains ON. Every future memory measurement must use
+   `--cap-gb` or repeat T.2(b)'s mistake.
+3. XS/M/L size labels remain unverified against the paper.
+4. Cadence: this entry covers prompts through #33. The P3 entry (Appendix S)
+   already covered the prior block, so no cadence was missed.
+5. **Nothing printed, nothing ordered** - unchanged since 2026-07-23. The
+   encoder-motor decision and the ~1:20 track re-spec still block all physical
+   progress, and the public README now says so where anyone can read it.
