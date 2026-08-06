@@ -23,3 +23,20 @@ gymnasium==1.3.0
 # stale and mismatched with the 2025 simulator. Pinned to the commit verified
 # working on 2026-08-05 (release v25.10.06, package version.txt says 1.3.1).
 gym_donkeycar @ git+https://github.com/tawnkramer/gym-donkeycar.git@a1f4ca6961e17a6929c1f2e883358a1edafb479d
+
+# --- SIM-POC P4 (DreamerV3), added 2026-08-06 -------------------------------
+# dreamerv3-torch is NOT a pip package. Clone it into ml/vendor/ (gitignored):
+#   git clone --depth 1 https://github.com/NM512/dreamerv3-torch.git ml/vendor/dreamerv3-torch
+# Verified against commit 6ef8646d807cd10ce0c88e10a7e943211e7fc44c (2026-03-08).
+#
+# Do NOT `pip install -r ml/vendor/dreamerv3-torch/requirements.txt` — it pins
+# torch==2.4.1 (CPU-only from PyPI, would clobber the cu126 build above) plus
+# mujoco/dm_control/crafter for environments this project never instantiates.
+# Only these three are needed, and only at import time:
+gym==0.26.2          # envs/wrappers.py imports it; the wrappers are never used
+ruamel.yaml          # dreamer.py's config loader
+tensorboard          # tools.py's SummaryWriter
+#
+# GOTCHA: ruamel.yaml >=0.19 REMOVED `yaml.safe_load`, which the vendored
+# dreamer.py `__main__` calls — so `python dreamer.py ...` cannot run here.
+# ml/run_dreamer_p4.py is the entry point and uses the current API instead.

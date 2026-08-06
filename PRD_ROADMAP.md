@@ -507,6 +507,33 @@ P4. **DreamerV3-S offline on the same corpus.** dreamerv3-torch repo
     Fallback disabled before the first run**; log
     `torch.cuda.max_memory_allocated()` every epoch. Done: a trained model
     OR a documented OOM boundary with the measured number — both pass.
+    **AMENDED 2026-08-06 (record Appendix T) — TWO PREMISES IN THIS TASK
+    WERE FALSE, and both are now measured facts:**
+    (a) ~~`offline_traindir`~~ does NOT give an offline training run.
+    `dreamer.main()` builds envs unconditionally (dreamer.py:238-241) and
+    drives training from `tools.simulate()` env steps (dreamer.py:319) — the
+    repo **has no offline training loop at all**; the flag only warm-starts
+    the replay buffer. This retires the 2026-07-23 research's flagged
+    unknown (a) with a NO. `ml/run_dreamer_p4.py` supplies hand-built gym
+    spaces plus a real offline loop over the unmodified `Dreamer._train`,
+    leaving `ml/vendor/` unpatched.
+    (b) ~~Sysmem Fallback disabled before the first run~~ — it was **not**
+    disabled, and it is **still ON** (measured: 10.0 GB allocated on the 8 GB
+    card with no OOM). Changing a driver setting is BLOCKED-ON-EVAN, so the
+    task is met instead with `torch.cuda.set_per_process_memory_fraction`
+    (`--cap-gb`), verified to still raise OOM under active fallback. That is
+    strictly better for this project: it lives in version control and is
+    reproducible, where a control-panel checkbox is neither.
+    **STATUS 2026-08-06 ~13:20 CDT — the done-check's SECOND half is met and
+    verified; the first is still running.** Measured boundary table:
+    `ml/runs/dreamer_p4/sweep_summary.json` (regenerate with
+    `python ml/sweep_dreamer_p4.py`). Headline: **batch size, not model size,
+    is what breaks 8 GB** — a 69.7M-param model fits at batch 16 (5.238 GB)
+    while the 19.1M model at batch 64 does not fit in 7.0 GB. **NOT yet
+    claimed: a trained model.** A 2000-step run is in flight; until its loss
+    curve is read, P4 is DONE on the boundary half ONLY. The PRD accepts
+    either half alone, so P4's done-check already passes — but "trained" must
+    not be written down until the curve is seen.
 P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
     through the learned dynamics; evaluate in sim against the P2 scripted
     driver. Done: eval table in the record + the explicit no-transfer-claim

@@ -15,6 +15,11 @@ __pycache__/
 
 # Simulator binary (~236 MB) — download from the gym-donkeycar GitHub release
 sim/
+# Third-party source we call but do not author. It is a git clone with its own
+# history, so committing it would nest a repo inside this one. Re-fetch with
+# the pinned commit in ml/requirements.txt; ml/run_dreamer_p4.py prints the
+# exact clone command if it is missing.
+ml/vendor/
 # ...and the log the Unity sim drops in the working directory when it runs
 unitylog.txt
 
@@ -29,3 +34,7 @@ ml/checkpoints/
 # metrics — are the experiment evidence this project exists to produce, and
 # they are ~1 MB total. Versioning them means a claim in the record can
 # always be traced to the artifact that produced it.
+# TensorBoard event files are the exception: regenerable, binary, and written
+# incrementally, so a commit taken mid-run captures a truncated one. The
+# json/png artifacts next to them are the evidence.
+*.tfevents.*

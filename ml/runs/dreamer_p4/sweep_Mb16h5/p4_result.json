@@ -1,0 +1,30 @@
+{
+  "size": "M",
+  "batch_size": 16,
+  "batch_length": 64,
+  "imag_horizon": 5,
+  "precision": 32,
+  "cap_gb": 7.0,
+  "params_world_model": 29801283,
+  "params_actor_critic": 5498114,
+  "params_total": 35299397,
+  "steps_requested": 20,
+  "steps_completed": 20,
+  "oom_at_step": null,
+  "peak_gb": 3.729,
+  "total_vram_gb": 7.999,
+  "episodes": 18,
+  "frames": 20818,
+  "history": [
+    {
+      "epoch": 1,
+      "step": 20,
+      "peak_gb": 3.729,
+      "alloc_gb": 0.402,
+      "reserved_gb": 4.004,
+      "image_loss": 1024.61,
+      "kl": 7.834,
+      "seconds": 14.0
+    }
+  ]
+}

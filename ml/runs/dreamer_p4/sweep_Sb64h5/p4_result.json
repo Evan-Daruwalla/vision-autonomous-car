@@ -1,0 +1,19 @@
+{
+  "size": "S",
+  "batch_size": 64,
+  "batch_length": 64,
+  "imag_horizon": 5,
+  "precision": 32,
+  "cap_gb": 7.0,
+  "params_world_model": 15685763,
+  "params_actor_critic": 3415554,
+  "params_total": 19101317,
+  "steps_requested": 20,
+  "steps_completed": 0,
+  "oom_at_step": 1,
+  "peak_gb": 0.0,
+  "total_vram_gb": 7.999,
+  "episodes": 18,
+  "frames": 20818,
+  "history": []
+}

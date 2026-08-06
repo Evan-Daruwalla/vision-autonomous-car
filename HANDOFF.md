@@ -10,10 +10,18 @@ the car's own logged real driving. The process is the product: every stage
 verified on the physical car and documented as a college-portfolio
 engineering artifact.
 
-## Current state — BOM final + SIM-POC track added; waiting on Evan's order, coupon print, and SIM-POC go
+## Current state — SIM-POC P2+P3 closed (working world model); still waiting on Evan's order and coupon print
 
-**Last updated: 2026-08-05** — this file is the only live snapshot; history
+**Last updated: 2026-08-06** — this file is the only live snapshot; history
 lives in the record.
+
+> **2026-08-06 — SIM-POC P2 and P3 are both CLOSED (Appendices R, S).** A
+> 102,888-frame corpus verified 88/88 on both alignment axes, and a Ha &
+> Schmidhuber V+M+C world model whose 30-step imagination beats a
+> frozen-frame baseline 30/30 steps in-domain. **The portfolio artifact is
+> banked**, so P4 (DreamerV3-S) is now free to fail. Software is ahead of
+> hardware: **nothing has been printed and nothing ordered since 2026-07-23**,
+> and the two decisions below still block all physical progress.
 
 > **2026-08-05 ~23:10 — DEADLINE MOVED (Appendix N).** **The hard deadline
 > is now REGULAR DECISION, ~Jan 1-15 2027** (~5 months); Nov 1 2026 is now a

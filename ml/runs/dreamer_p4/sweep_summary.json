@@ -1,0 +1,44 @@
+[
+  {
+    "label": "S  b16 h5",
+    "status": "fits",
+    "peak_gb": 2.552,
+    "params": 19101317,
+    "seconds": 11.1
+  },
+  {
+    "label": "S  b32 h5",
+    "status": "fits",
+    "peak_gb": 4.793,
+    "params": 19101317,
+    "seconds": 14.5
+  },
+  {
+    "label": "S  b64 h5",
+    "status": "OOM >7.0GB",
+    "peak_gb": null,
+    "params": 19101317,
+    "seconds": null
+  },
+  {
+    "label": "S  b16 h15",
+    "status": "fits",
+    "peak_gb": 3.873,
+    "params": 19101317,
+    "seconds": 13.7
+  },
+  {
+    "label": "M  b16 h5",
+    "status": "fits",
+    "peak_gb": 3.729,
+    "params": 35299397,
+    "seconds": 14.0
+  },
+  {
+    "label": "L  b16 h5",
+    "status": "fits",
+    "peak_gb": 5.238,
+    "params": 69654533,
+    "seconds": 16.3
+  }
+]

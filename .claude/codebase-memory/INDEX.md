@@ -6,7 +6,10 @@ Core bins:
 - architecture.md — planned system shape + staged AI pipeline (updated 2026-07-23)
 - features.md — empty, no code yet (updated 2026-07-23)
 - conventions.md — empty, no code yet (updated 2026-07-23)
-- gotchas.md — hardware/print/power traps from the research brief (updated 2026-07-23)
+- gotchas.md — hardware/print/power/track traps (updated 2026-08-06)
+- ml-training.md — GPU memory + world-model training facts MEASURED on this
+  3060 Ti: the DreamerV3 fitting table, Sysmem Fallback confirmed ON,
+  dreamerv3-torch's missing offline loop (updated 2026-08-06)
 
 Standards bins (only those the codebase actually commits to):
 - dependencies.md — planned stack (DonkeyCar 5.x plumbing + PyTorch models) (updated 2026-07-23)

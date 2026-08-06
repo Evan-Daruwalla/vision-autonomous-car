@@ -159,14 +159,35 @@ not yet verified on this car. Mark them verified when a build task confirms.
   native-Windows CUDA support** (official install table: Windows = "no",
   WSL2 = "experimental"). The PyTorch port has `offline_traindir` /
   `offline_evaldir`, and setting `offline_traindir` skips environment
-  prefill entirely.
+  prefill entirely. ~~*(the last clause read as "so it runs without an
+  environment" — see the correction below)*~~
+- **`offline_traindir` does NOT make dreamerv3-torch run without an
+  environment, and the repo has NO offline training loop** (measured
+  2026-08-06 against commit 6ef8646, record Appendix T — **partially
+  supersedes the 2026-07-23 entry above**, whose "skips environment prefill"
+  was true but was being read as "runs offline"). `dreamer.main()` builds
+  `train_envs`/`eval_envs` unconditionally (dreamer.py:238-241), and the
+  training loop is `tools.simulate(agent, train_envs, ...)` — train steps are
+  driven by ENV steps. The flag only warm-starts the replay buffer.
+  `Dreamer._train(batch)` itself needs no env, so `ml/run_dreamer_p4.py`
+  supplies hand-built obs/action spaces plus a real offline loop and leaves
+  the vendored tree unpatched. **Any future session planning "just run their
+  offline mode" is planning something that does not exist.** Full detail:
+  `.claude/codebase-memory/ml-training.md`.
 - **Disable NVIDIA "CUDA - Sysmem Fallback Policy" before any training run**
   (NVIDIA Control Panel → Manage 3D Settings → python.exe → "Prefer No
   Sysmem Fallback"). Since driver 536.40 the default spills VRAM overflow
   into shared system RAM, so an out-of-memory condition becomes a **silent
   ~3× slowdown** instead of a loud error. This is exactly what the "16GB
   shared" figure is — host RAM over PCIe (~25 GB/s) vs 448 GB/s GDDR6.
-  Never count it as VRAM (2026-07-23).
+  Never count it as VRAM (2026-07-23). **CONFIRMED STILL ENABLED and no
+  longer desk research (measured 2026-08-06, driver 610.62):
+  `ml/probe_vram.py` allocated 10.0 GB on the 8 GB card without raising
+  OutOfMemoryError.** Any OOM-boundary claim made while it is on is
+  worthless. Changing it is Evan's call; until then use
+  `torch.cuda.set_per_process_memory_fraction`, which was measured to still
+  raise OOM under fallback (OOM at 1.750 GB under a 2.0 GB cap) and is
+  reproducible because it lives in code, not a control panel.
 - **Mixed precision is not a reliable 8GB rescue here** — the one available
   PyTorch DreamerV3 measurement had bf16 costing **10.5 GiB more** and
   running slower. Measure `torch.cuda.max_memory_allocated()`; revert if it
