@@ -52,6 +52,7 @@ the dated entry, not the digest.
 - [O — Cold audit finds the alignment gate was a fake; both the audit's fix and mine were wrong; routing research lands](#appendix-o---cold-audit-finds-the-alignment-gate-was-a-fake-both-the-audits-fix-and-mine-were-wrong-routing-research-lands-2026-08-05-2354-cdt) (08-05)
 - [P — Verifier streamed (4.09 GB → 0.10 GB measured); a second false diagnosis caught; two sim tracks are unusable](#appendix-p---verifier-streamed-409-gb---010-gb-measured-a-second-false-diagnosis-caught-two-sim-tracks-are-unusable-2026-08-06-0020-cdt) (08-06)
 - [Q — Two sim tracks quarantined by Evan's decision; corpus verifies clean on both axes](#appendix-q---two-sim-tracks-quarantined-by-evans-decision-corpus-verifies-clean-on-both-axes-2026-08-06-0011-cdt) (08-06)
+- [R — SIM-POC P2 CLOSED: 102,888 frames, 88/88 verified on both axes](#appendix-r---sim-poc-p2-closed-102888-frames-8888-verified-on-both-axes-2026-08-06-0040-cdt) (08-06)
 
 ---
 
@@ -1713,4 +1714,68 @@ re-measured for the real car. (5) **Nothing printed, nothing ordered** - and
 two decisions remain open from Appendix O: the encoder motor (#5159, +$6,
 which unblocks ordering) and the ~1:20 track re-spec (which unblocks
 printing).
+
+
+# Appendix R - SIM-POC P2 CLOSED: 102,888 frames, 88/88 verified on both axes (2026-08-06, ~00:40 CDT)
+
+**WHAT:** The top-up collection landed and **P2 is done, above its own
+target, with no deviation to record.** 26 of 26 episodes saved, zero
+rejected. Final verification, real output:
+
+    holdout  :  10 episodes,   11210 frames, tracks ['donkey-waveshare-v0']
+    train    :  78 episodes,   91678 frames, tracks ['donkey-generated-roads-v0', 'donkey-generated-track-v0']
+      split is disjoint      : no track appears on both sides
+    total frames: 102888
+    alignment:
+      exact PID identity     : verified on 88/88 episode(s), every action reproduced from log_cte
+      image-axis gate        : 88/88 episodes in band (-2, -1), lag distribution {-2: 29, -1: 59}, mode -1 (|r| 0.74-0.96)
+    P2 CORPUS CHECK: PASS
+
+**Against the PRD's ~100k-frame target: 102,888. Met, not redefined.** At
+the point the two bad tracks were quarantined the corpus sat at 71,662 (72%
+of target), and the tempting move was to declare that sufficient. Collecting
+the remainder cost ~30 minutes of unattended wall-clock and removed the need
+to argue about it at all.
+
+**Final composition:**
+
+| Split | Track | Episodes | Frames |
+|---|---|---|---|
+| train | generated-track | 51 | 60,051 |
+| train | generated-roads | 27 | 31,627 |
+| holdout | waveshare (never trained on) | 10 | 11,210 |
+| | **total** | **88** | **102,888** (3.80 GB) |
+
+**What P2 actually established** - the point of the milestone was never the
+data, it was proving the pipeline and retiring flagged unknowns:
+- The dreamerv3-torch episode format round-trips, and its `offline_traindir`
+  path exists in source (Appendix E flagged it as verified-in-source but
+  never verified-to-run; **that remains true - P3/P4 will exercise it**).
+- The layout split is enforced mechanically, not by intention: the verifier
+  reads `log_track` back out of every episode and fails on any track
+  appearing on both sides.
+- Frame/action alignment is gated on **two independent axes**, with the
+  approximate one's limits documented rather than overclaimed.
+- The done-check runs in **O(1) memory** (0.10 GB measured at 76k frames),
+  so it will not die as the corpus grows toward M4's 200k.
+
+**Data contract now recorded where a future session will find it.** The
+audit's F18 (the `data.md` bin still said "empty, no code yet" while the npz
+schema WAS the project's data contract) is fixed: `data.md` now carries the
+on-disk format, all seven required keys, the t=0 convention, the
+terminal-vs-truncation distinction, both alignment gates with their measured
+constants, the split rule, and an explicit warning that **every constant is
+simulator-calibrated and must be re-measured for the real car.**
+
+**HONEST OPEN ITEMS:** (1) Train remains **unbalanced 51:27** toward
+`generated-track`, and it is **two layouts, not four** - both stated in the
+PRD, the bin, and the code comment so no writeup can claim otherwise.
+(2) Audit items still outstanding: quality thresholds unenforceable at rest
+(F7), edge cases E8-E12, no linter or test suite (F20). (3) P3 (Ha &
+Schmidhuber V+M+C) is the next PRD task and has not started. (4) **Nothing
+printed, nothing ordered** - and the two decisions that unblock physical
+progress are still open: the encoder motor (#5159, +$6) and the ~1:20 track
+re-spec. The software lane has now run three milestones ahead of the
+hardware lane, which was the plan's intent while parts shipped - but no
+parts have been ordered to ship.
 

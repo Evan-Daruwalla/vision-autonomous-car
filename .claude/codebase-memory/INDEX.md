@@ -12,7 +12,7 @@ Standards bins (only those the codebase actually commits to):
 - dependencies.md — planned stack (DonkeyCar 5.x plumbing + PyTorch models) (updated 2026-07-23)
 - ui.md — N/A, no frontend planned; teleop UI TBD at M2 (updated 2026-07-23)
 - testing.md — empty, no code yet (updated 2026-07-23)
-- data.md — empty; driving-log format lands at M3 (updated 2026-07-23)
+- data.md — THE episode data contract: npz schema, t=0 rule, both alignment gates, split rule (updated 2026-08-06)
 - tooling.md — Python 3.12.10 venv, machine facts, git -F quirk (updated 2026-08-06)
 
 Cross-bin invariants:
