@@ -50,6 +50,7 @@ the dated entry, not the digest.
 - [M — SIM-POC P2: expert driver tuned by measurement; alignment gate rebuilt after the first one proved wrong](#appendix-m---sim-poc-p2-expert-driver-tuned-by-measurement-alignment-gate-rebuilt-after-the-first-one-proved-wrong-2026-08-05-2310-cdt) (08-05)
 - [N — Deadline moved to Regular Decision; grid/routing scope proposed; collection interrupted at 30k frames](#appendix-n---deadline-moved-to-regular-decision-gridrouting-scope-proposed-collection-interrupted-at-30k-frames-2026-08-05-2310-cdt) (08-05)
 - [O — Cold audit finds the alignment gate was a fake; both the audit's fix and mine were wrong; routing research lands](#appendix-o---cold-audit-finds-the-alignment-gate-was-a-fake-both-the-audits-fix-and-mine-were-wrong-routing-research-lands-2026-08-05-2354-cdt) (08-05)
+- [P — Verifier streamed (4.09 GB → 0.10 GB measured); a second false diagnosis caught; two sim tracks are unusable](#appendix-p---verifier-streamed-409-gb---010-gb-measured-a-second-false-diagnosis-caught-two-sim-tracks-are-unusable-2026-08-06-0020-cdt) (08-06)
 
 ---
 
@@ -1531,4 +1532,120 @@ still Evan's decision - nothing was adopted into the PRD beyond this record.
 (4) The encoder-motor recommendation is not an order; nothing is bought.
 (5) `verify_corpus` will OOM near the 100k target and must be streamed first.
 (6) Corpus is 56,626 frames and still collecting.
+
+
+# Appendix P - Verifier streamed (4.09 GB -> 0.10 GB measured); a second false diagnosis caught; two sim tracks are unusable (2026-08-06, ~00:20 CDT)
+
+**WHAT:** The P2 top-up collection finished. Corpus is **76,299 frames**
+(67 train episodes / 65,089 frames; 10 holdout / 11,210). Two audit items
+fixed and re-verified; two data-quality findings surfaced that need Evan's
+decision. **P2 currently FAILS its own done-check** - honestly, and for a
+good reason.
+
+## P.1 - Streaming fix (audit F9/E7), with a measured result
+
+`verify_corpus.py` retained every episode's image array so two later passes
+could iterate. The audit predicted **~5.8 GB at the PRD's own 100k-frame
+target** - i.e. the done-check would OOM exactly when P2 became finishable.
+At 76,299 frames the retained-images estimate was **4.09 GB**.
+
+Refactored so each episode is checked and immediately discarded: both gates
+became per-episode functions writing into small accumulators, with separate
+finalizers. **Measured peak Python RSS after the change: 0.10 GB** - roughly
+40x lower, and now O(1) in corpus size rather than O(n). All four adversarial
+tests still behave correctly after the refactor (baseline PASS; images rolled
++1 FAIL; rolled +3 FAIL; actions rolled +1 FAIL).
+
+## P.2 - A SECOND false diagnosis, same class as the log_ki one
+
+With the band gate live, four short roboracingleague episodes reported
+*"the image array is offset from the actions"* - peaks at lag -3. That
+diagnosis was **wrong**, and it was wrong in the same way the `log_ki` bug
+was wrong: it pointed a reader at the wrong subsystem.
+
+The tell is the correlation strength. Measured separation across 77 episodes:
+
+| Group | \|r\| at peak |
+|---|---|
+| episodes with a well-determined lag | **0.60 - 0.96** |
+| the four "peaking at -3" (~180 frames each) | **0.34 - 0.40** |
+
+At \|r\| ~0.35 on ~180 frames the peak is **noise, not a lag measurement** -
+the correlation is far too weak to distinguish -3 from -1. `MIN_PEAK_CORR`
+was 0.30, permissive enough to let noise be reported as misalignment. Raised
+to **0.50** (set inside the measured gap, not tuned to make a failure
+disappear), and weak-correlation episodes are now routed to **UNVERIFIABLE**
+rather than **WRONG**, with the message saying so explicitly: *"not wrong,
+unchecked."*
+
+Lesson worth keeping: **a checker that misdiagnoses is worse than one that
+abstains.** Three separate instances of this class have now been found in
+this one file (peak-at-zero, log_ki, weak-correlation-as-misalignment). The
+common cause each time was asserting a constant that was not constant.
+
+## P.3 - Two of the four sim tracks are unusable by the expert
+
+Per-track breakdown of the finished corpus:
+
+| Split | Track | Episodes | Frames | Avg length |
+|---|---|---|---|---|
+| train | generated-track | 38 | 44,438 | 1169 |
+| train | generated-roads | 14 | 16,014 | 1144 |
+| train | **roboracingleague** | 14 | **4,236** | **303** |
+| train | **mountain-track** | **1** | **401** | 401 |
+| holdout | waveshare | 10 | 11,210 | 1121 |
+
+- **mountain-track: 13 of 13 episodes REJECTED** in the top-up run. The
+  quality filter (min 150 steps, mean\|cte\| <= 1.2) caught every one - the
+  expert cannot drive that geometry at the tuned gains.
+- **roboracingleague: episodes average 303 frames against a 1200 request**,
+  i.e. the car leaves the road in about a quarter of an episode, and its
+  mean\|cte\| of 0.68 is the worst of any saved track. **All 12 currently-
+  unverifiable episodes come from these two tracks.**
+
+Together they contribute **4,637 frames - 7% of the corpus** - while
+supplying 100% of its failures. The two healthy tracks supply **60,452
+frames**.
+
+**This undercuts a load-bearing claim.** The layout split (Appendix L/M) is
+premised on training across *several* layouts and holding one out. In
+practice the corpus is two healthy layouts plus two that barely produced
+data. That is still a valid layout split - two train layouts, one unseen
+holdout - but it is thinner than the PRD implies, and saying "trained on
+four tracks" would be false.
+
+**Not decided here - escalated to Evan**, because narrowing the training
+distribution is an experiment-design change, not a cleanup:
+- **(a)** Quarantine the two tracks' episodes and strike them from
+  `TRAIN_TRACKS` with a dated reason -> 60,452 frames, 2 train layouts,
+  clean PASS.
+- **(b)** Re-tune the expert per-track (lower throttle, per-track gains) so
+  they produce usable data -> more layout diversity, real work, no benefit
+  to the M4 pipeline P2 exists to prove.
+
+Recommendation: **(a)**, with the reduced diversity stated plainly in the
+PRD and any writeup. P2's purpose is proving the pipeline end to end, not
+maximising track variety; layout diversity is a *real-car* concern (M3/M4),
+where the physical tile configurations are the layouts that matter.
+
+## P.4 - Current state, stated honestly
+
+    total frames: 76,299
+      exact PID identity     : verified on 77/77 episode(s)
+      image-axis gate        : 65/77 in band (-2,-1), distribution {-2: 16, -1: 49}, mode -1 (|r| 0.64-0.96)
+    P2 CORPUS CHECK: FAIL
+      - image-axis: 12/77 episode(s) could NOT be checked ... UNVERIFIED - not wrong, unchecked.
+
+**P2 is NOT done.** The action axis verifies on every episode; 65 of 77 also
+verify on the image axis; the remaining 12 are unverifiable short episodes
+from the two bad tracks. The failure is the done-check working as intended -
+it is refusing to certify episodes nothing actually checked.
+
+**HONEST OPEN ITEMS:** (1) The track decision above is unmade. (2) Audit
+items still outstanding: quality thresholds unenforceable at rest (F7),
+per-track collection imbalance (F8 - now measured and worse than the audit
+saw: 38 of 67 train episodes are one track), the empty `data.md` bin (F18),
+and edge cases E8-E12. (3) `MIN_PEAK_CORR = 0.50` is calibrated on 77
+episodes from one simulator; it must be re-measured for the real car along
+with the lag constants. (4) Nothing printed, nothing ordered - unchanged.
 

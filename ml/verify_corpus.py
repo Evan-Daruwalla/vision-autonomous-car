@@ -137,11 +137,16 @@ ALIGN_LAGS = (-3, -2, -1, 0, 1, 2)
 # rate and platform, not the track.
 PLAUSIBLE_LAGS = (-2, -1)
 EXPECTED_MODE_LAG = -1
-MIN_PEAK_CORR = 0.30   # below this the peak is noise, not a lag measurement
+# Below this the peak is noise, not a lag measurement, and reporting it as a
+# lag would be a FALSE DIAGNOSIS. Measured separation 2026-08-06 across 77
+# episodes: episodes with a well-determined lag sit at |r| 0.60-0.96, while
+# four short (~180-frame) roboracingleague episodes sat at 0.34-0.40 and
+# "peaked" at -3 -- noise, not a rolled image array. Set above that gap.
+MIN_PEAK_CORR = 0.50
 
 
-def check_pid_identity(episodes: list[dict], failures: list) -> None:
-    """THE alignment gate: recompute every action from the logged cte.
+def check_pid_identity(ep: dict, acc: dict, failures: list) -> None:
+    """ACTION-AXIS gate, one episode at a time: recompute the actions from cte.
 
     The expert driver is a deterministic function of cross-track error, and
     `log_cte[i]` was recorded at the same instant as `image[i]`. So
@@ -159,48 +164,49 @@ def check_pid_identity(episodes: list[dict], failures: list) -> None:
     better with action[i-1] than action[i]. That is physics, not a bug, and
     it makes peak-correlation-at-lag-zero the wrong test.)
     """
-    checked, skipped = 0, []
-    for idx, ep in enumerate(episodes):
-        need = ("log_cte", "log_kp", "log_ki", "log_kd", "log_steer_sign",
-                "log_throttle", "log_throttle_corner", "log_steer_limit")
-        missing = [k for k in need if k not in ep]
-        if missing:
-            skipped.append((ep.get("_name", f"episode #{idx}"), missing[0]))
-            continue
+    name = ep.get("_name", "?")
+    need = ("log_cte", "log_kp", "log_ki", "log_kd", "log_steer_sign",
+            "log_throttle", "log_throttle_corner", "log_steer_limit")
+    missing = [k for k in need if k not in ep]
+    if missing:
+        acc["skipped"].append((name, missing[0]))
+        return
 
-        cte = np.asarray(ep["log_cte"], np.float64)
-        act = np.asarray(ep["action"], np.float64)
-        kp, ki, kd = float(ep["log_kp"]), float(ep["log_ki"]), float(ep["log_kd"])
-        sign, lim = float(ep["log_steer_sign"]), float(ep["log_steer_limit"])
-        thr, thr_c = float(ep["log_throttle"]), float(ep["log_throttle_corner"])
+    cte = np.asarray(ep["log_cte"], np.float64)
+    act = np.asarray(ep["action"], np.float64)
+    kp, ki, kd = float(ep["log_kp"]), float(ep["log_ki"]), float(ep["log_kd"])
+    sign, lim = float(ep["log_steer_sign"]), float(ep["log_steer_limit"])
+    thr, thr_c = float(ep["log_throttle"]), float(ep["log_throttle_corner"])
 
-        if len(cte) != len(act):
-            failures.append(f"pid-identity: log_cte has {len(cte)} entries, "
-                            f"action has {len(act)}")
-            continue
+    if len(cte) != len(act):
+        failures.append(f"pid-identity: {name}: log_cte has {len(cte)} entries, "
+                        f"action has {len(act)}")
+        return
 
-        prev, integral = 0.0, 0.0
-        max_err = 0.0
-        worst = -1
-        for i in range(1, len(act)):
-            e = cte[i - 1]
-            # mirror PIDDriver.act exactly, integral clamp included
-            integral = float(np.clip(integral + e, -50.0, 50.0))
-            steer = float(np.clip(
-                sign * (kp * e + ki * integral + kd * (e - prev)), -lim, lim))
-            prev = e
-            throttle = thr_c if abs(steer) > 0.5 else thr
-            err = max(abs(steer - act[i, 0]), abs(throttle - act[i, 1]))
-            if err > max_err:
-                max_err, worst = err, i
-        checked += 1
+    prev, integral = 0.0, 0.0
+    max_err, worst = 0.0, -1
+    for i in range(1, len(act)):
+        e = cte[i - 1]
+        # mirror PIDDriver.act exactly, integral clamp included
+        integral = float(np.clip(integral + e, -50.0, 50.0))
+        steer = float(np.clip(
+            sign * (kp * e + ki * integral + kd * (e - prev)), -lim, lim))
+        prev = e
+        throttle = thr_c if abs(steer) > 0.5 else thr
+        err = max(abs(steer - act[i, 0]), abs(throttle - act[i, 1]))
+        if err > max_err:
+            max_err, worst = err, i
+    acc["checked"] += 1
 
-        if max_err > 1e-5:
-            failures.append(
-                f"pid-identity: recomputed action disagrees with the stored one "
-                f"(max |diff| {max_err:.6f} at index {worst}). The frame/action "
-                f"indexing is wrong, or the corpus was modified after writing.")
+    if max_err > 1e-5:
+        failures.append(
+            f"pid-identity: {name}: recomputed action disagrees with the stored "
+            f"one (max |diff| {max_err:.6f} at index {worst}). The frame/action "
+            f"indexing is wrong, or the corpus was modified after writing.")
 
+
+def finalize_pid_identity(acc: dict, total: int, failures: list) -> None:
+    checked, skipped = acc["checked"], acc["skipped"]
     if checked == 0:
         failures.append("pid-identity: no episode carried the log_cte metadata "
                         "needed to verify alignment exactly - recollect with "
@@ -210,17 +216,17 @@ def check_pid_identity(episodes: list[dict], failures: list) -> None:
         # corpus (e.g. appended by an older collector via --only) slips
         # through half-checked.
         failures.append(
-            f"pid-identity: only {checked}/{len(episodes)} episodes could be "
+            f"pid-identity: only {checked}/{total} episodes could be "
             f"verified; {len(skipped)} lack metadata, first: "
             f"{skipped[0][0]} (missing {skipped[0][1]}). Recollect them or "
             f"remove them - a partially verified corpus is not verified.")
     else:
-        print(f"  exact PID identity     : verified on {checked}/{len(episodes)} "
+        print(f"  exact PID identity     : verified on {checked}/{total} "
               f"episode(s), every action reproduced from log_cte")
 
 
-def check_alignment(episodes: list[dict], failures: list) -> None:
-    """THE IMAGE-AXIS GATE: does pixel motion still lag the steering by -1?
+def check_alignment(ep: dict, acc: dict, failures: list) -> None:
+    """IMAGE-AXIS gate, one episode at a time: does pixel motion still lag by -1?
 
     `check_pid_identity` proves action[i] matches log_cte[i-1], but it never
     opens an image -- so it passes a corpus whose IMAGE array has been rolled.
@@ -240,54 +246,56 @@ def check_alignment(episodes: list[dict], failures: list) -> None:
     car -- re-measure it and update EXPECTED_PEAK_LAG rather than deleting
     the gate.
     """
-    checked, weak, bad = [], [], []
+    name = ep.get("_name", "?")
+    img, act = ep["image"], ep["action"]
+    T = len(img)
+    if T < 30:
+        acc["weak"].append((name, 0))
+        return
 
-    for idx, ep in enumerate(episodes):
-        name = ep.get("_name", f"episode #{idx}")
-        img, act = ep["image"], ep["action"]
-        T = len(img)
-        if T < 30:
-            weak.append((name, 0))
+    profs = [column_profile(img[t]) for t in range(T)]
+    shifts = []
+    steer_at_lag = {lag: [] for lag in ALIGN_LAGS}
+    lo, hi = 1 - min(ALIGN_LAGS), T - 1 - max(ALIGN_LAGS)
+    for t in range(lo, hi):
+        # only sample frames where the car is actually turning; straight
+        # driving carries no alignment information either way
+        if abs(act[t, 0]) < 0.06:
             continue
-
-        profs = [column_profile(img[t]) for t in range(T)]
-        shifts = []
-        steer_at_lag = {lag: [] for lag in ALIGN_LAGS}
-        lo, hi = 1 - min(ALIGN_LAGS), T - 1 - max(ALIGN_LAGS)
-        for t in range(lo, hi):
-            # only sample frames where the car is actually turning; straight
-            # driving carries no alignment information either way
-            if abs(act[t, 0]) < 0.06:
-                continue
-            shifts.append(estimate_shift(profs[t - 1], profs[t]))
-            for lag in ALIGN_LAGS:
-                steer_at_lag[lag].append(act[t + lag, 0])
-
-        n = len(shifts)
-        if n < MIN_PAIRS_PER_EPISODE:
-            weak.append((name, n))
-            continue
-
-        shifts = np.array(shifts)
-        if shifts.std() < 1e-6:
-            bad.append((name, None, 0.0, "estimated shifts are constant"))
-            continue
-
-        r = {}
+        shifts.append(estimate_shift(profs[t - 1], profs[t]))
         for lag in ALIGN_LAGS:
-            s = np.array(steer_at_lag[lag])
-            r[lag] = (abs(float(np.corrcoef(shifts, s)[0, 1]))
-                      if s.std() > 1e-9 else 0.0)
-        peak = max(ALIGN_LAGS, key=lambda k: r[k])
+            steer_at_lag[lag].append(act[t + lag, 0])
 
-        if r[peak] < MIN_PEAK_CORR:
-            bad.append((name, peak, r[peak], "steering barely explains motion"))
-        elif peak not in PLAUSIBLE_LAGS:
-            bad.append((name, peak, r[peak], "lag outside the plausible band"))
-        else:
-            checked.append((name, n, peak, r[peak]))
+    n = len(shifts)
+    if n < MIN_PAIRS_PER_EPISODE:
+        acc["weak"].append((name, n))
+        return
 
-    total = len(episodes)
+    shifts = np.array(shifts)
+    if shifts.std() < 1e-6:
+        acc["bad"].append((name, None, 0.0, "estimated shifts are constant"))
+        return
+
+    r = {}
+    for lag in ALIGN_LAGS:
+        s = np.array(steer_at_lag[lag])
+        r[lag] = (abs(float(np.corrcoef(shifts, s)[0, 1]))
+                  if s.std() > 1e-9 else 0.0)
+    peak = max(ALIGN_LAGS, key=lambda k: r[k])
+
+    if r[peak] < MIN_PEAK_CORR:
+        # UNVERIFIABLE, not wrong. Calling a noisy peak a misalignment is the
+        # same false-diagnosis class as the log_ki bug: it points the reader
+        # at the wrong subsystem.
+        acc["weak"].append((name, f"{n} frames but |r| only {r[peak]:.2f}"))
+    elif peak not in PLAUSIBLE_LAGS:
+        acc["bad"].append((name, peak, r[peak], "lag outside the plausible band"))
+    else:
+        acc["checked"].append((name, n, peak, r[peak]))
+
+
+def finalize_alignment(acc: dict, total: int, failures: list) -> None:
+    checked, weak, bad = acc["checked"], acc["weak"], acc["bad"]
 
     for name, peak, rp, why in bad[:5]:
         shown = "n/a" if peak is None else f"{peak:+d}"
@@ -301,10 +309,11 @@ def check_alignment(episodes: list[dict], failures: list) -> None:
 
     if weak:
         failures.append(
-            f"image-axis: {len(weak)}/{total} episode(s) had too few turning "
-            f"frames to check (need {MIN_PAIRS_PER_EPISODE}); first: "
-            f"{weak[0][0]} with {weak[0][1]}. Their image/action alignment is "
-            f"UNVERIFIED.")
+            f"image-axis: {len(weak)}/{total} episode(s) could NOT be checked "
+            f"(too few turning frames, or too weak a correlation to determine "
+            f"a lag); first: {weak[0][0]} - {weak[0][1]}. Their image/action "
+            f"alignment is UNVERIFIED - not wrong, unchecked. Drop them or "
+            f"collect longer episodes on that track.")
 
     if not checked:
         failures.append("image-axis: no episode could be checked at all")
@@ -344,7 +353,13 @@ def main():
 
     failures: list[str] = []
     split_tracks: dict[str, set] = {}
-    loaded, total_frames = [], 0
+    total_frames, n_episodes = 0, 0
+    # Streaming accumulators: each episode is checked and then DISCARDED.
+    # Retaining every image array cost 4.09 GB at 76k frames and would have
+    # OOM'd near the PRD's own ~100k target -- i.e. the done-check would have
+    # died exactly when P2 became finishable.
+    pid_acc = {"checked": 0, "skipped": []}
+    lag_acc = {"checked": [], "weak": [], "bad": []}
 
     for split_dir in sorted(p for p in root.iterdir() if p.is_dir()):
         files = sorted(split_dir.glob("*.npz"))
@@ -365,7 +380,10 @@ def main():
             frames += len(ep["reward"])
             if "log_track" in ep:
                 split_tracks[split].add(str(ep["log_track"]))
-            loaded.append(ep)
+            check_pid_identity(ep, pid_acc, failures)
+            check_alignment(ep, lag_acc, failures)
+            n_episodes += 1
+            del ep
         total_frames += frames
         print(f"{split:9s}: {len(files):3d} episodes, {frames:7d} frames, "
               f"tracks {sorted(split_tracks[split])}")
@@ -391,10 +409,10 @@ def main():
     # nothing is how a task gets marked done on nothing.
     if total_frames == 0:
         failures.append("corpus is empty - 0 frames found under " + str(root))
-    if loaded:
+    if n_episodes:
         print("\nalignment:")
-        check_pid_identity(loaded, failures)
-        check_alignment(loaded, failures)
+        finalize_pid_identity(pid_acc, n_episodes, failures)
+        finalize_alignment(lag_acc, n_episodes, failures)
 
     print()
     if failures:
