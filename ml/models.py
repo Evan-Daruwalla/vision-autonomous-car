@@ -58,6 +58,18 @@ class ConvVAE(nn.Module):
             nn.ConvTranspose2d(32, 3, 6, stride=2), nn.Sigmoid(),
         )
 
+        # **Asserted at construction, so it holds on EVERY run.** This check
+        # used to live only in self_check(), which runs under `__main__` --
+        # meaning no training or eval run ever executed it, while README.md
+        # claimed "models.py asserts it on every run". Proven false by the cold
+        # audit: `ConvVAE(z_dim=64)` built silently at 4,446,915 params.
+        # Guarded on the default z_dim so the class stays reusable at other
+        # latent sizes; only the paper configuration carries the paper's count.
+        if z_dim == Z_DIM:
+            n = sum(p.numel() for p in self.parameters())
+            assert n == 4_348_547, \
+                f"ConvVAE has {n:,} params, Ha & Schmidhuber report 4,348,547"
+
     def encode(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         h = self.enc(x).flatten(1)
         return self.fc_mu(h), self.fc_logvar(h)
@@ -134,7 +146,6 @@ def mdn_loss(logpi, mu, logsigma, target):
 
 def mdn_sample(logpi, mu, logsigma, temperature: float = 1.0):
     """Sample z_{t+1} from the mixture. temperature<1 sharpens, >1 diversifies."""
-    K = logpi.shape[-1]
     if temperature != 1.0:
         logpi = logpi / temperature
         logpi = logpi - torch.logsumexp(logpi, dim=-1, keepdim=True)

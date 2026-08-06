@@ -3,6 +3,11 @@ Thumbs.db
 desktop.ini
 .DS_Store
 
+# graphify knowledge-graph output — regenerable from the corpus with
+# /graphify, ~476 KB, and it was untracked but matched by NO ignore rule,
+# i.e. one `git add -A` from being published (cold audit finding 13).
+graphify-out/
+
 # Slicer output — regenerate from source models, don't version
 *.gcode
 *.bgcode

@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -35,10 +36,16 @@ import torch
 from PIL import Image
 
 from models import ConvVAE, MDNRNN, mdn_sample
-from splits import fit_val_episodes, load_proc
+from splits import (cache_key_matches, encoder_fingerprint,
+                    fit_val_episodes, load_proc)
 
 REPO = Path(__file__).resolve().parent.parent
 RUNS = REPO / "ml" / "runs"
+
+# Fraction of imagined steps on which val_indomain must beat the frozen-frame
+# baseline for the P3 done-check to pass. Observed 30/30; 0.9 leaves three
+# steps of headroom so seed variance does not fail a correct model.
+MIN_BEAT_FRACTION = 0.9
 
 
 @torch.no_grad()
@@ -48,7 +55,9 @@ def rollout(vae, rnn, mu_all, act_all, start, warmup, horizon, device,
 
     Returns (imagined_z, true_z, actions_used).
     """
-    g = torch.Generator(device=device).manual_seed(seed)
+    # Determinism comes from the global seed below. A local torch.Generator was
+    # created here and never passed to anything -- it read as a per-rollout
+    # determinism guarantee that did not exist (cold audit finding 12).
     torch.manual_seed(seed)
 
     total = warmup + horizon
@@ -85,9 +94,14 @@ def run_split(tag, imgs, mu_all, act_all, episodes, ep_idx, vae, rnn, args, out)
     device = args.device
     rng = np.random.default_rng(args.seed)
 
-    # pick episodes long enough to hold warmup + horizon
+    # pick episodes long enough to hold warmup + horizon.
+    # Strictly GREATER than `need`, not >=: line 108 draws a start offset with
+    # rng.integers(0, n - need), and an episode of exactly `need` frames makes
+    # that rng.integers(0, 0) -> ValueError after the models are already loaded.
+    # Reachable today with --warmup 369 --horizon 30 against the 401-frame
+    # episodes in this corpus. (Cold audit E6, 2026-08-06.)
     need = args.warmup + args.horizon + 2
-    usable = [i for i in ep_idx if episodes[i][1] >= need]
+    usable = [i for i in ep_idx if episodes[i][1] > need]
     if not usable:
         raise SystemExit(f"{tag}: no episode has {need} frames")
     chosen = rng.choice(usable, size=min(args.n_episodes, len(usable)),
@@ -157,8 +171,9 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
 
+    vae_ckpt = torch.load(args.vae, map_location=args.device)
     vae = ConvVAE().to(args.device)
-    vae.load_state_dict(torch.load(args.vae, map_location=args.device)["model"])
+    vae.load_state_dict(vae_ckpt["model"])
     vae.eval()
     rnn = MDNRNN().to(args.device)
     rnn.load_state_dict(torch.load(args.rnn, map_location=args.device)["model"])
@@ -168,7 +183,43 @@ def main():
     ho_imgs, ho_act, ho_eps, _ = load_proc("holdout")
     tr_mu = np.load(REPO / "ml" / "data" / "proc" / "train_mu.npy")
     ho_mu = np.load(REPO / "ml" / "data" / "proc" / "holdout_mu.npy")
-    _, val_eps = fit_val_episodes(tr_tracks, seed=args.seed)
+
+    # These latents were produced by train_mdnrnn.py under SOME VAE. If that
+    # was a different checkpoint than the one loaded above, this script decodes
+    # dynamics from one latent space through another and reports the resulting
+    # nonsense as a result. Missing sidecar => UNVERIFIABLE (caches predating
+    # this guard have none); present-and-different => WRONG, and we stop.
+    want = encoder_fingerprint(args.vae)
+    for split in ("train", "holdout"):
+        keyfile = REPO / "ml" / "data" / "proc" / f"{split}_latents.key"
+        if not keyfile.exists():
+            print(f"note: {split} latent cache has no encoder fingerprint - "
+                  f"cannot verify it matches {Path(args.vae).name}; re-run "
+                  f"train_mdnrnn.py to stamp it")
+        elif not cache_key_matches(split, want):
+            print(f"FAIL: {split} latents were encoded by a DIFFERENT VAE than "
+                  f"{Path(args.vae).name}. Delete "
+                  f"ml/data/proc/{split}_mu.npy and re-run train_mdnrnn.py.")
+            return 1
+
+    # **The SPLIT seed comes from the CHECKPOINT, never from --seed.**
+    # --seed varies the episode sampling and the MDN-RNN temperature draw; it
+    # must NOT re-derive the data split, because the checkpoint was selected
+    # against the split its own training run used. Measured before this fix
+    # (cold audit, 2026-08-06): `--seed 3` reported 12 of 12 "val_indomain"
+    # episodes that were in the seed-0 FIT set -- a held-out metric computed
+    # entirely on training data, recorded to json with no warning. P5 needs
+    # >=3 seeds for its comparative claim, so this was one flag away from
+    # publishing train-on-test numbers.
+    split_seed = vae_ckpt.get("args", {}).get("seed", 0)
+    fit_eps, val_eps = fit_val_episodes(tr_tracks, seed=split_seed)
+    if split_seed != args.seed:
+        print(f"note: sampling seed {args.seed}, but the split is rebuilt with "
+              f"seed {split_seed} (the checkpoint's) so val_indomain stays "
+              f"genuinely held out")
+    # The guard train_vae.py:115 has and this file did not.
+    assert not (set(fit_eps.tolist()) & set(val_eps.tolist())), \
+        "fit/val episodes overlap - the rollout split is not held out"
 
     print(f"warmup {args.warmup} frames, then {args.horizon} imagined steps "
           f"following the real actions\n")
@@ -181,6 +232,7 @@ def main():
         "holdout", ho_imgs, ho_mu, ho_act, ho_eps, np.arange(len(ho_eps)),
         vae, rnn, args, out)
 
+    beats = {}
     for tag, r in results.items():
         mse = r["image_mse_by_step"]
         base = r["frozen_baseline_mse_by_step"]
@@ -193,6 +245,7 @@ def main():
         print(f"  image MSE   " + "".join(f"{mse[i]:8.4f}" for i in pick))
         print(f"  frozen base " + "".join(f"{base[i]:8.4f}" for i in pick))
         better = sum(m < b for m, b in zip(mse, base))
+        beats[tag] = (better, len(mse))
         print(f"  beats the frozen-frame baseline on {better}/{len(mse)} steps\n")
 
     (out / "rollout_metrics.json").write_text(json.dumps(
@@ -200,6 +253,29 @@ def main():
     print(f"panels : {out}/rollout_{{val_indomain,holdout}}.png")
     print(f"metrics: {out / 'rollout_metrics.json'}")
 
+    # **The done-check has to be able to FAIL.** Before this, `better` was
+    # printed and discarded and main() returned None, so 0/30 exited 0 exactly
+    # like 30/30 -- while testing.md listed this file in a table of gates that
+    # "exit non-zero on failure". A gate that cannot fire is not a gate.
+    # (Cold audit finding 3, 2026-08-06.)
+    #
+    # Gated on val_indomain ONLY. Holdout is an unseen visual domain and is
+    # EXPECTED to lose to the baseline (measured 0/30, record Appendix S) --
+    # gating on it would fail a correct model.
+    #
+    # 0.9, not 1.0: the published result is 30/30, so the threshold sits three
+    # steps below the observed value. A gate pinned to a perfect score turns
+    # ordinary seed variance into a red build, which is how gates get disabled.
+    won, total = beats["val_indomain"]
+    need = int(MIN_BEAT_FRACTION * total)
+    print(f"\nP3 DONE-CHECK: val_indomain beat the baseline on {won}/{total} "
+          f"steps (need >= {need})")
+    if won < need:
+        print("P3 DONE-CHECK: FAIL")
+        return 1
+    print("P3 DONE-CHECK: PASS")
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

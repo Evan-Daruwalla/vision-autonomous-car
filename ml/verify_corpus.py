@@ -39,6 +39,12 @@ BAND = (60, 95)        # image rows to profile: road ahead, above the bumper
 MAX_SHIFT = 14         # px of horizontal search either way
 MIN_PAIRS_PER_EPISODE = 120   # turning frames needed to measure one episode's lag
 
+# Mirrored from collect_sim_data.py so the expert-quality contract is checkable
+# at rest, not only at write time. Keep the two in sync -- if the collector's
+# thresholds move, these must move with them, and the record entry should say so.
+MAX_MEAN_ABS_CTE = 1.2
+MIN_EPISODE_STEPS = 150
+
 
 def column_profile(img: np.ndarray) -> np.ndarray:
     """1-D horizontal intensity profile of the road band, mean-centred."""
@@ -77,10 +83,20 @@ def check_structure(ep: dict, path: Path, failures: list) -> None:
 
     T = len(ep["reward"])
 
-    # filename length must match the array length -- the loader trusts it
-    stem_len = int(name.rsplit("-", 1)[1].split(".")[0])
-    if stem_len != T:
-        failures.append(f"{name}: filename says {stem_len} steps, arrays have {T}")
+    # filename length must match the array length -- the loader trusts it.
+    # Parsed defensively: this ran outside the per-episode try/except, so a
+    # single file not matching `{id}-{length}.npz` raised IndexError/ValueError
+    # out of the whole check and every remaining episode went unexamined. A
+    # verifier that dies on the first odd filename verifies nothing after it.
+    # (Cold audit E5, 2026-08-06.)
+    try:
+        stem_len = int(name.rsplit("-", 1)[1].split(".")[0])
+    except (IndexError, ValueError):
+        failures.append(f"{name}: filename does not encode a length as "
+                        f"'{{id}}-{{length}}.npz' - the loader trusts this")
+    else:
+        if stem_len != T:
+            failures.append(f"{name}: filename says {stem_len} steps, arrays have {T}")
 
     for key in REQUIRED:
         if len(ep[key]) != T:
@@ -90,6 +106,29 @@ def check_structure(ep: dict, path: Path, failures: list) -> None:
         failures.append(f"{name}: image shape {ep['image'].shape} is not (T,H,W,3)")
     if ep["image"].dtype != np.uint8:
         failures.append(f"{name}: image dtype {ep['image'].dtype}, expected uint8")
+    # The lag constants below are calibrated for 120x160 frames; on any other
+    # resolution the pixel-motion profile means nothing (cold audit E8).
+    if ep["image"].shape[1:3] != (120, 160):
+        failures.append(f"{name}: image is {ep['image'].shape[1:3]}, but the "
+                        f"alignment gate's lag constants are calibrated for "
+                        f"(120, 160)")
+
+    # **The expert-quality contract, enforced AT REST.** These thresholds lived
+    # only inside collect_sim_data.py, which applies them once at write time and
+    # never again; log_mean_abs_cte was written and read by nothing. So a corpus
+    # collected under different constants, hand-assembled, or copied in from
+    # elsewhere would pass every structural and alignment check while containing
+    # episodes the expert drove badly. Re-reading them here makes the contract
+    # checkable on data that already exists. (Cold audit finding 7 / prior audit
+    # F7, open since 2026-08-05.)
+    if "log_mean_abs_cte" in ep:
+        cte = float(ep["log_mean_abs_cte"])
+        if cte > MAX_MEAN_ABS_CTE:
+            failures.append(f"{name}: mean|cte| {cte:.3f} exceeds the collector's "
+                            f"MAX_MEAN_ABS_CTE={MAX_MEAN_ABS_CTE}")
+    if T < MIN_EPISODE_STEPS:
+        failures.append(f"{name}: {T} steps is below the collector's "
+                        f"MIN_EPISODE_STEPS={MIN_EPISODE_STEPS}")
 
     # episode boundary flags
     if not ep["is_first"][0] or ep["is_first"][1:].any():
@@ -198,6 +237,13 @@ def check_pid_identity(ep: dict, acc: dict, failures: list) -> None:
             max_err, worst = err, i
     acc["checked"] += 1
 
+    # 1e-5 is safe ONLY because KI is currently 0.0. `integral` is replayed
+    # here from float32-rounded log_cte while the collector accumulated it in
+    # float64, so with a nonzero KI that rounding difference compounds across
+    # ~1200 steps and can exceed this threshold on a perfectly good corpus --
+    # a false FAIL of exactly the family already logged in record Appendix P.2
+    # (the omitted-log_ki misdiagnosis). If KI is ever raised, widen this and
+    # say so in the record. (Cold audit E9, 2026-08-06.)
     if max_err > 1e-5:
         failures.append(
             f"pid-identity: {name}: recomputed action disagrees with the stored "

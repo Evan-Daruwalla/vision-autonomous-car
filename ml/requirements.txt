@@ -12,7 +12,11 @@
 # https://github.com/tawnkramer/gym-donkeycar/releases/tag/v25.10.06
 # (236,059,289 bytes) and extract to sim/. It is gitignored.
 
-# CUDA build — the cu126 index URL above is required, or pip installs CPU-only torch
+# CUDA build. The index URL must be a REAL directive, not just prose in the
+# rebuild comment above: `pip install -r ml/requirements.txt` on a clean machine
+# cannot resolve `+cu126` from PyPI alone and fails outright. (Cold audit
+# finding 9, 2026-08-06.)
+--extra-index-url https://download.pytorch.org/whl/cu126
 torch==2.13.0+cu126
 
 numpy==2.5.1
@@ -25,17 +29,23 @@ gymnasium==1.3.0
 gym_donkeycar @ git+https://github.com/tawnkramer/gym-donkeycar.git@a1f4ca6961e17a6929c1f2e883358a1edafb479d
 
 # --- SIM-POC P4 (DreamerV3), added 2026-08-06 -------------------------------
-# dreamerv3-torch is NOT a pip package. Clone it into ml/vendor/ (gitignored):
-#   git clone --depth 1 https://github.com/NM512/dreamerv3-torch.git ml/vendor/dreamerv3-torch
-# Verified against commit 6ef8646d807cd10ce0c88e10a7e943211e7fc44c (2026-03-08).
+# dreamerv3-torch is NOT a pip package. Clone it into ml/vendor/ (gitignored)
+# AND CHECK OUT THE PINNED COMMIT -- `--depth 1` alone tracks whatever the
+# default branch happens to be, so the "verified against" note below was not
+# actually enforced by the command beside it (cold audit finding 9):
+#   git clone https://github.com/NM512/dreamerv3-torch.git ml/vendor/dreamerv3-torch
+#   git -C ml/vendor/dreamerv3-torch checkout 6ef8646d807cd10ce0c88e10a7e943211e7fc44c
+# This matters more than a usual pin: run_dreamer_p4.py drives the library's
+# internals (Dreamer._train, agent._wm, dv3.make_dataset, tools.load_episodes),
+# none of which are a public API, so an upstream refactor breaks it silently.
 #
 # Do NOT `pip install -r ml/vendor/dreamerv3-torch/requirements.txt` — it pins
 # torch==2.4.1 (CPU-only from PyPI, would clobber the cu126 build above) plus
 # mujoco/dm_control/crafter for environments this project never instantiates.
 # Only these three are needed, and only at import time:
 gym==0.26.2          # envs/wrappers.py imports it; the wrappers are never used
-ruamel.yaml          # dreamer.py's config loader
-tensorboard          # tools.py's SummaryWriter
+ruamel.yaml==0.19.1  # dreamer.py's config loader -- see the version note below
+tensorboard==2.21.0  # tools.py's SummaryWriter
 #
 # GOTCHA: ruamel.yaml >=0.19 REMOVED `yaml.safe_load`, which the vendored
 # dreamer.py `__main__` calls — so `python dreamer.py ...` cannot run here.

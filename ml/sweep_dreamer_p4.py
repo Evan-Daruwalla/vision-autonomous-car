@@ -84,13 +84,24 @@ def main() -> int:
         proc = subprocess.run(cmd, cwd=str(REPO / "ml"),
                               capture_output=True, text=True)
         result_path = RUNS / tag / "p4_result.json"
-        if not result_path.exists():
-            # A crash that is NOT an OOM (the runner catches those itself and
-            # still writes its json) means the config never ran -- record it as
-            # ERROR rather than silently dropping the row.
+        # **Check the EXIT CODE, not just the file.** `p4_result.json` from a
+        # previous run is committed to this repo, so "the file exists" is not
+        # evidence this run produced it. On a fresh clone with no GPU, no
+        # corpus, and no vendored library, the runner exits non-zero writing
+        # nothing -- and a file-existence check would then read the committed
+        # result and report it as freshly measured. That is a fabricated
+        # fitting table presented as a measurement, in the one command the
+        # README advertises as "Reproduce with". (Cold audit, 2026-08-06.)
+        #
+        # The runner catches OOM itself and still writes its json with exit 0,
+        # so a non-zero exit always means the config genuinely never ran.
+        if proc.returncode != 0 or not result_path.exists():
+            why = (f"exit {proc.returncode}" if proc.returncode != 0
+                   else "no result written")
             tail = (proc.stderr or proc.stdout).strip().splitlines()[-3:]
-            rows.append(dict(label=label, status="ERROR", note=" | ".join(tail)))
-            print(f"  ERROR: {' | '.join(tail)}")
+            rows.append(dict(label=label, status="ERROR",
+                             note=f"{why}: " + " | ".join(tail)))
+            print(f"  ERROR ({why}): {' | '.join(tail)}")
             continue
 
         r = json.loads(result_path.read_text())
@@ -99,6 +110,10 @@ def main() -> int:
         rows.append(dict(label=label, status=status,
                          peak_gb=None if r["oom_at_step"] else peak,
                          params=r["params_total"],
+                         # Recorded so a capped row is distinguishable from an
+                         # uncapped one; without it the summary cannot say
+                         # whether a number is a ceiling or a spill (finding 11).
+                         cap_gb=r.get("cap_gb"),
                          seconds=r["history"][-1]["seconds"] if r["history"] else None))
         print(f"  {status}" + ("" if r["oom_at_step"] else f": peak {peak:.3f} GB"))
 

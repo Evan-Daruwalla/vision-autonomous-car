@@ -24,6 +24,7 @@ near-duplicates, so a frame split leaks (record Appendix L).
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 import numpy as np
@@ -32,6 +33,31 @@ REPO = Path(__file__).resolve().parent.parent
 PROC = REPO / "ml" / "data" / "proc"
 
 VAL_FRACTION = 0.15     # of training episodes, per track
+
+
+def encoder_fingerprint(ckpt) -> str:
+    """Short stable fingerprint of the VAE checkpoint behind a latent cache.
+
+    Lives here because BOTH writers and readers of `{split}_mu.npy` need the
+    same answer: train_mdnrnn.py writes the cache, rollout_eval.py decodes
+    through it, and a mismatch between them is silent. One helper at the shared
+    chokepoint beats two copies that can drift. (Cold audit finding 5.)
+    """
+    if ckpt is None or not Path(ckpt).exists():
+        return "unknown"
+    st = Path(ckpt).stat()
+    return hashlib.sha1(
+        f"{Path(ckpt).name}:{st.st_size}:{st.st_mtime_ns}".encode()
+    ).hexdigest()[:12]
+
+
+def cache_key_matches(split: str, want: str, proc: Path = PROC) -> bool:
+    p = proc / f"{split}_latents.key"
+    return p.exists() and p.read_text(encoding="utf-8").strip() == want
+
+
+def write_cache_key(split: str, want: str, proc: Path = PROC) -> None:
+    (proc / f"{split}_latents.key").write_text(want, encoding="utf-8")
 
 
 def load_proc(split: str, proc: Path = PROC):

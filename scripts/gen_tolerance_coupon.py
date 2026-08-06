@@ -28,6 +28,7 @@ Usage:  python scripts/gen_tolerance_coupon.py [-o out.stl]
 import argparse
 import math
 import struct
+import sys
 from collections import Counter
 from pathlib import Path
 
@@ -227,7 +228,16 @@ def main():
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    write_stl(tris, out)
+    # **Write only if the geometry passed, and exit non-zero if it did not.**
+    # This used to write unconditionally and then print "OVERALL: FAIL" while
+    # returning 0 -- so a non-manifold or inside-out mesh landed on disk as a
+    # printable-looking STL, and any caller checking the exit code saw success.
+    # Both failure modes are real history here: the first two builds of this
+    # coupon failed manifold and then signed-volume (record Appendix I).
+    # README.md calls this artifact "geometrically self-validated", which was
+    # only true if a human read the output. (Cold audit finding 6, 2026-08-06.)
+    if ok:
+        write_stl(tris, out)
 
     print(f"plate      : {W:.1f} x {H:.1f} x {THICK:.1f} mm")
     print(f"triangles  : {len(tris)}")
@@ -237,7 +247,11 @@ def main():
     print(f"volume     : {vol:.3f} mm^3 (expected {exp:.3f}, rel.err {err:.2e})"
           f"  -> {'PASS' if vol > 0 and err < 1e-6 else 'FAIL'}")
     print(f"OVERALL    : {'PASS' if ok else 'FAIL'}")
-    print(f"wrote      : {out}  ({out.stat().st_size} bytes)")
+    if ok:
+        print(f"wrote      : {out}  ({out.stat().st_size} bytes)")
+    else:
+        print(f"NOT WRITTEN: {out} (geometry failed validation)")
+        return 1
     print()
     print("pitch row  : 5 holes @ 8.00 mm centres, all "
           f"{PIN_REF:.2f} mm  (no markers)")
@@ -245,7 +259,8 @@ def main():
     axle = sorted(d for (x, y), d in HOLES.items() if y == 5 and d != MARKER)
     print(f"pin row    : {', '.join(f'{d:.2f}' for d in pin)} mm  (1 marker hole)")
     print(f"axle row   : {', '.join(f'{d:.2f}' for d in axle)} mm  (2 marker holes)")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

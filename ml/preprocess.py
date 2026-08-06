@@ -29,6 +29,7 @@ Usage:  python ml/preprocess.py
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 
 import numpy as np
@@ -70,8 +71,19 @@ def process_split(split: str, out: Path, device: str, chunk: int = 256) -> None:
     print(f"{split:8s}: {len(files)} episodes, {total} frames")
 
     out.mkdir(parents=True, exist_ok=True)
+    # **All four outputs are written to .tmp and swapped in together.**
+    # open_memmap(mode="w+") allocates the FULL-SIZE images file up front and
+    # fills it progressively, while the three index arrays are only written
+    # after the loop. Interrupt the loop on a re-run and the old index files
+    # survive next to a half-real, zero-padded image array -- load_proc() then
+    # mmaps a consistent-looking pair and train_vae.py trains on black frames
+    # with no error at all. This is the project's normal workflow (the corpus
+    # has been topped up twice), so it is a live path, not a hypothetical.
+    # (Cold audit E1, 2026-08-06; mirrors episode_writer.py's tmp+os.replace.)
+    tmp = {k: out / f"{split}_{k}.npy.tmp"
+           for k in ("images", "actions", "episodes", "tracks")}
     images = np.lib.format.open_memmap(
-        out / f"{split}_images.npy", mode="w+", dtype=np.uint8,
+        tmp["images"], mode="w+", dtype=np.uint8,
         shape=(total, SIZE, SIZE, 3))
     actions = np.zeros((total, 2), np.float32)
     episodes = np.zeros((len(files), 2), np.int64)
@@ -101,13 +113,22 @@ def process_split(split: str, out: Path, device: str, chunk: int = 256) -> None:
 
     assert pos == total, f"wrote {pos} frames, expected {total}"
     images.flush()
-    np.save(out / f"{split}_actions.npy", actions)
-    np.save(out / f"{split}_episodes.npy", episodes)
-    np.save(out / f"{split}_tracks.npy", tracks)
+    img_bytes = images.nbytes
+    del images                      # release the mmap so Windows can rename it
+    # Written through a file object, not a path: np.save appends ".npy" to any
+    # path that does not already end in it, so np.save(".../x.npy.tmp") would
+    # silently create ".../x.npy.tmp.npy" and the rename below would fail.
+    for key in ("actions", "episodes", "tracks"):
+        with open(tmp[key], "wb") as f:
+            np.save(f, {"actions": actions, "episodes": episodes,
+                        "tracks": tracks}[key])
+    # Only now does any of it become visible under its real name.
+    for k, src in tmp.items():
+        os.replace(src, out / f"{split}_{k}.npy")
     uniq, cnt = np.unique(tracks, return_counts=True)
     print(f"    tracks: {dict(zip(uniq.tolist(), cnt.tolist()))}")
 
-    mb = (images.nbytes + actions.nbytes) / 1e6
+    mb = (img_bytes + actions.nbytes) / 1e6
     print(f"    -> {out / f'{split}_images.npy'}  ({mb:.0f} MB)")
 
 

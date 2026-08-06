@@ -31,7 +31,8 @@ import numpy as np
 import torch
 
 from models import MDNRNN, ConvVAE, count_params, mdn_loss
-from splits import fit_val_episodes, load_proc
+from splits import (cache_key_matches, encoder_fingerprint,
+                    fit_val_episodes, load_proc, write_cache_key)
 
 REPO = Path(__file__).resolve().parent.parent
 PROC = REPO / "ml" / "data" / "proc"
@@ -39,12 +40,26 @@ RUNS = REPO / "ml" / "runs"
 
 
 @torch.no_grad()
-def encode_split(split: str, vae: ConvVAE, device: str, batch: int = 512):
-    """Cache (mu, logvar) for every frame. Recomputed only if missing."""
+def encode_split(split: str, vae: ConvVAE, device: str, batch: int = 512,
+                 vae_ckpt: Path | None = None):
+    """Cache (mu, logvar) for every frame. Recomputed if missing OR STALE.
+
+    **Staleness is what this guards.** Keyed on the split name alone, retraining
+    the VAE with any different --epochs/--beta/--seed silently reused latents
+    from the PREVIOUS encoder: the MDN-RNN would learn dynamics in one latent
+    space while rollout_eval.py decoded them through another, with nothing
+    anywhere reporting a mismatch. The filename stays stable (rollout_eval.py
+    loads the same path) and a `.key` sidecar carries the encoder fingerprint.
+    (Cold audit finding 5, 2026-08-06.)
+    """
     mu_path = PROC / f"{split}_mu.npy"
     lv_path = PROC / f"{split}_logvar.npy"
-    if mu_path.exists() and lv_path.exists():
+    want = encoder_fingerprint(vae_ckpt)
+    if mu_path.exists() and lv_path.exists() and cache_key_matches(split, want):
         return np.load(mu_path), np.load(lv_path)
+    if mu_path.exists() and not cache_key_matches(split, want):
+        print(f"  {split}: cached latents are from a different VAE checkpoint "
+              f"- re-encoding")
 
     imgs, _, _, _ = load_proc(split)
     n = len(imgs)
@@ -63,6 +78,9 @@ def encode_split(split: str, vae: ConvVAE, device: str, batch: int = 512):
         lvs[s:e] = lv.cpu().numpy()
     np.save(mu_path, mus)
     np.save(lv_path, lvs)
+    # Stamp WHICH encoder produced these, so a later run cannot silently
+    # reuse them under a different VAE (cold audit finding 5).
+    write_cache_key(split, want)
     print(f"  encoded {split}: {n:,} frames -> {mu_path.name}")
     return mus, lvs
 
@@ -139,8 +157,8 @@ def main():
     print(f"VAE loaded from {args.vae}")
 
     print("encoding latents (cached after the first run)...")
-    tr_mu, tr_lv = encode_split("train", vae, args.device)
-    ho_mu, ho_lv = encode_split("holdout", vae, args.device)
+    tr_mu, tr_lv = encode_split("train", vae, args.device, vae_ckpt=args.vae)
+    ho_mu, ho_lv = encode_split("holdout", vae, args.device, vae_ckpt=args.vae)
 
     _, tr_act, tr_eps, tr_tracks = load_proc("train")
     _, ho_act, ho_eps, _ = load_proc("holdout")

@@ -89,6 +89,12 @@ def main() -> None:
     ap.add_argument("--out", default=str(OUT))
     ap.add_argument("--limit", type=int, default=0,
                     help="cap episodes per split (smoke runs)")
+    ap.add_argument("--seed", type=int, default=0,
+                    help="split seed; 0 is the split P3/P4 were trained on. "
+                         "The other three fit_val_episodes call sites take "
+                         "this from --seed, so hardcoding it here made the "
+                         "docstring's 'byte for byte' claim true only by "
+                         "coincidence (cold audit finding 10)")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     args = ap.parse_args()
 
@@ -99,12 +105,25 @@ def main() -> None:
     # Identical derivation to preprocess.py, so episode index i means the same
     # episode in both -- that is what makes the seed-0 split reproducible here.
     tracks = np.array([f.stem.rsplit("-", 2)[0] for f in files], dtype="<U40")
-    fit, val = fit_val_episodes(tracks, seed=0)
+    fit, val = fit_val_episodes(tracks, seed=args.seed)
     print(f"{len(files)} source episodes -> fit {len(fit)}, val_indomain {len(val)}")
 
     for name, idx in (("train", fit), ("eval", val)):
         dst = Path(args.out) / name
         dst.mkdir(parents=True, exist_ok=True)
+        # **Clear the directory first.** Episode filenames encode the source
+        # episode, not the split, so growing the corpus by even one episode
+        # reshuffles which side of the fit/val line an episode falls on -- and
+        # without this, its copy on the OLD side survives. Demonstrated on the
+        # live corpus (cold audit E2, 2026-08-06): appending one
+        # generated-track episode moves 4 episodes val->fit while their stale
+        # eval copies remain, so the P4 eval set silently contains episodes the
+        # model trained on. The corpus has already been topped up twice.
+        stale = list(dst.glob("*.npz"))
+        for p in stale:
+            p.unlink()
+        if stale:
+            print(f"  {name:5s} cleared {len(stale)} stale episode(s)")
         sel = idx[: args.limit] if args.limit else idx
         total = 0
         for j, i in enumerate(sel):

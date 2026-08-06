@@ -140,8 +140,17 @@ def collect_track(track: str, out_dir: Path, n_episodes: int,
             for _ in range(WARMUP_STEPS):
                 obs, _, term, trunc, info = env.step(np.array([0.0, THROTTLE], np.float32))
                 if term or trunc:
-                    obs, info = env.reset()[0], {}
+                    # Re-read cte after the reset instead of blanking `info`.
+                    # Blanking it forced cte_log[0] to 0.0 even though the car
+                    # sits at a real, generally non-zero cross-track error, so
+                    # the expert's first action was computed from a wrong value.
+                    # Self-consistent, so verify_corpus.py still passes it --
+                    # which is exactly why it needed finding by inspection.
+                    # (Cold audit E10, 2026-08-06.)
+                    obs, _ = env.reset()
                     driver.reset()
+                    obs, _, term, trunc, info = env.step(
+                        np.array([0.0, THROTTLE], np.float32))
 
             writer.add_reset(obs, action_dim=2)
             # cte_log[i] is the cross-track error AT THE SAME INSTANT as

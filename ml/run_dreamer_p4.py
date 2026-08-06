@@ -62,11 +62,14 @@ import numpy as np
 import torch
 
 VENDOR = pathlib.Path(__file__).resolve().parent / "vendor" / "dreamerv3-torch"
+VENDOR_COMMIT = "6ef8646d807cd10ce0c88e10a7e943211e7fc44c"
 if not VENDOR.exists():
     raise SystemExit(
         f"vendored dreamerv3-torch not found at {VENDOR}\n"
-        "  git clone --depth 1 https://github.com/NM512/dreamerv3-torch.git "
-        f"{VENDOR}"
+        f"  git clone https://github.com/NM512/dreamerv3-torch.git {VENDOR}\n"
+        f"  git -C {VENDOR} checkout {VENDOR_COMMIT}\n"
+        "(the checkout is not optional -- this file drives the library's "
+        "internals, which are not a stable API)"
     )
 sys.path.insert(0, str(VENDOR))
 
@@ -179,12 +182,20 @@ def main() -> int:
     ap.add_argument("--batch-length", type=int, default=64)
     ap.add_argument("--imag-horizon", type=int, default=5)
     ap.add_argument("--precision", type=int, choices=(16, 32), default=32)
-    ap.add_argument("--cap-gb", type=float, default=0.0,
-                    help="cap the torch allocator (0 = uncapped)")
+    ap.add_argument("--cap-gb", type=float, default=7.0,
+                    help="cap the torch allocator in GB (0 = uncapped). "
+                         "Defaults to 7.0, NOT 0: with Sysmem Fallback ON "
+                         "(measured ON here by probe_vram.py) an uncapped "
+                         "max_memory_allocated() is not a VRAM ceiling, it is "
+                         "just whatever the run happened to touch before "
+                         "spilling to host RAM (cold audit finding 11)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--dataset-size", type=int, default=0,
-                    help="cap frames loaded into host RAM (0 = whole corpus). "
-                         "VRAM holds only the batch, so a sweep can load less "
+                    help="cap frames loaded into host RAM. 0 means 'leave "
+                         "configs.yaml's dataset_size alone' (currently "
+                         "1,000,000), NOT 'unlimited' -- with a corpus larger "
+                         "than that it would silently load a subset. VRAM "
+                         "holds only the batch, so a sweep can load less "
                          "without changing the memory measurement")
     ap.add_argument("--smoke", action="store_true",
                     help="20 steps, tiny batch -- proves the path, not the ceiling")

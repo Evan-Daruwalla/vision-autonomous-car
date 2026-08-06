@@ -18,7 +18,8 @@ corpus collected in simulation.
 
 **A reproduction of Ha & Schmidhuber's World Models** (arXiv:1803.10122),
 ConvVAE plus MDN-RNN. The VAE has **4,348,547 parameters, matching the
-published figure exactly**, and `ml/models.py` asserts it on every run.
+published figure exactly**, and the assertion runs inside `ConvVAE.__init__`,
+so every training and evaluation run re-checks it.
 Matching a parameter count to the digit proves every kernel size and channel
 width is wired as specified. Reading the code proves nothing of the kind.
 
@@ -143,13 +144,20 @@ PRD_ROADMAP.md the standing plan, amended by strike-through, never deletion
 HANDOFF.md     current state in one file
 ```
 
-Runnable checks, each exiting non-zero on failure:
+Runnable checks, each exiting non-zero on failure. The first two run on a bare
+clone; the rest need things this repo deliberately does not ship:
 
 ```bash
-python ml/models.py           # asserts the VAE matches the published param count
-python ml/splits.py           # asserts the data split is disjoint and reproducible
-python ml/verify_corpus.py ml/data/sim   # asserts frame/action alignment
-python ml/probe_vram.py       # reports the real VRAM ceiling on this machine
+python ml/models.py    # asserts the VAE matches the published param count
+python ml/splits.py    # asserts the data split is disjoint and reproducible
+
+# needs the driving corpus (gitignored — regenerate with ml/collect_sim_data.py)
+python ml/verify_corpus.py ml/data/sim
+python ml/rollout_eval.py
+
+# needs an NVIDIA GPU. Exit 1 here means Sysmem Fallback is ON, which is a
+# real finding about the machine, not a broken check.
+python ml/probe_vram.py
 ```
 
 Setup is in `ml/requirements.txt`. The simulator binary and the DreamerV3
