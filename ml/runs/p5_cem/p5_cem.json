@@ -1,0 +1,231 @@
+{
+  "args": {
+    "track": "donkey-generated-track-v0",
+    "episodes": 3,
+    "max_steps": 600,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "port": 9091,
+    "horizon": 12,
+    "candidates": 256,
+    "iters": 3,
+    "w_cte": 1.0,
+    "w_smooth": 0.05,
+    "vae": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\vae\\vae_best.pt",
+    "rnn": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\mdnrnn\\mdnrnn_best.pt",
+    "probe": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\cte_probe\\cte_probe_mlp.pt",
+    "out": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\p5_cem",
+    "device": "cuda",
+    "with_expert": true,
+    "smoke": false
+  },
+  "probe_val_r2": 0.9571505679593773,
+  "per_episode": {
+    "cem": [
+      {
+        "steps": 81,
+        "mean_abs_cte": 0.5337185722108885,
+        "reversals_per_100": 23.46,
+        "mean_abs_dsteer": 0.13995313460472972,
+        "survived": false,
+        "seed": 0,
+        "episode": 0,
+        "seconds": 6.0
+      },
+      {
+        "steps": 93,
+        "mean_abs_cte": 0.4652437143858962,
+        "reversals_per_100": 24.73,
+        "mean_abs_dsteer": 0.1455246052077121,
+        "survived": false,
+        "seed": 0,
+        "episode": 1,
+        "seconds": 6.5
+      },
+      {
+        "steps": 90,
+        "mean_abs_cte": 0.45134159224107856,
+        "reversals_per_100": 16.67,
+        "mean_abs_dsteer": 0.12631605920287664,
+        "survived": false,
+        "seed": 0,
+        "episode": 2,
+        "seconds": 6.3
+      },
+      {
+        "steps": 91,
+        "mean_abs_cte": 0.45756744107251984,
+        "reversals_per_100": 23.08,
+        "mean_abs_dsteer": 0.13547296258103517,
+        "survived": false,
+        "seed": 1,
+        "episode": 0,
+        "seconds": 6.3
+      },
+      {
+        "steps": 89,
+        "mean_abs_cte": 1.202934001561966,
+        "reversals_per_100": 12.36,
+        "mean_abs_dsteer": 0.18321039993315935,
+        "survived": false,
+        "seed": 1,
+        "episode": 1,
+        "seconds": 6.3
+      },
+      {
+        "steps": 91,
+        "mean_abs_cte": 0.45972851239615586,
+        "reversals_per_100": 23.08,
+        "mean_abs_dsteer": 0.13620743554913337,
+        "survived": false,
+        "seed": 1,
+        "episode": 2,
+        "seconds": 6.4
+      },
+      {
+        "steps": 91,
+        "mean_abs_cte": 0.4633484635921705,
+        "reversals_per_100": 27.47,
+        "mean_abs_dsteer": 0.13130858867532677,
+        "survived": false,
+        "seed": 2,
+        "episode": 0,
+        "seconds": 6.3
+      },
+      {
+        "steps": 92,
+        "mean_abs_cte": 0.4725390181967825,
+        "reversals_per_100": 27.17,
+        "mean_abs_dsteer": 0.14246500850460686,
+        "survived": false,
+        "seed": 2,
+        "episode": 1,
+        "seconds": 6.4
+      },
+      {
+        "steps": 89,
+        "mean_abs_cte": 0.4532540570525974,
+        "reversals_per_100": 10.11,
+        "mean_abs_dsteer": 0.09596373965244064,
+        "survived": false,
+        "seed": 2,
+        "episode": 2,
+        "seconds": 6.2
+      }
+    ],
+    "expert": [
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.36897053954773584,
+        "reversals_per_100": 9.67,
+        "mean_abs_dsteer": 0.16226175121219832,
+        "survived": true,
+        "seed": 0,
+        "episode": 0,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.3706030010306373,
+        "reversals_per_100": 9.67,
+        "mean_abs_dsteer": 0.16398419369671352,
+        "survived": true,
+        "seed": 0,
+        "episode": 1,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.4088271999328087,
+        "reversals_per_100": 9.67,
+        "mean_abs_dsteer": 0.16337203980658285,
+        "survived": true,
+        "seed": 0,
+        "episode": 2,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.38894829540916054,
+        "reversals_per_100": 9.67,
+        "mean_abs_dsteer": 0.16472293713902791,
+        "survived": true,
+        "seed": 1,
+        "episode": 0,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.4088271999328087,
+        "reversals_per_100": 9.67,
+        "mean_abs_dsteer": 0.16337203980658285,
+        "survived": true,
+        "seed": 1,
+        "episode": 1,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.38894829540916054,
+        "reversals_per_100": 9.67,
+        "mean_abs_dsteer": 0.16472293713902791,
+        "survived": true,
+        "seed": 1,
+        "episode": 2,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.32083171539309363,
+        "reversals_per_100": 10.5,
+        "mean_abs_dsteer": 0.14648269245926546,
+        "survived": true,
+        "seed": 2,
+        "episode": 0,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.3247402420438205,
+        "reversals_per_100": 10.17,
+        "mean_abs_dsteer": 0.15638512732876614,
+        "survived": true,
+        "seed": 2,
+        "episode": 1,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.32301950093708,
+        "reversals_per_100": 10.17,
+        "mean_abs_dsteer": 0.15769782951797431,
+        "survived": true,
+        "seed": 2,
+        "episode": 2,
+        "seconds": 31.8
+      }
+    ]
+  },
+  "summary": {
+    "cem": {
+      "episodes": 9,
+      "steps_mean": 89.66666666666667,
+      "steps_sd": 3.299831645537222,
+      "cte_mean": 0.5510750414122285,
+      "reversals_per_100": 20.903333333333332,
+      "survived": 0
+    },
+    "expert": {
+      "episodes": 9,
+      "steps_mean": 600.0,
+      "steps_sd": 0.0,
+      "cte_mean": 0.36707955440403395,
+      "reversals_per_100": 9.873333333333333,
+      "survived": 9
+    }
+  },
+  "no_transfer_claim": "Simulated only. Nothing here is evidence about the physical car."
+}

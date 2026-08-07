@@ -1,0 +1,12 @@
+{
+  "val_mse": 0.16692191362380981,
+  "val_r2": 0.2856167948937306,
+  "args": {
+    "epochs": 40,
+    "batch": 4096,
+    "lr": 0.01,
+    "seed": 0,
+    "out": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\cte_probe",
+    "device": "cuda"
+  }
+}

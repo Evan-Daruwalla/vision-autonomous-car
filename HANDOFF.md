@@ -10,18 +10,33 @@ the car's own logged real driving. The process is the product: every stage
 verified on the physical car and documented as a college-portfolio
 engineering artifact.
 
-## Current state — SIM-POC P2+P3 closed (working world model); still waiting on Evan's order and coupon print
+## Current state — SIM-POC COMPLETE (P1–P5); still waiting on Evan's order and coupon print
 
-**Last updated: 2026-08-06** — this file is the only live snapshot; history
+**Last updated: 2026-08-07** — this file is the only live snapshot; history
 lives in the record.
 
-> **2026-08-06 — SIM-POC P2 and P3 are both CLOSED (Appendices R, S).** A
-> 102,888-frame corpus verified 88/88 on both alignment axes, and a Ha &
-> Schmidhuber V+M+C world model whose 30-step imagination beats a
-> frozen-frame baseline 30/30 steps in-domain. **The portfolio artifact is
-> banked**, so P4 (DreamerV3-S) is now free to fail. Software is ahead of
-> hardware: **nothing has been printed and nothing ordered since 2026-07-23**,
-> and the two decisions below still block all physical progress.
+> **2026-08-07 — SIM-POC IS COMPLETE, P1 through P5 (Appendices R, S, T, U,
+> V).** A 102,888-frame corpus verified 88/88 on both alignment axes; a Ha &
+> Schmidhuber world model beating a frozen-frame baseline 30/30 in-domain;
+> DreamerV3-S trained offline with the 8 GB boundary measured; and a full
+> policy-extraction pass.
+>
+> **P5 is an honest negative and should be read as one.** Latent BC (linear
+> and MLP) and CEM planning were each evaluated over 3 seeds × 3 episodes:
+> **no learned policy completed an episode; the PID expert completed 9/9.**
+> The diagnostic is the valuable part — the paper's linear controller is
+> structurally wrong for this task (z encodes cross-track error nonlinearly:
+> probe R² 0.27 linear vs 0.97 MLP), and the bottleneck is the learned
+> representation, not the controller. Corner speed was tested and ruled out.
+>
+> **A cold audit (2026-08-06, Appendix V.1) found four gates that could not
+> fail** — including one where the README's advertised "Reproduce with"
+> command would republish committed numbers as fresh measurements on any
+> clone without a GPU. All fixed, each verified by being made to fail.
+>
+> Software is now five SIM-POC tasks ahead of hardware: **nothing has been
+> printed and nothing ordered since 2026-07-23**, and the two decisions below
+> still block all physical progress.
 
 > **2026-08-05 ~23:10 — DEADLINE MOVED (Appendix N).** **The hard deadline
 > is now REGULAR DECISION, ~Jan 1-15 2027** (~5 months); Nov 1 2026 is now a
@@ -94,7 +109,7 @@ lives in the record.
 | SIM-POC P2 corpus | P2 | **DONE** | 2026-08-06, Appendix R: **102,888 frames**, 88/88 episodes verified on BOTH axes, split disjoint, PASS. Target met, not redefined. **2 train layouts, not 4** (Appendix Q), unbalanced 51:27 |
 | SIM-POC P3 world model | P3 | **DONE** | 2026-08-06, Appendix S: V+M+C trained (VAE 4,348,547 params = exact paper match). 30-step imagination **beats a frozen-frame baseline 30/30 steps in-domain**, 0/30 cross-domain. Done-check PASS. ~6 min total training |
 | SIM-POC P4 DreamerV3 | P4 | **DONE** | 2026-08-06, Appendices T+U: **both** halves. Trained 2000 steps (image loss 588.31→61.39, 9.6x) AND the 8GB fitting table measured. **Batch size, not model size, breaks 8GB**: 69.7M params fit at b16 (5.238 GB), 19.1M at b64 does not fit in 7.0 GB. Two task premises proved false — see T.2 |
-| SIM-POC P5 policy | P5 | **Next — the last SIM-POC task** | Latent BC / CEM planning vs the P2 scripted driver. **Needs ≥3 seeds** (comparative claim, unlike P3/P4 pipeline proofs) |
+| SIM-POC P5 policy | P5 | **DONE — SIM-POC COMPLETE** | 2026-08-07, Appendix V. Latent BC (linear + MLP) **and** CEM planning, 3 seeds × 3 episodes. **No learned policy finished; expert 9/9.** Key finding: the paper's linear C is structurally wrong here — z encodes cross-track error nonlinearly (probe R² 0.27 linear vs 0.97 MLP). Bottleneck is the representation, not the controller |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
 
 ## Hardware & stack facts (from the 2026-07-23 brief — re-verify prices at purchase)

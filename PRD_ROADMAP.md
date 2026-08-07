@@ -540,6 +540,28 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
     through the learned dynamics; evaluate in sim against the P2 scripted
     driver. Done: eval table in the record + the explicit no-transfer-claim
     note.
+    **DONE 2026-08-07 ~05:55 CDT (record Appendix V) — BOTH options built, and
+    the result is an INSTRUMENTED NEGATIVE.** Latent BC (`train_controller.py`,
+    linear and MLP) and CEM planning (`plan_cem.py`) were each evaluated over
+    3 seeds x 3 episodes against the PID expert. **No learned policy completed
+    a single episode; the expert completed 9/9.** Eval table in Appendix V.3.1;
+    artifacts in `ml/runs/p5_eval/` and `ml/runs/p5_cem/`.
+    Three findings the task did not anticipate:
+    (a) **The paper's linear controller is structurally wrong for this task.**
+    A linear probe recovers R^2 = 0.27 of cross-track error from z; an MLP
+    probe recovers 0.97 — the latent encodes lane position NONLINEARLY, so a
+    linear C cannot compute it. Swapping to an MLP cut in-sim lane error 2.4x
+    to essentially expert level (0.435 vs 0.381) and still did not finish.
+    (b) **Evan's "incentive" proposal required CEM, not BC** — behavioural
+    cloning has no reward to attach an incentive to. Implemented as
+    `W_CTE*mean(cte^2) + W_SMOOTH*mean(dsteer^2)`; the centring term gave the
+    best survival of any learned policy (89.7 vs 69.3 steps), while the
+    smoothness term proved UNDER-weighted (the planner is the jitteriest
+    policy measured, 20.9 reversals/100 vs the expert's 9.87).
+    (c) **The bottleneck is the representation, not the controller.** Three
+    policy classes wall at 69-110 steps; only the expert, which never touches
+    the latent, completes. Corner speed was tested and ruled out.
+    **SIM-POC (P1-P5) is now COMPLETE.**
 
 ## 6b. EXECUTION PLAN (dated 2026-08-05, approved by Evan — schedules the tasks above; adds no new milestones)
 

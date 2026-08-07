@@ -11,10 +11,28 @@ verified on a 102,888-frame corpus 2026-08-06.
 - **One `np.savez_compressed` archive per episode**, filename
   `{id}-{length}.npz` where `length == len(episode["reward"])`. The loader
   TRUSTS the filename, so a mismatch is a verifier failure, not a warning.
+  Parse it defensively anyway — `verify_corpus.py` appends a failure instead
+  of raising, so one odd filename cannot abort the whole check (audit E5).
 - Written to a `.npz.tmp` then `os.replace()`d — **atomic**, so a reader
   scanning the directory sees a complete file or no file, never a partial
   one. A plain write is not enough: a verifier racing the collector hits a
   truncated npz (observed 2026-08-06).
+- **`preprocess.py` uses the same tmp+`os.replace` pattern for all FOUR
+  outputs** (`_images/_actions/_episodes/_tracks`), added 2026-08-06 (audit
+  E1). It matters more here than it looks: `open_memmap(mode="w+")` allocates
+  the full-size image file up front and fills it progressively, while the
+  three index arrays are written only at the end — so an interrupted re-run
+  left a half-real, zero-padded image array beside the PREVIOUS run's index
+  files, and `load_proc()` mmapped the pair without complaint. Verified by
+  simulated Ctrl-C: all four files byte-identical afterwards.
+- **Latent caches carry an encoder fingerprint.** `{split}_mu.npy` /
+  `{split}_logvar.npy` are accompanied by `{split}_latents.key`, a hash of the
+  VAE checkpoint that produced them (`splits.encoder_fingerprint`). Keyed on
+  the split name alone, retraining the VAE silently left the MDN-RNN learning
+  dynamics in one latent space while `rollout_eval.py` decoded through
+  another. **Missing key = UNVERIFIABLE (warn and continue); different key =
+  WRONG (exit 1)** — the same abstain-don't-guess rule the alignment gate
+  uses. (Audit finding 5, 2026-08-06.)
 
 | Key | Shape | dtype | Meaning |
 |---|---|---|---|

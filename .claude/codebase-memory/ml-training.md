@@ -146,6 +146,36 @@ full 66-episode / 77,266-frame fit split
   not.** If throughput ever matters, measure it on an otherwise idle card and
   confirm with `nvidia-smi` first.
 
+## The latent encodes lane position NONLINEARLY (P5, 2026-08-07)
+
+**Measured, and it invalidates a design the paper hands you for free.** Probing
+cross-track error from the ConvVAE latent z:
+
+| probe | val R² |
+|---|---|
+| linear | **0.27** |
+| MLP (256-256) | **0.97** |
+
+The information is there — the encoding is not linear. Consequences:
+
+- **Ha & Schmidhuber's linear controller C cannot lane-follow on this latent.**
+  It structurally cannot compute the one quantity the task depends on. Swapping
+  to one hidden layer cut offline action MSE 4.9× and in-sim lane error 2.4×
+  (0.435 vs 0.435 expert-level 0.381). Do not assume the paper's C transfers.
+- **Anything that scores imagined latents needs a nonlinear readout.** The CEM
+  planner uses the MLP probe; the linear one would optimise a proxy explaining
+  a quarter of the target.
+- Expect the same for any future readout (heading, distance-to-stop-line). Probe
+  it linearly first — the linear R² is a statement about the LATENT, and the
+  linear-vs-MLP gap is the finding worth recording.
+
+**No learned policy completed a lap** (linear BC, MLP BC, CEM planning; 3 seeds
+× 3 episodes each) while the PID expert completed 9/9. All three wall at 69-110
+steps. Corner speed was tested and ruled out (lowering throttle made it worse).
+**The bottleneck is the representation and dynamics, not the controller** — the
+expert is the only policy that never touches the latent. Full table: record
+Appendix V.3.1.
+
 ## Rules carried forward to M4 (real-car logs)
 
 - **Measure, never estimate, VRAM.** The retracted "~24 GB for DreamerV3"
