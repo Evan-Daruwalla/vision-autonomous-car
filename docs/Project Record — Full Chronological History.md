@@ -57,6 +57,7 @@ the dated entry, not the digest.
 - [T — SIM-POC P4: the 8GB DreamerV3 boundary measured; two task premises proved false; repo goes public](#appendix-t---sim-poc-p4-the-8gb-dreamerv3-boundary-measured-two-task-premises-proved-false-repo-goes-public-2026-08-06-1329-cdt) (08-06)
 - [U — SIM-POC P4 CLOSED: the model trains; the memory boundary holds over a long run](#appendix-u---sim-poc-p4-closed-the-model-trains-the-memory-boundary-holds-over-a-long-run-2026-08-06-1336-cdt) (08-06)
 - [V — Cold audit fixed; knowledge graph built; SIM-POC P5 CLOSED as an instrumented negative result](#appendix-v---cold-audit-fixed-4-gates-that-could-not-fail-knowledge-graph-built-sim-poc-p5-closed-as-an-instrumented-negative-result-2026-08-07-0555-cdt) (08-07)
+- [W — The wall diagnosed (perception goes OOD); both encoders erase small objects, threatening the M4 stop-sign showcase](#appendix-w---the-wall-diagnosed-perception-goes-ood-both-encoders-erase-small-objects-so-the-m4-stop-sign-showcase-is-threatened-2026-08-08-2252-cdt) (08-08)
 
 ---
 
@@ -2355,3 +2356,192 @@ car's own real logs.
 5. **Nothing printed, nothing ordered** - unchanged since 2026-07-23. The
    encoder-motor decision and the ~1:20 track re-spec still block all physical
    progress. Software is now five SIM-POC tasks ahead of hardware.
+
+
+---
+
+# Appendix W - The wall diagnosed (perception goes OOD); both encoders erase small objects, so the M4 stop-sign showcase is threatened (2026-08-08, ~22:52 CDT)
+
+**CADENCE NOTE:** hooks fired at prompts #54, #57, #60 and #63 before this
+entry. Second consecutive multi-mark slip, both during long autonomous runs.
+Recorded, not smoothed. The pattern is now clear enough to act on: cadence
+fails specifically when a task chains many tool calls without a natural
+reporting break.
+
+**WHAT:** the two open items Appendix V.4 left as "undiagnosed" are now
+measured and closed. New: `ml/trace_failure.py`, `ml/compare_encoders.py`,
+plus checkpoint saving in `ml/run_dreamer_p4.py`. Artifacts in
+`ml/runs/p5_trace/` and `ml/runs/encoder_cmp/`.
+
+## W.1 The 69-110 step wall is PERCEPTION going out of distribution
+
+Appendix V.3.2 ruled out corner speed but left the cause open, and "the latent
+is the bottleneck" was a conclusion about three stages at once. `trace_failure.py`
+separates them by logging, per step: the probe's read of lane position
+(perception), the RNN's H-step-ahead prediction graded against what actually
+happened (dynamics), and the true cte.
+
+**Perception error is a function of POSITION, not of policy or elapsed time:**
+
+| \|actual cte\| | perception err, MLP policy | perception err, PID expert |
+|---|---|---|
+| 0.0 - 0.3 | 0.202 | 0.198 |
+| 0.3 - 0.6 | 0.267 | 0.315 |
+| 0.6 - 1.0 | 0.307 | 0.447 |
+| 1.0 - 1.5 | 0.625 | 0.665 |
+| 1.5 + | **2.104** | **1.734** |
+
+corr(|cte|, perception error) = **0.894** (MLP) and **0.852** (expert), n=263
+and n=600. Two drivers with nothing in common -- one learned, one hand-tuned
+PID -- trace the same curve. It is where the car IS, not what is steering it,
+and not how long it has been running.
+
+**Root cause, and it is in this project's own collector.**
+`collect_sim_data.py` rejects any episode with `mean|cte| > MAX_MEAN_ABS_CTE
+= 1.2`; the expert averaged 0.36. The corpus therefore contains essentially no
+off-centre frames, so the VAE and the probe were never shown the states a
+recovering policy must operate in. **The failure is unrecoverable by
+construction:** drift past ~1.0 and the car can no longer see where it is, so
+it cannot steer back. Every policy class fails identically because none of
+them is the problem.
+
+**This is a DATA problem, and it transfers to hardware.** M3/M4 on the real
+car need deliberate off-centre recovery demonstrations, or the same wall
+appears there. Note the irony worth keeping: the quality filter that keeps the
+imitation corpus clean is exactly what deletes the recovery data. The fix is a
+SEPARATE recovery set exempt from the filter, not a loosened threshold.
+
+**Instrumentation caveat, stated because it affects one number.** The trace
+adds an encode plus an H-step imagination per control step, slowing the loop
+enough to degrade even the expert (its last-25% mean|cte| rose to 1.213 versus
+0.367 in the uninstrumented eval). Within-run correlations are unaffected --
+that is the whole finding -- but absolute survival from a traced run is not
+comparable to `eval_in_sim.py`.
+
+## W.2 Both encoders erase small objects. The M4 stop-sign plan is threatened.
+
+Appendix V.2 flagged that the ConvVAE drops orange traffic cones, and asked
+whether DreamerV3's RSSM (dyn_deter 512 plus a 32x32 discrete stochastic
+state, against z=32 continuous) would keep them. `compare_encoders.py` answers
+it on 32 held-out frames averaging 28 cone pixels each (0.69% of frame):
+
+| model | cone err | bg err | ratio | cone px surviving |
+|---|---|---|---|---|
+| ConvVAE | 0.2200 | 0.0500 | 4.40x | **0 / 899** |
+| DreamerV3 | 0.1982 | 0.0640 | 3.10x | **0 / 899** |
+
+**Zero cone pixels survive in either reconstruction.** Road, lane lines and
+tree line are all preserved; the cone is simply gone. A bigger, differently-
+trained world model does not fix it.
+
+**Consequence for the PRD.** The stop sign was chosen as the M4 world-model
+showcase precisely because a memoryless BC policy provably cannot learn it
+while a recurrent world model can (Appendix L). That reasoning is still sound
+-- but it assumes the sign reaches the latent, and at 64x64 with a
+reconstruction-dominated objective an object at <1% of frame does not.
+Mitigations are OUTSIDE the choice of world model: higher input resolution, an
+auxiliary detection/segmentation head, or a reward the object actually moves.
+
+**Caveat, stated:** the DreamerV3 checkpoint saw 2,000 training steps against
+the ConvVAE's 40 epochs, and its worse BACKGROUND error (0.0640 vs 0.0500) is
+consistent with being undertrained. That weakens any claim about relative
+quality -- but not the conclusion, because 0/899 is an absence, not a blur.
+
+## W.3 A metric that graded its own answer wrong
+
+Worth recording as a method failure, not just a result.
+
+`compare_encoders.py` first reported only the RATIO of cone error to
+background error, and printed an automated verdict: *"DreamerV3 preserves
+cones BETTER (3.12x vs 4.38x). The M4 stop-sign showcase is not threatened."*
+
+That verdict was **wrong**, and the rendered panel showed it wrong at a
+glance: both rows have no cone at all. The ratio improved because DreamerV3's
+BACKGROUND error is 28% worse, shrinking the denominator -- a model can score
+a better ratio by getting worse everywhere else while erasing the object just
+as completely. Absolute cone error differed by only 9%.
+
+Fixed by adding a metric that cannot be gamed that way: re-run the same colour
+detector on the RECONSTRUCTION and count surviving cone pixels. Survival now
+gates the verdict; ratio only breaks ties among models that keep the object.
+
+The general lesson, which belongs with the audit's "a gate that cannot fire is
+not a gate": **a derived ratio can improve for the wrong reason. Prefer a
+metric that asks directly whether the thing you care about is still there.**
+The panel was rendered and LOOKED AT; that is what caught it.
+
+## W.4 Method failures this session
+
+1. **A cone detector that measured the road.** The first colour threshold
+   (`R-G > 40`) fired on 62% of frames with mean masked colour [209,164,85] --
+   tan dirt, not cone. It would have measured road fidelity and called it cone
+   fidelity. Fixed by deriving the threshold from the actual R-G distribution
+   (99.9th percentile 62, 99.99th 95, so `> 80` is the real tail) and then
+   RENDERING frames beside their masks to confirm the mask lands on the cone
+   and excludes the yellow centre line.
+2. **A decoder rescaling bug that would have faked the headline.** Upstream
+   DreamerV3 preprocesses images to [-0.5, 0.5] and its ConvDecoder ends with
+   `mean += 0.5`, so undoing an offset looks correct. This fork preprocesses to
+   [0, 1] (`models.py:182`), making that `+0.5` a bias init in the same space.
+   Adding another 0.5 would have brightened every DreamerV3 reconstruction and
+   manufactured a "DreamerV3 is worse" result out of a units error. Caught by
+   reading the vendored source before running; a range assertion now guards it.
+3. **`&` inside a `run_in_background` call.** The wrapper returned "exit 0"
+   immediately while the real training died. Cost one silent ~20-minute
+   no-op. Do not background a command that is already backgrounded.
+4. **A module-name collision with the vendored library.** `import models`
+   after adding `ml/vendor/` to sys.path returns THIS project's `ml/models.py`
+   (already cached in sys.modules), surfacing as
+   `module 'models' has no attribute 'WorldModel'`. Fixed by loading the
+   vendored file by explicit path via importlib, registering it as `models` so
+   the vendor's internal imports resolve, then restoring ours.
+
+## W.5 Research brief: BLOCKED, not abandoned
+
+`/research-brief` was started on "best AI method for this project's autonomy
+stack". Stages 1-5 completed and the hypotheses were pre-registered BEFORE
+collection (the anti-confirmation-bias gate):
+
+- **H1** the binding constraint is DATA COVERAGE, not model class
+- **H2** the binding constraint is the REPRESENTATION (reconstruction is the
+  wrong objective)
+- **H3** OFFLINE RL on the reward already in the corpus beats cloning
+- **H4 (null)** classical CV + control is the right answer at this scale and
+  the learned stack is portfolio decoration
+
+Four parallel collection agents were dispatched, one per hypothesis, each
+instructed to hunt its own falsifier. **All four terminated on an API session
+limit** partway through collection, returning only mid-work notes rather than
+findings. No brief was written and none of those fragments are recorded here
+as evidence -- an agent's note that a source "is a direct hit" is not a
+finding. Re-run collection after the limit resets.
+
+**Relevant discovery made while answering a question, not by the agents:** the
+corpus already carries a dense reward (mean 1.393, ~849 distinct values, range
+0-1.9) that essentially measures how centred the car is -- the exact incentive
+Evan proposed on 2026-08-07. It has been present in every episode since P2 and
+is used by nothing except the DreamerV3 actor-critic, whose policy P4 trained
+and discarded. That is directly relevant to H3.
+
+**Also clarified for the record:** no component that has ever driven the car
+uses reinforcement learning. V is unsupervised, M is supervised next-latent
+prediction, C is behavioural cloning, the probe is supervised regression, and
+CEM is planning against a hand-written cost with no learning from outcomes.
+The single exception is P4's DreamerV3 run, which does train an actor-critic
+on imagined rollouts (`dreamer.py:125`) -- genuine model-based RL -- but its
+policy was never extracted or driven.
+
+## W.6 Open items
+
+1. **Research brief incomplete** (W.5). Blocked on API limits, not on anything
+   technical.
+2. **The M4 stop-sign showcase needs a decision** (W.2): raise input
+   resolution, add an auxiliary detection head, or change the showcase. This
+   is a PRD-level choice, not an implementation detail.
+3. Untested: whether recovery data actually fixes the wall (W.1). It is the
+   obvious next experiment and it is cheap in sim -- collect episodes started
+   deliberately off-centre and re-train.
+4. `w_smooth` still under-weighted for the CEM planner (Appendix V.3.3).
+5. **Nothing printed, nothing ordered** - unchanged since 2026-07-23. The
+   encoder-motor decision and the ~1:20 track re-spec remain the only things
+   blocking physical progress.

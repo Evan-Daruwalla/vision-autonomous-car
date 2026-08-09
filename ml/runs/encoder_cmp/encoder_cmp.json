@@ -1,0 +1,30 @@
+{
+  "args": {
+    "n_frames": 32,
+    "min_cone_px": 12,
+    "vae": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\vae\\vae_best.pt",
+    "dreamer": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\dreamer_p4\\S_b16_saved\\world_model.pt",
+    "out": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\encoder_cmp",
+    "device": "cuda"
+  },
+  "n_frames": 32,
+  "mean_cone_px": 28.09375,
+  "summary": {
+    "ConvVAE": {
+      "cone_err": 0.22000661492347717,
+      "bg_err": 0.04998558387160301,
+      "ratio": 4.4014013218011785,
+      "cone_px_in_recon": 0,
+      "cone_px_in_truth": 899,
+      "survival": 0.0
+    },
+    "DreamerV3": {
+      "cone_err": 0.19821153581142426,
+      "bg_err": 0.06401550024747849,
+      "ratio": 3.0963053486289303,
+      "cone_px_in_recon": 0,
+      "cone_px_in_truth": 899,
+      "survival": 0.0
+    }
+  }
+}

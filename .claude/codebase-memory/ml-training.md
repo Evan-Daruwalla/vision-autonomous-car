@@ -176,6 +176,83 @@ steps. Corner speed was tested and ruled out (lowering throttle made it worse).
 expert is the only policy that never touches the latent. Full table: record
 Appendix V.3.1.
 
+## THE WALL IS PERCEPTION GOING OUT OF DISTRIBUTION (measured 2026-08-07)
+
+Appendix V left "why does every learned policy die at 69-110 steps" open.
+`ml/trace_failure.py` separates the three stages that could be at fault --
+perception (does the probe still read lane position correctly?), dynamics
+(does the RNN's H-step prediction match what happens?), and control -- by
+logging all three per step against the actions actually taken.
+
+**Perception error is a function of POSITION, not of policy or elapsed time:**
+
+| \|actual cte\| | perception err, MLP policy | perception err, PID expert |
+|---|---|---|
+| 0.0 - 0.3 | 0.202 | 0.198 |
+| 0.3 - 0.6 | 0.267 | 0.315 |
+| 0.6 - 1.0 | 0.307 | 0.447 |
+| 1.0 - 1.5 | 0.625 | 0.665 |
+| 1.5 + | **2.104** | **1.734** |
+
+corr(|cte|, perception error) = **0.894** (MLP) and **0.852** (expert). Two
+completely different drivers, one learned and one hand-tuned, produce the same
+curve — so it is where the car IS, not what is steering.
+
+**Root cause: the corpus has no off-centre frames.** `collect_sim_data.py`
+rejects any episode with `mean|cte| > MAX_MEAN_ABS_CTE = 1.2`, and the expert
+averaged 0.36. The VAE and the probe were therefore never shown what far-off-
+centre looks like, and perception collapses in exactly the region a recovering
+policy must operate in. **The failure is unrecoverable by construction:** drift
+past ~1.0 and the policy can no longer see where it is, so it cannot steer back.
+
+**Consequences, and these carry to the real car:**
+
+- **This is a DATA problem, not a controller problem.** No amount of policy
+  architecture fixes it — confirmed by three policy classes failing identically
+  (Appendix V.3.1). The fix is recovery data: DAgger-style relabelling, or
+  deliberately starting episodes off-centre and recording the expert's
+  correction.
+- **M3/M4 must collect off-centre recovery demonstrations on the physical
+  car**, or the same wall appears on hardware. A corpus of only clean expert
+  driving teaches a policy that cannot recover from its own mistakes.
+- **A quality filter that rejects bad episodes also deletes the recovery
+  data.** `MAX_MEAN_ABS_CTE` was added to keep the corpus clean and it does —
+  at the cost of the only frames that teach recovery. Keep the filter for the
+  imitation set; collect a SEPARATE recovery set that is deliberately exempt.
+- The trace tool adds an encode plus an H-step imagination per control step,
+  which slows the loop enough to degrade even the expert (its last-25%
+  mean|cte| rose to 1.213 vs 0.367 in the uninstrumented eval). Within-run
+  correlations are unaffected; absolute survival numbers from a traced run
+  are not comparable to `eval_in_sim.py`.
+
+## BOTH encoders erase small objects (measured 2026-08-08)
+
+The ConvVAE drops orange traffic cones; the open question was whether
+DreamerV3's much larger RSSM keeps them. It does not. 32 held-out frames,
+28 cone px each (0.69% of frame), `ml/compare_encoders.py`:
+
+| model | cone err | bg err | ratio | cone px surviving |
+|---|---|---|---|---|
+| ConvVAE | 0.2200 | 0.0500 | 4.40x | **0 / 899** |
+| DreamerV3 | 0.1982 | 0.0640 | 3.10x | **0 / 899** |
+
+**Zero surviving cone pixels in either.** Road, lane lines and treeline are
+preserved. A bigger world model is NOT the mitigation — the options are higher
+input resolution, an auxiliary detection/segmentation head, or a reward the
+object actually moves. **This threatens the M4 stop-sign showcase**, which
+assumed the sign reaches the latent. Caveat: the DreamerV3 checkpoint had
+2,000 steps vs the VAE's 40 epochs and its worse background error is
+consistent with undertraining — but 0/899 is an absence, not a blur.
+
+**Method warning attached to this result.** The first version of that script
+reported only cone-error / background-error RATIO and auto-concluded
+"DreamerV3 preserves cones better, the showcase is not threatened". Wrong:
+the ratio improved because DreamerV3's BACKGROUND error is 28% worse, not
+because it kept the cone. **A derived ratio can improve for the wrong reason.**
+Prefer a metric that asks directly whether the thing is still there — here,
+re-running the colour detector on the reconstruction. Render the artifact and
+LOOK at it; the panel showed both erasures instantly.
+
 ## Rules carried forward to M4 (real-car logs)
 
 - **Measure, never estimate, VRAM.** The retracted "~24 GB for DreamerV3"

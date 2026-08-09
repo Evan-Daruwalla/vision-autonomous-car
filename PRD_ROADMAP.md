@@ -562,6 +562,29 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
     policy classes wall at 69-110 steps; only the expert, which never touches
     the latent, completes. Corner speed was tested and ruled out.
     **SIM-POC (P1-P5) is now COMPLETE.**
+    **P5 FOLLOW-UP, 2026-08-08 (record Appendix W) — the wall is DIAGNOSED and
+    it is a DATA problem, plus a new PRD-level risk:**
+    (a) **The 69-110 step wall is PERCEPTION going out of distribution.** The
+    probe's lane-position error is a function of POSITION, not policy or time:
+    ~0.20 while |cte| < 1.0, rising to ~2.1 past 1.5, with corr 0.894 (learned
+    policy) and 0.852 (PID expert) — the SAME curve under both drivers. Cause:
+    `collect_sim_data.py` rejects episodes with `mean|cte| > 1.2` and the
+    expert averaged 0.36, so the corpus has no off-centre frames and the
+    encoder has never seen the states a recovering policy needs. Drift past
+    ~1.0 and the car cannot see where it is. **No controller change fixes
+    this** — it explains why three policy classes failed identically.
+    **ACTION FOR M3: collect a SEPARATE off-centre recovery set, exempt from
+    the quality filter.** The filter that keeps the imitation corpus clean is
+    exactly what deletes the recovery data, and the same wall will appear on
+    the physical car without it.
+    (b) **RISK TO THE M4 STOP-SIGN SHOWCASE.** Both the ConvVAE and DreamerV3
+    erase small objects entirely — **0 of 899 cone pixels survive in either
+    reconstruction** (`ml/compare_encoders.py`). The showcase assumed the sign
+    reaches the latent; at 64x64 with a reconstruction-dominated objective, an
+    object at <1% of frame does not. A bigger world model is NOT the fix.
+    **DECISION NEEDED (not an implementation detail):** raise input
+    resolution, add an auxiliary detection/segmentation head, or change the
+    showcase task.
 
 ## 6b. EXECUTION PLAN (dated 2026-08-05, approved by Evan — schedules the tasks above; adds no new milestones)
 

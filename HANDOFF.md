@@ -34,6 +34,20 @@ lives in the record.
 > command would republish committed numbers as fresh measurements on any
 > clone without a GPU. All fixed, each verified by being made to fail.
 >
+> **2026-08-08 — the wall is diagnosed, and it changes what M3 must collect
+> (Appendix W).** The 69-110 step failure is **perception going out of
+> distribution**: probe error is a function of POSITION (corr 0.894 learned,
+> 0.852 expert — the same curve under both), because the collector rejects
+> episodes with `mean|cte| > 1.2` so the corpus has no off-centre frames.
+> **No controller change fixes it.** M3 needs a SEPARATE off-centre recovery
+> set exempt from the quality filter, or the same wall appears on hardware.
+>
+> **NEW RISK, needs Evan's decision:** both the ConvVAE *and* DreamerV3 erase
+> small objects — **0 of 899 cone pixels survive in either**. The M4
+> stop-sign showcase assumed the sign reaches the latent. A bigger world model
+> is not the fix; the options are higher input resolution, an auxiliary
+> detection head, or a different showcase task.
+>
 > Software is now five SIM-POC tasks ahead of hardware: **nothing has been
 > printed and nothing ordered since 2026-07-23**, and the two decisions below
 > still block all physical progress.

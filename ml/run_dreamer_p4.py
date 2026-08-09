@@ -320,6 +320,17 @@ def main() -> int:
         oom_at = step
         print(f"\nOOM at step {step}: {str(e).splitlines()[0]}")
 
+    # Save the world model so downstream work can USE it, not just cite its
+    # memory figure. P4 measured a boundary and threw the trained model away,
+    # which meant the encoder question in record Appendix V.2 (does the RSSM
+    # keep small objects the ConvVAE drops?) could not be asked without a
+    # 2000-step retrain. Weights are gitignored; only the json is versioned.
+    if not oom_at:
+        torch.save({"wm": agent._wm.state_dict(), "config": vars(config),
+                    "steps": args.steps},
+                   logdir / "world_model.pt")
+        print(f"saved world model -> {logdir / 'world_model.pt'}")
+
     result = dict(
         size=args.size,
         batch_size=config.batch_size,
