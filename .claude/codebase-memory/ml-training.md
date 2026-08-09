@@ -253,6 +253,60 @@ Prefer a metric that asks directly whether the thing is still there — here,
 re-running the colour detector on the reconstruction. Render the artifact and
 LOOK at it; the panel showed both erasures instantly.
 
+## Recovery data fixes off-centre perception with a FROZEN encoder (2026-08-08)
+
+The direct test of the W.1 diagnosis. `ml/collect_recovery.py` adds off-centre
+states by DART-style noise injection (burst of steering noise every 60 steps
+for 8 steps, then the PID drives home). 18 episodes, 5,961 frames,
+**mean|cte| 0.95 vs the original corpus's 0.36** — 6.7% of the augmented set.
+
+`ml/exp_recovery.py` trains two probes against the **same frozen ConvVAE**:
+
+| \|cte\| bucket | baseline | + recovery | change |
+|---|---|---|---|
+| 0.0 - 0.3 | 0.057 | 0.069 | +21% |
+| 1.0 - 1.5 | 0.268 | **0.159** | **-41%** |
+| 1.5 + | 0.591 | **0.214** | **-64%** |
+| off-centre (>=1.0) | 0.429 | **0.186** | **-57%** |
+
+**The latent already contained off-centre lane position; only the readout was
+starved.** No VAE retrain needed — the cheap branch. Tradeoff: centred buckets
+get ~20% worse as the probe spreads capacity over a wider range; overall error
+still improves (0.093 -> 0.086).
+
+**This narrows the case against the ConvVAE.** The encoder was never the
+problem for LANE POSITION. It is still the problem for small OBJECTS (0/899
+cone pixels, above) — do not conflate the two failures.
+
+**Use DART, not DAgger, for the real car.** DAgger needs an expert relabelling
+states the learner visits, i.e. a human riding along with a controller every
+run. Noise injection needs only the scripted expert, so the same procedure
+transfers to hardware. That is why M3's recovery set is collectable at all.
+
+**Still untested:** whether this makes the car drive further. The probe result
+proves perception is cheaply fixable, not that the wall is beaten.
+
+## Steering smoothness: real knob, wrong target (2026-08-08)
+
+The CEM planner oscillates at **20.90 reversals/100 vs the expert's 9.84**
+(2.13x); the BC controllers do NOT (8.50 linear, 9.28 MLP). Sweeping
+`--w-smooth` (1 seed x 2 episodes, so directional only):
+
+| `w_smooth` | rev/100 | mean\|cte\| | steps |
+|---|---|---|---|
+| 0.05 | 21.4 | 0.346 | 82 |
+| 0.5 | 9.8 | 0.675 | 86 |
+| 1.0 | 6.4 | 1.049 | 97 |
+
+- Jitter falls monotonically, 3.3x. `w_smooth = 0.5` matches expert smoothness.
+- **Survival does NOT improve** (flat/noisy) — so jitter was never what killed
+  the car. Independent corroboration that the wall is perception.
+- Lane-holding is the cost: mean|cte| triples. At 0.05 the planner tracks the
+  lane BETTER than the expert (0.346 vs 0.367) — precise but jittery.
+- **Penalise the RATE of steering change, never the ANGLE.** A corner needs a
+  large sustained angle, so an angle penalty causes understeer; on straights it
+  is redundant because the cte term already charges for off-line steering.
+
 ## Rules carried forward to M4 (real-car logs)
 
 - **Measure, never estimate, VRAM.** The retracted "~24 GB for DreamerV3"

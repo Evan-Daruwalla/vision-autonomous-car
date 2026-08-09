@@ -1,0 +1,87 @@
+{
+  "args": {
+    "proc": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\data\\proc_aug",
+    "vae": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\vae\\vae_best.pt",
+    "out": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\exp_recovery",
+    "val_frac": 0.2,
+    "seed": 0,
+    "device": "cuda"
+  },
+  "n_recovery_episodes": 20,
+  "results": {
+    "baseline": {
+      "overall": 0.09328790754079819,
+      "buckets": [
+        {
+          "lo": 0.0,
+          "hi": 0.3,
+          "n": 11546,
+          "err": 0.05717945471405983
+        },
+        {
+          "lo": 0.3,
+          "hi": 0.6,
+          "n": 5906,
+          "err": 0.07070552557706833
+        },
+        {
+          "lo": 0.6,
+          "hi": 1.0,
+          "n": 1474,
+          "err": 0.13133643567562103
+        },
+        {
+          "lo": 1.0,
+          "hi": 1.5,
+          "n": 478,
+          "err": 0.2677421271800995
+        },
+        {
+          "lo": 1.5,
+          "hi": 99.0,
+          "n": 825,
+          "err": 0.591235876083374
+        }
+      ]
+    },
+    "augmented": {
+      "overall": 0.0860026627779007,
+      "buckets": [
+        {
+          "lo": 0.0,
+          "hi": 0.3,
+          "n": 11546,
+          "err": 0.06898611783981323
+        },
+        {
+          "lo": 0.3,
+          "hi": 0.6,
+          "n": 5906,
+          "err": 0.08517347276210785
+        },
+        {
+          "lo": 0.6,
+          "hi": 1.0,
+          "n": 1474,
+          "err": 0.1276087611913681
+        },
+        {
+          "lo": 1.0,
+          "hi": 1.5,
+          "n": 478,
+          "err": 0.15865185856819153
+        },
+        {
+          "lo": 1.5,
+          "hi": 99.0,
+          "n": 825,
+          "err": 0.21365894377231598
+        }
+      ]
+    },
+    "off_centre_mean": {
+      "baseline": 0.42948900163173676,
+      "augmented": 0.18615540117025375
+    }
+  }
+}

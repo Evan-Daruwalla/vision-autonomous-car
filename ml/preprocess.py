@@ -61,8 +61,19 @@ def resize_batch(img: np.ndarray, device: str) -> np.ndarray:
     return t.permute(0, 2, 3, 1).cpu().numpy()
 
 
-def process_split(split: str, out: Path, device: str, chunk: int = 256) -> None:
+def process_split(split: str, out: Path, device: str, chunk: int = 256,
+                  extra_src: Path | None = None) -> None:
     files = sorted((SRC / split).glob("*.npz"))
+    # `extra_src` appends a second corpus to the TRAIN split only -- used to
+    # fold in off-centre recovery episodes (ml/collect_recovery.py) without
+    # touching ml/data/sim, so every P2-P5 result stays reproducible from the
+    # original corpus. Appended AFTER the sorted originals so the first N
+    # episode indices keep their meaning and the seed-0 split of the original
+    # episodes is unchanged.
+    if extra_src is not None and split == "train":
+        extra = sorted(Path(extra_src).glob("*.npz"))
+        print(f"  + {len(extra)} recovery episodes from {extra_src}")
+        files = files + extra
     if not files:
         raise SystemExit(f"no episodes under {SRC / split}")
 
@@ -136,11 +147,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(OUT))
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--extra-src", default=None,
+                    help="append a second episode dir to the TRAIN split "
+                         "(e.g. ml/data/sim_recovery/train). Use with a "
+                         "different --out so the original proc arrays survive")
     args = ap.parse_args()
 
     print(f"resizing to {SIZE}x{SIZE} on {args.device}\n")
+    extra = Path(args.extra_src) if args.extra_src else None
     for split in ("train", "holdout"):
-        process_split(split, Path(args.out), args.device)
+        process_split(split, Path(args.out), args.device, extra_src=extra)
         print()
 
 

@@ -58,6 +58,7 @@ the dated entry, not the digest.
 - [U — SIM-POC P4 CLOSED: the model trains; the memory boundary holds over a long run](#appendix-u---sim-poc-p4-closed-the-model-trains-the-memory-boundary-holds-over-a-long-run-2026-08-06-1336-cdt) (08-06)
 - [V — Cold audit fixed; knowledge graph built; SIM-POC P5 CLOSED as an instrumented negative result](#appendix-v---cold-audit-fixed-4-gates-that-could-not-fail-knowledge-graph-built-sim-poc-p5-closed-as-an-instrumented-negative-result-2026-08-07-0555-cdt) (08-07)
 - [W — The wall diagnosed (perception goes OOD); both encoders erase small objects, threatening the M4 stop-sign showcase](#appendix-w---the-wall-diagnosed-perception-goes-ood-both-encoders-erase-small-objects-so-the-m4-stop-sign-showcase-is-threatened-2026-08-08-2252-cdt) (08-08)
+- [X — Recovery data fixes off-centre perception 57% with a frozen encoder; steering smoothness works but does not fix the wall](#appendix-x---recovery-data-fixes-off-centre-perception-by-57-with-a-frozen-encoder-the-steering-smoothness-knob-works-but-does-not-fix-the-wall-2026-08-08-2311-cdt) (08-08)
 
 ---
 
@@ -2545,3 +2546,139 @@ policy was never extracted or driven.
 5. **Nothing printed, nothing ordered** - unchanged since 2026-07-23. The
    encoder-motor decision and the ~1:20 track re-spec remain the only things
    blocking physical progress.
+
+
+---
+
+# Appendix X - Recovery data fixes off-centre perception by 57% with a FROZEN encoder; the steering-smoothness knob works but does not fix the wall (2026-08-08, ~23:11 CDT)
+
+**CADENCE NOTE:** hook fired at #66 before this entry. Third consecutive slip.
+
+**WHAT:** two experiments, both prompted by Evan. (1) The recovery-data test
+that Appendix W.6 listed as the obvious next experiment. (2) A steering-
+smoothness sweep, after Evan observed the car overcompensating a second time.
+New: `ml/collect_recovery.py`, `ml/exp_recovery.py`, `--extra-src` on
+`ml/preprocess.py`. Artifacts in `ml/runs/exp_recovery/`.
+
+## X.1 Recovery data: the cheap branch wins
+
+W.1 diagnosed the wall as perception going out of distribution, because the
+collector rejects `mean|cte| > 1.2` and the expert averaged 0.36, so no
+off-centre frames exist. `collect_recovery.py` supplies them by DART-style
+noise injection (Laskey et al.): drive the expert, inject a burst of steering
+noise every 60 steps for 8 steps, then hand back control and let the PID drive
+home. The frames in between are the missing states.
+
+**DART was chosen over DAgger deliberately.** DAgger needs an expert to
+relabel states the learner visits, which on a physical car means a human with
+a controller riding along every run. Noise injection needs only the scripted
+expert, so the identical procedure works on the real car — which is the point,
+since this experiment exists to de-risk M3's data plan.
+
+Collected: **18 episodes, 5,961 frames, mean|cte| 0.95** against the original
+corpus's 0.36; ~6.7% of the augmented corpus. Two episodes were rejected for
+never recovering (the loose 2.5 cap, deliberately NOT the 1.2 filter that
+caused the problem).
+
+**THE DECOMPOSITION, which is why the experiment was built this way.**
+"Perception failed" is two claims with very different price tags:
+(a) the LATENT does not contain off-centre lane position — expensive, needs a
+VAE retrain or a new representation; (b) the READOUT was never trained to
+decode it — cheap. `exp_recovery.py` separates them by training two probes
+against the **same frozen ConvVAE** and evaluating on the same held-out
+episodes drawn from both corpora.
+
+| \|cte\| bucket | n | baseline probe | augmented probe | change |
+|---|---|---|---|---|
+| 0.0 - 0.3 | 11,546 | 0.057 | 0.069 | +21% |
+| 0.3 - 0.6 | 5,906 | 0.071 | 0.085 | +20% |
+| 0.6 - 1.0 | 1,474 | 0.131 | 0.128 | -3% |
+| **1.0 - 1.5** | 478 | 0.268 | **0.159** | **-41%** |
+| **1.5 +** | 825 | 0.591 | **0.214** | **-64%** |
+| overall | 20,229 | 0.093 | 0.086 | -8% |
+
+**Off-centre (|cte| >= 1.0): 0.429 -> 0.186, a 57% reduction, with the encoder
+frozen.** Hypothesis (b) wins. The ConvVAE's latent carried off-centre lane
+position all along; the probe had simply never been shown it.
+
+**This corrects the emphasis of Appendix W.1.** W.1's diagnosis (coverage, not
+controller) holds and is confirmed. But its framing invited the reading that
+the *representation* was inadequate — and V/W together had been building a
+case against the ConvVAE. That case is now weaker: the encoder was never the
+problem for lane position. It remains true that the encoder erases small
+OBJECTS (W.2, 0/899 cone pixels) — those are different failures and should not
+be conflated.
+
+**Tradeoff, stated:** the centred buckets got ~20% WORSE. The probe now spends
+capacity across a wider range instead of overfitting a narrow one. Overall
+error still improved, and the trade is obviously right — 0.012 worse where the
+car was already fine, 0.38 better where it was dying — but it is a real cost
+and a reason to keep an eye on centred-lane precision.
+
+**NOT YET ESTABLISHED, and this matters:** this measures the PROBE, not the
+car. It proves perception is cheaply fixable; it does not prove the car drives
+further. A controller retrained on the augmented corpus and re-evaluated in
+sim is the outstanding test, and no claim about the wall being beaten should
+be made until it runs.
+
+## X.2 Steering smoothness: the knob works, and it does not fix anything
+
+Evan, 2026-08-08: "the car likes to overcompensate on turns and straights,
+would it be advantageous to punish the bot for excessive steering angle?"
+
+**He was right this time, and a previous entry argued the opposite for a
+different policy.** Appendix V.3.2 measured the LINEAR BC controller and found
+it does NOT oscillate (8.50 reversals/100 vs the expert's 9.84). But the CEM
+planner does: **20.90, or 2.13x the expert.** Same symptom, different policy,
+opposite diagnosis. V.3.3 had already flagged `w_smooth` as under-weighted and
+left it as an open item; Evan spotted it before it was acted on.
+
+**The correction to his framing is narrow but real: penalise the RATE of
+steering change, not the ANGLE.** A corner needs a large *sustained* angle, so
+an angle penalty causes understeer and running wide. On straights an angle
+penalty is redundant anyway — the centring term already charges for any
+steering that moves the car off-line. The cost function already had the rate
+term; only its weight was wrong.
+
+Sweep (1 seed, 2 episodes per setting, 600-step cap):
+
+| `w_smooth` | rev/100 | mean\|cte\| | steps |
+|---|---|---|---|
+| 0.05 (as shipped) | 21.4 | **0.346** | 82 |
+| 0.2 | 12.2 | 0.524 | 74 |
+| 0.5 | **9.8** | 0.675 | 86 |
+| 1.0 | 6.4 | 1.049 | 97 |
+| *expert* | *9.84* | *0.367* | *600* |
+
+**A PREDICTION WAS FALSIFIED, and the way it failed is the finding.** The
+prediction (logged before running) was that jitter would fall monotonically
+while survival peaked and then declined, because damping the planner also
+damps the recovery corrections it needs. Jitter did fall monotonically, 3.3x.
+**Survival did not decline — it is flat-to-noisy (74-97, overlapping).**
+Smoothing the steering does not make the car drive meaningfully further, so
+**the jitter was never what was killing it.** That independently corroborates
+W.1: the wall is perception, not steering behaviour.
+
+The real cost is lane-holding: mean|cte| triples, 0.346 -> 1.049. Note that at
+`w_smooth = 0.05` the planner holds the lane BETTER than the expert (0.346 vs
+0.367) — it is precise and jittery, and smoothing trades the precision away.
+
+**Recommendation:** `w_smooth = 0.5` for expert-matched smoothness (9.8 vs
+9.84) at roughly 2x lane error, but only if smoothness is wanted for its own
+sake. It does not improve survival.
+
+**UNDERPOWERED, and labelled as such.** One seed, two episodes per setting.
+`testing.md` requires >=3 seeds for a comparative claim. The jitter and
+lane-error trends are large and monotonic enough to trust directionally; the
+survival column is NOT distinguishable at n=2 and no conclusion rests on it
+beyond "no large effect".
+
+## X.3 Open items
+
+1. **The closed-loop test of X.1** — retrain the controller (and probe) on the
+   augmented corpus, re-run `eval_in_sim.py`, 3 seeds. This is the experiment
+   that decides whether recovery data beats the wall. Everything needed exists.
+2. Research brief still BLOCKED on API session limits (Appendix W.5).
+   Hypotheses remain pre-registered; collection has not been re-run.
+3. M4 stop-sign showcase decision still open (W.2).
+4. **Nothing printed, nothing ordered** — unchanged since 2026-07-23.
