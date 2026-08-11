@@ -582,9 +582,39 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
     reconstruction** (`ml/compare_encoders.py`). The showcase assumed the sign
     reaches the latent; at 64x64 with a reconstruction-dominated objective, an
     object at <1% of frame does not. A bigger world model is NOT the fix.
-    **DECISION NEEDED (not an implementation detail):** raise input
+    ~~**DECISION NEEDED (not an implementation detail):** raise input
     resolution, add an auxiliary detection/segmentation head, or change the
-    showcase task.
+    showcase task.~~ **RESOLVED 2026-08-10 18:44 CDT by Evan: auxiliary
+    detection head + an oversized (non-scale) printed sign.** Rationale and
+    the three measurements behind it are in record Appendix Y. In short:
+
+      - **Raising resolution was rejected on an argument, not a measurement.**
+        Reconstruction loss is a MEAN over pixels, so an object's share of the
+        gradient is scale-invariant — 28/4096 at 64x64 is 112/16384 at 128x128,
+        the same 0.68%. Higher resolution buys detection RANGE (a 2px distant
+        sign becomes 8-12px and is at least representable); it does not make
+        the objective care. It also costs the P3/P4 shared-tensor
+        comparability and runs into the batch-size wall measured in P4.
+      - **Oversized sign is the cheap half and attacks the real quantity.**
+        Pixel SHARE is what governs whether the objective cares, and printing
+        a larger sign raises it directly, for free. Deliberately off-scale;
+        that is a documented modelling choice, not an oversight.
+      - **NEW HARD REQUIREMENT — the sign must be RELOCATABLE / REMOVABLE.**
+        This falls out of a measurement, not a preference. On a fixed track a
+        sign at a fixed place is perfectly predicted by "where am I", and the
+        latent already encodes track position (cte probe R^2 0.957). A policy
+        could then pass the whole showcase by stopping at a LOCATION while
+        being blind to the sign, and an auxiliary head could drive its loss to
+        zero the same way. `ml/probe_cone.py` measured exactly this failure on
+        the sim's cones: AUC 0.997 that collapsed to nothing under ablation.
+        A sign that moves between runs is what makes the demonstration mean
+        anything. Cost: none — a printed sign placed on the track.
+
+    **STILL OPEN (tracked, not decided):** whether the aux head is sufficient.
+    `ml/exp_aux_head.py` tests it against a position-decorrelated synthetic
+    object; if a z=32 bottleneck cannot retain a <1%-of-frame object even
+    under direct supervision, the escalation is a larger z or a detection path
+    that bypasses the latent, and this item reopens.
 
 ## 6b. EXECUTION PLAN (dated 2026-08-05, approved by Evan — schedules the tasks above; adds no new milestones)
 

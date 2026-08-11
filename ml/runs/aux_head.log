@@ -1,0 +1,64 @@
+D:\ClaudeCode\Autonomous Car Project\ml\exp_aux_head.py:137: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\autograd\generated\python_variable_methods.cpp:823.)
+  run_aux += float(a)
+dropping frames that contain REAL cones (they would leak track position into the label) ...
+  dropped 9,220 of 91,678 frames (10.1%)
+injected object: 4-7px square, RGB (235, 96, 40), present in 50% of frames, uniform position
+fit 69,729 frames, val 12,729 frames
+
+training [plain] (VAE loss only) ...
+  [plain] epoch   5/40  fit rec  103.15  aux 0.0000  val rec   99.68  (17s)
+  [plain] epoch  10/40  fit rec   86.61  aux 0.0000  val rec   84.57  (17s)
+  [plain] epoch  15/40  fit rec   76.33  aux 0.0000  val rec   75.59  (17s)
+  [plain] epoch  20/40  fit rec   70.30  aux 0.0000  val rec   69.90  (17s)
+  [plain] epoch  25/40  fit rec   66.57  aux 0.0000  val rec   66.67  (17s)
+  [plain] epoch  30/40  fit rec   64.09  aux 0.0000  val rec   64.33  (17s)
+  [plain] epoch  35/40  fit rec   62.18  aux 0.0000  val rec   62.42  (17s)
+  [plain] epoch  40/40  fit rec   60.64  aux 0.0000  val rec   60.88  (7s)
+  [plain] val rec 60.88  object survival 0.0%  AUC 0.673  ablation 97%
+
+training [aux10] (VAE loss + 10.0*aux) ...
+  [aux10] epoch   5/40  fit rec  102.09  aux 0.9424  val rec   98.90  (7s)
+  [aux10] epoch  10/40  fit rec   84.97  aux 0.8403  val rec   82.90  (7s)
+  [aux10] epoch  15/40  fit rec   75.02  aux 0.8011  val rec   74.51  (6s)
+  [aux10] epoch  20/40  fit rec   69.42  aux 0.7806  val rec   69.57  (6s)
+  [aux10] epoch  25/40  fit rec   65.89  aux 0.7668  val rec   66.01  (6s)
+  [aux10] epoch  30/40  fit rec   63.49  aux 0.7555  val rec   63.91  (7s)
+  [aux10] epoch  35/40  fit rec   61.80  aux 0.7281  val rec   62.51  (8s)
+  [aux10] epoch  40/40  fit rec   60.32  aux 0.5683  val rec   60.41  (8s)
+  [aux10] val rec 60.41  object survival 0.0%  AUC 0.985  ablation 100%
+
+training [aux100] (VAE loss + 100.0*aux) ...
+  [aux100] epoch   5/40  fit rec  103.30  aux 0.7836  val rec  100.07  (8s)
+  [aux100] epoch  10/40  fit rec   87.80  aux 0.3195  val rec   85.42  (7s)
+  [aux100] epoch  15/40  fit rec   77.72  aux 0.1784  val rec   76.97  (8s)
+  [aux100] epoch  20/40  fit rec   71.61  aux 0.1237  val rec   71.35  (8s)
+  [aux100] epoch  25/40  fit rec   67.31  aux 0.0944  val rec   67.51  (8s)
+  [aux100] epoch  30/40  fit rec   64.18  aux 0.0743  val rec   64.75  (8s)
+  [aux100] epoch  35/40  fit rec   61.97  aux 0.0594  val rec   62.18  (7s)
+  [aux100] epoch  40/40  fit rec   60.16  aux 0.0481  val rec   60.48  (7s)
+  [aux100] val rec 60.48  object survival 35.4%  AUC 1.000  ablation 100%
+
+training [aux1000] (VAE loss + 1000.0*aux) ...
+  [aux1000] epoch   5/40  fit rec  120.74  aux 0.1185  val rec  115.06  (7s)
+  [aux1000] epoch  10/40  fit rec   99.22  aux 0.0587  val rec   96.19  (7s)
+  [aux1000] epoch  15/40  fit rec   88.90  aux 0.0363  val rec   86.77  (8s)
+  [aux1000] epoch  20/40  fit rec   81.31  aux 0.0240  val rec   79.74  (6s)
+  [aux1000] epoch  25/40  fit rec   75.52  aux 0.0169  val rec   75.60  (7s)
+  [aux1000] epoch  30/40  fit rec   71.25  aux 0.0126  val rec   71.02  (7s)
+  [aux1000] epoch  35/40  fit rec   67.90  aux 0.0098  val rec   68.02  (6s)
+  [aux1000] epoch  40/40  fit rec   65.23  aux 0.0077  val rec   65.04  (6s)
+  [aux1000] val rec 65.04  object survival 79.4%  AUC 1.000  ablation 100%
+
+
+                                 plain       aux10      aux100     aux1000
+val rec loss                     60.88       60.41       60.48       65.04
+object survival                  0.0%       0.0%      35.4%      79.4%
+pixel survival                   0.0%       0.0%      14.6%      34.6%
+probe AUC                        0.673       0.985       1.000       1.000
+ablation gap recovered             97%        100%        100%        100%
+
+best aux arm: aux100
+
+VERDICT: AUX HEAD WORKS. With the aux loss the latent carries the object (AUC 1.000, ablation 100%) and without it it does not (AUC 0.673, ablation 97%). Cost: val rec 60.88 -> 60.48. The M4 mitigation is a VAE retrain with this head, and it is validated in sim.
+-> D:\ClaudeCode\Autonomous Car Project\ml\runs\exp_aux_head\exp_aux_head.json

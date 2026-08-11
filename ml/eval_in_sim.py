@@ -107,8 +107,37 @@ class LatentPolicy:
         return action.astype(np.float32)
 
 
-def run_episode(env, driver, max_steps: int, is_expert: bool) -> dict:
-    """One episode. Returns steps survived and mean |cte|."""
+def run_episode(env, driver, max_steps: int, is_expert: bool,
+                min_step_s: float = 0.0) -> dict:
+    """One episode. Returns steps survived and mean |cte|.
+
+    **The reproducibility problem this was built for is real.** Measured
+    2026-08-10: the same MLP checkpoint, through this same script, scored 69.3
+    steps at a 13.2 Hz loop and 187.2 at 16.7 Hz -- a 2.7x swing driven by how
+    fast the machine ran inference that day. The PID expert, which does no
+    neural forward pass, sat at the sim's own 18.87 Hz in both runs and
+    returned 600/600 identically. So step counts are only comparable between
+    runs whose achieved `control_hz` is close.
+
+    **`min_step_s` DOES NOT FIX IT, and must not be used to equalise two arms.**
+    Sleeping out the remainder of an iteration is NOT the same manipulation as
+    "the same loop, slower". The loop normally runs flat out and stays in
+    lockstep with the sim's frame production, because `observe()` blocks for
+    the next frame. Adding any sleep breaks that lockstep: the sim produces a
+    frame while the loop idles, the next `observe()` returns an already-stale
+    one, and the two clocks beat against each other.
+
+    Measured, and it is a cliff rather than a slope: the expert throttled to
+    **18.5 Hz -- a 2% reduction from its natural 18.87 -- collapses from 9/9
+    survived to 0/2, with mean|cte| 0.361 -> 0.988.** Smooth control-rate
+    sensitivity does not do that. Numbers taken under a throttle describe the
+    desynchronised regime, not a slower controller.
+
+    Kept because it MEASURES the artifact and guards against assuming the
+    harness is rate-robust. To compare two policies fairly, run them
+    back-to-back unthrottled on an idle machine and check the reported
+    `control_hz` agrees between them.
+    """
     obs, _ = env.reset()
     driver.reset()
     info = {}
@@ -122,7 +151,9 @@ def run_episode(env, driver, max_steps: int, is_expert: bool) -> dict:
 
     ctes, steers, steps = [], [], 0
     cte = float(info.get("cte", 0.0)) if info else 0.0
+    t_start = time.time()
     for _ in range(max_steps):
+        t_iter = time.time()
         action = driver.act(cte) if is_expert else driver.act(obs)
         obs, _, term, trunc, info = env.step(action)
         cte = float(info.get("cte", 0.0))
@@ -131,6 +162,11 @@ def run_episode(env, driver, max_steps: int, is_expert: bool) -> dict:
         steps += 1
         if term or trunc:
             break
+        if min_step_s > 0.0:
+            slack = min_step_s - (time.time() - t_iter)
+            if slack > 0:
+                time.sleep(slack)
+    elapsed = time.time() - t_start
     # Steering smoothness, so "it swerves" is a measured number rather than an
     # impression. reversals = sign changes per 100 steps (oscillation);
     # mean_abs_dsteer = average step-to-step steering change (control effort).
@@ -140,6 +176,9 @@ def run_episode(env, driver, max_steps: int, is_expert: bool) -> dict:
             "mean_abs_cte": float(np.mean(ctes)) if ctes else float("nan"),
             "reversals_per_100": round(100.0 * reversals / max(1, len(s)), 2),
             "mean_abs_dsteer": float(np.abs(np.diff(s)).mean()) if len(s) > 1 else 0.0,
+            # Always reported, never optional: a step count is uninterpretable
+            # without the rate it was produced at (see the docstring).
+            "control_hz": round(steps / elapsed, 2) if elapsed > 0 else 0.0,
             "survived": steps >= max_steps}
 
 
@@ -153,6 +192,13 @@ def main() -> int:
     ap.add_argument("--vae", default=str(RUNS / "vae" / "vae_best.pt"))
     ap.add_argument("--rnn", default=str(RUNS / "mdnrnn" / "mdnrnn_best.pt"))
     ap.add_argument("--ctrl-dir", default=str(RUNS / "controller"))
+    ap.add_argument("--control-hz", type=float, default=0.0,
+                    help="DIAGNOSTIC ONLY. Throttle the control loop to this "
+                         "rate by sleeping. Do NOT use it to equalise two arms "
+                         "of a comparison: sleeping desynchronises the loop "
+                         "from the sim's frame production and is a cliff, not "
+                         "a slope (the expert dies at a 2%% throttle). See "
+                         "run_episode's docstring. 0 = normal.")
     ap.add_argument("--archs", nargs="+", default=["linear", "mlp"],
                     choices=("linear", "mlp"),
                     help="controller architectures to evaluate alongside the "
@@ -165,6 +211,16 @@ def main() -> int:
 
     if args.smoke:
         args.seeds, args.episodes, args.max_steps = [0], 1, 200
+
+    min_step_s = 1.0 / args.control_hz if args.control_hz > 0 else 0.0
+    if min_step_s:
+        print(f"WARNING: --control-hz {args.control_hz:g} throttles by SLEEPING, "
+              f"which desynchronises the loop from the sim's frame production. "
+              f"These numbers describe that regime, NOT a slower controller, "
+              f"and are not comparable to unthrottled runs.")
+    print("NOTE: step counts are only comparable between runs whose achieved "
+          "control_hz agrees (a 2.7x swing across 13.2 vs 16.7 Hz was measured "
+          "2026-08-10). Check the ctrl Hz column before comparing anything.")
 
     if len(args.seeds) < 3 and not args.smoke:
         print(f"WARNING: {len(args.seeds)} seed(s). P5 is a COMPARATIVE claim "
@@ -212,7 +268,8 @@ def main() -> int:
             for name, driver, is_expert in drivers:
                 for ep in range(args.episodes):
                     t0 = time.time()
-                    r = run_episode(env, driver, args.max_steps, is_expert)
+                    r = run_episode(env, driver, args.max_steps, is_expert,
+                                    min_step_s=min_step_s)
                     r.update(seed=seed, episode=ep,
                              seconds=round(time.time() - t0, 1))
                     results[name].append(r)
@@ -226,23 +283,25 @@ def main() -> int:
         except Exception:
             pass
 
-    print(f"\n{'driver':<12} {'episodes':>9} {'steps (mean+-sd)':>20} "
-          f"{'mean|cte|':>12} {'survived':>10}")
+    print(f"\n{'driver':<18} {'eps':>4} {'steps (mean+-sd)':>19} "
+          f"{'mean|cte|':>10} {'rev/100':>9} {'ctrl Hz':>8} {'survived':>8}")
     summary = {}
     for name, rows in results.items():
         steps = np.array([r["steps"] for r in rows], float)
         ctes = np.array([r["mean_abs_cte"] for r in rows], float)
         surv = sum(r["survived"] for r in rows)
         rev = np.array([r["reversals_per_100"] for r in rows], float)
+        hz = np.array([r.get("control_hz", 0.0) for r in rows], float)
         summary[name] = {"episodes": len(rows), "steps_mean": float(steps.mean()),
                          "steps_sd": float(steps.std()),
                          "cte_mean": float(np.nanmean(ctes)),
                          "reversals_per_100": float(rev.mean()),
+                         "control_hz": float(hz.mean()),
                          "survived": int(surv)}
         print(f"{name:<18} {len(rows):>4} "
               f"{steps.mean():>12.1f} +-{steps.std():<5.1f} "
               f"{np.nanmean(ctes):>10.3f} {rev.mean():>9.2f} "
-              f"{surv:>7}/{len(rows)}")
+              f"{hz.mean():>8.2f} {surv:>7}/{len(rows)}")
 
     payload = {"args": vars(args), "per_episode": results, "summary": summary,
                "no_transfer_claim": (

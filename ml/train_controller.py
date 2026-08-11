@@ -116,18 +116,31 @@ def rnn_states(rnn: MDNRNN, mu: np.ndarray, act: np.ndarray,
     return np.concatenate(idx_all), np.concatenate(h_all)
 
 
-def evaluate(model, z, h, a, device, batch=4096):
+def evaluate(model, z, h, a, device, batch=4096, w=None):
+    """Mean per-frame MSE. `w` gives a weighted mean over the same frames.
+
+    Both are reported: the WEIGHTED one is what checkpoint selection uses when
+    `--recovery-weight` is set, because selecting on the unweighted metric
+    would quietly pull the chosen epoch back toward the centred-frame optimum
+    the weighting exists to escape. The UNWEIGHTED one is the only number
+    comparable across different weights.
+    """
     model.eval()
-    tot, n = 0.0, 0
+    tot, n = 0.0, 0.0
     with torch.no_grad():
         for s in range(0, len(z), batch):
             e = min(s + batch, len(z))
             zb = torch.from_numpy(z[s:e]).to(device)
             hb = torch.from_numpy(h[s:e]).to(device)
             ab = torch.from_numpy(a[s:e]).to(device)
-            pred = model(zb, hb)
-            tot += float(((pred - ab) ** 2).mean(dim=-1).sum())
-            n += e - s
+            err = ((model(zb, hb) - ab) ** 2).mean(dim=-1)
+            if w is None:
+                tot += float(err.sum())
+                n += e - s
+            else:
+                wb = torch.from_numpy(w[s:e]).to(device)
+                tot += float((err * wb).sum())
+                n += float(wb.sum())
     model.train()
     return tot / n
 
@@ -141,6 +154,15 @@ def main() -> int:
     ap.add_argument("--vae", default=str(RUNS / "vae" / "vae_best.pt"))
     ap.add_argument("--rnn", default=str(RUNS / "mdnrnn" / "mdnrnn_best.pt"))
     ap.add_argument("--arch", choices=("linear", "mlp"), default="linear")
+    ap.add_argument("--proc", default=str(PROC),
+                    help="processed corpus to train on. Point at "
+                         "ml/data/proc_aug to include the off-centre recovery "
+                         "episodes; V and M stay frozen on the original.")
+    ap.add_argument("--recovery-weight", type=float, default=1.0,
+                    help="loss weight on frames from '-rec' (off-centre "
+                         "recovery) episodes. 1.0 = unweighted, the Appendix "
+                         "Z.3 arm that did NOT improve driving. Requires a "
+                         "--proc containing recovery episodes")
     ap.add_argument("--out", default=str(RUNS / "controller"))
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     args = ap.parse_args()
@@ -160,8 +182,38 @@ def main() -> int:
     rnn.load_state_dict(torch.load(args.rnn, map_location=args.device)["model"])
     vae.eval(); rnn.eval()
 
-    _, act, eps, tracks = load_proc("train")
-    mu = np.load(PROC / "train_mu.npy")
+    proc = Path(args.proc)
+    _, act, eps, tracks = load_proc("train", proc=proc)
+
+    # **Expert labels, not executed actions, when the corpus has recovery
+    # episodes.** collect_recovery.py records the action actually executed
+    # (including injected noise) to keep the data contract; cloning that
+    # teaches the car to swerve. build_expert_labels.py writes what the expert
+    # would have done at each visited state -- the DART target.
+    expert_path = proc / "train_actions_expert.npy"
+    if expert_path.exists():
+        act = np.load(expert_path)
+        print(f"labels: {expert_path.name} (expert actions)")
+
+    mu_path = proc / "train_mu.npy"
+    if mu_path.exists():
+        mu = np.load(mu_path)
+    else:
+        # An alternate corpus has no cached latents. Encode with the SAME
+        # frozen VAE loaded above rather than writing a cache here: the cache
+        # carries an encoder fingerprint (cold audit finding 5) and only
+        # train_mdnrnn.py is set up to stamp one.
+        print(f"no latent cache at {mu_path.name} - encoding with the frozen VAE...")
+        imgs, _, _, _ = load_proc("train", proc=proc)
+        mu = np.zeros((len(imgs), Z_DIM), np.float32)
+        with torch.no_grad():
+            for s in range(0, len(imgs), 512):
+                e = min(s + 512, len(imgs))
+                x = torch.from_numpy(np.array(imgs[s:e])).to(args.device)
+                mu[s:e] = vae.encode(
+                    x.permute(0, 3, 1, 2).float().div_(255.0))[0].cpu().numpy()
+        del imgs
+    assert len(mu) == len(act), f"{len(mu)} latents vs {len(act)} actions"
 
     # Same rule as rollout_eval.py: the SPLIT seed comes from the checkpoint,
     # never from --seed. --seed varies this controller's init and batch order
@@ -180,6 +232,33 @@ def main() -> int:
     fit_z, fit_a = mu[fit_i], act[fit_i]
     val_z, val_a = mu[val_i], act[val_i]
 
+    # **Recovery-frame sample weight.** Appendix Z.3: adding 6.67% off-centre
+    # recovery data left the controller's val MSE essentially unchanged
+    # (0.001754 -> 0.001788) and did not make the car drive further, because
+    # the objective is a mean over frames and 93% of them are centred -- the
+    # minimiser is nearly the same policy. Weighting recovery frames by W
+    # moves their share of the gradient from 6.67% to 6.67W/(93.33+6.67W).
+    # Directly analogous to the aux-head weight sweep in Z.1, where weight 10
+    # (~4% of loss) bought nothing and 100 saturated.
+    is_rec_ep = np.array([t.endswith("-rec") for t in tracks])
+    is_rec_frame = np.zeros(len(mu), bool)
+    for e_i in np.flatnonzero(is_rec_ep):
+        s0, n0 = eps[e_i]
+        is_rec_frame[s0:s0 + n0] = True
+    fit_w = np.where(is_rec_frame[fit_i], args.recovery_weight, 1.0).astype(np.float32)
+    val_w = np.where(is_rec_frame[val_i], args.recovery_weight, 1.0).astype(np.float32)
+    n_rec_fit = int(is_rec_frame[fit_i].sum())
+    share = (args.recovery_weight * n_rec_fit
+             / (args.recovery_weight * n_rec_fit + (len(fit_i) - n_rec_fit)))
+    if n_rec_fit:
+        print(f"recovery frames: {n_rec_fit:,}/{len(fit_i):,} "
+              f"({100*n_rec_fit/len(fit_i):.2f}%), weight {args.recovery_weight:g} "
+              f"-> {100*share:.1f}% of the objective")
+    elif args.recovery_weight != 1.0:
+        raise SystemExit(f"--recovery-weight {args.recovery_weight:g} given but "
+                         f"this corpus has NO '-rec' episodes. Point --proc at "
+                         f"ml/data/proc_aug, or the flag silently does nothing.")
+
     model = Controller(arch=args.arch).to(args.device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
     print(f"controller: {count_params(model):,} params "
@@ -194,21 +273,31 @@ def main() -> int:
             zb = torch.from_numpy(fit_z[sel]).to(args.device)
             hb = torch.from_numpy(fit_h[sel]).to(args.device)
             ab = torch.from_numpy(fit_a[sel]).to(args.device)
-            loss = ((model(zb, hb) - ab) ** 2).mean()
+            wb = torch.from_numpy(fit_w[sel]).to(args.device)
+            err = ((model(zb, hb) - ab) ** 2).mean(dim=-1)
+            # weighted MEAN, not sum: keeps the loss scale (and so the
+            # effective learning rate) comparable across weights
+            loss = (err * wb).sum() / wb.sum()
             opt.zero_grad(set_to_none=True)
             loss.backward()
             opt.step()
             run += float(loss)
         tr = run / steps
-        va = evaluate(model, val_z, val_h, val_a, args.device)
+        # selection on the weighted metric (matches the objective); the
+        # unweighted one is the only cross-weight-comparable number
+        va = evaluate(model, val_z, val_h, val_a, args.device, w=val_w)
+        va_plain = evaluate(model, val_z, val_h, val_a, args.device)
         history.append({"epoch": epoch, "fit_mse": tr, "val_mse": va,
+                        "val_mse_unweighted": va_plain,
                         "seconds": round(time.time() - t0, 1)})
         if epoch % 5 == 0 or epoch == 1:
-            print(f"  epoch {epoch:3d}  fit {tr:.5f}  val_indomain {va:.5f}")
+            print(f"  epoch {epoch:3d}  fit {tr:.5f}  val_indomain {va:.5f} "
+                  f"(unweighted {va_plain:.5f})")
         if va < best:
             best = va
             torch.save({"model": model.state_dict(), "epoch": epoch,
-                        "val_mse": va, "args": vars(args)},
+                        "val_mse": va, "val_mse_unweighted": va_plain,
+                        "args": vars(args)},
                        out / f"controller_{args.arch}_seed{args.seed}.pt")
 
     (out / f"history_{args.arch}_seed{args.seed}.json").write_text(

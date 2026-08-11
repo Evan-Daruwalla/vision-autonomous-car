@@ -307,6 +307,52 @@ The CEM planner oscillates at **20.90 reversals/100 vs the expert's 9.84**
   large sustained angle, so an angle penalty causes understeer; on straights it
   is redundant because the cte term already charges for off-line steering.
 
+## The latent does NOT contain small objects, and the obvious probe lies (2026-08-10)
+
+`ml/probe_cone.py`, frozen ConvVAE, cone labels from the W.2 colour detector.
+
+- Held-out **AUC 0.997** for "is a cone visible". Reads as a total success.
+- **It is meaningless.** Paint the cone out (verified 0 cone px left) and the
+  probe's score moves from 0.946 to 0.938 — **1% of the pos/neg gap**. It was
+  reading TRACK POSITION, not the object.
+- Cones sit at fixed track locations and the latent encodes position well
+  (cte probe R² 0.957), so position alone predicts cone presence.
+
+**So the aux head is the EXPENSIVE branch.** The hoped-for X.1-style result
+(signal already in `mu`, readout just needs data) is refuted for objects. The
+aux loss has to reshape the ENCODER → VAE retrain.
+
+**Two consequences that generalise beyond cones:**
+- **Never measure small-object perception on a FIXED-position object.** Any
+  such measurement is confounded by position. `exp_aux_head.py` injects a
+  synthetic object at uniform random position for exactly this reason.
+- **The M4 stop sign must be RELOCATABLE.** On a fixed track a policy passes
+  the showcase by stopping at a location while blind to the sign. Recorded as
+  a hard requirement in PRD 6(b), not a preference.
+
+**Control design rule, learned the hard way twice (W.3, then this):** a
+control that varies the LABEL (shuffled labels) tests the architecture; a
+control that varies the INPUT (ablate the thing you claim to detect) tests the
+claim. Here the shuffled control read 0.427 and would NOT have caught it —
+only the counterfactual did.
+
+## Recovery data: executed actions are the WRONG BC label (2026-08-10)
+
+`collect_recovery.py` stores the action ACTUALLY EXECUTED including injected
+noise, because the data contract is action[i] produced image[i]. Cloning that
+teaches the car to swerve.
+
+- `ml/build_expert_labels.py` writes `train_actions_expert.npy` into the proc
+  dir: `log_expert_steer` substituted on noise frames, throttle recomputed by
+  the collector's own rule. **805 frames, 0.82% of the augmented corpus.**
+- `train_controller.py` auto-prefers that file when present, and gained
+  `--proc` so it can train on `ml/data/proc_aug` with V and M frozen.
+- Corpus ground truth: **98 episodes / 98,230 frames = 78 original (91,678) +
+  20 recovery (6,552)**. Recovery mean|cte| 0.971 vs original 0.322.
+  (Record Appendix X said 18 episodes / 5,961 frames — wrong, corrected in
+  Appendix Y.4. It came from one collection run's stdout; the directory
+  already held 2 episodes from an earlier run.)
+
 ## Rules carried forward to M4 (real-car logs)
 
 - **Measure, never estimate, VRAM.** The retracted "~24 GB for DreamerV3"

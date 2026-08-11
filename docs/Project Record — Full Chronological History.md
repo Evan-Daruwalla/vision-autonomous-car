@@ -59,6 +59,9 @@ the dated entry, not the digest.
 - [V — Cold audit fixed; knowledge graph built; SIM-POC P5 CLOSED as an instrumented negative result](#appendix-v---cold-audit-fixed-4-gates-that-could-not-fail-knowledge-graph-built-sim-poc-p5-closed-as-an-instrumented-negative-result-2026-08-07-0555-cdt) (08-07)
 - [W — The wall diagnosed (perception goes OOD); both encoders erase small objects, threatening the M4 stop-sign showcase](#appendix-w---the-wall-diagnosed-perception-goes-ood-both-encoders-erase-small-objects-so-the-m4-stop-sign-showcase-is-threatened-2026-08-08-2252-cdt) (08-08)
 - [X — Recovery data fixes off-centre perception 57% with a frozen encoder; steering smoothness works but does not fix the wall](#appendix-x---recovery-data-fixes-off-centre-perception-by-57-with-a-frozen-encoder-the-steering-smoothness-knob-works-but-does-not-fix-the-wall-2026-08-08-2311-cdt) (08-08)
+- [Y — The stop-sign decision, and an AUC of 0.997 that meant nothing](#appendix-y---the-stop-sign-decision-and-an-auc-of-0997-that-meant-nothing-2026-08-10-1853-cdt) (08-10)
+- [Z — The aux head works; the research brief kills H3; the closed-loop metric was never reproducible](#appendix-z---the-aux-head-works-the-research-brief-kills-h3-and-the-closed-loop-metric-was-never-reproducible-2026-08-10-1924-cdt) (08-10)
+- [AA — Recovery data is not the fix, and the loss weight is not either: the wall is upstream](#appendix-aa---recovery-data-is-not-the-fix-and-the-loss-weight-is-not-either-the-wall-is-upstream-2026-08-10-2007-cdt) (08-10)
 
 ---
 
@@ -2682,3 +2685,544 @@ beyond "no large effect".
    Hypotheses remain pre-registered; collection has not been re-run.
 3. M4 stop-sign showcase decision still open (W.2).
 4. **Nothing printed, nothing ordered** — unchanged since 2026-07-23.
+
+
+---
+
+# Appendix Y - The stop-sign decision, and an AUC of 0.997 that meant nothing (2026-08-10, ~18:53 CDT)
+
+**CADENCE NOTE:** hook fired at #69. Fourth consecutive slip; entry written
+mid-work rather than after, so the experiments still running at the time of
+writing are marked IN FLIGHT and their results belong to the next entry.
+
+**WHAT:** Evan asked "what is the stop sign decision", then chose. Enacting
+the choice turned up (a) a measurement that inverts how expensive the choice
+is, (b) a hard new requirement on the physical track that falls out of that
+measurement, and (c) a factual error in Appendix X. New:
+`ml/probe_cone.py`, `ml/exp_aux_head.py`, `ml/build_expert_labels.py`,
+`--proc` on `ml/train_controller.py`.
+
+## Y.1 The decision (Evan, 2026-08-10 18:44 CDT)
+
+W.2 left PRD 6(b) open with three options. Evan chose **auxiliary detection
+head + an oversized (non-scale) printed sign** -- options 2 and 4 of the four
+put to him. PRD 6(b) amended in place, the old DECISION NEEDED struck through
+rather than deleted.
+
+**Raising input resolution was rejected on an ARGUMENT, and the argument is
+recorded because it is not a measurement.** Reconstruction loss is a MEAN over
+pixels, so an object's share of the gradient is scale-invariant: 28/4096 at
+64x64 is 112/16384 at 128x128, the same 0.68%. Higher resolution buys
+detection RANGE -- a 2px distant sign becomes 8-12px and is at least
+representable -- but it does not make the objective care. It also costs the
+P3/P4 shared-tensor comparability and meets the batch-size wall measured in
+P4. **This has not been tested and could be wrong**; it is reasoning from how
+the loss is defined, not a result.
+
+**The oversized sign attacks the quantity that actually governs the problem.**
+Pixel SHARE decides whether the objective cares, and printing the sign larger
+raises it for free. Deliberately off-scale -- a documented modelling choice,
+not an oversight.
+
+## Y.2 A probe scored AUC 0.997 and was blind. The ablation arm is the finding.
+
+Before building the aux head, the cheap question: **does the frozen latent
+already contain the object, and only the DECODER drop it?** Reconstruction
+loss is a mean over pixels, so a 28-pixel object contributes ~0.7% of the
+gradient -- the decoder has almost no reason to paint it even if `mu` encodes
+it perfectly. Same latent-vs-readout split that paid off in X.1.
+
+`ml/probe_cone.py`, frozen ConvVAE, cone labels from the W.2 colour detector:
+
+| measurement | value |
+|---|---|
+| cone frames (>=12 px) | 3,687 / 91,678 (4.02%), mean 49 px |
+| held-out AUC, cone present | **0.997** |
+| shuffled-label control | 0.427 |
+
+An AUC of 0.997 reads as a total success. **It is worth nothing, and the
+experiment was built to find that out.**
+
+Cones sit at FIXED track locations, and the latent demonstrably encodes track
+position (cte probe R^2 0.957). So a probe can score near-perfectly by
+learning "cones live near here" while being completely blind to cone pixels.
+The ablation arm separates the two: paint the cone out, re-encode, re-score.
+
+| | mean probe score |
+|---|---|
+| cone frames, as-is | 0.946 |
+| **same frames, cone erased** (0 cone px left, verified) | **0.938** |
+| true no-cone frames | 0.011 |
+
+**Erasing the object moved the score by 1% of the pos/neg gap.** The probe was
+reading position. The latent does not contain the cone.
+
+**Consequence: the aux head is the EXPENSIVE branch, not the cheap one.** The
+hoped-for result was X.1's -- signal already in `mu`, aux head only has to read
+it, no VAE retrain. That is refuted. The aux loss has to reshape the ENCODER,
+which means retraining the VAE.
+
+**Method note.** W.3 recorded a metric that graded its own answer wrong and was
+caught by rendering the frames. This time the check was designed in before the
+run, and it fired. Without the ablation arm this entry would report "AUC 0.997,
+the latent carries the object, the M4 mitigation is cheap" -- confident,
+quantified, and wrong. **The shuffled-label control alone would NOT have caught
+it** (it read 0.427, comfortably below the real 0.997); only the counterfactual
+did. Worth keeping as a pattern: a control that varies the LABEL tests the
+architecture, a control that varies the INPUT tests the claim.
+
+Small honesty note: the shuffled control at 0.427 sits a few standard errors
+BELOW chance rather than at it. A probe trained on destroyed labels learns an
+arbitrary function of z, which can land either side of 0.5; it is not evidence
+of leakage, which would show as AUC well above 0.5. Not investigated further.
+
+## Y.3 NEW HARD REQUIREMENT: the sign must be relocatable. This is not a preference.
+
+Y.2's confound is not confined to the probe. **On a fixed track, a sign at a
+fixed place is perfectly predicted by "where am I".** Three consequences, all
+following from the same fact:
+
+1. A policy could pass the entire M4 showcase by stopping at a LOCATION while
+   being blind to the sign. The demonstration would prove nothing.
+2. An auxiliary head trained against a fixed-position sign can drive its loss
+   to zero the same way, leaving the encoder blind while the metric goes green.
+3. Any measurement taken on the sim's fixed cones is uninterpretable for the
+   same reason -- which is why `exp_aux_head.py` uses a synthetic object at a
+   uniformly random position instead.
+
+**So the printed sign must be RELOCATABLE / REMOVABLE between runs.** Cost:
+none -- it is a printed sign placed on a track. Recorded in PRD 6(b) as a hard
+requirement rather than a nice-to-have, because the showcase is worthless
+without it and that is a measured claim, not a stylistic one.
+
+## Y.4 CORRECTION to Appendix X: the recovery corpus is 20 episodes, not 18
+
+Appendix X.1 states "18 episodes, 5,961 frames". **That is wrong.** Ground
+truth, from `ml/data/proc_aug/` and from X.1's own saved artifact:
+
+| | Appendix X said | actual |
+|---|---|---|
+| recovery episodes | 18 | **20** |
+| recovery frames | 5,961 | **6,552** |
+| recovery mean\|cte\| | 0.95 | **0.971** |
+| share of augmented corpus | ~6.7% | 6.67% (correct) |
+
+`exp_recovery/exp_recovery.json` records `n_recovery_episodes: 20`, and
+`train_episodes.npy` sums to 98,230 frames over 98 episodes (78 original +
+20 recovery). The stale pair came from one `collect_recovery.py` run's stdout
+summary ("saved 18 ... rejected 2") while the output directory already held 2
+episodes from an earlier run; the experiment consumed all 20.
+
+**The headline result is unaffected.** Off-centre probe error 0.42949 ->
+0.18616 is -56.7%, matching the artifact exactly, and the ~6.7% corpus share
+was computed from the arrays and was already right. Only the corpus
+description was wrong. Per the append-only rule Appendix X is left as written
+and stands corrected here.
+
+Also corrected: X.1 compares recovery mean|cte| against "the original corpus's
+0.36". 0.36 is the expert's mean PER-EPISODE value from the collection filter;
+the frame-level mean over the original 91,678 frames is **0.322**. Both are
+real numbers measuring different things, and X.1 compared across them without
+saying so.
+
+## Y.5 IN FLIGHT at time of writing (results belong to the next entry)
+
+1. **`ml/exp_aux_head.py`** -- does an aux head make the encoder keep the
+   object? Four arms (plain, aux weight 10/100/1000), 40 epochs each, on a
+   POSITION-DECORRELATED synthetic object (~50% of frames, uniform position,
+   real-cone frames dropped) precisely so Y.2's confound cannot recur. The
+   un-injected frame is an exact counterfactual, so the ablation control is
+   free. Weight is swept because at 10 the aux term is ~4% of total loss and a
+   null result there could not distinguish a failed idea from a small knob.
+2. **The closed-loop recovery test** (X.3 item 1) -- MLP controller, 3 seeds,
+   trained on the original vs augmented corpus with V and M frozen, then
+   `eval_in_sim.py`. Linear arm skipped: P5 established it is structurally
+   wrong (probe R^2 0.27 linear vs 0.957 MLP).
+   Required a real fix first: `build_expert_labels.py`. The corpus stores the
+   action EXECUTED including injected noise (the data contract), so cloning it
+   directly would teach the car to swerve -- exactly what
+   `collect_recovery.py`'s docstring warned. 805 noise frames (0.82% of the
+   corpus) are relabelled to `log_expert_steer`, with throttle recomputed by
+   the collector's own rule. This is the DART target.
+3. **Research brief** -- four collection agents dispatched, one per
+   pre-registered hypothesis (W.5 H1-H4), each tasked to hunt its own
+   falsifier. Previous attempt died on API limits and recorded nothing.
+
+## Y.6 Open items
+
+1. Whether the aux head is SUFFICIENT. If a z=32 bottleneck cannot retain a
+   <1%-of-frame object under direct supervision, PRD 6(b) reopens and the
+   escalation is a larger z or a detection path that bypasses the latent.
+2. `docs/BOM.md` is modified in the working tree by an author other than this
+   session (mtime 2026-08-08 23:05). It re-prices the Pi 5 4GB $70 -> $110 and
+   puts the total at ~$222-225, **breaching the $200 ceiling**. Unstaged,
+   uncommitted, unverified, and flagged to Evan rather than absorbed.
+3. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+
+
+---
+
+# Appendix Z - The aux head works; the research brief kills H3; and the closed-loop metric was never reproducible (2026-08-10, ~19:24 CDT)
+
+**WHAT:** the three things Evan asked for in one sitting — enact the stop-sign
+decision (Y.1), run the research brief, run the closed-loop recovery test.
+All three landed. The third one found a measurement problem that invalidates a
+banked number.
+
+## Z.1 The auxiliary head works, and the weight had to be 100x
+
+Y.2 established the aux head is the EXPENSIVE branch: the frozen latent does
+not contain the object, so the aux loss has to reshape the encoder.
+`ml/exp_aux_head.py` retrains it and measures whether that works.
+
+**The experiment could not be run on the sim's real cones**, because Y.2/Y.3
+showed cone presence is predictable from track position, so an aux head could
+satisfy its loss from position alone and the metric would go green on a blind
+encoder. Instead a synthetic object is INJECTED — a 4-7px square in cone
+colour, present in ~50% of frames at a uniformly random position, seeded from
+the frame index. Presence and position are independent of the track by
+construction, real-cone frames are dropped (10.1% of the corpus), and the
+un-injected frame is an EXACT counterfactual, so the ablation control is free.
+
+Four arms, identical seed/data/budget, 40 epochs each, ~69.7k fit frames:
+
+| arm | val rec | object survival | pixel survival | probe AUC | ablation |
+|---|---|---|---|---|---|
+| plain | 60.88 | 0.0% | 0.0% | 0.673 | 97% |
+| aux, weight 10 | 60.41 | **0.0%** | 0.0% | **0.985** | 100% |
+| aux, weight 100 | 60.48 | 35.4% | 14.6% | **1.000** | 100% |
+| aux, weight 1000 | 65.04 | **79.4%** | 34.6% | 1.000 | 100% |
+
+**Headline: an auxiliary detection head puts the object in the latent, and at
+weight 100 it is essentially free** (val rec 60.88 -> 60.48, a 0.7%
+*improvement*, within noise). PRD 6(b)'s chosen mitigation is validated in sim.
+
+**The `aux10` row is the most informative and was not predicted.** AUC 0.985
+with **zero object survival**: the encoder learned the object while the decoder
+still refuses to draw it. That is a clean dissociation of *in the latent* from
+*in the reconstruction* — and it is the latent that M4 needs, since every
+downstream stage consumes only `mu`. It also means **W.2's reconstruction-based
+survival test systematically understates what an encoder knows.** W.2's
+conclusion still stands for the plain ConvVAE (AUC 0.673 here, and the real-cone
+probe collapsed under ablation in Y.2), but the METHOD needs the caveat.
+
+**The weight sweep was load-bearing, and the pre-registered reason was right.**
+At weight 10 the aux term is ~4% of total loss and buys no survival at all. A
+single-weight experiment at 10 would have produced "the aux head does not work"
+— confidently, and wrongly. Independent corroboration arrived the same day from
+the research brief: HarmonyDream (ICML 2024) finds observation loss dominating
+reward loss "at two orders of magnitude greater scale" and fixes it by raising
+the coefficient from 1 to 100 — the same order as the jump from a dead arm to a
+working one here.
+
+**Cost, stated:** weight 1000 more than doubles object survival (35.4% ->
+79.4%) but degrades reconstruction 60.48 -> 65.04 (+7.5%). Weight 100 is
+selected as the cheapest arm that saturates AUC; the tie-break is now explicit
+in code (`min` weight within 0.005 AUC of the best) rather than an accident of
+`max()` argument order.
+
+**Limits, stated plainly.** This is a SYNTHETIC object, not a stop sign: a
+flat-colour square with a perfect colour detector for a label. It proves the
+mechanism (an aux loss can force a <1%-of-frame object into a z=32 latent); it
+does not prove a printed sign under real lighting will work. One seed. And the
+z=32 capacity confound raised by the brief is untouched — this says an aux head
+is SUFFICIENT at z=32, not that capacity was never a factor.
+
+## Z.2 The closed-loop metric was never reproducible, and a banked number is wrong
+
+Running the closed-loop test surfaced this before it produced a result.
+
+**The identical MLP checkpoint, through the identical script, scored 69.3 steps
+in the banked P5 run and 187.2 today — a 2.7x swing.** Ruled out, in order:
+the checkpoints are byte-identical on val_mse (0.001754), epoch (30) and args;
+`eval_in_sim.py` has one commit and was not modified between the runs; the
+per-episode variance inside each run is tiny (+-1.2 and +-8.9), so neither run
+is noisy.
+
+**What differed is the control-loop rate: 13.2 Hz then, 16.7 Hz today.** The
+PID expert, which does no neural forward pass, ran at the sim's own 18.87 Hz in
+BOTH runs and returned 600/600 identically — perfectly reproducible. The rate
+is flat across episodes within a run, so it is not a CUDA-warmup artifact
+(checked explicitly; the first episode matches the last).
+
+**The obvious mechanism is that gym_donkeycar advances in real time and
+`observe()` blocks for the next frame, so a policy that cannot keep up drives
+on a stale action.** `eval_in_sim.py` gained `--control-hz` to test that by
+throttling the loop, and now always reports `control_hz` per episode and in the
+summary.
+
+**The throttle then falsified the tool it was built to be.** Sleeping out the
+remainder of an iteration is NOT the same manipulation as "the same loop,
+slower" — it breaks the lockstep between the control loop and frame
+production, and the two clocks beat against each other. The PID expert,
+throttled:
+
+| throttle | steps | mean\|cte\| |
+|---|---|---|
+| none (18.87 Hz natural) | **600.0 (9/9)** | 0.361 |
+| 18.5 Hz (a 2% reduction) | 196.5 +- 0.5 | 0.988 |
+| 18.0 Hz | 136.0 +- 0.0 | 0.745 |
+| 17.0 Hz | 133.0 +- 1.0 | 0.806 |
+| 16.0 Hz | 124.9 +- 1.3 | 0.797 |
+
+**A 2% throttle costs two thirds of the performance, and slowing four times
+further barely matters.** That is a cliff, not a slope, and smooth control-rate
+sensitivity does not behave that way. So `--control-hz` is demoted to a
+DIAGNOSTIC that measures the artifact, explicitly documented as unusable for
+equalising two arms of a comparison. **This was caught after the pinned A/B had
+already been run** — the numbers exist in Z.3 and are reported, but they
+describe the desynchronised regime.
+
+**A second confound found while interpreting this, and it is a real bug for
+the physical car.** `PIDDriver` is not dt-normalised: `integral += err` and
+`derivative = err - prev_err` are per-CALL, not per-second. Changing the loop
+rate therefore silently re-tunes the effective Ki and Kd. Harmless at a
+constant rate, but **the expert's gains are tied to the rate they were tuned
+at**, and the Pi 5 will not run at the sim's 18.87 Hz. It also means every
+throttled-expert row above confounds rate with silent gain change.
+
+**What survives, and it is the operationally important part:**
+1. **The banked P5 headline of 69.3 steps understates that controller by
+   2.7x.** Appendix V's P5 numbers were measured at whatever rate the machine
+   ran that day. The QUALITATIVE conclusion is untouched — 0/9 survived at
+   both rates and the expert finishes 9/9 — but the step count is not a stable
+   quantity and must not be cited as one.
+2. **Comparisons require matched achieved `control_hz`**, obtained by running
+   both arms back-to-back unthrottled on an idle machine and checking the
+   reported rate agrees — not by throttling.
+3. **Inference latency is a first-class design constraint for M3/M4**, both
+   because loop rate demonstrably moves the result and because the PID's gains
+   are silently rate-coupled.
+
+## Z.3 The closed-loop recovery test: NO CLEAR IMPROVEMENT
+
+X.3 item 1, the experiment that was supposed to decide whether recovery data
+beats the wall. **It does not, on this evidence.**
+
+Setup: MLP controller (P5 established the linear one is structurally wrong),
+3 seeds, V and M FROZEN on the original corpus, trained on `ml/data/proc`
+vs `ml/data/proc_aug`, code-identical. Run at two operating points because of
+Z.2.
+
+| arm | steps | mean\|cte\| | ctrl Hz | survived |
+|---|---|---|---|---|
+| expert (reference) | 600.0 +- 0.0 | 0.361 | 18.87 | **9/9** |
+| baseline, unpinned | 187.2 +- 8.9 | 0.528 | 16.73 | 0/9 |
+| augmented, unpinned | 199.9 +- 24.6 | 0.774 | 16.88 | 0/9 |
+| baseline, throttled 16 Hz † | 81.2 +- 18.0 | 0.679 | 15.93 | 0/9 |
+| augmented, throttled 16 Hz † | 95.1 +- 9.0 | 0.626 | 15.90 | 0/9 |
+
+† **The throttled rows are in the desynchronised regime described in Z.2 and
+should not be read as a second operating point.** They were run before the
+throttle was understood, and are kept because both arms sat in the same broken
+regime, so the comparison between them is still internally matched — but the
+absolute numbers describe the artifact. **The unpinned pair is the real
+comparison**, and it is valid precisely because both arms happened to achieve
+almost identical rates (16.73 vs 16.88 Hz, 0.9% apart).
+
+Augmented is ahead at both operating points (+6.8% unpinned, +17.1%
+throttled) and the SIGN is consistent, which is weak positive evidence. **But
+no claim of improvement is made, for three reasons:**
+
+1. **0/9 survived in every single arm.** Nothing finishes. Whatever the effect
+   is, it is not the difference between failing and driving.
+2. **The error bars overlap** at both operating points.
+3. **The control arm moved.** The PID expert is IDENTICAL between the two
+   pinned runs — same code, same gains, no learned component — yet scored
+   124.9 +- 1.3 in one and 132.9 +- 19.6 in the other, a 6.4% swing with
+   wildly different variance. That is the between-run noise floor of this
+   harness, measured on a fixed reference, and it is the same order as the
+   effect being claimed. **Including the expert in every run is what made this
+   visible; a base-vs-aug comparison alone would have reported a 17% win.**
+
+**Why it probably did not work, and this is testable.** The augmented
+controller's held-out MSE is essentially unchanged: **0.001754 -> 0.001788**
+(slightly worse). Recovery frames are 6.67% of the corpus and the BC objective
+is a mean squared error dominated by the 93% of centred frames, so the policy
+that minimises it is nearly the same policy. The probe in X.1 improved 57%
+because it was trained with cross-track error as its TARGET; the controller's
+target is the action, and the recovery frames are drowned out.
+
+**That is the same failure mode Z.1 just measured in the aux head**, where
+weight 10 (~4% of loss) bought nothing and weight 100 saturated. **The obvious
+next experiment is a sample-weight sweep on the recovery frames in the
+controller loss** — and it is cheap, since controller training takes ~1 minute.
+Noted as the top open item rather than run tonight.
+
+**A second confound that the frozen design cannot rule out.** V and M were
+frozen deliberately, to test X.1's claim that the encoder needs no retraining.
+But the controller consumes `h` from an MDN-RNN trained ONLY on centred data,
+so on exactly the off-centre frames that matter, the hidden state is itself out
+of distribution. The test isolates the CONTROLLER's exposure to recovery data
+and leaves the dynamics model unexposed. Retraining M on the augmented corpus
+is the fuller version.
+
+**What this does NOT overturn.** X.1's measurement stands — recovery data
+really does cut off-centre probe error 57% with a frozen encoder. What fails is
+the inference from that to driving. **Appendix X.1 explicitly refused to make
+that inference** ("this measures the PROBE, not the car... no claim about the
+wall being beaten should be made until it runs"), and the research brief
+supplies the citation for why that refusal was right: offline prediction error
+is not necessarily correlated with driving quality, and two models with
+identical prediction error can differ dramatically in closed-loop performance
+(Codevilla et al., ECCV 2018).
+
+## Z.4 Research brief: H3 dies, nothing else wins outright
+
+`docs/research/2026-08-10_ai-methods-for-the-autonomy-stack.md`. Four
+collection agents, one per hypothesis pre-registered in W.5, each instructed to
+hunt its OWN falsifier. The W.5 attempt died on API limits and recorded
+nothing; this is the completed re-run against the identical hypotheses.
+
+- **H3 (offline RL beats cloning) DIES.** Every published win condition for
+  offline RL — sparse reward, noisy data, diverse coverage — is absent here.
+  V-D4RL benchmarks the same cell of the design space (pixels, 100k
+  transitions, continuous control, narrow expert data) and reports BC 91.5 vs
+  **offline DreamerV2 4.8** on walker-walk expert. The dense centredness reward
+  being free and unused is not evidence it is useful. **Do not build offline RL
+  on this corpus.**
+- **H1 (coverage) MIXED** — right now, wrong soon. CIL 2018 is the closest
+  analogue: 10% noise-injected data took success 56% -> 88% (and 22% -> 64% on
+  an unseen town). This corpus is at 6.67%, the same order. But Jaeger's
+  controlled CARLA ablation bought +17 DS from an architecture change and +2 DS
+  from tripling the data, so "coverage, not model class" is not defensible as a
+  general claim.
+- **H2 (representation) MIXED** — the mechanism is real and cited in primary
+  sources, including DreamerV2's own paper: the reconstruction loss fails
+  "because the most important object in the game, the ball, occupies only a
+  single pixel." **That is W.2's 0-of-899-pixels result, named by the authors
+  of one of the two encoders measured.** But the strong form dies: the best
+  published fixes KEEP reconstruction and re-aim it (Masked World Models,
+  Segmentation Dreamer, SEM2, MILE), and deleting it measurably hurts.
+- **H4 (classical is the answer) MIXED** — survives narrowly; "learned =
+  decoration" dies. Classical dominates F1TENTH, but that is LiDAR with a prior
+  map. In this project's actual regime — camera-only, printed markings, 1/10
+  scale — the AI Driving Olympics lane-following winner flipped from classical
+  (2018) to imitation learning (2019/20) to PPO (2021).
+
+**The convergent answer no single hypothesis proposed: hybrid.** Every recent
+result beating the classical state of the art at this scale is a learned
+component ON a classical one — residual RL on a classical controller (+11.5%
+lap time, 20 min on-car training), learned tuning of pure pursuit, learned
+perception feeding a classical Stanley controller. That reframes the PID as the
+thing to build on, not the thing to beat.
+
+**Two things this project appears to have measured that the literature has
+not**, both flagged so they are never cited as borrowed: (a) the
+scale-invariance argument against raising resolution is **Evan's own
+derivation** — no source states it, and no published experiment tests whether
+resolution alone restores small objects; (b) no cone- or sign-scale
+object-retention measurement for a ConvVAE latent on a 1/10-1/14 car was found,
+and no driving paper isolates sign retention with a causal paint-out test of
+the kind in Y.2.
+
+**One agent claim was checked and found FALSE.** The H1 arm named target-point
+conditioning as its most actionable recommendation, on the basis that
+"gym_donkeycar exposes track waypoints." It does not — verified directly
+against `donkey_sim.py`: the info dict is `pos, cte, speed, forward_vel, hit,
+gyro, accel, vel, lidar, car, last_lap_time, lap_count`, and there is no
+waypoint message type. A target point could be constructed from logged expert
+`pos`, but that needs localization at inference the physical car will not have,
+so it is a sim-only shortcut that does not transfer. Recorded because the
+underlying mechanism is real and the proposed action is not available.
+
+**A finding the brief was not looking for, and it is a live risk in this
+stack.** Copycat agents (NeurIPS 2020): a BC policy given observation HISTORIES
+learns to predict the *previous* expert action, with held-out likelihood
+improving while closed-loop reward decreases — explicitly not overfitting. This
+controller consumes the MDN-RNN hidden state, and the observed signature
+matches exactly: val MSE ~0.0018, closed-loop failure. **It is a rival
+explanation for the P5 wall, independent of perception, and it has never been
+tested.** The test is one training run: controller on `z` alone with `h` zeroed.
+
+## Z.5 Open items
+
+1. **The copycat test** (Z.4) — one training run, could partially rewrite the
+   P5 narrative. Highest value-per-cost item on the board.
+2. **A resolution ablation.** Nobody has published one, and PRD 6(b) currently
+   rejects resolution on an argument alone.
+3. The aux head on a REAL sign under real lighting, not a synthetic square.
+4. **`docs/BOM.md` still modified by another session** (mtime 2026-08-08
+   23:05), unstaged and unverified, claiming the $200 ceiling is breached.
+   Flagged to Evan, not absorbed.
+5. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+
+
+---
+
+# Appendix AA - Recovery data is not the fix, and the loss weight is not either: the wall is upstream (2026-08-10, ~20:07 CDT)
+
+**WHAT:** Z.3's negative result had one obvious escape hatch — recovery frames
+are 6.67% of a mean-squared objective, so maybe they were simply drowned out.
+`--recovery-weight` on `ml/train_controller.py` tests it by upweighting them.
+**The escape hatch is closed.**
+
+## AA.1 A 12x change in the objective moves survival not at all
+
+MLP controller, 3 seeds per arm, V and M frozen, all five arms evaluated
+**back-to-back on an idle machine** so the Z.2 rate confound cannot apply —
+achieved `control_hz` was 19.96-20.00 across every arm, and the PID expert
+returned 600/600 (9/9) in all five with mean|cte| 0.328-0.364.
+
+| arm | recovery share of objective | val MSE (unweighted) | steps, per-seed mean | mean\|cte\| |
+|---|---|---|---|---|
+| cl_base (original corpus) | 0% | 0.00177 | 189.7 +- 32.1 | 0.757 |
+| cl_aug (weight 1) | 6.6% | 0.00181 | **221.0 +- 27.2** | 0.977 |
+| rw5 | 27.3% | 0.00207 | 209.9 +- 32.7 | 0.640 |
+| rw15 | 52.9% | 0.00245 | **172.6 +- 80.7** | 0.907 |
+| rw50 | 78.9% | 0.00331 | 190.2 +- 37.6 | 1.029 |
+
+**0/9 survived in every arm.** Means span 172.6 to 221.0 with per-seed standard
+deviations of 27-81, so every arm's spread covers every other arm's mean.
+Nothing here is significant and nothing is monotonic.
+
+**The unit of analysis is the SEED, not the episode.** Three episodes share one
+controller, so they are not independent; quoting the 9-episode sd (as low as
++-22) would overstate precision roughly 1.7x. n=3 per arm.
+
+**The weighting was NOT a no-op — that is what makes this decisive.** Unweighted
+val MSE degrades monotonically 0.00177 -> 0.00331 as recovery frames take over
+the objective, and lane error drifts up across the swept arms (0.640 -> 0.907
+-> 1.029). The optimiser genuinely learned a different policy. **It just did not
+learn a better-driving one.** So "the recovery frames were drowned out by the
+93% centred majority" is refuted: at weight 50 they dominate 78.9% of the
+gradient and the car still dies at ~190 steps.
+
+**A prediction was logged before the run and half of it held.** Predicted:
+(a) weight 50 would HURT via worse lane-holding rather than fewer steps —
+**held**, mean|cte| rises across the sweep to 1.029, the worst of any arm;
+(b) survival flat all the way to weight 50 would mean the problem is upstream
+of the loss weighting — **that is what happened.**
+
+## AA.2 What this closes, and what it leaves
+
+**Closed:** recovery data does not beat the P5 wall, at any loss weight. X.1's
+57% off-centre PROBE improvement was real and remains real; it simply does not
+transfer to driving, and three separate attempts to make it transfer (add the
+data, relabel with DART expert actions, upweight the frames to 79% of the
+objective) all failed. Codevilla et al. (ECCV 2018) is the citation for why
+that is a known trap: offline prediction error is not correlated with driving
+quality.
+
+**Still standing, untested, and now the leading hypothesis: COPYCAT.** The
+research brief (Z.4) surfaced that a BC policy given observation HISTORIES
+learns to predict the PREVIOUS expert action, with held-out likelihood
+improving while closed-loop reward falls — explicitly not overfitting
+(arXiv:2010.14876, NeurIPS 2020). This controller consumes the MDN-RNN hidden
+state `h`, and every arm above shows the signature: excellent and steadily
+*improving* held-out MSE alongside flat, terrible driving. **Nothing in AA.1
+touches the `h` input, which is the one thing common to every failed arm.**
+The test is one training run with `h` zeroed.
+
+**Second candidate, also untouched:** M was frozen on centred data throughout,
+so on off-centre frames the hidden state itself is out of distribution.
+Retraining M on the augmented corpus separates that from copycat.
+
+## AA.3 Method note: the control arm earned its keep again
+
+The expert was run inside every one of the five eval batches rather than once.
+That is what makes "all arms at 19.96-20.00 Hz, expert 9/9 at cte 0.328-0.364"
+a checkable statement instead of an assumption — and after Z.2, an eval batch
+without its own control arm is not worth running. Note also that the sim ran at
+**20.00 Hz this session against 18.87 Hz earlier the same evening**, which is
+further evidence that only within-batch comparisons mean anything here.

@@ -1,0 +1,21 @@
+{
+  "args": {
+    "vae": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\vae\\vae_best.pt",
+    "out": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\probe_cone",
+    "arch": "mlp",
+    "seed": 0,
+    "device": "cuda"
+  },
+  "min_cone_px": 12,
+  "n_cone_frames": 3687,
+  "base_rate": 0.04021684591723205,
+  "auc": 0.997493535316515,
+  "auc_shuffled_control": 0.42696219828649123,
+  "score_pos": 0.9461005926132202,
+  "score_ablated": 0.9378007650375366,
+  "score_neg": 0.011368505656719208,
+  "ablation_gap_recovered": 0.008879365212237372,
+  "n_ablated": 400,
+  "cone_px_after_paint": 0,
+  "verdict": "CONFOUNDED - DO NOT BUILD ON THIS. The probe scores AUC 0.997, but painting the cone out barely moves it (1% of the gap), so it is reading TRACK POSITION, not the object. The latent has not been shown to contain the cone. Treat this as the aux loss needing to reshape the ENCODER."
+}

@@ -1,0 +1,248 @@
+{
+  "args": {
+    "track": "donkey-generated-track-v0",
+    "episodes": 3,
+    "max_steps": 600,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "port": 9091,
+    "vae": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\vae\\vae_best.pt",
+    "rnn": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\mdnrnn\\mdnrnn_best.pt",
+    "ctrl_dir": "../ml/runs/rw50",
+    "control_hz": 0.0,
+    "archs": [
+      "mlp"
+    ],
+    "out": "../ml/runs/ev_rw50",
+    "device": "cuda",
+    "smoke": false
+  },
+  "per_episode": {
+    "expert": [
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.3780739441789531,
+        "reversals_per_100": 9.67,
+        "mean_abs_dsteer": 0.1641987787998081,
+        "control_hz": 20.0,
+        "survived": true,
+        "seed": 0,
+        "episode": 0,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.38894829540916054,
+        "reversals_per_100": 9.67,
+        "mean_abs_dsteer": 0.16472293713902791,
+        "control_hz": 20.0,
+        "survived": true,
+        "seed": 0,
+        "episode": 1,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.4088271999328087,
+        "reversals_per_100": 9.67,
+        "mean_abs_dsteer": 0.16337203980658285,
+        "control_hz": 20.0,
+        "survived": true,
+        "seed": 0,
+        "episode": 2,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.32761866496410225,
+        "reversals_per_100": 10.83,
+        "mean_abs_dsteer": 0.14840328358175958,
+        "control_hz": 20.0,
+        "survived": true,
+        "seed": 1,
+        "episode": 0,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.3247402420438205,
+        "reversals_per_100": 10.17,
+        "mean_abs_dsteer": 0.15638512732876614,
+        "control_hz": 20.0,
+        "survived": true,
+        "seed": 1,
+        "episode": 1,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.32301950093708,
+        "reversals_per_100": 10.17,
+        "mean_abs_dsteer": 0.15769782951797431,
+        "control_hz": 20.0,
+        "survived": true,
+        "seed": 1,
+        "episode": 2,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.32937883591279377,
+        "reversals_per_100": 11.0,
+        "mean_abs_dsteer": 0.15012663634075513,
+        "control_hz": 20.0,
+        "survived": true,
+        "seed": 2,
+        "episode": 0,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.4261279493824501,
+        "reversals_per_100": 9.5,
+        "mean_abs_dsteer": 0.16235589072728632,
+        "control_hz": 20.0,
+        "survived": true,
+        "seed": 2,
+        "episode": 1,
+        "seconds": 31.8
+      },
+      {
+        "steps": 600,
+        "mean_abs_cte": 0.37062978219008075,
+        "reversals_per_100": 9.33,
+        "mean_abs_dsteer": 0.1638679466465292,
+        "control_hz": 20.0,
+        "survived": true,
+        "seed": 2,
+        "episode": 2,
+        "seconds": 31.8
+      }
+    ],
+    "controller_mlp": [
+      {
+        "steps": 153,
+        "mean_abs_cte": 1.0405627702381097,
+        "reversals_per_100": 5.88,
+        "mean_abs_dsteer": 0.06461836552051337,
+        "control_hz": 19.74,
+        "survived": false,
+        "seed": 0,
+        "episode": 0,
+        "seconds": 9.6
+      },
+      {
+        "steps": 241,
+        "mean_abs_cte": 0.9894202619605538,
+        "reversals_per_100": 5.39,
+        "mean_abs_dsteer": 0.0883642990452548,
+        "control_hz": 20.02,
+        "survived": false,
+        "seed": 0,
+        "episode": 1,
+        "seconds": 13.8
+      },
+      {
+        "steps": 192,
+        "mean_abs_cte": 0.552525811966916,
+        "reversals_per_100": 5.21,
+        "mean_abs_dsteer": 0.07166248286406252,
+        "control_hz": 20.0,
+        "survived": false,
+        "seed": 0,
+        "episode": 2,
+        "seconds": 11.4
+      },
+      {
+        "steps": 169,
+        "mean_abs_cte": 1.306235821994804,
+        "reversals_per_100": 4.14,
+        "mean_abs_dsteer": 0.0799475947597308,
+        "control_hz": 20.0,
+        "survived": false,
+        "seed": 1,
+        "episode": 0,
+        "seconds": 10.3
+      },
+      {
+        "steps": 66,
+        "mean_abs_cte": 0.5375521472006133,
+        "reversals_per_100": 13.64,
+        "mean_abs_dsteer": 0.0394845249185052,
+        "control_hz": 20.01,
+        "survived": false,
+        "seed": 1,
+        "episode": 1,
+        "seconds": 5.1
+      },
+      {
+        "steps": 216,
+        "mean_abs_cte": 1.1561726093619924,
+        "reversals_per_100": 4.17,
+        "mean_abs_dsteer": 0.08855016554250966,
+        "control_hz": 20.0,
+        "survived": false,
+        "seed": 1,
+        "episode": 2,
+        "seconds": 12.6
+      },
+      {
+        "steps": 220,
+        "mean_abs_cte": 1.5333953807130456,
+        "reversals_per_100": 4.09,
+        "mean_abs_dsteer": 0.06775436990949661,
+        "control_hz": 20.0,
+        "survived": false,
+        "seed": 2,
+        "episode": 0,
+        "seconds": 12.8
+      },
+      {
+        "steps": 258,
+        "mean_abs_cte": 1.1641656167213192,
+        "reversals_per_100": 6.2,
+        "mean_abs_dsteer": 0.08542213678189665,
+        "control_hz": 20.0,
+        "survived": false,
+        "seed": 2,
+        "episode": 1,
+        "seconds": 14.7
+      },
+      {
+        "steps": 197,
+        "mean_abs_cte": 0.9831505913126666,
+        "reversals_per_100": 7.11,
+        "mean_abs_dsteer": 0.08143012546839154,
+        "control_hz": 20.0,
+        "survived": false,
+        "seed": 2,
+        "episode": 2,
+        "seconds": 11.7
+      }
+    ]
+  },
+  "summary": {
+    "expert": {
+      "episodes": 9,
+      "steps_mean": 600.0,
+      "steps_sd": 0.0,
+      "cte_mean": 0.36415160166125,
+      "reversals_per_100": 10.001111111111111,
+      "control_hz": 20.0,
+      "survived": 9
+    },
+    "controller_mlp": {
+      "episodes": 9,
+      "steps_mean": 190.22222222222223,
+      "steps_sd": 53.789254973621674,
+      "cte_mean": 1.0292423346077801,
+      "reversals_per_100": 6.203333333333333,
+      "control_hz": 19.974444444444444,
+      "survived": 0
+    }
+  },
+  "no_transfer_claim": "Simulated only. These numbers say nothing about the physical car; the controller has never seen real hardware. The expert is a behavioural-cloning CEILING, not a rival."
+}

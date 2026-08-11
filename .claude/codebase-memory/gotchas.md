@@ -196,3 +196,40 @@ not yet verified on this car. Mark them verified when a build task confirms.
 - **WSL2 does not give more VRAM** — no evidence found; the GPU stays under
   the Windows WDDM driver. It buys compatibility (JAX, TF≥2.11) and clean
   OOM behaviour only (2026-07-23).
+- **`eval_in_sim.py` step counts are NOT comparable across runs unless
+  `--control-hz` is pinned** (measured 2026-08-10). The identical MLP
+  checkpoint (byte-identical val_mse 0.001754), through the identical script,
+  scored **69.3 steps at a 13.2 Hz control loop and 187.2 at 16.7 Hz** — a
+  2.7× swing from nothing but how fast the machine ran inference that day.
+  The rate is flat within a run (no warmup artifact) and the PID expert, which
+  does no neural forward pass, sat at the sim's own 18.87 Hz in both runs and
+  was perfectly reproducible. `control_hz` is now always reported per episode
+  and in the summary — **a step count without its rate is uninterpretable**,
+  and the banked P5 headline of 69.3 steps understates that controller.
+  **To compare two policies: run them back-to-back unthrottled on an idle
+  machine and check the reported `control_hz` agrees.**
+- **Do NOT use `--control-hz` to equalise two arms** (measured 2026-08-10, the
+  same day it was added). Throttling by SLEEPING is not the same manipulation
+  as "the same loop, slower." The loop normally runs flat out and stays in
+  lockstep with the sim's frame production because `observe()` blocks for the
+  next frame; any sleep breaks that lockstep and the two clocks beat against
+  each other. It is a **cliff, not a slope** — the PID expert:
+
+  | throttle | steps | mean\|cte\| |
+  |---|---|---|
+  | none (18.87 Hz natural) | **600 (9/9)** | 0.361 |
+  | 18.5 Hz (−2%) | 196.5 | 0.988 |
+  | 18.0 Hz | 136.0 | 0.745 |
+  | 17.0 Hz | 133.0 | 0.806 |
+  | 16.0 Hz | 124.9 | 0.797 |
+
+  A 2% throttle costs two thirds of the performance and further slowing barely
+  matters — that is desynchronisation, not control-rate sensitivity. The flag
+  is kept as a DIAGNOSTIC that measures the artifact.
+- **`PIDDriver` is not dt-normalised** (`collect_sim_data.py`). `integral +=
+  err` and `derivative = err - prev_err` are both per-CALL, not per-second, so
+  the effective Ki and Kd change with loop rate. Harmless while the loop rate
+  is constant, but it means **the gains are tied to the rate they were tuned
+  at** — a real portability trap for the physical car, whose loop will not run
+  at the sim's 18.87 Hz. Also means any throttled-expert number confounds rate
+  with silent gain re-tuning.

@@ -15,6 +15,7 @@ and a `tests/` directory before M3 is an open audit item (F20).
 | `python ml/splits.py` | the fit/val split is disjoint, exhaustive, stratified, and reproducible; a different seed gives a different split | catches a seed being silently ignored |
 | `python ml/rollout_eval.py` | 30-step imagination beats a frozen-frame baseline on ≥90% of steps **(exits 1 if not)** | SIM-POC P3 done-check. Gated on `val_indomain` only — holdout is *expected* to lose (0/30), so gating on it would fail a correct model |
 | `python ml/probe_vram.py` | whether an OOM can actually happen on this machine | exit 1 means Sysmem Fallback is ON — a finding about the machine, not a broken check |
+| `python ml/exp_aux_head.py --self-check` | the synthetic-object pipeline is sound: injected mask area matches the plan, the colour detector fires **exactly** on the injected pixels (so the survival metric counts the right ones), the un-injected frame is a clean counterfactual, the 8×8 aux target matches the object's cells, injection is deterministic per frame index, and object position is genuinely spread | guards the three things every conclusion in that experiment rests on and none of which are visible in its result table. Position spread is the load-bearing one — a fixed-position object is predictable from track position and would prove nothing (Appendix Y.2/Y.3) |
 
 **Cold audit 2026-08-06 fixed four gates that could not fail.** Before it:
 `rollout_eval.py` printed its win count and discarded it (0/30 exited exactly

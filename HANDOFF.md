@@ -10,10 +10,58 @@ the car's own logged real driving. The process is the product: every stage
 verified on the physical car and documented as a college-portfolio
 engineering artifact.
 
-## Current state — SIM-POC COMPLETE (P1–P5); still waiting on Evan's order and coupon print
+## Current state — SIM-POC COMPLETE (P1–P5); stop-sign decision made and validated; still waiting on Evan's order and coupon print
 
-**Last updated: 2026-08-07** — this file is the only live snapshot; history
-lives in the record.
+**Last updated: 2026-08-10 ~19:24 CDT** — this file is the only live snapshot;
+history lives in the record.
+
+> **2026-08-10 (Appendices Y, Z) — read these four before touching the ML
+> stack:**
+>
+> 1. **The M4 stop-sign decision is MADE and VALIDATED IN SIM.** Evan chose an
+>    auxiliary detection head + an oversized printed sign (PRD 6(b), resolved
+>    in place). Measured: an aux head at loss weight 100 puts a
+>    sub-1%-of-frame object into the z=32 latent at **essentially zero
+>    reconstruction cost** (probe AUC 0.673 → 1.000, val rec 60.88 → 60.48).
+>    **Weight matters enormously** — at weight 10 (~4% of loss) it buys
+>    nothing.
+> 2. **NEW HARD REQUIREMENT: the printed sign must be RELOCATABLE.** On a
+>    fixed track a sign at a fixed place is perfectly predicted by "where am
+>    I", so a policy can pass the whole showcase while blind to the sign. This
+>    is measured, not stylistic: a cone probe scored **AUC 0.997 and collapsed
+>    to nothing when the cone was painted out** — it was reading track
+>    position. Never measure small-object perception on a fixed-position
+>    object.
+> 3. **The closed-loop recovery test came back NEGATIVE.** Recovery data cut
+>    off-centre *probe* error 57% (Appendix X) but does **not** make the car
+>    drive further: 187.2 → 199.9 steps, error bars overlapping, **0/9
+>    survived in every arm**. The obvious escape hatch — that recovery frames
+>    were drowned out at 6.67% of a mean objective — was tested with a
+>    `--recovery-weight` sweep and **closed** (Appendix AA): pushing them to
+>    **78.9% of the objective changes survival not at all** (172.6–221.0
+>    steps across the sweep, per-seed sd 27–81, every spread covering every
+>    other mean, 0/9 everywhere). The weighting was not a no-op — unweighted
+>    val MSE degrades 0.00177 → 0.00331 and lane error rises to 1.029 — so a
+>    genuinely different policy was learned; it just does not drive better.
+>    **Recovery data does not beat this wall at any loss weight. The
+>    bottleneck is upstream.**
+> 4. **`eval_in_sim.py` step counts are NOT comparable across runs** unless
+>    the reported `control_hz` agrees. The same checkpoint scored 69.3 steps
+>    at 13.2 Hz and 187.2 at 16.7 Hz. **The banked P5 headline of 69.3
+>    understates that controller by 2.7×.** Do NOT use `--control-hz` to
+>    equalise arms — throttling by sleeping desynchronises the loop from the
+>    sim and is a cliff (the expert dies at a 2% throttle). Run arms
+>    back-to-back unthrottled and check the rate matched.
+>
+> **Also new:** a full research brief on AI methods
+> (`docs/research/2026-08-10_ai-methods-for-the-autonomy-stack.md`). Headline:
+> **do not build offline RL on this corpus** (H3 dies — the closest published
+> match reports BC 91.5 vs offline DreamerV2 4.8). And an untested rival
+> explanation for the P5 wall: **copycat agents** — a BC policy given
+> observation histories learns to predict the previous expert action, with
+> held-out loss improving while closed-loop reward drops. This controller
+> consumes the MDN-RNN hidden state and shows exactly that signature. One
+> training run tests it (`z` alone, `h` zeroed).
 
 > **2026-08-07 — SIM-POC IS COMPLETE, P1 through P5 (Appendices R, S, T, U,
 > V).** A 102,888-frame corpus verified 88/88 on both alignment axes; a Ha &
