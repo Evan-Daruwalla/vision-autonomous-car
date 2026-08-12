@@ -64,6 +64,7 @@ the dated entry, not the digest.
 - [AA — Recovery data is not the fix, and the loss weight is not either: the wall is upstream](#appendix-aa---recovery-data-is-not-the-fix-and-the-loss-weight-is-not-either-the-wall-is-upstream-2026-08-10-2007-cdt) (08-10)
 - [AB — ~~FIRST COMPLETED EPISODES~~ **[RETRACTED — see AC]**: the controller was ignoring z, and recovery data only pays once the crutch is removed](#appendix-ab---first-completed-episodes-the-controller-was-ignoring-z-and-recovery-data-only-pays-once-the-crutch-is-removed-2026-08-11-0021-cdt) (08-11)
 - [AC — **RETRACTION of AB**: the "first completed episodes" result did not replicate; the closed-loop harness is not trustworthy](#appendix-ac---retraction-of-ab-the-first-completed-episodes-result-did-not-replicate-and-the-closed-loop-harness-is-not-trustworthy-2026-08-11-1821-cdt) (08-11)
+- [AD — Harness noise floor MEASURED (CV 55%): the reset is exonerated and every comparison this session was underpowered](#appendix-ad---the-harness-noise-floor-measured-cv-55-and-every-comparison-this-session-was-underpowered-2026-08-11-2329-cdt) (08-11)
 
 ---
 
@@ -3486,3 +3487,164 @@ false NEGATIVES likely and false positives like AB's the real hazard — but
    only live ML hypothesis for the wall.
 4. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
 5. `docs/BOM.md` still modified by another session and unverified.
+
+
+---
+
+# Appendix AD - The harness noise floor MEASURED: CV 55%, and every comparison this session was underpowered (2026-08-11, ~23:29 CDT)
+
+**WHAT:** AC named "fix or characterise the reset" the project's top priority
+and the reset as the leading suspect. The reset is **exonerated**. The real
+answer is worse and more useful: the harness has a measured 55% coefficient of
+variation at the LAUNCH level, which means **no comparison run this session
+had the statistical power to detect the effects it claimed.** New:
+`ml/diag_reset.py`. Also folds in three errors caught by `/landing-check` on
+commit 0bf4264.
+
+## AD.1 The reset is not the cause (AC.3's hypothesis, refuted)
+
+`ml/diag_reset.py` replicates `eval_in_sim.run_episode`'s reset + warmup
+exactly and records the car's state at the moment the policy inherits it.
+
+| | post-warmup cte | speed | pos x | pos z |
+|---|---|---|---|---|
+| launch 1, 8 episodes | mean 0.0066, range 0.0055 | sd 0.0031 | sd 0.0002 | sd 0.0018 |
+| launch 2, 8 episodes | mean 0.0069, range 0.0046 | sd 0.0047 | sd 0.0002 | sd 0.0028 |
+
+Post-reset position is identical to four decimals in all 16 episodes across
+both launches (x 6.2116, z 5.9797), speed exactly 0.000, and `reset_seconds`
+1.201-1.202 throughout. **The start state is deterministic within AND across
+launches.** AC.3's leading hypothesis is dead. Recorded as a refuted
+hypothesis, not quietly dropped.
+
+## AD.2 The launch is the unit of variation, and the spread is 4.4x
+
+Same checkpoint (`nh_aug` seed 0), same seed, seven independent **gate-valid**
+sim launches (expert 600/600 in every one):
+
+| launch | episodes | mean | completions |
+|---|---|---|---|
+| sd_01234 | 100, 113 | 106.5 | 0/2 |
+| lc_3 | 115, 122 | 118.5 | 0/2 |
+| lc_5 | 175, 184 | 179.5 | 0/2 |
+| lc_1 | 200, 211 | 205.5 | 0/2 |
+| lc_2 | 197, 267 | 232.0 | 0/2 |
+| lc_6 | 183, 524 | 353.5 | 0/2 |
+| lc_4 | **600**, 343 | 471.5 | **1/2** |
+
+**mean 238.1, sd 131.6, min 106.5, max 471.5 — a 4.4x spread on one
+unchanged policy.** Episodes *within* a launch frequently agree to a few steps
+(100/113, 115/122, 175/184, 200/211); launches disagree enormously. The
+variance lives between launches, not between episodes.
+
+**Eliminated as causes, each by measurement:** control rate (matched
+19.5-20.0 Hz in all seven), track identity (expert mean|cte| 0.323-0.381 over
+12 launches — a regenerated track could not produce a +-5% band from a fixed
+PID), and episode start state (AD.1). **The cause remains unknown.**
+
+## AD.3 The number that matters: CV 55%, and what it costs
+
+Coefficient of variation **131.6 / 238.1 = 0.553**.
+
+Launches per ARM needed to detect a relative difference at 80% power,
+alpha 0.05 (`n = 2(1.96+0.84)^2 CV^2 / d^2`):
+
+| effect size | launches needed per arm |
+|---|---|
+| 10% | ~479 |
+| 20% | ~120 |
+| 30% | ~53 |
+| 50% | ~19 |
+| 100% (2x) | ~5 |
+| 200% (3x) | ~1.2 |
+
+**Every arm comparison in Appendices Z, AA, AB and AC used n = 1 launch per
+arm.** At n=1 this harness can only resolve differences around 3x. Therefore:
+
+- **Z.3** (recovery data, 187.2 vs 199.9, a 7% difference) — **uninterpretable.**
+  Correctly reported as null, but for the wrong reason: it was not a
+  measurement of "no effect", it was no measurement at all.
+- **AA.1** (recovery-weight sweep, 172.6-221.0 across arms, ~28% spread) —
+  **uninterpretable.** The conclusion "a 12x change in the objective moves
+  survival not at all" is not supported; the instrument could not have seen a
+  move smaller than 3x.
+- **AB.2** (the 2x2, nh_aug 342.4 vs cl_base 185.6, 1.85x) — **below
+  resolution at n=1.** The retraction in AC was right, but AC's own
+  replacement table has exactly the same defect.
+- **AC.1** (the reversed 2x2, cl_base 189.4 vs cl_aug 189.1) — **also
+  uninterpretable at n=1 per batch.**
+- **The one comparison that may survive**: `nh_base` 109.2 vs `cl_base` 189.4,
+  a 1.7x difference, and `nh_base` is the most stable arm measured
+  (109.33 / 109.17 across two launches). Still under the ~2x resolution bar,
+  so **suggestive, not established.**
+
+**This supersedes the framing of both AB and AC.** AB claimed a result the
+instrument could not support; AC retracted it and asserted a replacement the
+instrument could not support either. The correct statement is that **the
+project does not currently possess a closed-loop measurement capable of
+ranking these policies.**
+
+## AD.4 Three errors caught by /landing-check on commit 0bf4264
+
+Run by a fresh agent against artifacts only. All arithmetic in AC re-derived
+exactly from the JSON; three substantive findings:
+
+1. **A FALSE UNIVERSAL was committed.** AC, the commit message and
+   `ml-training.md` all state "no learned policy has completed an episode" —
+   contradicted by artifacts *in the same commit*: `ev3_nh_aug` has
+   `survived: 3`, `ev2_nh_aug` has `survived: 1`. This was an overcorrection
+   after the retraction. **True statement: no learned policy completes
+   RELIABLY.** Pooled over 35 gate-valid `nh_aug` episodes the distribution is
+   bimodal — 28 under 150 steps, 4 at 450-601 — with completions clustering by
+   launch. Corrected in HANDOFF and the bin.
+2. **AC's 2x2 table was not a matched comparison.** The four arms did not
+   share batch sets: `cl_base`/`cl_aug` each carried two pre-session batches
+   never re-run, and `nh_aug` had two batches no other arm had. Restricted to
+   the two batches common to all four (ev3, ev4): cl_base 190.3, cl_aug 167.8,
+   nh_base 109.25, **nh_aug 232.8** — the stated ranking flips. Only the
+   "removing `h` hurts" leg survives restriction. **The table was printed as
+   like-for-like and was not.**
+3. **`PRD_ROADMAP.md` was untouched** and still banked uncertified harness
+   numbers (69.3, 89.7, 187.2) while the harness problem was not a roadmap
+   item at all. Now carries a caveat and **P6, blocking all future closed-loop
+   claims.**
+
+Also noted: `ml/runs/ev3_nh_aug/p5_eval.json` predates the gate and so has NO
+`batch_valid` field — absent is not the same as `false`, and the one artifact
+holding 3 completions is the one an automated filter would read as unmarked.
+
+## AD.5 What survives all of this
+
+Untouched by the harness problem, because none of it involves the simulator:
+
+- **`h`-dependence** (AB.1): zeroing the RNN state gives skill **-0.120**,
+  worse than predicting the mean. Deterministic, open-loop.
+- **Copycat refuted** (AB.1): 18.2x better than repeat-last-action.
+- **The aux head works** (Z.1): probe AUC 0.673 -> 1.000 at loss weight 100,
+  ~zero reconstruction cost, ablation-clean.
+- **Small objects are absent from the frozen latent** (Y.2): AUC 0.997 that
+  collapsed to 1% of the pos/neg gap under paint-out.
+- **Recovery data fixes the off-centre readout 57%** (X.1), frozen encoder.
+- **The research brief** (Z.4), including H3's death.
+
+Every one of these is an open-loop measurement. **The project's reliable
+results are the ones that never touched the sim** — which is itself the
+finding to carry into M3/M4, where the "simulator" becomes a physical car and
+the equivalent noise will be worse, not better.
+
+## AD.6 Open items
+
+1. **P6: make the harness trustworthy or quantify it well enough to design
+   around.** Now a PRD item and blocking. Cheapest useful version: fix the
+   number of launches per arm by the effect size worth detecting, and have
+   `eval_in_sim.py` refuse comparisons the noise floor cannot support.
+2. Find the launch-level cause. Rate, track and start state are eliminated;
+   remaining suspects are inside the Unity process (physics/frame pacing,
+   GPU context) and were not reachable from the telemetry available.
+3. Re-run the Z.3/AA/AB/AC comparisons at adequate n once (1) exists. Until
+   then no ranking of those policies is claimed.
+4. Retrain M on the augmented corpus (AB.5) — still the only untested ML
+   hypothesis, and still worth doing, but not measurable until (1).
+5. **`docs/BOM.md` still modified by another session**, unverified, claiming
+   the $200 ceiling is breached. Excluded from commits 2cbb84e and 0bf4264.
+6. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.

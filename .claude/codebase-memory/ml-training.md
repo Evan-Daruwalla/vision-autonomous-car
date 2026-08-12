@@ -360,15 +360,34 @@ independent gate-valid batches give **107.2 ± 16.0, 0/20 completions**; the
 same three checkpoints that scored [78,600,600] / [600,469,448] / [96,96,95]
 re-ran at [100,113] / [108,108] / [107,107]. The re-runs are tight (all 10
 seeds 85–147) where the original was chaotic (sd 230), so the original batch
-is the anomaly. **No learned policy has completed an episode.**
+is the anomaly. ~~**No learned policy has completed an episode.**~~ **That
+flat claim is FALSE — an overcorrection, caught by landing-check 2026-08-12.**
+3 completions exist in `ev3_nh_aug` and 1 in `ev2_nh_aug`. The true statement:
+**no learned policy completes RELIABLY.** Pooled over 35 gate-valid `nh_aug`
+episodes the distribution is **bimodal** — 28 under 150 steps, 4 at 450-601,
+almost nothing between — and **every completion came from a single launch.**
 
 **The lesson is bigger than the result: the expert-survival gate is NECESSARY
 BUT NOT SUFFICIENT.** Both batches pass it (expert 600/600) and disagree 3×.
 **Never rest a closed-loop claim on one batch — replicate in an independent
-one.** The 2×2 interaction below was measured in the suspect batch and is
-under re-test; treat every number in it as provisional.
+one.**
 
-## The controller ignored `z` and rode the RNN state (2026-08-11, result under re-test)
+**THE LAUNCH IS THE UNIT OF VARIATION (measured 2026-08-12).** Same checkpoint,
+same seed, four gate-valid launches: **106.5, 118.5, 205.5, 232.0 steps — a
+2.2× spread**, while episodes WITHIN a launch agree to ±3.5-5.5. Eliminated as
+causes: control rate (matched ~20 Hz), track identity (expert cte 0.323-0.381
+over 12 launches), and **episode start state** — `ml/diag_reset.py` shows
+post-warmup cte varying 0.0055 within a launch and 0.0066 vs 0.0069 between
+launches, i.e. deterministic to four decimals. Cause still unknown.
+
+**The 2×2 table below is NOT a matched comparison** (landing-check). The arms
+do not share batch sets. Restricted to the two batches common to all four arms
+(ev3, ev4): cl_base 190.3, cl_aug 167.8, nh_base 109.25, **nh_aug 232.8** —
+the ranking flips and nh_aug is top. **Only the "removing `h` hurts" leg
+survives matched-batch restriction** (109.25 vs 190.3); "the plain baseline is
+best" does not.
+
+## The controller ignored `z` and rode the RNN state (2026-08-11; closed-loop half RETRACTED, open-loop half stands)
 
 `ml/diag_copycat.py`, held-out, skill = 1 − MSE/var:
 
@@ -386,12 +405,13 @@ under re-test; treat every number in it as provisional.
   one input it uses is the one that drifts. Compounding error through the
   recurrent state — not the same failure as perception OOD.
 
-**The 2×2 (3 seeds, V and M frozen, one matched batch, expert 9/9 in all):**
+**The 2×2 — ONE BATCH (ev3), and its `nh_aug` cell did NOT replicate. Kept for
+the record; do not cite the bottom-right number:**
 
 | | with `h` | `z` only (`--no-history`) |
 |---|---|---|
 | original | 185.6 (0/9) | 109.3 (0/9) |
-| + recovery | 196.6 (0/9) | **342.4, 3/9 COMPLETED** |
+| + recovery | 196.6 (0/9) | ~~342.4, 3/9~~ **RETRACTED — see above** |
 
 - **Neither change works alone; the interaction is the result.** z-only alone
   is *worse*. Recovery data alone does nothing. A one-variable-at-a-time

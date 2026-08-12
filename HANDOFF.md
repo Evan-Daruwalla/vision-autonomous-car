@@ -55,7 +55,13 @@ history lives in the record.
 >    and 147 and episodes within a seed near-identical. The same three
 >    checkpoints that scored [78,600,600] / [600,469,448] / [96,96,95] scored
 >    [100,113] / [108,108] / [107,107] on re-run. **Treat the 342.4 batch as
->    the anomaly, not these.** No learned policy has completed an episode.
+>    the anomaly, not these.** **Correction (2026-08-12): the flat claim "no
+>    learned policy has completed an episode" is FALSE and was itself an
+>    overcorrection — 3 completions exist in `ev3_nh_aug` and 1 in
+>    `ev2_nh_aug`. The true statement is that **no learned policy completes
+>    RELIABLY**: pooled over 35 gate-valid `nh_aug` episodes the distribution
+>    is bimodal — 28 die under 150 steps, 4 reach 450-601 — and **all
+>    completions came from one launch.**
 >    **The whole 2×2 reverses on re-run** (Appendix AC) — the plain baseline
 >    is the best and by far the most stable arm:
 >
@@ -68,12 +74,32 @@ history lives in the record.
 >
 >    **No intervention tried on 2026-08-10/11 improves closed-loop driving.**
 >    Recovery data does nothing (189.4 → 189.1); removing `h` actively hurts.
-> 5. **The expert-survival gate is NECESSARY BUT NOT SUFFICIENT.** Both the
->    342.4 batch and the 107.2 batches pass it (expert 600/600) and disagree
->    by 3×. A healthy expert does NOT certify a batch for a marginal policy.
->    Until the cause is found, **no closed-loop claim should rest on a single
->    batch** — replicate in an independent one first. This is the single most
->    important methodological fact in the project right now.
+> 5. **THE HARNESS NOISE FLOOR IS MEASURED, AND IT INVALIDATES THE PRECISION
+>    OF EVERY CLOSED-LOOP COMPARISON IN THIS PROJECT (Appendix AD).** Same
+>    checkpoint, same seed, **7 gate-valid launches: 106.5 / 118.5 / 179.5 /
+>    205.5 / 232.0 / 353.5 / 471.5 — mean 238.1, sd 131.6, CV 55%, a 4.4×
+>    spread.** Episodes *within* a launch agree to a few steps; launches do
+>    not. **The launch is the unit of variation.**
+>
+>    At CV 55%, launches needed per arm at 80% power: **~5 to detect a 2×
+>    effect, ~19 for 50%, ~120 for 20%.** Every comparison in Appendices Z,
+>    AA, AB and AC used **n = 1**. So this harness could only ever have
+>    resolved ~3× differences, and the 7–28% differences those entries
+>    discuss were never measurable. **Z.3 and AA's nulls are not "no effect" —
+>    they are "no measurement".** The one comparison that may survive is
+>    nh_base 109.2 vs cl_base 189.4 (1.7×, and nh_base is the most stable arm
+>    seen) — suggestive, still under the resolution bar.
+>
+>    Eliminated as causes, each by measurement: control rate, track identity,
+>    and **episode start state** (`ml/diag_reset.py` — deterministic to four
+>    decimals within *and* across launches, refuting the leading hypothesis in
+>    AC). Cause unknown; remaining suspects are inside the Unity process.
+>
+>    **Consequence: do not rank policies on closed-loop steps until PRD P6 is
+>    done.** The project's trustworthy results are precisely the ones that
+>    never touched the sim (aux head, `h`-dependence, copycat refutation, cone
+>    probe, the 57% readout finding) — worth remembering for M3/M4, where the
+>    sim becomes a physical car and this noise gets worse, not better.
 > 5. **Held-out MSE ranks these arms almost exactly backwards.** The
 >    best-driving policy has the WORST val MSE by 16× (0.02846 vs 0.00177).
 >    Do not select controllers on open-loop loss in this project.

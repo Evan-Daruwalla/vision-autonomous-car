@@ -562,6 +562,33 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
     policy classes wall at 69-110 steps; only the expert, which never touches
     the latent, completes. Corner speed was tested and ruled out.
     **SIM-POC (P1-P5) is now COMPLETE.**
+    **CAVEAT ADDED 2026-08-12 (record Appendices AC/AD): every STEP COUNT above
+    is from a harness now known to be unreliable, and none of them are
+    certified.** The same controller checkpoint, same seed, evaluated across
+    gate-valid sim launches, scores anywhere from 106.5 to 471.5 steps — a
+    4.4x spread — while episodes WITHIN a launch agree to a few steps. Ruled
+    out as causes: control rate, track identity, and episode start state
+    (`ml/diag_reset.py`: post-warmup cte deterministic to four decimals within
+    AND across launches). **The LAUNCH is the unit of variation and the cause
+    is unknown.** The qualitative conclusions above survive — the expert
+    completes and learned policies mostly do not, across every launch — but
+    the specific numbers (69.3, 89.7, 187.2, 110) must not be quoted as
+    measurements. Also note the flat claim "no learned policy completed a
+    single episode" is now FALSE: completions have since been observed, just
+    not reliably.
+
+- [ ] **P6 (NEW, 2026-08-12, BLOCKING all future closed-loop claims): make the
+      sim evaluation harness trustworthy, or characterise its noise well
+      enough to design around.** This is not optional polish — it invalidated
+      a headline result (Appendix AB, retracted in AC) and it gates every
+      driving number the project will ever report, including M3/M4 on the
+      physical car. Done when: the launch-to-launch spread on a fixed
+      checkpoint is either eliminated, or quantified with enough launches that
+      a claim can carry a real confidence interval; and `eval_in_sim.py`
+      refuses to emit a comparison that the measured noise floor cannot
+      support. Already built and reusable: the expert-survival batch gate
+      (necessary, not sufficient), `control_hz` reporting, and
+      `ml/diag_reset.py`.
     **P5 FOLLOW-UP, 2026-08-08 (record Appendix W) — the wall is DIAGNOSED and
     it is a DATA problem, plus a new PRD-level risk:**
     (a) **The 69-110 step wall is PERCEPTION going out of distribution.** The
