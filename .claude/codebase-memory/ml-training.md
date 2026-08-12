@@ -361,7 +361,7 @@ same three checkpoints that scored [78,600,600] / [600,469,448] / [96,96,95]
 re-ran at [100,113] / [108,108] / [107,107]. The re-runs are tight (all 10
 seeds 85–147) where the original was chaotic (sd 230), so the original batch
 is the anomaly. ~~**No learned policy has completed an episode.**~~ **That
-flat claim is FALSE — an overcorrection, caught by landing-check 2026-08-12.**
+flat claim is FALSE — an overcorrection, caught by landing-check 2026-08-11.**
 3 completions exist in `ev3_nh_aug` and 1 in `ev2_nh_aug`. The true statement:
 **no learned policy completes RELIABLY.** Pooled over 35 gate-valid `nh_aug`
 episodes the distribution is **bimodal** — 28 under 150 steps, 4 at 450-601,
@@ -372,7 +372,7 @@ BUT NOT SUFFICIENT.** Both batches pass it (expert 600/600) and disagree 3×.
 **Never rest a closed-loop claim on one batch — replicate in an independent
 one.**
 
-**THE LAUNCH IS THE UNIT OF VARIATION (measured 2026-08-12).** Same checkpoint,
+**THE LAUNCH IS THE UNIT OF VARIATION (measured 2026-08-11).** Same checkpoint,
 same seed, four gate-valid launches: **106.5, 118.5, 205.5, 232.0 steps — a
 2.2× spread**, while episodes WITHIN a launch agree to ±3.5-5.5. Eliminated as
 causes: control rate (matched ~20 Hz), track identity (expert cte 0.323-0.381

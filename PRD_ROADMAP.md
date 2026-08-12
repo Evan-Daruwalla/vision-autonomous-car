@@ -562,33 +562,25 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
     policy classes wall at 69-110 steps; only the expert, which never touches
     the latent, completes. Corner speed was tested and ruled out.
     **SIM-POC (P1-P5) is now COMPLETE.**
-    **CAVEAT ADDED 2026-08-12 (record Appendices AC/AD): every STEP COUNT above
+    **CAVEAT ADDED 2026-08-11 ~23:29 CDT (record Appendices AC/AD): every STEP COUNT above
     is from a harness now known to be unreliable, and none of them are
     certified.** The same controller checkpoint, same seed, evaluated across
     gate-valid sim launches, scores anywhere from 106.5 to 471.5 steps — a
     4.4x spread — while episodes WITHIN a launch agree to a few steps. Ruled
     out as causes: control rate, track identity, and episode start state
-    (`ml/diag_reset.py`: post-warmup cte deterministic to four decimals within
-    AND across launches). **The LAUNCH is the unit of variation and the cause
-    is unknown.** The qualitative conclusions above survive — the expert
+    (`ml/diag_reset.py`: post-RESET POSITION is near-deterministic — z and
+    speed identical across all 16 episodes of two launches, x identical for 14
+    of 16 with episode 0 of each launch differing by 2.8e-4 world units.
+    Post-warmup *cte* is NOT four-decimal identical; it spans 0.0018-0.0075,
+    which is ~0.6% of the ~0.87 cte the car actually operates at, i.e. far too
+    small to explain a 4.4x swing). **The LAUNCH is the unit of variation and
+    the cause is unknown.** The qualitative conclusions above survive — the expert
     completes and learned policies mostly do not, across every launch — but
     the specific numbers (69.3, 89.7, 187.2, 110) must not be quoted as
     measurements. Also note the flat claim "no learned policy completed a
     single episode" is now FALSE: completions have since been observed, just
     not reliably.
 
-- [ ] **P6 (NEW, 2026-08-12, BLOCKING all future closed-loop claims): make the
-      sim evaluation harness trustworthy, or characterise its noise well
-      enough to design around.** This is not optional polish — it invalidated
-      a headline result (Appendix AB, retracted in AC) and it gates every
-      driving number the project will ever report, including M3/M4 on the
-      physical car. Done when: the launch-to-launch spread on a fixed
-      checkpoint is either eliminated, or quantified with enough launches that
-      a claim can carry a real confidence interval; and `eval_in_sim.py`
-      refuses to emit a comparison that the measured noise floor cannot
-      support. Already built and reusable: the expert-survival batch gate
-      (necessary, not sufficient), `control_hz` reporting, and
-      `ml/diag_reset.py`.
     **P5 FOLLOW-UP, 2026-08-08 (record Appendix W) — the wall is DIAGNOSED and
     it is a DATA problem, plus a new PRD-level risk:**
     (a) **The 69-110 step wall is PERCEPTION going out of distribution.** The
@@ -642,6 +634,42 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
     object; if a z=32 bottleneck cannot retain a <1%-of-frame object even
     under direct supervision, the escalation is a larger z or a detection path
     that bypasses the latent, and this item reopens.
+
+- [ ] **P6 (NEW, 2026-08-11, BLOCKING all future closed-loop claims): make the
+      sim evaluation harness trustworthy, or characterise its noise well
+      enough to design around.** This is not optional polish — it invalidated
+      a headline result (Appendix AB, retracted in AC) and it gates every
+      driving number the project will ever report, including M3/M4 on the
+      physical car. Done when: the launch-to-launch spread on a fixed
+      checkpoint is either eliminated, or quantified with enough launches that
+      a claim can carry a real confidence interval; and `eval_in_sim.py`
+      refuses to emit a comparison that the measured noise floor cannot
+      support. Already built and reusable: the expert-survival batch gate
+      (necessary, not sufficient), `control_hz` reporting, and
+      `ml/diag_reset.py`.
+      **Three concrete levers, cheapest first (added 2026-08-11 from the
+      landing-check critique of Appendix AD):**
+      (a) **PAIR THE DESIGN — probably the single biggest win.** The launch is
+      the confounder, so run EVERY arm inside EACH launch and difference
+      within-launch; the launch effect then cancels and the relevant variance
+      collapses to the within-launch component, which is a few steps. Today
+      `eval_in_sim.py` takes one `--ctrl-dir` per invocation and structurally
+      cannot do this. Fixing that plausibly beats accepting ~120 launches for
+      a 20% effect by an order of magnitude.
+      (b) **STOP USING THE MEAN — the outcome is right-censored.** `steps` is
+      capped at `--max-steps` (600) and completions sit exactly on the cap, so
+      mean and sd are biased toward it and understate upper spread; if two
+      arms differ in how often they hit the cap, the censored mean can move
+      OPPOSITE to the true one. Report a completion RATE (binomial) plus
+      MEDIAN steps instead.
+      (c) **Quote the CV with its interval.** CV 0.553 comes from n=7
+      (df=6): the chi-square 95% CI is CV ∈ [0.36, 1.22], so "~5 launches for
+      a 2× effect" is really 2-23, "~19 for 50%" is 8-93, "~120 for 20%" is
+      50-581. Use the table to choose between "a handful" and "a hundred",
+      never to certify "we ran 5, therefore powered" — re-estimate CV from the
+      actual launches first. **The conclusion that survives regardless: even
+      at the optimistic end, n=1 resolves only ~2×, and every retracted
+      difference was under 1.85×.**
 
 ## 6b. EXECUTION PLAN (dated 2026-08-05, approved by Evan — schedules the tasks above; adds no new milestones)
 

@@ -7,6 +7,17 @@ fixes the readout 57% with a frozen encoder, and both encoders erase
 sub-1%-of-frame objects — what is the right AI method for this car's autonomy
 stack: behavioural cloning, an offline world model, offline RL, or classical
 CV plus control?
+
+> **CAVEAT ADDED 2026-08-11 (record Appendix AD) — one of the four framing
+> premises above has since weakened.** "No learned policy completes a lap" is
+> now known to be false in the strict sense (completions occur, just not
+> reliably), and every closed-loop number that supported it came from a
+> harness later measured at **CV 55%**, where a single launch per arm resolves
+> only ~3× differences. **The other three premises are unaffected** — they are
+> open-loop measurements that never touched the simulator, and they are what
+> the brief's conclusions actually rest on. The findings below (H3 dies; the
+> convergent answer is hybrid; DreamerV2's own single-pixel-ball quote) are
+> unchanged.
 **For:** Evan, and any executing model working PRD M3/M4. This brief is
 supposed to settle which branch gets built, so it is written to be
 disagreed with — every hypothesis was pre-registered and every arm was

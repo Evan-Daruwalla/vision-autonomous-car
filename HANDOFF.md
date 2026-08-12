@@ -10,7 +10,7 @@ the car's own logged real driving. The process is the product: every stage
 verified on the physical car and documented as a college-portfolio
 engineering artifact.
 
-## Current state — SIM-POC COMPLETE (P1–P5); stop-sign decision made and validated; still waiting on Evan's order and coupon print
+## Current state — SIM-POC P1–P5 built but its closed-loop NUMBERS are uncertified (P6 open); stop-sign decision made and validated; still waiting on Evan's order and coupon print
 
 **Last updated: 2026-08-10 ~19:24 CDT** — this file is the only live snapshot;
 history lives in the record.
@@ -55,7 +55,7 @@ history lives in the record.
 >    and 147 and episodes within a seed near-identical. The same three
 >    checkpoints that scored [78,600,600] / [600,469,448] / [96,96,95] scored
 >    [100,113] / [108,108] / [107,107] on re-run. **Treat the 342.4 batch as
->    the anomaly, not these.** **Correction (2026-08-12): the flat claim "no
+>    the anomaly, not these.** **Correction (2026-08-11 ~23:29 CDT): the flat claim "no
 >    learned policy has completed an episode" is FALSE and was itself an
 >    overcorrection — 3 completions exist in `ev3_nh_aug` and 1 in
 >    `ev2_nh_aug`. The true statement is that **no learned policy completes
@@ -74,15 +74,23 @@ history lives in the record.
 >
 >    **No intervention tried on 2026-08-10/11 improves closed-loop driving.**
 >    Recovery data does nothing (189.4 → 189.1); removing `h` actively hurts.
-> 5. **THE HARNESS NOISE FLOOR IS MEASURED, AND IT INVALIDATES THE PRECISION
+> 4. **THE HARNESS NOISE FLOOR IS MEASURED, AND IT INVALIDATES THE PRECISION
 >    OF EVERY CLOSED-LOOP COMPARISON IN THIS PROJECT (Appendix AD).** Same
 >    checkpoint, same seed, **7 gate-valid launches: 106.5 / 118.5 / 179.5 /
 >    205.5 / 232.0 / 353.5 / 471.5 — mean 238.1, sd 131.6, CV 55%, a 4.4×
 >    spread.** Episodes *within* a launch agree to a few steps; launches do
 >    not. **The launch is the unit of variation.**
 >
->    At CV 55%, launches needed per arm at 80% power: **~5 to detect a 2×
->    effect, ~19 for 50%, ~120 for 20%.** Every comparison in Appendices Z,
+>    At CV 55%, launches needed per arm at 80% power: ~5 for a 2× effect, ~19
+>    for 50%, ~120 for 20% — **but quote these with their interval or not at
+>    all** (Appendix AE): CV is estimated from n=7, 95% CI [0.36, 1.22], so
+>    those are really **2–23 / 8–93 / 50–581**. Use them to choose between "a
+>    handful" and "a hundred", never to certify "we ran 5, therefore powered".
+>    Two things matter more than sample size: **the outcome is right-censored**
+>    at 600 steps, so report a completion RATE and MEDIAN, not a mean; and
+>    **pairing the design** (all arms inside each launch, differenced
+>    within-launch) cancels the launch effect and is likely worth an order of
+>    magnitude. Every comparison in Appendices Z,
 >    AA, AB and AC used **n = 1**. So this harness could only ever have
 >    resolved ~3× differences, and the 7–28% differences those entries
 >    discuss were never measurable. **Z.3 and AA's nulls are not "no effect" —
@@ -103,7 +111,7 @@ history lives in the record.
 > 5. **Held-out MSE ranks these arms almost exactly backwards.** The
 >    best-driving policy has the WORST val MSE by 16× (0.02846 vs 0.00177).
 >    Do not select controllers on open-loop loss in this project.
-> 4. **`eval_in_sim.py` step counts are NOT comparable across runs** unless
+> 6. **`eval_in_sim.py` step counts are NOT comparable across runs** unless
 >    the reported `control_hz` agrees. The same checkpoint scored 69.3 steps
 >    at 13.2 Hz and 187.2 at 16.7 Hz. **The banked P5 headline of 69.3
 >    understates that controller by 2.7×.** Do NOT use `--control-hz` to
@@ -229,7 +237,8 @@ history lives in the record.
 | SIM-POC P2 corpus | P2 | **DONE** | 2026-08-06, Appendix R: **102,888 frames**, 88/88 episodes verified on BOTH axes, split disjoint, PASS. Target met, not redefined. **2 train layouts, not 4** (Appendix Q), unbalanced 51:27 |
 | SIM-POC P3 world model | P3 | **DONE** | 2026-08-06, Appendix S: V+M+C trained (VAE 4,348,547 params = exact paper match). 30-step imagination **beats a frozen-frame baseline 30/30 steps in-domain**, 0/30 cross-domain. Done-check PASS. ~6 min total training |
 | SIM-POC P4 DreamerV3 | P4 | **DONE** | 2026-08-06, Appendices T+U: **both** halves. Trained 2000 steps (image loss 588.31→61.39, 9.6x) AND the 8GB fitting table measured. **Batch size, not model size, breaks 8GB**: 69.7M params fit at b16 (5.238 GB), 19.1M at b64 does not fit in 7.0 GB. Two task premises proved false — see T.2 |
-| SIM-POC P5 policy | P5 | **DONE — SIM-POC COMPLETE** | 2026-08-07, Appendix V. Latent BC (linear + MLP) **and** CEM planning, 3 seeds × 3 episodes. **No learned policy finished; expert 9/9.** Key finding: the paper's linear C is structurally wrong here — z encodes cross-track error nonlinearly (probe R² 0.27 linear vs 0.97 MLP). Bottleneck is the representation, not the controller |
+| SIM-POC P5 policy | P5 | **DONE — but its NUMBERS are uncertified** | 2026-08-07, Appendix V. Latent BC (linear + MLP) **and** CEM planning, 3 seeds × 3 episodes. Key finding (stands, open-loop): the paper's linear C is structurally wrong here — z encodes cross-track error nonlinearly (probe R² 0.27 linear vs 0.97 MLP). **CAVEAT 2026-08-11 (Appendix AD): every step count from this task came from a harness later measured at CV 55%, where n=1 launch resolves only ~3×. The qualitative result holds — the expert completes, learned policies mostly do not — but 69.3/89.7/187.2/110 are not measurements. "No learned policy finished" was also later shown FALSE in the strict sense: completions occur, just not reliably.** |
+| **Harness trustworthiness** | **P6** | **OPEN — BLOCKING all closed-loop claims** | 2026-08-11, Appendix AD. Same checkpoint across 7 gate-valid launches: 106.5–471.5 steps, CV 55%. Rate, track and start state ruled out; cause unknown. Nothing may be ranked on closed-loop steps until this is fixed or quantified |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
 
 ## Hardware & stack facts (from the 2026-07-23 brief — re-verify prices at purchase)

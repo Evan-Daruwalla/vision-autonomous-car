@@ -65,6 +65,7 @@ the dated entry, not the digest.
 - [AB — ~~FIRST COMPLETED EPISODES~~ **[RETRACTED — see AC]**: the controller was ignoring z, and recovery data only pays once the crutch is removed](#appendix-ab---first-completed-episodes-the-controller-was-ignoring-z-and-recovery-data-only-pays-once-the-crutch-is-removed-2026-08-11-0021-cdt) (08-11)
 - [AC — **RETRACTION of AB**: the "first completed episodes" result did not replicate; the closed-loop harness is not trustworthy](#appendix-ac---retraction-of-ab-the-first-completed-episodes-result-did-not-replicate-and-the-closed-loop-harness-is-not-trustworthy-2026-08-11-1821-cdt) (08-11)
 - [AD — Harness noise floor MEASURED (CV 55%): the reset is exonerated and every comparison this session was underpowered](#appendix-ad---the-harness-noise-floor-measured-cv-55-and-every-comparison-this-session-was-underpowered-2026-08-11-2329-cdt) (08-11)
+- [AE — Corrections to AD, and a better harness fix than AD proposed: pair the design, the outcome is censored, and the CV needs its interval](#appendix-ae---corrections-to-ad-and-a-better-fix-for-the-harness-than-the-one-ad-proposed-2026-08-12-0724-cdt) (08-12)
 
 ---
 
@@ -3648,3 +3649,133 @@ the equivalent noise will be worse, not better.
 5. **`docs/BOM.md` still modified by another session**, unverified, claiming
    the $200 ceiling is breached. Excluded from commits 2cbb84e and 0bf4264.
 6. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+
+
+---
+
+# Appendix AE - Corrections to AD, and a better fix for the harness than the one AD proposed (2026-08-12, ~07:24 CDT)
+
+`/landing-check` on commit e5dceed, run cold against artifacts. Every headline
+number in AD re-derived exactly. Six corrections, and one methodological
+critique that is more useful than anything AD itself proposed.
+
+## AE.1 Corrections to Appendix AD
+
+1. **"Post-reset position identical to four decimals across 16 episodes" is
+   OVERSTATED.** z, speed and `reset_seconds` are identical throughout, but
+   **x is not**: episode 0 of *each* launch reads 6.2114 against 6.2116 for
+   the other 14. The conclusion is unaffected — the difference is 2.8e-4 world
+   units — but the claim as written is false.
+2. **The episode pool was stale: 35, not 47.** The `lc_*` launches were added
+   by the very commit that quoted the 35-episode pool. Re-derived over all
+   gate-valid `nh_aug` episodes at HEAD: **n=47, 30 under 150 steps, 6 at
+   450-601, 4 completions.** Still bimodal; conclusion unchanged.
+3. **The matched-batch table did not state its estimator.** cl_base 190.3 /
+   cl_aug 167.8 / nh_base 109.25 / nh_aug 232.8 are **unweighted
+   mean-of-batch-means**. Episode-pooled gives 189.3 / 173.5 / 109.3 /
+   **254.7** — nh_aug moves 22 steps, because ev3 (n=9) and ev4 (n=6) disagree
+   most on that arm. Unweighted is the defensible choice given the batch is
+   the unit of variation, but it should have been said.
+4. **Date stamps were wrong in four places.** `ml-training.md`,
+   `PRD_ROADMAP.md` (x2) and `HANDOFF.md` stamped edits **2026-08-12** while
+   the commit landed 2026-08-11 23:31 CDT — i.e. ~29 minutes in the future.
+   Cause: I took the date from a system notice (UTC) instead of the `date`
+   call I had already run (2026-08-11 23:29 -0500). The standing rule is to
+   run `date` and label by the reported offset; I ran it and then ignored it.
+   All four corrected to 2026-08-11.
+5. **`PRD_ROADMAP.md` misdescribed the diagnostic it cited.** It said
+   "post-warmup **cte** deterministic to four decimals". False — post-warmup
+   cte spans 0.0018-0.0075. It is post-**reset position** that is
+   near-deterministic. AD's own wording was right; the PRD paraphrase was not.
+   Corrected, and the cte spread is now given in context (~0.6% of the ~0.87
+   cte the car actually operates at, far too small to explain a 4.4x swing).
+6. **The research brief still carried a retracted premise.** Its framing
+   question opens with "no learned policy completes a lap". AD said the false
+   universal was "corrected in HANDOFF and the bin" and never mentioned the
+   brief — while the same commit message listed the brief under "what
+   survives". Now caveated in place, noting that the other three framing
+   premises are open-loop and unaffected.
+
+Also fixed: `HANDOFF.md` had duplicate item numbers (two 5s and an out-of-order
+4) from successive edits, and its status table still showed P5 as
+"DONE — SIM-POC COMPLETE" with no caveat and no P6 row, so a fresh session
+reading the table got the pre-correction picture. Both repaired.
+
+## AE.2 The power table is a good argument and a bad number
+
+AD's CV-55% table is arithmetically correct and the formula is the right one.
+It is also **far softer than AD presented it**, and the reason is not the one
+AD flagged.
+
+**The sd is barely estimated, and this is the real defect.** n=7, df=6. The
+chi-square 95% CI on sigma gives **CV in [0.36, 1.22]**. Since n scales with
+CV^2:
+
+| effect | AD stated | actual 95% interval |
+|---|---|---|
+| 2x | ~5 | **2 - 23** |
+| 50% | ~19 | **8 - 93** |
+| 20% | ~120 | **50 - 581** |
+
+**Three lines after establishing that n=1 cannot support a claim, AD committed
+the same error one level up** — a single n=7 sample quoted to two significant
+figures with no interval. Recorded because it is the same mistake in a new
+costume.
+
+**Bimodality matters LESS than AD claimed, and the label was on the wrong
+pool.** Normality is assumed of the sampling distribution of the mean
+difference, not the raw data, and the CLT absorbs most of it. More to the
+point: the bimodality evidence comes from the 35/47-EPISODE pool mixing four
+batches, whereas **the 7 launch means the CV was computed from are not
+bimodal** — they are right-skewed (skew +1.02), and near-symmetric on a log
+scale (log-sd 0.540). The launch process looks multiplicative, which is
+exactly the regime where CV is the right scale-free summary. The shape
+argument mostly *supports* the parameterisation. What skew does cost is that
+nominal 80% power will not be true power at n~5, usually against you — so
+treat the n's as floors.
+
+**The unmodelled defect nobody named: the outcome is RIGHT-CENSORED.**
+`eval_in_sim.py` defines `survived = steps >= max_steps`, steps caps at 600,
+and completions sit exactly on the cap. Mean and sd of a censored variable are
+biased toward the cap and understate upper spread; **if two arms differ in how
+often they hit it, the censored mean can move opposite to the true one.** This
+is a worse problem than bimodality and it silently affects every step-count
+comparison in Z, AA, AB, AC and AD. The fix is a completion RATE plus MEDIAN
+steps, not a mean.
+
+**And the biggest lever is a design change, not a sample size.** The formula
+prices an UNPAIRED design. The launch is the confounder, so run every arm
+INSIDE each launch and difference within-launch: the launch effect cancels and
+the relevant variance collapses to the within-launch component, which
+`diag_reset` and the `lc_*` episodes both put at a few steps. `eval_in_sim.py`
+takes one `--ctrl-dir` per invocation and structurally cannot do this today.
+**That plausibly beats accepting ~120 launches for a 20% effect by an order of
+magnitude**, and AD never considered it. All three are now PRD P6 sub-items.
+
+**What survives intact** is the conclusion AD actually needs: *one launch per
+arm resolves only ~3x, so every n=1 comparison in Z/AA/AB/AC was
+unmeasurable.* That holds at the optimistic end of the CV interval too — at
+CV 0.36, n=1 still resolves only 2.4x, and every retracted difference was
+under 1.85x.
+
+## AE.3 A lead AD closed too early
+
+Episode 0 of each launch differs from episodes 1-7 on **both** x (6.2114 vs
+6.2116) and post-warmup cte (0.0018/0.0028 vs 0.0073/0.0075), reproducibly, in
+both launches. In a session whose thesis is "the launch is the unit of
+variation", **a systematic first-episode-after-launch difference is exactly
+the signal worth chasing.** The magnitudes are physically tiny and the
+conclusion is almost certainly right, but AD closed the hypothesis as "the
+start state is deterministic", which the data do not quite say. Left open
+rather than quietly dropped.
+
+## AE.4 Open items
+
+1. **P6, now with three concrete levers** (paired design, censoring-aware
+   endpoints, CV with interval) rather than the vague "characterise it".
+   Paired design first.
+2. The first-episode effect (AE.3).
+3. Everything still blocked on Evan: `docs/BOM.md` (unverified, claims the
+   $200 ceiling is breached, excluded from three commits now), the encoder
+   motor (#5159, +$6) and the ~1:20 track re-spec.
+4. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
