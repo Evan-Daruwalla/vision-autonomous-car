@@ -668,8 +668,9 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
       50-581. Use the table to choose between "a handful" and "a hundred",
       never to certify "we ran 5, therefore powered" — re-estimate CV from the
       actual launches first. **The conclusion that survives regardless: even
-      at the optimistic end, n=1 resolves only ~2×, and every retracted
-      difference was under 1.85×.**
+      at the optimistic end of the CV interval (0.36), n=1 resolves only
+      2.43×, and every retracted difference was under 1.85× (342.4/185.6 =
+      1.845).**
 
 ## 6b. EXECUTION PLAN (dated 2026-08-05, approved by Evan — schedules the tasks above; adds no new milestones)
 

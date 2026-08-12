@@ -12,7 +12,7 @@ engineering artifact.
 
 ## Current state — SIM-POC P1–P5 built but its closed-loop NUMBERS are uncertified (P6 open); stop-sign decision made and validated; still waiting on Evan's order and coupon print
 
-**Last updated: 2026-08-10 ~19:24 CDT** — this file is the only live snapshot;
+**Last updated: 2026-08-12 ~12:34 CDT** — this file is the only live snapshot;
 history lives in the record.
 
 > **2026-08-10 (Appendices Y, Z) — read these four before touching the ML
@@ -59,9 +59,9 @@ history lives in the record.
 >    learned policy has completed an episode" is FALSE and was itself an
 >    overcorrection — 3 completions exist in `ev3_nh_aug` and 1 in
 >    `ev2_nh_aug`. The true statement is that **no learned policy completes
->    RELIABLY**: pooled over 35 gate-valid `nh_aug` episodes the distribution
->    is bimodal — 28 die under 150 steps, 4 reach 450-601 — and **all
->    completions came from one launch.**
+>    RELIABLY**: pooled over **47** gate-valid `nh_aug` episodes the
+>    distribution is bimodal — **30 die under 150 steps, 6 reach 450-601** —
+>    with **4 completions**, all from one launch.
 >    **The whole 2×2 reverses on re-run** (Appendix AC) — the plain baseline
 >    is the best and by far the most stable arm:
 >
@@ -99,9 +99,12 @@ history lives in the record.
 >    seen) — suggestive, still under the resolution bar.
 >
 >    Eliminated as causes, each by measurement: control rate, track identity,
->    and **episode start state** (`ml/diag_reset.py` — deterministic to four
->    decimals within *and* across launches, refuting the leading hypothesis in
->    AC). Cause unknown; remaining suspects are inside the Unity process.
+>    and **episode start state** (`ml/diag_reset.py` — post-RESET POSITION is
+>    near-deterministic: z identical across all 16 episodes of two launches, x
+>    identical for 14 of 16. NOT "deterministic to four decimals" — post-warmup
+>    cte spans 0.0018-0.0075, ~0.6% of the ~0.87 cte the car operates at, far
+>    too small to explain a 4.4× swing. Refutes the leading hypothesis in AC).
+>    Cause unknown; remaining suspects are inside the Unity process.
 >
 >    **Consequence: do not rank policies on closed-loop steps until PRD P6 is
 >    done.** The project's trustworthy results are precisely the ones that

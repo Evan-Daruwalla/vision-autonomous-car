@@ -66,6 +66,7 @@ the dated entry, not the digest.
 - [AC — **RETRACTION of AB**: the "first completed episodes" result did not replicate; the closed-loop harness is not trustworthy](#appendix-ac---retraction-of-ab-the-first-completed-episodes-result-did-not-replicate-and-the-closed-loop-harness-is-not-trustworthy-2026-08-11-1821-cdt) (08-11)
 - [AD — Harness noise floor MEASURED (CV 55%): the reset is exonerated and every comparison this session was underpowered](#appendix-ad---the-harness-noise-floor-measured-cv-55-and-every-comparison-this-session-was-underpowered-2026-08-11-2329-cdt) (08-11)
 - [AE — Corrections to AD, and a better harness fix than AD proposed: pair the design, the outcome is censored, and the CV needs its interval](#appendix-ae---corrections-to-ad-and-a-better-fix-for-the-harness-than-the-one-ad-proposed-2026-08-12-0724-cdt) (08-12)
+- [AF — AE corrected the record and forgot the live docs, which is the error AE was correcting](#appendix-af---ae-corrected-the-record-and-forgot-the-live-docs-which-is-the-error-ae-was-correcting-2026-08-12-0735-cdt) (08-12)
 
 ---
 
@@ -3779,3 +3780,96 @@ rather than quietly dropped.
    $200 ceiling is breached, excluded from three commits now), the encoder
    motor (#5159, +$6) and the ~1:20 track re-spec.
 4. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+
+
+---
+
+# Appendix AF - AE corrected the record and forgot the live docs, which is the error AE was correcting (2026-08-12, ~07:35 CDT)
+
+Third `/landing-check`, on commit 35fd453. It confirmed every number in AE
+re-derives exactly, and then found that **two of AE's six corrections were
+written into the append-only record and never applied to the two LIVE
+documents carrying the same errors.** That is precisely the failure AE was
+correcting AD for, committed one layer up. Recorded because the pattern is now
+three deep and clearly systematic rather than incidental.
+
+## AF.1 The pattern
+
+| layer | error | caught by |
+|---|---|---|
+| AB | reported a result the instrument could not support | replication |
+| AC | retracted it, asserted a replacement with the same defect | AD |
+| AD | quoted CV 0.553 off n=7 to three figures, three lines after establishing n=1 proves nothing | landing-check 2 |
+| AE | corrected AD in the RECORD, left HANDOFF and the bin stating the old numbers | landing-check 3 |
+
+**The common shape: the correction is written where it is easiest to write —
+the newest entry — rather than everywhere the claim actually lives.** The
+append-only record makes this especially seductive, because appending *feels*
+like fixing. It is not. `HANDOFF.md` is the only live snapshot and the bins are
+what a fresh session reads; a correction that lands only in the record is a
+correction nobody will see.
+
+## AF.2 What was still stale, now fixed
+
+1. **`ml-training.md` and `HANDOFF.md` both still said "35 gate-valid episodes,
+   28 under 150, 4 at 450-601".** Corrected everywhere to the re-derived
+   **47 / 30 / 6, with 4 completions.**
+2. **Both still said the start state was "deterministic to four decimals"** —
+   the exact phrasing AE had just corrected in the PRD, and self-refuting where
+   the bin quoted "0.0066 vs 0.0069" in the same sentence. Replaced with the
+   accurate statement: post-RESET POSITION is near-deterministic; post-warmup
+   *cte* spans 0.0018-0.0075.
+3. **`ml-training.md` still described "four gate-valid launches ... 2.2x
+   spread"** from the intermediate measurement, against the final seven
+   launches / 4.4x / CV 55%.
+4. **`HANDOFF.md` still read "Last updated: 2026-08-10 ~19:24 CDT"** after two
+   commits had rewritten it — in a commit whose stated theme was date-stamp
+   correctness. Now 2026-08-12.
+5. **`ml-training.md:172`'s "No learned policy completed a lap"** was true as
+   scoped to Appendix V's three arms but unmarked, 190 lines above its own
+   retraction. Now carries the scope caveat.
+6. **PRD P6(c) understated its own bound** (~2x where the arithmetic gives
+   2.43x at CV 0.36).
+
+## AF.3 A correction to AE itself
+
+AE.1 §1 states that in `diag_reset`, "z, speed and `reset_seconds` are
+identical throughout". **Two thirds of that is wrong**, though harmlessly:
+
+- `z` — genuinely identical across all 16 episodes.
+- `speed` — **not identical**: it ranges 1.02e-7 to 4.19e-7. Equal only when
+  rounded, and at that magnitude the claim is vacuous rather than true.
+- `reset_seconds` — **not identical**: 1.201 and 1.202 both occur.
+
+The conclusion is untouched (a 3e-7 speed difference cannot move a car), but
+"identical" was the wrong word and this is the second time in two entries that
+an over-strong determinism claim has had to be walked back. **Rule adopted:
+write the measured range, never the word "identical", unless the values are
+bit-equal.**
+
+## AF.4 What the three landing-checks cost and returned
+
+Three fresh-agent sweeps across commits 0bf4264, e5dceed and 35fd453. Between
+them they caught: a false universal committed to a public repo, an unmatched
+comparison table presented as like-for-like, four wrong date stamps, a PRD that
+misdescribed the diagnostic it cited, a stale episode pool, an unstated
+estimator, an untouched roadmap, and this entry's stale live docs. **None of
+these were code bugs** — `/code-review` and `code-check` would have passed all
+three commits. Every one was a claim that did not match disk, or a correction
+that did not propagate.
+
+They also produced the single best idea of the session, which was not mine:
+**pair the design** — run every arm inside each launch and difference
+within-launch, cancelling the launch effect entirely — rather than accepting
+~120 launches per arm to detect a 20% effect. Now PRD P6(a).
+
+## AF.5 Open items
+
+Unchanged from AE, minus the fixed items:
+1. **P6**, with its three levers — paired design first.
+2. The first-episode-after-launch effect (AE.3), still unchased.
+3. **Blocked on Evan:** `docs/BOM.md` (excluded from four commits now,
+   unverified, claims the $200 ceiling is breached); the encoder motor
+   (#5159, +$6); the ~1:20 track re-spec.
+4. **Nothing printed, nothing ordered** - unchanged since 2026-07-23, now
+   three weeks.
