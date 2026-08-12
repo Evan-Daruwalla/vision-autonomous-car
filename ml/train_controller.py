@@ -158,6 +158,15 @@ def main() -> int:
                     help="processed corpus to train on. Point at "
                          "ml/data/proc_aug to include the off-centre recovery "
                          "episodes; V and M stay frozen on the original.")
+    ap.add_argument("--no-history", action="store_true",
+                    help="zero the MDN-RNN hidden state, training C on z "
+                         "alone. Tests whether the controller's near-total "
+                         "dependence on h is what kills it in closed loop: h "
+                         "is teacher-forced on LOGGED expert actions during "
+                         "training but built from the POLICY's own actions at "
+                         "serve time, so it drifts. eval_in_sim.py reads this "
+                         "flag back out of the checkpoint and zeroes h to "
+                         "match (see diag_copycat.py)")
     ap.add_argument("--recovery-weight", type=float, default=1.0,
                     help="loss weight on frames from '-rec' (off-centre "
                          "recovery) episodes. 1.0 = unweighted, the Appendix "
@@ -231,6 +240,14 @@ def main() -> int:
 
     fit_z, fit_a = mu[fit_i], act[fit_i]
     val_z, val_a = mu[val_i], act[val_i]
+
+    if args.no_history:
+        # Zeroed rather than removed so the Controller architecture, parameter
+        # count and checkpoint format stay identical to every banked arm --
+        # the only thing that changes is the information available.
+        fit_h = np.zeros_like(fit_h)
+        val_h = np.zeros_like(val_h)
+        print("--no-history: MDN-RNN hidden state ZEROED, C sees z only")
 
     # **Recovery-frame sample weight.** Appendix Z.3: adding 6.67% off-centre
     # recovery data left the controller's val MSE essentially unchanged

@@ -353,6 +353,59 @@ teaches the car to swerve.
   Appendix Y.4. It came from one collection run's stdout; the directory
   already held 2 episodes from an earlier run.)
 
+## RETRACTION (2026-08-11): the "first completions" result did not replicate
+
+The 342.4-steps / 3-of-9 headline below is **withdrawn**. Ten seeds across two
+independent gate-valid batches give **107.2 ± 16.0, 0/20 completions**; the
+same three checkpoints that scored [78,600,600] / [600,469,448] / [96,96,95]
+re-ran at [100,113] / [108,108] / [107,107]. The re-runs are tight (all 10
+seeds 85–147) where the original was chaotic (sd 230), so the original batch
+is the anomaly. **No learned policy has completed an episode.**
+
+**The lesson is bigger than the result: the expert-survival gate is NECESSARY
+BUT NOT SUFFICIENT.** Both batches pass it (expert 600/600) and disagree 3×.
+**Never rest a closed-loop claim on one batch — replicate in an independent
+one.** The 2×2 interaction below was measured in the suspect batch and is
+under re-test; treat every number in it as provisional.
+
+## The controller ignored `z` and rode the RNN state (2026-08-11, result under re-test)
+
+`ml/diag_copycat.py`, held-out, skill = 1 − MSE/var:
+
+| comparison | MSE | skill |
+|---|---|---|
+| controller → a[t] | 0.001755 | 0.993 |
+| a[t−1] → a[t] (trivial copy) | 0.031997 | 0.873 |
+| **controller with h=0 → a[t]** | **0.282040** | **−0.120** |
+
+- **Copycat (Wen et al. NeurIPS 2020) is REFUTED** — beats repeat-last-action
+  by 18.2× and predicts a[t] better than a[t−1].
+- **But it depends almost entirely on `h`.** Zero it and the model is worse
+  than predicting the mean. **`h` is teacher-forced on LOGGED expert actions
+  in training and built from the POLICY's own actions at serve time**, so the
+  one input it uses is the one that drifts. Compounding error through the
+  recurrent state — not the same failure as perception OOD.
+
+**The 2×2 (3 seeds, V and M frozen, one matched batch, expert 9/9 in all):**
+
+| | with `h` | `z` only (`--no-history`) |
+|---|---|---|
+| original | 185.6 (0/9) | 109.3 (0/9) |
+| + recovery | 196.6 (0/9) | **342.4, 3/9 COMPLETED** |
+
+- **Neither change works alone; the interaction is the result.** z-only alone
+  is *worse*. Recovery data alone does nothing. A one-variable-at-a-time
+  search rejects both.
+- **This vindicates the 57% probe finding** — it was necessary but could not
+  express itself while the controller ignored `z`. It also means the
+  `--recovery-weight` null had a cause I got wrong (not "drowned out in the
+  objective" — no weighting helps when the model ignores the input).
+- **Variance is high: per-seed [426, 506, 96].** Not a solved task.
+
+**DO NOT SELECT CONTROLLERS ON OPEN-LOOP MSE.** It ranks these arms backwards:
+the best-driving arm has the worst val MSE by **16×** (0.02846 vs 0.00177).
+Exactly Codevilla et al. (ECCV 2018), measured on this stack.
+
 ## Rules carried forward to M4 (real-car logs)
 
 - **Measure, never estimate, VRAM.** The retracted "~24 GB for DreamerV3"

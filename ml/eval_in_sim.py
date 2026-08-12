@@ -69,8 +69,14 @@ SIZE = 64
 class LatentPolicy:
     """V -> M -> C, driven online. Maintains the LSTM state across steps."""
 
-    def __init__(self, vae: ConvVAE, rnn: MDNRNN, ctrl: Controller, device: str):
+    def __init__(self, vae: ConvVAE, rnn: MDNRNN, ctrl: Controller, device: str,
+                 no_history: bool = False):
         self.vae, self.rnn, self.ctrl, self.device = vae, rnn, ctrl, device
+        # Set from the CHECKPOINT, never by hand: a controller trained with h
+        # zeroed must be served with h zeroed, and serving them differently is
+        # a silent train/serve skew of exactly the kind that cost this project
+        # a result once already.
+        self.no_history = no_history
         self.reset()
 
     def reset(self):
@@ -98,7 +104,8 @@ class LatentPolicy:
         # C sees h BEFORE the RNN consumes this step -- the same causal
         # convention train_controller.py used. Getting this backwards here
         # would silently change the policy's input distribution at serve time.
-        action = self.ctrl(mu, self._h).squeeze(0).cpu().numpy()
+        h = torch.zeros_like(self._h) if self.no_history else self._h
+        action = self.ctrl(mu, h).squeeze(0).cpu().numpy()
 
         _, self._state = self.rnn.lstm(
             torch.cat([mu, torch.from_numpy(action).to(self.device).unsqueeze(0)],
@@ -258,12 +265,17 @@ def main() -> int:
                 if not ctrl_path.exists():
                     print(f"FAIL: no {arch} controller for seed {seed} at {ctrl_path}")
                     return 1
+                ck = torch.load(ctrl_path, map_location=args.device)
                 ctrl = Controller(arch=arch).to(args.device)
-                ctrl.load_state_dict(torch.load(
-                    ctrl_path, map_location=args.device)["model"])
+                ctrl.load_state_dict(ck["model"])
                 ctrl.eval()
+                no_hist = bool(ck.get("args", {}).get("no_history", False))
+                if no_hist and seed == args.seeds[0]:
+                    print(f"  {arch}: checkpoint was trained with --no-history; "
+                          f"serving with h zeroed to match")
                 drivers.append((f"controller_{arch}",
-                                LatentPolicy(vae, rnn, ctrl, args.device), False))
+                                LatentPolicy(vae, rnn, ctrl, args.device,
+                                             no_history=no_hist), False))
 
             for name, driver, is_expert in drivers:
                 for ep in range(args.episodes):
@@ -303,7 +315,23 @@ def main() -> int:
               f"{np.nanmean(ctes):>10.3f} {rev.mean():>9.2f} "
               f"{hz.mean():>8.2f} {surv:>7}/{len(rows)}")
 
+    # **Batch validity gate.** The PID expert is fixed code with no learned
+    # part and completes 9/9 on a healthy sim. When it does NOT, the sim itself
+    # was degraded for this batch and every controller number in it is
+    # untrustworthy -- measured 2026-08-10, when the expert fell to 4/9 then
+    # 0/9 across four consecutive arms at a normal ~20 Hz, having been 9/9 all
+    # evening. Recorded in the payload so a stale artifact cannot later be read
+    # as a clean result.
+    exp = summary.get("expert")
+    batch_valid = bool(exp and exp["survived"] == exp["episodes"])
+    if exp and not batch_valid:
+        print(f"\n*** BATCH INVALID: the expert survived only "
+              f"{exp['survived']}/{exp['episodes']}. The expert is fixed code "
+              f"and completes 9/9 on a healthy sim, so the SIMULATOR was "
+              f"degraded during this run. Do not compare these controller "
+              f"numbers against another batch. Re-run. ***")
     payload = {"args": vars(args), "per_episode": results, "summary": summary,
+               "batch_valid": batch_valid,
                "no_transfer_claim": (
                    "Simulated only. These numbers say nothing about the "
                    "physical car; the controller has never seen real hardware. "
@@ -311,7 +339,7 @@ def main() -> int:
     (out / "p5_eval.json").write_text(json.dumps(payload, indent=2))
     print(f"\n-> {out / 'p5_eval.json'}")
     print("NOTE: simulated only. No transfer claim is made or implied.")
-    return 0
+    return 0 if batch_valid or exp is None else 2
 
 
 if __name__ == "__main__":

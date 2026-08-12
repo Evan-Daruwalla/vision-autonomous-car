@@ -43,8 +43,40 @@ history lives in the record.
 >    other mean, 0/9 everywhere). The weighting was not a no-op — unweighted
 >    val MSE degrades 0.00177 → 0.00331 and lane error rises to 1.029 — so a
 >    genuinely different policy was learned; it just does not drive better.
->    **Recovery data does not beat this wall at any loss weight. The
->    bottleneck is upstream.**
+>    **…and Appendix AB found why: the controller was barely reading `z` at
+>    all.** Zeroing the MDN-RNN hidden state at serve time makes it worse than
+>    predicting the mean (skill −0.120), so it rode almost entirely on `h` —
+>    which is teacher-forced on logged expert actions in training but built
+>    from the policy's own actions in closed loop, and therefore drifts.
+>    ~~**Remove `h` AND add recovery data and the car finally drives: 342.4
+>    steps, 3/9 episodes COMPLETED.**~~ **RETRACTED 2026-08-11 — DID NOT
+>    REPLICATE.** Ten seeds across two independent gate-valid batches give
+>    **107.2 ± 16.0 steps and 0/20 completions**, with every seed between 85
+>    and 147 and episodes within a seed near-identical. The same three
+>    checkpoints that scored [78,600,600] / [600,469,448] / [96,96,95] scored
+>    [100,113] / [108,108] / [107,107] on re-run. **Treat the 342.4 batch as
+>    the anomaly, not these.** No learned policy has completed an episode.
+>    **The whole 2×2 reverses on re-run** (Appendix AC) — the plain baseline
+>    is the best and by far the most stable arm:
+>
+>    | arm | valid batches | mean | sd |
+>    |---|---|---|---|
+>    | cl_base (h, original) | 4 | **189.4** | **4.1** |
+>    | cl_aug (h, +recovery) | 4 | 189.1 | 35.1 |
+>    | nh_base (z-only) | 2 | 109.2 | 0.1 |
+>    | nh_aug (z-only, +recovery) | 4 | 170.0 | 115.4 |
+>
+>    **No intervention tried on 2026-08-10/11 improves closed-loop driving.**
+>    Recovery data does nothing (189.4 → 189.1); removing `h` actively hurts.
+> 5. **The expert-survival gate is NECESSARY BUT NOT SUFFICIENT.** Both the
+>    342.4 batch and the 107.2 batches pass it (expert 600/600) and disagree
+>    by 3×. A healthy expert does NOT certify a batch for a marginal policy.
+>    Until the cause is found, **no closed-loop claim should rest on a single
+>    batch** — replicate in an independent one first. This is the single most
+>    important methodological fact in the project right now.
+> 5. **Held-out MSE ranks these arms almost exactly backwards.** The
+>    best-driving policy has the WORST val MSE by 16× (0.02846 vs 0.00177).
+>    Do not select controllers on open-loop loss in this project.
 > 4. **`eval_in_sim.py` step counts are NOT comparable across runs** unless
 >    the reported `control_hz` agrees. The same checkpoint scored 69.3 steps
 >    at 13.2 Hz and 187.2 at 16.7 Hz. **The banked P5 headline of 69.3

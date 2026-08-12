@@ -1,0 +1,17 @@
+{
+  "args": {
+    "proc": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\data\\proc",
+    "ctrl": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\cl_base\\controller_mlp_seed0.pt",
+    "vae": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\vae\\vae_best.pt",
+    "rnn": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\mdnrnn\\mdnrnn_best.pt",
+    "out": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\diag_copycat",
+    "device": "cuda"
+  },
+  "n_frames": 14400,
+  "var_action": 0.25183409452438354,
+  "mse_ctrl_vs_at": 0.0017547676106914878,
+  "mse_prev_vs_at": 0.03199651092290878,
+  "mse_ctrl_vs_prev": 0.030698562040925026,
+  "mse_ctrl_h0_vs_at": 0.28203994035720825,
+  "verdict": "NOT A COPYCAT on this evidence. The controller (0.001755) beats repeat-last-action (0.031997) by 18.23x and predicts a[t] better than a[t-1]. Its MSE reflects real signal, so the P5 wall needs a different explanation."
+}

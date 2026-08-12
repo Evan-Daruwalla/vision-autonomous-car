@@ -62,6 +62,8 @@ the dated entry, not the digest.
 - [Y — The stop-sign decision, and an AUC of 0.997 that meant nothing](#appendix-y---the-stop-sign-decision-and-an-auc-of-0997-that-meant-nothing-2026-08-10-1853-cdt) (08-10)
 - [Z — The aux head works; the research brief kills H3; the closed-loop metric was never reproducible](#appendix-z---the-aux-head-works-the-research-brief-kills-h3-and-the-closed-loop-metric-was-never-reproducible-2026-08-10-1924-cdt) (08-10)
 - [AA — Recovery data is not the fix, and the loss weight is not either: the wall is upstream](#appendix-aa---recovery-data-is-not-the-fix-and-the-loss-weight-is-not-either-the-wall-is-upstream-2026-08-10-2007-cdt) (08-10)
+- [AB — ~~FIRST COMPLETED EPISODES~~ **[RETRACTED — see AC]**: the controller was ignoring z, and recovery data only pays once the crutch is removed](#appendix-ab---first-completed-episodes-the-controller-was-ignoring-z-and-recovery-data-only-pays-once-the-crutch-is-removed-2026-08-11-0021-cdt) (08-11)
+- [AC — **RETRACTION of AB**: the "first completed episodes" result did not replicate; the closed-loop harness is not trustworthy](#appendix-ac---retraction-of-ab-the-first-completed-episodes-result-did-not-replicate-and-the-closed-loop-harness-is-not-trustworthy-2026-08-11-1821-cdt) (08-11)
 
 ---
 
@@ -3226,3 +3228,261 @@ a checkable statement instead of an assumption — and after Z.2, an eval batch
 without its own control arm is not worth running. Note also that the sim ran at
 **20.00 Hz this session against 18.87 Hz earlier the same evening**, which is
 further evidence that only within-batch comparisons mean anything here.
+
+
+---
+
+# Appendix AB - FIRST COMPLETED EPISODES: the controller was ignoring z, and recovery data only pays once the crutch is removed (2026-08-11, ~00:21 CDT)
+
+**WHAT:** the copycat test from AA.2. Copycat is refuted, but the ablation
+built to test it found the actual failure, and fixing it produced **the first
+learned policy in this project to finish an episode.** New:
+`ml/diag_copycat.py`, `--no-history` on `train_controller.py` (honoured at
+serve time by `eval_in_sim.py`), and a batch-validity gate.
+
+## AB.1 Copycat: refuted, cheaply, without retraining
+
+Expert steering is temporally smooth, so "repeat the previous action" is a
+strong predictor for free. If the controller cannot beat it, its held-out MSE
+is autocorrelation rather than perception. Held-out, 14,400 frames, skill =
+1 - MSE/var:
+
+| comparison | MSE | skill |
+|---|---|---|
+| controller -> a[t] (the reported val MSE) | 0.001755 | 0.993 |
+| a[t-1] -> a[t] (trivial copy baseline) | 0.031997 | 0.873 |
+| controller -> a[t-1] | 0.030699 | 0.878 |
+| **controller with h=0 -> a[t]** | **0.282040** | **-0.120** |
+
+The controller beats repeat-last-action by **18.2x** and predicts a[t] far
+better than a[t-1]. **Wen et al.'s copycat mechanism does not apply here** —
+recorded as a refuted hypothesis, not quietly dropped.
+
+**The fourth row is the finding.** Zero the MDN-RNN hidden state at serve time
+and the controller is *worse than predicting the mean* (skill -0.120). It is
+riding almost entirely on `h` and barely reading `z`.
+
+**Why that is fatal, and it is a train/serve asymmetry:** during training `h`
+is teacher-forced on the **logged expert actions**; in closed loop it is built
+from the **policy's own actions**, fed back step by step. The single input the
+controller depends on is the one that drifts the moment the policy deviates.
+That is compounding error through the RECURRENT STATE, a different failure from
+the perception-OOD story in W.1.
+
+## AB.2 The 2x2, and the interaction that neither change produces alone
+
+MLP controller, 3 seeds, V and M frozen, all four arms in one back-to-back
+batch. `--no-history` zeroes `h` at training AND serve (read back out of the
+checkpoint, so the two can never disagree).
+
+| | with `h` | `z` only |
+|---|---|---|
+| original corpus | 185.6 +- 15.4 (0/9) | 109.3 +- 27.8 (0/9) |
+| **+ recovery data** | 196.6 +- 7.0 (0/9) | **342.4 +- 230.6 (3/9)** |
+
+**Three of nine episodes completed the full 600 steps. No learned policy in
+this project had ever finished one.** Per-seed means [426, 506, 96].
+
+**Neither intervention works alone, and that is the point.** Removing `h` by
+itself makes things WORSE (185.6 -> 109.3): the controller is forced onto `z`,
+whose off-centre readout is poor. Recovery data by itself does almost nothing
+(185.6 -> 196.6), reproducing Z.3/AA. Together: 1.85x the baseline and the
+first completions. **A one-variable-at-a-time search would have rejected both.**
+
+**This retroactively vindicates X.1 and explains AA.** The 57% off-centre probe
+improvement was real AND necessary — it just could not express itself while the
+controller was routing around `z` entirely. It also means **AA's null had a
+cause I got wrong**: I attributed it to recovery frames being drowned out at
+6.67% of the objective, and the `--recovery-weight` sweep to 78.9% duly
+disproved that. The real reason is that no loss weighting helps when the model
+ignores the input the data improves. Upweighting merely fit those frames'
+actions better *through `h`*.
+
+**The open-loop metric is actively misleading, which is the transferable
+lesson.** Held-out MSE ranks these arms in almost exactly the wrong order:
+
+| arm | val MSE (unweighted) | steps |
+|---|---|---|
+| cl_base | **0.00177** (best) | 185.6 |
+| cl_aug | 0.00181 | 196.6 |
+| nh_base | 0.02614 | 109.3 |
+| **nh_aug** | **0.02846** (worst, 16x) | **342.4 (3/9)** |
+
+**The best-driving policy has the worst held-out loss by a factor of 16.** This
+was pre-registered as the signature to look for before the run, and it is
+exactly Codevilla et al. (ECCV 2018) — "two models with identical prediction
+error can differ dramatically in their driving performance" — arriving as a
+measurement on this project's own stack rather than as a citation.
+
+## AB.3 Honest limits
+
+- **High variance: per-seed [426, 506, 96].** One seed in three collapses.
+  `nh_aug`'s +-230.6 is by far the widest of any arm. This is a promising
+  configuration, **not a solved task**, and 3/9 is not "it drives".
+- **The expert still wins outright**: 600/600, 9/9, mean|cte| 0.32-0.37 in
+  every arm. The learned policy has not caught the scripted one.
+- **Jitter roughly doubles without `h`** (rev/100 13.2 vs 6.6). Appendix X
+  measured that jitter does not drive survival, so nothing here rests on it,
+  but it is a real behavioural change and the z-only car visibly saws.
+- Sim only. Nothing has touched hardware.
+
+## AB.4 A batch was thrown away, and the control arm is why
+
+The first run of this 2x2 was **discarded**: the PID expert — fixed code, no
+learned component, 9/9 all evening — fell to 4/9 and then 0/9 across four
+consecutive arms at a normal ~20 Hz. The simulator itself had degraded, so
+every controller number in that batch was untrustworthy.
+
+**The order was then reversed** to rule out an ordering artifact, since
+`nh_aug` had run last. It won from first position too (342.4/3-of-9 valid,
+362.0/1-of-9 degraded), and the two batches agree on the ordering while
+disagreeing on the absolute numbers — which is the expected signature of a
+degraded run.
+
+`eval_in_sim.py` now **gates on this automatically**: expert survival below
+9/9 prints a BATCH INVALID banner, records `batch_valid: false` in the
+artifact, and exits 2. Verified by replaying it against the artifacts already
+on disk — it passes the healthy batches and fails the degraded one. Combined
+with Z.2's rate warning, an eval result in this project now has to declare both
+the rate it ran at and whether its own control arm held.
+
+## AB.5 Open items
+
+1. **More seeds on `nh_aug`.** One-in-three collapse needs explaining before
+   this is called a result; n=3 cannot distinguish a bad seed from a bimodal
+   policy.
+2. **Retrain M on the augmented corpus.** `h` was never useless in principle —
+   it was trained only on centred data. A dynamics model that has seen
+   off-centre states might beat z-only rather than lose to it.
+3. **Revisit the `--recovery-weight` sweep with `h` zeroed.** AA swept it with
+   the crutch in place, where it could not have worked.
+4. Aux head on a real sign, not a synthetic square (Z.1).
+5. **`docs/BOM.md` still modified by another session**, unverified, claiming
+   the $200 ceiling is breached. Deliberately excluded from commit 2cbb84e.
+6. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+
+
+---
+
+# Appendix AC - RETRACTION of AB: the "first completed episodes" result did not replicate, and the closed-loop harness is not trustworthy (2026-08-11, ~18:21 CDT)
+
+**Appendix AB's headline is withdrawn.** It claimed 342.4 steps and 3/9
+completed episodes for the z-only + recovery-data controller, called it the
+first learned policy in this project to finish an episode, and built a 2x2
+interaction story on it. **None of that survives replication.** AB is left as
+written per the append-only rule and stands corrected here.
+
+## AC.1 What replication actually shows
+
+Same checkpoints, independent gate-valid batches:
+
+| seed | AB's batch (expert 9/9) | re-run (expert 10/10) |
+|---|---|---|
+| 0 | 78, **600**, **600** | 100, 113 |
+| 1 | **600**, 469, 448 | 108, 108 |
+| 2 | 96, 96, 95 | 107, 107 |
+
+Extended to **10 seeds over two independent valid batches: 107.2 +- 16.0,
+0 of 20 completions**, every seed between 85 and 147. **No learned policy in
+this project has ever completed an episode.**
+
+Every arm re-run in the short-batch regime, all gate-valid:
+
+| arm | valid batches | mean | sd | range |
+|---|---|---|---|---|
+| cl_base (h, original) | 4 | **189.4** | **4.1** | 185.6-195.0 |
+| cl_aug (h, +recovery) | 4 | 189.1 | 35.1 | 139.0-221.0 |
+| nh_base (z-only, original) | 2 | 109.2 | 0.1 | 109.2-109.3 |
+| nh_aug (z-only, +recovery) | 4 | 170.0 | 115.4 | 98.3-342.4 |
+
+**The 2x2 does not merely weaken — it reverses.** The plain baseline is the
+best and by far the most stable arm (189.4 +- 4.1 across four batches).
+Recovery data does nothing (189.4 -> 189.1, means indistinguishable). Removing
+`h` is actively harmful (189.4 -> 109.2, and that one is rock-stable across
+batches). `nh_aug`'s apparent advantage rests entirely on the single anomalous
+batch; drop it and the arm sits at ~110-123.
+
+**Honest conclusion: no intervention attempted on 2026-08-10/11 improves
+closed-loop driving.** Recovery data, DART expert relabelling, recovery loss
+weighting, and removing the history input have all now failed.
+
+## AC.2 How the error was made, because that is the reusable part
+
+The gate added hours earlier (expert survival 9/9) fired correctly on genuinely
+degraded batches and gave false confidence on this one. **AB's batch passes
+every check that existed**: expert 600/600 at 20.00 Hz, healthy mean|cte| 0.369,
+reproduced in a second batch with the arm order reversed.
+
+**The tell was present and I read it backwards.** AB's winning arm had
+sd 230.6 while every other arm in the same batch had sd 7-45. I recorded that
+as "high variance, not a solved task" and reported the mean as a result
+anyway. **A 20x variance blow-up confined to the arm that wins is evidence the
+measurement broke, not evidence of a promising policy.** The re-runs make this
+unmistakable: the stable arms (cl_base sd 4.1, nh_base sd 0.1) reproduce to the
+step, and only the arms with large sd move between batches.
+
+**Second error: I treated agreement on ORDERING between two batches as
+replication.** Both batches that ranked `nh_aug` first (ev2, ev3) were the
+high-variance ones; ev2 was already known degraded. Two correlated
+observations are not two independent ones.
+
+## AC.3 The harness problem, which now outranks every ML question
+
+**Two batches that both pass every available check disagree by 3x.** Until that
+is understood, no closed-loop number from this project is trustworthy —
+including those in Appendices Z and AA, which used the same harness. Those
+were comparative and mostly null, so their conclusions are less exposed, but
+they are not certified either.
+
+**Leading hypothesis, not yet tested: the episode start state is
+uncontrolled.** `DonkeyEnv.reset()` is sleep-synchronised, not
+state-synchronised — `send_control(handbrake)`, `sleep(0.1)`, `viewer.reset()`,
+`sleep(0.1)`, `observe()` — with nothing waiting for the simulator to confirm
+the reset landed. Under different machine load the car's pose and speed at the
+first control step will differ. The `seed=` parameter is a red herring: it sets
+only `self.np_random`, which the Unity process never reads.
+
+This fits the signature. A PID absorbs a varied start (600/600 regardless);
+a marginal learned policy does not — which is exactly why the expert gate
+passes while controller numbers swing 3x. It also explains the within-batch
+pattern: consistent resets give near-identical episodes (107/107, 108/108),
+inconsistent ones give 78 vs 600 within one controller.
+
+**Test:** log cte, speed and pose at the first control step of every episode
+and compare across batches. Cheap, and it either confirms the mechanism or
+eliminates it.
+
+**What is NOT affected**, because it never touched the simulator:
+- The `h`-dependence measurement (AB.1). Open-loop, deterministic: zeroing the
+  hidden state still gives skill -0.120, and copycat is still refuted at 18.2x
+  over repeat-last-action.
+- The aux-head sweep (Z.1) and the cone probe (Y.2). Open-loop, four arms,
+  tight numbers.
+- The research brief (Z.4).
+
+**What IS affected:** every survival/step number in Z.3, AA.1, AB.2 and this
+entry. The comparative nulls are probably safe — a harness this noisy makes
+false NEGATIVES likely and false positives like AB's the real hazard — but
+"probably safe" is not certified.
+
+## AC.4 Rules adopted
+
+1. **A closed-loop claim requires replication in an INDEPENDENT batch**, not a
+   second arm within the same run. Ordering agreement is not replication.
+2. **Variance is a validity signal, not just an error bar.** An arm whose sd is
+   an order of magnitude above its neighbours in the same batch is suspect
+   regardless of its mean.
+3. The expert-survival gate stays, but is documented as **necessary and not
+   sufficient**.
+4. Prefer short batches. Every degraded batch tonight was a long one; every
+   tight batch was short. Correlational, cause unknown.
+
+## AC.5 Open items
+
+1. **Fix or characterise the reset.** Highest priority in the project; every
+   driving number depends on it.
+2. Re-certify Z.3 and AA.1 once the harness is trustworthy.
+3. Retrain M on the augmented corpus (AB.5) — still untested, and now the
+   only live ML hypothesis for the wall.
+4. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+5. `docs/BOM.md` still modified by another session and unverified.
