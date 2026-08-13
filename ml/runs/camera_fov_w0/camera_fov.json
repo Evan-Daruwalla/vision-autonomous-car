@@ -1,0 +1,39 @@
+{
+  "args": {
+    "track": "donkey-generated-track-v0",
+    "fovs": [
+      60,
+      90,
+      120,
+      150
+    ],
+    "warmup": 0,
+    "port": 9091,
+    "out": "../ml/runs/camera_fov_w0"
+  },
+  "noise_floor_mae": 48.40270833333334,
+  "results": [
+    {
+      "fov": 90,
+      "mae_vs_default": 34.46324652777778,
+      "distinguishable": false
+    },
+    {
+      "fov": 60,
+      "mae_vs_default": 53.974583333333335,
+      "distinguishable": false
+    },
+    {
+      "fov": 150,
+      "mae_vs_default": 58.817569444444445,
+      "distinguishable": false
+    },
+    {
+      "fov": 120,
+      "mae_vs_default": 68.38904513888889,
+      "distinguishable": false
+    }
+  ],
+  "explicit_fov_spread": 69.95934027777778,
+  "verdict": "AMBIGUOUS: 4 tested FOVs are indistinguishable from the default ([90, 60, 150, 120]). Either the sim ignored cam_config entirely, or the frames are insensitive to FOV at this pose. **Check whether the captured frames actually differ from each other before concluding anything** \u2014 if they are all identical, cam_config is not being applied and this method cannot answer the question."
+}

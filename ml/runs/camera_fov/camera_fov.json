@@ -1,0 +1,39 @@
+{
+  "args": {
+    "track": "donkey-generated-track-v0",
+    "fovs": [
+      60,
+      90,
+      120,
+      150
+    ],
+    "warmup": 12,
+    "port": 9091,
+    "out": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\camera_fov"
+  },
+  "noise_floor_mae": 23.916753472222222,
+  "results": [
+    {
+      "fov": 60,
+      "mae_vs_default": 42.58444444444444,
+      "distinguishable": false
+    },
+    {
+      "fov": 150,
+      "mae_vs_default": 65.23168402777777,
+      "distinguishable": false
+    },
+    {
+      "fov": 90,
+      "mae_vs_default": 65.96013888888889,
+      "distinguishable": false
+    },
+    {
+      "fov": 120,
+      "mae_vs_default": 70.48315972222223,
+      "distinguishable": false
+    }
+  ],
+  "explicit_fov_spread": 76.48871527777777,
+  "verdict": "AMBIGUOUS: 4 tested FOVs are indistinguishable from the default ([60, 150, 90, 120]). Either the sim ignored cam_config entirely, or the frames are insensitive to FOV at this pose. **Check whether the captured frames actually differ from each other before concluding anything** \u2014 if they are all identical, cam_config is not being applied and this method cannot answer the question."
+}

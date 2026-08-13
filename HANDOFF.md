@@ -21,15 +21,33 @@ expert holds **|cte| 0.317 m mean** and **saturates steering at the p95**.
 floor space** over the ~1:20 track re-spec; research Pi alternatives before a
 **~September** purchase.
 
-> **⚠️ THE CAMERA WAS NEVER CONFIGURED — check before buying one.**
-> `cam_config` is absent from every conf dict in `ml/*.py`, so the sim's FOV,
-> lens distortion, camera height, pitch and offset were all left at an
-> **unrecorded Unity default**. The corpus was captured through a projection
-> nobody has measured. Camera Module 3 Wide is 120°; if the default differs,
-> the encoder trained on a different lens than the car will have. **Identifying
-> it is one short sim run with no hardware** (capture at default, then at a
-> few explicit FOVs, compare) and it may change the camera purchase.
-> `docs/BOM.md` row 2 is flagged HOLD.
+> **✅ RESOLVED 2026-08-13 (Appendix AI) — and it uncovered the harness cause.**
+> The camera was never configured (`cam_config` absent from every conf dict),
+> so the corpus was captured at an unrecorded Unity default. **Identified by
+> comparison: the sim default is `fov=90`** → ~106° H / ~118° diagonal (Unity
+> FOV is vertical). **The Camera Module 3 Wide (102° H / 120° D) matches within
+> 2-4° and is the correct part** — the standard module is ~40° off. BOM row 2
+> HOLD is LIFTED. Camera height/pitch/offset are still unidentified.
+>
+> **⚠️ BIGGER: `donkey-generated-track-v0` REGENERATES THE TRACK EVERY LAUNCH.**
+> Three identical-config launches at an identical spawn pose differ by MAE
+> 29-36 with **27-35% of pixels differing by >30**, while mean brightness is
+> stable (spread 6.6) — so the structure changes, not the lighting. The same
+> test on the fixed `donkey-warehouse-v0` gives a noise floor of **0.307**,
+> 158× smaller.
+>
+> **THIS IS THE HARNESS MYSTERY FROM AD/AE/AF.** The launch is the unit of
+> variation because the **track** is. It explains the 4.4× spread on a fixed
+> checkpoint, why episodes within a launch agree to a few steps, why the PID
+> expert was unaffected (it does not care about track shape — which is why it
+> was a poor control), and the bimodality. **AD.2 listed "track identity" as
+> ELIMINATED and that was wrong**: tight expert cte across launches is what a
+> track *generator* produces, not evidence of one track.
+>
+> **Consequence: evaluate on a FIXED track** (e.g. `donkey-warehouse-v0`), or
+> average many launches and report the spread as track difficulty. PRD P6's
+> "cause unknown" is closed. **Z.3, AA.1, AB.2 and AC.1 are all re-runnable now
+> that the confound is controllable — the highest-value ML work available.**
 
 > **⚠️ `donkeycar[pi]` INSTALLS `RPi.GPIO`, WHICH DOES NOT WORK ON THE PI 5.**
 > Pi 5 moved GPIO behind the RP1 southbridge; RPi.GPIO pokes `/dev/mem` and

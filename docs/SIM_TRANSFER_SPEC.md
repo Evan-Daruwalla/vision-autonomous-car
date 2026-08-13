@@ -137,8 +137,14 @@ is the safe direction to err.
 ## 5. Known unknowns — measure these, do not assume
 
 1. **Sim lane width in metres.** Blocks the clean speed-scaling formula (§2.4).
-2. **Sim camera FOV — investigated 2026-08-12, and the finding is bigger than
-   the question.** `donkey_sim.py` sends a camera config only via
+2. **RESOLVED 2026-08-13 (Appendix AI): the sim default is `fov=90`**, i.e.
+   ~106° horizontal / ~118° diagonal at 160x120 under Unity's vertical-FOV
+   convention. **The Camera Module 3 Wide (102° H / 120° D) matches within
+   2-4° and is the correct part**; the standard module is ~40° off. Identified
+   by capturing a default frame and comparing against explicit FOVs on a FIXED
+   track (`ml/diag_camera_fov.py`) - the test is meaningless on
+   `donkey-generated-track-v0`, which regenerates the scene every launch.
+   Original finding, retained because the mechanism still matters: `donkey_sim.py` sends a camera config only via
    **three paths** (two keyed on `cam_config`/`cam_config_b`, one deprecated
    top-level), and **all three are skipped** when those keys are absent, and this project's conf
    (`collect_sim_data.py`, `eval_in_sim.py`) contains only `exe_path, host,

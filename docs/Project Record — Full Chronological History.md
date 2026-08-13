@@ -69,6 +69,7 @@ the dated entry, not the digest.
 - [AF — AE corrected the record and forgot the live docs, which is the error AE was correcting](#appendix-af---ae-corrected-the-record-and-forgot-the-live-docs-which-is-the-error-ae-was-correcting-2026-08-12-0735-cdt) (08-12)
 - [AG — Evan's build decisions, the operating point measured, and the camera nobody configured](#appendix-ag---evans-build-decisions-the-operating-point-measured-and-the-camera-nobody-configured-2026-08-12-2048-cdt) (08-13)
 - [AH — The camera was never the constraint; the PWM pin was, and it breaks the Pi 5 too](#appendix-ah---the-camera-was-never-the-constraint-the-pwm-pin-was-and-it-breaks-the-pi-5-too-2026-08-12-2148-cdt) (08-12)
+- [AI — The track regenerates every launch (the harness mystery, solved), and the sim FOV is 90](#appendix-ai---the-track-regenerates-every-launch-that-is-the-harness-mystery-solved-and-the-sim-fov-is-90-2026-08-13-0056-cdt) (08-13)
 
 ---
 
@@ -4142,4 +4143,143 @@ snippet rather than a fetched page. **Not entered anywhere.**
 2. The sim camera FOV/mount identification (AG.4) — still the top no-hardware
    item, and still gating the camera purchase.
 3. PRD P6 — harness trustworthiness, paired design first.
+4. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+
+
+---
+
+# Appendix AI - The track regenerates every launch (that is the harness mystery, solved), and the sim FOV is 90 (2026-08-13, ~00:56 CDT)
+
+**WHAT:** the camera-FOV identification from AG.4, which was the top
+no-hardware item. It answered its own question **and** solved the harness
+variance that AD/AE/AF spent three entries failing to explain — by failing
+first, loudly, in a way that pointed at the cause. New: `ml/diag_camera_fov.py`.
+
+## AI.1 The generated track is regenerated EVERY LAUNCH
+
+The FOV test compares a default frame against frames captured at explicit
+FOVs. On `donkey-generated-track-v0` it returned garbage: the
+**default-vs-default noise floor was 23.9 MAE**, and on a second attempt with
+a fully-controlled pose (no warmup, car stationary at spawn) it got *worse* at
+**48.4** — swamping a real signal of ~50.
+
+Three identical-config launches, captured at the identical spawn pose:
+
+| pair | MAE | median | pixels differing >30 |
+|---|---|---|---|
+| 1 vs 2 | 30.02 | 10.0 | **31.4%** |
+| 1 vs 3 | 36.45 | 17.0 | **35.1%** |
+| 2 vs 3 | 29.32 | 14.0 | **27.3%** |
+
+Mean brightness across the three: 121.3 / 123.1 / 127.9 — **spread 6.65, i.e.
+stable.** So this is not lighting or time-of-day. **A third of the pixels
+differ structurally between launches: the scene itself is different.** The
+"generated" in `donkey-generated-track-v0` is literal.
+
+**Confirmed by contrast:** the identical test on the FIXED `donkey-warehouse-v0`
+gives a default-vs-default noise floor of **0.307** — 158x smaller.
+
+## AI.2 This is the harness mystery from AD, and I got that one wrong
+
+**AD.2 listed "track identity" as ELIMINATED**, on this reasoning: the expert's
+mean|cte| spans only 0.323-0.381 over 12 launches, and "a regenerated track
+could not produce a +-5% band from a fixed PID."
+
+**That reasoning is wrong.** A PID tracking a centreline produces similar
+mean|cte| on *any* track whose curvature statistics are similar — which is
+exactly what a track *generator* produces. Tight cte was never evidence of an
+identical track, and I treated a weak proxy as a measurement.
+
+**It explains every observation AD/AE/AF could not:**
+- **The 4.4x launch-to-launch spread on a fixed checkpoint** (106.5 to 471.5) —
+  each launch is a *different track*, so a marginal policy meets a different
+  difficulty each time.
+- **Episodes WITHIN a launch agreeing to a few steps** (107/107, 108/108) —
+  same track for the whole launch.
+- **The expert being unaffected** (600/600 everywhere) — a PID on cte does not
+  care about track shape, which is precisely why it made such a poor control.
+- **The bimodality** (28 of 35 episodes under 150 steps, 4 at 450-601) — some
+  generated tracks are easy and most are not.
+- **Why start state, control rate and reset determinism all came back clean** —
+  they were all fine; the variable was never inside the episode.
+
+**The launch is the unit of variation because the TRACK is the unit of
+variation.** Not a bug — the sim doing what its name says, unnoticed for the
+whole project.
+
+**Consequences that need acting on:**
+1. **PRD P6's "cause unknown" is closed.** The fix is now concrete: evaluate on
+   a FIXED track, or deliberately average over many launches and report the
+   spread as track difficulty. The paired-design lever from AE.2 is still right
+   and now has a mechanism: pairing arms *within* a launch holds the track
+   constant.
+2. **The corpus spans many generated tracks.** 88 episodes collected across
+   multiple launches means the training data covers many layouts. That is
+   *good* for generalisation and it means "the track" was never one track — the
+   fit/val split by episode was never a within-track split either.
+3. **Every closed-loop comparison in Z, AA, AB, AC, AD remains uncertified**,
+   but the reason is now understood rather than mysterious.
+
+## AI.3 The sim FOV is 90, and the Camera Module 3 Wide is the right part
+
+Re-run on the fixed track, noise floor 0.307:
+
+| fov | MAE vs default |
+|---|---|
+| 60 | 47.369 |
+| **90** | **0.192 <- matches** |
+| 120 | 42.950 |
+| 150 | 50.025 |
+
+**The sim default is `fov=90`**, unambiguous at a 0.307 noise floor with every
+other tested value 140x further away.
+
+**What that means for the purchase.** Unity's `Camera.fieldOfView` is VERTICAL
+by default. At 160x120:
+
+| | horizontal | diagonal |
+|---|---|---|
+| sim (fov=90 vertical) | **106.3 deg** | **118.1 deg** |
+| Camera Module 3 **Wide** | 102 deg | 120 deg |
+| Camera Module 3 standard | 66 deg | 75 deg |
+
+**The Wide is within 4.3 deg horizontal and 1.9 deg diagonal.** Even under the
+alternative reading (fov=90 as horizontal) the Wide is 12 deg wide, while the
+standard module is ~40 deg off under *either* reading. **The Wide is correct
+under both interpretations and the standard module is definitively wrong.**
+
+**`docs/BOM.md` row 2 HOLD is LIFTED.** The camera specced back on 2026-07-23
+turns out to match the projection the corpus was captured through — by luck,
+not by design, since nobody had set or checked it.
+
+**Stated as an assumption, not a measurement:** the vertical-FOV reading rests
+on Unity's documented default, not on anything measured here. It does not
+change the decision (the Wide wins either way), but the exact horizontal FOV is
++-12 deg depending on the convention.
+
+**Still unmeasured: camera height, pitch and forward offset.** `offset_x/y/z`
+and `rot_x/y/z` were never set either, and the same comparison method would
+identify them — but each needs a scan over a continuous parameter rather than
+four discrete guesses, so it is a larger job than the FOV was.
+
+## AI.4 Method note: the failure was more informative than a success
+
+The first two runs of this experiment produced no answer. What made them
+useful was the **sanity check written into the script before it ran** — "if
+the explicit-FOV frames are all identical to each other, cam_config is being
+ignored and this method cannot answer the question." That check fired, proved
+cam_config *was* working (MAE 70 between fov=60 and fov=150), and forced the
+question "then why is default-vs-default so noisy?" — which is the entire
+finding in AI.1.
+
+Without it the honest conclusion would have been "cam_config appears to be
+ignored", which is false, and the track regeneration would still be undiscovered.
+
+## AI.5 Open items
+
+1. **Re-run the closed-loop comparisons on a FIXED track.** Z.3, AA.1, AB.2,
+   AC.1 are all re-runnable now that the confound is known and controllable.
+   This is the highest-value ML work available.
+2. Camera height/pitch/offset identification (AI.3).
+3. Libre Computer, still unsourced (AH).
 4. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.

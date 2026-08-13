@@ -635,7 +635,8 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
     under direct supervision, the escalation is a larger z or a detection path
     that bypasses the latent, and this item reopens.
 
-- [ ] **P6 (NEW, 2026-08-11, BLOCKING all future closed-loop claims): make the
+- [ ] **P6 (NEW, 2026-08-11, BLOCKING all future closed-loop claims; CAUSE
+      FOUND 2026-08-13, Appendix AI): make the
       sim evaluation harness trustworthy, or characterise its noise well
       enough to design around.** This is not optional polish — it invalidated
       a headline result (Appendix AB, retracted in AC) and it gates every
@@ -649,6 +650,19 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
       `ml/diag_reset.py`.
       **Three concrete levers, cheapest first (added 2026-08-11 from the
       landing-check critique of Appendix AD):**
+      **THE CAUSE IS NO LONGER UNKNOWN (2026-08-13, Appendix AI):
+      `donkey-generated-track-v0` REGENERATES THE TRACK ON EVERY LAUNCH.**
+      Three identical-config launches at an identical spawn pose differ by
+      MAE 29-36 with 27-35% of pixels differing by >30, at stable brightness;
+      the same test on the fixed `donkey-warehouse-v0` gives a 0.307 noise
+      floor. The launch is the unit of variation because the TRACK is. This
+      supersedes the caveat above listing track identity as "ruled out" -
+      that was wrong, and tight expert cte across launches is exactly what a
+      track generator produces.
+      **The cheapest fix now dominates the others: EVALUATE ON A FIXED TRACK.**
+      The paired design (a) is still correct and now has a mechanism - pairing
+      arms within one launch holds the track constant. Done when Z.3, AA.1,
+      AB.2 and AC.1 have been re-run on a fixed track.
       (a) **PAIR THE DESIGN — probably the single biggest win.** The launch is
       the confounder, so run EVERY arm inside EACH launch and difference
       within-launch; the launch effect then cancels and the relevant variance

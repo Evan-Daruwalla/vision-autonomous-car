@@ -196,6 +196,26 @@ not yet verified on this car. Mark them verified when a build task confirms.
 - **WSL2 does not give more VRAM** — no evidence found; the GPU stays under
   the Windows WDDM driver. It buys compatibility (JAX, TF≥2.11) and clean
   OOM behaviour only (2026-07-23).
+- **`donkey-generated-track-v0` REGENERATES THE TRACK ON EVERY LAUNCH**
+  (measured 2026-08-13, Appendix AI). Three identical-config launches at an
+  identical spawn pose gave pairwise MAE 29-36 with **27-35%% of pixels
+  differing by >30**, at stable mean brightness (spread 6.6) - so the
+  structure changes, not the lighting. The same test on the fixed
+  `donkey-warehouse-v0` gives a **0.307** noise floor, 158x smaller.
+  **This is the cause of the 4.4x launch-to-launch closed-loop variance** that
+  AD/AE/AF could not explain: the launch is the unit of variation because the
+  TRACK is. **Any frame-comparison experiment (FOV, encoder, reconstruction)
+  is meaningless on the generated track - use a fixed one.** And any
+  closed-loop A/B must either run on a fixed track or pair arms within one
+  launch. Note AD.2 wrongly listed track identity as ruled out: tight expert
+  mean|cte| across launches is what a track GENERATOR produces, not evidence
+  of one track.
+- **The sim camera FOV is 90** (`cam_config` was never sent, so it was the
+  Unity default; identified 2026-08-13 by comparison on a fixed track). At
+  160x120 with Unity's vertical-FOV convention that is ~106 deg horizontal /
+  ~118 deg diagonal. **Camera Module 3 Wide (102 H / 120 D) is the right
+  part**; the standard module (66 H) is ~40 deg off. Camera height, pitch and
+  offset are still unidentified - same method would find them.
 - **`eval_in_sim.py` step counts are NOT comparable across runs unless
   `--control-hz` is pinned** (measured 2026-08-10). The identical MLP
   checkpoint (byte-identical val_mse 0.001754), through the identical script,

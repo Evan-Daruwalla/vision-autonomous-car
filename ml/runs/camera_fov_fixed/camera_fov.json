@@ -1,0 +1,39 @@
+{
+  "args": {
+    "track": "donkey-warehouse-v0",
+    "fovs": [
+      60,
+      90,
+      120,
+      150
+    ],
+    "warmup": 0,
+    "port": 9091,
+    "out": "../ml/runs/camera_fov_fixed"
+  },
+  "noise_floor_mae": 0.30711805555555555,
+  "results": [
+    {
+      "fov": 90,
+      "mae_vs_default": 0.1918923611111111,
+      "distinguishable": false
+    },
+    {
+      "fov": 120,
+      "mae_vs_default": 42.94998263888889,
+      "distinguishable": true
+    },
+    {
+      "fov": 60,
+      "mae_vs_default": 47.36871527777778,
+      "distinguishable": true
+    },
+    {
+      "fov": 150,
+      "mae_vs_default": 50.025,
+      "distinguishable": true
+    }
+  ],
+  "explicit_fov_spread": 50.02682291666667,
+  "verdict": "THE SIM DEFAULT FOV IS 90 DEGREES (MAE 0.192 vs a noise floor of 0.307; every other tested FOV is clearly distinguishable). The corpus was captured at this FOV, so the physical camera must match it."
+}
