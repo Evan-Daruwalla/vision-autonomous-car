@@ -434,6 +434,41 @@ the record; do not cite the bottom-right number:**
 the best-driving arm has the worst val MSE by **16×** (0.02846 vs 0.00177).
 Exactly Codevilla et al. (ECCV 2018), measured on this stack.
 
+## The paired closed-loop comparison: no intervention helps (2026-08-13, AJ)
+
+**First closed-loop comparison in this project that is a measurement rather
+than an anecdote.** `ml/eval_paired.py` runs every arm inside ONE launch so
+all share that launch's generated track, and differences are taken
+within-launch, cancelling track difficulty. Verified on synthetic data with a
+known +40 effect and per-launch offsets of +0/+300/-100: paired diff recovered
++40 at **sd 0.0**, unpaired sds 208.
+
+4 launches x 3 seeds x 2 episodes, expert 600/600 in every launch:
+
+| arm vs cl_base | mean diff | sd | t (df=3) | signs |
+|---|---|---|---|---|
+| cl_aug (+recovery) | **-26.0** | 28.4 | -1.84 | **4/4 negative** |
+| nh_base (z-only) | -15.7 | 58.8 | -0.53 | 2/4 |
+| nh_aug (z-only +rec) | +49.3 | 121.2 | 0.81 | 1/4 |
+
+- **NO ARM BEATS THE BASELINE.** Five attempts have now failed to transfer
+  X.1's 57% probe improvement to driving.
+- **The most consistent signal says recovery data mildly HURTS** with `h`
+  present (4/4 negative). Not significant; ~19 launches needed.
+- **`nh_aug`'s advantage is ONE launch (+221) for the second time** — the first
+  was the retracted Appendix AB. **High-variance and occasionally lucky, not
+  better.** Assume any future headline from this arm is that launch again.
+- **A FIXED TRACK DOES NOT WORK as the fix.** `donkey-avc-sparkfun-v0` (MAE
+  0.367) and `donkey-mountain-track-v0` (0.481) are genuinely fixed, but the
+  controllers collapse to 13-67 steps at mean|cte| 2.2-3.8 there — far OOD.
+  `donkey-generated-roads-v0` (3.504) is ALSO regenerated.
+- **Pairing helped 2 of 3 arms and RAISED variance for `nh_base`** — so real
+  arm x track interaction exists and cannot be designed away.
+
+**Gate defect, unfixed:** the expert-survival batch gate fires BATCH INVALID on
+a harder track (expert 425/549 of 600 on the fixed tracks) because it cannot
+distinguish "simulator degraded" from "track harder than the expert's tuning".
+
 ## Rules carried forward to M4 (real-car logs)
 
 - **Measure, never estimate, VRAM.** The retracted "~24 GB for DreamerV3"

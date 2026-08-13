@@ -661,8 +661,22 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
       track generator produces.
       **The cheapest fix now dominates the others: EVALUATE ON A FIXED TRACK.**
       The paired design (a) is still correct and now has a mechanism - pairing
-      arms within one launch holds the track constant. Done when Z.3, AA.1,
-      AB.2 and AC.1 have been re-run on a fixed track.
+      arms within one launch holds the track constant. ~~Done when Z.3, AA.1,
+      AB.2 and AC.1 have been re-run on a fixed track.~~ **DONE 2026-08-13
+      (Appendix AJ), but NOT on a fixed track — a fixed track proved unusable:
+      every one is far outside the corpus's visual distribution and the learned
+      controllers collapse to 13-67 steps there (mean|cte| 2.2-3.8 vs the 0.317
+      they trained at). The fix was the PAIRED design instead
+      (`ml/eval_paired.py`): all arms inside ONE launch sharing that launch's
+      generated track, differenced within-launch, verified on synthetic data to
+      cancel a known per-launch offset exactly. RESULT: no arm beats the
+      baseline. The most consistent signal is that recovery data mildly HURTS
+      (cl_aug negative in 4/4 launches, mean -26.0, t=-1.84, n.s.; ~19 launches
+      needed). Pairing cut variance for 2 of 3 arms but RAISED it for the
+      third, so real arm x track interaction remains and is not removable by
+      experimental design. Expert 600/600 in all four launches, so the batch is
+      unambiguously valid — the first closed-loop comparison in this project
+      that is a measurement rather than an anecdote.**
       (a) **PAIR THE DESIGN — probably the single biggest win.** The launch is
       the confounder, so run EVERY arm inside EACH launch and difference
       within-launch; the launch effect then cancels and the relevant variance

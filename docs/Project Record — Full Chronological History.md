@@ -70,6 +70,7 @@ the dated entry, not the digest.
 - [AG — Evan's build decisions, the operating point measured, and the camera nobody configured](#appendix-ag---evans-build-decisions-the-operating-point-measured-and-the-camera-nobody-configured-2026-08-12-2048-cdt) (08-13)
 - [AH — The camera was never the constraint; the PWM pin was, and it breaks the Pi 5 too](#appendix-ah---the-camera-was-never-the-constraint-the-pwm-pin-was-and-it-breaks-the-pi-5-too-2026-08-12-2148-cdt) (08-12)
 - [AI — The track regenerates every launch (the harness mystery, solved), and the sim FOV is 90](#appendix-ai---the-track-regenerates-every-launch-that-is-the-harness-mystery-solved-and-the-sim-fov-is-90-2026-08-13-0056-cdt) (08-13)
+- [AJ — The closed-loop comparison, re-run PAIRED and finally valid: no intervention helps](#appendix-aj---the-closed-loop-comparison-re-run-paired-and-finally-valid-no-intervention-helps-2026-08-13-1547-cdt) (08-13)
 
 ---
 
@@ -4283,3 +4284,127 @@ ignored", which is false, and the track regeneration would still be undiscovered
 2. Camera height/pitch/offset identification (AI.3).
 3. Libre Computer, still unsourced (AH).
 4. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+
+
+---
+
+# Appendix AJ - The closed-loop comparison, re-run PAIRED and finally valid: no intervention helps (2026-08-13, ~15:47 CDT)
+
+**WHAT:** AI.5's top item — re-run Z.3 / AA.1 / AB.2 / AC.1 now that the
+confound (track regeneration per launch) is known and controllable. New:
+`ml/eval_paired.py`. **This is the first closed-loop comparison in the project
+that is a measurement rather than an anecdote**, and the answer is a clean
+negative.
+
+## AJ.1 A fixed track does not work, and that is itself a finding
+
+The obvious fix — evaluate on a track that does not regenerate — was tried
+first and **fails for a reason worth recording.** Two fixed outdoor tracks were
+confirmed genuinely fixed by launch-to-launch frame comparison:
+
+| track | launch-to-launch MAE | |
+|---|---|---|
+| `donkey-avc-sparkfun-v0` | 0.367 | FIXED |
+| `donkey-mountain-track-v0` | 0.481 | FIXED |
+| `donkey-generated-roads-v0` | 3.504 | **also REGENERATED** |
+| `donkey-generated-track-v0` | 29-36 | REGENERATED (AI.1) |
+
+But on both fixed tracks the learned controllers **collapse to 13-67 steps at
+mean|cte| 2.2-3.8**, against the 0.317 the expert holds in training. Every
+fixed track is far outside the corpus's visual distribution, so all arms bunch
+at the floor and the comparison measures nothing. **The generated track is the
+only in-distribution option**, which is why pairing — not track substitution —
+is the fix.
+
+**A defect in my own batch-validity gate surfaced here.** It fired BATCH
+INVALID on both fixed tracks because the expert did not survive (425 and 549 of
+600). But that is not sim degradation — it is PID gains tuned at 20 Hz on the
+generated track failing to complete a tighter course. **The gate conflates
+"simulator degraded" with "track harder than the expert's tuning"**, and would
+silently invalidate any legitimate new-track experiment. Recorded; not yet
+fixed.
+
+## AJ.2 The paired design, and what it bought
+
+`eval_paired.py` runs **every arm inside ONE launch**, so all four share that
+launch's generated track, and reports the **within-launch difference**. Track
+difficulty cancels exactly. Verified before running on synthetic data with a
+known +40 effect and per-launch offsets of +0/+300/-100: the paired difference
+recovered +40 with **sd 0.0** while the unpaired sds were 208.
+
+4 launches x 3 seeds x 2 episodes. **The expert completed 600/600 in every
+launch** — so for once the batch is unambiguously valid.
+
+| launch | expert | cl_base | cl_aug | nh_base | nh_aug |
+|---|---|---|---|---|---|
+| 1 | 600.0 | 122.5 | 119.0 | 151.7 | 132.5 |
+| 2 | 600.0 | 215.7 | 158.2 | 121.3 | 152.3 |
+| 3 | 600.0 | 65.0 | 64.3 | 94.5 | 94.5 |
+| 4 | 600.0 | 215.2 | 172.7 | 188.2 | 436.0 |
+
+**Paired differences vs `cl_base`, n=4, df=3, t_crit 3.182:**
+
+| arm | mean diff | sd | t | signs | verdict |
+|---|---|---|---|---|---|
+| cl_aug (+recovery) | **-26.0** | 28.4 | -1.84 | **4/4 negative** | n.s. |
+| nh_base (z-only) | -15.7 | 58.8 | -0.53 | 2/4 negative | n.s. |
+| nh_aug (z-only +rec) | +49.3 | 121.2 | 0.81 | 1/4 negative | n.s. |
+
+**NO ARM BEATS THE BASELINE.** Same conclusion as AA and AC — but this time it
+is a measurement rather than an absence of one.
+
+## AJ.3 Three things the numbers say that the verdict line does not
+
+1. **Pairing helped, but did NOT fully solve it.** Variance of the difference
+   vs the arm's own unpaired spread: cl_aug 48.4 -> **28.4 (helped)**,
+   nh_aug 156.6 -> **121.2 (helped)**, nh_base 40.3 -> **58.8 (did NOT help)**.
+   If the track were the only confound, pairing would reduce variance for every
+   arm. It did not. **There is real arm x track interaction** — different
+   policies genuinely suit different layouts — which is behaviour, not noise,
+   and it is not removable by better experimental design.
+
+2. **The most consistent signal points AGAINST recovery data.** `cl_aug` is
+   negative in **4 of 4** launches. Not significant (t=-1.84; ~19 launches
+   needed at 80% power), but a sign that is consistent across every paired
+   comparison is the strongest evidence in the table, and it says recovery data
+   mildly **hurts** when `h` is present. That is a stronger statement than
+   AA's "no effect", and it is the opposite of what X.1 predicted.
+
+3. **`nh_aug` produced a large positive from ONE launch again** (+221 in launch
+   4; 1/4 negative overall). **This is the second time this exact configuration
+   has generated a headline from a single launch** — the first was Appendix AB,
+   retracted in AC. Recorded as a behavioural signature: **`nh_aug` is
+   high-variance and occasionally lucky, not better.** Any future result from
+   this arm should be assumed to be launch 4 again until shown otherwise across
+   many launches.
+
+## AJ.4 What this settles, and what it costs
+
+**Settled:** recovery data, DART expert relabelling, recovery loss weighting,
+and removing the history input have now all been tested with a design that
+matches the confound, and **none of them improves closed-loop driving.** The
+X.1 finding (57% better off-centre probe readout with a frozen encoder) remains
+true and remains untransferred — five attempts.
+
+**Not settled, and not cheap:** at n=4 launches this design resolves roughly a
+2x effect. Detecting the ~17% `cl_aug` effect would take ~19 launches, about
+2.5 hours of sim. That is affordable if the question is worth it; it probably
+is not, since the interesting hypotheses are exhausted.
+
+**The honest position for the portfolio:** the SIM-POC produced a working world
+model, a measured 8 GB DreamerV3 boundary, a validated auxiliary-head fix for
+small-object blindness, and **a well-instrumented negative on policy
+extraction** whose cause is now understood down to the simulator's track
+generator. That is a stronger engineering story than a policy that half-works
+for reasons nobody checked.
+
+## AJ.5 Open items
+
+1. **Fix the batch-validity gate's semantics** (AJ.1) — it cannot distinguish a
+   degraded sim from a harder track.
+2. Camera height/pitch/offset identification (AI.3) — same method as the FOV,
+   but a continuous scan.
+3. Sim lane width in metres — still blocks the clean speed-scaling formula in
+   `SIM_TRANSFER_SPEC` §2.4.
+4. Libre Computer, still unsourced (AH).
+5. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.

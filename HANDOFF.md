@@ -44,10 +44,30 @@ floor space** over the ~1:20 track re-spec; research Pi alternatives before a
 > ELIMINATED and that was wrong**: tight expert cte across launches is what a
 > track *generator* produces, not evidence of one track.
 >
-> **Consequence: evaluate on a FIXED track** (e.g. `donkey-warehouse-v0`), or
-> average many launches and report the spread as track difficulty. PRD P6's
-> "cause unknown" is closed. **Z.3, AA.1, AB.2 and AC.1 are all re-runnable now
-> that the confound is controllable — the highest-value ML work available.**
+> **RE-RUN DONE 2026-08-13 (Appendix AJ), and a fixed track turned out NOT to
+> be the answer** — every fixed track is far outside the corpus's visual
+> distribution and the learned controllers collapse to 13-67 steps there
+> (mean|cte| 2.2-3.8 vs the 0.317 they trained at). The working fix is the
+> **PAIRED design** (`ml/eval_paired.py`): all arms inside ONE launch sharing
+> that launch's generated track, differenced within-launch.
+>
+> **RESULT: no arm beats the baseline**, expert 600/600 in all four launches
+> so the batch is unambiguously valid — the first closed-loop comparison in
+> this project that is a measurement rather than an anecdote.
+>
+> | arm vs cl_base | mean diff | sd | t (df=3) | signs |
+> |---|---|---|---|---|
+> | cl_aug (+recovery) | **-26.0** | 28.4 | -1.84 | **4/4 negative** |
+> | nh_base (z-only) | -15.7 | 58.8 | -0.53 | 2/4 |
+> | nh_aug (z-only+rec) | +49.3 | 121.2 | 0.81 | 1/4 |
+>
+> Nothing significant. **The most consistent signal is that recovery data
+> mildly HURTS** with `h` present (negative in 4/4 launches; ~19 launches
+> needed to confirm). **`nh_aug`'s +49 is again driven by ONE launch (+221)** —
+> the second time that arm has produced a headline from a single launch, the
+> first being the retracted Appendix AB. Treat it as high-variance, not better.
+> Pairing cut variance for 2 of 3 arms but RAISED it for `nh_base`, so real
+> **arm x track interaction** remains and is not removable by design.
 
 > **⚠️ `donkeycar[pi]` INSTALLS `RPi.GPIO`, WHICH DOES NOT WORK ON THE PI 5.**
 > Pi 5 moved GPIO behind the RP1 southbridge; RPi.GPIO pokes `/dev/mem` and

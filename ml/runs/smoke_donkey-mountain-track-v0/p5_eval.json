@@ -1,0 +1,93 @@
+{
+  "args": {
+    "track": "donkey-mountain-track-v0",
+    "episodes": 2,
+    "max_steps": 600,
+    "seeds": [
+      0
+    ],
+    "port": 9091,
+    "vae": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\vae\\vae_best.pt",
+    "rnn": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\mdnrnn\\mdnrnn_best.pt",
+    "ctrl_dir": "../ml/runs/cl_base",
+    "control_hz": 0.0,
+    "archs": [
+      "mlp"
+    ],
+    "out": "../ml/runs/smoke_donkey-mountain-track-v0",
+    "device": "cuda",
+    "smoke": false
+  },
+  "per_episode": {
+    "expert": [
+      {
+        "steps": 549,
+        "mean_abs_cte": 1.720878457709492,
+        "reversals_per_100": 2.91,
+        "mean_abs_dsteer": 0.03315480091493495,
+        "control_hz": 20.0,
+        "survived": false,
+        "seed": 0,
+        "episode": 0,
+        "seconds": 29.2
+      },
+      {
+        "steps": 550,
+        "mean_abs_cte": 1.716994151284241,
+        "reversals_per_100": 2.91,
+        "mean_abs_dsteer": 0.0328788770759692,
+        "control_hz": 20.0,
+        "survived": false,
+        "seed": 0,
+        "episode": 1,
+        "seconds": 29.3
+      }
+    ],
+    "controller_mlp": [
+      {
+        "steps": 12,
+        "mean_abs_cte": 3.7708903948465995,
+        "reversals_per_100": 8.33,
+        "mean_abs_dsteer": 0.11219525879079645,
+        "control_hz": 15.97,
+        "survived": false,
+        "seed": 0,
+        "episode": 0,
+        "seconds": 2.6
+      },
+      {
+        "steps": 15,
+        "mean_abs_cte": 3.737529850006103,
+        "reversals_per_100": 13.33,
+        "mean_abs_dsteer": 0.16505075352532522,
+        "control_hz": 20.03,
+        "survived": false,
+        "seed": 0,
+        "episode": 1,
+        "seconds": 2.5
+      }
+    ]
+  },
+  "summary": {
+    "expert": {
+      "episodes": 2,
+      "steps_mean": 549.5,
+      "steps_sd": 0.5,
+      "cte_mean": 1.7189363044968666,
+      "reversals_per_100": 2.91,
+      "control_hz": 20.0,
+      "survived": 0
+    },
+    "controller_mlp": {
+      "episodes": 2,
+      "steps_mean": 13.5,
+      "steps_sd": 1.5,
+      "cte_mean": 3.7542101224263513,
+      "reversals_per_100": 10.83,
+      "control_hz": 18.0,
+      "survived": 0
+    }
+  },
+  "batch_valid": false,
+  "no_transfer_claim": "Simulated only. These numbers say nothing about the physical car; the controller has never seen real hardware. The expert is a behavioural-cloning CEILING, not a rival."
+}
