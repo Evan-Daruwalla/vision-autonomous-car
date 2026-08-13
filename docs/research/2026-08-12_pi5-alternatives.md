@@ -29,8 +29,15 @@ was found in the current plan.**
    **1,212,775 params** — 28% of the headline 4.35M, because the 3.59M decoder
    never runs on the car — and a full step takes **0.903 ms**, i.e. **55× under
    the 50 ms budget.**
-4. **No alternative board is cheaper AND better.** The only one with defensible
-   software (BeagleY-AI, $70) costs *more* than the Pi 5 2GB ($65).
+4. **CORRECTED 2026-08-12 ~22:0x CDT, after Evan pointed out the comparison was
+   not like-for-like.** This brief originally said "the only board with
+   defensible software costs more than the Pi" — true only against the *2GB*
+   Pi. **At equal RAM, BeagleY-AI 4GB ($70) undercuts the Pi 5 4GB ($110) by
+   $40.** The consequence is sharper than the correction: **the Pi 5 4GB is now
+   dominated in both directions** — if 2GB suffices the Pi 5 2GB is $5 cheaper,
+   and if 4GB is wanted BeagleY-AI is $40 cheaper. The 4GB Pi has no remaining
+   price argument. BeagleY-AI is a genuine contender, not a strictly-worse one;
+   what it costs is integration work, not money.
 5. **Off-board compute over WiFi fails on measured latency** — best figure
    found is 200 ms, 4× the budget.
 
@@ -134,9 +141,13 @@ Official Debian 13.6 images dated **2026-07-24** — three weeks old — on a
 current kernel line, plus an Armbian board page. That is a genuinely different
 posture from a vendor that dumped an Ubuntu image in 2023.
 
-**But it costs $70 (Seeed, in stock, 2026-08-12) against the Pi 5 2GB's $65.**
-The reason to leave the Pi is money, and the only board with defensible
-software is *more expensive*. Its camera path also needs manual device-tree +
+**Price, stated properly (corrected after Evan flagged the mismatch):** $70
+(Seeed, in stock, verified 2026-08-12) for **4GB**. That is **+$5 against the
+Pi 5 2GB ($65)** but **-$40 against the Pi 5 4GB ($110)**. Framing it only
+against the 2GB flattered the incumbent. **Power, sourced 2026-08-12:**
+~4.7-4.8 W idle, and it **requires 5V @ 3A** over USB-C PD, defaulting to
+500 mA until PD negotiates — comparable to a Pi 5 and **a real risk for the USB
+power bank, which must actually negotiate 3A.** Its camera path also needs manual device-tree +
 `media-ctl` work; **IMX219 works, IMX708 (Camera Module 3) is unconfirmed**;
 and TI staff initially called IMX219 incompatible (thread 39098, 2024) with a
 community recipe only landing in 2025.
