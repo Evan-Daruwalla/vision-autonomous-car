@@ -10,6 +10,32 @@ the car's own logged real driving. The process is the product: every stage
 verified on the physical car and documented as a college-portfolio
 engineering artifact.
 
+## Physical build — spec written, two decisions made (2026-08-12)
+
+**`docs/SIM_TRANSFER_SPEC.md` is the contract the real car must meet** for the
+sim work to transfer. Measured, not guessed: **20.00 Hz control**, **1.401 m/s
+mean** (7.0 cm per control step), **120×160 → 64×64 anisotropic squash**,
+expert holds **|cte| 0.317 m mean** and **saturates steering at the p95**.
+
+**Evan decided 2026-08-12:** buy the encoder motor (#5159, +$6); take **more
+floor space** over the ~1:20 track re-spec; research Pi alternatives before a
+**~September** purchase.
+
+> **⚠️ THE CAMERA WAS NEVER CONFIGURED — check before buying one.**
+> `cam_config` is absent from every conf dict in `ml/*.py`, so the sim's FOV,
+> lens distortion, camera height, pitch and offset were all left at an
+> **unrecorded Unity default**. The corpus was captured through a projection
+> nobody has measured. Camera Module 3 Wide is 120°; if the default differs,
+> the encoder trained on a different lens than the car will have. **Identifying
+> it is one short sim run with no hardware** (capture at default, then at a
+> few explicit FOVs, compare) and it may change the camera purchase.
+> `docs/BOM.md` row 2 is flagged HOLD.
+
+**Pi: recommend the 5 2GB at $65**, not the 4GB at $110 — same silicon, saves
+$45, returns the build to ≈$192–205 all-in. The "4GB minimum" is an
+unjustified DonkeyCar recommendation. Full brief:
+`docs/research/2026-08-12_onboard-compute-selection.md`. **Evan's call.**
+
 ## Current state — SIM-POC P1–P5 built but its closed-loop NUMBERS are uncertified (P6 open); stop-sign decision made and validated; still waiting on Evan's order and coupon print
 
 **Last updated: 2026-08-12 ~12:34 CDT** — this file is the only live snapshot;

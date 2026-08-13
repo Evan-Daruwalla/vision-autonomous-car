@@ -15,9 +15,9 @@
     ],
     "speed_steady_mean": 1.4014858726092752,
     "speed_steady_max": 1.58633351325989,
-    "speed_cruise_mean": null,
-    "speed_corner_mean": null,
-    "frac_steps_cornering": 0.0,
+    "speed_cruise_mean": 1.2089135631730286,
+    "speed_corner_mean": 1.3964855611816913,
+    "frac_steps_cornering": 0.605,
     "cte_mean_abs": 0.3167810619942611,
     "cte_p95": 0.7888453811407082,
     "cte_max": 1.12180769443512,
@@ -31,7 +31,8 @@
       "steer_limit": 1.0,
       "throttle": 0.2,
       "throttle_corner": 0.14
-    }
+    },
+    "CORRECTION": "cruise/corner/frac recomputed 2026-08-13 with np.isclose; the original run used == on float32-widened throttle, storing frac_steps_cornering 0.0 (true 0.605) and null speeds."
   },
   "per_step": [
     {

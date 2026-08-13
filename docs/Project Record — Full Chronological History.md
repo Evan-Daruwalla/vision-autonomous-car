@@ -67,6 +67,7 @@ the dated entry, not the digest.
 - [AD — Harness noise floor MEASURED (CV 55%): the reset is exonerated and every comparison this session was underpowered](#appendix-ad---the-harness-noise-floor-measured-cv-55-and-every-comparison-this-session-was-underpowered-2026-08-11-2329-cdt) (08-11)
 - [AE — Corrections to AD, and a better harness fix than AD proposed: pair the design, the outcome is censored, and the CV needs its interval](#appendix-ae---corrections-to-ad-and-a-better-fix-for-the-harness-than-the-one-ad-proposed-2026-08-12-0724-cdt) (08-12)
 - [AF — AE corrected the record and forgot the live docs, which is the error AE was correcting](#appendix-af---ae-corrected-the-record-and-forgot-the-live-docs-which-is-the-error-ae-was-correcting-2026-08-12-0735-cdt) (08-12)
+- [AG — Evan's build decisions, the operating point measured, and the camera nobody configured](#appendix-ag---evans-build-decisions-the-operating-point-measured-and-the-camera-nobody-configured-2026-08-12-2048-cdt) (08-13)
 
 ---
 
@@ -3873,3 +3874,143 @@ Unchanged from AE, minus the fixed items:
    (#5159, +$6); the ~1:20 track re-spec.
 4. **Nothing printed, nothing ordered** - unchanged since 2026-07-23, now
    three weeks.
+
+---
+
+# Appendix AG - Evan's build decisions, the operating point measured, and the camera nobody configured (2026-08-12, ~20:48 CDT)
+
+**WHAT:** Evan made three build calls, the BOM was verified, the sim's physical
+operating point was measured for the first time, and a Pi brief ran. A fourth
+`/landing-check` then found a false value I had committed as measured data.
+
+## AG.1 Evan's decisions (2026-08-12)
+
+1. **Buy the encoder motor #5159 (+$6).** The decisive argument was never
+   odometry in general but the **intersection blind zone** — no lane markings
+   for 40-60 cm, the piece that broke all four prior attempts found in the
+   2026-07-23 research, two of which fell back to hardcoded timing.
+2. **More floor space**, rather than accept the ~1:20 re-spec's 26 mm
+   clearance. This retires the 3x5-grid constraint.
+3. **Research Pi alternatives**, purchase ~September.
+
+## AG.2 The BOM re-pricing is accurate; the ceiling is genuinely breached
+
+The unattributed re-pricing had been held out of four commits. All six prices
+re-checked against live vendor pages and **every one confirmed exactly**: Pi 5
+4GB $110.00 pishop / $130.00 Adafruit; Camera Module 3 Wide $38.50; Pololu
+#1093 $23.95; #713 $4.95; Pi 5 2GB $65.00. Total ~$222-225 before shipping.
+Committed at 9f9af08.
+
+## AG.3 The operating point, measured for the first time
+
+`ml/measure_operating_point.py` (new, 400 steps). **None of this had ever been
+written down** — `THROTTLE = 0.20` is a normalised command and the corpus logs
+cte but not velocity, so every sim result was tied to an operating point nobody
+had recorded.
+
+| quantity | measured |
+|---|---|
+| control rate | **20.00 Hz** |
+| mean operating speed | **1.401 m/s** (max 1.586) -> **7.0 cm per control step** |
+| frame | 120x160x3 native |
+| \|cte\| held by the expert | mean **0.317 m**, p95 0.789, max 1.122 |
+| \|steer\| | mean 0.598, **p95 1.000 — saturating** |
+
+`docs/SIM_TRANSFER_SPEC.md` turns this into the contract the physical car must
+meet: 20 Hz sustained, a byte-identical image pipeline, steering authority at
+least what the sim uses, and **speed scaled to the lane rather than copied**.
+Recommends ~300 mm lanes (85 mm clearance for a 130 mm car) and starting at
+0.3-0.5 m/s empirically.
+
+## AG.4 THE CAMERA WAS NEVER CONFIGURED
+
+Chasing one of the spec's own "known unknowns" produced the largest finding of
+the day. `donkey_sim.py` sends a camera config only via three paths, all keyed
+on `cam_config` / `cam_config_b` being present — and **`cam_config` is absent
+from every conf dict in `ml/*.py`.**
+
+**So the FOV, lens distortion, camera height, pitch and forward offset were
+never set.** The entire corpus was captured through the Unity binary's default
+projection, which is **not recorded anywhere on the Python side.** Camera
+Module 3 Wide is 120 deg. If the default differs materially, every learned
+component trained on a different lens than the physical car will have — a
+first-order sim2real risk that had been invisible.
+
+**Identifying it costs one short sim run and no hardware:** capture at the
+default, then at several explicit FOVs from the same pose, and compare. **Do it
+before buying a camera** — `docs/BOM.md` row 2 is now flagged HOLD.
+
+## AG.5 Pi: the 2GB, and the "4GB minimum" is folklore
+
+`docs/research/2026-08-12_onboard-compute-selection.md`. Verdict: **Pi 5 2GB,
+$65** — same 2.4 GHz Cortex-A76, saves $45, **returns the build to ~$192-205
+all-in.**
+
+- **H1 survives.** DonkeyCar's page says "in general, we recommend ... 4GB"
+  with **no stated justification**, its `pi` extra installs **tflite-runtime,
+  not TensorFlow**, and a **512MB Zero 2 W already drives autonomously**.
+- **H4 dies on a primary source.** Raspberry Pi's 2026-04-01 post held the
+  1GB/2GB variants flat while raising 4GB by $25. The 4GB has taken every hike
+  since Dec 2025 ($70 -> $85 -> $110); the 2GB none. **September price risk is
+  concentrated entirely on the 4GB.**
+- **H3 dies on camera drivers** — IMX708 lives only in Raspberry Pi's kernel
+  fork; Radxa cannot drive even the older IMX219.
+- **Honest counterweight:** nobody has benchmarked this actual model, no
+  measured RSS figure exists for a DonkeyCar loop on any board, and if 2GB
+  blocks you it costs $175 and weeks. The 2GB's failure mode is at `pip
+  install` (fixable with swap), not runtime.
+- Free lever regardless of board: **export to ONNX** rather than shipping
+  PyTorch (~17 MB vs ~65 MB runtime).
+
+## AG.6 A false value was committed as measured data
+
+`/landing-check` #4. `measure_operating_point.py` compared `thr == THROTTLE`,
+but throttle round-trips through float32 as `0.20000000298023224`, so **exact
+equality never matched.** Consequences:
+
+- `frac_steps_cornering` was written to the committed JSON as **0.0 when the
+  true value is 0.605** — a false number presented as a measurement.
+- Both conditional prints never fired; `speed_cruise_mean` and
+  `speed_corner_mean` were stored as **null**.
+- **60.5% of the run was at corner throttle**, so labelling 1.401 m/s "cruise
+  speed" was wrong. Fixed to "mean operating speed", with the note that the
+  split is not meaningful anyway — corner-throttle mean (1.397) *exceeds*
+  cruise-throttle mean (1.209) because speed lags the command. The 7.0 cm/step
+  figure survives; it was always the overall mean.
+
+Fixed with `np.isclose`; the JSON was re-derived from the recorded per-step
+data and carries a `CORRECTION` field.
+
+**Three further spec defects the same check caught:**
+- **An unsourced number: "the car went from 39 to 61 steps".** It appears
+  nowhere in the record or codebase. **Withdrawn.** The uint8-before-/255
+  practice is real and documented in `eval_in_sim.py`; the quantified gain was
+  not. This is the standing no-invented-data rule, broken.
+- **"2.6x the grid's margin" is wrong** — 85/26 = **3.27x**. And "comparable to
+  Duckietown's relative margin" cited no Duckietown figure; withdrawn.
+- **§2.1's rate evidence contradicts the project's own AD.3.** 69 -> 187 steps
+  is 2.7x, below the ~3x that a CV-55% harness can resolve at n=1. Direction
+  real, magnitude unestablished — now stated that way.
+
+## AG.8 The date error, a third time
+
+This entry was first written stamped **2026-08-13 ~01:52 CDT**. That is wrong;
+`date` reported **2026-08-12 20:48 -0500**. I took the date from a UTC system
+notice instead of the clock call I had already made — **the identical error AE
+corrected in four places and AF recorded as a pattern**, committed again inside
+the entry documenting it.
+
+The standing rule is to run `date` and label by the reported offset. Running it
+is not the failing step; **using it is.** Hardening the habit: the timestamp is
+copied from the `date` output verbatim, and any date that arrives from a hook,
+a system notice or a task banner is treated as UTC and never written down.
+
+## AG.7 Open items
+
+1. **Identify the sim camera FOV and mount geometry** (AG.4). Highest-value
+   work available with no hardware, and it gates the camera purchase.
+2. **PRD P6** — harness trustworthiness, paired design first. Still blocking
+   every closed-loop claim.
+3. Sim lane width in metres — blocks the clean speed-scaling formula.
+4. Evan's call on the Pi 2GB vs 4GB.
+5. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.

@@ -90,8 +90,12 @@ def main() -> int:
     # Discard the first 50 steps for the steady-state figure: the car is still
     # accelerating out of the reset and would drag the cruise speed down.
     ss = sp[50:] if n > 100 else sp
-    cruise = sp[(thr == THROTTLE)]
-    corner = sp[(thr == THROTTLE_CORNER)]
+    # np.isclose, NOT ==: throttle round-trips through float32 and comes back
+    # as 0.20000000298023224, so exact equality never matches. Measured
+    # 2026-08-12: the == form silently reported frac_steps_cornering 0.0 when
+    # the true value was 0.605, and left both speeds null.
+    cruise = sp[np.isclose(thr, THROTTLE)]
+    corner = sp[np.isclose(thr, THROTTLE_CORNER)]
     hz = n / elapsed if elapsed > 0 else 0.0
     img = obs.shape if hasattr(obs, "shape") else None
 
@@ -101,7 +105,7 @@ def main() -> int:
         "speed_steady_mean": float(ss.mean()), "speed_steady_max": float(ss.max()),
         "speed_cruise_mean": float(cruise.mean()) if len(cruise) else None,
         "speed_corner_mean": float(corner.mean()) if len(corner) else None,
-        "frac_steps_cornering": float((thr == THROTTLE_CORNER).mean()),
+        "frac_steps_cornering": float(np.isclose(thr, THROTTLE_CORNER).mean()),
         "cte_mean_abs": float(ct.mean()), "cte_p95": float(np.percentile(ct, 95)),
         "cte_max": float(ct.max()),
         "steer_mean_abs": float(st.mean()), "steer_p95": float(np.percentile(st, 95)),
@@ -115,7 +119,7 @@ def main() -> int:
         print(f"       cruise (thr {THROTTLE})       {cruise.mean():.3f} m/s")
     if len(corner):
         print(f"       corner (thr {THROTTLE_CORNER})       {corner.mean():.3f} m/s"
-              f"   ({100*(thr==THROTTLE_CORNER).mean():.0f}% of steps)")
+              f"   ({100*np.isclose(thr,THROTTLE_CORNER).mean():.0f}% of steps)")
     print(f"|cte|  mean {ct.mean():.3f} m  p95 {np.percentile(ct,95):.3f}  "
           f"max {ct.max():.3f}")
     print(f"|steer| mean {st.mean():.3f}  p95 {np.percentile(st,95):.3f} "

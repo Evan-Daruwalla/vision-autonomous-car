@@ -18,8 +18,8 @@ steps, scripted PID expert, `donkey-generated-track-v0`), not estimated.
 | quantity | measured | why it matters |
 |---|---|---|
 | **Control rate** | **20.00 Hz** | The PID gains and every learned policy were tuned here. Rate changes behaviour sharply (record Z.2). |
-| **Cruise speed** | **1.401 m/s** steady mean, 1.586 max | The speed all the data was collected at. |
-| **Distance per control step** | **7.0 cm** | 1.401 ÷ 20. The car commits to an action for 7 cm. |
+| **Mean operating speed** | **1.401 m/s** steady mean, 1.586 max | The speed all the data was collected at. **Not a "cruise" speed: 60.5% of steps ran at THROTTLE_CORNER (0.14) because the expert steers hard, and speed lags the command — corner-throttle mean 1.397 vs cruise-throttle mean 1.209. There is no clean cruise regime; use the overall mean.** |
+| **Distance per control step** | **7.0 cm** | 1.401 ÷ 20, on the overall mean. The car commits to an action for 7 cm. |
 | **Camera frame** | **120 × 160 × 3** native | Then squashed to 64×64 (see §3). |
 | **\|cte\| held by the expert** | **mean 0.317 m**, p95 0.789, max 1.122 | The distribution the encoder saw. Off-centre perception collapses past ~1.0. |
 | **Corpus quality filter** | rejected mean\|cte\| > 1.2 m | Why the corpus had no recovery data. |
@@ -32,9 +32,14 @@ steps, scripted PID expert, `donkey-generated-track-v0`), not estimated.
 ## 2. The four things that MUST match, in priority order
 
 ### 2.1 Control rate: 20 Hz, sustained
-Not "about 20". Rate is the single most sensitive parameter measured: a **2%**
-sleep-throttle collapsed the expert from 9/9 to 0/2 (record Z.2), and the same
-checkpoint scored 69 vs 187 steps at 13.2 vs 16.7 Hz. **The Pi must sustain
+Not "about 20". Rate is the most sensitive parameter measured: a **2%**
+sleep-throttle dropped the expert from 600/600 to **196.5 +- 0.5 steps**
+(record Z.2 — and Z.2 itself demotes `--control-hz` to a diagnostic that
+measures a desynchronisation artifact, so read it as "the harness is
+rate-fragile", not as a clean rate law). The same checkpoint also scored 69 vs
+187 steps at 13.2 vs 16.7 Hz — **but note AD.3 measured the harness at CV 55%,
+where n=1 resolves only ~3x, and 69->187 is 2.7x. Treat the direction as real
+and the magnitude as unestablished.** **The Pi must sustain
 camera capture + preprocess + VAE + MDN-RNN + controller inside 50 ms, with
 headroom.** If it can't, the sim-tuned gains and policies do not transfer and
 must be re-tuned at whatever rate the Pi actually achieves — which is a real
@@ -47,9 +52,13 @@ cost, so measure it before committing to the board.
   turn.
 - **Antialiased bilinear.** Without it, thin lane markings alias between frames
   and the encoder sees flicker it never trained on.
-- **Quantise to uint8 BEFORE dividing by 255.** This exact skew has already
-  cost this project once — the serve path skipped the round trip and the car
-  went from 39 to 61 steps when it was fixed.
+- **Quantise to uint8 BEFORE dividing by 255.** The corpus was written as
+  uint8 and only divided by 255 at load, so skipping the round trip feeds the
+  encoder continuous values it never saw. `ml/eval_in_sim.py` does this
+  correctly and documents why; match it exactly. *(An earlier draft of this
+  spec attached a "39 → 61 steps" improvement to this fix. **That number is
+  not in the record or the codebase and should not be relied on** — the
+  practice is right, the quantified gain is unsourced.)*
 
 ### 2.3 Steering authority: at least as much as the sim uses
 The expert's steering **saturates (|steer| = 1.0) at the p95**, and averages
@@ -92,13 +101,16 @@ With a **130 mm car**:
 |---|---|---|
 | 182 mm (3×5 grid, now abandoned) | 26 mm | **~half a Duckiebot's margin.** Every perception error you measured in sim gets amplified. |
 | 250 mm | 60 mm | workable |
-| **300 mm** | **85 mm** | **recommended** — comparable to Duckietown's relative margin |
+| **300 mm** | **85 mm** | **recommended** — 3.27x the abandoned grid's margin |
 | 350 mm+ | 110 mm | most forgiving; costs floor area per tile |
 
-**Recommendation: target ~300 mm lanes.** That gives 85 mm per side, roughly
-2.6× the 3×5 grid's margin, and it is the cheapest possible insurance against
-the one failure this project has measured repeatedly — perception degrading as
-the car goes off-centre.
+**Recommendation: target ~300 mm lanes** — a judgement call, not a derived
+number. It gives 85 mm per side, **3.27x** the 3x5 grid's 26 mm, and it is the
+cheapest insurance against the one failure this project has measured
+repeatedly: perception degrading as the car goes off-centre. *(An earlier
+draft said 2.6x and compared it to "Duckietown's relative margin" without
+citing a Duckietown figure. The multiple is corrected; the comparison is
+withdrawn as uncited.)*
 
 **Then set the speed empirically**, not from the formula: start at **0.3–0.5
 m/s** on the real car and raise it only while the PID still holds the lane.
@@ -126,8 +138,9 @@ is the safe direction to err.
 
 1. **Sim lane width in metres.** Blocks the clean speed-scaling formula (§2.4).
 2. **Sim camera FOV — investigated 2026-08-12, and the finding is bigger than
-   the question.** `donkey_sim.py` only sends a camera config **if
-   `cam_config` is present in the conf dict**, and this project's conf
+   the question.** `donkey_sim.py` sends a camera config only via
+   **three paths** (two keyed on `cam_config`/`cam_config_b`, one deprecated
+   top-level), and **all three are skipped** when those keys are absent, and this project's conf
    (`collect_sim_data.py`, `eval_in_sim.py`) contains only `exe_path, host,
    port, start_delay, car_name, max_cte`. **So the FOV, the lens distortion,
    and the camera's offset_x/y/z and rot_x/y/z were NEVER SET** — every frame

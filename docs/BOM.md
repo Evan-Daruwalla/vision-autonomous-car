@@ -16,7 +16,7 @@ split-source power path costs almost nothing.
 |---|---|---|---|---|
 | **Compute + sensing** |
 | 1 | Raspberry Pi 5 **4GB** | DonkeyCar's stated minimum; onboard work is inference-only, all training is on the 3060 Ti | **$110.00** ⚠️ *(was $70.00 — see re-pricing note)* | pishop.us $110 / adafruit.com $130 |
-| 2 | Camera Module 3 **Wide** | ≥120° FOV is the consensus lever for track following; rolling shutter is fine at 1–3 m/s | **$38.50** *(was $35.00)* | pishop.us |
+| 2 | Camera Module 3 **Wide** | ⚠️ **HOLD — do not order until the sim FOV is identified (2026-08-12).** The sim's camera FOV/offset/rotation were NEVER SET (`cam_config` absent from every conf dict), so the whole corpus was captured at an unrecorded Unity default. If it differs from this camera's 120°, the encoder trained on a different projection than this part will produce. One short sim run settles it — see `docs/SIM_TRANSFER_SPEC.md` §5.2. Original rationale: ≥120° FOV is the consensus lever for track following; rolling shutter is fine at 1–3 m/s | **$38.50** *(was $35.00)* | pishop.us |
 | 3 | **Camera cable, Standard-Mini** | ⚠️ **Camera Module 3 ships with a Standard-Standard cable, which does NOT fit the Pi 5's mini 22-pin connector.** Verified against Raspberry Pi docs 2026-07-23. Without this, nothing works. | **~$2–5** | raspberrypi.com |
 | 4 | microSD card, 32GB+, A2/U3 | OS + driving logs | **~$10.00** | any |
 | **Drive + steering** |
@@ -75,6 +75,16 @@ checkout actually costs.
 Dropping to 2GB returns the build to ≈$192–205 all-in — but 2GB is **below the
 4GB DonkeyCar minimum** this BOM's row 1 cites. That is a real engineering
 trade, not a free saving, and it is **Evan's call, not made here.**
+
+**PI RECOMMENDATION 2026-08-12 (`docs/research/2026-08-12_onboard-compute-selection.md`):
+switch row 1 to the Pi 5 **2GB at $65.00** (pishop.us, in stock). Same 2.4 GHz
+Cortex-A76 silicon, saves **$45**, and it is the only variant Raspberry Pi has
+held flat through all three 2025-26 DRAM hikes while the 4GB took every one
+(official posts 2025-12-01 / 2026-02-02 / 2026-04-01). **Returns the build to
+≈$192-205 all-in.** DonkeyCar's "4GB minimum" is an unjustified recommendation
+— its `pi` extra installs tflite-runtime, not TensorFlow, and a 512MB Zero 2 W
+already drives autonomously. The 2GB's risk is at `pip install`, fixable with a
+temporary swap file, not at runtime. **Evan's call; not applied to row 1.**
 
 **INDEPENDENTLY VERIFIED 2026-08-12 ~07:40 CDT** against live vendor pages by
 a second session, because the re-pricing above was authored outside the session
