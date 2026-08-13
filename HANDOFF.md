@@ -31,7 +31,7 @@ floor space** over the ~1:20 track re-spec; research Pi alternatives before a
 > few explicit FOVs, compare) and it may change the camera purchase.
 > `docs/BOM.md` row 2 is flagged HOLD.
 
-> **⚠️  INSTALLS , WHICH DOES NOT WORK ON THE PI 5.**
+> **⚠️ `donkeycar[pi]` INSTALLS `RPi.GPIO`, WHICH DOES NOT WORK ON THE PI 5.**
 > Pi 5 moved GPIO behind the RP1 southbridge; RPi.GPIO pokes `/dev/mem` and
 > fails with `Cannot determine SOC peripheral base address`. Use **`rpi-lgpio`**
 > (drop-in). This is a defect in the CURRENT plan, not a board comparison, and
