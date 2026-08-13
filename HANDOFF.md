@@ -31,6 +31,15 @@ floor space** over the ~1:20 track re-spec; research Pi alternatives before a
 > few explicit FOVs, compare) and it may change the camera purchase.
 > `docs/BOM.md` row 2 is flagged HOLD.
 
+> **⚠️  INSTALLS , WHICH DOES NOT WORK ON THE PI 5.**
+> Pi 5 moved GPIO behind the RP1 southbridge; RPi.GPIO pokes `/dev/mem` and
+> fails with `Cannot determine SOC peripheral base address`. Use **`rpi-lgpio`**
+> (drop-in). This is a defect in the CURRENT plan, not a board comparison, and
+> it would otherwise surface as a mystery bench failure in September.
+> Also decide the PWM path before ordering: DonkeyCar's `pins.py` has only
+> three backends (RPI_GPIO, PCA9685, PIGPIO), the BOM wires straight to GPIO,
+> and **a PCA9685 breakout would make actuation board-agnostic** (Appendix AH).
+
 **Pi: recommend the 5 2GB at $65**, not the 4GB at $110 — same silicon, saves
 $45, returns the build to ≈$192–205 all-in. The "4GB minimum" is an
 unjustified DonkeyCar recommendation. Full brief:

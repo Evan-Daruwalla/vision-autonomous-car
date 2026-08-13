@@ -68,6 +68,7 @@ the dated entry, not the digest.
 - [AE — Corrections to AD, and a better harness fix than AD proposed: pair the design, the outcome is censored, and the CV needs its interval](#appendix-ae---corrections-to-ad-and-a-better-fix-for-the-harness-than-the-one-ad-proposed-2026-08-12-0724-cdt) (08-12)
 - [AF — AE corrected the record and forgot the live docs, which is the error AE was correcting](#appendix-af---ae-corrected-the-record-and-forgot-the-live-docs-which-is-the-error-ae-was-correcting-2026-08-12-0735-cdt) (08-12)
 - [AG — Evan's build decisions, the operating point measured, and the camera nobody configured](#appendix-ag---evans-build-decisions-the-operating-point-measured-and-the-camera-nobody-configured-2026-08-12-2048-cdt) (08-13)
+- [AH — The camera was never the constraint; the PWM pin was, and it breaks the Pi 5 too](#appendix-ah---the-camera-was-never-the-constraint-the-pwm-pin-was-and-it-breaks-the-pi-5-too-2026-08-12-2148-cdt) (08-12)
 
 ---
 
@@ -4014,3 +4015,131 @@ a system notice or a task banner is treated as UTC and never written down.
 3. Sim lane width in metres — blocks the clean speed-scaling formula.
 4. Evan's call on the Pi 2GB vs 4GB.
 5. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+
+---
+
+# Appendix AH - The camera was never the constraint; the PWM pin was, and it breaks the Pi 5 too (2026-08-12, ~21:48 CDT)
+
+**WHAT:** `/research-brief` on alternatives to the Raspberry Pi 5 *as a whole*.
+Four agents, one per pre-registered hypothesis, each hunting its own falsifier.
+The verdict keeps the incumbent, but **both of the reasons the previous brief
+gave were wrong**, and the brief surfaced a live defect in the current build
+plan. Saved: `docs/research/2026-08-12_pi5-alternatives.md`.
+
+## AH.1 The prior brief's central argument does not hold
+
+The 2026-08-12 compute brief rejected every non-Pi board because DonkeyCar
+depends on `picamera2` and IMX708 drivers are Pi-only. **Verified false in
+DonkeyCar `main` source:**
+
+- `picamera2` and `RPi.GPIO` are **only in the `pi` extra**, not
+  `install_requires`.
+- `PiCamera` imports picamera2 **inside `__init__`** — with `CAMERA_TYPE=CVCAM`
+  it never executes.
+- `templates/complete.py` dispatches PICAM / WEBCAM / CVCAM / CSIC / V4L /
+  IMAGE_LIST / LEOPARD / MOCK, all lazily.
+- **The `nano` extra is the existence proof**: `Jetson.GPIO` instead of
+  `RPi.GPIO`, and no `picamera2` at all. Upstream already ships a non-Pi build.
+
+That the prior brief's own H3 rested on this is worth recording: **the
+conclusion (stay with the Pi) survived, the argument did not.** A correct
+answer reached through a wrong argument is not a validated answer.
+
+## AH.2 The real constraint, and it bites the incumbent
+
+`parts/pins.py` has **exactly three PWM backends: RPI_GPIO, PCA9685, PIGPIO.**
+No libgpiod, no periphery, no vendor GPIO. **Two of three are Pi-only**; the
+third needs a PCA9685 breakout that is **not in the BOM** (checked absent, and
+absent from the deferred list). Evan's wiring drives the servo and TB6612FNG
+straight off GPIO.
+
+**And `RPi.GPIO` does not work on the Raspberry Pi 5 at all.** Verified against
+the Raspberry Pi forum directly (thread 361834): *"RPi.GPIO is not compatible
+on PI5"*, failing with `Cannot determine SOC peripheral base address` because
+Pi 5 moved GPIO behind the **RP1 southbridge** while RPi.GPIO poked registers
+through `/dev/mem`. Replacements: **`rpi-lgpio`** (drop-in), `gpiozero`,
+`libgpiod`.
+
+**`donkeycar[pi]` installs `RPi.GPIO`.** So this is not a comparison point
+between boards — **it is a defect in the current plan**, and it would have
+surfaced as a mystery failure on the bench in September.
+
+## AH.3 H3 dies on a number that was measured, not argued
+
+The onboard path was benchmarked locally (4 CPU threads to mimic the Pi's four
+cores, 300 iterations after warmup, real `ConvVAE.encode` + `Controller` +
+`MDNRNN.lstm`):
+
+| | |
+|---|---|
+| ConvVAE | 4,348,547 = **encoder 755,744** + decoder 3,592,803 |
+| MDN-RNN / Controller | 382,533 / 74,498 |
+| **onboard path** | **1,212,775 params — 28% of the headline 4.35M** |
+| **full step** | **0.903 ms -> 1108 Hz** |
+| **vs the 50 ms budget** | **55x headroom** |
+
+**The decoder never runs on the car.** `models.py` notes callers use `mu`
+directly at eval; a Ha & Schmidhuber controller is `a = W[z,h]+b`; and even M4's
+latent imagination needs no decoder. **Every prior discussion of "the 4.3M-param
+model" overstated the onboard workload by 3.6x.**
+
+Also against accelerators: Hailo's compiler reportedly rejects LSTM/GRU
+outright ("not supported layers", community thread 2025-07-13), and its
+documented fallback is **unrolling to a fixed sequence length**, which is not
+the stateful single-step RNN a driving MDN-RNN needs. **Coral is archived**
+(`google-coral/edgetpu`, 2026-04-19, flagship complaint unanswered).
+
+**Caveat kept prominent:** this is a desktop x86 CPU, not a Cortex-A76, and it
+measures the MODEL ONLY — not capture, resize, or DonkeyCar's vehicle loop.
+The agents' own warning stands: the 20 Hz risk is per-frame Python overhead,
+not FLOPs.
+
+## AH.4 The rest of the field
+
+- **BeagleY-AI is the only board that partially falsifies "only Pi has working
+  software"** — first-party Debian 13.6 images dated **2026-07-24**. But it is
+  **$70 against the Pi 5 2GB's $65**: the reason to leave the Pi is money, and
+  the one board with real software costs more.
+- **US stock has collapsed for Radxa** (Rock 5A/5B, Zero 3W, X2L all out of
+  stock 2026-08-12; 5C and Zero 3E unlisted). `ubuntu-rockchip` **archived
+  2026-04-29**, narrowly replaced.
+- **Off-board compute over WiFi fails on measurement**: best figure 200 ms
+  (WebRTC, 720p30, glass-to-glass) against a 50 ms budget. The honest
+  counter — a raw 64x64 frame is 12,288 bytes and skips the encode/jitter/decode
+  stages that dominate that 200 ms — **has no measured figure behind it**, and
+  jitter rather than mean latency is what kills a steering loop.
+- **Android/OpenBot** is the only left-field option not dismissed: proven
+  architecture, ~$0 if a phone exists, GPIO sidestepped via Arduino over USB
+  OTG. Costs a full Kotlin rewrite, abandons DonkeyCar, and NNAPI was
+  deprecated in Android 15. A cheaper project and a worse one.
+- **Used market: no usable prices, second consecutive brief.** Treat "used is
+  cheaper" as unverified. Meanwhile **RAM prices are up ~7x** and drove the Pi
+  increases — September is likelier worse than better.
+
+## AH.5 Method note: all four arms returned PARTIAL
+
+The previous process died mid-run. The agents were **resumed from transcript**
+rather than restarted, and instructed to deliver only what they had actually
+sourced with a NOT-YET-COLLECTED section. That preserved real work — but the
+brief has genuine holes, the largest being **Libre Computer, entirely
+unsourced**, which was one of the two best shots at falsifying the Pi's
+software advantage. Recorded as a limitation rather than papered over.
+
+One agent also flagged a DigiKey price ($72.54) that came from a search
+snippet rather than a fetched page. **Not entered anywhere.**
+
+## AH.6 Actions this forces regardless of board
+
+1. **Plan on `rpi-lgpio`** — `donkeycar[pi]`'s `RPi.GPIO` is broken on Pi 5.
+2. **Decide the PWM path before ordering.** Straight-to-GPIO locks the project
+   to a Pi; a PCA9685 breakout makes actuation pure I2C and board-agnostic, at
+   a cost not yet collected.
+3. **Measure the real loop rate on hardware** before trusting the 55x headroom.
+
+## AH.7 Open items
+
+1. Libre Computer — the unsourced gap.
+2. The sim camera FOV/mount identification (AG.4) — still the top no-hardware
+   item, and still gating the camera purchase.
+3. PRD P6 — harness trustworthiness, paired design first.
+4. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
