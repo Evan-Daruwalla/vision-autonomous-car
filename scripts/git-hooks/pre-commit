@@ -1,0 +1,23 @@
+#!/bin/sh
+# Standalone, VERSION-CONTROLLED pre-commit hook for the Autonomous Car repo.
+# Added 2026-08-16 (audit finding AC-2): no secret gate existed at all — no
+# core.hooksPath, no .git/hooks/pre-commit. Activate with:
+#   git config core.hooksPath scripts/git-hooks
+#
+# Secret gate ONLY (this repo has no HTML-twin record — don't add that job
+# here just because Trading has it).
+#
+# ONE executing copy, at a fixed path, shared by every repo — do NOT inline a
+# second copy here. That file resolves the scanner and owns the block/fail-open
+# policy, so a gate fix lands once instead of in four forks.
+# Emergency bypass: git commit --no-verify (don't make it a habit).
+
+GATE="${HOME}/.claude/skills/commit-gate/hooks/pre-commit"
+if [ -f "$GATE" ]; then
+  sh "$GATE" || exit 1
+else
+  echo "commit-gate WARNING: gate not found at $GATE — secret gate SKIPPED (fail-open)." >&2
+  echo "The commit proceeds UNSCANNED." >&2
+fi
+
+exit 0

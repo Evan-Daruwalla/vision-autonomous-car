@@ -41,6 +41,7 @@ import torch
 
 from collect_sim_data import PIDDriver, SIM_EXE, THROTTLE, WARMUP_STEPS
 from eval_in_sim import SIZE, LatentPolicy
+from sim_conf import base_sim_conf
 from models import HIDDEN, MDNRNN, ConvVAE
 from plan_cem import CEMPlanner, load_probe
 from train_controller import Controller
@@ -121,8 +122,7 @@ def main() -> int:
 
     import gym_donkeycar  # noqa: F401
     import gymnasium as gym
-    conf = {"exe_path": str(SIM_EXE), "host": "127.0.0.1", "port": args.port,
-            "start_delay": 10.0, "car_name": "trace", "max_cte": 4.0}
+    conf = base_sim_conf(str(SIM_EXE), args.port, "trace", max_cte=4.0)
     print(f"launching {args.track}, driver={args.driver} ...")
     env = gym.make(args.track, conf=conf)
 

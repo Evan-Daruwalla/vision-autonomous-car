@@ -4408,3 +4408,53 @@ for reasons nobody checked.
    `SIM_TRANSFER_SPEC` §2.4.
 4. Libre Computer, still unsourced (AH).
 5. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+
+# Appendix AK - Scheduled daily-audit: the sim FOV that AI identified by comparison is now pinned in code, and a secret gate is wired (2026-08-16, ~13:28 CDT)
+
+## AK.1 What ran
+
+The `daily-audit` scheduled task ran a cross-project cold audit; Evan
+replied "do all." Two fixes here (AC-1, AC-2).
+
+## AK.2 AC-1 - cam_config chokepoint
+
+AI (2026-08-13) identified the sim's default FOV as 90 degrees by
+comparison - `diag_camera_fov.py` sweeping explicit values against the
+unrecorded default. That identification was never asserted anywhere in the
+code that actually launches the sim: `cam_config` appeared in exactly one
+file (the diagnostic itself); the 9 modules that build the corpus, measure
+the operating point, and run every closed-loop eval (`collect_sim_data.py`,
+`measure_operating_point.py`, `eval_paired.py`, `verify_env.py`,
+`collect_recovery.py`, `diag_reset.py`, `eval_in_sim.py`, `plan_cem.py`,
+`trace_failure.py`) each hand-built a conf dict with no camera geometry at
+all. A gym-donkeycar or DonkeySimWin version bump could move every measured
+number in `docs/SIM_TRANSFER_SPEC.md` with nothing to notice.
+
+Added `ml/sim_conf.py`: one `base_sim_conf()` builder carrying the pinned
+`fov=90` cam_config, callers keep only `port`/`car_name`/overrides.
+Migrated all 9 launch sites to it. `diag_camera_fov.py` deliberately left
+untouched - its whole job is sweeping FOV values including "none sent" to
+IDENTIFY this constant, so it must not import the thing it discovered.
+
+## AK.3 AC-2 - secret gate wired
+
+No `core.hooksPath`, no native `.git/hooks/pre-commit` - same gap as Swing
+Trading. Added `scripts/git-hooks/pre-commit` (secret-gate delegation only;
+this repo has no HTML-twin record per CLAUDE.md) and set
+`core.hooksPath scripts/git-hooks`.
+
+## AK.4 Verification
+
+- **P1 done-check re-run for real, post-migration:** `ml\verify_env.py` ->
+  `torch 2.13.0+cu126`, `cuda.is_available: True`,
+  `device: NVIDIA GeForce RTX 3060 Ti`, sim launched, `reset ok: obs (120,
+  160, 3) uint8`, `step ok`, frame saved, **`P1 DONE-CHECK: PASS`**.
+- Confirmed exactly the 9 intended call sites now import `sim_conf`
+  (`grep -rl "from sim_conf import"`) and exactly one hand-rolled conf dict
+  remains, in `diag_camera_fov.py` (the deliberate exception).
+- AC-2: staged content, ran the hook directly - clean, exit 0.
+
+## AK.5 Status
+
+- AC-1, AC-2: closed.
+- Not pushed - Evan has not authorized a push.

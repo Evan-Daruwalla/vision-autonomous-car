@@ -44,6 +44,7 @@ import torch
 
 from collect_sim_data import PIDDriver, SIM_EXE
 from eval_in_sim import LatentPolicy, run_episode
+from sim_conf import base_sim_conf
 from models import MDNRNN, ConvVAE
 from train_controller import Controller
 
@@ -103,9 +104,7 @@ def main() -> int:
 
     records = []
     for L in range(args.launches):
-        conf = {"exe_path": str(SIM_EXE), "host": "127.0.0.1",
-                "port": args.port, "start_delay": 10.0,
-                "car_name": "pair", "max_cte": 4.0}
+        conf = base_sim_conf(str(SIM_EXE), args.port, "pair", max_cte=4.0)
         env = gym.make(args.track, conf=conf)
         print(f"=== launch {L+1}/{args.launches} "
               f"(one generated track, shared by every arm) ===")

@@ -57,6 +57,7 @@ import torch.nn as nn
 from collect_sim_data import (PIDDriver, SIM_EXE, THROTTLE, THROTTLE_CORNER,
                               WARMUP_STEPS)
 from eval_in_sim import SIZE, run_episode
+from sim_conf import base_sim_conf
 from models import HIDDEN, MDNRNN, Z_DIM, ConvVAE
 
 REPO = Path(__file__).resolve().parent.parent
@@ -216,8 +217,7 @@ def main() -> int:
 
     import gym_donkeycar  # noqa: F401
     import gymnasium as gym
-    conf = {"exe_path": str(SIM_EXE), "host": "127.0.0.1", "port": args.port,
-            "start_delay": 10.0, "car_name": "p5cem", "max_cte": 4.0}
+    conf = base_sim_conf(str(SIM_EXE), args.port, "p5cem", max_cte=4.0)
     print(f"launching {args.track} (H={args.horizon}, N={args.candidates}, "
           f"w_cte={args.w_cte}, w_smooth={args.w_smooth}) ...")
     env = gym.make(args.track, conf=conf)

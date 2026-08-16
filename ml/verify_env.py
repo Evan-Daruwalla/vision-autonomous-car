@@ -52,14 +52,9 @@ def main():
     import numpy as np
     from PIL import Image
 
-    conf = {
-        "exe_path": str(SIM_EXE),
-        "host": "127.0.0.1",
-        "port": 9091,
-        "start_delay": START_DELAY,
-        "car_name": "poc",
-        "font_size": 40,
-    }
+    from sim_conf import base_sim_conf
+    conf = base_sim_conf(str(SIM_EXE), 9091, "poc",
+                         start_delay=START_DELAY, font_size=40)
 
     print(f"\nlaunching simulator: {SIM_EXE.name}  (track {TRACK})")
     env = gym.make(TRACK, conf=conf)

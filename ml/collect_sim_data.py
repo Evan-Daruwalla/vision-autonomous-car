@@ -29,6 +29,7 @@ from pathlib import Path
 import numpy as np
 
 from episode_writer import EpisodeWriter
+from sim_conf import base_sim_conf
 
 REPO = Path(__file__).resolve().parent.parent
 SIM_EXE = REPO / "sim" / "DonkeySimWin" / "donkey_sim.exe"
@@ -114,16 +115,12 @@ def collect_track(track: str, out_dir: Path, n_episodes: int,
     import gym_donkeycar  # noqa: F401  registers the envs
     import gymnasium as gym
 
-    conf = {
-        "exe_path": str(SIM_EXE),
-        "host": "127.0.0.1",
-        "port": port,
-        "start_delay": 10.0,
-        "car_name": "poc",
-        "max_cte": 4.0,          # terminate sooner than the 8.0 default:
+    conf = base_sim_conf(
+        str(SIM_EXE), port, "poc",
+        max_cte=4.0,             # terminate sooner than the 8.0 default:
                                  # past this the car is off-road and the
                                  # frames are not expert data
-    }
+    )
     env = gym.make(track, conf=conf)
     driver = PIDDriver()
     writer = EpisodeWriter(out_dir, prefix=f"{track.replace('donkey-', '').replace('-v0', '')}-")
