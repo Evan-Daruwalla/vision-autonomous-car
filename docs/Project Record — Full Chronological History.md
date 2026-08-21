@@ -71,6 +71,7 @@ the dated entry, not the digest.
 - [AH — The camera was never the constraint; the PWM pin was, and it breaks the Pi 5 too](#appendix-ah---the-camera-was-never-the-constraint-the-pwm-pin-was-and-it-breaks-the-pi-5-too-2026-08-12-2148-cdt) (08-12)
 - [AI — The track regenerates every launch (the harness mystery, solved), and the sim FOV is 90](#appendix-ai---the-track-regenerates-every-launch-that-is-the-harness-mystery-solved-and-the-sim-fov-is-90-2026-08-13-0056-cdt) (08-13)
 - [AJ — The closed-loop comparison, re-run PAIRED and finally valid: no intervention helps](#appendix-aj---the-closed-loop-comparison-re-run-paired-and-finally-valid-no-intervention-helps-2026-08-13-1547-cdt) (08-13)
+- [AK — Scheduled daily-audit: the sim FOV that AI identified by comparison is now pinned in code, and a secret gate is wired](#appendix-ak---scheduled-daily-audit-the-sim-fov-that-ai-identified-by-comparison-is-now-pinned-in-code-and-a-secret-gate-is-wired-2026-08-16-1328-cdt) (08-16)
 
 ---
 
