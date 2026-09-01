@@ -195,12 +195,41 @@ is the safe direction to err.
    **Do (a) before spending money on a camera.** It is the highest-value work
    available with no hardware, and it may make the Camera Module 3 Wide the
    wrong purchase.
-3. **Camera height, pitch and forward offset in sim.** Same root cause as (2)
-   — `offset_x/y/z` and `rot_x/y/z` were never set either, so the mount
-   geometry the encoder trained on is also the Unity default and also
-   unrecorded. Recover it in the same experiment as (a), then replicate it on
-   the physical mount. **A camera at the wrong height or pitch changes the
-   projection as surely as the wrong FOV does.**
+3. **Camera height, pitch and forward offset in sim.** **PARTIALLY RESOLVED
+   2026-09-01 (Appendix AR).** Same root cause as (2) — `offset_x/y/z` and
+   `rot_x/y/z` were never set either, so the mount geometry the encoder trained
+   on is also the Unity default and also unrecorded. **A camera at the wrong
+   height or pitch changes the projection as surely as the wrong FOV does.**
+
+   - **The method of (2) does NOT extend here.** `send_cam_config`'s contract
+     is "set any field to Zero to get the default camera setting". FOV was
+     sweepable because its default (90) is non-zero; for the offsets and
+     rotations **0.0 means "keep the default"**, so no sweep can reproduce a
+     default it cannot express. Recovered geometrically instead, from frames
+     already on disk (`ml/diag_camera_pose.py`).
+   - **PITCH: 16.3° DOWN — MEASURED.** The horizon sits at row **41.97 of 120**
+     (sd 0.284 px, n=3,187, `donkey-generated-roads-v0`; the other training
+     track is tree-lined and yields no horizon). The image centre row is
+     confirmed empirically at 59.5 ± 0.2 px.
+   - **`fov` is the VERTICAL field of view — MEASURED, no longer assumed.**
+     Holding pose and `fov=90` while changing only `img_h` moved the horizon's
+     offset from centre by a ratio of **1.346** (second reference: 1.271)
+     against 1.3333 predicted for vertical and 1.0000 for horizontal. So
+     f = 60 px at 120×160, and item 2's 106° H / 118° D is confirmed.
+   - **HEIGHT: NOT identified.** The regression of the yellow centre line's
+     column on the logged `cte` is the right method and needs no FOV
+     assumption (f cancels), but it fails on the corpus as collected — the
+     line runs off the left edge at close rows, `cte` spans only ±0.17 m, and
+     the PID couples heading to `cte`. Needs a purpose-built lateral-sweep
+     collection run, or a different observable. **No number is available.**
+   - **`offset_z` is NOT identifiable at all** from a ground plane; it is
+     absorbed into `cte`. **`offset_x` is not separable** from the road's own
+     geometry with a single line marking.
+   - **Mount target for the real car:** ignore the angle and match the
+     observable. Mount so the true horizon lands on **row 42 of a 120-row
+     frame (35% down)** at 90° vertical FOV, and the real projection
+     reproduces the training projection in pitch. Checkable with a spirit
+     level and one test photo.
 4. **Achievable control rate on the target board.** Determines whether §2.1
    holds at all.
 

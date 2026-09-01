@@ -78,6 +78,7 @@ the dated entry, not the digest.
 - [AO — The AL audit fixes, run: the encoder-fingerprint guard is a false negative and breaks train_cte_probe.py](#appendix-ao---the-al-audit-fixes-run-the-encoder-fingerprint-guard-is-a-false-negative-and-breaks-train_cte_probepy-2026-09-01-1546-cdt) (09-01)
 - [AP — Option 1 applied: load_cached_mu resolves three states, and every runnable AL-touched reader re-run](#appendix-ap---option-1-applied-load_cached_mu-resolves-three-states-and-every-runnable-al-touched-reader-re-run-2026-09-01-1550-cdt) (09-01)
 - [AQ — CORRECTION to AP.5: ml/data/sim was never missing - verify_corpus.py's cwd-relative default was, and P2 re-verified PASS](#appendix-aq---correction-to-ap5-mldatasim-was-never-missing---verify_corpuspys-cwd-relative-default-was-and-p2-re-verified-pass-2026-09-01-1555-cdt) (09-01)
+- [AR — Sim camera pose: the FOV trick does not extend to extrinsics; fov proved VERTICAL, pitch measured 16.3 deg down, height NOT identified](#appendix-ar---sim-camera-pose-the-fov-trick-does-not-extend-to-extrinsics-fov-proved-vertical-pitch-measured-163-deg-down-height-not-identified-2026-09-01-1610-cdt) (09-01)
 
 ---
 
@@ -5041,3 +5042,200 @@ The new `from collect_sim_data import MAX_MEAN_ABS_CTE, MIN_EPISODE_STEPS`
 import (committed in 3f58804) is now exercised for real, not merely
 import-resolved: the thresholds it pulls are what gate the 88-episode
 expert-quality check above.
+
+# Appendix AR - Sim camera pose: the FOV trick does not extend to extrinsics; fov proved VERTICAL, pitch measured 16.3 deg down, height NOT identified (2026-09-01, ~16:10 CDT)
+HANDOFF's next-action 2 was "identify the sim camera height/pitch/offset by the
+same comparison method that pinned fov=90". **The method does not transfer.**
+Pitch is now measured; the FOV convention it depends on is now settled
+empirically; height and lateral offset are NOT identified, and this entry says
+why rather than supplying a number.
+
+## AR.1 Why the FOV trick cannot be reused
+
+`diag_camera_fov.py` worked by sweeping explicit FOVs until one reproduced the
+un-configured default frame. Applying that to the extrinsics is blocked by
+gym_donkeycar's own contract, `donkey_sim.py:738`:
+
+    set any field to Zero to get the default camera setting
+
+FOV was identifiable because its default (90) is **non-zero**, so an explicit
+sweep could land on it. For `offset_x/y/z` and `rot_x/y/z`, **0.0 means "use
+the default"** -- asking whether `offset_y=0` reproduces the default is a
+tautology, not a measurement. Worse, the fov=90 run itself sent all six
+extrinsic keys as 0.0, so it explicitly *held the extrinsics at default* and
+yielded no information about them at all.
+
+So the extrinsics had to be attacked geometrically, off frames already on disk.
+
+## AR.2 The FOV convention, settled: it is VERTICAL
+
+The pitch calculation needs the focal length `f`, and `f` depends on whether
+the sim's `fov` is the vertical or the horizontal field of view -- a ~30%
+difference in `f` (60 px vs 80 px on a 120x160 frame) and therefore a ~4 deg
+difference in pitch. Appendix AI **assumed** vertical (that is where its
+"~106 deg H / ~118 deg diagonal" came from). It had not been tested.
+
+Decisive test, 3 launches on `donkey-avc-sparkfun-v0` (fixed track, so the
+pose is reproducible; `donkey-generated-*` regenerates per launch): hold pose
+and `fov=90`, change only `img_h`.
+
+| hypothesis | prediction for the horizon's offset from centre, 160x160 vs 160x120 |
+|---|---|
+| fov VERTICAL (f tracks height: 60 -> 80 px) | ratio 1.3333 |
+| fov HORIZONTAL (f = 80 px either way) | ratio 1.0000 |
+
+Measured, from two independent references in the same frames:
+
+| measure | value | vertical predicts | horizontal predicts |
+|---|---|---|---|
+| horizon offset ratio | **1.3460** | 1.3333 | 1.0000 |
+| horizon->pink-stripe separation ratio | **1.2713** | 1.3333 | 1.0000 |
+
+Both land near 1.33 and nowhere near 1.00. **`fov` is the VERTICAL field of
+view**, so f = 60 px at the native 120x160, and AI's 106 deg H / 118 deg
+diagonal -- and with them the Camera Module 3 Wide purchase decision -- are
+confirmed rather than assumed. Frames in `ml/runs/camera_aspect/`.
+
+## AR.3 A false confirmation, and what it cost
+
+The first pass at AR.2 returned an offset ratio of **0.0867**, matching neither
+hypothesis, and the script's own tie-break still printed
+`VERDICT: fov is HORIZONTAL` because 0.0867 is nearer 1.0 than 1.333. It was
+wrong, and the reason is worth recording.
+
+The horizon detector took the steepest vertical gradient of blue-minus-red.
+On `sparkfun_avc` that locks onto a **saturated pink stripe painted on the
+ground**, which is a stronger B-R edge than the sky boundary. The giveaway was
+geometric: the reported "horizon" (row 77.5) sat **below** a ground stripe
+(row 75.5), which is impossible.
+
+**The repeatability check said 0.000 px.** Two independent launches of the same
+configuration returned bit-identical horizon rows. That read as confirmation
+and was nothing of the sort: the detector failed *deterministically*, so its
+failure repeated perfectly. **Repeatability bounds noise; it says nothing about
+correctness.** This is the same shape of error as the AO cache guard -- a check
+that looked like evidence and was not.
+
+Replacing the rule with a **content** test -- the last row that is still
+predominantly sky, requiring pixels to actually BE sky rather than merely to
+sit on a strong edge -- fixed it, on the already-saved frames, with no extra
+launches. That correction is what produced the AR.2 table.
+
+## AR.4 Pitch, measured
+
+`ml/data/sim/train`, `donkey-generated-roads-v0` only, every 10th frame:
+
+```
+$ python ml/diag_camera_pose.py
+generated-roads: n=3,187  horizon row 41.974 (sd 0.284, IQR 41.73-42.19)
+  cy - r_h = 17.526 px
+  pitch DOWN = 16.28 deg (fov vertical, f=60 px -- the measured convention)
+  pitch DOWN = 12.36 deg (fov horizontal, f=80 px -- ruled out, kept for the record)
+```
+
+**Camera pitch: 16.3 deg DOWN.** The horizon sits at row 41.97 of 120, with a
+standard deviation of **0.284 px** across 3,187 frames -- tight, because that
+track is an open flat desert with an unobstructed true horizon.
+
+`donkey-generated-track-v0` gives horizon 10.5 with sd 9.34 and is unusable:
+it is tree-lined, so no row is ever predominantly sky. Only one of the two
+training tracks can answer this question, and the corpus is 51:27 weighted
+toward the *other* one.
+
+Two supporting facts that make the number trustworthy:
+
+- **The image centre row is 59.5, confirmed empirically to 0.2 px.** Refitting
+  the old `camera_fov_fixed` sweep (warehouse, the run that produced the fov=90
+  verdict) to `r_h = cy - k/tan(fov/2)` gives an intercept of **59.295** against
+  a geometric prediction of 59.5, with a max residual of **0.351 px** across
+  four FOVs. That also proves the sim genuinely applies `fov` as a perspective
+  FOV rather than ignoring it.
+- That same warehouse run **cannot** give pitch, despite the excellent fit:
+  warehouse is indoor and has no horizon, so the feature it locked onto is a
+  wall/floor edge at some fixed unknown angle.
+
+## AR.5 Height: NOT identified, and the failure is diagnosed
+
+The intended method is sound on paper and needs no FOV assumption at all. For a
+camera at height h pitched down by theta, a ground point at lateral offset X
+projects to
+
+    u - cx = (X * cos(theta) / h) * (v - v_h)
+
+in which **f cancels**. The yellow centre line sits at X = C - cte with `cte`
+logged per frame in metres, so regressing its column on `cte` at each row gives
+`slope(v) = -(cos(theta)/h) * (v - v_h)`: the rate yields h/cos(theta) in
+metres, and the zero crossing yields the horizon independently.
+
+It does not work on the corpus as collected. Run on 2,077 near-straight frames
+(|steer| < 0.05) of `generated-roads`:
+
+```
+weighted fit  slope(v) = 1.39483*v + -317.8315   (resid rms 8.7026, n rows 45)
+  -> h / cos(pitch)      = -0.7169  sim length units
+  -> horizon row v_h     = 227.864   (sky-boundary measurement: 43.02)
+```
+
+A negative height and a horizon 108 rows outside a 120-row image. The model is
+being violated, by three confirmed causes:
+
+1. **Left-edge censoring.** The yellow line exits the frame at close rows --
+   measured centroids fall to column 13.0 at row 96 and 4.0 at row 104. Those
+   are exactly the rows carrying the most signal, and truncation at the border
+   compresses their centroid, flattening the slope. Observed slope magnitude
+   *decreases* from 216 to 154 across rows 68->108; the model requires it to
+   *increase* by a factor of ~2.6.
+2. **`cte` barely varies.** Range [-0.160, 0.176] m, sd 0.053 m. The PID holds
+   the car centred, so the lateral excitation is tiny.
+3. **Heading is coupled to `cte`.** The PID steers *from* `cte`, so heading
+   error is a lagged function of it. Heading rotates the line's image position
+   in a row-dependent way, and the regression cannot separate the two.
+
+`ml/data/sim_recovery` has cte spanning +-4.2 m (sd 1.474, 28x wider) and would
+fix cause 2 -- but it is on `generated-track-v0`, which is tree-shadowed with
+dappled light and an occluded horizon, and at cte=4.14 the car is off the road
+entirely with no line in frame. Trading cause 2 for a much harder extraction is
+not obviously a win, and was not attempted.
+
+**No height number is being reported.** The honest state is that the method is
+correct, the data as collected cannot support it, and fixing it means either a
+purpose-built collection run (a slow lateral sweep on the clean desert track,
+steering decoupled from cte) or a different observable.
+
+## AR.6 What is not identifiable at all
+
+- **`offset_z` (forward)** cannot be recovered from a ground plane by any
+  amount of analysis. Sliding the camera along its own optical axis leaves
+  every ground-plane image relation unchanged; the shift is absorbed into the
+  definition of `cte`.
+- **`offset_x` (lateral)** is not separable from the road's own geometry with a
+  single line: the yellow line's observed lateral position is (its offset from
+  the track reference) minus `cte`, and only the sum is observable. A second
+  line does not fix this -- it adds the lane width as another unknown.
+
+## AR.7 What transfers to the physical car
+
+The convention-free, directly actionable spec is **the horizon's image row**,
+not an angle. If the real camera is mounted so that the true horizon lands on
+**row 42 of a 120-row frame (35% down)** at the matched 90 deg vertical FOV,
+the real projection reproduces the training projection in pitch, whatever the
+mounting hardware ends up looking like. That is a mount target that can be
+checked with a spirit level and one test photo, and it needs no trigonometry
+at the bench.
+
+Height remains open, and it is the parameter that most constrains where the
+camera can sit on a chassis nobody has built yet -- so this is not currently on
+anyone's critical path. It should be settled before the camera mount is
+designed, not after.
+
+## AR.8 Artifacts
+
+- `ml/diag_camera_pose.py` -- new. Carries the horizon detector, the pitch
+  calculation, the full LIMITATIONS section above, and a `--self-check` that
+  runs with no corpus: three synthetic frames with known horizons, an
+  all-grey frame that must return NaN rather than 0, **a frame with a bright
+  red ground stripe below the true boundary (the sparkfun failure mode, which
+  the old gradient rule fails)**, and the two f-convention identities.
+  `diag_camera_pose self_check: PASS`.
+- `ml/runs/camera_aspect/` -- the three aspect-test frames and their JSON.
+- `ml/runs/camera_pose/camera_pose.json` -- the pitch measurement.

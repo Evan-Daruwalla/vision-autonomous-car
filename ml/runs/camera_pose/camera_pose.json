@@ -1,0 +1,14 @@
+{
+  "track_prefix": "generated-roads",
+  "n_frames": 3187,
+  "horizon_row_median": 41.97435897435898,
+  "horizon_row_sd": 0.28351397965228275,
+  "horizon_row_iqr": [
+    41.73443554637045,
+    42.19191919191919
+  ],
+  "cy": 59.5,
+  "offset_above_centre_px": 17.525641025641022,
+  "pitch_deg_if_fov_vertical": 16.282767837671138,
+  "pitch_deg_if_fov_horizontal": 12.356611518702454
+}
