@@ -4,9 +4,9 @@ Core bins:
 - security.md — empty, no attack surface yet; live at M2 teleop (updated 2026-07-23)
 - performance.md — empty, no perf work yet; live at M3 inference loop (updated 2026-07-23)
 - architecture.md — planned system shape + staged AI pipeline (updated 2026-07-23)
-- features.md — empty, no code yet (updated 2026-07-23)
-- conventions.md — empty, no code yet (updated 2026-07-23)
-- gotchas.md — hardware/print/power/track traps (updated 2026-08-06)
+- features.md — inventory of the 31 ml/ scripts by pipeline stage (updated 2026-08-25)
+- conventions.md — general code style observed across ml/ (argparse, seeding, no logging) (updated 2026-08-25)
+- gotchas.md — hardware/print/power/track traps (updated 2026-09-01; 272 lines, OVER the ~150 cap — due a split)
 - ml-training.md — GPU memory + world-model training facts MEASURED on this
   3060 Ti: the DreamerV3 fitting table, Sysmem Fallback confirmed ON,
   dreamerv3-torch's missing offline loop (updated 2026-08-06)

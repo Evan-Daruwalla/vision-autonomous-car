@@ -60,6 +60,22 @@ not yet verified on this car. Mark them verified when a build task confirms.
   and t+1 are near-duplicates, so a random split leaks and massively
   overstates accuracy. Split by lap at minimum, **by LAYOUT ideally** (train
   configs A+B, hold out C entirely). Applies to SIM-POC P2, M3, and M4.
+- **3DStreet is a street CROSS-SECTION tool, not a track-geometry tool**
+  (assessed 2026-09-01, Appendix AM). It does linear segments plus 90-deg /
+  T / dead-end intersections; **no curved streets found**, and it works in
+  real-world units (a real lane is 3-3.6 m, this track's is ~0.3 m, roughly
+  1/11). **Good for** marking design, dash patterns, sign placement and a
+  portfolio render. **Bad for** the figure-8 plan-view geometry, which is
+  the actual hard part. Keep the layout in a dimensioned plan. The
+  `3dstreet-mcp` server (`.mcp.json`) is a bridge to a LIVE browser tab over
+  WebSocket - alpha, no auth token, piggybacks on whichever tab is signed
+  in - not a headless generator.
+- **CORNER GEOMETRY IS FROZEN until the B3 turning test** (Appendix L, AM.2).
+  Minimum turn radius ~ wheelbase / tan(max steer) ~ **330 mm is an ESTIMATE**
+  resting on a **130 mm car width that is itself unmeasured** until B2/B3, so
+  the ~500-670 mm centreline corner figure is arithmetic on an estimate.
+  Designing the look now is fine; **cutting or printing corner tiles now
+  risks a track the car physically cannot drive**.
 - **Track: print MARKINGS, not the road surface** (2026-08-05). Full-surface
   printing is ~6.4 kg / ~150-250 h for a minimum loop vs ~0.15 kg / ~6 h for
   markings — 97% less for identical camera input, because at 120×160 the

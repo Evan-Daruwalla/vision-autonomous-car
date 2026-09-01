@@ -1,296 +1,139 @@
 # Handoff
 
+**Last updated: 2026-09-01 ~15:12 CDT** — this file is the ONLY live snapshot.
+History lives in `docs/Project Record — Full Chronological History.md`
+(append-only, 39 appendices A–AM). When this file and the record disagree about
+a historical fact, **the record wins**.
+
 ## Goal
 
 Build a mini autonomous car — Lego Technic differential/steering/wheels in a
 3D-printed frame, Pi 5 + wide mono camera — that drives teleop, then drives
-autonomously via behavioral cloning trained on Evan's own demonstrations,
-then (capstone) runs a policy improved by a world model trained offline on
-the car's own logged real driving. The process is the product: every stage
-verified on the physical car and documented as a college-portfolio
-engineering artifact.
+autonomously via behavioral cloning trained on Evan's own demonstrations, then
+(capstone) runs a policy improved by a world model trained offline on the car's
+own logged real driving. **The process is the product:** every stage verified on
+the physical car and documented as a college-portfolio engineering artifact.
 
-## Physical build — spec written, two decisions made (2026-08-12)
+---
 
-**`docs/SIM_TRANSFER_SPEC.md` is the contract the real car must meet** for the
-sim work to transfer. Measured, not guessed: **20.00 Hz control**, **1.401 m/s
-mean** (7.0 cm per control step), **120×160 → 64×64 anisotropic squash**,
-expert holds **|cte| 0.317 m mean** and **saturates steering at the p95**.
+## Where the project actually is
 
-**Evan decided 2026-08-12:** buy the encoder motor (#5159, +$6); take **more
-floor space** over the ~1:20 track re-spec; research Pi alternatives before a
+**The software lane is four milestones ahead of the hardware lane, and the
+hardware lane has not started.** SIM-POC (P1–P5) is built and its findings are
+banked. **Nothing has been printed and nothing has been ordered since
+2026-07-23.**
+
+The sim work ended in a **well-instrumented negative**: no learned policy
+drives reliably, across five separate attempts to make one. That is a
+defensible portfolio result — the cause is understood down to the simulator's
+track generator — but it is a negative, and the write-up must say so.
+
+### The four things a fresh session must not rediscover
+
+1. **`donkey-generated-track-v0` REGENERATES the track on every launch**
+   (Appendix AI). This caused a 4.4× launch-to-launch swing that three
+   appendices failed to explain. **Never compare closed-loop numbers across
+   launches.** Use `ml/eval_paired.py`, which runs every arm inside ONE launch
+   and differences within-launch.
+2. **No intervention improves closed-loop driving** (Appendix AJ, the first
+   *valid* comparison in the project). Recovery data, DART relabelling,
+   recovery loss weighting, and removing the history input have all failed. The
+   most consistent signal is that recovery data mildly *hurts*.
+3. **The project's trustworthy results are the open-loop ones** — the aux head
+   (probe AUC 0.673 → 1.000), the `h`-dependence measurement (skill −0.120),
+   the copycat refutation (18.2×), the cone probe, the 57% readout improvement.
+   Everything that touched the simulator's closed loop is noisier than it looks.
+4. **Held-out MSE ranks policies backwards here.** The best-driving arm had the
+   worst val MSE by 16×. Do not select controllers on open-loop loss.
+
+### Two defects that will bite the physical build
+
+- **`donkeycar[pi]` installs `RPi.GPIO`, which does not work on the Pi 5** (RP1
+  southbridge; fails with `Cannot determine SOC peripheral base address`). Use
+  **`rpi-lgpio`**, a drop-in. This is a defect in the *current* plan, not a
+  board comparison — it would surface as a mystery bench failure otherwise.
+- **DonkeyCar's `pins.py` has only three PWM backends** (RPI_GPIO, PCA9685,
+  PIGPIO). The BOM wires the servo and TB6612FNG **straight to GPIO**, which
+  locks the project to a Pi. A **PCA9685 breakout** would make actuation
+  board-agnostic. Decide before ordering. (Appendix AH.)
+
+---
+
+## Immediate next actions
+
+| # | Action | Blocked on |
+|---|---|---|
+| 1 | **Give the floor-space number.** "More floor space" was chosen 2026-08-12 but never quantified. Every track dimension scales off it. | **Evan** |
+| 2 | **Commit or discard the uncommitted AL audit fixes** — 19 files, 299 insertions, in the working tree. They compile and `splits.py` self-checks PASS, but **nothing was re-run end-to-end**. | review |
+| 3 | **Print the tolerance coupon (M1.3).** Needs no parts — only the printer and Lego. Gates every chassis dimension. | **Evan** |
+| 4 | **Pi 2GB ($65) vs 4GB ($110).** Purchase window is now; the 4GB has taken every DRAM hike and the 2GB none. | **Evan** |
+| 5 | **Place the order** (`docs/BOM.md`). Nothing downstream of M1.5 moves until parts exist. | **Evan** |
+
+---
+
+## Physical build — decisions made, spec written
+
+**`docs/SIM_TRANSFER_SPEC.md` is the contract the real car must meet** for any
+of the sim work to transfer. Measured, not guessed: **20.00 Hz control loop**,
+**1.401 m/s mean speed** (7.0 cm per control step), **120×160 → 64×64
+anisotropic squash**, expert holds **|cte| 0.317 m** and **saturates steering at
+the p95**.
+
+**Evan decided 2026-08-12:** buy the encoder motor (#5159, +$6) · take **more
+floor space** rather than compress to ~1:20 · research Pi alternatives before a
 **~September** purchase.
 
-> **✅ RESOLVED 2026-08-13 (Appendix AI) — and it uncovered the harness cause.**
-> The camera was never configured (`cam_config` absent from every conf dict),
-> so the corpus was captured at an unrecorded Unity default. **Identified by
-> comparison: the sim default is `fov=90`** → ~106° H / ~118° diagonal (Unity
-> FOV is vertical). **The Camera Module 3 Wide (102° H / 120° D) matches within
-> 2-4° and is the correct part** — the standard module is ~40° off. BOM row 2
-> HOLD is LIFTED. Camera height/pitch/offset are still unidentified.
->
-> **⚠️ BIGGER: `donkey-generated-track-v0` REGENERATES THE TRACK EVERY LAUNCH.**
-> Three identical-config launches at an identical spawn pose differ by MAE
-> 29-36 with **27-35% of pixels differing by >30**, while mean brightness is
-> stable (spread 6.6) — so the structure changes, not the lighting. The same
-> test on the fixed `donkey-warehouse-v0` gives a noise floor of **0.307**,
-> 158× smaller.
->
-> **THIS IS THE HARNESS MYSTERY FROM AD/AE/AF.** The launch is the unit of
-> variation because the **track** is. It explains the 4.4× spread on a fixed
-> checkpoint, why episodes within a launch agree to a few steps, why the PID
-> expert was unaffected (it does not care about track shape — which is why it
-> was a poor control), and the bimodality. **AD.2 listed "track identity" as
-> ELIMINATED and that was wrong**: tight expert cte across launches is what a
-> track *generator* produces, not evidence of one track.
->
-> **RE-RUN DONE 2026-08-13 (Appendix AJ), and a fixed track turned out NOT to
-> be the answer** — every fixed track is far outside the corpus's visual
-> distribution and the learned controllers collapse to 13-67 steps there
-> (mean|cte| 2.2-3.8 vs the 0.317 they trained at). The working fix is the
-> **PAIRED design** (`ml/eval_paired.py`): all arms inside ONE launch sharing
-> that launch's generated track, differenced within-launch.
->
-> **RESULT: no arm beats the baseline**, expert 600/600 in all four launches
-> so the batch is unambiguously valid — the first closed-loop comparison in
-> this project that is a measurement rather than an anecdote.
->
-> | arm vs cl_base | mean diff | sd | t (df=3) | signs |
-> |---|---|---|---|---|
-> | cl_aug (+recovery) | **-26.0** | 28.4 | -1.84 | **4/4 negative** |
-> | nh_base (z-only) | -15.7 | 58.8 | -0.53 | 2/4 |
-> | nh_aug (z-only+rec) | +49.3 | 121.2 | 0.81 | 1/4 |
->
-> Nothing significant. **The most consistent signal is that recovery data
-> mildly HURTS** with `h` present (negative in 4/4 launches; ~19 launches
-> needed to confirm). **`nh_aug`'s +49 is again driven by ONE launch (+221)** —
-> the second time that arm has produced a headline from a single launch, the
-> first being the retracted Appendix AB. Treat it as high-variance, not better.
-> Pairing cut variance for 2 of 3 arms but RAISED it for `nh_base`, so real
-> **arm x track interaction** remains and is not removable by design.
+**Camera resolved (Appendix AI):** the sim's camera was never configured, so
+the whole corpus was captured at an unrecorded Unity default. Identified by
+comparison as **`fov=90`** → ~106° H / ~118° diagonal. **The Camera Module 3
+Wide (102° H / 120° D) matches within 2–4° and is the correct part**; the
+standard module is ~40° off. BOM row 2 HOLD is lifted. Camera height, pitch and
+offset remain unidentified — same method would find them.
 
-> **⚠️ `donkeycar[pi]` INSTALLS `RPi.GPIO`, WHICH DOES NOT WORK ON THE PI 5.**
-> Pi 5 moved GPIO behind the RP1 southbridge; RPi.GPIO pokes `/dev/mem` and
-> fails with `Cannot determine SOC peripheral base address`. Use **`rpi-lgpio`**
-> (drop-in). This is a defect in the CURRENT plan, not a board comparison, and
-> it would otherwise surface as a mystery bench failure in September.
-> Also decide the PWM path before ordering: DonkeyCar's `pins.py` has only
-> three backends (RPI_GPIO, PCA9685, PIGPIO), the BOM wires straight to GPIO,
-> and **a PCA9685 breakout would make actuation board-agnostic** (Appendix AH).
+**Compute:** recommend the **Pi 5 2GB at $65**, not the 4GB at $110 — identical
+silicon, and DonkeyCar's "4GB minimum" is an unjustified recommendation (its
+`pi` extra installs tflite-runtime, not TensorFlow; a 512 MB Zero 2 W already
+drives autonomously). Full brief:
+`docs/research/2026-08-12_onboard-compute-selection.md`. Whole-landscape
+follow-up (BeagleY-AI, x86, phone, off-board WiFi):
+`docs/research/2026-08-12_pi5-alternatives.md`. **Evan's call.**
 
-**Pi: recommend the 5 2GB at $65**, not the 4GB at $110 — same silicon, saves
-$45, returns the build to ≈$192–205 all-in. The "4GB minimum" is an
-unjustified DonkeyCar recommendation. Full brief:
-`docs/research/2026-08-12_onboard-compute-selection.md`. **Evan's call.**
+---
 
-## Current state — SIM-POC P1–P5 built but its closed-loop NUMBERS are uncertified (P6 open); stop-sign decision made and validated; still waiting on Evan's order and coupon print
+## Track layout — IN PROGRESS, and the geometry is frozen
 
-**Last updated: 2026-08-12 ~12:34 CDT** — this file is the only live snapshot;
-history lives in the record.
+Evan is designing the street layout in **3dstreet.app**; `.mcp.json` wires the
+`3dstreet-mcp` server (project scope, loads on restart). **The `claude` CLI is
+not on PATH here**, so `claude mcp add` must be run by Evan.
 
-> **2026-08-10 (Appendices Y, Z) — read these four before touching the ML
-> stack:**
->
-> 1. **The M4 stop-sign decision is MADE and VALIDATED IN SIM.** Evan chose an
->    auxiliary detection head + an oversized printed sign (PRD 6(b), resolved
->    in place). Measured: an aux head at loss weight 100 puts a
->    sub-1%-of-frame object into the z=32 latent at **essentially zero
->    reconstruction cost** (probe AUC 0.673 → 1.000, val rec 60.88 → 60.48).
->    **Weight matters enormously** — at weight 10 (~4% of loss) it buys
->    nothing.
-> 2. **NEW HARD REQUIREMENT: the printed sign must be RELOCATABLE.** On a
->    fixed track a sign at a fixed place is perfectly predicted by "where am
->    I", so a policy can pass the whole showcase while blind to the sign. This
->    is measured, not stylistic: a cone probe scored **AUC 0.997 and collapsed
->    to nothing when the cone was painted out** — it was reading track
->    position. Never measure small-object perception on a fixed-position
->    object.
-> 3. **The closed-loop recovery test came back NEGATIVE.** Recovery data cut
->    off-centre *probe* error 57% (Appendix X) but does **not** make the car
->    drive further: 187.2 → 199.9 steps, error bars overlapping, **0/9
->    survived in every arm**. The obvious escape hatch — that recovery frames
->    were drowned out at 6.67% of a mean objective — was tested with a
->    `--recovery-weight` sweep and **closed** (Appendix AA): pushing them to
->    **78.9% of the objective changes survival not at all** (172.6–221.0
->    steps across the sweep, per-seed sd 27–81, every spread covering every
->    other mean, 0/9 everywhere). The weighting was not a no-op — unweighted
->    val MSE degrades 0.00177 → 0.00331 and lane error rises to 1.029 — so a
->    genuinely different policy was learned; it just does not drive better.
->    **…and Appendix AB found why: the controller was barely reading `z` at
->    all.** Zeroing the MDN-RNN hidden state at serve time makes it worse than
->    predicting the mean (skill −0.120), so it rode almost entirely on `h` —
->    which is teacher-forced on logged expert actions in training but built
->    from the policy's own actions in closed loop, and therefore drifts.
->    ~~**Remove `h` AND add recovery data and the car finally drives: 342.4
->    steps, 3/9 episodes COMPLETED.**~~ **RETRACTED 2026-08-11 — DID NOT
->    REPLICATE.** Ten seeds across two independent gate-valid batches give
->    **107.2 ± 16.0 steps and 0/20 completions**, with every seed between 85
->    and 147 and episodes within a seed near-identical. The same three
->    checkpoints that scored [78,600,600] / [600,469,448] / [96,96,95] scored
->    [100,113] / [108,108] / [107,107] on re-run. **Treat the 342.4 batch as
->    the anomaly, not these.** **Correction (2026-08-11 ~23:29 CDT): the flat claim "no
->    learned policy has completed an episode" is FALSE and was itself an
->    overcorrection — 3 completions exist in `ev3_nh_aug` and 1 in
->    `ev2_nh_aug`. The true statement is that **no learned policy completes
->    RELIABLY**: pooled over **47** gate-valid `nh_aug` episodes the
->    distribution is bimodal — **30 die under 150 steps, 6 reach 450-601** —
->    with **4 completions**, all from one launch.
->    **The whole 2×2 reverses on re-run** (Appendix AC) — the plain baseline
->    is the best and by far the most stable arm:
->
->    | arm | valid batches | mean | sd |
->    |---|---|---|---|
->    | cl_base (h, original) | 4 | **189.4** | **4.1** |
->    | cl_aug (h, +recovery) | 4 | 189.1 | 35.1 |
->    | nh_base (z-only) | 2 | 109.2 | 0.1 |
->    | nh_aug (z-only, +recovery) | 4 | 170.0 | 115.4 |
->
->    **No intervention tried on 2026-08-10/11 improves closed-loop driving.**
->    Recovery data does nothing (189.4 → 189.1); removing `h` actively hurts.
-> 4. **THE HARNESS NOISE FLOOR IS MEASURED, AND IT INVALIDATES THE PRECISION
->    OF EVERY CLOSED-LOOP COMPARISON IN THIS PROJECT (Appendix AD).** Same
->    checkpoint, same seed, **7 gate-valid launches: 106.5 / 118.5 / 179.5 /
->    205.5 / 232.0 / 353.5 / 471.5 — mean 238.1, sd 131.6, CV 55%, a 4.4×
->    spread.** Episodes *within* a launch agree to a few steps; launches do
->    not. **The launch is the unit of variation.**
->
->    At CV 55%, launches needed per arm at 80% power: ~5 for a 2× effect, ~19
->    for 50%, ~120 for 20% — **but quote these with their interval or not at
->    all** (Appendix AE): CV is estimated from n=7, 95% CI [0.36, 1.22], so
->    those are really **2–23 / 8–93 / 50–581**. Use them to choose between "a
->    handful" and "a hundred", never to certify "we ran 5, therefore powered".
->    Two things matter more than sample size: **the outcome is right-censored**
->    at 600 steps, so report a completion RATE and MEDIAN, not a mean; and
->    **pairing the design** (all arms inside each launch, differenced
->    within-launch) cancels the launch effect and is likely worth an order of
->    magnitude. Every comparison in Appendices Z,
->    AA, AB and AC used **n = 1**. So this harness could only ever have
->    resolved ~3× differences, and the 7–28% differences those entries
->    discuss were never measurable. **Z.3 and AA's nulls are not "no effect" —
->    they are "no measurement".** The one comparison that may survive is
->    nh_base 109.2 vs cl_base 189.4 (1.7×, and nh_base is the most stable arm
->    seen) — suggestive, still under the resolution bar.
->
->    Eliminated as causes, each by measurement: control rate, track identity,
->    and **episode start state** (`ml/diag_reset.py` — post-RESET POSITION is
->    near-deterministic: z identical across all 16 episodes of two launches, x
->    identical for 14 of 16. NOT "deterministic to four decimals" — post-warmup
->    cte spans 0.0018-0.0075, ~0.6% of the ~0.87 cte the car operates at, far
->    too small to explain a 4.4× swing. Refutes the leading hypothesis in AC).
->    Cause unknown; remaining suspects are inside the Unity process.
->
->    **Consequence: do not rank policies on closed-loop steps until PRD P6 is
->    done.** The project's trustworthy results are precisely the ones that
->    never touched the sim (aux head, `h`-dependence, copycat refutation, cone
->    probe, the 57% readout finding) — worth remembering for M3/M4, where the
->    sim becomes a physical car and this noise gets worse, not better.
-> 5. **Held-out MSE ranks these arms almost exactly backwards.** The
->    best-driving policy has the WORST val MSE by 16× (0.02846 vs 0.00177).
->    Do not select controllers on open-loop loss in this project.
-> 6. **`eval_in_sim.py` step counts are NOT comparable across runs** unless
->    the reported `control_hz` agrees. The same checkpoint scored 69.3 steps
->    at 13.2 Hz and 187.2 at 16.7 Hz. **The banked P5 headline of 69.3
->    understates that controller by 2.7×.** Do NOT use `--control-hz` to
->    equalise arms — throttling by sleeping desynchronises the loop from the
->    sim and is a cliff (the expert dies at a 2% throttle). Run arms
->    back-to-back unthrottled and check the rate matched.
->
-> **Also new:** a full research brief on AI methods
-> (`docs/research/2026-08-10_ai-methods-for-the-autonomy-stack.md`). Headline:
-> **do not build offline RL on this corpus** (H3 dies — the closest published
-> match reports BC 91.5 vs offline DreamerV2 4.8). And an untested rival
-> explanation for the P5 wall: **copycat agents** — a BC policy given
-> observation histories learns to predict the previous expert action, with
-> held-out loss improving while closed-loop reward drops. This controller
-> consumes the MDN-RNN hidden state and shows exactly that signature. One
-> training run tests it (`z` alone, `h` zeroed).
+**Fit caveat (Appendix AM):** 3DStreet is a street *cross-section* tool —
+linear segments plus 90° / T / dead-end intersections, **no curved streets
+found**, and real-world units (a real lane is 3–3.6 m; this track's is ~0.3 m).
+It is good for **marking design, dash patterns, sign placement and a portfolio
+render**. It is not a plan-view track-geometry tool, and the figure-8 is
+plan-view geometry. Keep the layout itself in a dimensioned plan.
 
-> **2026-08-07 — SIM-POC IS COMPLETE, P1 through P5 (Appendices R, S, T, U,
-> V).** A 102,888-frame corpus verified 88/88 on both alignment axes; a Ha &
-> Schmidhuber world model beating a frozen-frame baseline 30/30 in-domain;
-> DreamerV3-S trained offline with the 8 GB boundary measured; and a full
-> policy-extraction pass.
->
-> **P5 is an honest negative and should be read as one.** Latent BC (linear
-> and MLP) and CEM planning were each evaluated over 3 seeds × 3 episodes:
-> **no learned policy completed an episode; the PID expert completed 9/9.**
-> The diagnostic is the valuable part — the paper's linear controller is
-> structurally wrong for this task (z encodes cross-track error nonlinearly:
-> probe R² 0.27 linear vs 0.97 MLP), and the bottleneck is the learned
-> representation, not the controller. Corner speed was tested and ruled out.
->
-> **A cold audit (2026-08-06, Appendix V.1) found four gates that could not
-> fail** — including one where the README's advertised "Reproduce with"
-> command would republish committed numbers as fresh measurements on any
-> clone without a GPU. All fixed, each verified by being made to fail.
->
-> **2026-08-08 — the wall is diagnosed, and it changes what M3 must collect
-> (Appendix W).** The 69-110 step failure is **perception going out of
-> distribution**: probe error is a function of POSITION (corr 0.894 learned,
-> 0.852 expert — the same curve under both), because the collector rejects
-> episodes with `mean|cte| > 1.2` so the corpus has no off-centre frames.
-> **No controller change fixes it.** M3 needs a SEPARATE off-centre recovery
-> set exempt from the quality filter, or the same wall appears on hardware.
->
-> **NEW RISK, needs Evan's decision:** both the ConvVAE *and* DreamerV3 erase
-> small objects — **0 of 899 cone pixels survive in either**. The M4
-> stop-sign showcase assumed the sign reaches the latent. A bigger world model
-> is not the fix; the options are higher input resolution, an auxiliary
-> detection head, or a different showcase task.
->
-> Software is now five SIM-POC tasks ahead of hardware: **nothing has been
-> printed and nothing ordered since 2026-07-23**, and the two decisions below
-> still block all physical progress.
+| constraint | value | source |
+|---|---|---|
+| floor space | was 1.6 × 2.8 m; **"more" chosen 2026-08-12, still unquantified** | Appendix L / AG |
+| lane width | **~300 mm** (85 mm clearance for a 130 mm car) | `SIM_TRANSFER_SPEC` §3 |
+| corner radius | **≥500–670 mm centreline** — *estimate on an estimate* | Appendix L |
+| layout | **figure-8**, never an oval | `gotchas.md` |
+| stop sign | **relocatable/removable** — a fixed sign is predictable from position | Appendix Y.3 |
+| surface | print **MARKINGS**, not road (~0.15 kg vs ~6.4 kg) | `gotchas.md` |
+| dashes | MUTCD 1:3 does not survive at scale; ~2:1, a documented deviation | Appendix L |
 
-> **2026-08-05 ~23:10 — DEADLINE MOVED (Appendix N).** **The hard deadline
-> is now REGULAR DECISION, ~Jan 1-15 2027** (~5 months); Nov 1 2026 is now a
-> SOFT milestone — whatever is done by then strengthens the EA application,
-> the rest lands as an RD update. The Appendix K schedule already assumed
-> Nov 1 needed only SIM-POC + M3, so nothing has to be cut and **M4 moves
-> from stretch to comfortably in scope.** This is 1 of 5 concurrent
-> portfolio projects (~2-3 sittings/week here). PRD §6b holds the schedule.
->
-> **A SCOPE EXPANSION IS UNDER EVALUATION, NOT ADOPTED:** destinations,
-> parking, and routing on a bigger grid. Two blockers before it enters the
-> PRD — (1) end-to-end BC likely **cannot route** (identical intersection
-> images, different destinations ⇒ needs goal-conditioning, an architecture
-> change to every model in the plan); (2) **a 4-intersection grid does not
-> fit 1.6 m at 1:14** (needs ~2.04 m; a single intersection needs 1.52 m and
-> does fit). Research in flight. **Live BOM consequence: the encoder motor
-> (#5159, +$6) is decidable now at zero cost and expensive after ordering.** **Nothing printed and nothing ordered as of 2026-08-05** — those
-> are Evan's two actions this week.
->
-> **2026-08-05 ~23:10 — track design settled + P2 code done (Appendices L,
-> M).** Track: **print MARKINGS, not the road surface** (97% less filament
-> for identical camera input), **figure-8 not an oval** (an oval teaches
-> "always steer left"), 1:14 scale in the confirmed 1.6 × 2.8 m space,
-> MUTCD-verified markings. **A stop sign is provably unlearnable by plain
-> BC** — that makes it the M4 world-model showcase, not an M3 feature.
-> P2's expert driver was tuned by measurement (throttle, not gains, was the
-> binding constraint) and its alignment gate is an exact algebraic identity
-> after the first pixel-based gate proved to be a false alarm on good data.
->
-> **Per-task commits are authorized** (plan approval, 2026-08-05). Push
-> still requires Evan's explicit say-so.
+> **⚠️ CORNER GEOMETRY IS FROZEN until the B3 turning test.** The ~330 mm
+> minimum turn radius is `wheelbase / tan(max steer)` on an **unmeasured**
+> 130 mm car width. Appendix L already ruled that corner tiles must not be cut
+> until an empirical turning test on the rolling chassis. Designing the *look*
+> now is fine; committing corner geometry now risks a track the car cannot
+> drive.
 
-> **2026-07-23 — Research brief + PRD written, then M1.1 gate answered
-> (record Phase 0, Appendix A-C).** Four-worker research settled the stack:
-> Pi 5 8GB + Camera Module 3 Wide + TB6612FNG + MG90S + 2S LiPo/UBEC;
-> DonkeyCar plumbing + custom PyTorch. Evan RATIFIED the amended staging
-> (sim-RL demoted to optional M5; offline world model on the car's own logs
-> is the M4 capstone).
->
-> **2026-07-23 ~20:46 — all six research workers complete; BOM final.**
-> Evan chose **Pi 5 4GB** (down from 8GB) and **owns a USB power bank**, so
-> the build lands at **≈$178-181 + shipping**, inside the $200 ceiling.
-> `docs/BOM.md` is the order list. **Nothing is bought yet.**
->
-> **Three claims were overturned during research and are recorded as dated
-> corrections** (Appendices E, F, G) — a future session must not
-> reintroduce them: the "~24GB VRAM for DreamerV3" figure is **retracted**
-> (unlocatable source); the printed motor coupler is the **lowest**-torque
-> joint, not the highest; and the **Pi 5 does not need 5V/5A** for this
-> workload (that rating is a USB-peripheral budget).
+*(Superseded: the earlier "1.6 × 2.8 m, 1:14, lane 261 mm" spec assumed the
+original floor and the pre-2026-08-12 scale decision.)*
+
+---
 
 ### Workstreams (mapped to PRD milestones)
 
@@ -314,6 +157,8 @@ history lives in the record.
 | SIM-POC P3 world model | P3 | **DONE** | 2026-08-06, Appendix S: V+M+C trained (VAE 4,348,547 params = exact paper match). 30-step imagination **beats a frozen-frame baseline 30/30 steps in-domain**, 0/30 cross-domain. Done-check PASS. ~6 min total training |
 | SIM-POC P4 DreamerV3 | P4 | **DONE** | 2026-08-06, Appendices T+U: **both** halves. Trained 2000 steps (image loss 588.31→61.39, 9.6x) AND the 8GB fitting table measured. **Batch size, not model size, breaks 8GB**: 69.7M params fit at b16 (5.238 GB), 19.1M at b64 does not fit in 7.0 GB. Two task premises proved false — see T.2 |
 | SIM-POC P5 policy | P5 | **DONE — but its NUMBERS are uncertified** | 2026-08-07, Appendix V. Latent BC (linear + MLP) **and** CEM planning, 3 seeds × 3 episodes. Key finding (stands, open-loop): the paper's linear C is structurally wrong here — z encodes cross-track error nonlinearly (probe R² 0.27 linear vs 0.97 MLP). **CAVEAT 2026-08-11 (Appendix AD): every step count from this task came from a harness later measured at CV 55%, where n=1 launch resolves only ~3×. The qualitative result holds — the expert completes, learned policies mostly do not — but 69.3/89.7/187.2/110 are not measurements. "No learned policy finished" was also later shown FALSE in the strict sense: completions occur, just not reliably.** |
+| Harness trustworthiness | P6 | **DONE 2026-08-13** | Appendix AI/AJ. Cause found: `donkey-generated-track-v0` REGENERATES per launch, which is the 4.4x swing. Fix is the PAIRED design (`ml/eval_paired.py`), not a fixed track — every fixed track is far OOD and the controllers collapse to 13-67 steps there. Result: **no arm beats the baseline** |
+| Track layout | M1.4 | **In progress** | 2026-09-01, Appendix AM. Evan designing in 3dstreet.app; `.mcp.json` wires `3dstreet-mcp`. **Corner geometry FROZEN until the B3 turning test**; floor-space number still needed from Evan |
 | **Harness trustworthiness** | **P6** | **OPEN — BLOCKING all closed-loop claims** | 2026-08-11, Appendix AD. Same checkpoint across 7 gate-valid launches: 106.5–471.5 steps, CV 55%. Rate, track and start state ruled out; cause unknown. Nothing may be ranked on closed-loop steps until this is fixed or quantified |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
 
@@ -384,18 +229,11 @@ history lives in the record.
   `verify_env.py` and `verify_corpus.py` are the P1/P2 done-checks and both
   exit non-zero on failure.
 
-## Track (decided 2026-08-05, record Appendix L)
-Figure-8 (never an oval — a one-handed loop teaches "always steer left"),
-1.6 × 2.8 m, **1:14 scale**: lane 261 mm, line 7.3 mm, stop line 22-44 mm,
-dash compressed to ~60/180 mm. **Print MARKINGS, not the road surface** —
-full-surface printing is ~6.4 kg and 150-250 h versus ~0.15 kg and ~6 h for
-markings, for identical camera input. Substrate is dark matte foam board.
-Stop sign goes in from the start but is exercised at M4, because plain BC
-provably cannot learn it and the world model can.
-- `.claude/pm-cadence.json` — record entry every 3 prompts; handoff at
-  session end.
 
 ## BLOCKED-ON-EVAN
+- **HOW MUCH FLOOR SPACE?** "More floor space" was chosen 2026-08-12 over compressing to ~1:20, but never quantified. **Every track dimension scales off this number** and the layout cannot be finalised without it.
+- **Pi 5 2GB ($65) or 4GB ($110)?** Recommended 2GB — identical silicon, and the 4GB has absorbed every DRAM price rise while the 2GB has absorbed none. Purchase window is now.
+- **PWM path: straight-to-GPIO or a PCA9685 breakout?** Straight-to-GPIO (as the BOM wires it) locks the project to a Pi. Decide before ordering.
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.

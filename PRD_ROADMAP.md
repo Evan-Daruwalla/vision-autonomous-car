@@ -700,6 +700,21 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
       2.43×, and every retracted difference was under 1.85× (342.4/185.6 =
       1.845).**
 
+- [ ] **M1.4b (NEW, 2026-09-01): design the printable track layout.**
+      Evan is drafting in 3dstreet.app (`.mcp.json` wires
+      `3dstreet-mcp`). **Scope split, because the tool only covers
+      half of it:** 3DStreet does street CROSS-SECTIONS — linear
+      segments plus 90/T/dead-end intersections, no curved streets,
+      real-world units — so use it for marking design, dash pattern,
+      sign placement and the portfolio render. **Keep the figure-8
+      plan-view geometry in a dimensioned plan**, where the corner
+      radius is checkable. Done when: a dimensioned plan exists that
+      fits the (still unstated) floor space at ~300 mm lanes with
+      corner radii >= the MEASURED turn radius, and a marking sheet
+      is ready to print. **BLOCKED on (a) Evan's floor-space number
+      and (b) the B3 turning test — corner geometry must not be
+      committed before it** (Appendix L, AM.2).
+
 ## 6b. EXECUTION PLAN (dated 2026-08-05, approved by Evan — schedules the tasks above; adds no new milestones)
 
 **Why this exists:** §6 says WHAT to build and in what order. This says WHEN,

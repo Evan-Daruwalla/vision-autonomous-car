@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "3dstreet": { "command": "npx", "args": ["-y", "3dstreet-mcp"] }
+  }
+}

@@ -161,7 +161,9 @@ python ml/probe_vram.py
 ```
 
 Setup is in `ml/requirements.txt`. The simulator binary and the DreamerV3
-reference implementation are fetched separately and not vendored here.
+reference implementation are fetched separately and not vendored here. On a
+fresh clone, also run `git config core.hooksPath scripts/git-hooks` to wire
+the pre-commit secret-scan gate.
 
 ---
 

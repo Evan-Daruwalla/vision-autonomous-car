@@ -72,6 +72,8 @@ the dated entry, not the digest.
 - [AI — The track regenerates every launch (the harness mystery, solved), and the sim FOV is 90](#appendix-ai---the-track-regenerates-every-launch-that-is-the-harness-mystery-solved-and-the-sim-fov-is-90-2026-08-13-0056-cdt) (08-13)
 - [AJ — The closed-loop comparison, re-run PAIRED and finally valid: no intervention helps](#appendix-aj---the-closed-loop-comparison-re-run-paired-and-finally-valid-no-intervention-helps-2026-08-13-1547-cdt) (08-13)
 - [AK — Scheduled daily-audit: the sim FOV that AI identified by comparison is now pinned in code, and a secret gate is wired](#appendix-ak---scheduled-daily-audit-the-sim-fov-that-ai-identified-by-comparison-is-now-pinned-in-code-and-a-secret-gate-is-wired-2026-08-16-1328-cdt) (08-16)
+- [AL — Scheduled daily-audit: 23 findings; three cache readers skip the encoder fingerprint, and the record guard's missing-file branch fails OPEN under a "Fails CLOSED" comment](#appendix-al---scheduled-daily-audit-23-findings-three-cache-readers-skip-the-encoder-fingerprint-and-the-record-guards-missing-file-branch-fails-open-under-a-fails-closed-comment-2026-08-25-0721-cdt) (08-25)
+- [AM — 3DStreet wired for the track layout, and the AL audit fixes found sitting uncommitted](#appendix-am---3dstreet-wired-for-the-track-layout-and-the-al-audit-fixes-found-sitting-uncommitted-2026-09-01-1512-cdt) (09-01)
 
 ---
 
@@ -4459,3 +4461,159 @@ this repo has no HTML-twin record per CLAUDE.md) and set
 
 - AC-1, AC-2: closed.
 - Not pushed - Evan has not authorized a push.
+
+# Appendix AL - Scheduled daily-audit: 23 findings; three cache readers skip the encoder fingerprint, and the record guard's missing-file branch fails OPEN under a "Fails CLOSED" comment (2026-08-25, ~07:21 CDT)
+Audit run - 23 findings (2 high, 6 med, 10 low, 5 edge cases), findings only, nothing changed.
+
+**Top:** `ml/train_cte_probe.py:85`, `ml/train_controller.py:207-209` and
+`ml/diag_copycat.py:87-89` load the cached latents `ml/data/proc/train_mu.npy`
+with no encoder-fingerprint check, while `ml/train_mdnrnn.py:57-60` and
+`ml/rollout_eval.py:192-203` do check. Retrain the VAE without deleting the
+cache and the probe trains on the old encoder's latents silently. Second high:
+three `fit_val_episodes()` call sites take the split seed from the checkpoint
+and three do not (`compare_encoders.py:163`, `probe_cone.py:173`,
+`train_cte_probe.py:91`), the same class as the bug `rollout_eval.py:205-213`
+already documents.
+
+**Cross-project:** `scripts/git-hooks/pre-commit`'s record-invariant block
+carries the comment "Fails CLOSED" directly above an `else` branch that fails
+OPEN. The enforcement path itself is sound - `append-record-entry.js --canary`
+prints `CANARY PASS 45/45` - but when the guard FILE is absent the commit
+proceeds: with `HOME` pointed at an empty directory the live hook printed both
+skip warnings and exited **0**. The same branch is in all **six** repos carrying
+the block - Autonomous Car Project, ServeLocal, Skills, Swing Trading, Trading
+and World Models Research - so a fresh clone or a second machine commits
+unverified. (Corrected before this entry was committed: the count first
+written here was "five", which omitted Trading, where the block is present
+on disk but uncommitted. Found by the 2026-08-25 landing-check, F5.)
+
+**Docs:** the record's cadence rule and HANDOFF's session-end sync were both
+missed for the three commits after Appendix AK (`e8b464b`, `3e5f6bf`,
+`fc4c75f`) - the LF pin and the record-guard delegation are in no entry.
+
+Full report in the scheduled daily-audit session output for 2026-08-25.
+
+# Appendix AM - 3DStreet wired for the track layout, and the AL audit fixes found sitting uncommitted (2026-09-01, ~15:12 CDT)
+**CADENCE NOTE:** first entry since AL (2026-08-25). AL itself recorded that
+the cadence rule and the HANDOFF session-end sync were both missed for three
+commits; that gap is closed in AM.4 rather than left implicit.
+
+**WHAT:** Evan is building the physical street layout in 3dstreet.app and
+supplied the `3dstreet-mcp` server config. Wired it up, assessed the fit
+against the track this project actually needs, and — while surveying state for
+a handoff — found the Appendix AL audit fixes complete but uncommitted in the
+working tree.
+
+## AM.1 3DStreet MCP: wired, with a fit caveat that matters more than the wiring
+
+`.mcp.json` written at the project root (project scope). `npx` 11.9.0 is
+present. **The `claude` CLI is not on PATH in this environment**, so the
+`claude mcp add` form Evan supplied has to be run by him; the JSON file is the
+equivalent and loads on restart.
+
+**What the server actually is:** a bridge to a LIVE 3DStreet browser tab over
+WebSocket — not a headless generator. Tools: `getScene`, `getEntity`,
+`entityCreate/Update/Remove/Clone/Reparent`, `componentAdd/Remove`,
+`segmentAdd/Update/Remove`, `selectEntity`, `focusCamera`, `undo/redo`. It is
+**alpha, protocol subject to change**, and carries no auth token — it
+piggybacks on whichever tab is already signed in.
+
+**The fit problem, stated before any time is spent on it.** 3DStreet is
+Streetmix-lineage: its competence is the street CROSS-SECTION (what sits in
+the street left-to-right) extruded along a line. Its own materials describe
+drag-and-drop **linear** streets plus **4-way 90-degree, T and dead-end**
+intersections; **no evidence of curved streets was found**.
+
+**This project's track is a FIGURE-8**, and its hard part is plan-view
+geometry — corner radii, closing the loop, fitting the floor. That is exactly
+what the tool does not do. What it IS good for: lane widths, dash patterns,
+sign placement, and a presentable 3D render for the portfolio.
+
+Second mismatch: 3DStreet works in **real-world street units** (a real lane is
+3-3.6 m; this track's is ~0.3 m, roughly 1/11). Designing at 1:1 and scaling
+on export is workable, but typing 0.3 into a lane-width field is not.
+
+**Recommendation recorded:** use it for the marking design and the render;
+keep the figure-8 geometry in a plain dimensioned plan where the radius
+constraint is checkable.
+
+## AM.2 The constraint that gates the layout, and it is still an estimate
+
+Consolidated from the record so the layout work has one place to read:
+
+| constraint | value | source |
+|---|---|---|
+| floor space | was **1.6 x 2.8 m**; Evan chose "more floor space" 2026-08-12, amount **not yet specified** | Appendix L; AG.1 |
+| lane width | **~300 mm** (85 mm clearance for a 130 mm car) | `SIM_TRANSFER_SPEC` §3 |
+| corner radius | **>=500-670 mm centreline**, from an estimated ~330 mm min turn radius | Appendix L |
+| layout | **figure-8**, never an oval (an oval teaches "always steer left") | `gotchas.md` |
+| stop sign | **relocatable/removable** — a fixed sign is predictable from position | Appendix Y.3 |
+| surface | print MARKINGS, not road (~0.15 kg vs ~6.4 kg) | `gotchas.md` |
+| dashes | MUTCD 1:3 does not survive at scale; Duckietown ~2:1, a documented deviation | Appendix L |
+
+**The corner radius is arithmetic on an estimate, not a measurement.** Min
+radius ~ wheelbase / tan(max steer) ~ 330 mm assumes a 130 mm car width that
+is itself unmeasured until B2/B3. Appendix L already ruled that corner tiles
+must not be cut until B3 and an empirical turning test on the rolling chassis.
+**Designing the look now is fine; committing corner geometry now risks a track
+the car physically cannot drive.**
+
+**Blocked on Evan:** how much floor space there actually is. Every dimension
+scales off it and "more" is not a number.
+
+## AM.3 The AL fixes are done, verified to compile, and were never committed
+
+Surveying state for the handoff turned up **19 modified files, 299 insertions,
+uncommitted** — including Appendix AL itself. AL's own text says "findings
+only, nothing changed", which was true when written; the fixes landed
+afterwards and then stalled before commit.
+
+**Both AL high findings are addressed:**
+
+- **Finding 1 (stale latent cache).** `ml/splits.py` gains
+  `load_cached_mu(split, vae_ckpt, proc)` — a chokepoint that returns the
+  cached `{split}_mu.npy` **only if** its encoder fingerprint matches, else
+  `None`, letting each caller decide between re-encoding and failing loudly.
+  The three readers that previously skipped the check
+  (`train_cte_probe.py`, `train_controller.py`, `diag_copycat.py`) now use it.
+  `train_cte_probe.py` has no encoder loaded to re-encode with, so it treats a
+  stale cache as a **hard stop**, which is the right call for that script.
+- **Finding 2 (split seed).** The three `fit_val_episodes()` call sites that
+  used a hardcoded default now take the seed from the VAE checkpoint, matching
+  the convention `rollout_eval.py` already documented.
+
+**Verified this session:** all 11 changed modules compile, and `splits.py`'s
+own gate prints `splits self_check: PASS`. **NOT verified:** that any of the
+affected scripts still produce correct results end-to-end — no training or
+eval was re-run. **Do not treat these as validated fixes; treat them as
+complete-looking and unrun.**
+
+## AM.4 Closing AL's documentation gap
+
+AL flagged that three commits after Appendix AK carry no record entry. Named
+here so the record is continuous:
+
+| commit | date | subject |
+|---|---|---|
+| `e8b464b` | 2026-08-20 23:46 | Delegate record-invariant checking in the pre-commit hook |
+| `3e5f6bf` | 2026-08-21 16:25 | Restore the missing TOC line for Appendix AK |
+| `fc4c75f` | 2026-08-21 16:29 | Pin shell scripts and git hooks to LF |
+
+The substance of each is in its commit message; this entry does not restate
+work it did not do, it only makes the gap navigable.
+
+**Still open from AL, unfixed:** the pre-commit record-guard's missing-file
+branch **fails OPEN** under a comment reading "Fails CLOSED" — verified live by
+pointing `HOME` at an empty directory, where the hook printed both skip
+warnings and exited 0. The same branch is in **six** repos. Cross-project, so
+it is not this project's to fix alone, but it means a fresh clone or a second
+machine commits unverified.
+
+## AM.5 Open items
+
+1. **Floor space number** — blocks every track dimension.
+2. **Commit or discard the uncommitted AL fixes.** They compile; they are unrun.
+3. Corner geometry stays frozen until the B3 turning test.
+4. Pre-commit guard fails OPEN (cross-project, from AL).
+5. Pi 2GB vs 4GB — Evan's call, purchase window is now.
+6. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
