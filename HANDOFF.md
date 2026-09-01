@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-01 ~15:12 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-01 ~16:12 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 39 appendices A–AM). When this file and the record disagree about
+(append-only, 44 appendices A–AR). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -64,7 +64,7 @@ track generator — but it is a negative, and the write-up must say so.
 | # | Action | Blocked on |
 |---|---|---|
 | 1 | **Give the floor-space number.** "More floor space" was chosen 2026-08-12 but never quantified. Every track dimension scales off it. | **Evan** |
-| 2 | **Commit or discard the uncommitted AL audit fixes** — 19 files, 299 insertions, in the working tree. They compile and `splits.py` self-checks PASS, but **nothing was re-run end-to-end**. | review |
+| 2 | ~~Commit or discard the uncommitted AL audit fixes~~ **DONE 2026-09-01** (AO/AP, commit `3f58804`). The central fix was WRONG and broke `train_cte_probe.py`; repaired and every runnable reader re-run. | — |
 | 3 | **Print the tolerance coupon (M1.3).** Needs no parts — only the printer and Lego. Gates every chassis dimension. | **Evan** |
 | 4 | **Pi 2GB ($65) vs 4GB ($110).** Purchase window is now; the 4GB has taken every DRAM hike and the 2GB none. | **Evan** |
 | 5 | **Place the order** (`docs/BOM.md`). Nothing downstream of M1.5 moves until parts exist. | **Evan** |
@@ -87,8 +87,31 @@ floor space** rather than compress to ~1:20 · research Pi alternatives before a
 the whole corpus was captured at an unrecorded Unity default. Identified by
 comparison as **`fov=90`** → ~106° H / ~118° diagonal. **The Camera Module 3
 Wide (102° H / 120° D) matches within 2–4° and is the correct part**; the
-standard module is ~40° off. BOM row 2 HOLD is lifted. Camera height, pitch and
-offset remain unidentified — same method would find them.
+standard module is ~40° off. BOM row 2 HOLD is lifted.
+
+**Camera POSE, 2026-09-01 (Appendix AR) — pitch measured, height still open.**
+The FOV sweep method **does not extend to the extrinsics**: `send_cam_config`'s
+contract is "set any field to Zero to get the default camera setting", and for
+`offset_x/y/z` / `rot_x/y/z` **0.0 means "keep the default"**, so no sweep can
+reproduce a default it cannot express. Measured geometrically instead
+(`ml/diag_camera_pose.py`):
+
+- **`fov` is the VERTICAL FOV — measured, not assumed.** Changing only `img_h`
+  at fixed pose moved the horizon offset by **1.346** (2nd reference 1.271) vs
+  1.3333 predicted for vertical and 1.0000 for horizontal. So **f = 60 px** at
+  120×160, and AI's 106° H / 118° D — the basis of the camera purchase — is
+  now confirmed rather than assumed.
+- **Pitch = 16.3° DOWN.** Horizon at row **41.97 of 120**, sd 0.284 px,
+  n=3,187 (`generated-roads`; `generated-track` is tree-lined, no horizon).
+- **Height NOT identified, no number reported.** The cte-regression method is
+  right (f cancels) but fails on this corpus — the yellow line runs off the
+  left edge at close rows, `cte` spans only ±0.17 m, and the PID couples
+  heading to `cte`. Needs a purpose-built lateral-sweep run.
+- **`offset_z` is not identifiable at all** from a ground plane; **`offset_x`**
+  is not separable from the road's own geometry.
+- **Mount target:** match the observable, not the angle — mount so the true
+  horizon lands on **row 42 of a 120-row frame (35% down)** at 90° vertical
+  FOV. Spirit level plus one test photo.
 
 **Compute:** recommend the **Pi 5 2GB at $65**, not the 4GB at $110 — identical
 silicon, and DonkeyCar's "4GB minimum" is an unjustified recommendation (its
@@ -227,7 +250,9 @@ original floor and the pre-2026-08-12 scale decision.)*
   before any hardware, track, or ML work.
 - `ml/` — SIM-POC code. `requirements.txt` rebuilds the environment;
   `verify_env.py` and `verify_corpus.py` are the P1/P2 done-checks and both
-  exit non-zero on failure.
+  exit non-zero on failure. **P2 re-verified PASS 2026-09-01** (102,888
+  frames, 88/88 on both axes) — first run since 2026-08-06.
+  `diag_camera_pose.py` measures the sim's camera pitch from the corpus.
 
 
 ## BLOCKED-ON-EVAN
