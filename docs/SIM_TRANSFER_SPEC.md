@@ -85,8 +85,10 @@ instead (§3).
 
 ## 3. Deriving the real car's speed from the track
 
-With **more floor space** chosen (2026-08-12), the lane is no longer forced to
-182 mm by a 3×5 grid. Pick the lane first, then the speed follows.
+**Floor space CONFIRMED 2026-09-01: 3.0 × 3.0 m** (9 m²). That fits the full
+estimated 500-670 mm corner-radius range at either candidate car width, so
+space no longer constrains the layout. Pick the lane from the car, then the
+speed from the lane.
 
 Preserve the sim's **error-to-clearance ratio**, which is the quantity that
 actually governs whether the car stays on the road:
@@ -95,27 +97,46 @@ actually governs whether the car stays on the road:
   **1.2 m** — so the working band is roughly **±0.32 m typical, ±1.2 m worst**.
 - Real: the same *shape* must fit inside `(lane_width − car_width) / 2`.
 
-With a **130 mm car**:
+| ratio | 100 mm car | 130 mm car | clearance/side |
+|---|---|---|---|
+| 1.8x | 180 mm | 234 mm | 40 / 52 mm |
+| **2.0x (recommended)** | **200 mm** | **260 mm** | **50 / 65 mm** |
+| 2.2x | 220 mm | 286 mm | 60 / 78 mm |
 
-| lane width | clearance per side | verdict |
-|---|---|---|
-| 182 mm (3×5 grid, now abandoned) | 26 mm | **~half a Duckiebot's margin.** Every perception error you measured in sim gets amplified. |
-| 250 mm | 60 mm | workable |
-| **300 mm** | **85 mm** | **recommended** — 3.27x the abandoned grid's margin |
-| 350 mm+ | 110 mm | most forgiving; costs floor area per tile |
+**RULE: lane width = 2.0 x the MEASURED car width.** Corrected 2026-09-01
+after Evan pointed out that the previous fixed-clearance rule produced
+unrealistic proportions. Sourced references:
 
-**Recommendation: target ~300 mm lanes** — a judgement call, not a derived
-number. It gives 85 mm per side, **3.27x** the 3x5 grid's 26 mm, and it is the
-cheapest insurance against the one failure this project has measured
-repeatedly: perception degrading as the car goes off-centre. *(An earlier
-draft said 2.6x and compared it to "Duckietown's relative margin" without
-citing a Duckietown figure. The multiple is corrected; the comparison is
-withdrawn as uncited.)*
+| reference | lane : vehicle |
+|---|---|
+| US highway lane (12 ft = 3658 mm) / typical car body (~1850 mm) | **1.98x** |
+| Duckietown: 210 mm lane / Duckiebot DB21 (~150 mm) | **1.40x** |
+| Duckietown, if the chassis is nearer 130 mm | **1.62x** |
+| ~~previous spec: 300 mm / 130 mm~~ | ~~2.31x~~ |
+| ~~previous spec: 270 mm / 100 mm~~ | ~~2.70x~~ |
+
+**The old rule was wider than every real reference**, and its justification —
+"insurance against the measured off-centre perception failure" — does not hold
+up: widening the lane does not fix perception, it only delays the consequence.
+**Duckietown demonstrably runs learned policies at 30-40 mm per side**, well
+under the 85 mm previously specced.
+
+**Why 2.0x and not Duckietown's 1.4-1.6x:** Duckiebots are differential-drive
+and can pivot in place; this car is Ackermann-steered with a real minimum turn
+radius, so it is less able to recover from a bad line. 2.0x matches real-road
+proportion, still leaves 50-65 mm per side (more than Duckietown), and costs
+essentially nothing in the 3 x 3 m space — maximum corner radius moves only
+675 mm -> 685-700 mm.
+
+*(Caveat on the Duckiebot figure: 150 mm comes from a "13x6x9 in / 34x15x23 cm"
+product listing that may describe the shipping box rather than the chassis, so
+the 1.40x is soft. Either reading puts Duckietown TIGHTER than real roads,
+which is the point that matters.)*
 
 **Then set the speed empirically**, not from the formula: start at **0.3–0.5
 m/s** on the real car and raise it only while the PID still holds the lane.
-At 20 Hz, 0.4 m/s is **2 cm per control step** — about 7% of a 300 mm lane per
-decision, against the sim's 7 cm per step. Slower relative motion than the sim
+At 20 Hz, 0.4 m/s is **2 cm per control step** — 10% of a 200 mm lane or 7.7% of
+a 260 mm lane per decision, against the sim's 7 cm per step. Slower relative motion than the sim
 is the safe direction to err.
 
 ---

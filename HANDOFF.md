@@ -115,8 +115,8 @@ plan-view geometry. Keep the layout itself in a dimensioned plan.
 
 | constraint | value | source |
 |---|---|---|
-| floor space | was 1.6 × 2.8 m; **"more" chosen 2026-08-12, still unquantified** | Appendix L / AG |
-| lane width | **~300 mm** (85 mm clearance for a 130 mm car) | `SIM_TRANSFER_SPEC` §3 |
+| floor space | **3.0 × 3.0 m — CONFIRMED by Evan 2026-09-01** (9 m², vs 4.48 m² for the old 1.6×2.8 plan) | Evan |
+| lane width | **2.0 x the MEASURED car width** (200 mm @ 100 mm car, 260 mm @ 130 mm). Corrected 2026-09-01 — the old fixed-85 mm rule gave 2.31-2.70x, wider than real roads (1.98x) or Duckietown (1.4-1.6x) | `SIM_TRANSFER_SPEC` §3 |
 | corner radius | **≥500–670 mm centreline** — *estimate on an estimate* | Appendix L |
 | layout | **figure-8**, never an oval | `gotchas.md` |
 | stop sign | **relocatable/removable** — a fixed sign is predictable from position | Appendix Y.3 |
@@ -231,7 +231,20 @@ original floor and the pre-2026-08-12 scale decision.)*
 
 
 ## BLOCKED-ON-EVAN
-- **HOW MUCH FLOOR SPACE?** "More floor space" was chosen 2026-08-12 over compressing to ~1:20, but never quantified. **Every track dimension scales off this number** and the layout cannot be finalised without it.
+- ~~**HOW MUCH FLOOR SPACE?**~~ **ANSWERED 2026-09-01: 3.0 × 3.0 m.**
+  Comfortable — it fits the FULL estimated corner-radius range
+  (500–670 mm) at either car width. A 130 mm car at 300 mm lanes gives
+  a figure-8 bbox of 1.30 × 2.30 m (R=500) to 1.64 × 2.98 m (R=670).
+- **Car width: measure, don't choose.** Evan asked about ~100 mm.
+  Space does not require it — 3×3 m fits either. It would buy ~18% more
+  clearance per side (100 mm vs 85 mm at a 300 mm lane), which targets
+  the measured off-centre perception failure. **But width is set by the
+  Lego steering rack and diff, fixed parts nobody has measured**, and
+  the existing 130 mm is itself an estimate (Appendix L, unmeasured
+  until B2/B3). Measure the assembled rack + diff at M1.2/B2 and let
+  the car land where it lands; set lane width for ≥85 mm/side from the
+  MEASURED width. Note a smaller car also lowers the camera, and the
+  sim's camera height/pitch are still unidentified (AI.3).
 - **Pi 5 2GB ($65) or 4GB ($110)?** Recommended 2GB — identical silicon, and the 4GB has absorbed every DRAM price rise while the 2GB has absorbed none. Purchase window is now.
 - **PWM path: straight-to-GPIO or a PCA9685 breakout?** Straight-to-GPIO (as the BOM wires it) locks the project to a Pi. Decide before ordering.
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).

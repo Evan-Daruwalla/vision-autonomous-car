@@ -74,6 +74,7 @@ the dated entry, not the digest.
 - [AK — Scheduled daily-audit: the sim FOV that AI identified by comparison is now pinned in code, and a secret gate is wired](#appendix-ak---scheduled-daily-audit-the-sim-fov-that-ai-identified-by-comparison-is-now-pinned-in-code-and-a-secret-gate-is-wired-2026-08-16-1328-cdt) (08-16)
 - [AL — Scheduled daily-audit: 23 findings; three cache readers skip the encoder fingerprint, and the record guard's missing-file branch fails OPEN under a "Fails CLOSED" comment](#appendix-al---scheduled-daily-audit-23-findings-three-cache-readers-skip-the-encoder-fingerprint-and-the-record-guards-missing-file-branch-fails-open-under-a-fails-closed-comment-2026-08-25-0721-cdt) (08-25)
 - [AM — 3DStreet wired for the track layout, and the AL audit fixes found sitting uncommitted](#appendix-am---3dstreet-wired-for-the-track-layout-and-the-al-audit-fixes-found-sitting-uncommitted-2026-09-01-1512-cdt) (09-01)
+- [AN — Floor space is 3x3 m; car width must be measured not chosen; and the lane-width rule was over-provisioned](#appendix-an---floor-space-is-3x3-m-car-width-must-be-measured-not-chosen-and-the-lane-width-rule-was-over-provisioned-2026-09-01-1531-cdt) (09-01)
 
 ---
 
@@ -4616,4 +4617,103 @@ machine commits unverified.
 3. Corner geometry stays frozen until the B3 turning test.
 4. Pre-commit guard fails OPEN (cross-project, from AL).
 5. Pi 2GB vs 4GB — Evan's call, purchase window is now.
+6. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+
+# Appendix AN - Floor space is 3x3 m; car width must be measured not chosen; and the lane-width rule was over-provisioned (2026-09-01, ~15:31 CDT)
+**WHAT:** Evan answered the floor-space question (3.0 x 3.0 m), asked whether
+the car could shrink to ~100 mm, and then **caught a real over-provisioning in
+the lane-width rule I wrote in `SIM_TRANSFER_SPEC` §3**. The rule is corrected
+here from a fixed clearance to a proportional one.
+
+## AN.1 Floor space: 3.0 x 3.0 m, and it is generous
+
+The number that had been blocking M1.4b. **9 m2 against the 4.48 m2 the
+original 1.6 x 2.8 m plan assumed** — so the "more floor space" decision of
+2026-08-12 more than doubled the area, and space is no longer the binding
+constraint on anything.
+
+Figure-8 as two tangent loops, bounding box `(2R + W) x (4R + W)`:
+
+| car | lane | clearance/side | max corner R that fits in 3 m |
+|---|---|---|---|
+| 100 mm | 270 mm | 85 mm | 682 mm |
+| 100 mm | 300 mm | 100 mm | 675 mm |
+| 130 mm | 300 mm | 85 mm | 675 mm |
+| 130 mm | 330 mm | 100 mm | 668 mm |
+
+**Every combination fits the full estimated 500-670 mm corner range.** At
+R=500 the figure-8 is 1.30 x 2.30 m; at R=670 it is 1.64 x 2.98 m — the tight
+end just fits, the comfortable end leaves most of a metre.
+
+## AN.2 Car width: measure it, do not choose it
+
+Evan asked about ~100 mm. **Space does not require it** (AN.1), and neither
+does turn radius: `R_min ~ wheelbase / tan(max steer)` gives **157-322 mm**
+across plausible wheelbases (110-150 mm) and steer angles (25-35 deg), all far
+below the 500-670 mm corners the track would actually use. **Shrinking the car
+to buy a tighter turning circle solves a problem this project does not have.**
+
+What it would buy is clearance — ~18% more per side at a given lane width,
+aimed at the measured off-centre perception failure.
+
+**What blocks it: car width is not a free parameter.** It is track width,
+outer wheel face to outer wheel face, set by the Lego steering rack and diff —
+fixed parts. Working back from 100 mm: two wheels at 20-22 mm each (44309 is
+22 mm wide, 32019 is 20 mm) consume 40-44 mm, leaving ~56-60 mm between the
+inner faces for the differential (62821 is a 28-tooth module-1 ring, ~28 mm
+pitch diameter, plus housing) and the front knuckles. Plausible and tight.
+
+**And the existing 130 mm was itself never measured** — Appendix L flags it
+unmeasured until B2/B3. Choosing 100 mm now trades one estimate for another.
+**Decision: build to the parts, measure the assembled rack + diff at M1.2/B2,
+and set lane width from the MEASURED result.** Also noted: a smaller car sits
+the camera lower, and the sim's camera height and pitch are still unidentified
+(AI.3) — only `fov=90` was pinned.
+
+## AN.3 The lane-width rule was wrong, and Evan caught it
+
+He observed that real lanes are only ~1.8-2x vehicle width. **He is right, and
+the spec was well outside that.** Sourced:
+
+| reference | lane : vehicle |
+|---|---|
+| US highway lane (12 ft = 3658 mm) / typical car body (~1850 mm) | **1.98x** |
+| Duckietown: 210 mm lane / Duckiebot DB21 (~150 mm) | **1.40x** |
+| Duckietown, if the chassis is nearer 130 mm | **1.62x** |
+| **previous spec: 300 mm / 130 mm** | **2.31x** |
+| **previous spec: 270 mm / 100 mm** | **2.70x** |
+
+**The old rule was wider than every real reference — up to 93% wider than
+Duckietown.** Worse, its justification does not survive scrutiny: I wrote that
+85 mm/side was "the cheapest insurance against the measured off-centre
+perception failure", but **widening a lane does not fix perception, it only
+delays the consequence**. And Duckietown demonstrably runs learned policies at
+**30-40 mm per side**, under half what I specced.
+
+**Corrected rule: lane width = 2.0 x the MEASURED car width.**
+200 mm for a 100 mm car (50 mm/side), 260 mm for a 130 mm car (65 mm/side).
+
+**Why 2.0x rather than Duckietown's 1.4-1.6x**, stated so it is not mistaken
+for splitting the difference: Duckiebots are **differential-drive and can pivot
+in place**; this car is **Ackermann-steered with a real minimum turn radius**
+and cannot recover from a bad line the same way. 2.0x matches real-road
+proportion, still leaves more margin than Duckietown, and **costs essentially
+nothing here** — maximum corner radius moves only 675 mm to 685-700 mm.
+
+**Caveat kept in the spec:** the 150 mm Duckiebot width comes from a
+"13x6x9 in / 34x15x23 cm" product listing that may describe the shipping box
+rather than the chassis, so the 1.40x figure is soft. Either reading puts
+Duckietown tighter than real roads, which is the point that matters. **This is
+the second Duckietown comparison in this project; the first was withdrawn as
+uncited in Appendix AE, so this one was sourced before use.**
+
+## AN.4 Open items
+
+1. **Measure the assembled steering rack + diff** (M1.2/B2) — sets car width,
+   which now sets lane width by rule.
+2. Corner geometry still frozen until the B3 turning test.
+3. Camera height / pitch / offset still unidentified (AI.3) — same comparison
+   method that found `fov=90` would find them, no hardware needed.
+4. Pi 2GB vs 4GB — Evan's call, purchase window is now.
+5. The AL audit fixes remain uncommitted and unrun (AM.3).
 6. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.

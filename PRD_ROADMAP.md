@@ -711,8 +711,9 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
       radius is checkable. Done when: a dimensioned plan exists that
       fits the (still unstated) floor space at ~300 mm lanes with
       corner radii >= the MEASURED turn radius, and a marking sheet
-      is ready to print. **BLOCKED on (a) Evan's floor-space number
-      and (b) the B3 turning test — corner geometry must not be
+      is ready to print. **Floor space ANSWERED 2026-09-01: 3.0 x 3.0 m**,
+      which fits the full 500-670 mm corner range at either car width.
+      Still BLOCKED on (b) the B3 turning test — corner geometry must not be
       committed before it** (Appendix L, AM.2).
 
 ## 6b. EXECUTION PLAN (dated 2026-08-05, approved by Evan — schedules the tasks above; adds no new milestones)
