@@ -50,7 +50,7 @@ import torch
 import torch.nn as nn
 
 from models import ACTION_DIM, HIDDEN, MDNRNN, Z_DIM, ConvVAE, count_params
-from splits import fit_val_episodes, load_proc
+from splits import fit_val_episodes, load_cached_mu, load_proc
 
 REPO = Path(__file__).resolve().parent.parent
 PROC = REPO / "ml" / "data" / "proc"
@@ -205,14 +205,16 @@ def main() -> int:
         print(f"labels: {expert_path.name} (expert actions)")
 
     mu_path = proc / "train_mu.npy"
-    if mu_path.exists():
-        mu = np.load(mu_path)
-    else:
-        # An alternate corpus has no cached latents. Encode with the SAME
-        # frozen VAE loaded above rather than writing a cache here: the cache
-        # carries an encoder fingerprint (cold audit finding 5) and only
-        # train_mdnrnn.py is set up to stamp one.
-        print(f"no latent cache at {mu_path.name} - encoding with the frozen VAE...")
+    # Cold audit finding 1: check the cache's encoder fingerprint before
+    # reusing it, same as train_mdnrnn.py does when it writes the cache.
+    mu = load_cached_mu("train", args.vae, proc=proc)
+    if mu is None:
+        # Missing (alternate corpus) or stale (different VAE than loaded
+        # above) cache. Encode with the SAME frozen VAE loaded above rather
+        # than writing a cache here: the cache carries an encoder fingerprint
+        # (cold audit finding 5) and only train_mdnrnn.py is set up to stamp
+        # one.
+        print(f"no usable latent cache at {mu_path.name} - encoding with the frozen VAE...")
         imgs, _, _, _ = load_proc("train", proc=proc)
         mu = np.zeros((len(imgs), Z_DIM), np.float32)
         with torch.no_grad():

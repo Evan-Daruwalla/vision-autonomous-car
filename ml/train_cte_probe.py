@@ -35,7 +35,7 @@ import torch.nn as nn
 
 from episode_writer import load_episode
 from models import Z_DIM
-from splits import fit_val_episodes, load_proc
+from splits import fit_val_episodes, load_cached_mu, load_proc
 
 REPO = Path(__file__).resolve().parent.parent
 SRC = REPO / "ml" / "data" / "sim" / "train"
@@ -72,6 +72,7 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--arch", choices=("linear", "mlp"), default="mlp")
     ap.add_argument("--width", type=int, default=256)
+    ap.add_argument("--vae", default=str(RUNS / "vae" / "vae_best.pt"))
     ap.add_argument("--out", default=str(RUNS / "cte_probe"))
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     args = ap.parse_args()
@@ -82,13 +83,26 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
 
     _, _, eps, tracks = load_proc("train")
-    mu = np.load(PROC / "train_mu.npy")
+    vae_ckpt = torch.load(args.vae, map_location=args.device)
+    # Cold audit finding 1: don't silently reuse a latent cache from a
+    # retrained VAE. This script has no encoder loaded to re-encode with, so
+    # a stale/missing cache is a hard stop, not a silent reuse.
+    mu = load_cached_mu("train", args.vae, proc=PROC)
+    if mu is None:
+        raise SystemExit(
+            f"ml/data/proc/train_mu.npy is missing or was encoded by a "
+            f"different VAE checkpoint than {args.vae} -- run "
+            f"train_mdnrnn.py first to refresh the cache.")
     cte = build_cte_array()
     if len(cte) != len(mu):
         raise SystemExit(f"cte has {len(cte)} frames, mu has {len(mu)} - "
                          f"the episode ordering does not match preprocess.py")
 
-    fit_eps, val_eps = fit_val_episodes(tracks, seed=0)
+    # Cold audit finding 2: the split seed comes from the VAE checkpoint that
+    # produced these latents, never a hardcoded default -- see
+    # rollout_eval.py's split_seed comment for why.
+    split_seed = vae_ckpt.get("args", {}).get("seed", 0)
+    fit_eps, val_eps = fit_val_episodes(tracks, seed=split_seed)
     fit_i = np.concatenate([np.arange(s, s + n) for s, n in eps[fit_eps]])
     val_i = np.concatenate([np.arange(s, s + n) for s, n in eps[val_eps]])
 

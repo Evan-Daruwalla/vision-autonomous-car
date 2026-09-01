@@ -160,7 +160,12 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
 
     imgs_all, acts_all, eps, tracks = load_proc("train")
-    _, val_eps = fit_val_episodes(tracks, seed=0)
+    # Cold audit finding 2: the split seed comes from the VAE checkpoint,
+    # never a hardcoded default -- same rule as rollout_eval.py/
+    # train_controller.py.
+    vae_ckpt = torch.load(args.vae, map_location=args.device)
+    split_seed = vae_ckpt.get("args", {}).get("seed", 0)
+    _, val_eps = fit_val_episodes(tracks, seed=split_seed)
     # Held-out episodes only: reconstructing training frames would flatter both
     # models and say nothing about what either one generalises.
     pool = np.concatenate([np.arange(s, s + n) for s, n in eps[val_eps]])
@@ -186,7 +191,7 @@ def main() -> int:
     acts = np.ascontiguousarray(acts_all[idx])
 
     vae = ConvVAE().to(args.device)
-    vae.load_state_dict(torch.load(args.vae, map_location=args.device)["model"])
+    vae.load_state_dict(vae_ckpt["model"])
     vae.eval()
     rec_vae = vae_reconstruct(vae, imgs, args.device)
 

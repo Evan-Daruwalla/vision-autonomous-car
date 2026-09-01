@@ -60,6 +60,38 @@ def write_cache_key(split: str, want: str, proc: Path = PROC) -> None:
     (proc / f"{split}_latents.key").write_text(want, encoding="utf-8")
 
 
+def load_cached_mu(split: str, vae_ckpt, proc: Path = PROC):
+    """Load `{split}_mu.npy` unless it is known to come from a different VAE.
+
+    Chokepoint for the read-only sites that consume the latent cache without
+    owning a write path for it (train_cte_probe.py, train_controller.py,
+    diag_copycat.py) -- none of them can stamp a fingerprint, only check one.
+
+    THREE states, not two, exactly as rollout_eval.py already decides them:
+    no cache file => None; cache present but NO sidecar key => UNVERIFIABLE,
+    warn and hand it back (caches predating the fingerprint scheme have no
+    key, and nothing short of re-running train_mdnrnn.py can give them one);
+    sidecar present and DIFFERENT => wrong latent space, None. Collapsing the
+    missing-key case into "stale" is what broke train_cte_probe.py on the
+    2026-08-06 corpus, which has no key and is measurably the output of
+    vae_best.pt (Appendix AO). The caller decides what None means (re-encode
+    in memory, or fail loudly). (Cold audit finding 1.)
+    """
+    mu_path = proc / f"{split}_mu.npy"
+    if not mu_path.exists():
+        return None
+    if not (proc / f"{split}_latents.key").exists():
+        print(f"  note: {split} latent cache has no encoder fingerprint - "
+              f"cannot verify it matches {Path(vae_ckpt).name}; using it "
+              f"anyway. Re-run train_mdnrnn.py to stamp one.")
+        return np.load(mu_path)
+    if cache_key_matches(split, encoder_fingerprint(vae_ckpt), proc):
+        return np.load(mu_path)
+    print(f"  {split}: cached latents at {mu_path.name} are from a different "
+          f"VAE checkpoint than {vae_ckpt} - treating as stale")
+    return None
+
+
 def load_proc(split: str, proc: Path = PROC):
     imgs = np.load(proc / f"{split}_images.npy", mmap_mode="r")
     actions = np.load(proc / f"{split}_actions.npy")
@@ -126,6 +158,26 @@ def self_check() -> None:
     fr = frame_indices(eps, np.array([0, 2]))
     assert fr.tolist() == [0, 1, 2, 3, 4, 12, 13, 14], fr.tolist()
     assert frame_indices(eps, np.array([], np.int64)).size == 0
+
+    # load_cached_mu resolves THREE states, not two (Appendix AO). Built on a
+    # scratch dir so the check needs no corpus and no VAE.
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        ck = d / "vae_best.pt"
+        ck.write_bytes(b"not a real checkpoint - only its stat() is fingerprinted")
+        # 1. no cache file at all -> None
+        assert load_cached_mu("train", ck, proc=d) is None, "missing cache != None"
+        np.save(d / "train_mu.npy", np.arange(6, dtype=np.float32).reshape(3, 2))
+        # 2. cache, no sidecar key -> UNVERIFIABLE, hand it back anyway
+        got = load_cached_mu("train", ck, proc=d)
+        assert got is not None and got.shape == (3, 2), "keyless cache must be used"
+        # 3. sidecar present and MATCHING -> use it
+        write_cache_key("train", encoder_fingerprint(ck), proc=d)
+        assert load_cached_mu("train", ck, proc=d) is not None, "matching key rejected"
+        # 4. sidecar present and DIFFERENT -> stale, None
+        write_cache_key("train", "deadbeef0000", proc=d)
+        assert load_cached_mu("train", ck, proc=d) is None, "mismatched key accepted"
 
     print(f"fit={fit.tolist()}")
     print(f"val={val.tolist()}")

@@ -30,6 +30,7 @@ from pathlib import Path
 
 import numpy as np
 
+from collect_sim_data import MAX_MEAN_ABS_CTE, MIN_EPISODE_STEPS
 from episode_writer import load_episode
 
 REQUIRED = ["image", "action", "reward", "discount",
@@ -38,12 +39,6 @@ REQUIRED = ["image", "action", "reward", "discount",
 BAND = (60, 95)        # image rows to profile: road ahead, above the bumper
 MAX_SHIFT = 14         # px of horizontal search either way
 MIN_PAIRS_PER_EPISODE = 120   # turning frames needed to measure one episode's lag
-
-# Mirrored from collect_sim_data.py so the expert-quality contract is checkable
-# at rest, not only at write time. Keep the two in sync -- if the collector's
-# thresholds move, these must move with them, and the record entry should say so.
-MAX_MEAN_ABS_CTE = 1.2
-MIN_EPISODE_STEPS = 150
 
 
 def column_profile(img: np.ndarray) -> np.ndarray:

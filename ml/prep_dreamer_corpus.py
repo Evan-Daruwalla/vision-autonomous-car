@@ -79,8 +79,8 @@ def write_episode(src: Path, dst_dir: Path, device: str, chunk: int = 256) -> in
         if tmp.exists():
             try:
                 tmp.unlink()
-            except OSError:
-                pass
+            except OSError as e:
+                print(f"  failed to clean up {tmp}: {e}")
     return n
 
 

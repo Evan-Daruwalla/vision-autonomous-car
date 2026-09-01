@@ -44,7 +44,7 @@ import numpy as np
 import torch
 
 from models import MDNRNN, ConvVAE, Z_DIM
-from splits import fit_val_episodes, load_proc
+from splits import fit_val_episodes, load_cached_mu, load_proc
 from train_controller import Controller, rnn_states
 
 REPO = Path(__file__).resolve().parent.parent
@@ -85,9 +85,10 @@ def main() -> int:
     if expert_path.exists():
         act = np.load(expert_path)
     mu_path = proc / "train_mu.npy"
-    if mu_path.exists():
-        mu = np.load(mu_path)
-    else:
+    # Cold audit finding 1: check the cache's encoder fingerprint before
+    # reusing it, same as train_mdnrnn.py does when it writes the cache.
+    mu = load_cached_mu("train", args.vae, proc=proc)
+    if mu is None:
         imgs, _, _, _ = load_proc("train", proc=proc)
         vae = ConvVAE().to(args.device)
         vae.load_state_dict(vae_ckpt["model"])

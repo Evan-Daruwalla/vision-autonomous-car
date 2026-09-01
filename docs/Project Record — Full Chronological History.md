@@ -75,6 +75,8 @@ the dated entry, not the digest.
 - [AL — Scheduled daily-audit: 23 findings; three cache readers skip the encoder fingerprint, and the record guard's missing-file branch fails OPEN under a "Fails CLOSED" comment](#appendix-al---scheduled-daily-audit-23-findings-three-cache-readers-skip-the-encoder-fingerprint-and-the-record-guards-missing-file-branch-fails-open-under-a-fails-closed-comment-2026-08-25-0721-cdt) (08-25)
 - [AM — 3DStreet wired for the track layout, and the AL audit fixes found sitting uncommitted](#appendix-am---3dstreet-wired-for-the-track-layout-and-the-al-audit-fixes-found-sitting-uncommitted-2026-09-01-1512-cdt) (09-01)
 - [AN — Floor space is 3x3 m; car width must be measured not chosen; and the lane-width rule was over-provisioned](#appendix-an---floor-space-is-3x3-m-car-width-must-be-measured-not-chosen-and-the-lane-width-rule-was-over-provisioned-2026-09-01-1531-cdt) (09-01)
+- [AO — The AL audit fixes, run: the encoder-fingerprint guard is a false negative and breaks train_cte_probe.py](#appendix-ao---the-al-audit-fixes-run-the-encoder-fingerprint-guard-is-a-false-negative-and-breaks-train_cte_probepy-2026-09-01-1546-cdt) (09-01)
+- [AP — Option 1 applied: load_cached_mu resolves three states, and every runnable AL-touched reader re-run](#appendix-ap---option-1-applied-load_cached_mu-resolves-three-states-and-every-runnable-al-touched-reader-re-run-2026-09-01-1550-cdt) (09-01)
 
 ---
 
@@ -4717,3 +4719,240 @@ uncited in Appendix AE, so this one was sourced before use.**
 4. Pi 2GB vs 4GB — Evan's call, purchase window is now.
 5. The AL audit fixes remain uncommitted and unrun (AM.3).
 6. **Nothing printed, nothing ordered** - unchanged since 2026-07-23.
+
+# Appendix AO - The AL audit fixes, run: the encoder-fingerprint guard is a false negative and breaks train_cte_probe.py (2026-09-01, ~15:46 CDT)
+The AL audit fixes had been sitting uncommitted since 2026-08-25, described in
+AM as "compile, splits.py self-checks PASS, nothing re-run end-to-end". Ran
+them. **The central fix is wrong and breaks a working script.**
+
+## AO.1 What the fix does
+
+Cold-audit finding 1 said three readers of the latent cache
+(`ml/data/proc/train_mu.npy`) load it without checking which VAE produced it.
+The fix adds `splits.load_cached_mu()` as a shared chokepoint: it returns the
+cached array iff `{split}_latents.key` matches `encoder_fingerprint(vae_ckpt)`,
+otherwise `None`. `train_cte_probe.py` treats `None` as a hard stop;
+`train_controller.py` and `diag_copycat.py` treat it as "re-encode in memory".
+
+## AO.2 The regression, run
+
+`ml/data/proc/` contains **no `.key` file at all** — the fingerprint scheme
+postdates the cache, and nothing but `train_mdnrnn.py` can stamp one.
+`cache_key_matches` therefore returns False for every split, and
+`load_cached_mu` returns `None` on a corpus that has not changed:
+
+```
+$ python train_cte_probe.py --out runs/_verify_cte_probe
+  train: cached latents at train_mu.npy are from a different VAE checkpoint
+  than ...\runs\vae\vae_best.pt - treating as stale
+ml/data/proc/train_mu.npy is missing or was encoded by a different VAE
+checkpoint than ...\runs\vae\vae_best.pt -- run train_mdnrnn.py first to
+refresh the cache.
+```
+
+`train_cte_probe.py` **worked before this change and refuses to run after it.**
+`train_controller.py` survives only because its `None` branch re-encodes — it
+now does 91,678 VAE forward passes on every run that the cache already answers:
+
+```
+$ python train_controller.py --epochs 2 --out runs/_verify_ctrl
+  train: cached latents at train_mu.npy are from a different VAE checkpoint ...
+no usable latent cache at train_mu.npy - encoding with the frozen VAE...
+building RNN states for 66 fit + 12 val episodes...
+  fit 77,266 frames, val 14,412 frames (1s)
+controller: 578 params (linear on z32 + h256)
+  epoch   1  fit 0.08711  val_indomain 0.03229 (unweighted 0.03229)
+best val_indomain MSE 0.01926 -> runs\_verify_ctrl\controller_linear_seed0.pt
+```
+
+## AO.3 The cache is fine — measured, not assumed
+
+Re-encoded a 4,096-frame random sample of the train split with
+`runs/vae/vae_best.pt` and differenced it against the cache. Control arm:
+the same VAE with every weight multiplied by 1.01, i.e. the smallest
+"different checkpoint" worth worrying about.
+
+| arm | max abs diff | mean abs diff | mean/scale |
+|---|---|---|---|
+| cuda TF32=on | 2.85e-03 | 2.84e-04 | 7.46e-04 |
+| cuda TF32=off | 2.09e-03 | 1.99e-04 | 5.22e-04 |
+| cpu fp32 | 2.09e-03 | 1.99e-04 | 5.22e-04 |
+| **+1% weights (control)** | 2.42e-01 | 1.95e-02 | **5.12e-02** |
+
+Cached mu scale (mean |mu|) 0.3813. The cache-vs-checkpoint residual is
+**100x smaller than a 1% weight change**, and is bit-identical between CPU
+fp32 and TF32-off CUDA — so it is float32 accumulation-order noise from the
+chunk size used when the cache was written, not a different encoder.
+**`train_mu.npy` is the output of `vae_best.pt`. The guard is a false
+negative.**
+
+## AO.4 Root cause: the fix does not mirror the thing it cites
+
+`load_cached_mu`'s docstring says it "mirrors the check half of
+train_mdnrnn.py:encode_split", and the call-site comments cite
+`rollout_eval.py`. `rollout_eval.py:190-203` distinguishes **three** states,
+and says why in a comment:
+
+> Missing sidecar => UNVERIFIABLE (caches predating this guard have none);
+> present-and-different => WRONG, and we stop.
+
+Missing key warns and continues; mismatched key returns 1. `load_cached_mu`
+collapses missing and mismatched into one `None` — deleting exactly the
+carve-out `rollout_eval.py` wrote for this corpus. The fix contradicts the
+precedent it cites rather than mirroring it.
+
+## AO.5 The other changes in the working tree
+
+Ran or read the rest; none is broken.
+
+- **Split seed from the checkpoint** (`compare_encoders.py`, `probe_cone.py`,
+  `train_cte_probe.py`): correct hardening, and a **no-op today** —
+  `vae_best.pt`'s `args` is a plain dict with `seed: 0`, the same value the
+  removed hardcodes used. It buys nothing now and prevents a silent wrong
+  split after any VAE retrain at another seed. `.get` is safe: `args` is a
+  dict, not an argparse Namespace.
+- **`verify_corpus.py` importing `MAX_MEAN_ABS_CTE`/`MIN_EPISODE_STEPS` from
+  `collect_sim_data`** instead of re-declaring them: good — kills a
+  keep-in-sync comment. Import resolves; the script then exits 1 on
+  `corpus not found: ml\data\sim`, because **the raw episode corpus is not on
+  disk** (only `ml/data/proc/`). Pre-existing, unrelated to this change, and
+  it means the P2 done-check cannot currently be re-run at all.
+- **`eval_in_sim.py`**: `SIZE` now imported from `preprocess` rather than
+  re-declared; `--force` guard against silently overwriting `p5_eval.json`;
+  `batch_valid` now requires `episodes > 0` (an empty batch used to read as
+  valid). All three are right. Not exercised — needs a sim launch.
+- **`plan_cem.py`**: CEM candidates clamped to `STEER_LIMIT` instead of
+  hardcoded +-1.0. Right, and it changes CEM behaviour if `STEER_LIMIT < 1`.
+  Not exercised — needs a sim launch.
+- **`episode_writer.py` / `prep_dreamer_corpus.py`**: silent `except OSError:
+  pass` on temp-file cleanup now prints. Fine.
+
+## AO.6 Status
+
+Nothing committed. `runs/_verify_cte_probe` and `runs/_verify_ctrl` are
+throwaway verification outputs. `ml/runs/controller/history_linear_seed0.json`
+is also modified in the tree and is a **result artifact**, not a code fix — it
+does not belong in a commit labelled "audit fixes" and needs its own account
+of which run produced it before it goes anywhere.
+
+Also corrected: HANDOFF's "19 files, 299 insertions" is stale — the tree holds
+**13 files, 161 insertions** (12 of them tracked work plus `.claude/
+pm-cadence.json`, a counter file).
+
+# Appendix AP - Option 1 applied: load_cached_mu resolves three states, and every runnable AL-touched reader re-run (2026-09-01, ~15:50 CDT)
+Evan picked option 1 from AO. Repaired `splits.load_cached_mu` and re-ran every
+reader the AL fixes touched that can run without the simulator.
+
+## AP.1 The repair
+
+`load_cached_mu` now resolves the same THREE states `rollout_eval.py:190`
+already decides, instead of collapsing two of them:
+
+| state | before | after |
+|---|---|---|
+| no `{split}_mu.npy` | `None` | `None` |
+| cache, **no sidecar key** | `None` ("stale") | **warn UNVERIFIABLE, return the array** |
+| sidecar present, matches | array | array |
+| sidecar present, differs | `None` ("stale") | `None` ("stale") |
+
+One file changed (`ml/splits.py`); the three callers are untouched, because
+what changed is only *when* `None` is produced, not what `None` means. The
+docstring now states the three states and names AO as the reason.
+
+## AP.2 The self-check
+
+`self_check()` gains a four-state assertion over a `tempfile` scratch dir --
+no corpus and no real VAE needed, since `encoder_fingerprint` only stats the
+file. It asserts missing-cache => None, keyless-cache => usable, matching-key
+=> usable, mismatched-key => None.
+
+```
+$ python splits.py
+  note: train latent cache has no encoder fingerprint - cannot verify it
+  matches vae_best.pt; using it anyway. Re-run train_mdnrnn.py to stamp one.
+  train: cached latents at train_mu.npy are from a different VAE checkpoint
+  than ...\tmpgadg1yti\vae_best.pt - treating as stale
+fit=[0, 1, 2, 3, 5, 7, 8, 9, 10, 11, 12, 14, 15]
+val=[4, 6, 13]
+splits self_check: PASS
+```
+
+## AP.3 Every runnable reader, re-run
+
+**`train_cte_probe.py` -- the script AO found broken. Now runs.** R^2 0.957
+matches the 0.97 MLP probe of Appendix V.
+
+```
+  note: train latent cache has no encoder fingerprint - ... using it anyway.
+  epoch  40  val MSE 0.0100  R^2 0.9572
+mlp z->cte probe: val MSE 0.0100, R^2 0.9572
+```
+
+**`train_controller.py` --epochs 2.** This is the strongest evidence in the
+whole exercise: the run now reads the cache, and produces **numbers identical
+to the AO run that re-encoded all 91,678 frames from `vae_best.pt`** --
+fit 0.08711, val_indomain 0.03229, best 0.01926, to five decimals. Cache and
+fresh encode are interchangeable downstream, which is what AO's 100x margin
+predicted.
+
+```
+  note: train latent cache has no encoder fingerprint - ... using it anyway.
+building RNN states for 66 fit + 12 val episodes...
+  fit 77,266 frames, val 14,412 frames (1s)
+controller: 578 params (linear on z32 + h256)
+  epoch   1  fit 0.08711  val_indomain 0.03229 (unweighted 0.03229)
+best val_indomain MSE 0.01926 -> runs\_v_ctrl\controller_linear_seed0.pt
+```
+
+**`diag_copycat.py`.** Reproduces the banked copycat refutation exactly --
+18.23x (Appendix recorded 18.2x) and the h=0 skill of -0.120.
+
+```
+controller -> a[t]      (the reported val MSE)                  0.001755   0.993
+a[t-1]     -> a[t]      (TRIVIAL COPY BASELINE)                 0.031997   0.873
+controller -> a[t-1]    (is it predicting the PREVIOUS action?)  0.030699   0.878
+controller(h=0) -> a[t] (serve-time history ablation)           0.282040  -0.120
+VERDICT: NOT A COPYCAT on this evidence. ... beats repeat-last-action by 18.23x
+```
+
+**`probe_cone.py`** (split seed now from the checkpoint). AUC 0.997, and the
+paint-out ablation still returns the CONFOUNDED verdict -- 1% of the pos/neg
+gap recovered. The negative stands.
+
+**`compare_encoders.py`** (same change). Both encoders erase the cone, 0/899
+cone pixels surviving in each. ConvVAE ratio 4.42x, DreamerV3 3.22x. The M4
+stop-sign threat stands.
+
+## AP.4 Two changes that are no-ops today -- stated, not glossed
+
+Measured, not assumed:
+
+- **Split-seed-from-checkpoint** (`compare_encoders.py`, `probe_cone.py`,
+  `train_cte_probe.py`): `vae_best.pt`'s `args` is `{'epochs': 40, 'batch':
+  256, 'lr': 0.0001, 'beta': 1.0, 'seed': 0, ...}`. `seed: 0` is the value the
+  removed hardcodes used, so **behaviour is unchanged today**. It is insurance
+  against a silent wrong split after any VAE retrain at another seed.
+- **`plan_cem.py` clamping to `STEER_LIMIT`** instead of +-1.0:
+  `collect_sim_data.STEER_LIMIT == 1.0`, so **this too changes nothing today**.
+  It stops the clamp drifting away from the collector's limit later.
+
+Neither is wrong; neither has yet been shown to do anything. Recorded that way
+so a future reader does not mistake them for tested behaviour changes.
+
+## AP.5 What is still NOT verified
+
+- **`eval_in_sim.py` and `plan_cem.py` need a simulator launch.** Not run.
+  `eval_in_sim.py --smoke` was attempted and the new `--force` guard **stopped
+  it, correctly** -- the default `--out` is `runs/p5_eval`, so the smoke run
+  would have overwritten the banked Appendix V artifact. The guard did the job
+  it was added for on its first real contact. Its refusal path is therefore
+  exercised; its success path is not.
+- **`verify_corpus.py` cannot run at all**: the raw episode corpus
+  `ml/data/sim` **is not on disk** (only `ml/data/proc/`). The new
+  `from collect_sim_data import MAX_MEAN_ABS_CTE, MIN_EPISODE_STEPS` import
+  resolves -- the script reaches its own `corpus not found: ml\data\sim` and
+  exits 1 -- but the P2 done-check is unrunnable until the raw corpus is
+  restored or regenerated. Pre-existing, unrelated to the AL fixes, and it
+  means P2's DONE status currently rests on the 2026-08-06 record alone.
+- Throwaway verification outputs `runs/_v_cte`, `runs/_v_ctrl`,
+  `runs/_v_copycat`, `runs/_v_cone`, `runs/_v_enc` were deleted.

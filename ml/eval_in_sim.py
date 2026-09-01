@@ -59,12 +59,12 @@ import torch
 from collect_sim_data import (MAX_EPISODE_STEPS, PIDDriver, SIM_EXE,
                               THROTTLE, WARMUP_STEPS)
 from models import HIDDEN, MDNRNN, ConvVAE
+from preprocess import SIZE
 from sim_conf import base_sim_conf
 from train_controller import Controller
 
 REPO = Path(__file__).resolve().parent.parent
 RUNS = REPO / "ml" / "runs"
-SIZE = 64
 
 
 class LatentPolicy:
@@ -215,6 +215,8 @@ def main() -> int:
     ap.add_argument("--out", default=str(RUNS / "p5_eval"))
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     ap.add_argument("--smoke", action="store_true")
+    ap.add_argument("--force", action="store_true",
+                     help="overwrite an existing p5_eval.json in --out")
     args = ap.parse_args()
 
     if args.smoke:
@@ -236,6 +238,10 @@ def main() -> int:
               f"as a comparison.")
 
     out = Path(args.out)
+    if (out / "p5_eval.json").exists() and not args.force:
+        print(f"REFUSING: {out / 'p5_eval.json'} already exists. "
+              f"Pass --force to overwrite it.")
+        return 1
     out.mkdir(parents=True, exist_ok=True)
 
     vae = ConvVAE().to(args.device)
@@ -323,7 +329,7 @@ def main() -> int:
     # evening. Recorded in the payload so a stale artifact cannot later be read
     # as a clean result.
     exp = summary.get("expert")
-    batch_valid = bool(exp and exp["survived"] == exp["episodes"])
+    batch_valid = bool(exp and exp["episodes"] > 0 and exp["survived"] == exp["episodes"])
     if exp and not batch_valid:
         print(f"\n*** BATCH INVALID: the expert survived only "
               f"{exp['survived']}/{exp['episodes']}. The expert is fixed code "

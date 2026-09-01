@@ -54,8 +54,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from collect_sim_data import (PIDDriver, SIM_EXE, THROTTLE, THROTTLE_CORNER,
-                              WARMUP_STEPS)
+from collect_sim_data import (PIDDriver, SIM_EXE, STEER_LIMIT, THROTTLE,
+                              THROTTLE_CORNER, WARMUP_STEPS)
 from eval_in_sim import SIZE, run_episode
 from sim_conf import base_sim_conf
 from models import HIDDEN, MDNRNN, Z_DIM, ConvVAE
@@ -149,13 +149,13 @@ class CEMPlanner:
         for _ in range(self.iters):
             cand = (mean.unsqueeze(0)
                     + std.unsqueeze(0) * torch.randn(self.N, self.H, device=self.device))
-            cand = cand.clamp(-1.0, 1.0)
+            cand = cand.clamp(-STEER_LIMIT, STEER_LIMIT)
             cost = self._rollout_cost(z, self._h, c0, cand)
             elite = cand[cost.topk(self.n_elite, largest=False).indices]
             mean = elite.mean(dim=0)
             std = elite.std(dim=0).clamp_min(self.min_std)
 
-        steer = float(mean[0].clamp(-1.0, 1.0))
+        steer = float(mean[0].clamp(-STEER_LIMIT, STEER_LIMIT))
         thr = self.throttle_corner if abs(steer) > 0.5 else self.throttle
         action = np.array([steer, thr], dtype=np.float32)
 

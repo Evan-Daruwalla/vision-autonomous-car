@@ -170,7 +170,12 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
 
     imgs, _, eps, tracks = load_proc("train")
-    fit_eps, val_eps = fit_val_episodes(tracks, seed=args.seed)
+    # Cold audit finding 2: the split seed comes from the VAE checkpoint,
+    # never from --seed (which is the probe's own init/training seed) --
+    # same rule as rollout_eval.py/train_controller.py.
+    vae_ckpt = torch.load(args.vae, map_location=args.device)
+    split_seed = vae_ckpt.get("args", {}).get("seed", 0)
+    fit_eps, val_eps = fit_val_episodes(tracks, seed=split_seed)
 
     print(f"scanning {len(imgs):,} frames for cones ...")
     counts = scan_cones(imgs)
@@ -190,7 +195,7 @@ def main() -> int:
           f"val {len(val_i):,} frames ({y[val_i].sum():,} cone)\n")
 
     vae = ConvVAE().to(args.device)
-    vae.load_state_dict(torch.load(args.vae, map_location=args.device)["model"])
+    vae.load_state_dict(vae_ckpt["model"])
     vae.eval()
     print("encoding with the FROZEN ConvVAE ...")
     mu = encode(vae, imgs, args.device)
