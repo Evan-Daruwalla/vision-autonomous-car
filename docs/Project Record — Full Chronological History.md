@@ -77,6 +77,7 @@ the dated entry, not the digest.
 - [AN — Floor space is 3x3 m; car width must be measured not chosen; and the lane-width rule was over-provisioned](#appendix-an---floor-space-is-3x3-m-car-width-must-be-measured-not-chosen-and-the-lane-width-rule-was-over-provisioned-2026-09-01-1531-cdt) (09-01)
 - [AO — The AL audit fixes, run: the encoder-fingerprint guard is a false negative and breaks train_cte_probe.py](#appendix-ao---the-al-audit-fixes-run-the-encoder-fingerprint-guard-is-a-false-negative-and-breaks-train_cte_probepy-2026-09-01-1546-cdt) (09-01)
 - [AP — Option 1 applied: load_cached_mu resolves three states, and every runnable AL-touched reader re-run](#appendix-ap---option-1-applied-load_cached_mu-resolves-three-states-and-every-runnable-al-touched-reader-re-run-2026-09-01-1550-cdt) (09-01)
+- [AQ — CORRECTION to AP.5: ml/data/sim was never missing - verify_corpus.py's cwd-relative default was, and P2 re-verified PASS](#appendix-aq---correction-to-ap5-mldatasim-was-never-missing---verify_corpuspys-cwd-relative-default-was-and-p2-re-verified-pass-2026-09-01-1555-cdt) (09-01)
 
 ---
 
@@ -4956,3 +4957,87 @@ so a future reader does not mistake them for tested behaviour changes.
   means P2's DONE status currently rests on the 2026-08-06 record alone.
 - Throwaway verification outputs `runs/_v_cte`, `runs/_v_ctrl`,
   `runs/_v_copycat`, `runs/_v_cone`, `runs/_v_enc` were deleted.
+
+# Appendix AQ - CORRECTION to AP.5: ml/data/sim was never missing - verify_corpus.py's cwd-relative default was, and P2 re-verified PASS (2026-09-01, ~15:55 CDT)
+**CORRECTION to AP.5.** AP.5 states "the raw episode corpus `ml/data/sim` **is
+not on disk**" and concludes "the P2 done-check is unrunnable until the raw
+corpus is restored or regenerated" and "P2's DONE status currently rests on the
+2026-08-06 record alone". **All three statements are wrong.** AP is committed
+(3f58804) and append-only, so the correction lives here rather than as an edit
+to it.
+
+## AQ.1 The corpus was never missing
+
+```
+ml/data/sim/train     78 episodes
+ml/data/sim/holdout   10 episodes
+3.9G  ml/data/sim
+```
+
+88 episodes, matching the P2 figure recorded 2026-08-06 exactly. `ml/data/` is
+gitignored (`.gitignore:32`, "large and regenerable"), which is why `git
+ls-files ml/data` is empty -- that is by design and is not evidence of absence.
+
+## AQ.2 What actually happened
+
+`verify_corpus.py`'s positional default was the **cwd-relative string**
+`"ml/data/sim"`:
+
+```python
+ap.add_argument("root", nargs="?", default="ml/data/sim")
+```
+
+Every reader in AP.3 was run with `cd ml` first, so the default resolved to
+`ml/ml/data/sim`, and the script printed its own honest `corpus not found:
+ml\data\sim` and exited 1. **I read a path error as a missing 3.9 GB corpus and
+wrote it into the record as fact.** The script was right; the invocation and
+the inference were both mine.
+
+The general lesson, worth more than the specific bug: `corpus not found` is a
+claim about a *path*, not about *disk*. It needed one `ls` before it became a
+record entry. It got none.
+
+## AQ.3 P2 re-verified, and it PASSES
+
+Run against the real corpus. This is the first time the P2 done-check has been
+executed since 2026-08-06, so P2's DONE status is now independently
+re-confirmed rather than record-only -- the opposite of what AP.5 claimed.
+
+```
+$ python ml/verify_corpus.py ml/data/sim
+holdout  :  10 episodes,   11210 frames, tracks ['donkey-waveshare-v0']
+train    :  78 episodes,   91678 frames, tracks ['donkey-generated-roads-v0', 'donkey-generated-track-v0']
+  split is disjoint      : no track appears on both sides
+
+total frames: 102888
+
+alignment:
+  exact PID identity     : verified on 88/88 episode(s), every action reproduced from log_cte
+  image-axis gate        : 88/88 episodes in band (-2, -1), lag distribution {-2: 29, -1: 59}, mode -1 (|r| 0.74-0.96)
+
+P2 CORPUS CHECK: PASS
+```
+
+Both gates hold: the ACTION axis (every action reproduced from `log_cte` by
+exact PID algebra) and the IMAGE axis (88/88 episodes with pixel-motion lag in
+the expected `(-2, -1)` band). Gate 2 is the one that catches an off-by-one
+image roll, which gate 1 cannot see -- see the module docstring.
+
+## AQ.4 The one-line defect, fixed
+
+`verify_corpus.py` was the only script in `ml/` whose default path was
+cwd-relative; `collect_sim_data.py`, `preprocess.py`, `train_vae.py` and the
+rest all resolve from `REPO = Path(__file__).resolve().parent.parent`. Added
+`REPO` and made the default absolute, so the P2 done-check no longer depends
+on the directory it is launched from.
+
+Verified by running it from `ml/` -- the exact cwd that produced the false
+"corpus not found" -- and getting `P2 CORPUS CHECK: PASS`, RC=0.
+
+## AQ.5 Also corrected
+
+AP.5's bullet claiming `verify_corpus.py` "cannot run at all" is void.
+The new `from collect_sim_data import MAX_MEAN_ABS_CTE, MIN_EPISODE_STEPS`
+import (committed in 3f58804) is now exercised for real, not merely
+import-resolved: the thresholds it pulls are what gate the 88-episode
+expert-quality check above.

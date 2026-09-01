@@ -33,6 +33,8 @@ import numpy as np
 from collect_sim_data import MAX_MEAN_ABS_CTE, MIN_EPISODE_STEPS
 from episode_writer import load_episode
 
+REPO = Path(__file__).resolve().parent.parent
+
 REQUIRED = ["image", "action", "reward", "discount",
             "is_first", "is_last", "is_terminal"]
 
@@ -384,7 +386,10 @@ def finalize_alignment(acc: dict, total: int, failures: list) -> None:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("root", nargs="?", default="ml/data/sim")
+    # Absolute by default: every other script in ml/ resolves from REPO, and a
+    # cwd-relative default here reads as "corpus not found" when the check is
+    # launched from ml/ (Appendix AQ).
+    ap.add_argument("root", nargs="?", default=str(REPO / "ml" / "data" / "sim"))
     args = ap.parse_args()
 
     root = Path(args.root)
