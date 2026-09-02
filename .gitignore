@@ -43,3 +43,8 @@ ml/checkpoints/
 # incrementally, so a commit taken mid-run captures a truncated one. The
 # json/png artifacts next to them are the evidence.
 *.tfevents.*
+
+# Raw frame dumps from diagnostics under ml/runs/. The RESULTS next to them
+# (json/png) are versioned evidence and stay tracked; a 99MB uint8 image array
+# is raw data, belongs with ml/data/, and its entropy trips the secret scanner.
+ml/runs/**/images.npy

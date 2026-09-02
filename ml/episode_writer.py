@@ -53,6 +53,41 @@ _DTYPES = {
 }
 
 
+# ---- turn-signal channel (PRD task 11b, docs/LIGHTING_SPEC.md section 5) ----
+# A turn signal is a POLICY OUTPUT, so behavioural cloning needs a per-frame
+# label for it, the same way it needs steering and throttle. Task 11's
+# done-check names only "images + steering/throttle synced"; this is the third
+# channel, and it MUST exist before the M3 collection run -- 10-20 laps
+# recorded without indicator labels cannot be relabelled honestly.
+#
+# The `log_` prefix is deliberate and follows `log_cte`: dreamerv3-torch's
+# dataloader filters keys containing "log_", so the world-model path (M4) is
+# untouched, while this project's own scripts read the npz directly and can use
+# it as a training target -- which is exactly how train_cte_probe.py already
+# consumes `log_cte`.
+#
+# Unlike a stop sign, this IS learnable by plain BC: on a memorised route the
+# correct indicator state is a function of where the car is, which is visible
+# in the frame (gotchas.md's "traffic lights are memoryless-learnable").
+INDICATOR_OFF, INDICATOR_LEFT, INDICATOR_RIGHT = 0, 1, 2
+_PER_FRAME_LOG = ("log_indicator",)
+INDICATOR_NAMES = {INDICATOR_OFF: "off", INDICATOR_LEFT: "left",
+                   INDICATOR_RIGHT: "right"}
+
+
+def _check_indicator(v) -> np.int8:
+    """Reject anything that is not one of the three states, loudly.
+
+    A silently-coerced label is worse than a crash: it trains the third head on
+    garbage while every shape check still passes.
+    """
+    if isinstance(v, bool) or v not in INDICATOR_NAMES:
+        raise ValueError(
+            f"indicator must be one of {sorted(INDICATOR_NAMES)} "
+            f"({', '.join(INDICATOR_NAMES.values())}), got {v!r}")
+    return np.int8(v)
+
+
 class EpisodeWriter:
     """Accumulate one episode's transitions, then write it as a single npz."""
 
@@ -62,7 +97,8 @@ class EpisodeWriter:
         self.prefix = prefix
         self._steps: list[dict] = []
 
-    def add_reset(self, image: np.ndarray, action_dim: int) -> None:
+    def add_reset(self, image: np.ndarray, action_dim: int,
+                  indicator: int = INDICATOR_OFF) -> None:
         """Record the frame returned by env.reset(): no action caused it."""
         if self._steps:
             raise RuntimeError("add_reset() called on a non-empty episode")
@@ -74,13 +110,23 @@ class EpisodeWriter:
             "is_first": True,
             "is_last": False,
             "is_terminal": False,
+            "log_indicator": _check_indicator(indicator),
         })
 
-    def add_step(self, image, action, reward, terminated, truncated) -> None:
-        """Record a post-step frame and the action that produced it."""
+    def add_step(self, image, action, reward, terminated, truncated,
+                 indicator: int = INDICATOR_OFF) -> None:
+        """Record a post-step frame and the action that produced it.
+
+        `indicator` is the TURN-SIGNAL STATE AT THIS FRAME (PRD task 11b). It
+        is a third supervised channel, not telemetry: a turn signal is a policy
+        OUTPUT, so behavioural cloning needs a per-frame label for it exactly
+        as it needs steering and throttle. Defaults to OFF so every existing
+        caller keeps working unchanged.
+        """
         if not self._steps:
             raise RuntimeError("add_step() before add_reset()")
         self._steps.append({
+            "log_indicator": _check_indicator(indicator),
             "image": image,
             "action": np.asarray(action, np.float32),
             "reward": float(reward),
@@ -107,6 +153,15 @@ class EpisodeWriter:
         episode = {}
         for key, dtype in _DTYPES.items():
             episode[key] = np.array([s[key] for s in self._steps], dtype=dtype)
+
+        # Per-frame `log_` channels recorded alongside the dreamer keys. These
+        # are PARALLEL ARRAYS over timesteps, unlike the `meta` block below,
+        # which stores one constant per episode. The indicator label (task 11b)
+        # is the first of these: it varies frame to frame and is a supervised
+        # target, so it cannot ride in `meta`.
+        for key in _PER_FRAME_LOG:
+            if key in self._steps[0]:
+                episode[key] = np.array([s[key] for s in self._steps], np.int8)
 
         if meta:
             for key, value in meta.items():
@@ -149,3 +204,48 @@ def load_episode(path: str | Path) -> dict:
     with Path(path).open("rb") as f:
         with np.load(f) as data:
             return {k: data[k] for k in data.files}
+
+
+def self_check() -> None:
+    """Round-trip an episode carrying indicator labels through a real npz."""
+    import tempfile
+    rng = np.random.default_rng(0)
+    want = [INDICATOR_OFF, INDICATOR_LEFT, INDICATOR_LEFT,
+            INDICATOR_RIGHT, INDICATOR_OFF]
+    with tempfile.TemporaryDirectory() as td:
+        w = EpisodeWriter(td, prefix="selfcheck")
+        img = lambda: rng.integers(0, 255, (8, 10, 3), dtype=np.uint8)
+        w.add_reset(img(), action_dim=2, indicator=want[0])
+        for k in want[1:]:
+            w.add_step(img(), np.zeros(2, np.float32), 0.0, False, False,
+                       indicator=k)
+        path = w.save()
+        ep = load_episode(path)
+
+    assert "log_indicator" in ep, "indicator channel missing after round-trip"
+    got = ep["log_indicator"]
+    assert got.shape == (len(want),), got.shape
+    assert list(got) == want, (list(got), want)
+    # parallel with every other channel -- an off-by-one here mislabels which
+    # frame the driver was indicating on
+    assert len(got) == len(ep["image"]) == len(ep["action"]) == len(ep["reward"])
+    # t=0 convention preserved
+    assert bool(ep["is_first"][0]) and not bool(ep["is_first"][1])
+
+    # bad labels must RAISE, not coerce
+    for bad in (3, -1, 1.5, "left", True, None):
+        try:
+            _check_indicator(bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"accepted invalid indicator {bad!r}")
+    # ... and the three valid ones must pass
+    for good in (INDICATOR_OFF, INDICATOR_LEFT, INDICATOR_RIGHT):
+        assert int(_check_indicator(good)) == good
+
+    print("episode_writer self_check: PASS")
+
+
+if __name__ == "__main__":
+    self_check()

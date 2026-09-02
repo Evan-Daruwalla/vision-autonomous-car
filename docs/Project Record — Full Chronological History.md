@@ -87,6 +87,7 @@ the dated entry, not the digest.
 - [AX — Track v2: a 3x3 city grid that fits only at R=500mm, the sim cannot rehearse it, and the 225-panel floor is refused (my filament figure was 2.7x too high)](#appendix-ax---track-v2-a-3x3-city-grid-that-fits-only-at-r500mm-the-sim-cannot-rehearse-it-and-the-225-panel-floor-is-refused-my-filament-figure-was-27x-too-high-2026-09-01-2100-cdt) (09-01)
 - [AY — CORRECTION to AX.2: the street pitch never needed a lane term, so the city fits at R=500/550/600; v2 shrunk; lighting spec settles the PCA9685](#appendix-ay---correction-to-ax2-the-street-pitch-never-needed-a-lane-term-so-the-city-fits-at-r500550600-v2-shrunk-lighting-spec-settles-the-pca9685-2026-09-01-2106-cdt) (09-01)
 - [AZ — PCA9685 and lighting added to the BOM: the $200 ceiling is breached on every path, and the wiring rule was already self-contradictory](#appendix-az---pca9685-and-lighting-added-to-the-bom-the-200-ceiling-is-breached-on-every-path-and-the-wiring-rule-was-already-self-contradictory-2026-09-01-2139-cdt) (09-01)
+- [BA — Vehicle envelope derived (height provably blocked); camera height attempt 2 is a second negative and the curvature hypothesis is refuted; indicator logging lands](#appendix-ba---vehicle-envelope-derived-height-provably-blocked-camera-height-attempt-2-is-a-second-negative-and-the-curvature-hypothesis-is-refuted-indicator-logging-lands-2026-09-01-2204-cdt) (09-01)
 
 ---
 
@@ -6228,3 +6229,177 @@ final track version's bridge and 5 destinations, and any lane-width number.
   and left untouched.
 - `python cad/track_layout_v2.py --self-check` still **PASS** -- nothing here
   touches geometry, so a change would have meant something went wrong.
+
+# Appendix BA - Vehicle envelope derived (height provably blocked); camera height attempt 2 is a second negative and the curvature hypothesis is refuted; indicator logging lands (2026-09-01, ~22:04 CDT)
+Evan asked for three things: dimensional requirements (height/width/length/
+steering angle), the camera-height measurement (A), and indicator logging (B).
+Two delivered. **A is a SECOND negative, and this entry does not dress it up.**
+
+## BA.1 Vehicle envelope: three of four derived, height provably blocked
+
+`cad/vehicle_envelope.py`. This inverts the project's usual direction --
+everywhere else the Lego parts are measured and the car "lands where it lands";
+here the track is held fixed and the envelope is solved for, so the measurement
+at B2 has a pass/fail to meet.
+
+**WIDTH** -- hard ceiling from the grid fitting the floor. The straight run
+between corners trades directly against width:
+
+| corner R | max car width @ straight=0 | @ straight=200mm | verdict for 130 mm |
+|---|---|---|---|
+| 500 mm | 400 mm | 200 mm | fits, with proper straights |
+| 550 mm | 300 mm | 100 mm | fits only with tangent corners |
+| 600 mm | 200 mm | none | fits only with tangent corners |
+| 670 mm | 60 mm | none | **does not fit** |
+
+**STEERING ANGLE** -- the minimum max-lock, `atan(wheelbase / R)`. At the R=500
+corner track v2 uses: **11.3 deg** at a 100 mm wheelbase, **13.5** at 120,
+**15.6** at 140, **17.7** at 160, **19.8** at 180. The recorded ~330 mm
+minimum-radius estimate implies **21.5 deg at a 130 mm wheelbase**, which is
+where that estimate came from.
+
+Every one of these is a **FLOOR** from a bicycle model that ignores tyre slip,
+Ackermann error and roll -- all of which make the real radius LARGER. Build
+margin over them. `gotchas.md` already records that LEGO ball-jointed knuckles
+with a straight tie rod give near-parallel steer, not true Ackermann.
+
+**LENGTH** -- bounded by off-tracking, which the project had not accounted for
+anywhere. A turning car sweeps WIDER than its own width because the rear axle
+cuts inside the front. At R=500 mm, off-track is 10.1 mm at a 100 mm wheelbase
+rising to **41.7 mm at 200 mm**, and lane clearance per side falls from 59.9 mm
+to 44.1 mm. Past a ~160 mm wheelbase it breaches a 50 mm/side working minimum.
+
+**HEIGHT -- CANNOT BE DERIVED, and that is a result rather than an omission.**
+Camera height does not set the horizon row; PITCH does (AR). The horizon sits
+at row 41.97 because the camera is pitched 16.3 deg down, and that is true at
+ANY height. What height changes is SCALE. So the only thing that pins the real
+camera's height is matching the SIM's -- which is exactly what BA.2 failed to
+measure. Any number would have been invented.
+
+**A contradiction found and fixed while writing this:** the first cut held the
+straight run fixed at 200 mm and concluded R=550 and R=600 do not fit -- while
+`track_layout_v2.py` reports both fitting, because it SHRINKS the straight as
+the radius grows (`best_straight`). Two scripts describing one track disagreed.
+`max_car_width` now takes the straight as an argument and the table shows both
+ends of the trade; a self-check pins the two together.
+
+## BA.2 Camera height, attempt 2: the sweep worked, the fit did NOT
+
+AR.5 listed three causes for the first failure and this attack fixed all three.
+`ml/diag_camera_height.py`.
+
+**The instrument worked.** `PIDDriver.act` takes the error and its setpoint is
+implicitly zero, so passing `act(cte - target(t))` sweeps the car laterally
+with **no change to the driver** -- one line at the call site. With a slow
+30 s/cycle sine at +-0.6 m:
+
+```
+1,800 frames, cte range [-1.044, 1.621] m, sd 0.476
+```
+
+against the original corpus's sd **0.053** -- **9x the lateral excitation**,
+which was cause 2. Border censoring (cause 1) is enforced by rejecting any row
+whose centroid sits within 8 px of a border or whose mask touches one. The slow
+sweep addresses cause 3.
+
+**The fit still fails, and worse than before.** Pinning the horizon at its
+trusted direct measurement (41.974, sd 0.284 over 3,187 frames) leaves one
+unknown, the scale:
+
+```
+45 usable rows, mean |r| 0.509
+  ONE-PARAM (horizon PINNED at 41.97): h/cos(pitch) = 2.1027, R^2 = -0.3232
+  FREE 2-PARAM: h/cos(pitch) = 4.5130, horizon = -13.59 (vs 41.97 measured)
+```
+
+**R^2 is NEGATIVE.** The model fits worse than a constant. The per-row
+correlation between the line's column and `cte` is only 0.509. The geometry
+`slope(v) = -(cos t / h)(v - v_h)` does not describe this data, so **no height
+is being reported.** The 2.10 figure is what the arithmetic returns, not a
+measurement.
+
+The free 2-parameter fit is separately untrustworthy for a reason worth
+recording: the usable rows are 64-112 and the horizon is near row 42, so it
+extrapolates ~100 rows past its own data and a 3-4% slope error swings the
+intercept by tens of rows -- which is how it produced a horizon of -13.59,
+outside the image entirely.
+
+## BA.3 The curvature hypothesis, tested and REFUTED
+
+The obvious explanation was that `generated-roads` CURVES, so the line's
+lateral offset varies with forward distance and the model's constant-X premise
+breaks. The synthetic self-check passes precisely because it builds a straight
+road.
+
+Tested by scoring each frame's straightness (residual of a line fit to the
+line's column-vs-row trace) and keeping only the straightest:
+
+| kept | frames | h | R^2 | free-fit horizon |
+|---|---|---|---|---|
+| 100% | 1,346 | 2.192 | **0.858** | 28.01 |
+| straightest 50% | 673 | 1.969 | **-0.188** | -9.45 |
+| straightest 25% | 337 | 1.646 | **-1.867** | -36.75 |
+
+**Filtering out curvature makes the fit monotonically WORSE.** If curvature
+were the confound, removing it would improve the fit. It does the opposite, and
+h drifts 2.19 -> 1.97 -> 1.65 as the filter tightens, which is the signature of
+an estimate with no stable value. The apparent R^2 = 0.858 on the unfiltered
+set is therefore driven BY the curved frames -- the confound was carrying the
+fit, not spoiling it.
+
+**So the hypothesis is dead and the cause is still unknown.** Something other
+than lateral offset moves the line's column, and it is not road curvature.
+
+## BA.4 What a third attempt needs, concretely
+
+`gym_donkeycar`'s per-step `info` carries more than `cte`
+(`donkey_sim.py:444-455`): **`pos` (x, y, z)**, **`car` (roll, pitch, yaw)**,
+`vel`, `gyro`, `accel`, `forward_vel`. None of it was logged here.
+
+The next attempt should log `pos` and `car`, compute heading error against the
+road direction, and either regress with heading as a second covariate or filter
+on it directly. That tests the one cause AR named and this run could not
+isolate: heading error still dominating despite the slow sweep. It is bounded --
+the collection script already exists and needs two more logged fields.
+
+**Two designed experiments, two negatives.** That is the honest state, and the
+method is not yet vindicated.
+
+## BA.5 Indicator logging (PRD task 11b) -- done and round-tripped
+
+`ml/episode_writer.py` gains `INDICATOR_OFF/LEFT/RIGHT`, an `indicator=`
+argument on `add_reset`/`add_step` defaulting to OFF so **every existing caller
+is unchanged**, and a `log_indicator` (T,) int8 channel.
+
+**Why the `log_` prefix:** dreamerv3-torch's dataloader filters keys containing
+`log_`, so the M4 world-model path is untouched, while this project's own
+scripts read the npz directly and can use it as a target -- exactly how
+`train_cte_probe.py` already consumes `log_cte`. Precedent, not invention.
+
+`_check_indicator` **raises** on anything outside the three states, including
+`True` (which would otherwise coerce to 1 = LEFT). A silently-coerced label is
+worse than a crash: it trains the third head on garbage while every shape check
+still passes.
+
+**The self-check caught a real gap.** `save()` builds the archive from a fixed
+`_DTYPES` whitelist, so the first version wrote episodes with **no indicator
+channel at all** -- the round-trip assertion failed on `"log_indicator" in ep`.
+Fixed with a `_PER_FRAME_LOG` tuple, kept distinct from the `meta` block
+because meta stores ONE constant per episode while this varies frame to frame.
+
+```
+$ python ml/episode_writer.py
+episode_writer self_check: PASS
+```
+
+Regression: the P2 done-check still passes on the untouched 88-episode corpus
+(102,888 frames, 88/88 on both axes), so the format change is backward
+compatible -- old episodes simply carry no indicator key.
+
+## BA.6 Still open
+
+- **Camera height: unknown after two attempts.** Third attempt scoped in BA.4.
+- The height requirement in `vehicle_envelope.py` stays blocked on it.
+- Nothing ordered; every hardware item remains BLOCKED-ON-EVAN.
+- The indicator channel exists in the writer but **nothing writes it yet** --
+  the teleop rig that would set it is task 11, which needs hardware.
