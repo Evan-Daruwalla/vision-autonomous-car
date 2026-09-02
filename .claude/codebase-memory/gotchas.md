@@ -326,3 +326,24 @@ not yet verified on this car. Mark them verified when a build task confirms.
 - **SRAM measured at 2048 bytes** (`RAMEND 0x8FF`; 1472 B obtained by malloc in
   46x32 B blocks; 1705 B free with a small sketch loaded). Confirms the 2KB
   figure rather than assuming it — and confirms nothing ML fits.
+- **A floating analog pin reads NEAR FULL SCALE, not zero** (measured 2026-09-02:
+  10238-10266 mV on a 100k/12k divider input with nothing connected, against a
+  10.27 V ceiling). A sensor guard that only rejects implausibly LOW readings
+  therefore treats an **unwired sensor as a healthy one**. `uno_packguard`'s
+  first build did exactly that and would have allowed throttle with no divider
+  attached. **Any analog guard needs an upper implausibility band too.**
+- **The 2S pack has no HARDWARE over-discharge protection** (Appendix BI). BOM
+  row 11's "BMS" documents over-voltage and short-circuit only, and the EVE
+  cells are bare. `firmware/uno_packguard/` implements a latched firmware cutoff
+  (warn 6.4 V, cut 6.0 V held 500 ms, fault outside 4.0-8.8 V, CLEAR needs
+  6.8 V) - **but firmware cannot guard a pack while the firmware is off.** It
+  supplements a protection board; it does not replace one.
+- **Measure the pack against the internal 1.1 V band gap, never the 5 V rail.**
+  The Uno's 5 V comes from the LM2596 - the same supply that sags when the pack
+  sags - so a rail-referenced reading lies exactly when it matters.
+- **Quoted heredocs write backslash-u escapes LITERALLY.** `cat > f <<'EOF'` does
+  no escape interpretation, so a `\u2014` written for an em dash lands as six
+  characters. 21 such lines reached the append-only record on 2026-09-02 and
+  **cannot be edited out**. Write real UTF-8 characters, or build the file in
+  Python where the escapes are interpreted.
+

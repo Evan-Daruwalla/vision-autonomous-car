@@ -82,4 +82,7 @@
     failure: the pack sags under motor stall and the AMS1117 drops out,
     browning out the Uno mid-drive. Preferred: feed its 5V pin from the LM2596
     rail and use a **data-only USB cable** so nothing back-feeds.
+  - **Pin budget update 2026-09-02 (Appendix BJ): A0 is now the pack-sense
+    divider input** (100k/12k, internal 1.1 V reference), so the free analog
+    pins are **A1-A5**, not A0-A5. Firmware: `firmware/uno_packguard/`.
 - gotchas.md holds the hardware traps; this bin stays about system shape.

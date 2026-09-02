@@ -97,6 +97,7 @@ the dated entry, not the digest.
 - [BH — landing-check returned FIX FIRST: nine items closed, including a wrong PWM budget the D3 fix silently created and a stale price in the public README](#appendix-bh---landing-check-returned-fix-first-nine-items-closed-including-a-wrong-pwm-budget-the-d3-fix-silently-created-and-a-stale-price-in-the-public-readme-2026-09-02-1611-cdt) (09-02)
 - [BI — Rows 11/13/14 linked, and row 11's board does NOT document the over-discharge protection the BOM credited it with - the 2S pack has no low-voltage cutoff](#appendix-bi---rows-111314-linked-and-row-11s-board-does-not-document-the-over-discharge-protection-the-bom-credited-it-with---the-2s-pack-has-no-low-voltage-cutoff-2026-09-02-1634-cdt) (09-02)
 - [BJ — Pack low-voltage cutoff implemented on the Uno: 27/27 on hardware, and the hardware test caught a floating-pin fault the design reasoning had missed](#appendix-bj---pack-low-voltage-cutoff-implemented-on-the-uno-2727-on-hardware-and-the-hardware-test-caught-a-floating-pin-fault-the-design-reasoning-had-missed-2026-09-02-1647-cdt) (09-02)
+- [BK — Second landing-check: the pack guard is genuine on hardware, but this range put 21 unrenderable escape sequences into the append-only record and left a struck safety claim standing elsewhere](#appendix-bk---second-landing-check-the-pack-guard-is-genuine-on-hardware-but-this-range-put-21-unrenderable-escape-sequences-into-the-append-only-record-and-left-a-struck-safety-claim-standing-elsewhere-2026-09-02-1705-cdt) (09-02)
 
 ---
 
@@ -7312,3 +7313,110 @@ so at the point of decision rather than only here.
   row 19 now carries the two divider resistors (1x 100k, 1x 12k).
 - `firmware/README.md` \u2014 the sketch, its limits, and the "firmware off means no
   guard" caveat.
+
+# Appendix BK - Second landing-check: the pack guard is genuine on hardware, but this range put 21 unrenderable escape sequences into the append-only record and left a struck safety claim standing elsewhere (2026-09-02, ~17:05 CDT)
+A second `/landing-check`, cold and artifacts-only, over `590f765..930980b`.
+Verdict **FIX FIRST**: the firmware control is genuine and every number
+reproduces, but the surrounding docs carried eight false or self-contradicting
+claims — two safety-relevant — and this range put **21 lines of unrenderable
+escape sequences into the append-only record**, which cannot be undone.
+
+## BK.1 The permanent one: 21 lines of literal escapes in the record
+
+```
+$ git show 590f765:"docs/Project Record — Full Chronological History.md" | grep -cF '\u'
+0
+$ grep -cF '\u' "docs/Project Record — Full Chronological History.md"
+21
+```
+
+All 21 are inside BH, BI and BJ — **introduced by this range**. They read as
+`—`, `·`, `≈`, `⚠️` where an em dash, middot, approx sign
+and warning glyph belong.
+
+**Cause, and it is mine.** Those entry bodies were written with
+`cat > file <<'MDEOF'`. A **quoted** heredoc performs no escape interpretation,
+so `—` typed for an em dash lands as six literal characters. The entries
+written through Python (`p.write_text` with real `"—"` in a source string)
+rendered correctly — the same escape, two different mechanisms, opposite results.
+
+**It cannot be fixed.** The record is append-only, the pre-commit hook enforces
+it, and a PreToolUse guard blocks direct edits. This entry is the correction, and
+the rule is now in `gotchas.md`: **write real UTF-8, or build the file in Python
+where escapes are interpreted.** Never a quoted heredoc for record prose.
+
+## BK.2 The safety claim that survived its own correction
+
+BI struck the over-discharge claim in `docs/BOM.md` row 11 and added Verify
+item 6 — and left the **same claim standing 250 lines below**, in "Caveats
+carried into the build":
+
+> "the $7.99 BMS board's published protection list covers overcharge,
+> **over-discharge** and short circuit"
+
+So the file simultaneously said the protection exists and does not. A reader
+skimming the caveats section — which is exactly where someone checks battery
+risk — would have taken the wrong one. Now struck in place with the correction
+beside it.
+
+**This is the third time this project has corrected a claim in one place and
+left another copy live** (AZ.7 → BH.3, BH.4's PCA9685 propagation, now this).
+The pattern is not carelessness about any one file; it is that a correction has
+no mechanism to find its own copies.
+
+## BK.3 The other six
+
+| claim | where | truth |
+|---|---|---|
+| "12 of 20 rows now have verified prices" | BI.3 | **7** rows carry a verified price (1,2,5,6,11,13,14); 12 is the count with a *link*. BI.3 contradicted itself two lines later listing 9/10/12/15 as unverified — all inside the 12 |
+| "http only, no TLS" (row 11) | BOM, BI.2 | **False.** `https://www.adeept.com/…p0374.html` returns 200 with a valid certificate; only the apex downgrades |
+| "Not linked at all … rows 11, 13, 14" | `BOM.md:59-64` | Falsified by the **next commit**, which linked all three. Left standing in the same file |
+| "Firmware currently includes only `avr/io.h`, `avr/boot.h` and `stdlib.h`" | `dependencies.md` | `uno_packguard.ino:59` includes **`Arduino.h`** — a universal falsified three commits later, inside its own range |
+| "59 appendices A–BG" | `HANDOFF.md:5` | **62, A–BJ.** Already 60 the instant the commit that wrote it landed |
+| "the **five** items in Verify" | HANDOFF, PRD, and BOM item 4's "open set is 1–3 and 5" | **Six** since item 6 was added |
+
+Also corrected: `firmware/SERIAL_PROTOCOL.md` said "Free after this: A0–A5"
+while **A0 is the pack-sense input** — and BOM Verify item 6 cited that very
+line to argue A0 was free, in the paragraph that then used it.
+
+## BK.4 What the sweep confirmed, on hardware
+
+The load-bearing negatives, worth as much as the faults:
+
+- **The control fires and stays quiet, walked boundary by boundary on the real
+  board:** 6400→OK / 6399→WARN · 6000→WARN forever / 5999→CUTOFF+latch after the
+  hold · latch survives 8400 · CLEAR refused at 6700, granted at 6800 ·
+  8800→OK / 8801→FAULT · 3999→FAULT / 4000→WARN. Unwired A0 reads 10248–10266
+  and reports FAULT/INHIBITED, so BJ.1's defect is genuinely closed.
+- **SELFTEST 27/27 twice**, and the source really contains 27 checks.
+- **6004 B / 18%, 289 B / 14% reproduce from a fresh compile**, which also proves
+  the flashed binary matches the committed source.
+- **16/16 arithmetic claims exact**, including the rejected 100k/15k option.
+- **8/8 BOM totals exact**, unchanged by row 19 gaining two resistors.
+- **14/14 URLs resolve**, and rows 11/13/14 match description, price, quantity
+  and form factor. The earlier refusal to guess COM-08837 was right: COM-11138
+  is the part.
+- **All nine BH fixes landed with no regression.** "One PWM pin spare" survives
+  only in the append-only record, which is correct.
+- **Nothing is public yet** — `origin/main` is still `590f765`, ahead 4. No new
+  private identifier in 674 added lines; the two hits are the repo's own public
+  URL and a first name that predates the range.
+
+## BK.5 A false negative the sweep caught in itself
+
+Its first pass reported "BH/BI/BJ have no TOC line" — a **case-sensitive grep
+against a lowercase anchor**. Re-run a second way, all three exist and the
+checker agrees: `62 appendices, letters unique and ordered, TOC balanced`. Worth
+recording because a zero result *is* a claim, and this one would have sent a fix
+at a file that was already correct.
+
+## BK.6 Still open
+
+- **The pack's hardware over-discharge gap** — firmware cutoff is not a
+  substitute, and this is now in HANDOFF's BLOCKED-ON-EVAN rather than only in
+  the BOM.
+- `/code-review` has never seen `uno_packguard.ino` (233 lines). The sweep
+  flagged one thing to point it at without reviewing logic: `atoi(buf + 4)`
+  assigned to a `uint16_t` with no range check, against a 24-byte line buffer.
+  BH.8's handoff for the other three sketches and the BA/BB Python is still open.
+- Rows 9, 10, 12, 15 remain linked but price-unverified.

@@ -307,7 +307,7 @@ transfer gap) must not block the capstone.
      ≈$226–234 before shipping, ≈$241–259 with.** The $200 ceiling is still
      breached on the 4GB Pi; the **2GB path now reaches ≈$196–214**, whose low
      end clears $200 for the first time since lighting was added.)*
-   - *(Amended 2026-09-01: the "four items" are now **five** — check 5, which
+   - *(Amended 2026-09-01, again 2026-09-02: the "four items" are now **six** — check 5, which
      LEDs, sets every series-resistor value. And the **PWM-path question is
      RESOLVED** — ~~PCA9685~~ **an ARDUINO UNO (2026-09-02, Appendix BC)**,
      carrying motor PWM + servo + 4 light channels and adding encoder counting

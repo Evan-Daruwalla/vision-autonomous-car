@@ -34,7 +34,9 @@ and motor PWM is the one channel that may need its frequency raised above
 they take the frequency-locked Timer0 pins. This is the only pin assignment
 here that is forced rather than convenient.
 
-Free after this: A0–A5, D10, plus D0/D1 (the USB UART — **do not use**).
+Free after this: ~~A0–A5~~ **A1–A5** and D10, plus D0/D1 (the USB UART — **do
+not use**). **A0 is the pack-sense divider input** as of 2026-09-02
+(`firmware/uno_packguard/`, Appendix BJ) — corrected in BK.
 
 ---
 

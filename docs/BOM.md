@@ -27,7 +27,9 @@ split-source power path costs almost nothing.
 | 8 | USB power bank, **5V/3A** | → Pi ONLY. **You own this — check the label says 5V/3A** (see Verify below) | **$0.00** | owned |
 | 9 | 2× EVE 25P 18650 cells | → motor + servo pack (7.4V). **Buy both from the same order** (matched cells — see caveat) | **$3.70** | [18650batterystore.com/products/eve-18650-25p](https://www.18650batterystore.com/products/eve-18650-25p) — price NOT re-verified |
 | 10 | 2-cell 18650 series holder | | **$1.25** | [addicore.com 2-place 18650 holder](https://www.addicore.com/products/2-place-18650-battery-holder-with-wires) — price NOT re-verified |
-| 11 | USB-C 2S BMS / charge board | Charges the pack in place from USB-C. ~~provides overcharge, over-discharge and short protection~~ ⚠️ **SAFETY CLAIM NOT SUPPORTED BY THE VENDOR PAGE (checked 2026-09-02, Appendix BI).** Adeept documents **over-voltage/overcharge and short-circuit protection only** — **over-discharge protection is NOT listed.** Bare EVE cells have none either, so as specified **the pack has no low-voltage cutoff**. Must be closed before ordering — see Verify item 6. **No hobby balance charger needed** (unverified: balancing is also not documented) | **$7.99** *(list $9.99)* | [adeept.com p0374](http://www.adeept.com/li-ion-battery-charger-m-2s2a_p0374.html) ⚠️ **http only** · ✅ $7.99 verified 2026-09-02 |
+| 11 | USB-C 2S BMS / charge board | Charges the pack in place from USB-C. ~~provides overcharge, over-discharge and short protection~~ ⚠️ **SAFETY CLAIM NOT SUPPORTED BY THE VENDOR PAGE (checked 2026-09-02, Appendix BI).** Adeept documents **over-voltage/overcharge and short-circuit protection only** — **over-discharge protection is NOT listed.** Bare EVE cells have none either, so as specified **the pack has no low-voltage cutoff**. Must be closed before ordering — see Verify item 6. **No hobby balance charger needed** (unverified: balancing is also not documented) | **$7.99** *(list $9.99)* | [adeept.com p0374](http://www.adeept.com/li-ion-battery-charger-m-2s2a_p0374.html) ✅ $7.99 verified 2026-09-02 *(an earlier note here claimed "http only, no
+TLS" — **wrong**: the https URL resolves with a valid certificate; only the
+apex adeept.com downgrades. Corrected 2026-09-02, Appendix BK)* |
 | 12 | LM2596 buck module | 7.4V → 5.2V for the servo only (700mA peak — well within it). **Not for the Pi** | **$2.48** | [addicore.com LM2596](https://www.addicore.com/products/lm2596-step-down-adjustable-dc-dc-switching-buck-converter) — price NOT re-verified |
 | **Wiring + protection** |
 | 13 | XT30 connector pair | | **$1.10** | [alofthobbies.com/products/xt30-plugs](https://alofthobbies.com/products/xt30-plugs) ✅ **verified 2026-09-02: $1.10, ONE male+female pair, genuine Amass, in stock** |
@@ -56,11 +58,11 @@ lists it at $75 and OUT OF STOCK** — so the cheap path depends on one vendor
 having it, and that is a supply risk, not just a price.
 
 **NOT re-verified** (linked but price unchecked): rows 9, 10, 12, 15. **Not
-linked at all** (no canonical product page found this pass): row 11 the USB-C 2S
-BMS (adeept.com), row 13 the XT30 pair (alofthobbies.com), row 14 the SPST
-rocker (sparkfun.com — COM-08837 appears to be a right-angle variant, not
-obviously the 10A part specified). Rows 4, 7, 16, 18-20 are generic `any` parts
-with no canonical page by design.
+linked at all**~~ (no canonical product page found this pass): row 11 the USB-C
+2S BMS, row 13 the XT30 pair, row 14 the SPST rocker.~~ **ALL THREE LINKED
+2026-09-02 in the next commit** (Appendix BI) — and the COM-08837 suspicion was
+right: the correct SparkFun part is **COM-11138**. Rows 4, 7, 16, 18-20 remain
+generic `any` parts with no canonical page by design.
 
 *(Total corrected 2026-08-06 from "≈$176–179" — the cold audit found it
 excluded row 3, the camera cable, i.e. the very item this BOM was written to
@@ -241,10 +243,13 @@ with the SD card mounted. The split is structural, not stylistic.
    **DONE 2026-08-08 ~23:03 CDT** — see the re-pricing table above. Total is
    ~~**≈$237–250**~~ **≈$241–259 with shipping as of 2026-09-02**, not ≈$195. Checks 1–3 remain open and are all physical
    inspection; this was the only one of the four that did not need Evan's hands.
-   *(Amended 2026-09-01: that "≈$237–250" was the with-shipping figure for the
-   pre-lighting row set; it is now **≈$247–274**. And "Checks 1–3 remain open"
-   is superseded by the addition of check 5 below — the open set is **1–3 and
-   5**. Prices need re-checking again anyway, since rows 17–20 are estimates.)*
+   *(Amended 2026-09-01, again 2026-09-02 (Appendix BK): that "≈$237–250" was
+   the with-shipping figure for the pre-lighting row set; it is now
+   **≈$241–259** (~~≈$247–274~~, itself superseded when the PCA9685 became a
+   $0 owned Arduino). And "Checks 1–3 remain open" is superseded twice over —
+   checks 5 and 6 were added below, so **the open set is 1–3, 5 and 6**.
+   Prices: 7 of 20 rows re-verified 2026-09-02; rows 9, 10, 12 and 15 are
+   linked but their prices are NOT re-checked.)*
 5. **Which LEDs** — forward voltage and current set every series-resistor value
    in row 19, and decide whether the Uno can drive them directly (20mA/pin,
    **200mA absolute max across ALL pins** — 8 LEDs at 20mA is 160mA, 80% of
@@ -276,9 +281,11 @@ with the SD card mounted. The split is structural, not stylistic.
 
 ## Caveats carried into the build
 
-- **Matched cells:** the $7.99 BMS board's published protection list covers
-  overcharge, over-discharge and short circuit but **does not state per-cell
-  balancing**. With two new cells from the same order this is tolerable;
+- **Matched cells:** ~~the $7.99 BMS board's published protection list covers
+  overcharge, over-discharge and short circuit~~ ⚠️ **CORRECTED 2026-09-02
+  (Appendix BK): it does NOT cover over-discharge** — see row 11 and Verify
+  item 6. Adeept lists over-voltage and short-circuit only. The board also
+  **does not state per-cell balancing**. With two new cells from the same order this is tolerable;
   check them with a multimeter occasionally, and never mix in an older cell.
   (The alternative — an XTAR FC2 at $6.99 charging cells individually —
   eliminates balancing entirely but means pulling cells out to charge and

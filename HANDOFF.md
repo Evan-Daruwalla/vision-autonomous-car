@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-02 ~15:25 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-02 ~17:05 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 59 appendices A–BG). When this file and the record disagree about
+(append-only, 62 appendices A–BJ). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -229,6 +229,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Track layout | M1.4 | **v1 + v2 drawn, NOT committed** | 2026-09-01, Appendices AM/AT/AX/AY. `cad/track_layout_v1.py` = figure-8 with a flat causeway bridge + 5 landmarks; `cad/track_layout_v2.py` = 3x3 city grid, 9 intersections, figure-8 route through the centre, 8.31 m, 140 mm spare at R=500. Both parametric and self-checking. **Corner geometry FROZEN until the T2 turning test** |
 | Track: sim rehearsal | — | **IMPOSSIBLE, settled** | 2026-09-01, Appendix AX. gym-donkeycar's protocol has ten message types and none defines a road; `load_scene` picks from 11 prebuilt Unity scenes. A custom track needs a Unity build. Costs little: M3 trains on real laps, not the sim corpus |
 | Track surface | T3 | **Decided: hybrid** | 2026-09-01, Appendix AX. NOT 225 printed panels (~12.6 kg, 169-900 h, 225 bed clears, 28 camera-visible seams). Print the 6.28 m of corner arcs + 9.36 m of intersection boxes as ~79 tiles (~970 g); tape the 31.9 m of straight street lines |
+| Uno firmware | — | **bring-up + pack guard DONE; control firmware NOT written** | 2026-09-02, Appendices BD/BJ. `firmware/` — `uno_bringup` (board proven), `uno_memtest` (2048 B SRAM, 16.0042 MHz measured), `uno_echo` (link p99 1.069 ms), `uno_packguard` (low-voltage cutoff, SELFTEST 27/27 on hardware). `SERIAL_PROTOCOL.md` is DESIGN ONLY — nothing implements it |
 | Vehicle lighting | — | **Spec written, nothing wired** | 2026-09-01, Appendix AY. `docs/LIGHTING_SPEC.md`. Headlights/tail/DRL/indicators. Only the headlight beam is in the camera's view. ~~Settles the PCA9685.~~ Superseded 2026-09-02 (BC): an **Arduino Uno** takes actuation instead. Turn signals are a THIRD policy head and gate the M3 collection run via PRD task 11b |
 | **Harness trustworthiness** | **P6** | **OPEN — BLOCKING all closed-loop claims** | 2026-08-11, Appendix AD. Same checkpoint across 7 gate-valid launches: 106.5–471.5 steps, CV 55%. Rate, track and start state ruled out; cause unknown. Nothing may be ranked on closed-loop steps until this is fixed or quantified |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
@@ -322,6 +323,16 @@ original floor and the pre-2026-08-12 scale decision.)*
   the car land where it lands; set lane width for ≥85 mm/side from the
   MEASURED width. Note a smaller car also lowers the camera, and the
   sim's camera height/pitch are still unidentified (AI.3).
+- ⚠️ **THE 2S PACK HAS NO HARDWARE LOW-VOLTAGE CUTOFF — open safety item**
+  (2026-09-02, Appendix BI). BOM row 11's board is titled "BMS" but Adeept
+  documents **over-voltage and short-circuit protection only**; over-discharge
+  is not listed, and the EVE 25P cells are bare. Below ~2.5 V/cell lithium takes
+  permanent capacity loss and can grow internal shorts that become a fire risk
+  on the NEXT charge. **A firmware cutoff is implemented and tested**
+  (`firmware/uno_packguard/`, SELFTEST 27/27 on hardware) — **but firmware
+  cannot guard a pack while the firmware is off.** Close it with a protection
+  board that states over-discharge cutoff, or protected cells. BOM Verify
+  item 6 has the options. **Evan's call.**
 - **Pi 5 2GB ($65) or 4GB ($110)?** Recommended 2GB — identical silicon, and the 4GB has absorbed every DRAM price rise while the 2GB has absorbed none. Purchase window is now.
 - ~~**PWM path: straight-to-GPIO or a PCA9685 breakout?**~~ ~~RESOLVED 2026-09-01 (AY): PCA9685~~ **SUPERSEDED 2026-09-02 (Appendix BC): an ARDUINO UNO Evan already owns** takes motor PWM + servo + 4 light channels, and adds encoder counting and a throttle watchdog the PCA9685 cannot do. $0. BOM row 17; pin map in `firmware/SERIAL_PROTOCOL.md`.
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
@@ -329,7 +340,7 @@ original floor and the pre-2026-08-12 scale decision.)*
   2026-07-23**; the motor is in the BOM below.
 - **THE ORDER (`docs/BOM.md`, ≈$226-234 + shipping = ≈$241-259).** Nothing is bought.
   Everything downstream of M1.5 waits on parts. Before ordering Evan should
-  check the **five** items in the BOM's "Verify before ordering" section — most
+  check the **six** items in the BOM's "Verify before ordering" section — most
   importantly that his power bank's label reads **5V/3A**, and now also **which
   LEDs** (item 5), whose forward voltage sets every series-resistor value.
 - **PRINT THE COUPON (M1.3)** — needs NO parts, only his printer and Lego.
