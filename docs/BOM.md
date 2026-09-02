@@ -15,24 +15,24 @@ split-source power path costs almost nothing.
 | # | Item | Why this one | Price | Source |
 |---|---|---|---|---|
 | **Compute + sensing** |
-| 1 | Raspberry Pi 5 **4GB** | DonkeyCar's stated minimum; onboard work is inference-only, all training is on the 3060 Ti | **$110.00** ⚠️ *(was $70.00 — see re-pricing note)* | pishop.us $110 / adafruit.com $130 |
-| 2 | Camera Module 3 **Wide** | ✅ **HOLD LIFTED 2026-08-13 (Appendix AI): the sim FOV was identified as `fov=90`, i.e. ~106° H / ~118° diagonal, and the Wide (102° H / 120° D) matches within 2-4°. The standard module is ~40° off and would be wrong. Correct part — by luck, since nobody set or checked it.** Superseded warning: The sim's camera FOV/offset/rotation were NEVER SET (`cam_config` absent from every conf dict), so the whole corpus was captured at an unrecorded Unity default. If it differs from this camera's 120°, the encoder trained on a different projection than this part will produce. One short sim run settles it — see `docs/SIM_TRANSFER_SPEC.md` §5.2. Original rationale: ≥120° FOV is the consensus lever for track following; rolling shutter is fine at 1–3 m/s | **$38.50** *(was $35.00)* | pishop.us |
-| 3 | **Camera cable, Standard-Mini** | ⚠️ **Camera Module 3 ships with a Standard-Standard cable, which does NOT fit the Pi 5's mini 22-pin connector.** Verified against Raspberry Pi docs 2026-07-23. Without this, nothing works. | **~$2–5** | raspberrypi.com |
+| 1 | Raspberry Pi 5 **4GB** | DonkeyCar's stated minimum; onboard work is inference-only, all training is on the 3060 Ti | **$110.00** ⚠️ *(was $70.00 — see re-pricing note)* | [pishop.us $110](https://www.pishop.us/product/raspberry-pi-5-4gb/) ✅ **verified 2026-09-02, in stock** · **2GB $65** [here](https://www.pishop.us/product/raspberry-pi-5-2gb/) ✅ in stock · adafruit 2GB $75 **OUT OF STOCK** |
+| 2 | Camera Module 3 **Wide** | ✅ **HOLD LIFTED 2026-08-13 (Appendix AI): the sim FOV was identified as `fov=90`, i.e. ~106° H / ~118° diagonal, and the Wide (102° H / 120° D) matches within 2-4°. The standard module is ~40° off and would be wrong. Correct part — by luck, since nobody set or checked it.** Superseded warning: The sim's camera FOV/offset/rotation were NEVER SET (`cam_config` absent from every conf dict), so the whole corpus was captured at an unrecorded Unity default. If it differs from this camera's 120°, the encoder trained on a different projection than this part will produce. One short sim run settles it — see `docs/SIM_TRANSFER_SPEC.md` §5.2. Original rationale: ≥120° FOV is the consensus lever for track following; rolling shutter is fine at 1–3 m/s | **$38.50** *(was $35.00)* | [pishop.us](https://www.pishop.us/product/raspberry-pi-camera-module-3-wide/) ✅ **verified 2026-09-02, in stock** |
+| 3 | **Camera cable, Standard-Mini** | ⚠️ **Camera Module 3 ships with a Standard-Standard cable, which does NOT fit the Pi 5's mini 22-pin connector.** Verified against Raspberry Pi docs 2026-07-23. Without this, nothing works. | **~$2–5** | [adafruit.com #5818 200mm](https://www.adafruit.com/product/5818) · [#5820 500mm](https://www.adafruit.com/product/5820) — the 22-pin 0.5mm to 15-pin 1mm FPC cable |
 | 4 | microSD card, 32GB+, A2/U3 | OS + driving logs | **~$10.00** | any |
 | **Drive + steering** |
-| 5 | Pololu **#1093** N20 30:1 HP 6V | The only gear ratio that lands in the required 430–1550 rpm band; full spec sheet + CAD envelope | **$23.95** | pololu.com |
-| 6 | Pololu **#713** TB6612FNG carrier | MOSFET bridge, ~0.5V drop, 4.5–13.5V. **Parallel both channels** for 2A continuous | **$4.95** | pololu.com |
+| 5 | Pololu **#1093** N20 30:1 HP 6V | The only gear ratio that lands in the required 430–1550 rpm band; full spec sheet + CAD envelope | **$23.95** | [pololu.com/product/1093](https://www.pololu.com/product/1093) ✅ **verified 2026-09-02, $23.95 unchanged** |
+| 6 | Pololu **#713** TB6612FNG carrier | MOSFET bridge, ~0.5V drop, 4.5–13.5V. **Parallel both channels** for 2A continuous | **$4.95** | [pololu.com/product/713](https://www.pololu.com/product/713) ✅ **verified 2026-09-02, $4.95 unchanged** |
 | 7 | MG90S metal-gear servo | Steering. Metal gears non-negotiable; MG996R is the fallback if it stalls | **~$5.00** | any |
 | **Power (split source — bank owned)** |
 | 8 | USB power bank, **5V/3A** | → Pi ONLY. **You own this — check the label says 5V/3A** (see Verify below) | **$0.00** | owned |
-| 9 | 2× EVE 25P 18650 cells | → motor + servo pack (7.4V). **Buy both from the same order** (matched cells — see caveat) | **$3.70** | 18650batterystore.com |
-| 10 | 2-cell 18650 series holder | | **$1.25** | addicore.com |
+| 9 | 2× EVE 25P 18650 cells | → motor + servo pack (7.4V). **Buy both from the same order** (matched cells — see caveat) | **$3.70** | [18650batterystore.com/products/eve-18650-25p](https://www.18650batterystore.com/products/eve-18650-25p) — price NOT re-verified |
+| 10 | 2-cell 18650 series holder | | **$1.25** | [addicore.com 2-place 18650 holder](https://www.addicore.com/products/2-place-18650-battery-holder-with-wires) — price NOT re-verified |
 | 11 | USB-C 2S BMS / charge board | Charges the pack in place from USB-C; provides overcharge, over-discharge and short protection. **No hobby balance charger needed** | **$7.99** | adeept.com |
-| 12 | LM2596 buck module | 7.4V → 5.2V for the servo only (700mA peak — well within it). **Not for the Pi** | **$2.48** | addicore.com |
+| 12 | LM2596 buck module | 7.4V → 5.2V for the servo only (700mA peak — well within it). **Not for the Pi** | **$2.48** | [addicore.com LM2596](https://www.addicore.com/products/lm2596-step-down-adjustable-dc-dc-switching-buck-converter) — price NOT re-verified |
 | **Wiring + protection** |
 | 13 | XT30 connector pair | | **$1.10** | alofthobbies.com |
 | 14 | SPST rocker switch, 10A | Main switch on the motor pack | **$0.75** | sparkfun.com |
-| 15 | Inline ATO/ATC fuse holder + 3A fuse | **Mandatory** — unprotected 18650s can deliver enormous short-circuit current | **~$2.15** | bc-robotics.com |
+| 15 | Inline ATO/ATC fuse holder + 3A fuse | **Mandatory** — unprotected 18650s can deliver enormous short-circuit current | **~$2.15** | [bc-robotics.com inline ATO/ATC holder](https://bc-robotics.com/shop/inline-ato-atc-fuse-holder-14awg/) ⚠️ **the 14AWG and 18AWG listings have inconsistent titles — confirm gauge and that it is ATO/ATC, not 5x20mm, at checkout**. Fuse bought separately |
 | 16 | Wire, heat-shrink, bulk caps, headers | ~22AWG for motor, ~26AWG signal; 470–1000µF across the motor rail | **~$8.00** | any |
 | **Lighting + I/O** |
 | 17 | ~~**PCA9685** 16-ch I2C PWM/LED driver~~ **Arduino Uno R3 clone — OWNED** | ✅ **SUPERSEDES the PCA9685 2026-09-02 (Appendix BC).** Evan has an Uno R3 clone on hand: ATmega328P, 5V logic, FTDI FT232RL, working on COM3. It does everything the PCA9685 would (motor PWM + servo + 4 light channels, fits with **ZERO** PWM spare — corrected 2026-09-02 (Appendix BH): Servo takes Timer1 (kills D9/D10) and the encoder takes D3, leaving usable PWM {5, 6, 11}, all three consumed by motor + headlights + tail) **plus two things the PCA9685 cannot**: quadrature **encoder counting** on hardware interrupts D2/D3, and a **throttle watchdog** that stops the car if the Pi hangs. ⚠️ **5V logic — connect over USB, NEVER to Pi GPIO** (`gotchas.md`). Cost of the swap: no DonkeyCar backend exists, so the actuator path becomes custom firmware + a serial protocol | **$0.00** | owned |
@@ -40,6 +40,27 @@ split-source power path costs almost nothing.
 | 19 | LED series resistors | One per LED; value set by the chosen LEDs' forward voltage — see Verify item 5. ⚠️ **Current budget is tight on an Uno:** an ATmega328P pin sources 20mA (one LED) but the chip's ABSOLUTE MAX across all I/O is **200mA**. 8 LEDs at 20mA = 160mA, i.e. 80% of the hard limit. In practice only 4 are on continuously (2 head + 2 tail = 80mA) with 2 indicators blinking (+40mA) = **~120mA peak**, which is fine. If brighter LEDs are chosen, switch them with small N-channel MOSFETs off the LM2596 rail instead of driving pins directly — not currently in this BOM | **~$1–2** | any |
 | 20 | Dupont jumpers + **data-only USB cable** | Pi→Uno is **USB, not GPIO** (5V logic would damage the Pi's 3.3V pins). The USB 5V wire must be **cut or omitted**: the Uno's 5V pin is fed from the LM2596 rail so LED current stays off the Pi's bank, and two supplies must not back-feed each other. Plus LED and servo leads | **~$2–4** | any |
 | | | **TOTAL** | **≈ $226–234** | |
+
+**LINKS ADDED + PRICES SPOT-CHECKED 2026-09-02 ~16:20 CDT.** The Source column
+now carries markdown links, a deliberate departure from this file's bare-domain
+convention — noted rather than slipped in.
+
+**Re-verified live, all UNCHANGED from the 2026-08-08 re-pricing:** Pi 5 4GB
+**$110.00** (in stock) · Camera Module 3 Wide **$38.50** (in stock) · Pololu
+#1093 **$23.95** · Pololu #713 **$4.95**. **So the TOTAL below is current, not
+stale** — which is the first time this file has been able to say that.
+
+**Pi 5 2GB confirmed at $65.00 and IN STOCK at pishop.us**, which matters
+because it is the only path whose low end clears the $200 ceiling. **Adafruit
+lists it at $75 and OUT OF STOCK** — so the cheap path depends on one vendor
+having it, and that is a supply risk, not just a price.
+
+**NOT re-verified** (linked but price unchecked): rows 9, 10, 12, 15. **Not
+linked at all** (no canonical product page found this pass): row 11 the USB-C 2S
+BMS (adeept.com), row 13 the XT30 pair (alofthobbies.com), row 14 the SPST
+rocker (sparkfun.com — COM-08837 appears to be a right-angle variant, not
+obviously the 10A part specified). Rows 4, 7, 16, 18-20 are generic `any` parts
+with no canonical page by design.
 
 *(Total corrected 2026-08-06 from "≈$176–179" — the cold audit found it
 excluded row 3, the camera cable, i.e. the very item this BOM was written to
