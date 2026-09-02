@@ -138,10 +138,30 @@ here**, so `claude mcp add` must be run by Evan.~~ **CLI INSTALLED 2026-09-01**
 A **project-scoped** `.mcp.json` server requires Evan's explicit approval on
 first load, which is why the server was absent from the session's tool list
 entirely rather than failing — and why pairing the 3dstreet browser tab changed
-nothing. **Evan must run `claude` interactively in this directory and approve
-it**; a model cannot approve a server that will run `npx -y 3dstreet-mcp` under
-his account. Until then no `mcp__3dstreet__*` tool exists, whatever the tab
-says.
+nothing on its own.
+
+**STATUS 2026-09-01 ~22:20 — approved and paired; the NEXT session gets the
+tools.** Evan approved it (`claude mcp list` → `3dstreet: npx -y 3dstreet-mcp -
+✔ Connected`) and paired the tab. The session that made those changes still saw
+zero `mcp__3dstreet__*` tools after three checks, because **a session's MCP
+registry is fixed at startup**. Nothing is broken; it just needs a fresh
+session with the tab left open.
+
+**THREE conditions, all now met except the restart:** server approved (done) ·
+browser tab paired at `https://3dstreet.app/#mcp`, kept open in the background
+(done) · session started AFTER the approval (**pending**).
+
+**What to actually use it for — do not re-litigate this.** 3DStreet cannot draw
+this track: cross-section tool, no curved streets, real-world units (a real
+lane is 3–3.6 m, this track's is 260 mm). Plan-view geometry stays in
+`cad/track_layout_v2.py`. Use the MCP for **markings and a portfolio render**,
+which maps onto real open work:
+- dash ratio — MUTCD's 1:3 does not survive at this scale; ~2:1 is the
+  documented deviation (`gotchas.md`)
+- the hybrid print plan's **6.28 m of corner arcs and 9.36 m of intersection
+  boxes** (Appendix AX), which become ~79 printed tiles
+- stop-sign placement — must stay **relocatable** (Appendix Y.3), since a fixed
+  sign is predictable from position and defeats the M4 showcase
 
 **Fit caveat (Appendix AM):** 3DStreet is a street *cross-section* tool —
 linear segments plus 90° / T / dead-end intersections, **no curved streets
