@@ -84,6 +84,7 @@ the dated entry, not the digest.
 - [AU — Scheduled daily-audit: AP/AQ/AR/AS re-verified against disk, 3 findings, and a stale artifact that would mislead the next auditor](#appendix-au---scheduled-daily-audit-apaqaras-re-verified-against-disk-3-findings-and-a-stale-artifact-that-would-mislead-the-next-auditor-2026-09-01-2014-cdt) (09-01)
 - [AV — Record letter-collision race repaired, and the AU audit's two findings against AR's artifacts fixed](#appendix-av---record-letter-collision-race-repaired-and-the-au-audits-two-findings-against-ars-artifacts-fixed-2026-09-01-2018-cdt) (09-01)
 - [AW — CORRECTION to AV.1: the append script was never the race; the daily-audit prompt never named it. Prompt fixed and a write-time guard added](#appendix-aw---correction-to-av1-the-append-script-was-never-the-race-the-daily-audit-prompt-never-named-it-prompt-fixed-and-a-write-time-guard-added-2026-09-01-2036-cdt) (09-01)
+- [AX — Track v2: a 3x3 city grid that fits only at R=500mm, the sim cannot rehearse it, and the 225-panel floor is refused (my filament figure was 2.7x too high)](#appendix-ax---track-v2-a-3x3-city-grid-that-fits-only-at-r500mm-the-sim-cannot-rehearse-it-and-the-225-panel-floor-is-refused-my-filament-figure-was-27x-too-high-2026-09-01-2100-cdt) (09-01)
 
 ---
 
@@ -5780,3 +5781,150 @@ must never diverge again.
   entries"), but it is new friction people will feel.
 - **`~/.claude` is not a git repository.** The prompt fix, the hook and the
   settings change are unversioned; if that directory is lost they go with it.
+
+# Appendix AX - Track v2: a 3x3 city grid that fits only at R=500mm, the sim cannot rehearse it, and the 225-panel floor is refused (my filament figure was 2.7x too high) (2026-09-01, ~21:00 CDT)
+Evan asked three things: can the sim run the generated landscapes, make track
+v2 more like a real city, and is a 225-panel 3D-printed floor a good idea. One
+"no", one built, one refused with numbers -- and Evan caught an error in mine.
+
+## AX.1 The sim CANNOT rehearse a custom track. No road-definition message exists
+
+`gym_donkeycar/envs/donkey_sim.py` sends exactly ten message types:
+`cam_config`, `cam_config_b`, `car_config`, `control`, `exit_scene`,
+`get_scene_names`, `lidar_config`, `load_scene`, `racer_info`, `reset_car`.
+**There is no way to send a road.** `load_scene` selects from 11 prebuilt Unity
+scenes:
+
+    avc-sparkfun, circuit-launch-track, generated-roads, generated-track,
+    minimonaco-track, mountain-track, roboracingleague-track,
+    thunderhill-track, warehouse, warren-track, waveshare
+
+A custom track means authoring a Unity scene and rebuilding the sim binary --
+its own project. And the two "generated" scenes are not authorable either: they
+regenerate randomly per launch, which is the 4.4x measurement swing of AI.
+
+**This costs less than it first appears.** `PRD_ROADMAP.md:306-310` has M3
+collecting **10-20 laps on the real track**, and M4 consuming the car's own
+logs. The sim corpus was never the training set for the physical car. What must
+still match is the CONTROL LOOP and CAMERA -- 20.00 Hz, 1.401 m/s,
+120x160 -> 64x64, fov=90 VERTICAL, horizon on row 42 (AR) -- not the scenery.
+What is genuinely lost: no sim rehearsal of the city, and M5 (sim-RL) stays on
+stock tracks. M5 is already marked optional and parallel.
+
+## AX.2 A city grid fits at exactly ONE point in the frozen radius band
+
+Streets must be spaced at least `2R + lane` so consecutive 90-degree turns do
+not overlap, and `span = (S-1) * pitch + lane` must fit 2800 mm of usable floor:
+
+| R | pitch | 3x3 span | fits? |
+|---|---|---|---|
+| **500 mm** | **1260 mm** | **2780 mm** | **yes -- 20 mm spare** |
+| 550 mm | 1360 mm | 2980 mm | no |
+| 600 mm | 1460 mm | 3180 mm | no |
+| 670 mm | 1600 mm | 3460 mm | no |
+
+Identical at 100 mm and 130 mm car width -- the radius dominates, not the lane.
+
+**And there is no smaller-city fallback.** A 2x2 grid has the SPACE at those
+radii but cannot carry the route at all: a figure-8 needs a centre street to
+cross on plus outer streets both sides, so three per axis. Two streets admit
+only a perimeter loop -- every turn the same way, the oval `gotchas.md` bans
+because it teaches "always steer left". **So B3 above 500 mm does not shrink the
+city, it deletes it**, and the fallback is v1's non-grid figure-8. The generator
+refuses rather than emitting something undrivable.
+
+## AX.3 The route: a figure-8 THROUGH the centre intersection
+
+Three LEFT turns round the top-left block, straight through the centre, three
+RIGHT turns round the bottom-right block, straight through again. One closed
+circuit, 8.79 m, balanced turns, and a genuine level crossing. It drives 7 of
+the 9 intersections; the other two are city dressing.
+
+**Behavioural cloning can drive intersections, and the honest caveat matters.**
+A cloned lane-follower has no goal input and cannot CHOOSE at a junction. It
+does not have to: M3 collects 10-20 laps of the SAME route, so the policy learns
+"turn right here" from the visuals. That is **route memorisation, not
+navigation** -- a different route means retraining. It is still a better result
+than an oval, and the write-up must say which of the two it is.
+
+## AX.4 The 225-panel floor: refused, and my first numbers were WRONG
+
+Proposal was 15x15 = 225 panels of 200 mm with dovetails, on a 256 mm bed.
+
+**Evan caught the error.** My first table said 33.5 kg / $670 at 3 mm. That
+assumed **100% infill**. A real panel -- ~0.8 mm of solid skins plus ~15% sparse
+-- is about 56 g, not 149 g, so **~12.6 kg**, which is what Evan said ("even if
+I make them only 3mm thick its 12kg"). My figure was **2.7x too high**. The
+corrected cost is roughly $250, not $670. Still the wrong trade, but the
+argument has to rest on the right number.
+
+What stands after the correction:
+
+- **~12.6 kg** of filament at 3 mm, against a whole-project BOM of ~$180.
+- **169-900 hours** of printing at 45-240 min/panel: 7 to 37 days nonstop.
+- **225 separate print jobs.** The bed is 256 mm, so one 200 mm panel fits but
+  two do not (400 > 256) -- every panel is its own job with a hand bed-clear,
+  before dovetails add to the footprint.
+- **28 seam lines** (14 each way) across the floor. At 120x160 the camera reads
+  high-contrast straight edges in exactly the region the lane-follower uses,
+  and the corpus is seamless.
+- **Warping.** 200 x 200 mm at 2-3 mm is the textbook PLA warp case: large
+  area, almost no height to resist it. Any panel-to-panel lip is both a bump
+  and a visual edge.
+- **Tolerance stack** across 15 dovetails: 0.77 mm random-walk, 3.0 mm worst
+  case at +-0.2 mm per joint.
+
+`gotchas.md:79-83` had already settled this on 2026-08-05 -- markings not
+surface -- and explicitly warns "Don't let a future session 'improve' this back
+to printed tiles."
+
+**Evan's call: HYBRID.** Print only the geometry that must be exact.
+
+## AX.5 The hybrid print plan
+
+| element | length | disposition |
+|---|---|---|
+| corner arcs (6 turns) | 6.28 m | **printed tiles** |
+| intersection boxes (9) | 9.36 m | **printed tiles** |
+| straight street lines | 33.36 m | tape or paint on the board |
+
+**79 tiles at 200 mm, ~970 g of filament.** For contrast: printing every line
+would be ~3,038 g, and the 225-panel floor ~12,600 g.
+
+Note that `gotchas.md`'s "~0.15 kg for markings" does NOT carry over -- that
+figure was for a MINIMUM LOOP, not 50 m of city-grid lines. The honest hybrid
+number is ~1 kg, not 0.15 kg.
+
+## AX.6 Three real errors the self-check caught
+
+All three were caught by assertions, not by looking at the render.
+
+1. **Phantom cusps.** Zero-length segments at every arc/straight junction: the
+   straight's endpoints duplicated the neighbouring arcs' vertices, and
+   `arctan2(0, 0)` fabricates a heading of 0 there, which reads as a **pi jump**
+   in a path that is actually smooth. Slice both ends, not just the leading one.
+2. **The two lobes never touched.** The first design was two rounded rectangles
+   on diagonally opposite blocks, assumed to meet at the shared block corner.
+   They do not -- rounding pulls each path `R*(sqrt(2)-1)` = **207 mm** clear of
+   the corner. It was **two separate loops with no way to drive between them**,
+   and it looked plausible in the summary line. Fixed by building the route as
+   a rounded polyline that passes STRAIGHT THROUGH the centre intersection;
+   self-check 6 now asserts the route reaches the origin on two perpendicular
+   headings.
+3. **An off-grid fallback.** With `--streets 2` the route still ran to
+   `+-pitch` while the grid only had streets at `-pitch` and `0` -- a path not
+   on any street, which printed a clean-looking summary. Self-check 6b now
+   asserts every route vertex lies on a real street, and 6c asserts a 2x2 grid
+   refuses outright.
+
+## AX.7 Status and what is still not committed
+
+`cad/track_layout_v2.py` (parametric, self-checking), `track_layout_v2.svg`,
+`track_layout_v2.json`. v1 is NOT superseded -- it is the documented fallback if
+B3 puts the radius above 500 mm.
+
+**No geometry is committed.** R = 500 mm is a parameter at the optimistic end of
+a frozen band that is itself arithmetic on an unmeasured 130 mm car width.
+Appendix L still rules that corner tiles must not be cut until B3. The 20 mm of
+spare floor is the whole margin, so B2's measured car width can also break it:
+every 10 mm of extra car width costs 20 mm of lane and 40 mm of span.
