@@ -20,8 +20,9 @@ split-source power path costs almost nothing.
 | 3 | **Camera cable, Standard-Mini** | ⚠️ **Camera Module 3 ships with a Standard-Standard cable, which does NOT fit the Pi 5's mini 22-pin connector.** Verified against Raspberry Pi docs 2026-07-23. Without this, nothing works. | **~$2–5** | [adafruit.com #5818 200mm](https://www.adafruit.com/product/5818) · [#5820 500mm](https://www.adafruit.com/product/5820) — the 22-pin 0.5mm to 15-pin 1mm FPC cable |
 | 4 | microSD card, 32GB+, A2/U3 | OS + driving logs | **~$10.00** | any |
 | **Drive + steering** |
-| 5 | Pololu **#1093** N20 30:1 HP 6V | The only gear ratio that lands in the required 430–1550 rpm band; full spec sheet + CAD envelope | **$23.95** | [pololu.com/product/1093](https://www.pololu.com/product/1093) ✅ **verified 2026-09-02, $23.95 unchanged** |
-| 6 | Pololu **#713** TB6612FNG carrier | MOSFET bridge, ~0.5V drop, 4.5–13.5V. **Parallel both channels** for 2A continuous | **$4.95** | [pololu.com/product/713](https://www.pololu.com/product/713) ✅ **verified 2026-09-02, $4.95 unchanged** |
+| 5 | ~~Pololu **#1093** N20 30:1 HP 6V~~ **Pololu #5159 — 30:1 HP 6V *with 12 CPR encoder*, side connector** | The only gear ratio that lands in the required 430–1550 rpm band; full spec sheet + CAD envelope. ⚠️ **CORRECTED 2026-09-02 (Appendix BO): this row listed #1093, which has NO ENCODER — but Evan chose the encoder variant on 2026-08-12 (Appendix O) and the firmware pin map has spent D2/D3 on encoder interrupts ever since. The BOM was buying a motor that could not feed the design.** Verified 2026-09-02: 29.86:1, 1000 rpm no-load, **1.6 A stall**, 0.57 kg·cm stall torque, encoder Vcc 2.7–18 V with internal 10k pull-ups, 12 CPR at the motor shaft = **~358 counts/output rev** | **$29.95** *(was $23.95, +$6.00)* | [pololu.com/product/5159](https://www.pololu.com/product/5159) ✅ **verified 2026-09-02, $29.95, in stock** |
+| 5b | **Pololu #4763** JST SH encoder cable, 6-pin, single-ended female, 30 cm | ⚠️ **NEW ROW 2026-09-02 (Appendix BO). Pololu states plainly that "cables are not included"** with #5159, and the encoder connector is **6-pin JST SH at 1.0 mm pitch — not hand-solderable to 0.1" protoboard**. Without this, the encoder cannot be connected at all. *Same class of defect as row 3, the camera cable — an omitted mating cable that stops the build dead.* Single-ended is the right variant: JST connector one end, bare wires to solder at the other | **$3.00** | [pololu.com/product/4763](https://www.pololu.com/product/4763) ✅ **verified 2026-09-02, $3.00** |
+| 6 | Pololu **#713** TB6612FNG carrier | MOSFET bridge, ~0.5V drop, 4.5–13.5V. **Parallel both channels** for 2A continuous. ⚠️ **`STBY` MUST be driven high or the driver never leaves sleep** — Pololu: *"pulled low internally … must be driven high (2.7 V – 5.5 V) in order to enable the driver."* Omitted from this BOM and from the pin map until **2026-09-02 (Appendix BL)**; now **D10**. **Paralleling = tie AIN1↔BIN1, AIN2↔BIN2, PWMA↔PWMB on the input side and AO1↔BO1, AO2↔BO2 on the output side** — forced here rather than merely tidy, because there is ZERO spare PWM to drive the B channel separately. *Pololu states the 2 A paralleled rating but does NOT document the method; the pin pairing above is standard practice, unverified against Toshiba — confirm before soldering.* | **$4.95** | [pololu.com/product/713](https://www.pololu.com/product/713) ✅ **verified 2026-09-02, $4.95 unchanged** |
 | 7 | MG90S metal-gear servo | Steering. Metal gears non-negotiable; MG996R is the fallback if it stalls | **~$5.00** | any |
 | **Power (split source — bank owned)** |
 | 8 | USB power bank, **5V/3A** | → Pi ONLY. **You own this — check the label says 5V/3A** (see Verify below) | **$0.00** | owned |
@@ -41,7 +42,7 @@ apex adeept.com downgrades. Corrected 2026-09-02, Appendix BK)* |
 | 18 | 8× 3mm LEDs (2 white, 2 red, 4 amber) | Headlights, tail lights, 4 indicators. Amber for indicators; rear lamps are never in the forward camera's view, so they are realism at zero ML cost (`docs/LIGHTING_SPEC.md` §1) | **~$1.50–3** | any |
 | 19 | LED series resistors **+ 1x 100k and 1x 12k for the pack-sense divider** (Appendix BJ) | One per LED; value set by the chosen LEDs' forward voltage — see Verify item 5. ⚠️ **Current budget is tight on an Uno:** an ATmega328P pin sources 20mA (one LED) but the chip's ABSOLUTE MAX across all I/O is **200mA**. 8 LEDs at 20mA = 160mA, i.e. 80% of the hard limit. In practice only 4 are on continuously (2 head + 2 tail = 80mA) with 2 indicators blinking (+40mA) = **~120mA peak**, which is fine. If brighter LEDs are chosen, switch them with small N-channel MOSFETs off the LM2596 rail instead of driving pins directly — not currently in this BOM | **~$1–2** | any |
 | 20 | Dupont jumpers + **data-only USB cable** | Pi→Uno is **USB, not GPIO** (5V logic would damage the Pi's 3.3V pins). The USB 5V wire must be **cut or omitted**: the Uno's 5V pin is fed from the LM2596 rail so LED current stays off the Pi's bank, and two supplies must not back-feed each other. Plus LED and servo leads | **~$2–4** | any |
-| | | **TOTAL** | **≈ $226–234** | |
+| | | **TOTAL** | **≈ $235–243** | |
 
 **LINKS ADDED + PRICES SPOT-CHECKED 2026-09-02 ~16:20 CDT.** The Source column
 now carries markdown links, a deliberate departure from this file's bare-domain
@@ -88,10 +89,26 @@ row 17's PCA9685 is superseded by an **Arduino Uno R3 clone Evan already owns**,
 taking rows 17–20 from $10.50–$24.00 to **$4.50–$9.00**. Recomputed from the
 rows, not carried forward: **$226.32–$233.82 before shipping**, **≈$241–259
 with** the $15–25 shipping estimate.)*
-*(**The $200 ceiling is REACHABLE again at the low end — but only with the 2GB
+*(~~**The $200 ceiling is REACHABLE again at the low end — but only with the 2GB
 Pi**, which now lands at **$181–189 before shipping, ≈$196–214 with**. The
 bottom of that range clears $200; the top does not. On the 4GB Pi every path is
-still over. Evan's call, and nothing is ordered.)*
+still over.~~ **SUPERSEDED 2026-09-02 ~17:45 CDT — see the row-5 correction
+below.** Evan's call, and nothing is ordered.)*
+
+*(**TOTAL raised 2026-09-02 ~17:45 CDT from ≈$226–234 to ≈$235–243** (Appendix
+BO), by two changes that are drift repair rather than new scope: **row 5**
+corrected from #1093 to the **#5159 encoder motor Evan chose on 2026-08-12**
+(+$6.00), and **new row 5b**, the **#4763 JST SH cable** Pololu does not include
+with it (+$3.00). Recomputed from the rows, not carried forward:
+**$235.32–$242.82 before shipping**, **≈$250–268 with** the $15–25 estimate.)*
+
+*(⚠️ **THE $200 CEILING IS NOW BREACHED ON EVERY PATH, INCLUDING THE 2GB Pi.**
+The 2GB swap saves $45, landing at **$190.32–$197.82 before shipping** — which
+still clears $200 — but **≈$205–223 with shipping**, which does not, at either
+end. The 2GB path was the last one whose low end cleared the ceiling and it no
+longer does. **This is not a cost overrun from adding features**: both increments
+are parts the existing design already required and the BOM had failed to list.
+Evan decides whether the ceiling moves; nothing is ordered.)*
 
 **⚠️ RE-PRICED 2026-08-08 ~23:03 CDT against live vendor pages — the total rose
 ≈$44 and the BOM's Pi price was already stale when this file was written.**
@@ -183,12 +200,14 @@ paralleled TB6612 is enough).
                                                         +--> LED commons
 
                     [UNO] pin budget (CORRECTED 2026-09-02 -- the earlier
-                    map double-booked D3; see firmware/SERIAL_PROTOCOL.md):
+                    map double-booked D3, and BOTH files omitted STBY
+                    entirely; see firmware/SERIAL_PROTOCOL.md SS1/SS1a):
                        D2  encoder A (INT0)    D5  headlights  (PWM Timer0)
                        D3  encoder B (INT1)    D6  tail lights (PWM Timer0)
                        D9  servo (Timer1)      D4  left  indicator (digital)
                        D11 motor PWM (Timer2)  D7  right indicator (digital)
                        D8/D12 motor DIR        D13 status LED
+                       D10 TB6612 STBY         A0  pack sense divider
                     Motor PWM MUST be Timer2: Timer0 also drives millis(), so
                     its frequency cannot move, and motor PWM is the one channel
                     that may need raising above the audible band.

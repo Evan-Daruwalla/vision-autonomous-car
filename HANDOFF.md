@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-02 ~17:05 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-02 ~18:05 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 62 appendices A–BJ). When this file and the record disagree about
+(append-only, 68 appendices A–BP; BM/BN/BP are corrections to BL/BO). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -19,7 +19,11 @@ the physical car and documented as a college-portfolio engineering artifact.
 ## Where the project actually is
 
 **The software lane is four milestones ahead of the hardware lane. The hardware
-lane has now STARTED — one piece of hardware is verified working (2026-09-02).** SIM-POC (P1–P5) is built and its findings are
+lane has now STARTED — and as of 2026-09-02 the ACTUATION FIRMWARE RUNS ON THE
+BOARD** (`firmware/uno_control/`, SELFTEST 37/37, host_test 11/11, Appendix BO).
+**Actuators are still unwired**: the link and state machine are verified, but no
+motor, servo, encoder, LED or pack exists, so every actuator path is verified
+only as a DECISION the firmware made. SIM-POC (P1–P5) is built and its findings are
 banked. **Nothing has been printed and nothing has been ordered since
 2026-07-23.**
 
@@ -70,8 +74,9 @@ track generator — but it is a negative, and the write-up must say so.
 | 1 | ~~Give the floor-space number.~~ **ANSWERED 2026-09-01: 3.0 × 3.0 m.** Track v1 and v2 are both drawn against it (`cad/track_layout_v*.py`). | — |
 | 2 | ~~Commit or discard the uncommitted AL audit fixes~~ **DONE 2026-09-01** (AO/AP, commit `3f58804`). The central fix was WRONG and broke `train_cte_probe.py`; repaired and every runnable reader re-run. | — |
 | 3 | **Print the tolerance coupon (M1.3).** Needs no parts — only the printer and Lego. Gates every chassis dimension. | **Evan** |
+| 3b | **MEASURE WHEELBASE** (front to rear axle centres). With steering confirmed at **32°** (2026-09-02), `R = wheelbase / tan(32°)` = **1.600 × wheelbase** — wheelbase is the LAST unmeasured input to the turn radius, and the turn radius is what unfreezes corner geometry. Blocked: Evan does not have the parts yet. | **Evan (parts)** |
 | 4 | **Pi 2GB ($65) vs 4GB ($110).** Purchase window is now; the 4GB has taken every DRAM hike and the 2GB none. | **Evan** |
-| 5 | **Place the order** (`docs/BOM.md`). Nothing downstream of M1.5 moves until parts exist. | **Evan** |
+| 5 | **Place the order** (`docs/BOM.md`). Nothing downstream of M1.5 moves until parts exist. **Now ≈$235–243 + shipping = ≈$250–268**, and the $200 ceiling is breached on EVERY path including the 2GB Pi (≈$205–223 with shipping). Both 2026-09-02 increments are parts the design already required and the BOM had failed to list — row 5 was buying a motor with no encoder, and the encoder cable was missing entirely (Appendix BO). | **Evan** |
 
 ---
 
@@ -177,7 +182,9 @@ plan-view geometry. Keep the layout itself in a dimensioned plan.
 | constraint | value | source |
 |---|---|---|
 | floor space | **3.0 × 3.0 m — CONFIRMED by Evan 2026-09-01** (9 m², vs 4.48 m² for the old 1.6×2.8 plan) | Evan |
-| lane width | **2.0 x the MEASURED car width** (200 mm @ 100 mm car, 260 mm @ 130 mm). Corrected 2026-09-01 — the old fixed-85 mm rule gave 2.31-2.70x, wider than real roads (1.98x) or Duckietown (1.4-1.6x) | `SIM_TRANSFER_SPEC` §3 |
+| **car width** | **114.75 mm — MEASURED 2026-09-02** (rear tire track, the widest point; front is 107.75 mm). Supersedes the 130 mm estimate. **Caveat: tire track, not whole-vehicle** — confirm nothing on the assembled car exceeds it | Evan, Appendix BL |
+| **max steer** | **32° — confirmed by Evan 2026-09-02** (was eyeballed at 45, then 30). Gives `R = 1.600 × wheelbase`. ⚠️ **32° is the wheel's DEVIATION from straight ahead** — Evan measured with 90° = straight, angle = 90 − protractor reading. Reading it as 58° instead gives 0.625 × wheelbase, a **2.6× error** | Evan, Appendix BQ |
+| lane width | **229.5 mm** = 2.0 x the measured 114.75 mm. Rule corrected 2026-09-01 — the old fixed-85 mm rule gave 2.31-2.70x, wider than real roads (1.98x) or Duckietown (1.4-1.6x) | `SIM_TRANSFER_SPEC` §3 |
 | corner radius | **≥500–670 mm centreline** — *estimate on an estimate* | Appendix L |
 | layout | **figure-8**, never an oval | `gotchas.md` |
 | stop sign | **relocatable/removable** — a fixed sign is predictable from position | Appendix Y.3 |
@@ -212,7 +219,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Decision gate | M1.1 | **Done** | 2026-07-23: 8GB · no Lego motors · 3060 Ti 8GB · ~$200 · ratified |
 | Drive motor selection | M1.1b | **Done (purchase pending)** | 2026-07-23: Pololu #1093 N20 30:1 HP 6V, $23.95; docs/research/2026-07-23_drive-motor-selection.md |
 | Power system selection | M1.1c | **Done (purchase pending)** | 2026-07-23: split source, power bank owned; docs/research/2026-07-23_power-system.md |
-| BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced twice** | `docs/BOM.md`, **≈$226-234 + $15-25 shipping** (≈$241-259 all-in). Row 17 is an **Arduino Uno Evan already owns, $0** — the PCA9685 is superseded (2026-09-02, Appendix BC) |
+| BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced three times** | `docs/BOM.md`, **≈$235-243 + $15-25 shipping** (≈$250-268 all-in). Row 17 is an **Arduino Uno Evan already owns, $0**. **Row 5 corrected 2026-09-02 to the #5159 ENCODER motor** Evan chose on 2026-08-12 (+$6) and **new row 5b, the #4763 JST SH cable Pololu does not include** (+$3) — Appendix BO. **$200 ceiling breached on every path** |
 | Chassis CAD + print | M1 | **Started** | M1.3 coupon generated + validated 2026-07-23; awaiting Evan's print + measurements |
 | Tolerance coupon | M1.3 | **Ready to print** | `cad/tolerance_coupon_v1.stl` + `cad/README.md`; gates every chassis dimension |
 | Electronics + teleop | M2 | **Not started** | purchase list is task 8 |
@@ -226,10 +233,10 @@ original floor and the pre-2026-08-12 scale decision.)*
 | SIM-POC P4 DreamerV3 | P4 | **DONE** | 2026-08-06, Appendices T+U: **both** halves. Trained 2000 steps (image loss 588.31→61.39, 9.6x) AND the 8GB fitting table measured. **Batch size, not model size, breaks 8GB**: 69.7M params fit at b16 (5.238 GB), 19.1M at b64 does not fit in 7.0 GB. Two task premises proved false — see T.2 |
 | SIM-POC P5 policy | P5 | **DONE — but its NUMBERS are uncertified** | 2026-08-07, Appendix V. Latent BC (linear + MLP) **and** CEM planning, 3 seeds × 3 episodes. Key finding (stands, open-loop): the paper's linear C is structurally wrong here — z encodes cross-track error nonlinearly (probe R² 0.27 linear vs 0.97 MLP). **CAVEAT 2026-08-11 (Appendix AD): every step count from this task came from a harness later measured at CV 55%, where n=1 launch resolves only ~3×. The qualitative result holds — the expert completes, learned policies mostly do not — but 69.3/89.7/187.2/110 are not measurements. "No learned policy finished" was also later shown FALSE in the strict sense: completions occur, just not reliably.** |
 | Harness trustworthiness | P6 | **DONE 2026-08-13** | Appendix AI/AJ. Cause found: `donkey-generated-track-v0` REGENERATES per launch, which is the 4.4x swing. Fix is the PAIRED design (`ml/eval_paired.py`), not a fixed track — every fixed track is far OOD and the controllers collapse to 13-67 steps there. Result: **no arm beats the baseline** |
-| Track layout | M1.4 | **v1 + v2 drawn, NOT committed** | 2026-09-01, Appendices AM/AT/AX/AY. `cad/track_layout_v1.py` = figure-8 with a flat causeway bridge + 5 landmarks; `cad/track_layout_v2.py` = 3x3 city grid, 9 intersections, figure-8 route through the centre, 8.31 m, 140 mm spare at R=500. Both parametric and self-checking. **Corner geometry FROZEN until the T2 turning test** |
+| Track layout | M1.4 | **v1 + v2 drawn, NOT committed** | 2026-09-01, Appendices AM/AT/AX/AY. `cad/track_layout_v1.py` = figure-8 with a flat causeway bridge + 5 landmarks; `cad/track_layout_v2.py` = 3x3 city grid, 9 intersections, figure-8 route through the centre, 8.31 m, **171 mm spare at R=500** (re-run 2026-09-02 on the measured car width: lane 260→230 mm, span 2660→2629 mm, tiles 79→73). Both parametric and self-checking; `--car-width` flag added. **Corner geometry FROZEN until the T2 turning test** |
 | Track: sim rehearsal | — | **IMPOSSIBLE, settled** | 2026-09-01, Appendix AX. gym-donkeycar's protocol has ten message types and none defines a road; `load_scene` picks from 11 prebuilt Unity scenes. A custom track needs a Unity build. Costs little: M3 trains on real laps, not the sim corpus |
 | Track surface | T3 | **Decided: hybrid** | 2026-09-01, Appendix AX. NOT 225 printed panels (~12.6 kg, 169-900 h, 225 bed clears, 28 camera-visible seams). Print the 6.28 m of corner arcs + 9.36 m of intersection boxes as ~79 tiles (~970 g); tape the 31.9 m of straight street lines |
-| Uno firmware | — | **bring-up + pack guard DONE; control firmware NOT written** | 2026-09-02, Appendices BD/BJ. `firmware/` — `uno_bringup` (board proven), `uno_memtest` (2048 B SRAM, 16.0042 MHz measured), `uno_echo` (link p99 1.069 ms), `uno_packguard` (low-voltage cutoff, SELFTEST 27/27 on hardware). `SERIAL_PROTOCOL.md` is DESIGN ONLY — nothing implements it |
+| Uno firmware | — | **CONTROL FIRMWARE RUNS ON THE BOARD (2026-09-02)** | Appendices BD/BJ/BO. `firmware/` — `uno_bringup` (board proven), `uno_memtest` (2048 B SRAM, 16.0042 MHz), `uno_echo` (link p99 1.069 ms), `uno_packguard` (SELFTEST 27/27, **currently flashed**), **`uno_control` (implements `SERIAL_PROTOCOL.md` v0.2: SELFTEST 37/37, `host_test.py` 11/11 exit 0, 7134 B flash / 312 B SRAM, loop 2-3 ms)**. `SERIAL_PROTOCOL.md` is no longer design-only. **ACTUATORS UNWIRED** — link + state machine only |
 | Vehicle lighting | — | **Spec written, nothing wired** | 2026-09-01, Appendix AY. `docs/LIGHTING_SPEC.md`. Headlights/tail/DRL/indicators. Only the headlight beam is in the camera's view. ~~Settles the PCA9685.~~ Superseded 2026-09-02 (BC): an **Arduino Uno** takes actuation instead. Turn signals are a THIRD policy head and gate the M3 collection run via PRD task 11b |
 | **Harness trustworthiness** | **P6** | **OPEN — BLOCKING all closed-loop claims** | 2026-08-11, Appendix AD. Same checkpoint across 7 gate-valid launches: 106.5–471.5 steps, CV 55%. Rate, track and start state ruled out; cause unknown. Nothing may be ranked on closed-loop steps until this is fixed or quantified |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
@@ -299,8 +306,10 @@ original floor and the pre-2026-08-12 scale decision.)*
   M1.1c or any wiring.
 - `docs/BOM.md` — the order list, with wiring architecture and the
   pre-order verification checklist.
-- `.claude/codebase-memory/` — bins. `gotchas.md` is the dense one — read it
-  before any hardware, track, or ML work.
+- `.claude/codebase-memory/` — bins. **`gotchas.md` was SPLIT 2026-09-02** (it
+  hit 423 lines) and is now a 24-line ROUTER. Read `hardware.md` before any
+  build work, `track.md` before track work, `sim-harness.md` before touching the
+  simulator or eval harness.
 - `ml/` — SIM-POC code. `requirements.txt` rebuilds the environment;
   `verify_env.py` and `verify_corpus.py` are the P1/P2 done-checks and both
   exit non-zero on failure. **P2 re-verified PASS 2026-09-01** (102,888
@@ -313,6 +322,10 @@ original floor and the pre-2026-08-12 scale decision.)*
   Comfortable — it fits the FULL estimated corner-radius range
   (500–670 mm) at either car width. A 130 mm car at 300 mm lanes gives
   a figure-8 bbox of 1.30 × 2.30 m (R=500) to 1.64 × 2.98 m (R=670).
+- ~~**Car width: measure, don't choose.**~~ **ANSWERED 2026-09-02: 114.75 mm
+  MEASURED** (rear tire track). Lane width follows at 229.5 mm; track v2 spare
+  went 140 → 171 mm. **Still open: WHEELBASE** (no parts) and confirming no part
+  of the assembled car exceeds the tire track. Original note kept below.
 - **Car width: measure, don't choose.** Evan asked about ~100 mm.
   Space does not require it — 3×3 m fits either. It would buy ~18% more
   clearance per side (100 mm vs 85 mm at a 300 mm lane), which targets

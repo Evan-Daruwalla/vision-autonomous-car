@@ -98,6 +98,12 @@ the dated entry, not the digest.
 - [BI — Rows 11/13/14 linked, and row 11's board does NOT document the over-discharge protection the BOM credited it with - the 2S pack has no low-voltage cutoff](#appendix-bi---rows-111314-linked-and-row-11s-board-does-not-document-the-over-discharge-protection-the-bom-credited-it-with---the-2s-pack-has-no-low-voltage-cutoff-2026-09-02-1634-cdt) (09-02)
 - [BJ — Pack low-voltage cutoff implemented on the Uno: 27/27 on hardware, and the hardware test caught a floating-pin fault the design reasoning had missed](#appendix-bj---pack-low-voltage-cutoff-implemented-on-the-uno-2727-on-hardware-and-the-hardware-test-caught-a-floating-pin-fault-the-design-reasoning-had-missed-2026-09-02-1647-cdt) (09-02)
 - [BK — Second landing-check: the pack guard is genuine on hardware, but this range put 21 unrenderable escape sequences into the append-only record and left a struck safety claim standing elsewhere](#appendix-bk---second-landing-check-the-pack-guard-is-genuine-on-hardware-but-this-range-put-21-unrenderable-escape-sequences-into-the-append-only-record-and-left-a-struck-safety-claim-standing-elsewhere-2026-09-02-1705-cdt) (09-02)
+- [BL — Car width measured (114.75 mm); the missing TB6612 STBY; the proto-shield net list and the three defects it found](#appendix-bl---car-width-measured-11475-mm-the-missing-tb6612-stby-the-proto-shield-net-list-and-the-three-defects-it-found-2026-09-02-1738-cdt) (09-02)
+- [BM — CORRECTION to BL - its heading timestamp is 6 minutes ahead of the clock](#appendix-bm---correction-to-bl---its-heading-timestamp-is-6-minutes-ahead-of-the-clock-2026-09-02-1733-cdt) (09-02)
+- [BN — CORRECTION to BL.4's dirty-file counts (74/41, not 77/44); 12-tooth steering pinion and rack travel](#appendix-bn---correction-to-bl4s-dirty-file-counts-7441-not-7744-12-tooth-steering-pinion-and-rack-travel-2026-09-02-1736-cdt) (09-02)
+- [BO — Control firmware runs on the board (37/37, host 11/11); T1 re-run gives 171 mm not 201; BOM row 5 corrected; gotchas split four ways](#appendix-bo---control-firmware-runs-on-the-board-3737-host-1111-t1-re-run-gives-171-mm-not-201-bom-row-5-corrected-gotchas-split-four-ways-2026-09-02-1755-cdt) (09-02)
+- [BP — CORRECTION to BL.1 and BO.1 - the 40mm/10mm sensitivity rule is from Appendix AZ, not HANDOFF](#appendix-bp---correction-to-bl1-and-bo1---the-40mm10mm-sensitivity-rule-is-from-appendix-az-not-handoff-2026-09-02-1757-cdt) (09-02)
+- [BQ — Max steer confirmed 32 degrees and the measurement convention that makes it a 2.6x trap; board restored; HANDOFF synced](#appendix-bq---max-steer-confirmed-32-degrees-and-the-measurement-convention-that-makes-it-a-26x-trap-board-restored-handoff-synced-2026-09-02-1802-cdt) (09-02)
 
 ---
 
@@ -7420,3 +7426,572 @@ at a file that was already correct.
   assigned to a `uint16_t` with no range check, against a 24-byte line buffer.
   BH.8's handoff for the other three sketches and the BA/BB Python is still open.
 - Rows 9, 10, 12, 15 remain linked but price-unverified.
+
+# Appendix BL - Car width measured (114.75 mm); the missing TB6612 STBY; the proto-shield net list and the three defects it found (2026-09-02, ~17:38 CDT)
+**2026-09-02 ~17:30 CDT.** Evan built the Lego rack-and-pinion steering and
+measured it, which retires the project's longest-standing unmeasured number.
+Then two wiring tasks: design the proto-shield net list, and close the `STBY`
+gap found in the previous prompt. Writing the net list found three more
+defects.
+
+## BL.1 Car width is measured: 114.75 mm. The 130 mm estimate is dead.
+
+Evan's measurement, tire track at the widest point:
+
+| | width |
+|---|---|
+| front | **107.75 mm** |
+| rear | **114.75 mm** |
+| **governing (widest)** | **114.75 mm** |
+
+Every track document since Appendix L has been drawn against a **130 mm
+estimate**. The real car is **15.25 mm narrower, 11.7%**. Consequences, applying
+the rules already on the books rather than re-deriving them:
+
+- `SIM_TRANSFER_SPEC` §3's rule is lane = 2.0 x measured car width, so lane
+  width is **229.5 mm**, not 260 mm.
+- HANDOFF's stated sensitivity is 40 mm of track span per 10 mm of car width, so
+  15.25 mm narrower is roughly **+61 mm of span**, taking track v2's 140 mm
+  spare at R=500 to **~201 mm**. **This is the rule of thumb applied, not a
+  re-run of `cad/track_layout_v2.py`.** The script is parametric and
+  self-checking; PRD task T1 is to re-run it on the measured number. Not done
+  here, and no marking table was recomputed.
+
+**Two things this measurement does NOT settle, stated so they are not later
+assumed away:**
+
+1. **It is tire track, not whole-vehicle width.** Lane width has to key off the
+   widest point of the assembled car, including the chassis, the electronics
+   stack and any camera mount. Nothing has been assembled, so this is
+   unconfirmed.
+2. **The minimum turn radius is still an estimate.** `wheelbase / tan(max
+   steer)` needs two more numbers, neither measured. The width input improved;
+   the ~330 mm figure and the 500-670 mm corner range did not. **Corner geometry
+   stays frozen until T2.**
+
+**Rear track is 7.0 mm wider than front.** In a corner a normal car's rear
+wheels cut inside the front path; a wider rear track partly cancels that, so
+swept width is set by front-outer and rear-outer together. A T2 detail, recorded
+so it is not rediscovered.
+
+## BL.2 `STBY` was missing from every document, and the car could not have moved
+
+Flagged in the previous prompt while checking the pin map; closed here. Verified
+against the vendor page rather than from memory. Pololu #713:
+
+> "The STBY pin is pulled low internally, putting the TB6612FNG into a low-power
+> sleep mode by default, and must be driven high (2.7 V - 5.5 V) in order to
+> enable the driver."
+
+So an unwired `STBY` is **not a degraded mode, it is a dead motor** - and it
+would have presented as a mystery bring-up failure with perfectly correct PWM on
+a scope. It was absent from `firmware/SERIAL_PROTOCOL.md` §1, from `docs/BOM.md`'s
+wiring diagram and pin budget, and from row 6's description. All three fixed.
+
+**Assigned to D10, on a GPIO rather than tied to 5 V, and the reason is
+architectural.** All three existing safety mechanisms - the per-frame ARMED bit,
+the 150 ms watchdog, and `uno_packguard`'s latched cutoff - act through **one**
+code path: writing D11. A stuck Timer2 register or a hang after the timer is
+loaded defeats all three at once. `STBY` gives them a second, hardware path that
+removes the bridge outputs regardless of the PWM and DIR pins. D10 is the right
+pin to spend because its PWM is already dead (Servo owns Timer1), so it is the
+cheapest free pin, and it keeps A1-A5 for future analog such as motor current
+sense. **Free pins remaining: A1-A5 only.**
+
+**Two behaviours the truth table settles, both easy to get backwards** (Toshiba
+table via the SparkFun hookup guide; the Pololu page does not reproduce it):
+
+- **`analogWrite(D11, 0)` with a direction set is a SHORT BRAKE, not a coast.**
+  So "cut throttle to zero" already stops the car actively. That is the desired
+  watchdog behaviour and it is what the current design does - **by accident, not
+  by decision**, which is why it is now written down.
+- **`STBY` low is a COAST** - high-Z outputs, the car rolls on. `STBY` is a
+  *disable*, never the stop action. Order is **brake first, then drop `STBY`**.
+
+**A fail-safe falls out for free, and it closes a known trap.** Uno pins are
+high-Z until `setup()` runs, and the carrier's internal pull-down then holds
+`STBY` low, so the driver is disabled through every reset - including the reset
+that happens when **opening the serial port** (`gotchas.md`). The Pi connecting
+can no longer leave an enabled bridge on an unattended car. Tying `STBY` to 5 V
+would have thrown that away. Firmware must therefore raise D10 only after the
+first valid ARMED frame, never in `setup()`. Added as safety rule 4 in
+`SERIAL_PROTOCOL.md` §3.
+
+## BL.3 The proto-shield net list, and why not a PCB
+
+Evan asked whether a custom PCB could simplify the wiring. **Recommended the
+cheaper rung first**: an Arduino proto shield (~$3-4), which removes every
+flying Dupont jumper - the actual failure mode on a vibrating vehicle - at zero
+lead time and infinite revisability. Cost was never the objection to a PCB
+(JLCPCB is roughly $2-5 for five boards); **schedule is**, at 1-2 weeks per spin
+against a chassis and control firmware that are the real critical path. The
+portfolio argument also favours this order: "I breadboarded it, found N defects,
+then spun a board that fixed them" is an engineering narrative with evidence; a
+board spun from a schematic that never ran is a KiCad screenshot.
+
+**`docs/WIRING_PROTOSHIELD.md`** is the full point-to-point net list: pack and
+power distribution, motor with both TB6612 channels paralleled, encoder, servo,
+lights, pack sense, star ground, an 8-step build order where each step has a
+check that gates the next, and §7 on what changes if it becomes a PCB.
+
+**Writing it found three further defects.** This is the entire justification for
+doing the net list before the board:
+
+1. **The LED current budget is wrong per-pin, and the chip-total being right is
+   what hid it.** `LIGHTING_SPEC.md` computes 8 x 20 mA = 160 mA against the
+   ATmega328P's 200 mA all-I/O maximum and calls it 80%. True, and the wrong
+   limit. There are **4 channels driving 2 LEDs each**, so each *pin* sources
+   **40 mA** - the ATmega328P's *absolute maximum* per I/O pin, against a 20 mA
+   recommended figure. The per-channel reasoning was inherited from the PCA9685,
+   which sank 25 mA per channel independently, and was only partly rewritten
+   when the Uno superseded it in Appendix BC. **Fix: run the LEDs at 10 mA** -
+   20 mA/pin, in spec, 80 mA chip total, 40% of the limit. 3 mm LEDs at 10 mA
+   are plainly bright, so `BOM.md` row 19's MOSFET fallback stays unbuilt.
+2. **`BOM.md` row 5 buys the wrong motor.** The record has Evan choosing the
+   **encoder** motor **#5159 at $29.95** on 2026-08-12 (Appendix O, restated at
+   three later points). Row 5 still lists **#1093 at $23.95**, which has no
+   encoder - while the pin map has spent D2 and D3 on encoder interrupts and the
+   net list wires six encoder conductors. **The BOM buys a motor that cannot
+   feed the firmware designed around it.** Not changed: it moves the total by
+   +$6 and purchases are Evan's call.
+3. **The motor/encoder connector is not hand-solderable.** 6-pin JST SH at
+   1.0 mm pitch does not mate with 0.1 inch protoboard. Pololu's mating cable is
+   needed and is not a `BOM.md` line item.
+
+**Encoder facts verified against pololu.com/product/5159**, not recalled: 6-pin
+JST SH, red M1 / black M2 / blue Vcc / green GND / yellow A / white B; Vcc range
+2.7-18 V; outputs carry internal 10k pull-ups so none are needed externally;
+12 CPR at the motor shaft x 29.86:1 = **~358 counts per output revolution**.
+
+**One trap this produced:** the encoder accepts 2.7-18 V, so powering it from
+the 7.4 V pack "works" - and then swings its outputs to 7.4 V into the Uno's
+5 V-max inputs. **Encoder Vcc must come off the 5.2 V rail.**
+
+## BL.4 Corrections to the session briefing
+
+- **The four commits were NOT unpushed.** Local `main`, `origin/main` and the
+  server are all at `7322b61`, 0 ahead / 0 behind, confirmed with `git
+  ls-remote`. No push command was needed.
+- **The 3dstreet MCP tools DID load this session** - 17 of them. The HANDOFF's
+  hypothesis (approval plus paired tab plus a session started afterwards) was
+  correct.
+- `ml/runs/controller/history_linear_seed0.json` is dirty with 77 insertions /
+  44 deletions from no session that touched it. **Unexplained, not
+  investigated.**
+
+## BL.5 Docs cadence
+
+Bins updated per the `[PM-CADENCE]` reminder, after checking what actually
+changed rather than re-dating:
+
+- **`testing.md`** - the firmware gates were entirely absent. Added
+  `uno_packguard`'s `SELFTEST` (27/27 on the real board), the point that its
+  transition is a pure function so the test exercises shipping logic rather
+  than a copy, and the two backwards-guard traps. Marked `uno_bringup`,
+  `uno_memtest` and `uno_echo` as **measurements, not gates** - they have no
+  pass/fail.
+- **`data.md`** - added the Pi/Uno serial frame contract as the project's second
+  wire format, labelled **DESIGN ONLY**. Flagged an unwritten seam: real-car
+  `action` in an episode npz has no defined conversion from the protocol's int8
+  percentages.
+- **`ui.md`** - checked and genuinely unchanged; lighting is an actuator
+  channel, not a UI. Re-dated with the reason stated, not silently.
+- **`gotchas.md` is now 404 lines, 2.7x the ~150 cap.** It was already flagged
+  as due a split at 272. **A split is overdue** - suggested hardware / track /
+  tooling.
+
+## BL.6 State
+
+**Nothing is built, nothing is ordered, no firmware implements the protocol.**
+The net list is design. The `STBY` fix is a document change. The only physical
+facts added this session are Evan's two tire measurements.
+
+# Appendix BM - CORRECTION to BL - its heading timestamp is 6 minutes ahead of the clock (2026-09-02, ~17:33 CDT)
+**BL's heading timestamp is wrong. It reads `~17:38 CDT`; the entry was written
+at `~17:32 CDT`.**
+
+The `--date` argument was typed before `date` was read, making it an invented
+number rather than a measured one - the exact thing the standing order forbids,
+at a harmless magnitude. Recorded here rather than edited, because dated entries
+are immutable and a silent fix would be worse than the error.
+
+`date` output at the moment of the append: `2026-09-02, ~17:32 CDT`, and
+`17:33:03 CDT` on the verification call immediately after. **Nothing else in BL
+is affected** - every other date in it is 2026-09-02 or an earlier absolute
+date, and no measurement or derived number depends on the minute.
+
+# Appendix BN - CORRECTION to BL.4's dirty-file counts (74/41, not 77/44); 12-tooth steering pinion and rack travel (2026-09-02, ~17:36 CDT)
+## BN.1 CORRECTION to BL.4 - the dirty-file line counts were wrong
+
+**BL.4 says `ml/runs/controller/history_linear_seed0.json` is dirty with "77
+insertions / 44 deletions". That is wrong, and wrong in two ways.**
+
+`77/44` was the **two-file total** printed by `git diff --stat` at the bottom of
+its output, not the per-file figure. Re-derived with `git diff --numstat`:
+
+| file | + | - |
+|---|---|---|
+| `.claude/pm-cadence.json` | 3 | 3 |
+| `ml/runs/controller/history_linear_seed0.json` | **74** | **41** |
+
+The second error is the attribution. BL.4 says the change came "from no session
+that touched it" - but 3 of those 77 lines were `.claude/pm-cadence.json`, which
+**this session's own cadence hook writes on every prompt**. So the sentence
+folded a file this session demonstrably touched into a claim that nothing had
+touched it.
+
+**What survives the correction:** `history_linear_seed0.json` really is dirty
+with **74/41**, it really was dirty at session start (it is in the opening `git
+status`), and it is still **unexplained and uninvestigated**.
+
+Caught by the `[CLAIM-CHECK]` stop hook, which flagged `77/44` as appearing in
+no tool output. It was in a tool output - just as a different quantity than the
+one it was used for. **The hook flags provenance, not correctness, and here the
+provenance gap was the correctness bug.**
+
+## BN.2 Steering pinion: 12 teeth. Rack travel per turn is now a measured-basis number.
+
+Evan, 2026-09-02: the rack-and-pinion he built uses a **12-tooth gear on the
+rack**. With the tire measurements in BL.1 this is the second piece of real
+geometry the project has.
+
+**LEGO gear pitch rule, verified rather than recalled** (orionrobots.co.uk,
+BrickNerd, Rebrickable): every gear in the standard LEGO system has **16 teeth
+per stud of pitch radius**, and a stud is **8 mm**, so pitch radius = N/2 mm.
+The same sources give the system a **metric module of 1**, which is an
+independent statement of the same fact.
+
+| quantity | value |
+|---|---|
+| pinion teeth | **12** |
+| pitch radius | 12 / 16 studs = 0.75 studs = **6.00 mm** |
+| pitch diameter | **12.00 mm** |
+| module check | 12.00 mm / 12 teeth = **1.00 mm** - agrees with the stated module |
+| **rack travel per full pinion revolution** | pi x 12.00 = **37.70 mm** |
+
+**Cross-check, two independent routes to the same number:** tooth pitch on a
+module-1 rack is pi x m = 3.1416 mm, and 12 teeth x 3.1416 = **37.70 mm**.
+Matches the circumference route exactly. (For reference the classic LEGO rack,
+part 3743, carries 10 teeth over 4 studs = 31.944 mm, consistent with the same
+3.14 mm tooth pitch.)
+
+**Servo travel, if the servo drives the pinion 1:1:**
+
+| MG90S travel | pinion turns | total rack travel | from centre |
+|---|---|---|---|
+| 180 deg | 0.500 | 18.85 mm | **+/-9.42 mm** |
+| 120 deg | 0.333 | 12.57 mm | **+/-6.28 mm** |
+
+*The MG90S travel figure is a nominal spec, not measured, and it depends on the
+pulse range driven. Treat both rows as bracketing, not as the answer.*
+
+**What this does and does not settle.**
+
+- It confirms the protocol's `int8` steering choice with room to spare: 200
+  steps across +/-9.42 mm is 0.094 mm per step, far finer than the mechanism
+  resolves. No reason to revisit `int16`.
+- It does **not** give the max road-wheel steer angle, because that depends on
+  the steering arm length, which is unmeasured - and on where the LEGO
+  geometry's own hard stops fall, which may bind before the servo does.
+- **Turn radius therefore remains an estimate**, and corner geometry stays
+  frozen. But it is now short exactly **two** measurements rather than being
+  arithmetic on a guessed car width: **wheelbase** (front to rear axle centres)
+  and **max road-wheel angle at the rack's hard stop**. Both are measurable on
+  the bench today, without the rolling chassis.
+- Worth distinguishing: that would be a **geometric** turn radius from measured
+  inputs. **PRD T2 asks for an EMPIRICAL turning test** on the rolling chassis
+  (M1.7), and it still does. A measured-geometry figure is strictly better than
+  today's arithmetic on estimates, but it does not close T2.
+
+## BN.3 State
+
+Nothing built, nothing ordered. BN.2 records a part count Evan reported plus
+arithmetic on a verified pitch rule; **no steering angle, wheelbase, or turn
+radius was measured**, and none is claimed.
+
+# Appendix BO - Control firmware runs on the board (37/37, host 11/11); T1 re-run gives 171 mm not 201; BOM row 5 corrected; gotchas split four ways (2026-09-02, ~17:55 CDT)
+Four tasks in one sitting at Evan's direction: BOM drift repair, the real T1
+re-run, the `gotchas.md` split, and the control firmware. **The firmware is the
+first code in this project that has run on hardware and done something other
+than measure itself.**
+
+Evan also corrected the steering angle mid-session: **30 degrees, not 45.** The
+45 figure never reached disk. At 30 deg, `R = wheelbase / tan(30) = 1.73 x
+wheelbase`, so the existing ~330 mm estimate implies a ~190 mm wheelbase, which
+is plausible — meaning the 500-670 mm corner band probably does **not** shrink.
+**Wheelbase remains unmeasured**: Evan does not have the parts.
+
+## BO.1 T1 re-run: the spare is 171 mm, and my own earlier estimate was wrong
+
+`cad/track_layout_v2.py` re-run on the measured 114.75 mm. Real output, both
+arms, self-check PASS either way:
+
+| | 130 mm ESTIMATE (before) | 114.75 mm MEASURED (now) |
+|---|---|---|
+| lane width | 260 mm | **230 mm** |
+| street pitch | 1200 mm | 1200 mm — **unchanged** |
+| span | 2660 mm | **2629 mm** |
+| **spare of 2800 usable** | 140 mm | **171 mm** |
+| printed tiles | 79, ~970 g | **73, ~902 g** |
+
+**BL.1 predicted ~201 mm of spare. It is 171 mm. That prediction was wrong and
+this supersedes it.** BL.1 applied HANDOFF's rule of thumb — *40 mm of span per
+10 mm of car width* — which does not hold for this geometry. The script shows
+why: `best_straight` is **capped at MAX_STRAIGHT = 200 mm**, and at both widths
+the uncapped value (270 mm and 285 mm) exceeds the cap, so **pitch does not move
+at all**. `span = (streets-1) x pitch + lane` then changes by exactly the lane
+delta, 30.5 mm.
+
+**So the real sensitivity is 2x the car-width change, not 4x**, for as long as
+the straight stays capped. HANDOFF's rule appears to predate the Appendix AY
+pitch correction (which removed the `lane` term from `pitch`). **It should be
+struck from HANDOFF rather than carried.** The lesson is the one this file keeps
+relearning: the runnable, self-checking generator is the authority, and a rule
+of thumb quoted from a snapshot is not.
+
+Changes to the script, both surgical: `CAR_WIDTH` set to the measured value with
+the caveat inline (tire track, not whole-vehicle), and a **`--car-width` flag**
+added to mirror the `--radius` flag that already existed — this file was made
+parametric for exactly two unmeasured numbers and only one of them had a knob.
+
+## BO.2 BOM row 5 was buying a motor that cannot feed the design
+
+Corrected: **#1093 ($23.95, no encoder) -> #5159 ($29.95, 12 CPR encoder)**, the
+motor Evan chose on 2026-08-12 (Appendix O) and which the pin map has assumed
+ever since by spending D2/D3 on encoder interrupts. Verified live 2026-09-02:
+29.86:1, 1000 rpm, 1.6 A stall, encoder Vcc 2.7-18 V with internal 10k pull-ups.
+
+**New row 5b: Pololu #4763 JST SH cable, $3.00.** The page states plainly that
+*"cables are not included"*, and the connector is 6-pin JST SH at 1.0 mm pitch —
+not hand-solderable to 0.1" protoboard. **This is the same defect class as row 3,
+the camera cable: an omitted mating cable that stops the build dead**, and row 3
+is the item this BOM was originally written to catch.
+
+**Total: $226-234 -> $235-243 before shipping, ~$250-268 with.** Recomputed from
+the rows, not carried forward.
+
+**The $200 ceiling is now breached on EVERY path, including the 2GB Pi**, which
+lands at $190.32-197.82 before shipping but **~$205-223 with**. The 2GB path was
+the last one whose low end cleared the ceiling. Worth being precise about what
+this is: **not a cost overrun from new features** — both increments are parts the
+existing design already required and the BOM had failed to list. Evan decides
+whether the ceiling moves. Nothing is ordered.
+
+## BO.3 `gotchas.md` split four ways, mechanically, with a no-loss invariant
+
+It had reached **423 lines, 2.8x the ~150 cap** and was four unrelated subjects
+in one file. Split by script rather than by hand, because hand-moving 400 lines
+drops facts silently:
+
+    entry blocks parsed : 68
+    entry blocks placed : 68
+    INVARIANT OK - nothing lost
+
+| new bin | entries | lines | scope |
+|---|---|---|---|
+| `hardware.md` | 46 | 283 | printing/Lego fit, power, motors, drivers, the Uno, vehicle geometry |
+| `track.md` | 8 | 54 | layout, markings, surface, what the camera sees |
+| `sim-harness.md` | 13 | 131 | the simulator, the eval harness, training GPU limits |
+| `tooling.md` | +1 | 47 | appended, not overwritten |
+
+**`gotchas.md` is KEPT as a 24-line router, not deleted**, because `CLAUDE.md`,
+`HANDOFF.md` and several appendices reference it by name and a dangling
+reference is worse than a stub.
+
+**One entry was deliberately not carried over, and this is the disclosure:**
+*"NEVER split a driving dataset randomly by frame"*. It duplicated `data.md`'s
+**"Splitting rule — THREE splits, not two"**, which states the same rule with the
+measured evidence behind it (fit 56.11 vs val 56.72). Keeping both is exactly the
+scattering the bins exist to prevent. **The rule is unchanged and still enforced
+in `data.md`.**
+
+`hardware.md` at 283 lines is still over the cap. Left as one coherent domain
+rather than split again immediately; flagged in `INDEX.md`.
+
+## BO.4 The control firmware — and what running it found that compiling did not
+
+`firmware/uno_control/` implements SERIAL_PROTOCOL.md, with `packguard.h` (a
+marked COPY of the 27/27-tested pack guard) and `firmware/host_test.py` as the
+Pi-side exerciser.
+
+**Verified on the real board.** Firmware SELFTEST, which runs in `setup()`:
+
+    == UNO CONTROL == protocol v0.2, ACTUATORS UNWIRED
+    SELFTEST PASS 37/37
+
+`host_test.py`, driving the protocol over COM3, **PASS 11/11, exit 0**: reply
+framing and CRC, seq echo, a 20 Hz stream, bad-CRC rejection, the 150 ms
+watchdog, the `?` escape hatch, and that **STBY stays LOW because no pack sensor
+is wired**. Measured: flash **7134 B of 32256 (22%)**, SRAM **312 B of 2048
+(15%)**, loop period **2.0-3.0 ms** against the 50 ms budget.
+
+**THE FINDING OF THIS SESSION: the firmware compiled clean while carrying three
+wrong assertions.** Only flashing it and reading the board surfaced them.
+
+1. **A test asserted the pack latch outranks a fault reading.** The firmware does
+   the reverse — `step()` checks the FAULT band before the latch — and the
+   firmware is RIGHT, matching the 27/27-tested original: both states inhibit
+   throttle, and FAULT names the actual problem (the sensor). **The test was
+   wrong, not the code.** Corrected, and strengthened to prove the latch survives
+   underneath a fault and that a sane reading returns to CUTOFF rather than OK.
+2. **and 3. Two tests asserted an encoder DIRECTION.** "One cycle forward is +4."
+   **Which way is forward is not knowable until the encoder is on a motor in a
+   drivetrain that does not exist.** The table happens to count the
+   00->01->11->10 cycle as negative; that is a convention, not a defect.
+
+**The generalisable rule, now in `hardware.md` and `testing.md`: do not assert a
+sign, direction or polarity that no measurement has established. Test the
+property that survives the convention.** Replaced with: the two directions are
+exact opposites, one cycle is 4 counts either way, an illegal 2-bit jump counts
+0, and `QTAB` is antisymmetric across all 16 entries — all true regardless of
+which way the motor turns. That discovery also earned a real knob,
+`ENCODER_SIGN`, to flip when the car first rolls.
+
+**Design decisions worth recording:**
+
+- **The safety decision is a PURE function**, `outputModeFor(armed, packInhibit,
+  wdTripped, everArmed, msUnsafe)`, so SELFTEST drives shipping logic rather than
+  a copy — the same discipline that made `uno_packguard` testable without a
+  battery.
+- **Brake THEN coast**, forced by the truth table: `STBY` low is a coast, so
+  dropping it as the safety action would leave the car rolling. Unsafe states
+  brake with `STBY` still high for `BRAKE_MS`, then drop it.
+- **`everArmed` gates the first rise of `STBY`**, so the driver is never enabled
+  before a valid ARMED frame — and the Pi opening the port (which resets the
+  board) cannot leave an enabled bridge on an unattended car.
+- **Protocol bumped to v0.2**: status bits 4-5 now carry `PackState`. Without
+  them the Pi cannot distinguish "throttle dead because the pack is flat" from
+  "throttle dead because I stopped sending" — identical symptom, opposite fix.
+- **Timer2 prescaler set to 1** (31.25 kHz), above the audible band. This is the
+  entire reason motor PWM is on D11; Timer0 drives `millis()` and cannot move.
+
+**Two environment facts found:** the **Servo library was not installed**
+(`arduino-cli lib install Servo`, 1.3.0), and **pyserial was not in the venv**
+(installed 3.5). `arduino-cli` 1.5.1 is at
+`~/AppData/Local/Programs/Arduino IDE/resources/app/lib/backend/resources/`.
+`board list` reports COM3 as **"Unknown"** — the FTDI-clone identity trap, which
+is why `--fqbn arduino:avr:uno` stays mandatory.
+
+## BO.5 State, stated plainly
+
+**Nothing is wired and nothing is ordered.** The firmware's link and state
+machine are verified on real hardware; **every actuator path is verified only as
+a DECISION the firmware made**, never as something that physically moved. No
+motor, servo, encoder, LED or pack exists. `packguard.h` is a copy that will
+drift from the tested original. Wheelbase is unmeasured, the 30-degree steering
+figure is Evan's eyeball rather than a protractor, and corner geometry stays
+frozen until T2.
+
+# Appendix BP - CORRECTION to BL.1 and BO.1 - the 40mm/10mm sensitivity rule is from Appendix AZ, not HANDOFF (2026-09-02, ~17:57 CDT)
+**BL.1 and BO.1 both credit HANDOFF.md with the "40 mm of span per 10 mm of car
+width" sensitivity rule. HANDOFF does not contain it and never did.**
+
+Verified by grep: `HANDOFF.md` mentions "140 mm spare at R=500" (line 229, the
+Track-layout workstream row) and **nothing about a per-millimetre sensitivity**.
+The rule's actual origin is **Appendix AZ** (2026-09-01), in its Evan-only
+critical-path list:
+
+> "every 10 mm of car width costs 40 mm of grid span against 140 mm of spare"
+
+It also appeared in this session's opening briefing, which is where it entered my
+working set — and I attributed it to HANDOFF without checking, twice.
+
+**What is corrected:**
+
+| claim | where | correction |
+|---|---|---|
+| "HANDOFF's stated sensitivity is 40 mm of span per 10 mm of car width" | BL.1 | the rule is from **Appendix AZ**, not HANDOFF |
+| "HANDOFF's stated sensitivity..." (restated) | BO.1 | same |
+| "It should be struck from HANDOFF rather than carried" | BO.1 | **there is nothing to strike in HANDOFF.** The stale rule lives in Appendix AZ, which is an append-only dated entry and is therefore corrected here rather than edited |
+
+**What is NOT affected.** BO.1's substantive finding stands on its own, because
+it came from running the generator rather than from reading any document: lane
+260 -> 230 mm, span 2660 -> 2629 mm, **spare 140 -> 171 mm**, `pitch` unchanged
+at 1200 mm because `best_straight` is capped at MAX_STRAIGHT = 200 mm. The rule
+of thumb is still wrong for this geometry, the real sensitivity is still 2x
+rather than 4x the car-width change, and BL.1's ~201 mm estimate is still
+superseded by the measured 171 mm. **Only the attribution was wrong.**
+
+`.claude/codebase-memory/hardware.md` carried the same misattribution and has
+been corrected in place (bins are editable; the record is not).
+
+**Process note, since this is the third correction in one session.** All three
+were the same failure: a number or a source taken from the session's working
+context rather than re-derived at the moment of writing. The `[CLAIM-CHECK]`
+hook caught one (BN.1). The other two — BM's fabricated timestamp and this
+attribution — were caught only by explicitly re-checking, which is the habit
+that should not depend on a hook firing.
+
+# Appendix BQ - Max steer confirmed 32 degrees and the measurement convention that makes it a 2.6x trap; board restored; HANDOFF synced (2026-09-02, ~18:02 CDT)
+Session close: steering angle confirmed, board restored, HANDOFF synced, commit.
+
+## BQ.1 Max steer = 32 degrees, and the MEASUREMENT CONVENTION is the load-bearing part
+
+Evan, 2026-09-02, in three reports across the session: **~45 (eyeball) -> 30 ->
+32 (measured)**. **Use 32.** The first two never reached disk; only 32 is
+recorded as a project fact.
+
+**How he measured it, in his words: "if 90 is straight ahead then 90 - (angle
+measured on protractor) = steering angle."**
+
+This is worth its own entry because it disambiguates the number in the way that
+actually matters. **32 degrees is the wheel's DEVIATION from straight ahead**,
+which is exactly the `delta` in `R = wheelbase / tan(delta)`. The convention is
+correct and the arithmetic below uses it correctly.
+
+**Getting it backwards is a 2.6x error, not a rounding error:**
+
+| reading | R |
+|---|---|
+| `delta = 32` (correct: deviation) | **1.600 x wheelbase** |
+| `delta = 58` (wrong: raw protractor reading) | 0.625 x wheelbase |
+| | **ratio 2.56x** |
+
+A future session that finds "32 degrees" without the convention could plausibly
+read it either way, and would then design corners at 39% of the correct radius.
+Recorded in `hardware.md` and in HANDOFF's constraint table.
+
+**Turn radius is now exactly ONE measurement away.** `R_min = 1.600 x wheelbase`,
+and **wheelbase is unmeasured because Evan does not have the parts.** For
+reference, the standing ~330 mm estimate implies a **~206 mm wheelbase**, which
+is plausible for a 114.75 mm-wide car — so the frozen 500-670 mm corner band
+probably does **not** shrink.
+
+**What this does NOT do: it does not close T2.** A geometric radius computed
+from wheelbase and 32 degrees would be strictly better than today's
+arithmetic-on-estimates, but PRD T2 asks for an **empirical** turning test on the
+rolling chassis (M1.7). **Corner geometry stays frozen.**
+
+## BQ.2 Board restored to uno_packguard
+
+`uno_control` was flashed to the real Uno during BO to verify it. The board has
+been returned to the pack guard, and it was re-verified rather than assumed:
+
+    == UNO PACK GUARD ==
+    divider 100k/12k  warn=6400 cutoff=6000 fault<4000 fault>8800 hold=500ms
+    SELFTEST PASS 27/27
+
+`uno_packguard` is 6004 B flash (18%), 289 B SRAM (14%). **The board currently
+runs the pack guard, not the control firmware** — re-flash `uno_control` before
+any protocol work.
+
+## BQ.3 HANDOFF synced
+
+Eleven edits. It was stale on: appendix count (62 -> 68), the hardware-lane
+headline (control firmware now runs on the board), car width (130 estimate ->
+114.75 measured), max steer (new row, with the convention caveat), lane width
+(260 -> 229.5 mm), track v2 spare (140 -> 171 mm), the BOM total and the breached
+ceiling, the Uno-firmware workstream row, the bins pointer (`gotchas.md` is now a
+router, not "the dense one"), and BLOCKED-ON-EVAN, where car width is answered
+and **wheelbase is added as the new critical-path measurement**.
+
+## BQ.4 State
+
+**Nothing is wired, nothing is ordered.** Physical facts added across this whole
+session: three of Evan's measurements — **front tire track 107.75 mm, rear
+114.75 mm, max steer 32 degrees** — plus one 12-tooth pinion count. Everything
+else is documents, arithmetic on verified rules, and firmware verified on a bare
+board with no actuators attached.
+
+Committed at the end of this session; **not pushed** — pushing was not
+authorised.

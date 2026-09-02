@@ -74,7 +74,12 @@ REPO = Path(__file__).resolve().parent.parent
 
 FLOOR = 3.000          # m   CONFIRMED by Evan 2026-09-01
 WALL_MARGIN = 0.100    # m                                          EST
-CAR_WIDTH = 0.130      # m   UNMEASURED -- set by the Lego rack + diff at B2
+CAR_WIDTH = 0.11475    # m   MEASURED 2026-09-02 (Appendix BL): rear tire track,
+                       #     the widest point. Front is 107.75 mm. Supersedes the
+                       #     0.130 ESTIMATE this file used until then.
+                       #     CAVEAT: tire track, not whole-vehicle width -- the
+                       #     assembled car (chassis, electronics stack, camera
+                       #     mount) has never been measured and may be wider.
 LANE = 2.0 * CAR_WIDTH  # m  lane width rule, SIM_TRANSFER_SPEC section 3
 R_NOM = 0.500          # m   FROZEN band 500-670; only 500 fits a 3x3 grid
 STREETS = 3            # per axis
@@ -421,6 +426,9 @@ def svg(g, out: Path) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--radius", type=float, default=R_NOM)
+    ap.add_argument("--car-width", type=float, default=CAR_WIDTH,
+                    help="metres; lane = 2x this. --radius already existed for "
+                         "the frozen number, this is the other one")
     ap.add_argument("--streets", type=int, default=STREETS)
     ap.add_argument("--self-check", action="store_true")
     ap.add_argument("--out", default=str(REPO / "cad"))
@@ -430,12 +438,13 @@ def main() -> int:
         return 0
     self_check()
 
-    g = build(R=args.radius, streets=args.streets)
+    g = build(R=args.radius, lane=2.0 * args.car_width, streets=args.streets)
     pp = print_plan(g)
     usable = FLOOR - 2 * WALL_MARGIN
     route = path_len(g["route"])
     print(f"floor           {FLOOR:.3f} x {FLOOR:.3f} m (usable {usable:.3f})")
-    print(f"car width       {CAR_WIDTH*1000:.0f} mm  UNMEASURED, set at B2")
+    print(f"car width       {args.car_width*1000:.2f} mm  MEASURED 2026-09-02 "
+          f"(tire track, not whole-vehicle)")
     print(f"lane width      {g['lane']*1000:.0f} mm")
     print(f"corner radius   {g['R']*1000:.0f} mm  NOT COMMITTED until B3")
     print(f"street pitch    {g['pitch']*1000:.0f} mm  "

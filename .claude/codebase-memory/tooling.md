@@ -35,3 +35,13 @@
   timestamp lines on the HOST and compare deltas — comparing board uptime against
   a host stopwatch started at a different moment produced a bogus 0.54x clock
   ratio before this was understood (Appendix BE).
+
+## Moved from gotchas.md 2026-09-02 (Appendix BO)
+
+- **Quoted heredocs write backslash-u escapes LITERALLY.** `cat > f <<'EOF'` does
+  no escape interpretation, so a `\u2014` written for an em dash lands as six
+  characters. 21 such lines reached the append-only record on 2026-09-02 and
+  **cannot be edited out**. Write real UTF-8 characters, or build the file in
+  Python where the escapes are interpreted.
+
+

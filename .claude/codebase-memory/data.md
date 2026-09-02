@@ -118,3 +118,41 @@ the model was never meant to cover picks an underfit model.
 `roboracingleague-track` are quarantined in `ml/data/sim_quarantine/`
 (the expert cannot drive them; see record Appendix P/Q). Train is still
 unbalanced 51:27 in favour of `generated-track`.
+
+## The OTHER contract: Pi <-> Uno serial frames (added 2026-09-02)
+
+**Status: DESIGN ONLY — `firmware/SERIAL_PROTOCOL.md` v0.1, nothing implements
+it.** Recorded here because it is the project's second wire-format contract and
+the episode format above is silent about it. Do not treat any field below as
+verified on hardware; only the *link* is measured (p50 0.869 / p99 1.069 ms
+round trip at 20 Hz, ~2% of the 50 ms budget).
+
+- **Binary, fixed length, sync byte + CRC8 (poly 0x07) — not ASCII.** The
+  reason is the failure mode, not speed: at 115200 even 100 ASCII bytes cost
+  8.7 ms out of 50, so size is irrelevant. A line-oriented ASCII parser
+  silently accepts a truncated number as valid; a sync byte plus checksum lets
+  the Uno *reject* a corrupt frame and fall to a safe state.
+- **Command Pi->Uno, 7 bytes**: `SYNC 0xA5` · `seq` u8 · `steer` i8 -100..100 ·
+  `throttle` i8 -100..100 · `lights` u8 bitfield · `flags` u8 (bit0 ARMED) ·
+  `crc8`.
+- **Reply Uno->Pi, 9 bytes**: `SYNC 0x5A` (deliberately different, so a
+  loopback cannot be mistaken for a reply) · `seq` echoed · `ticks` i32 LE
+  cumulative quadrature · `status` u8 (armed / watchdog tripped / bad CRC /
+  frame dropped) · `loop_dt` u8 in 100 us units, saturating · `crc8`.
+- **ARMED is opt-in EVERY frame**, not a latched mode. Actuators are inert on
+  boot, after reset, and after any watchdog trip, so stray bytes on a serial
+  port cannot start the car.
+- **Watchdog 150 ms** = three missed frames at 20 Hz. On expiry: throttle to
+  zero, *hold* last steering angle, hazards. Throttle-zero is the safety
+  action; holding steer avoids a snap-to-centre mid-corner.
+- **int8 steer/throttle is deliberate**: 200 steps, vs maybe 60 discrete
+  servo positions across useful travel. *Upgrade trigger: int16 only if a
+  measurement shows steering quantisation visible in driving.*
+- **The pack guard's throttle inhibit must fold into this** — `uno_packguard`'s
+  `throttleInhibited()` already exists but the two sketches are separate; the
+  merge is unwritten work, not a done thing.
+
+**This contract and the episode contract meet at the encoder.** `ticks` is the
+only odometry source on the car, so whatever `action` means in a real-car
+episode npz must be defined against these int8 percentages, not against the
+sim's float [-1, 1]. That conversion is not written down anywhere yet.

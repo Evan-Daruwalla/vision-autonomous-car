@@ -62,3 +62,53 @@ were documented, here and in the README, as if they were.
   Committed result files make "the output exists" indistinguishable from "the
   run worked" — and republishing a stored number as a fresh measurement is
   the worst failure this project can have.
+
+## Firmware gates (added 2026-09-02, hardware lane)
+
+No test framework here either. The Uno sketches in `firmware/` verify
+themselves over the serial console; there is no host-side runner.
+
+| Command | Proves | Notes |
+|---|---|---|
+| `SELFTEST` on `firmware/uno_packguard` | the pack low-voltage state machine is correct: OK→WARN→CUTOFF thresholds, the 500 ms hold that ignores stall dips, that CUTOFF **latches** (a recovered or even full pack stays cut), that FAULT is distinct from CUTOFF and does NOT latch, and that both CUTOFF and FAULT inhibit throttle | **27/27 PASS on the real board 2026-09-02** (Appendix BJ). Runs automatically in `setup()` as well as on demand |
+| `SIM <mv>` / `REAL` / `CLEAR` / `STATUS` on the same sketch | lets every state transition be driven without discharging a real pack | The divider itself and the ADC path are NOT covered by SELFTEST — only the logic downstream of a millivolt reading is |
+
+**The gate is testable because the transition is a pure function.** `step(mv,
+now)` takes voltage and time and returns a state, so SELFTEST exercises
+*exactly* the shipping logic rather than a copy of it. Any firmware state
+machine added later (the serial protocol's ARMED/watchdog logic is the next
+one) should be factored the same way — the alternative is a state machine only
+testable by driving the car.
+
+**Two guards here exist because a naive check would have been backwards:**
+- A **floating analog pin reads near full scale, not zero** — measured 10248 mV
+  on the first build with nothing wired to A0. So the sensor guard needs an
+  *upper* implausibility band (>8.8 V ⇒ FAULT), not just a lower one. A
+  lower-only guard would have read an unwired divider as a healthy pack.
+- CUTOFF **latches** deliberately. An unlatched cutoff would re-enable as the
+  pack relaxed a few hundred mV above threshold, sag under load, and oscillate.
+
+**`uno_bringup`, `uno_memtest`, `uno_echo` are MEASUREMENTS, not gates** — they
+have no pass/fail and exit nothing. They produced the board facts in
+`gotchas.md` (2048 B SRAM / 1705 B free, 16.0042 MHz measured, link p50
+0.869 / p99 1.069 ms). Do not cite them as verification of anything else.
+
+## Control firmware gates (added 2026-09-02, Appendix BO)
+
+| Command | Proves | Notes |
+|---|---|---|
+| firmware SELFTEST on `firmware/uno_control` (runs in `setup()`, or send `T`) | CRC8 against the 123456789=0xF4 reference vector, whole-frame CRC, steering/throttle clamping, the duty cap, the **whole four-input safety decision** (`outputModeFor`), the pack transitions, and the quadrature table's antisymmetry | **PASS 37/37 on the real board 2026-09-02.** Same discipline as `uno_packguard`: the safety decision is a PURE function, so the test drives shipping logic, not a copy |
+| `.venv/Scripts/python.exe firmware/host_test.py --port COM3` | the protocol end-to-end on hardware: reply framing and CRC, seq echo, a 20 Hz stream, bad-CRC rejection, the 150 ms watchdog, the `?` escape hatch, and that **STBY stays LOW with no pack sensor** | **PASS 11/11, exit 0, 2026-09-02.** Exits non-zero on any failure, so it is a gate. Needs `pyserial` (installed into `.venv` 2026-09-02) |
+
+**Compiling is not running, and this is the evidence.** `uno_control` compiled
+clean (7134 B flash, 312 B SRAM) while carrying **three wrong assertions**. Only
+flashing it and reading the board surfaced them: one asserted the pack latch
+outranked a fault reading when the firmware — correctly, matching the tested
+`uno_packguard` — does the reverse, and two asserted an encoder direction that
+**is not knowable until the encoder is on a motor.** A green compile said
+nothing about any of them.
+
+**The lesson generalises: do not assert a sign, a direction, or a polarity that
+no measurement has established.** Test the property that survives the
+convention instead — here, that the two directions are exact opposites and that
+`QTAB` is antisymmetric across all 16 entries, which is true either way.
