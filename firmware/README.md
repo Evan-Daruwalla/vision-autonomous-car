@@ -56,6 +56,9 @@ tick 0
 ## Not done
 
 - **No control firmware exists.** The serial protocol is designed on paper only.
-- **The FTDI latency timer (default 16 ms) is UNMEASURED** and sits on the 20 Hz
-  control path, whose whole budget is 50 ms per step. Measure before trusting
-  the loop rate.
+- ~~The FTDI latency timer (default 16 ms) is UNMEASURED~~ **MEASURED
+  2026-09-02 (Appendix BF): it does NOT threaten the loop.** Registry
+  `LatencyTimer` is indeed 16, but the real round trip at the actual control
+  shape (4-byte command -> 4-byte reply, 20 Hz, 400 exchanges) is **p50 0.869 ms,
+  p95 0.956 ms, p99 1.069 ms, max 5.753 ms, zero failures** — nothing above
+  10 ms, so ~2% of the 50 ms budget at p99. `firmware/uno_echo` is the harness.

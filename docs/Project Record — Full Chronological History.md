@@ -92,6 +92,7 @@ the dated entry, not the digest.
 - [BC — Arduino Uno supersedes the PCA9685 one day old: encoder counting and a watchdog for $0, the $200 ceiling is reachable again, and the record write-guard is confirmed firing](#appendix-bc---arduino-uno-supersedes-the-pca9685-one-day-old-encoder-counting-and-a-watchdog-for-0-the-200-ceiling-is-reachable-again-and-the-record-write-guard-is-confirmed-firing-2026-09-02-1520-cdt) (09-02)
 - [BD — First verified hardware: the Uno runs our firmware (signature 1E 95 0F, F_CPU 16 MHz), and an FTDI clone needs an explicit --fqbn forever](#appendix-bd---first-verified-hardware-the-uno-runs-our-firmware-signature-1e-95-0f-f_cpu-16-mhz-and-an-ftdi-clone-needs-an-explicit---fqbn-forever-2026-09-02-1526-cdt) (09-02)
 - [BE — SRAM measured at 2048 B and the clock at 16.0042 MHz; CORRECTION to BD (F_CPU was never measured), and the silicon's signature says 328PB while avrdude says 328P](#appendix-be---sram-measured-at-2048-b-and-the-clock-at-160042-mhz-correction-to-bd-f_cpu-was-never-measured-and-the-silicons-signature-says-328pb-while-avrdude-says-328p-2026-09-02-1541-cdt) (09-02)
+- [BF — FTDI latency timer measured: configured at 16 ms but costs ~0.9 ms on the wire, so the risk flagged in BD and BE was wrong](#appendix-bf---ftdi-latency-timer-measured-configured-at-16-ms-but-costs-09-ms-on-the-wire-so-the-risk-flagged-in-bd-and-be-was-wrong-2026-09-02-1550-cdt) (09-02)
 
 ---
 
@@ -6843,3 +6844,95 @@ extra I2C, none of which the plan uses). Recorded so a future session does not
   quantity from the clock measured above: the clock is the chip's timebase, the
   latency timer is how long the USB bridge sits on bytes before delivering them,
   and only the latter eats the 50 ms control budget.
+
+# Appendix BF - FTDI latency timer measured: configured at 16 ms but costs ~0.9 ms on the wire, so the risk flagged in BD and BE was wrong (2026-09-02, ~15:50 CDT)
+The FTDI latency timer was the most concrete unmeasured number in the hardware
+lane, flagged in BD and BE as sitting on the 20 Hz control path. **Measured. It
+does not threaten the loop, which means the risk I flagged twice was wrong.**
+
+## BF.1 The configured value really is 16 ms
+
+```
+HKLM\SYSTEM\CurrentControlSet\Enum\FTDIBUS\VID_0403+PID_6001+A5069RR4A\0000\Device Parameters
+LatencyTimer    : 16
+MinReadTimeout  : 0
+MinWriteTimeout : 0
+```
+
+So the premise of the concern was correct: the FT232RL is configured with the
+16 ms default, and a control reply is a SHORT packet, which is precisely the
+case the timer governs.
+
+## BF.2 The measured round trip is ~0.9 ms, not 16 ms
+
+`firmware/uno_echo` echoes a byte with no delay, no formatting and no flush, so
+what remains is USB out + microseconds of AVR + USB back.
+
+First pass, 200 single-byte exchanges: p50 **0.508 ms**, p95 0.634, p99 0.764,
+max 7.277, 0 failures.
+
+Then at the shape that actually matters -- a 4-byte command and 4-byte reply,
+paced at 20 Hz for 400 exchanges:
+
+```
+n=400 fails=0   (4-byte cmd -> 4-byte reply, 20 Hz)
+p50=0.869  p95=0.956  p99=1.069  max=5.753 ms
+over 5ms : 1
+over 10ms: 0
+over 16ms: 0
+over 50ms: 0  <- would break the control loop
+```
+
+**About 2% of the 50 ms budget at p99, ~12% in the single worst sample, and
+nothing above 10 ms across 400 exchanges.** The serial link is not a constraint
+on the 20 Hz loop.
+
+## BF.3 The mechanism is NOT established, and I am not going to invent one
+
+The registry says 16 ms. The wire says 0.9 ms. Those are both facts and I
+cannot presently reconcile them. The plausible stories -- that the timer bounds
+a MAXIMUM wait rather than imposing a fixed delay, that the host driver drains
+more eagerly than the datasheet model suggests, or that a counterfeit FT232RL
+(BC.6 flags that risk) does not implement the timer faithfully -- are
+speculation, and none was tested.
+
+What follows from that honestly:
+
+- **Do not budget 16 ms.** It was measured, repeatedly, and it is not there.
+- **Do not budget 0.9 ms on a different host either.** This is one machine, one
+  driver, one cable. The number is not portable and the mechanism that produces
+  it is unknown, so it could differ on the Pi, which is where it will actually
+  run.
+- The firmware watchdog already covers the failure mode regardless, and if the
+  timer ever does bite, the registry `LatencyTimer` value is the known lever.
+
+**Re-measure on the Pi before relying on this.** The measurement that matters is
+Pi-to-Uno, and every number above is Windows-to-Uno.
+
+## BF.4 What this corrects
+
+BD.4 and BE.6 both list the latency timer as an open risk on the control path,
+and BE.6 goes further, calling it "the most concrete unmeasured number in the
+hardware lane". That framing was right to measure and wrong in its expectation:
+the concern was reasoned from the datasheet default rather than from the wire.
+Two entries carried it as a live risk; it was ~2% of the budget the whole time.
+
+Updated in place: `firmware/README.md` and `.claude/codebase-memory/performance.md`
+both had it as UNMEASURED and now carry the numbers plus the caveat that the
+mechanism is unexplained.
+
+## BF.5 Artifacts
+
+- `firmware/uno_echo/uno_echo.ino` -- the harness. Deliberately minimal so the
+  measurement is of the link and not of the sketch.
+- The measurement scripts were scratch PowerShell and are not committed; the
+  method is described above precisely enough to repeat: discard the input
+  buffer, timestamp with a Stopwatch around write-then-blocking-read, pace the
+  loop to 20 Hz, and report percentiles rather than a mean.
+
+## BF.6 Still open
+
+- No control firmware; the serial protocol is still paper only. Echo proves the
+  link, not the design.
+- The Pi-side measurement above.
+- Everything physical remains BLOCKED-ON-EVAN.
