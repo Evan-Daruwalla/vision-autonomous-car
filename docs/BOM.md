@@ -37,7 +37,7 @@ split-source power path costs almost nothing.
 | **Lighting + I/O** |
 | 17 | ~~**PCA9685** 16-ch I2C PWM/LED driver~~ **Arduino Uno R3 clone — OWNED** | ✅ **SUPERSEDES the PCA9685 2026-09-02 (Appendix BC).** Evan has an Uno R3 clone on hand: ATmega328P, 5V logic, FTDI FT232RL, working on COM3. It does everything the PCA9685 would (motor PWM + servo + 4 light channels, fits with **ZERO** PWM spare — corrected 2026-09-02 (Appendix BH): Servo takes Timer1 (kills D9/D10) and the encoder takes D3, leaving usable PWM {5, 6, 11}, all three consumed by motor + headlights + tail) **plus two things the PCA9685 cannot**: quadrature **encoder counting** on hardware interrupts D2/D3, and a **throttle watchdog** that stops the car if the Pi hangs. ⚠️ **5V logic — connect over USB, NEVER to Pi GPIO** (`gotchas.md`). Cost of the swap: no DonkeyCar backend exists, so the actuator path becomes custom firmware + a serial protocol | **$0.00** | owned |
 | 18 | 8× 3mm LEDs (2 white, 2 red, 4 amber) | Headlights, tail lights, 4 indicators. Amber for indicators; rear lamps are never in the forward camera's view, so they are realism at zero ML cost (`docs/LIGHTING_SPEC.md` §1) | **~$1.50–3** | any |
-| 19 | LED series resistors | One per LED; value set by the chosen LEDs' forward voltage — see Verify item 5. ⚠️ **Current budget is tight on an Uno:** an ATmega328P pin sources 20mA (one LED) but the chip's ABSOLUTE MAX across all I/O is **200mA**. 8 LEDs at 20mA = 160mA, i.e. 80% of the hard limit. In practice only 4 are on continuously (2 head + 2 tail = 80mA) with 2 indicators blinking (+40mA) = **~120mA peak**, which is fine. If brighter LEDs are chosen, switch them with small N-channel MOSFETs off the LM2596 rail instead of driving pins directly — not currently in this BOM | **~$1–2** | any |
+| 19 | LED series resistors **+ 1x 100k and 1x 12k for the pack-sense divider** (Appendix BJ) | One per LED; value set by the chosen LEDs' forward voltage — see Verify item 5. ⚠️ **Current budget is tight on an Uno:** an ATmega328P pin sources 20mA (one LED) but the chip's ABSOLUTE MAX across all I/O is **200mA**. 8 LEDs at 20mA = 160mA, i.e. 80% of the hard limit. In practice only 4 are on continuously (2 head + 2 tail = 80mA) with 2 indicators blinking (+40mA) = **~120mA peak**, which is fine. If brighter LEDs are chosen, switch them with small N-channel MOSFETs off the LM2596 rail instead of driving pins directly — not currently in this BOM | **~$1–2** | any |
 | 20 | Dupont jumpers + **data-only USB cable** | Pi→Uno is **USB, not GPIO** (5V logic would damage the Pi's 3.3V pins). The USB 5V wire must be **cut or omitted**: the Uno's 5V pin is fed from the LM2596 rail so LED current stays off the Pi's bank, and two supplies must not back-feed each other. Plus LED and servo leads | **~$2–4** | any |
 | | | **TOTAL** | **≈ $226–234** | |
 
@@ -267,6 +267,12 @@ with the SD card mounted. The split is structural, not stylistic.
    divider on the pack lets the Uno cut throttle at a voltage threshold, reusing
    the watchdog path that already exists. (c) costs two resistors and is the only
    option that also *logs* the event.
+   ✅ **(c) IS NOW IMPLEMENTED (2026-09-02, Appendix BJ):**
+   `firmware/uno_packguard/` — divider **100k (pack+ to A0) / 12k (A0 to GND)**,
+   internal 1.1 V reference, warn 6.4 V, latched cutoff 6.0 V held 500 ms,
+   fault outside 4.0-8.8 V. **SELFTEST PASS 27/27 on the real board.** Still
+   needs (a) or (b) as well if you want protection that survives the Arduino
+   being unpowered — firmware cannot guard a pack when the firmware is off.
 
 ## Caveats carried into the build
 

@@ -53,6 +53,23 @@ F_CPU=16000000
 tick 0
 ```
 
+## uno_packguard — pack low-voltage cutoff
+
+Closes the safety gap in Appendix BI: `docs/BOM.md` row 11's "BMS" documents only
+over-voltage and short-circuit protection, and the EVE cells are bare, so nothing
+otherwise stops the 2S pack being run flat under motor load.
+
+Divider **100k / 12k** on **A0**, **internal 1.1 V reference** (NOT the 5 V rail,
+which sags with the pack). Warn 6.4 V, **latched** cutoff 6.0 V sustained 500 ms,
+fault outside 4.0-8.8 V. `SIM <mv>` injects readings; `SELFTEST` runs 27 checks
+against the shipping state machine. **PASS 27/27 on hardware.**
+
+**Untested on a real pack** — no battery is ordered. The state machine is proven
+by injection; the divider and the ADC's real behaviour are not.
+
+**Firmware cannot protect a pack while the firmware is off.** This is a
+supplement to a hardware protection board or protected cells, not a replacement.
+
 ## Not done
 
 - **No control firmware exists.** The serial protocol is designed on paper only.

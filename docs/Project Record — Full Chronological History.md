@@ -96,6 +96,7 @@ the dated entry, not the digest.
 - [BG — Serial protocol v0.1 drafted, and drafting it caught D3 double-booked between the encoder interrupt and motor PWM in yesterday's diagram](#appendix-bg---serial-protocol-v01-drafted-and-drafting-it-caught-d3-double-booked-between-the-encoder-interrupt-and-motor-pwm-in-yesterdays-diagram-2026-09-02-1558-cdt) (09-02)
 - [BH — landing-check returned FIX FIRST: nine items closed, including a wrong PWM budget the D3 fix silently created and a stale price in the public README](#appendix-bh---landing-check-returned-fix-first-nine-items-closed-including-a-wrong-pwm-budget-the-d3-fix-silently-created-and-a-stale-price-in-the-public-readme-2026-09-02-1611-cdt) (09-02)
 - [BI — Rows 11/13/14 linked, and row 11's board does NOT document the over-discharge protection the BOM credited it with - the 2S pack has no low-voltage cutoff](#appendix-bi---rows-111314-linked-and-row-11s-board-does-not-document-the-over-discharge-protection-the-bom-credited-it-with---the-2s-pack-has-no-low-voltage-cutoff-2026-09-02-1634-cdt) (09-02)
+- [BJ — Pack low-voltage cutoff implemented on the Uno: 27/27 on hardware, and the hardware test caught a floating-pin fault the design reasoning had missed](#appendix-bj---pack-low-voltage-cutoff-implemented-on-the-uno-2727-on-hardware-and-the-hardware-test-caught-a-floating-pin-fault-the-design-reasoning-had-missed-2026-09-02-1647-cdt) (09-02)
 
 ---
 
@@ -7215,3 +7216,99 @@ simply be renumbered because `docs/BOM.md` row 19 cross-references "Verify item
 5" for the LED question, so the new item was moved after it instead. Also
 removed a dangling clause left in item 5 by an earlier edit ("or needs a
 transistor per channel", orphaned mid-sentence).
+
+# Appendix BJ - Pack low-voltage cutoff implemented on the Uno: 27/27 on hardware, and the hardware test caught a floating-pin fault the design reasoning had missed (2026-09-02, ~16:47 CDT)
+Evan chose option (c) from BI: firmware low-voltage cutoff on the Arduino.
+Implemented, uploaded, **SELFTEST PASS 27/27 on the real board** \u2014 and testing
+it on hardware caught a defect that the design reasoning had missed.
+
+## BJ.1 The defect the hardware test found
+
+The design already argued that a guard must distinguish "broken" from
+"triggered", and the first build had a FAULT band for **implausibly LOW**
+readings (< 4.0 V), on the reasoning that an unwired A0 would read near zero.
+
+**It does not.** With nothing connected, the real board reported:
+
+```
+PACK OK mv=10248 latched=0 throttle=allowed mode=REAL
+```
+
+A floating A0 sits near **full scale** \u2014 1.1 V / 0.10714 = 10.27 V maximum
+readable, and it measured 10248-10266 mV across runs. That is **above** a full
+2S pack (8.4 V), so it sailed past a low-only check and read as a **healthy
+battery with throttle ALLOWED**. The guard would have permitted driving with no
+sensor attached at all, which is the precise failure it exists to prevent.
+
+Fixed with an upper band: **fault outside 4.0-8.8 V**. Re-verified on hardware:
+
+| input | before | after |
+|---|---|---|
+| unwired A0, 10266 mV | `OK`, throttle **allowed** | **`FAULT`, INHIBITED** |
+| 8400 mV (full 2S) | \u2014 | `OK`, allowed |
+| 8900 mV (above any 2S) | \u2014 | **`FAULT`, INHIBITED** |
+
+**The reasoning was right and the constant was wrong**, and only running it on
+the board showed which. Recorded in the source header as found-by-testing.
+
+## BJ.2 Design decisions that are load-bearing
+
+**The internal 1.1 V band gap reference, not the 5 V rail.** The Uno's 5 V comes
+from the LM2596, which is the same supply that sags when the pack sags.
+Measuring the pack against a reference that moves with it produces a meter that
+lies precisely when it matters. `analogReference(INTERNAL)` is
+supply-independent.
+
+**Divider 100k / 12k**, chosen against tolerance rather than for round numbers.
+The obvious 100k/15k puts 8.4 V at 1.096 V against a 1.1 V ceiling \u2014 **0.4%
+margin**, which 5% resistors would clip (worst case 1.195 V), silently pinning
+the reading at full scale. 100k/12k gives 0.900 V, **18% margin**, worst case
+0.984 V, and still resolves 10.0 mV of pack per count against thresholds 400 mV
+apart. Divider drain 75 uA = 1.8 mAh/day against a 2500 mAh cell.
+
+**WARN does not cut.** Voltage sags hard under motor stall. Cutting on a
+transient makes the car undriveable for no safety gain, so cutoff requires
+**6.0 V sustained for 500 ms**, and a dip that recovers **restarts** the timer
+rather than resuming it (self-test covers that specific case).
+
+**The latch never clears itself.** With throttle cut the pack recovers a few
+hundred mV, would cross back over, re-enable, sag, and oscillate \u2014 cycling the
+motor on a pack already too flat. `CLEAR` is explicit AND requires \u2265 6.8 V. The
+board refused it correctly under test: `REFUSED: need >= 6800 mV, have 5900`.
+
+## BJ.3 How it is tested with no battery
+
+Nothing is ordered; no pack exists. The state machine is a **pure function** of
+(millivolts, now), so `SIM <mv>` injects readings over serial and `SELFTEST`
+drives **27 checks through the shipping code path** on real silicon \u2014 not a
+host-side mock of it. Every transition is covered: warn without latching, a dip
+too brief to cut, a sustained dip that latches, a restarted timer, refusal to
+auto-recover, both fault bands, and that WARN/OK do NOT inhibit while
+CUTOFF/FAULT do.
+
+Live transitions confirmed on the board beyond the self-test: 7400 OK -> 6300
+WARN -> 5900 WARN then CUTOFF latched with throttle INHIBITED -> CLEAR refused
+-> 3000 FAULT -> 0 FAULT -> back to 7400 still CUTOFF (latch survives).
+
+**What is NOT verified: the divider and the ADC's real behaviour.** Both need
+hardware that does not exist. The resistor values are arithmetic; the 10 mV/count
+figure is arithmetic; the only measured ADC number so far is the floating-pin
+reading that produced BJ.1.
+
+## BJ.4 The honest limit on this fix
+
+**Firmware cannot protect a pack while the firmware is off.** If the Arduino is
+unpowered, disconnected, or mid-reset, the guard does not exist \u2014 and the pack
+is still bare cells behind a board that does not document over-discharge
+protection. This is a **supplement** to Verify item 6's options (a) a protection
+board or (b) protected cells, not a replacement for them. `docs/BOM.md` now says
+so at the point of decision rather than only here.
+
+## BJ.5 Artifacts
+
+- `firmware/uno_packguard/uno_packguard.ino` \u2014 6004 bytes flash (18%), 289 bytes
+  SRAM (14%), well inside the 1705 bytes measured free in BE.
+- `docs/BOM.md` \u2014 Verify item 6 marks (c) implemented with its thresholds, and
+  row 19 now carries the two divider resistors (1x 100k, 1x 12k).
+- `firmware/README.md` \u2014 the sketch, its limits, and the "firmware off means no
+  guard" caveat.
