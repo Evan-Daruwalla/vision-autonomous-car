@@ -94,6 +94,7 @@ the dated entry, not the digest.
 - [BE — SRAM measured at 2048 B and the clock at 16.0042 MHz; CORRECTION to BD (F_CPU was never measured), and the silicon's signature says 328PB while avrdude says 328P](#appendix-be---sram-measured-at-2048-b-and-the-clock-at-160042-mhz-correction-to-bd-f_cpu-was-never-measured-and-the-silicons-signature-says-328pb-while-avrdude-says-328p-2026-09-02-1541-cdt) (09-02)
 - [BF — FTDI latency timer measured: configured at 16 ms but costs ~0.9 ms on the wire, so the risk flagged in BD and BE was wrong](#appendix-bf---ftdi-latency-timer-measured-configured-at-16-ms-but-costs-09-ms-on-the-wire-so-the-risk-flagged-in-bd-and-be-was-wrong-2026-09-02-1550-cdt) (09-02)
 - [BG — Serial protocol v0.1 drafted, and drafting it caught D3 double-booked between the encoder interrupt and motor PWM in yesterday's diagram](#appendix-bg---serial-protocol-v01-drafted-and-drafting-it-caught-d3-double-booked-between-the-encoder-interrupt-and-motor-pwm-in-yesterdays-diagram-2026-09-02-1558-cdt) (09-02)
+- [BH — landing-check returned FIX FIRST: nine items closed, including a wrong PWM budget the D3 fix silently created and a stale price in the public README](#appendix-bh---landing-check-returned-fix-first-nine-items-closed-including-a-wrong-pwm-budget-the-d3-fix-silently-created-and-a-stale-price-in-the-public-readme-2026-09-02-1611-cdt) (09-02)
 
 ---
 
@@ -7023,3 +7024,115 @@ this.**
 - Encoder counts-per-revolution unknown until the motor exists, so `ticks` is
   raw counts and conversion is the Pi's job.
 - Throttle-to-duty mapping (linear vs calibrated) deliberately left to firmware.
+
+# Appendix BH - landing-check returned FIX FIRST: nine items closed, including a wrong PWM budget the D3 fix silently created and a stale price in the public README (2026-09-02, ~16:11 CDT)
+`/landing-check` swept commits `397c46a..590f765` cold, from artifacts only. It
+returned **FIX FIRST** with eight findings; a ninth turned up while fixing them.
+All are now closed. **One was an engineering error I introduced, not a doc slip.**
+
+## BH.1 The one that mattered: "one PWM pin spare" was FALSE
+
+Stated in BC and repeated in three live docs. The D3 pin fix (BG) falsified it
+and nothing noticed.
+
+Arithmetic: the Servo library claims Timer1, killing PWM on D9/D10, leaving
+`{3, 5, 6, 11}`. **The encoder then takes D3 (INT1)**, leaving `{5, 6, 11}` --
+exactly three, all consumed by motor + headlights + tail. **Zero spare, not
+one.**
+
+Why it matters beyond tidiness: **there is no PWM headroom at all.** Any future
+PWM channel needs a pin freed or a timer reconfigured, and `gotchas.md` was
+still telling a future reader "usable PWM after that: 3, 5, 6, 11" -- four pins,
+one of which is spoken for. That is the kind of line trusted at the bench with a
+soldering iron in hand.
+
+Corrected in `docs/BOM.md`, `docs/LIGHTING_SPEC.md`,
+`.claude/codebase-memory/architecture.md`, plus a new `gotchas.md` entry naming
+D3 explicitly. The BC/BG record entries keep the wrong claim -- append-only --
+and this entry is the correction.
+
+## BH.2 A document that contradicted itself on arrival
+
+`firmware/SERIAL_PROTOCOL.md:14` warned that `docs/BOM.md` **currently**
+double-books D3 -- in the same commit (`590f765`) that fixed it, citing line
+numbers that no longer pointed at it. The two files ended up pointing at each
+other, each saying the other was wrong. Rewritten to past tense with the fixing
+commit named.
+
+## BH.3 A stale budget in the PUBLIC repo
+
+`README.md:128` read "**Budget: ~$178-181, under a $200 ceiling**", unstruck.
+The repo is public (`github.com/Evan-Daruwalla/vision-autonomous-car`), the real
+figure is **$226-234 before shipping / $241-259 with**, and the ceiling is
+breached on the 4GB path. This also falsifies AZ.7's claim that a grep for stale
+anchors "returns only struck or dated-corrected hits" -- **a false universal**,
+and the second one this project has produced in a public file.
+
+## BH.4 The PCA9685 supersession reached 3 of 6 docs
+
+BC replaced the PCA9685 with the Uno. It propagated to `BOM.md`,
+`architecture.md` and `gotchas.md`, and NOT to:
+
+- `HANDOFF.md` -- three live assertions (rows 215, 232, 326) plus two stale
+  totals (215, 330), including "RESOLVED ... PCA9685, BOM row 17"
+- `PRD_ROADMAP.md` -- two blocks (the task-8 amendment and the ~line-96 budget
+  note), both still stating $232-249 / "$200 breached on every path"
+- `docs/LIGHTING_SPEC.md` section 7 -- the only section with no supersession
+  banner, carrying "**Order the PCA9685**" as a live imperative, plus a ceiling
+  claim `BOM.md:59-62` had already struck
+
+All closed, and the imperative at section 2's end now reads **DO NOT ORDER IT**.
+
+## BH.5 The rest
+
+- `docs/BOM.md:224` still said the total was "\u2248$237-250"; struck, now \u2248$241-259.
+- `dependencies.md` claimed firmware uses "the bundled `Servo` library". **No
+  `.ino` includes `Servo.h`.** Corrected to what is actually included
+  (`avr/io.h`, `avr/boot.h`, `stdlib.h`), with a note that Servo is PLANNED and
+  matters because it claims Timer1 and thereby sets the whole PWM budget.
+- `docs/research/2026-07-23_power-system.md:22` still read "This build has zero
+  USB peripherals, so the cap is irrelevant." Two bins had flagged it as false
+  since BC; **neither propagated to the brief itself.** Now corrected in place
+  with the conclusion preserved (~50 mA is still far inside the 600 mA cap).
+- `HANDOFF.md:5` said "55 appendices A-BC"; the record held **59, A-BG**, and it
+  was already wrong when set in `084d271`.
+- **Ninth, found while fixing:** `PRD_ROADMAP.md` ~line 96 carried a SECOND copy
+  of the superseded budget block. The sweep named one; there were two.
+
+## BH.6 What the sweep confirmed, which matters as much
+
+Load-bearing negatives, all re-derived by the agent and spot-checked by hand:
+
+- **BOM arithmetic reproduces 13/13 to the cent**, including every historical
+  and struck figure. No invented precision anywhere.
+- **The D3 fix genuinely landed in both files** -- full 11-pin enumeration, no
+  pin assigned twice.
+- **The FTDI numbers are byte-identical across all four copies**, and neither
+  `firmware/README.md` nor `performance.md` still says UNMEASURED.
+- Every re-derivable measurement exact: 2048 B, 1472 B, 1.00026, 16.0042 MHz,
+  1.389 ms, 8.68 ms, 4.9%, 80%, 120 mA.
+- **The record write-guard fired on a planted positive and stayed silent on a
+  negative**, canary 23/23, tested on a decoy so the real record was never at
+  risk. No mislanding, one live hook, no dead copy.
+
+## BH.7 Two process notes worth keeping
+
+1. **The sweep's findings held; its citations did not.** It cited
+   `HANDOFF.md:330` as a PCA9685 mention -- `grep -n PCA9685 HANDOFF.md` returns
+   55, 56, 215, 232, 326 and not 330. Line 330 IS stale (a superseded total) but
+   for a different reason. Re-deriving every cited line before acting was worth
+   it, exactly as the skill says.
+2. **A doc-only finding was an engineering error in disguise.** "One PWM spare"
+   reads like prose drift and is actually a wrong pin budget. The cheap tell was
+   that a *fix* (BG) silently invalidated a *claim* made two entries earlier;
+   nothing in the workflow connects those, which is why the cold sweep found it
+   and the author did not.
+
+## BH.8 Not swept
+
+Appendices BA/BB and commit `d2527a1` -- `cad/vehicle_envelope.py`,
+`ml/diag_camera_height.py`, `ml/episode_writer.py` -- were outside the sweep and
+remain unverified. Handoffs the sweep raised: `/code-review` for the three
+`.ino` files and that Python; and the latency percentiles came from **scratch
+PowerShell that was never committed**, so those headline numbers are not
+reproducible from the repo by anyone but this session.

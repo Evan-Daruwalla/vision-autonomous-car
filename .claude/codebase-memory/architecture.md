@@ -66,7 +66,7 @@
   - **Channel budget, checked:** the Servo library claims Timer1, killing PWM
     on pins 9/10 and leaving PWM on **3, 5, 6, 11**. Needed: motor + headlights
     + tail = 3 PWM, servo on its own library, and the two indicators are on/off
-    so plain digital pins serve. **Fits with one PWM pin spare.**
+    so plain digital pins serve. **Fits with ZERO PWM spare.** (Corrected 2026-09-02, Appendix BH — the D3 pin fix put the encoder on D3, so usable PWM is {5, 6, 11} and all three are used. There is NO headroom: another PWM channel needs a pin freed or a timer reconfigured.)
   - **The cost, stated plainly:** DonkeyCar's `pins.py` has a PCA9685 backend
     and **no Arduino backend**, so the actuator path in PRD task 11 becomes
     custom firmware plus a serial protocol this project writes and debugs.

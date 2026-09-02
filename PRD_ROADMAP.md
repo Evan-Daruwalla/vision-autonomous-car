@@ -94,10 +94,12 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   bank**, and takes the **Pi 5 8GB → 4GB downgrade** (supersedes the ~17:21
   gate answer (a), on his own instruction). ~~Final BOM ≈ **$176-179 +
   shipping**, inside the $200 ceiling.~~ *(Superseded 2026-09-01: re-priced
-  2026-08-08 to $221.82-$224.82, then rows 17-20 (lighting + I2C, Appendix AY)
-  took it to **$232-249 + $15-25 shipping**. The **$200 ceiling is breached on
-  every path**, including the 2GB Pi swap at ≈$202-229 with shipping. Budget is
-  NOT settled; it is Evan's open call.)* Itemised in `docs/BOM.md`. One part
+  2026-08-08 to $221.82-$224.82, then rows 17-20 (lighting + I/O, Appendix AY)
+  took it to $232-249. **Revised again 2026-09-02 (Appendix BC): row 17's
+  PCA9685 is superseded by an Arduino Uno Evan already OWNS ($0), giving
+  ≈$226-234 + $15-25 shipping = ≈$241-259.** The $200 ceiling is still breached
+  on the 4GB Pi; the **2GB path reaches ≈$196-214**, whose low end clears $200.
+  Budget is NOT settled; it is Evan's open call.)* Itemised in `docs/BOM.md`. One part
   was missing from every earlier estimate and is now included: a **camera
   cable, Standard-Mini (~$2-5)** — Camera Module 3 ships with a
   Standard-Standard cable that does NOT fit the Pi 5's mini 22-pin
@@ -299,14 +301,18 @@ transfer gap) must not block the capstone.
    placed by Evan; arrival + any price deltas noted in the record.
    - *(Price corrected 2026-09-01: ≈$176-179 is stale by ~$60. The BOM
      re-priced 2026-08-08 to **$221.82–$224.82** before shipping, and rows
-     17–20 — the PCA9685, LEDs, resistors and I2C wire added 2026-09-01
-     (Appendix AY) — take it to **$232–249 before shipping, ≈$247–274 with**.
-     The **$200 ceiling is breached on every path now**, including the 2GB Pi
-     swap, which lands at ≈$202–229 with shipping.)*
+     17–20 — lighting and I/O added 2026-09-01 (Appendix AY) — took it to
+     $232–249. **Revised again 2026-09-02 (Appendix BC): row 17's PCA9685 is
+     superseded by an Arduino Uno Evan already OWNS ($0), so the total is
+     ≈$226–234 before shipping, ≈$241–259 with.** The $200 ceiling is still
+     breached on the 4GB Pi; the **2GB path now reaches ≈$196–214**, whose low
+     end clears $200 for the first time since lighting was added.)*
    - *(Amended 2026-09-01: the "four items" are now **five** — check 5, which
      LEDs, sets every series-resistor value. And the **PWM-path question is
-     RESOLVED**: PCA9685, carrying motor PWM + servo + 4 light channels. That
-     was BLOCKED-ON-EVAN and no longer is.)*
+     RESOLVED** — ~~PCA9685~~ **an ARDUINO UNO (2026-09-02, Appendix BC)**,
+     carrying motor PWM + servo + 4 light channels and adding encoder counting
+     plus a throttle watchdog the PCA9685 could not. That was BLOCKED-ON-EVAN
+     and no longer is. Pin map: `firmware/SERIAL_PROTOCOL.md`.)*
 9. **Bench bring-up.** Pi OS (64-bit Bookworm), SSH, camera test; TB6612 +
    PF motor on bench PSU; servo sweep test. Done: each subsystem's real
    output (photo/log) in record.

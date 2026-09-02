@@ -291,6 +291,7 @@ not yet verified on this car. Mark them verified when a build task confirms.
 - **The Servo library claims Timer1**, which kills `analogWrite` on pins 9 and
   10. Usable PWM after that: 3, 5, 6, 11. Discovering this after wiring the
   board is how a "dead" LED channel gets misdiagnosed as a bad solder joint.
+- **And D3 is NOT available either** (2026-09-02): the quadrature encoder needs both external interrupts, INT0 on D2 and INT1 on D3. So usable PWM is **{5, 6, 11}, not {3, 5, 6, 11}** — three pins for motor + headlights + tail, **zero spare**. The earlier "3, 5, 6, 11" line above is the pre-encoder count.
 - **Pins 5 and 6 share Timer0 with `millis()`.** `analogWrite` works there, but
   changing their PWM frequency breaks timekeeping — so the watchdog and the
   dimming cannot both be tuned freely on those pins.

@@ -51,8 +51,12 @@ Remaining planned stack from the 2026-07-23 research brief:
 
 - **Arduino toolchain (added 2026-09-02):** Arduino IDE 2.x at
   `~/AppData/Local/Programs/Arduino IDE`, bundling `arduino-cli` 1.5.1 and core
-  `arduino:avr` 1.8.8. Firmware uses only the bundled `Servo` library and AVR
-  headers (`avr/io.h`, `avr/boot.h`) — **no third-party Arduino libraries**, so
-  there is nothing to vendor or pin beyond the core version above.
+  `arduino:avr` 1.8.8. Firmware currently includes only `avr/io.h`, `avr/boot.h`
+  and `stdlib.h` — **no third-party Arduino libraries**, so there is nothing to
+  vendor or pin beyond the core version above. *(Corrected 2026-09-02, Appendix
+  BH: the earlier wording claimed the bundled `Servo` library was in use. It is
+  NOT — no `.ino` includes `Servo.h` yet. `Servo` is PLANNED for the steering
+  servo on D9 per `firmware/SERIAL_PROTOCOL.md`, and it matters because Servo
+  claims Timer1 and thereby sets the whole PWM budget.)*
 - The firmware toolchain is entirely separate from the Python venv; nothing in
   `ml/requirements.txt` touches the board.

@@ -35,7 +35,7 @@ the portfolio, they cost nothing in risk.
 > needing PWM — and it is what proved a dedicated driver was necessary at all.
 > What changed is which driver. On the Uno the Servo library claims Timer1,
 > leaving PWM on pins 3, 5, 6, 11: motor + headlights + tail = 3 PWM, servo on
-> its library, indicators on plain digital pins. **Fits with one PWM spare.**
+> its library, indicators on plain digital pins. **Fits with ZERO PWM spare** (corrected 2026-09-02, Appendix BH: the D3 fix moved the encoder onto D3, so usable PWM is {5, 6, 11} and all three are taken by motor + headlights + tail).
 > Series-resistor sizing changes too: an Uno pin sources 20 mA and the chip's
 > absolute max across ALL pins is **200 mA**, where the PCA9685 sank 25 mA per
 > channel independently. See `docs/BOM.md` rows 17-20 and `gotchas.md`.
@@ -53,8 +53,10 @@ Minimum channel count:
 Four new channels, two of them PWM, on top of the existing **1 servo PWM + 2
 motor PWM/DIR**.
 
-**This resolves the open BLOCKED-ON-EVAN item "straight-to-GPIO or a PCA9685?"
-in favour of the PCA9685.** The reasoning was previously about portability
+~~**This resolves the open BLOCKED-ON-EVAN item "straight-to-GPIO or a
+PCA9685?" in favour of the PCA9685.**~~ **→ resolved in favour of an ARDUINO
+UNO instead (2026-09-02, Appendix BC).** The paragraph below is the original
+reasoning and is kept for the trail; the conclusion it reaches is superseded. The reasoning was previously about portability
 (DonkeyCar's `pins.py` has only three PWM backends, and straight-to-GPIO locks
 the project to a Pi). Lighting makes it a capacity question as well: a PCA9685
 is a **16-channel I2C LED controller** that costs **2 pins** total and is
@@ -62,8 +64,9 @@ literally designed to drive LEDs at constant current with per-channel 12-bit
 dimming. Straight-to-GPIO would need four more pins and has no hardware PWM to
 spare for dimming.
 
-Order the PCA9685. It is the same part either way, so this does not add a
-decision — it removes one.
+~~Order the PCA9685. It is the same part either way, so this does not add a
+decision — it removes one.~~ **DO NOT ORDER IT (2026-09-02, Appendix BC): an
+Arduino Uno Evan already owns supersedes it, at $0.**
 
 ---
 
@@ -173,14 +176,18 @@ defensible. Passing a rule off as a learned behaviour is not.
 
 - ~~**Nothing is ordered.** The PCA9685, LEDs, resistors and wire are not in
   `docs/BOM.md` yet, and adding them changes the ~$178-181 total.~~
-  **CLOSED 2026-09-01 ~21:20 CDT: added as BOM rows 17-20** (PCA9685, 8 LEDs,
-  resistors, I2C wire), **~$10.50-24.00**. The "~$178-181" anchor was itself
-  stale by ~$60 — the BOM had re-priced to $221.82-$224.82 on 2026-08-08. New
-  total **$232-249 before shipping, ≈$247-274 with**. **Nothing is ordered**,
-  and the $200 ceiling is now breached on every path including the 2GB Pi
-  (≈$202-229 with shipping). BLOCKED-ON-EVAN with the rest of the order.
-- **Scope widened 2026-09-01 (Evan):** the PCA9685 carries **motor PWM and the
-  servo as well as the four light channels** — 6 of 16 used. That was Appendix
+  **CLOSED 2026-09-01 ~21:20 CDT: added as BOM rows 17-20.** ~~(PCA9685, 8 LEDs,
+  resistors, I2C wire), ~$10.50-24.00 ... total $232-249 before shipping,
+  ≈$247-274 with ... the $200 ceiling is now breached on every path including
+  the 2GB Pi (≈$202-229).~~ **REVISED 2026-09-02 (Appendix BC):** row 17 is an
+  **Arduino Uno Evan already OWNS, $0**, so rows 17-20 are **$4.50-9.00** and the
+  total is **≈$226-234 before shipping, ≈$241-259 with**. The $200 ceiling is
+  still breached on the 4GB Pi, but the **2GB path reaches ≈$196-214**, whose low
+  end clears $200. **Nothing is ordered.** BLOCKED-ON-EVAN with the rest.
+- **Scope widened 2026-09-01 (Evan), then the PART CHANGED 2026-09-02:** ~~the
+  PCA9685~~ **the Arduino Uno** carries **motor PWM and the servo as well as the
+  four light channels** — ~~6 of 16~~ and on the Uno that leaves **ZERO PWM
+  spare**, not one (Appendix BH). That was Appendix
   AH's original argument (DonkeyCar's `pins.py` has a PCA9685 backend, so
   actuation stops being Pi-locked); lighting only made the channel count decide
   it too. The TB6612's two direction pins stay on GPIO — the backend drives PWM,

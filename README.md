@@ -125,7 +125,7 @@ Design decisions are settled and costed; nothing is bought.
 - **Power:** split source. USB power bank to the Pi, separate 2S pack to the
   motor and servo, one shared ground. Combining them puts 4.62 A on a 3 A
   rail during a stall and resets the Pi mid-run.
-- **Budget:** ≈$178–181, under a $200 ceiling. `docs/BOM.md` is the order list.
+- **Budget:** ~~≈$178–181, under a $200 ceiling~~ → **≈$226–234 before shipping, ≈$241–259 with** (re-priced 2026-08-08 and again 2026-09-02). The **$200 ceiling is breached** on the 4GB Pi; the 2GB path reaches ≈$196–214. `docs/BOM.md` is the order list and the only current figure.
 
 A parametric Lego-fit tolerance coupon is generated and geometrically
 self-validated (manifold and signed-volume checks pass), but **it has not been

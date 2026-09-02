@@ -2,7 +2,7 @@
 
 **Last updated: 2026-09-02 ~15:25 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 55 appendices A–BC). When this file and the record disagree about
+(append-only, 59 appendices A–BG). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -212,7 +212,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Decision gate | M1.1 | **Done** | 2026-07-23: 8GB · no Lego motors · 3060 Ti 8GB · ~$200 · ratified |
 | Drive motor selection | M1.1b | **Done (purchase pending)** | 2026-07-23: Pololu #1093 N20 30:1 HP 6V, $23.95; docs/research/2026-07-23_drive-motor-selection.md |
 | Power system selection | M1.1c | **Done (purchase pending)** | 2026-07-23: split source, power bank owned; docs/research/2026-07-23_power-system.md |
-| BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced twice** | `docs/BOM.md`, **≈$232-249 + $15-25 shipping**. Rows 17-20 (PCA9685, LEDs, resistors, I2C wire) added 2026-09-01 |
+| BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced twice** | `docs/BOM.md`, **≈$226-234 + $15-25 shipping** (≈$241-259 all-in). Row 17 is an **Arduino Uno Evan already owns, $0** — the PCA9685 is superseded (2026-09-02, Appendix BC) |
 | Chassis CAD + print | M1 | **Started** | M1.3 coupon generated + validated 2026-07-23; awaiting Evan's print + measurements |
 | Tolerance coupon | M1.3 | **Ready to print** | `cad/tolerance_coupon_v1.stl` + `cad/README.md`; gates every chassis dimension |
 | Electronics + teleop | M2 | **Not started** | purchase list is task 8 |
@@ -229,7 +229,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Track layout | M1.4 | **v1 + v2 drawn, NOT committed** | 2026-09-01, Appendices AM/AT/AX/AY. `cad/track_layout_v1.py` = figure-8 with a flat causeway bridge + 5 landmarks; `cad/track_layout_v2.py` = 3x3 city grid, 9 intersections, figure-8 route through the centre, 8.31 m, 140 mm spare at R=500. Both parametric and self-checking. **Corner geometry FROZEN until the T2 turning test** |
 | Track: sim rehearsal | — | **IMPOSSIBLE, settled** | 2026-09-01, Appendix AX. gym-donkeycar's protocol has ten message types and none defines a road; `load_scene` picks from 11 prebuilt Unity scenes. A custom track needs a Unity build. Costs little: M3 trains on real laps, not the sim corpus |
 | Track surface | T3 | **Decided: hybrid** | 2026-09-01, Appendix AX. NOT 225 printed panels (~12.6 kg, 169-900 h, 225 bed clears, 28 camera-visible seams). Print the 6.28 m of corner arcs + 9.36 m of intersection boxes as ~79 tiles (~970 g); tape the 31.9 m of straight street lines |
-| Vehicle lighting | — | **Spec written, nothing wired** | 2026-09-01, Appendix AY. `docs/LIGHTING_SPEC.md`. Headlights/tail/DRL/indicators. Only the headlight beam is in the camera's view. Settles the PCA9685. Turn signals are a THIRD policy head and gate the M3 collection run via PRD task 11b |
+| Vehicle lighting | — | **Spec written, nothing wired** | 2026-09-01, Appendix AY. `docs/LIGHTING_SPEC.md`. Headlights/tail/DRL/indicators. Only the headlight beam is in the camera's view. ~~Settles the PCA9685.~~ Superseded 2026-09-02 (BC): an **Arduino Uno** takes actuation instead. Turn signals are a THIRD policy head and gate the M3 collection run via PRD task 11b |
 | **Harness trustworthiness** | **P6** | **OPEN — BLOCKING all closed-loop claims** | 2026-08-11, Appendix AD. Same checkpoint across 7 gate-valid launches: 106.5–471.5 steps, CV 55%. Rate, track and start state ruled out; cause unknown. Nothing may be ranked on closed-loop steps until this is fixed or quantified |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
 
@@ -323,11 +323,11 @@ original floor and the pre-2026-08-12 scale decision.)*
   MEASURED width. Note a smaller car also lowers the camera, and the
   sim's camera height/pitch are still unidentified (AI.3).
 - **Pi 5 2GB ($65) or 4GB ($110)?** Recommended 2GB — identical silicon, and the 4GB has absorbed every DRAM price rise while the 2GB has absorbed none. Purchase window is now.
-- ~~**PWM path: straight-to-GPIO or a PCA9685 breakout?**~~ **RESOLVED 2026-09-01 (Appendix AY): PCA9685**, carrying motor PWM + servo + 4 light channels, 6 of 16 used. Lighting made the channel count decide what Appendix AH had already argued on portability grounds. BOM row 17.
+- ~~**PWM path: straight-to-GPIO or a PCA9685 breakout?**~~ ~~RESOLVED 2026-09-01 (AY): PCA9685~~ **SUPERSEDED 2026-09-02 (Appendix BC): an ARDUINO UNO Evan already owns** takes motor PWM + servo + 4 light channels, and adds encoder counting and a throttle watchdog the PCA9685 cannot do. $0. BOM row 17; pin map in `firmware/SERIAL_PROTOCOL.md`.
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.
-- **THE ORDER (`docs/BOM.md`, ≈$232-249 + shipping).** Nothing is bought.
+- **THE ORDER (`docs/BOM.md`, ≈$226-234 + shipping = ≈$241-259).** Nothing is bought.
   Everything downstream of M1.5 waits on parts. Before ordering Evan should
   check the **five** items in the BOM's "Verify before ordering" section — most
   importantly that his power bank's label reads **5V/3A**, and now also **which

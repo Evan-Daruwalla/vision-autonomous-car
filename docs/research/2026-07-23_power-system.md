@@ -21,6 +21,12 @@ someone else's measurement or a stated assumption.
    consequence of a 3 A supply is that USB-port current cap. **This build
    has zero USB peripherals**, so the cap is irrelevant. Measured draw
    during CNN inference on a Pi 5 is **1.40 A**; all-core stress is ~1.76 A.
+   *(**CORRECTED 2026-09-02, Appendix BC: the "zero USB peripherals" claim is
+   now FALSE** — an Arduino Uno is connected over USB. The board alone draws
+   ~50 mA, still far inside the 600 mA cap, so the conclusion survives. But it
+   matters because the Uno must NOT source LED current from its pins (up to
+   160 mA): its 5 V pin is fed from the LM2596 rail instead. See
+   `.claude/codebase-memory/gotchas.md`.)*
    This reopens cheap 5 V/3 A sources, including USB power banks.
 2. **Recommended: split source.** A USB power bank feeds the Pi alone; a
    separate 2S pack feeds the motor and servo. The single shared connection

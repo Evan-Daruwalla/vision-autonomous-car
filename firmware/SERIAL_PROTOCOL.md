@@ -11,9 +11,7 @@ back state. Rationale for the split: Appendix BC.
 
 ## 1. Pin map — CORRECTED
 
-⚠️ **`docs/BOM.md`'s diagram (lines 153, 164) double-books D3**, assigning it to
-both the encoder's second interrupt and motor PWM. Found while drafting this.
-The map below is the corrected one.
+The map below is the corrected one. **`docs/BOM.md`'s diagram used to double-book D3** — assigning it to both the encoder's second interrupt and motor PWM — which this draft caught; **both files were fixed in the same commit (590f765)**, so neither double-books it now. (The original wording here said BOM.md *currently* double-books D3, which was false the moment it was committed.)
 
 | pin | use | why this pin |
 |---|---|---|
