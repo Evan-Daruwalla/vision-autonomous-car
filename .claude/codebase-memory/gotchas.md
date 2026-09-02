@@ -306,3 +306,22 @@ not yet verified on this car. Mark them verified when a build task confirms.
   the two supplies cannot back-feed each other.
 - **2KB of SRAM.** Fine for a command loop and encoder counters; it will hold no
   model, no buffer of frames, and no meaningful history. Nothing ML goes here.
+- **The device signature is AMBIGUOUS and the two ways of reading it DISAGREE
+  (measured 2026-09-02).** avrdude reports `1E 95 0F` and itself names three
+  candidate parts: `ATmega328P, ATA6614Q, LGT8F328P`. But reading the silicon's
+  own signature row in-app (`boot_signature_byte_get`) returns **`1E 95 16`,
+  which is ATmega328PB.** The in-app read is the more direct evidence:
+  **optiboot HARDCODES the signature it reports over STK500**, so avrdude is
+  quoting the bootloader's build-time constant, not the chip. Treat the part as
+  "328P-family, probably a PB" and do not rely on PB-only peripherals.
+- **`F_CPU` is a BUILD constant, not a measurement.** It proves nothing about
+  the silicon. The clock was measured separately at **16.0042 MHz (+0.026%)** by
+  timestamping serial beacons on the host — which rules out an LGT8F328P at
+  32 MHz (would read ~2.0x) and the internal 8 MHz RC (~0.5x).
+- **Opening the serial port RESETS the board.** Any timing comparison must
+  timestamp on the host and use DELTAS; comparing board uptime to a host
+  stopwatch started later gives a nonsense ratio (0.54x was measured this way
+  before the reset was understood).
+- **SRAM measured at 2048 bytes** (`RAMEND 0x8FF`; 1472 B obtained by malloc in
+  46x32 B blocks; 1705 B free with a small sketch loaded). Confirms the 2KB
+  figure rather than assuming it — and confirms nothing ML fits.

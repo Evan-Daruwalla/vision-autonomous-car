@@ -20,3 +20,18 @@
   `git commit -F <file>` — PowerShell here-strings mangle embedded quotes
   into pathspecs (hit 2026-07-23).
 - CAD tool choice still pending (M1.2; Onshape recommended, not decided).
+- **`arduino-cli` ships INSIDE the Arduino IDE (found 2026-09-02)** — no separate
+  install, and it is not on PATH:
+  `~/AppData/Local/Programs/Arduino IDE/resources/app/lib/backend/resources/arduino-cli.exe`
+  (v1.5.1, with core `arduino:avr 1.8.8` already present). Build/upload:
+  `arduino-cli compile --fqbn arduino:avr:uno firmware/<sketch>` then
+  `arduino-cli upload -p COM3 --fqbn arduino:avr:uno firmware/<sketch>`.
+- **`--fqbn arduino:avr:uno` is MANDATORY on every command.** `arduino-cli board
+  list` reports COM3 as `Unknown` with no FQBN, because the FT232RL is a generic
+  bridge carrying no Arduino vendor ID (a genuine Uno announces itself through an
+  ATmega16U2). The IDE's board dropdown will not auto-select either.
+- **Reading the board's serial from the shell:** PowerShell
+  `System.IO.Ports.SerialPort` works. **Opening the port RESETS the board**, so
+  timestamp lines on the HOST and compare deltas — comparing board uptime against
+  a host stopwatch started at a different moment produced a bogus 0.54x clock
+  ratio before this was understood (Appendix BE).

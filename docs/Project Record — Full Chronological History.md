@@ -91,6 +91,7 @@ the dated entry, not the digest.
 - [BB — claude CLI verified installed, and the 3dstreet MCP blocker was pending APPROVAL all along - not a restart and not the browser tab](#appendix-bb---claude-cli-verified-installed-and-the-3dstreet-mcp-blocker-was-pending-approval-all-along---not-a-restart-and-not-the-browser-tab-2026-09-01-2214-cdt) (09-01)
 - [BC — Arduino Uno supersedes the PCA9685 one day old: encoder counting and a watchdog for $0, the $200 ceiling is reachable again, and the record write-guard is confirmed firing](#appendix-bc---arduino-uno-supersedes-the-pca9685-one-day-old-encoder-counting-and-a-watchdog-for-0-the-200-ceiling-is-reachable-again-and-the-record-write-guard-is-confirmed-firing-2026-09-02-1520-cdt) (09-02)
 - [BD — First verified hardware: the Uno runs our firmware (signature 1E 95 0F, F_CPU 16 MHz), and an FTDI clone needs an explicit --fqbn forever](#appendix-bd---first-verified-hardware-the-uno-runs-our-firmware-signature-1e-95-0f-f_cpu-16-mhz-and-an-ftdi-clone-needs-an-explicit---fqbn-forever-2026-09-02-1526-cdt) (09-02)
+- [BE — SRAM measured at 2048 B and the clock at 16.0042 MHz; CORRECTION to BD (F_CPU was never measured), and the silicon's signature says 328PB while avrdude says 328P](#appendix-be---sram-measured-at-2048-b-and-the-clock-at-160042-mhz-correction-to-bd-f_cpu-was-never-measured-and-the-silicons-signature-says-328pb-while-avrdude-says-328p-2026-09-02-1541-cdt) (09-02)
 
 ---
 
@@ -6723,3 +6724,122 @@ remaining untested variable is ORDER: the relay publishes its tool list from the
 paired tab, so the tab must be paired **before** the session starts, not after.
 That sequence has not yet been tried. Recorded so the next session tries it
 rather than re-diagnosing from scratch.
+
+# Appendix BE - SRAM measured at 2048 B and the clock at 16.0042 MHz; CORRECTION to BD (F_CPU was never measured), and the silicon's signature says 328PB while avrdude says 328P (2026-09-02, ~15:41 CDT)
+Evan asked how much RAM the board has. The answer is 2048 bytes, but getting
+there **corrected an error in BD, produced a real clock measurement, and turned
+up a signature conflict that says the chip may not be what avrdude claims.**
+
+## BE.1 CORRECTION to BD: "F_CPU is the chip reporting its own clock" is WRONG
+
+BD.1 states the bring-up output proved the clock because `F_CPU=16000000` came
+back over serial. **It proves nothing.** `F_CPU` is a macro the BUILD supplies
+from the board definition; the chip never reported it, and printing a constant
+you compiled in is circular. The same commit message repeats the claim.
+
+This mattered, because the signature avrdude read is shared with a part that
+runs at a different speed (BE.3), so the clock was exactly the thing that needed
+independent measurement rather than assertion.
+
+## BE.2 SRAM: 2048 bytes, measured
+
+`firmware/uno_memtest`. Three numbers rather than one, because each can fail
+differently:
+
+```
+RAMEND (compile-time) = 0x8FF
+SRAM total implied by RAMEND = 2048
+MEASURED malloc'd = 1472 B in 46 x 32B
+MEASURED freeRam before/after = 1705/1705
+```
+
+- **2048 B total**, consistent with an ATmega328P/PB.
+- **1705 B free** with a small sketch loaded (338 B of globals).
+- **1472 B obtainable through malloc** in 32 B blocks. The gap to 1705 is
+  allocator overhead plus the static block table, which is expected, not a leak
+  -- `freeRam` returns to exactly 1705 after freeing, so nothing was lost.
+
+Confirms rather than assumes the "2 KB, nothing ML goes here" note already in
+`gotchas.md`. For the control firmware 1.7 KB is ample: serial buffers and a
+couple of encoder counters.
+
+## BE.3 The clock: 16.0042 MHz, measured -- and why it had to be
+
+avrdude's own output names three candidate parts for the signature it read:
+
+```
+Device signature = 1E 95 0F (ATmega328P, ATA6614Q, LGT8F328P)
+```
+
+The **LGT8F328P** is a Chinese clone with a different core that commonly runs at
+**32 MHz**. On a knockoff board that is a live question, and `F_CPU` cannot
+settle it.
+
+Measured by timestamping serial beacons on the HOST and regressing board time
+against wall time:
+
+```
+host  delta = 19022 ms
+board delta = 19027 ms
+ratio board/host = 1.00026   (+0.026% error)
+implied real clock = 16.0042 MHz
+```
+
+**16 MHz, to 0.026%.** An LGT8F328P at 32 MHz on a 16 MHz build would read ~2.0;
+the internal 8 MHz RC oscillator would read ~0.5. Both excluded.
+
+**A false alarm on the way, worth recording because the method was the fault.**
+An earlier capture gave a ratio of **0.54**, which would have meant an ~8.7 MHz
+part. It was wrong: **opening the serial port RESETS the board**, so board
+uptime restarts while the host stopwatch does not, and comparing the two
+absolute values is meaningless. The fix is to timestamp each line on the host
+and use DELTAS, which is immune to when either clock started. The 0.54 also
+contradicted evidence already in hand -- serial at 115200 was clean, which a
+2x clock error would have made impossible -- and that contradiction is what
+prompted re-measuring instead of reporting it.
+
+## BE.4 The signature conflict: the chip may be a 328PB, not a 328P
+
+Two ways of reading the signature **disagree**:
+
+| method | result | part |
+|---|---|---|
+| avrdude over STK500 | `1E 95 0F` | ATmega328P |
+| in-app `boot_signature_byte_get(0,2,4)` | **`1E 95 16`** | **ATmega328PB** |
+
+**The in-app read is the more direct evidence.** avrdude talks to the
+**bootloader**, and optiboot **hardcodes** the signature bytes it reports as
+build-time constants -- so avrdude is quoting what the bootloader was compiled
+to say, not what the silicon is. The in-app read goes to the signature row.
+
+Consistent with everything else measured: a 328PB has 32 KB flash, **2 KB SRAM**
+and runs at 16 MHz here. Nothing observed contradicts it.
+
+**Not treated as settled.** One in-app read is not a cross-check, and the
+practical rule either way is the same: **treat the part as 328P-family and do
+not rely on PB-only peripherals** (the PB adds a third timer, a second UART and
+extra I2C, none of which the plan uses). Recorded so a future session does not
+"discover" the discrepancy and assume the board is broken.
+
+## BE.5 Bins updated
+
+- **`gotchas.md`** -- the signature ambiguity and why optiboot's answer is the
+  weaker one; `F_CPU` is a build constant; the port-open reset and the timing
+  method it forces; the measured 2048 B.
+- **`tooling.md`** -- `arduino-cli` lives inside the IDE and is not on PATH;
+  `--fqbn arduino:avr:uno` is mandatory on every command because an FTDI clone
+  reports no board identity; how to read the port from PowerShell and the reset
+  caveat.
+- **`dependencies.md`** -- the Arduino toolchain, and the fact that firmware uses
+  **only** bundled `Servo` and AVR headers, so there is no third-party Arduino
+  dependency to vendor or pin.
+- **`ui.md` deliberately still untouched** -- still no frontend, so its staleness
+  remains correct rather than drift.
+
+## BE.6 Still not done
+
+- No control firmware; the serial protocol remains paper only.
+- **The FTDI latency timer is still UNMEASURED.** Note this is a DIFFERENT
+  quantity from the clock measured above: the clock is the chip's timebase, the
+  latency timer is how long the USB bridge sits on bytes before delivering them,
+  and only the latter eats the 50 ms control budget.

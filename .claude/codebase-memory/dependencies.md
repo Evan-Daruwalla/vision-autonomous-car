@@ -48,3 +48,11 @@ Remaining planned stack from the 2026-07-23 research brief:
   remains optional-M5-only.
 - Environment rule: everything ML installs into the pinned Python 3.12.10
   venv, never system 3.14 — see tooling.md (2026-08-05).
+
+- **Arduino toolchain (added 2026-09-02):** Arduino IDE 2.x at
+  `~/AppData/Local/Programs/Arduino IDE`, bundling `arduino-cli` 1.5.1 and core
+  `arduino:avr` 1.8.8. Firmware uses only the bundled `Servo` library and AVR
+  headers (`avr/io.h`, `avr/boot.h`) — **no third-party Arduino libraries**, so
+  there is nothing to vendor or pin beyond the core version above.
+- The firmware toolchain is entirely separate from the Python venv; nothing in
+  `ml/requirements.txt` touches the board.
