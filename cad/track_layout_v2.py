@@ -80,15 +80,45 @@ R_NOM = 0.500          # m   FROZEN band 500-670; only 500 fits a 3x3 grid
 STREETS = 3            # per axis
 
 
-def grid_pitch(R: float, lane: float) -> float:
-    """Street spacing. Consecutive 90-degree turns must not overlap."""
-    return 2 * R + lane
+MAX_STRAIGHT = 0.200   # m  cap on the straight run between corners     EST
 
 
-def check_fits(R: float, lane: float, streets: int):
-    pitch = grid_pitch(R, lane)
+def grid_pitch(R: float, lane: float, straight: float) -> float:
+    """Street spacing: two arcs plus whatever straight street runs between.
+
+    Driving east and turning north, the arc is tangent to both centrelines and
+    consumes R BEFORE the corner and R AFTER it. Two consecutive corners a
+    pitch apart therefore need `pitch - 2R >= 0`.
+
+    **The lane width is NOT part of this** -- parallel streets only need
+    `pitch >= lane` so their surfaces do not overlap, and 2R (>= 1000 mm) already
+    dwarfs lane (260 mm). v1 of this file used `2R + lane`, over-constraining
+    the pitch by a full 260 mm, which is what produced the false claim that a
+    3x3 grid fits ONLY at R = 500 mm. It fits at 500, 550 and 600 (Appendix AY).
+    """
+    return 2 * R + straight
+
+
+def best_straight(R: float, lane: float, streets: int) -> float:
+    """Largest straight run between corners that still fits the floor, capped.
+
+    Evan 2026-09-01: "the loop can be smaller, smaller is probably better."
+    Smaller buys margin against BOTH unmeasured numbers -- B3's turning radius
+    and B2's car width -- so this takes the largest straight up to a cap rather
+    than the largest that fits, and returns 0 when even tangent corners are too
+    big.
+    """
+    usable = FLOOR - 2 * WALL_MARGIN
+    s = (usable - lane) / (streets - 1) - 2 * R
+    return max(0.0, min(MAX_STRAIGHT, s))
+
+
+def check_fits(R: float, lane: float, streets: int, straight: float = None):
+    if straight is None:
+        straight = best_straight(R, lane, streets)
+    pitch = grid_pitch(R, lane, straight)
     span = (streets - 1) * pitch + lane
-    return pitch, span, span <= FLOOR - 2 * WALL_MARGIN
+    return pitch, span, span <= FLOOR - 2 * WALL_MARGIN + 1e-9
 
 
 def round_polyline(verts, R: float, per: int = 40):
@@ -147,16 +177,20 @@ def round_polyline(verts, R: float, per: int = 40):
     return np.concatenate(pts)
 
 
-def build(R: float = R_NOM, lane: float = LANE, streets: int = STREETS):
-    pitch, span, ok = check_fits(R, lane, streets)
+def build(R: float = R_NOM, lane: float = LANE, streets: int = STREETS,
+          straight: float = None):
+    if straight is None:
+        straight = best_straight(R, lane, streets)
+    pitch, span, ok = check_fits(R, lane, streets, straight)
     if not ok:
         raise SystemExit(
             f"a {streets}x{streets} street grid does NOT fit: pitch "
             f"{pitch * 1000:.0f} mm gives a span of {span * 1000:.0f} mm against "
             f"{(FLOOR - 2 * WALL_MARGIN) * 1000:.0f} mm usable. This is the "
-            f"documented failure mode -- R above 500 mm leaves only a 2x2 grid "
-            f"(4 intersections, 1 block), which is a plus sign, not a city. "
-            f"Re-run with --streets 2, and record that B3 deleted the city.")
+            f"documented failure mode: even TANGENT corners (no straight street "
+            f"between them) do not fit at this radius. There is no smaller-city "
+            f"fallback -- a 2x2 grid cannot carry a figure-8 -- so the fallback "
+            f"is v1's non-grid figure-8 (cad/track_layout_v1.py).")
     if streets < 3:
         raise SystemExit(
             f"a {streets}x{streets} grid cannot carry this route. The figure-8 "
@@ -177,6 +211,7 @@ def build(R: float = R_NOM, lane: float = LANE, streets: int = STREETS):
     route = round_polyline(verts, R)
     streets_xy = [(-pitch + i * pitch) for i in range(streets)]
     return {"pitch": pitch, "span": span, "R": R, "lane": lane,
+            "straight": straight,
             "route": route, "verts": verts, "street_coords": streets_xy,
             "intersections": [(x, y) for x in streets_xy for y in streets_xy]}
 
@@ -239,18 +274,39 @@ def self_check() -> None:
     g = build()
     # 1. the grid fits, and only just
     assert g["span"] <= FLOOR - 2 * WALL_MARGIN, g["span"]
-    assert g["span"] > 2.7, "span suspiciously small - pitch formula wrong?"
+    # NOT "span > 2.7": that encoded the over-constrained pitch and asserted the
+    # loop was BIG. Smaller is the goal (Evan, 2026-09-01). The real floor is
+    # geometric -- the grid must not collapse below tangent corners.
+    assert g["span"] >= 2 * (2 * g["R"]) + g["lane"] - 1e-9, \
+        f"span {g['span']:.3f} is below tangent corners - grid is degenerate"
+    assert g["straight"] >= 0.0, g["straight"]
 
-    # 2. the frozen-band risk is real and the generator REFUSES, not guesses
-    for bad_R in (0.550, 0.600, 0.670):
-        try:
-            build(R=bad_R)
-        except SystemExit:
-            pass
-        else:
-            raise AssertionError(f"R={bad_R} should not fit a 3x3 grid")
-    # NOTE: there is no smaller-city fallback. A 2x2 grid has the SPACE at
-    # those radii but cannot host the route (see 6c) -- the fallback is v1.
+    # 2. the CORRECTED pitch (2R, not 2R+lane) fits most of the frozen band.
+    #    500/550/600 build; only 670 is out of reach even with tangent corners.
+    for ok_R in (0.500, 0.550, 0.600):
+        gg = build(R=ok_R)
+        assert gg["span"] <= FLOOR - 2 * WALL_MARGIN + 1e-9, (ok_R, gg["span"])
+    try:
+        build(R=0.670)
+    except SystemExit:
+        pass
+    else:
+        raise AssertionError("R=670 should not fit a 3x3 grid")
+    # "Smaller is better" cannot mean "a bigger radius gives a smaller loop" --
+    # a bigger turning circle FORCES a bigger loop, and at R=600 the straight is
+    # already squeezed to 70 mm. What it does mean: at the small end the cap
+    # binds, so the layout leaves real margin instead of spending the whole
+    # floor. That margin is the defence against B2 and B3 both landing badly.
+    assert build(R=0.500)["span"] <= FLOOR - 2 * WALL_MARGIN - 0.100, \
+        "at R=500 the layout should leave >=100 mm spare, not fill the floor"
+    assert grid_pitch(0.6, LANE, 0.0) > grid_pitch(0.5, LANE, 0.0), \
+        "pitch must grow with radius"
+
+    # 2b. the pitch formula itself: 2R + straight, with NO lane term. Getting
+    #     this wrong by one lane width is what produced the false "fits only at
+    #     R=500" claim (Appendix AY).
+    assert abs(grid_pitch(0.5, 0.26, 0.1) - 1.1) < 1e-9, grid_pitch(0.5, 0.26, 0.1)
+    assert abs(grid_pitch(0.5, 0.99, 0.1) - 1.1) < 1e-9, "lane must not affect pitch"
 
     # 3. ONE closed route, min radius respected, NO cusps
     r = g["route"]

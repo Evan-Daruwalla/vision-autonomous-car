@@ -85,6 +85,7 @@ the dated entry, not the digest.
 - [AV — Record letter-collision race repaired, and the AU audit's two findings against AR's artifacts fixed](#appendix-av---record-letter-collision-race-repaired-and-the-au-audits-two-findings-against-ars-artifacts-fixed-2026-09-01-2018-cdt) (09-01)
 - [AW — CORRECTION to AV.1: the append script was never the race; the daily-audit prompt never named it. Prompt fixed and a write-time guard added](#appendix-aw---correction-to-av1-the-append-script-was-never-the-race-the-daily-audit-prompt-never-named-it-prompt-fixed-and-a-write-time-guard-added-2026-09-01-2036-cdt) (09-01)
 - [AX — Track v2: a 3x3 city grid that fits only at R=500mm, the sim cannot rehearse it, and the 225-panel floor is refused (my filament figure was 2.7x too high)](#appendix-ax---track-v2-a-3x3-city-grid-that-fits-only-at-r500mm-the-sim-cannot-rehearse-it-and-the-225-panel-floor-is-refused-my-filament-figure-was-27x-too-high-2026-09-01-2100-cdt) (09-01)
+- [AY — CORRECTION to AX.2: the street pitch never needed a lane term, so the city fits at R=500/550/600; v2 shrunk; lighting spec settles the PCA9685](#appendix-ay---correction-to-ax2-the-street-pitch-never-needed-a-lane-term-so-the-city-fits-at-r500550600-v2-shrunk-lighting-spec-settles-the-pca9685-2026-09-01-2106-cdt) (09-01)
 
 ---
 
@@ -5928,3 +5929,155 @@ a frozen band that is itself arithmetic on an unmeasured 130 mm car width.
 Appendix L still rules that corner tiles must not be cut until B3. The 20 mm of
 spare floor is the whole margin, so B2's measured car width can also break it:
 every 10 mm of extra car width costs 20 mm of lane and 40 mm of span.
+
+# Appendix AY - CORRECTION to AX.2: the street pitch never needed a lane term, so the city fits at R=500/550/600; v2 shrunk; lighting spec settles the PCA9685 (2026-09-01, ~21:06 CDT)
+Evan: the loop can be smaller; the bridge and 5 destinations belong to the FINAL
+track version, not v2; stop signs only, never traffic lights; and the car should
+have headlights, tail lights, daytime running lights and turn signals.
+
+## AY.1 CORRECTION to AX.2: the street pitch was over-constrained by one lane width
+
+AX.2 claimed a 3x3 city grid "fits at exactly ONE point in the frozen radius
+band". **That is wrong, and it was my arithmetic, not the geometry.**
+
+`track_layout_v2.py` used `pitch = 2R + lane`. Deriving it instead of assuming
+it: driving east and turning north, the arc is tangent to both street
+centrelines and consumes R **before** the corner and R **after** it, so two
+consecutive corners a pitch apart need only
+
+    pitch >= 2R
+
+The lane width is **not** part of that constraint. Parallel streets need
+`pitch >= lane` merely so their surfaces do not overlap, and 2R (>= 1000 mm)
+already dwarfs lane (260 mm). The `+ lane` term inflated every pitch by 260 mm
+and every 3x3 span by 520 mm.
+
+Corrected, with `pitch = 2R + straight`:
+
+| R | max straight that fits | pitch | span | vs AX.2's claim |
+|---|---|---|---|---|
+| 500 mm | 200 mm (capped) | 1200 mm | **2660 mm, 140 mm spare** | AX.2 said 2780 mm |
+| 550 mm | 100 mm | 1200 mm | **2800 mm, fits** | AX.2 said **NO** |
+| 600 mm | 70 mm | 1270 mm | **2800 mm, fits** | AX.2 said **NO** |
+| 670 mm | — | 1340 mm | 2940 mm, does not fit | AX.2 said NO (correct) |
+
+**So B3 only deletes the city at the very top of the frozen band, not across
+three quarters of it.** The layout is far less at-risk than AX.2 recorded. The
+"no smaller-city fallback" finding still stands: a 2x2 grid cannot carry a
+figure-8, so R = 670 mm still means falling back to v1.
+
+## AY.2 Smaller, as asked
+
+Evan: "the loop can be smaller, smaller is probably better." Implemented as
+`best_straight()`: take the largest straight run between corners that fits, up
+to a 200 mm cap, rather than spending the whole floor. At R = 500 mm that leaves
+**140 mm spare** instead of 20 mm.
+
+That margin is the defence against the TWO unmeasured numbers, not one. B3 sets
+the radius; **B2 sets the car width, and every 10 mm of measured car width costs
+20 mm of lane and 40 mm of span.** A layout with 20 mm of slack was one
+measurement away from dead in either direction.
+
+```
+$ python cad/track_layout_v2.py
+street pitch    1200 mm  (straight between corners 200 mm)
+grid            3x3 streets, 4 blocks, 9 intersections
+span            2660 mm of 2800 usable -> 140 mm SPARE
+driven route    figure-8 through the centre intersection, 8.31 m, 3 lefts + 3 rights (balanced)
+```
+
+A self-check that asserted `span > 2.7` had to be **inverted**: it encoded the
+over-constrained pitch and was asserting the loop was BIG. It is replaced by a
+geometric floor (the grid must not collapse below tangent corners) plus a check
+that R = 500 mm leaves >= 100 mm spare. A second new check pins the pitch
+formula directly -- `grid_pitch` must be unchanged by the lane argument, which
+is the exact error above.
+
+Also corrected in passing: a "smaller is better" assertion I wrote claiming a
+bigger radius must not give a bigger loop. **That is false physics** -- a bigger
+turning circle forces a bigger loop, and at R = 600 mm the straight is already
+squeezed to 70 mm. The real property, now asserted, is that the cap binds at the
+small end so margin is left rather than spent.
+
+## AY.3 Bridge and destinations move to the final version
+
+Evan scoped these to the final track. v2 carries neither, which is why it is
+just streets. **v1's work is not wasted** -- `cad/track_layout_v1.py` holds the
+verified flat-causeway bridge (387 mm deck, 387 mm clearance) and the 5-landmark
+placement, and both are parametric, so they port to the final layout once the
+radius is measured. The reasoning behind them stands unchanged: the bridge
+cannot be an overpass (torque caps the grade at 9-15%, a 10% ramp eats 2.77 m of
+a 3 m floor, and a 10% grade moves the horizon 21 sd out of distribution --
+AT.3), and destinations are landmarks rather than spur junctions.
+
+## AY.4 Stop signs only, no traffic lights -- already the plan, and for a reason
+
+Confirmed correct against `gotchas.md:97-103`, which records it as a FEATURE:
+
+> A stop sign is provably unlearnable by plain BC. Stopped at the line the image
+> is identical whether to wait or go, so the action depends on history, which
+> pi(action|image) cannot express (frame-stacking gives ~0.2 s at 20 Hz; a stop
+> is 2-3 s). This is a FEATURE of the plan -- it is the M4 world-model showcase,
+> since the RSSM/MDN-RNN has recurrent state. **Traffic lights are the opposite:
+> memoryless-learnable (state is visible in the frame) but need hardware.**
+
+So a traffic light would be both more hardware AND a weaker demonstration. The
+sign must also stay relocatable (Appendix Y.3) or position alone predicts it.
+
+## AY.5 Lighting: `docs/LIGHTING_SPEC.md`, and it settles an open purchase decision
+
+Written as a spec; nothing ordered, nothing wired.
+
+**What the camera sees is what decides the risk.** The camera faces forward, so
+tail lights and rear indicators are never in frame -- pure realism, zero ML
+cost, build them freely. **Only the headlight beam matters**, because it lands on
+the road ahead.
+
+**The PCA9685 decision is now settled.** Lights need 4 more channels (headlight,
+tail, left, right), two of them PWM for the dimmed daytime running mode, on top
+of the existing 1 servo PWM + 2 motor PWM/DIR. A PCA9685 is a 16-channel I2C LED
+controller costing 2 pins, designed for exactly this. Straight-to-GPIO needs 4
+more pins and has no hardware PWM to spare. The portability argument (DonkeyCar's
+`pins.py` has only three PWM backends; straight-to-GPIO locks the project to a
+Pi) already leaned this way; capacity settles it. **This closes a
+BLOCKED-ON-EVAN item rather than adding one.**
+
+Power: ~8 LEDs x 20 mA = ~160 mA EST, off the **LM2596 5 V rail** that already
+feeds the servo -- never off the Pi, whose 5 V/3 A bank has a 600 mA peripheral
+cap against a measured 1.40 A CNN draw.
+
+**The headlight trap.** `gotchas.md` says to vary lighting across sessions on
+purpose. A headlight beam is NOT that kind of variation: ambient light is
+uncorrelated with the car's state, but the beam is fixed to the car and lands in
+the same image region every frame. Switching between full beam and the dimmed
+daytime mode creates **two visual domains the policy cannot tell apart**, because
+nothing in the input says which is active. Collecting some laps in each does the
+opposite of domain randomisation -- it injects a hidden variable correlated with
+nothing. **Rule: lock ONE lighting mode across the whole dataset and deployment,
+exactly as the camera pitch is locked**, or log the mode as an input and say so.
+
+**Turn signals are a policy OUTPUT, and this is the genuinely interesting part.**
+The policy gains a third head: a 3-state indicator (off/left/right); the blink
+cadence is firmware. Unlike the stop sign, this **is** learnable by plain BC --
+on a memorised fixed route the correct state is a function of where the car is,
+which is visible in the frame, the same reason `gotchas.md` calls traffic lights
+memoryless-learnable.
+
+The prerequisite is real and has a deadline: **M2's logger must record indicator
+state per frame before the M3 collection run.** 10-20 laps recorded without
+indicator labels cannot be relabelled honestly. If that change does not land in
+time, drive the indicators from a rule on predicted steering and **say in the
+write-up that they are rule-driven, not learned.** Both are defensible; passing
+a rule off as learned is not.
+
+## AY.6 Open
+
+- The PCA9685, LEDs, resistors and wire are **not in `docs/BOM.md`**, and adding
+  them moves the ~$178-181 total. BLOCKED-ON-EVAN with the rest of the order.
+- Whether indicators are a learned head depends on the M2 logger change landing
+  before M3 data collection.
+- Headlight position relative to the camera decides where the beam falls in
+  frame, which per AY.5 is a dataset-defining choice, not styling -- and it is
+  downstream of a chassis nobody has built.
+- Still no committed geometry. R = 500 mm remains a parameter; B2 and B3 both
+  still gate it.
