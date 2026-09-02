@@ -105,6 +105,7 @@ the dated entry, not the digest.
 - [BP — CORRECTION to BL.1 and BO.1 - the 40mm/10mm sensitivity rule is from Appendix AZ, not HANDOFF](#appendix-bp---correction-to-bl1-and-bo1---the-40mm10mm-sensitivity-rule-is-from-appendix-az-not-handoff-2026-09-02-1757-cdt) (09-02)
 - [BQ — Max steer confirmed 32 degrees and the measurement convention that makes it a 2.6x trap; board restored; HANDOFF synced](#appendix-bq---max-steer-confirmed-32-degrees-and-the-measurement-convention-that-makes-it-a-26x-trap-board-restored-handoff-synced-2026-09-02-1802-cdt) (09-02)
 - [BR — Lego-mountable motors: none work, but the bin overstated its source and the real constraint is now the encoder](#appendix-br---lego-mountable-motors-none-work-but-the-bin-overstated-its-source-and-the-real-constraint-is-now-the-encoder-2026-09-02-1806-cdt) (09-02)
+- [BS — Steering: the servo-to-pinion coupling is specified nowhere, and Geekservo 270 is a real candidate the drive-motor argument wrongly excludes](#appendix-bs---steering-the-servo-to-pinion-coupling-is-specified-nowhere-and-geekservo-270-is-a-real-candidate-the-drive-motor-argument-wrongly-excludes-2026-09-02-1810-cdt) (09-02)
 
 ---
 
@@ -8087,3 +8088,90 @@ No decision changed. The N20 #5159 remains the drive motor. **Nothing ordered,
 nothing wired.** What changed is that one bin now matches its source, and the
 live reason for the choice is recorded as the encoder rather than as speed
 alone — so the next session re-litigating this starts from the real constraint.
+
+# Appendix BS - Steering: the servo-to-pinion coupling is specified nowhere, and Geekservo 270 is a real candidate the drive-motor argument wrongly excludes (2026-09-02, ~18:10 CDT)
+Evan asked the same Lego-mountability question about the steering. **The answer
+is the opposite of BR's**, and asking it exposed an unclosed mechanical
+interface nobody had noticed.
+
+## BS.1 The finding: the servo-to-pinion coupling is specified NOWHERE
+
+`docs/BOM.md` row 7 is *"MG90S metal-gear servo | Steering. Metal gears
+non-negotiable; MG996R is the fallback if it stalls."*
+`docs/WIRING_PROTOSHIELD.md` §2.4 covers the servo's three wires and nothing
+else. **No document says how a splined servo horn reaches the 12-tooth Lego
+pinion Evan has actually built.**
+
+This is the **same defect class as the missing TB6612 `STBY`** (Appendix BL):
+an interface that every document assumes and none specifies, which surfaces as
+a dead stop at assembly rather than as a design question. The drive side has
+the same problem and at least knows it — the printed coupler is analysed at
+length in the drive-motor research. The steering side has no equivalent
+analysis at all.
+
+## BS.2 The drive-motor rejection does NOT transfer to steering
+
+BR rejected Geekservo as a drive motor at **70-90 rpm** against the N20's 1000.
+**That objection is irrelevant here.** A steering servo needs position accuracy
+and torque; rpm is not the axis. Carrying BR's conclusion across would be
+reasoning from the wrong constraint, so it is recorded here explicitly to stop
+a future session doing it.
+
+## BS.3 Geekservo 270 vs MG90S, on real numbers
+
+Specs checked 2026-09-02 (Pimoroni / RobotShop / Kittenbot listings). Rack force
+computed through the measured 12-tooth pinion's **6.0 mm pitch radius**; travel
+computed from the **37.70 mm per pinion revolution** established in BN.2.
+
+| | MG90S | Geekservo 270 |
+|---|---|---|
+| stall torque | ~2.2 kg.cm @ 4.8 V | **0.9 kg.cm @ 4.8 V, 1.0 @ 6.0 V** |
+| **rack force** | **36.0 N** | **14.7-16.4 N** |
+| **travel at 1:1** | 180 deg = **+/-9.42 mm** | 270 deg = **+/-14.14 mm** |
+| speed | 60 deg / 0.10 s | 60 deg / 0.12 s |
+| Lego mount + cross axle | **no, needs an adapter** | **yes, native** |
+| clutch | none | **built in** |
+| gear material | metal — the stated reason it was chosen | **NOT STATED in any listing seen** |
+
+**The trade: 2.4x less torque, for a native cross axle, 50% more rack travel,
+and a clutch.**
+
+**Whether 14.7 N is enough is NOT computable yet** — it needs the car's mass and
+front-axle load, neither measured, and the worst case (steering a stationary car
+during behavioural-cloning collection) is exactly the case the data run will
+hit. **Not a drop-in swap. A candidate to test.**
+
+**The clutch is worth more than it first appears.** `uno_control.ino` carries the
+warning that driving into the Lego rack's hard stop stalls and cooks the servo,
+and `SERVO_US_SPAN` is deliberately narrowed to 300 us as a guessed guard against
+it. A built-in clutch is a mechanical answer to a problem currently handled by a
+software limit that nobody has calibrated.
+
+## BS.4 If the MG90S is kept, there is a manufactured adapter
+
+**Adafruit #4252, $0.75**, micro-servo spline to a 16 mm Lego cross axle.
+
+⚠️ **Adafruit's own hedge, quoted:** *"fits our Micro Servo only! Not guaranteed
+to fit with any other kind of servo splines."* Their micro servo (#169) is
+SG90-class and the MG90S usually shares that spline, but the vendor will not
+guarantee it. **It is also plastic, and it sits at the highest-torque point of
+the steering path** — the opposite of the drive coupler, which the research
+correctly identified as the LOWEST-torque joint. Verify the spline before buying.
+
+Printed alternatives were already known and are already cited in
+`docs/research/2026-07-23_sensor-compute-stack.md` (lines 132 and 255,
+Printables 61922 / 147626) — the manufactured option is what was missing.
+
+## BS.5 Firmware consequence, if the servo changes
+
+`SERVO_US_CENTRE` and `SERVO_US_SPAN` in `uno_control.ino` are calibrated for a
+180-degree part and are already flagged provisional. **A 270-degree servo needs
+them re-derived, not re-tuned** — the same command percentage maps to 1.5x the
+mechanical angle.
+
+## BS.6 State
+
+**No decision made. Nothing ordered, nothing wired.** The MG90S remains the
+specified steering servo. What changed: the coupling gap is now recorded rather
+than latent, and the Geekservo option is on the table with real numbers instead
+of being wrongly excluded by the drive-motor argument.

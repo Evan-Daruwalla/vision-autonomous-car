@@ -325,3 +325,48 @@ traps in `sim-harness.md`.
   shrink. **Corner geometry stays frozen until T2 measures it empirically on the
   rolling chassis; a geometric radius from wheelbase + 32 degrees would be
   better than today's arithmetic-on-estimates but is still not T2.**
+
+## Steering actuator + the servo-to-pinion coupling (added 2026-09-02, Appendix BS)
+
+- **THE SERVO-TO-PINION COUPLING IS SPECIFIED NOWHERE.** `BOM.md` row 7 is
+  "MG90S metal-gear servo | Steering"; `WIRING_PROTOSHIELD.md` §2.4 covers only
+  its three wires. **Nothing says how a splined servo horn reaches the 12-tooth
+  Lego pinion.** Same defect class as the missing TB6612 `STBY` (Appendix BL),
+  on the mechanical side: an unclosed interface that stops the build dead.
+- **For STEERING, "Lego-mountable" is worth far more than it is for drive** —
+  the speed objection that kills Geekservo as a drive motor (70-90 rpm) does not
+  apply, because a steering servo needs position accuracy and torque, not rpm.
+  **Do not carry the drive-motor rejection across to steering; it does not
+  transfer.**
+- **Geekservo 270° (Kittenbot) vs MG90S**, checked 2026-09-02:
+
+  | | MG90S | Geekservo 270° |
+  |---|---|---|
+  | stall torque | ~2.2 kg.cm @4.8V | **0.9 kg.cm @4.8V, 1.0 @6.0V** |
+  | rack force via the 6.0 mm pitch radius | **36.0 N** | **14.7-16.4 N** |
+  | travel at 1:1 to the pinion | 180° = **+/-9.42 mm** | 270° = **+/-14.14 mm** |
+  | speed | 60°/0.10s | 60°/0.12s |
+  | Lego mount + cross axle | **no — needs an adapter** | **yes, native** |
+  | clutch | no | **built in** |
+  | gears | metal (the reason it was chosen) | **NOT STATED in any listing seen** |
+
+  So Geekservo trades **2.4x less torque** for a native Lego cross axle, **50%
+  more rack travel**, and a clutch. **Whether 14.7 N of rack force is enough is
+  NOT computable here** — it needs the car's mass and front axle load, neither
+  measured. Do not treat it as a drop-in swap; treat it as a candidate to test.
+- **The clutch matters more than it looks.** `uno_control` warns that driving
+  into the Lego rack's hard stop stalls and cooks the servo; the MG90S has no
+  protection and `SERVO_US_SPAN` is deliberately narrowed to 300 us because of
+  it. A built-in clutch is a mechanical answer to a problem currently handled
+  by a guessed software limit.
+- **Manufactured servo-to-Lego adapter, if the MG90S is kept: Adafruit #4252,
+  $0.75**, micro-servo spline to a 16 mm Lego cross axle. ⚠️ Adafruit's own
+  wording: *"fits our Micro Servo only! Not guaranteed to fit with any other
+  kind of servo splines."* Their micro servo is SG90-class; the MG90S usually
+  shares that spline but the vendor will not guarantee it. **It is also plastic,
+  sitting at the highest-torque point of the steering path.** Verify the spline
+  before buying. Printed alternatives already known: Printables 61922 / 147626
+  (`docs/research/2026-07-23_sensor-compute-stack.md` lines 132, 255).
+- **Firmware impact of a 270° servo:** `SERVO_US_CENTRE`/`SERVO_US_SPAN` in
+  `uno_control.ino` are calibrated for a 180° part and are already marked
+  provisional. A 270° servo needs them re-derived, not just re-tuned.
