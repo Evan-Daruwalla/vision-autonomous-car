@@ -2,7 +2,7 @@
 
 **Last updated: 2026-09-01 ~16:12 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 44 appendices A–AR). When this file and the record disagree about
+(append-only, 51 appendices A–AY). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -146,7 +146,14 @@ plan-view geometry. Keep the layout itself in a dimensioned plan.
 | surface | print **MARKINGS**, not road (~0.15 kg vs ~6.4 kg) | `gotchas.md` |
 | dashes | MUTCD 1:3 does not survive at scale; ~2:1, a documented deviation | Appendix L |
 
-> **⚠️ CORNER GEOMETRY IS FROZEN until the B3 turning test.** The ~330 mm
+> **⚠️ CORNER GEOMETRY IS FROZEN until the T2 turning test.**
+>
+> *(Naming collision, flagged 2026-09-01: "B3" is used across ~10 record
+> appendices to mean the TURNING TEST, which is PRD **T2** and needs the whole
+> rolling chassis (M1.7). But `PRD_ROADMAP.md` §6b's own B-lane maps **B3 =
+> task 4, measure donor geometry**, which needs only calipers and is doable
+> today. Two different tasks with wildly different prerequisites. Say **T2**
+> when the turning test is meant.)* The ~330 mm
 > minimum turn radius is `wheelbase / tan(max steer)` on an **unmeasured**
 > 130 mm car width. Appendix L already ruled that corner tiles must not be cut
 > until an empirical turning test on the rolling chassis. Designing the *look*
@@ -167,7 +174,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Decision gate | M1.1 | **Done** | 2026-07-23: 8GB · no Lego motors · 3060 Ti 8GB · ~$200 · ratified |
 | Drive motor selection | M1.1b | **Done (purchase pending)** | 2026-07-23: Pololu #1093 N20 30:1 HP 6V, $23.95; docs/research/2026-07-23_drive-motor-selection.md |
 | Power system selection | M1.1c | **Done (purchase pending)** | 2026-07-23: split source, power bank owned; docs/research/2026-07-23_power-system.md |
-| BOM | M2.8 | **Final; BLOCKED-ON-EVAN** | `docs/BOM.md`, ≈$178-181 + shipping |
+| BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced twice** | `docs/BOM.md`, **≈$232-249 + $15-25 shipping**. Rows 17-20 (PCA9685, LEDs, resistors, I2C wire) added 2026-09-01 |
 | Chassis CAD + print | M1 | **Started** | M1.3 coupon generated + validated 2026-07-23; awaiting Evan's print + measurements |
 | Tolerance coupon | M1.3 | **Ready to print** | `cad/tolerance_coupon_v1.stl` + `cad/README.md`; gates every chassis dimension |
 | Electronics + teleop | M2 | **Not started** | purchase list is task 8 |
@@ -181,7 +188,10 @@ original floor and the pre-2026-08-12 scale decision.)*
 | SIM-POC P4 DreamerV3 | P4 | **DONE** | 2026-08-06, Appendices T+U: **both** halves. Trained 2000 steps (image loss 588.31→61.39, 9.6x) AND the 8GB fitting table measured. **Batch size, not model size, breaks 8GB**: 69.7M params fit at b16 (5.238 GB), 19.1M at b64 does not fit in 7.0 GB. Two task premises proved false — see T.2 |
 | SIM-POC P5 policy | P5 | **DONE — but its NUMBERS are uncertified** | 2026-08-07, Appendix V. Latent BC (linear + MLP) **and** CEM planning, 3 seeds × 3 episodes. Key finding (stands, open-loop): the paper's linear C is structurally wrong here — z encodes cross-track error nonlinearly (probe R² 0.27 linear vs 0.97 MLP). **CAVEAT 2026-08-11 (Appendix AD): every step count from this task came from a harness later measured at CV 55%, where n=1 launch resolves only ~3×. The qualitative result holds — the expert completes, learned policies mostly do not — but 69.3/89.7/187.2/110 are not measurements. "No learned policy finished" was also later shown FALSE in the strict sense: completions occur, just not reliably.** |
 | Harness trustworthiness | P6 | **DONE 2026-08-13** | Appendix AI/AJ. Cause found: `donkey-generated-track-v0` REGENERATES per launch, which is the 4.4x swing. Fix is the PAIRED design (`ml/eval_paired.py`), not a fixed track — every fixed track is far OOD and the controllers collapse to 13-67 steps there. Result: **no arm beats the baseline** |
-| Track layout | M1.4 | **In progress** | 2026-09-01, Appendix AM. Evan designing in 3dstreet.app; `.mcp.json` wires `3dstreet-mcp`. **Corner geometry FROZEN until the B3 turning test**; floor-space number still needed from Evan |
+| Track layout | M1.4 | **v1 + v2 drawn, NOT committed** | 2026-09-01, Appendices AM/AT/AX/AY. `cad/track_layout_v1.py` = figure-8 with a flat causeway bridge + 5 landmarks; `cad/track_layout_v2.py` = 3x3 city grid, 9 intersections, figure-8 route through the centre, 8.31 m, 140 mm spare at R=500. Both parametric and self-checking. **Corner geometry FROZEN until the T2 turning test** |
+| Track: sim rehearsal | — | **IMPOSSIBLE, settled** | 2026-09-01, Appendix AX. gym-donkeycar's protocol has ten message types and none defines a road; `load_scene` picks from 11 prebuilt Unity scenes. A custom track needs a Unity build. Costs little: M3 trains on real laps, not the sim corpus |
+| Track surface | T3 | **Decided: hybrid** | 2026-09-01, Appendix AX. NOT 225 printed panels (~12.6 kg, 169-900 h, 225 bed clears, 28 camera-visible seams). Print the 6.28 m of corner arcs + 9.36 m of intersection boxes as ~79 tiles (~970 g); tape the 31.9 m of straight street lines |
+| Vehicle lighting | — | **Spec written, nothing wired** | 2026-09-01, Appendix AY. `docs/LIGHTING_SPEC.md`. Headlights/tail/DRL/indicators. Only the headlight beam is in the camera's view. Settles the PCA9685. Turn signals are a THIRD policy head and gate the M3 collection run via PRD task 11b |
 | **Harness trustworthiness** | **P6** | **OPEN — BLOCKING all closed-loop claims** | 2026-08-11, Appendix AD. Same checkpoint across 7 gate-valid launches: 106.5–471.5 steps, CV 55%. Rate, track and start state ruled out; cause unknown. Nothing may be ranked on closed-loop steps until this is fixed or quantified |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
 
@@ -223,8 +233,12 @@ original floor and the pre-2026-08-12 scale decision.)*
 - **Actuators: TWO — one drive motor + one MG90S steering SERVO.** Steering
   is never a plain DC motor (no position feedback ⇒ no commandable angle;
   see `gotchas.md`).
-- Budget: **SETTLED at ≈$178-181 + shipping**, inside the ~$200 ceiling
-  (Evan took the 4GB downgrade and owns the power bank, 2026-07-23 ~20:46).
+- Budget: ~~SETTLED at ≈$178-181 + shipping, inside the ~$200 ceiling~~
+  **NOT settled and the ceiling is breached on EVERY path (2026-09-01).**
+  Re-priced 2026-08-08 to $221.82-$224.82; rows 17-20 (lighting + I2C, Appendix
+  AY) take it to **$232-249 before shipping, ≈$247-274 with**. The 2GB Pi swap
+  no longer restores the ceiling either — it lands at **≈$202-229 with
+  shipping**. Evan decides whether the ceiling moves or the lighting waits.
   Shipping across 3-4 vendors could add $15-25 — **consolidate vendors**;
   most small parts are generic. Full list: `docs/BOM.md`.
 
@@ -271,14 +285,15 @@ original floor and the pre-2026-08-12 scale decision.)*
   MEASURED width. Note a smaller car also lowers the camera, and the
   sim's camera height/pitch are still unidentified (AI.3).
 - **Pi 5 2GB ($65) or 4GB ($110)?** Recommended 2GB — identical silicon, and the 4GB has absorbed every DRAM price rise while the 2GB has absorbed none. Purchase window is now.
-- **PWM path: straight-to-GPIO or a PCA9685 breakout?** Straight-to-GPIO (as the BOM wires it) locks the project to a Pi. Decide before ordering.
+- ~~**PWM path: straight-to-GPIO or a PCA9685 breakout?**~~ **RESOLVED 2026-09-01 (Appendix AY): PCA9685**, carrying motor PWM + servo + 4 light channels, 6 of 16 used. Lighting made the channel count decide what Appendix AH had already argued on portability grounds. BOM row 17.
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.
-- **THE ORDER (`docs/BOM.md`, ≈$178-181).** Nothing is bought. Everything
-  downstream of M1.5 waits on parts. Before ordering Evan should check the
-  four items in the BOM's "Verify before ordering" section — most
-  importantly that his power bank's label reads **5V/3A**.
+- **THE ORDER (`docs/BOM.md`, ≈$232-249 + shipping).** Nothing is bought.
+  Everything downstream of M1.5 waits on parts. Before ordering Evan should
+  check the **five** items in the BOM's "Verify before ordering" section — most
+  importantly that his power bank's label reads **5V/3A**, and now also **which
+  LEDs** (item 5), whose forward voltage sets every series-resistor value.
 - **PRINT THE COUPON (M1.3)** — needs NO parts, only his printer and Lego.
   `cad/tolerance_coupon_v1.stl`, once in PLA and once in PETG, using the
   settings he intends for the chassis. Every chassis dimension in M1.5–M1.7

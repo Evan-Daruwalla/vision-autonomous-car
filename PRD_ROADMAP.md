@@ -92,8 +92,12 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
 
 - **BUDGET SETTLED 2026-07-23 ~20:46 CDT (Evan):** he **owns a USB power
   bank**, and takes the **Pi 5 8GB → 4GB downgrade** (supersedes the ~17:21
-  gate answer (a), on his own instruction). Final BOM ≈ **$176-179 +
-  shipping**, inside the $200 ceiling. Itemised in `docs/BOM.md`. One part
+  gate answer (a), on his own instruction). ~~Final BOM ≈ **$176-179 +
+  shipping**, inside the $200 ceiling.~~ *(Superseded 2026-09-01: re-priced
+  2026-08-08 to $221.82-$224.82, then rows 17-20 (lighting + I2C, Appendix AY)
+  took it to **$232-249 + $15-25 shipping**. The **$200 ceiling is breached on
+  every path**, including the 2GB Pi swap at ≈$202-229 with shipping. Budget is
+  NOT settled; it is Evan's open call.)* Itemised in `docs/BOM.md`. One part
   was missing from every earlier estimate and is now included: a **camera
   cable, Standard-Mini (~$2-5)** — Camera Module 3 ships with a
   Standard-Standard cable that does NOT fit the Pi 5's mini 22-pin
@@ -288,11 +292,21 @@ transfer gap) must not block the capstone.
 8. ~~**Purchase list — BLOCKED-ON-EVAN.** Final BOM from brief §Ranked
    options (+ SD card, PF 8886 sacrificial cable if not owned).~~
    (superseded 2026-07-23 ~20:46 — the BOM is now written and complete)
-   **Purchase — BLOCKED-ON-EVAN.** `docs/BOM.md` is final at ≈$176-179 +
-   shipping. Before ordering, Evan verifies the four items in that file's
+   **Purchase — BLOCKED-ON-EVAN.** ~~`docs/BOM.md` is final at ≈$176-179 +
+   shipping.~~ Before ordering, Evan verifies the four items in that file's
    "Verify before ordering" section (power-bank output rating, which
    differential he owns, which tires, and current prices). Done: order
    placed by Evan; arrival + any price deltas noted in the record.
+   - *(Price corrected 2026-09-01: ≈$176-179 is stale by ~$60. The BOM
+     re-priced 2026-08-08 to **$221.82–$224.82** before shipping, and rows
+     17–20 — the PCA9685, LEDs, resistors and I2C wire added 2026-09-01
+     (Appendix AY) — take it to **$232–249 before shipping, ≈$247–274 with**.
+     The **$200 ceiling is breached on every path now**, including the 2GB Pi
+     swap, which lands at ≈$202–229 with shipping.)*
+   - *(Amended 2026-09-01: the "four items" are now **five** — check 5, which
+     LEDs, sets every series-resistor value. And the **PWM-path question is
+     RESOLVED**: PCA9685, carrying motor PWM + servo + 4 light channels. That
+     was BLOCKED-ON-EVAN and no longer is.)*
 9. **Bench bring-up.** Pi OS (64-bit Bookworm), SSH, camera test; TB6612 +
    PF motor on bench PSU; servo sweep test. Done: each subsystem's real
    output (photo/log) in record.
@@ -303,10 +317,36 @@ transfer gap) must not block the capstone.
     recorder verified (images + steering/throttle synced). Done: M2 success
     criterion (full-session drive + ≥10 readable laps).
 
+11b. **Indicator state in the logger — GATES TASK 12** (appended 2026-09-01,
+    Appendix AY / `docs/LIGHTING_SPEC.md` §5). Task 11's done-check names two
+    logged channels, "images + steering/throttle synced". Evan's lighting
+    request adds turn signals, and a turn signal is a **policy OUTPUT**, so it
+    needs a per-frame label: extend the tub schema to a third field,
+    `indicator ∈ {off, left, right}`, and give the teleop rig two buttons to
+    set it.
+    - **Why it is learnable at all, unlike the stop sign:** `gotchas.md` records
+      that a stop sign is provably unlearnable by plain BC — stopped at the
+      line, the image is identical whether to wait or go. An indicator on a
+      MEMORISED route is the opposite: the correct state is a function of where
+      the car is, which is visible in the frame.
+    - **Why it gates task 12:** 10-20 laps recorded without indicator labels
+      cannot be relabelled honestly. If this does not land before the
+      collection run, drive the indicators from a rule on predicted steering
+      and **say in the write-up that they are rule-driven, not learned.**
+    - Done: a logged session whose tub carries all three fields, frame-synced,
+      spot-checked against the recorded button presses; record entry.
+
 ### M3 — Behavioral cloning
 
 12. **Track + dataset.** Define the training track (tape on floor);
     collect 10-20 clean laps. Done: dataset size + sample frames in record.
+    - *(Amended 2026-09-01: "tape on floor" is superseded by the TRACK section
+      below — printed markings on a board, layout in `cad/track_layout_v2.py`.
+      Not struck, because the task's intent — define a track, collect clean
+      laps — is unchanged.)*
+    - *(Amended 2026-09-01: **gated by task 11b.** Collecting these laps before
+      the logger records indicator state forfeits the multi-task head for this
+      dataset. Check 11b's status before starting the run.)*
 13. **Baseline train + deploy.** DonkeyCar's stock trainer as baseline;
     deploy; measure. Done: autonomous attempt logged (laps, interventions).
 14. **Custom PyTorch model.** Swap PyTorch CNN into the inference path;

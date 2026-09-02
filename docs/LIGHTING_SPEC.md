@@ -147,9 +147,20 @@ defensible. Passing a rule off as a learned behaviour is not.
 
 ## 7. Open items
 
-- **Nothing is ordered.** The PCA9685, LEDs, resistors and wire are not in
-  `docs/BOM.md` yet, and adding them changes the ~$178-181 total. BLOCKED-ON-EVAN
-  along with the rest of the order.
+- ~~**Nothing is ordered.** The PCA9685, LEDs, resistors and wire are not in
+  `docs/BOM.md` yet, and adding them changes the ~$178-181 total.~~
+  **CLOSED 2026-09-01 ~21:20 CDT: added as BOM rows 17-20** (PCA9685, 8 LEDs,
+  resistors, I2C wire), **~$10.50-24.00**. The "~$178-181" anchor was itself
+  stale by ~$60 — the BOM had re-priced to $221.82-$224.82 on 2026-08-08. New
+  total **$232-249 before shipping, ≈$247-274 with**. **Nothing is ordered**,
+  and the $200 ceiling is now breached on every path including the 2GB Pi
+  (≈$202-229 with shipping). BLOCKED-ON-EVAN with the rest of the order.
+- **Scope widened 2026-09-01 (Evan):** the PCA9685 carries **motor PWM and the
+  servo as well as the four light channels** — 6 of 16 used. That was Appendix
+  AH's original argument (DonkeyCar's `pins.py` has a PCA9685 backend, so
+  actuation stops being Pi-locked); lighting only made the channel count decide
+  it too. The TB6612's two direction pins stay on GPIO — the backend drives PWM,
+  not direction logic.
 - LED count, colour and forward voltage are unchosen; the 160 mA figure is EST
   at 20 mA per LED.
 - Whether indicators become a learned head depends on the M2 logger change

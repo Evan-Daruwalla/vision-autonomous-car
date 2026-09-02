@@ -86,6 +86,7 @@ the dated entry, not the digest.
 - [AW — CORRECTION to AV.1: the append script was never the race; the daily-audit prompt never named it. Prompt fixed and a write-time guard added](#appendix-aw---correction-to-av1-the-append-script-was-never-the-race-the-daily-audit-prompt-never-named-it-prompt-fixed-and-a-write-time-guard-added-2026-09-01-2036-cdt) (09-01)
 - [AX — Track v2: a 3x3 city grid that fits only at R=500mm, the sim cannot rehearse it, and the 225-panel floor is refused (my filament figure was 2.7x too high)](#appendix-ax---track-v2-a-3x3-city-grid-that-fits-only-at-r500mm-the-sim-cannot-rehearse-it-and-the-225-panel-floor-is-refused-my-filament-figure-was-27x-too-high-2026-09-01-2100-cdt) (09-01)
 - [AY — CORRECTION to AX.2: the street pitch never needed a lane term, so the city fits at R=500/550/600; v2 shrunk; lighting spec settles the PCA9685](#appendix-ay---correction-to-ax2-the-street-pitch-never-needed-a-lane-term-so-the-city-fits-at-r500550600-v2-shrunk-lighting-spec-settles-the-pca9685-2026-09-01-2106-cdt) (09-01)
+- [AZ — PCA9685 and lighting added to the BOM: the $200 ceiling is breached on every path, and the wiring rule was already self-contradictory](#appendix-az---pca9685-and-lighting-added-to-the-bom-the-200-ceiling-is-breached-on-every-path-and-the-wiring-rule-was-already-self-contradictory-2026-09-01-2139-cdt) (09-01)
 
 ---
 
@@ -6081,3 +6082,149 @@ a rule off as learned is not.
   downstream of a chassis nobody has built.
 - Still no committed geometry. R = 500 mm remains a parameter; B2 and B3 both
   still gate it.
+
+# Appendix AZ - PCA9685 and lighting added to the BOM: the $200 ceiling is breached on every path, and the wiring rule was already self-contradictory (2026-09-01, ~21:39 CDT)
+Evan: add the PCA9685 and LEDs to the BOM, then plan the next steps. Two
+decisions taken with him first: **all PWM moves to the PCA9685** (lights, servo
+AND motor), and **one order** rather than a deferred phase two.
+
+## AZ.1 BOM rows 17-20, and the ceiling is now breached on every path
+
+New `**Lighting + I/O**` category, matching the file's existing format (bold
+prices, bare vendor domains, quantity folded into the item name, status markers
+inline):
+
+| # | item | price |
+|---|---|---|
+| 17 | PCA9685 16-ch I2C PWM/LED driver | ~$6-15 |
+| 18 | 8x 3mm LEDs (2 white, 2 red, 4 amber) | ~$1.50-3 |
+| 19 | LED series resistors | ~$1-2 |
+| 20 | JST/Dupont jumpers + I2C wire | ~$2-4 |
+
+**Totals recomputed from the rows, not carried forward.** Rows 1-16 sum to
+**$221.82-$224.82**, which matches the file's own prose exactly -- so the
+apparent conflict between the `TOTAL` row (≈$222-225) and the "≈$237-250"
+elsewhere was never a conflict: **the TOTAL row is pre-shipping and the other
+figure was with-shipping.** I had flagged that as an inconsistency while
+planning; it was not one, and the correction note in the BOM says so.
+
+New total: **$232.32-$248.82 before shipping, ≈$247-274 with the $15-25
+estimate.**
+
+**The finding that matters: the $200 ceiling is breached on EVERY path now.**
+Swapping the Pi 5 4GB for the 2GB at $65 was the move that previously restored
+it; with lighting it lands at **$187-204 before shipping, ≈$202-229 with**. So
+the ceiling is no longer recoverable by that swap. Evan decides whether the
+ceiling moves or the lighting waits. Nothing is ordered.
+
+## AZ.2 The wiring rule was already self-contradictory, and this says so
+
+`docs/BOM.md` carried a paragraph headed **"The one rule that matters"** stating
+that the Pi and motor pack share *"ground only ... Nothing else crosses between
+them"* -- and then, in the same paragraph, that the ground *"reference is
+required for the PWM/direction logic"*. Those cannot both be true: PWM and
+direction wires were crossing all along.
+
+So adding I2C did not break a clean rule. **It exposed a loose one.** The
+amended rule states the invariant that was always actually meant:
+
+> **No power path crosses between the Pi and the motor pack.** What crosses is
+> signal and reference only -- ground, SDA, SCL, the PCA9685's 3.3V logic
+> supply, and the TB6612's two direction lines.
+
+The old wording is quoted in place with a dated note rather than deleted, per
+this file's own convention (it already flags its own wrong date at lines 42-44
+instead of fixing it).
+
+The diagram now shows the PCA9685 with its **V+ on the LM2596 rail** (so ~160 mA
+of LEDs never touches the Pi's 5V/3A bank and its 600 mA peripheral cap) and its
+**VCC referenced to the Pi at 3.3V** so I2C levels match -- two different pins
+that must not be bridged -- plus a channel map: ch0 motor PWM, ch1 servo, ch2-5
+lights. **6 of 16 channels.**
+
+**The TB6612's two direction pins stay on GPIO.** DonkeyCar's PCA9685 backend
+drives PWM, not direction logic, so moving them needs custom code. Recorded
+rather than implying actuation became 100% I2C.
+
+## AZ.3 Power headroom: comfortable, and explicitly unproven
+
+`docs/research/2026-07-23_power-system.md` justifies the LM2596 **solely by the
+servo's 700 mA peak**, and elsewhere says a bare LM2596 "won't honestly deliver
+3 A". Lights add ~160 mA EST, giving **~860 mA peak** on that rail. That is
+comfortable against the 700 mA precedent but **the brief states no measured
+module ceiling**, so it is recorded as unverified above ~1 A rather than as
+proven headroom. Pack side gains ~110 mA against a documented 3.92 A total --
+untroubling. The power brief is closed-world ("Nothing has been built or
+measured") and never anticipated additional 5V loads.
+
+## AZ.4 PRD: appended, never rewritten
+
+Per the roadmap's mutability rule (ADD by appending, REMOVE by dated
+strikethrough, PIVOT by forking):
+
+- **New task 11b -- indicator state in the logger, GATES TASK 12.** Task 11's
+  done-check names two logged channels, "images + steering/throttle synced". A
+  turn signal is a **policy output**, so it needs a third per-frame field
+  (`indicator in {off, left, right}`) and two buttons on the teleop rig. No
+  existing task owned this; `1b`, `1c`, `16a`, `M1.4b` are the precedent for
+  suffixed appends.
+- **Task 12 amended** with the gate, and with a note that "tape on floor" is
+  superseded by the TRACK section -- not struck, because the task's intent is
+  unchanged.
+- **Task 8 amended**: the price is stale by ~$60, the "four items" to verify are
+  now **five**, and the **PWM-path question is resolved**.
+- Tasks 6, 9 and 10 still say "PF motor" and "LiPo + UBEC", both superseded by
+  1b/1c. **Left as-is and flagged here**, not silently rewritten.
+
+## AZ.5 HANDOFF drift, closed
+
+It claimed **"44 appendices A-AR"** while the record stood at **AY (51)** --
+appendices AS-AY had no HANDOFF row at all. Fixed, and four workstream rows
+added: track layout v1+v2, the sim-rehearsal impossibility, the hybrid track
+surface, and vehicle lighting. The PWM-path blocker moved from open to resolved.
+Budget line struck and replaced.
+
+**Naming collision flagged, not silently resolved.** "B3" means two different
+tasks: ~10 record appendices use "the B3 turning test", which is PRD **T2** and
+needs the whole rolling chassis (M1.7); but `PRD_ROADMAP.md` §6b's own B-lane
+maps **B3 = task 4, measure donor geometry**, which needs only calipers and is
+doable today. The freeze banner now says **T2** and carries a note explaining
+the collision. Both readings are left visible; neither was redefined.
+
+## AZ.6 Next steps
+
+**Evan only -- the critical path runs entirely through these:**
+
+1. **Print the tolerance coupon** (task 3), PLA *and* PETG, with the settings
+   intended for the chassis. Needs **no parts**, and gates every chassis
+   dimension in tasks 5-7. Highest-value action available while an order ships.
+2. **Measure the assembled Lego steering rack + diff** (tasks 2/4). This sets
+   car width, which sets lane width, which decides whether track v2 fits at all
+   -- every 10 mm of car width costs 40 mm of grid span against 140 mm of spare.
+3. **Count the diff ring teeth** (62821 = 28 vs 6573 = 24+16) and confirm the
+   power bank reads **5V/3A**.
+4. **Decide Pi 2GB vs 4GB** -- a $45 swing that no longer restores the ceiling
+   either way, so it is now a value call rather than a budget fix.
+5. **Pick the LEDs** (new BOM verify item 5) -- forward voltage sets every
+   resistor value.
+6. **Place the order.**
+
+**Available without hardware:** parametric CAD for tasks 5-7 written to consume
+the coupon's numbers when they exist (task 6's motor cradle is explicitly meant
+to stay parametric); the M2 logger's indicator-field design ahead of task 11b;
+and further doc reconciliation.
+
+**Blocked on measurement, not on time:** track v2's corner geometry (T2), the
+final track version's bridge and 5 destinations, and any lane-width number.
+
+## AZ.7 Verified
+
+- BOM table renders: every data row has 5 columns, every category separator has
+  1, matching rows 17/22/26/32; no markdown links introduced (the file uses bare
+  domains throughout).
+- Totals recomputed from the row values themselves.
+- `grep` for the stale `$178-181` / `$176-179` anchors across the live docs
+  returns only struck or dated-corrected hits; record appendices are append-only
+  and left untouched.
+- `python cad/track_layout_v2.py --self-check` still **PASS** -- nothing here
+  touches geometry, so a change would have meant something went wrong.

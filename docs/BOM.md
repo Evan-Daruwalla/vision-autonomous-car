@@ -34,7 +34,12 @@ split-source power path costs almost nothing.
 | 14 | SPST rocker switch, 10A | Main switch on the motor pack | **$0.75** | sparkfun.com |
 | 15 | Inline ATO/ATC fuse holder + 3A fuse | **Mandatory** — unprotected 18650s can deliver enormous short-circuit current | **~$2.15** | bc-robotics.com |
 | 16 | Wire, heat-shrink, bulk caps, headers | ~22AWG for motor, ~26AWG signal; 470–1000µF across the motor rail | **~$8.00** | any |
-| | | **TOTAL** | **≈ $222–225** | |
+| **Lighting + I/O** |
+| 17 | **PCA9685** 16-ch I2C PWM/LED driver | ✅ **RESOLVES the open PWM-path question 2026-09-01 (Appendix AH, AY).** Carries motor PWM + servo + 4 light channels = **6 of 16 used**. DonkeyCar's `pins.py` has a PCA9685 backend, so actuation stops being Pi-locked — that was AH's argument before lighting existed; the lights only made the channel count decide it too. 12-bit per-channel dimming is what the daytime-running mode needs. **The TB6612's 2 direction pins stay on GPIO** — the backend drives PWM, not direction logic | **~$6–15** | adafruit.com $14.95 / any |
+| 18 | 8× 3mm LEDs (2 white, 2 red, 4 amber) | Headlights, tail lights, 4 indicators. Amber for indicators; rear lamps are never in the forward camera's view, so they are realism at zero ML cost (`docs/LIGHTING_SPEC.md` §1) | **~$1.50–3** | any |
+| 19 | LED series resistors | One per LED; value set by the chosen LEDs' forward voltage — see Verify item 5. PCA9685 sinks 25mA/channel, enough for a 20mA LED direct | **~$1–2** | any |
+| 20 | JST/Dupont jumpers + I2C wire | 4-wire run Pi→PCA9685 (GND, SDA, SCL, 3.3V logic) plus LED leads | **~$2–4** | any |
+| | | **TOTAL** | **≈ $232–249** | |
 
 *(Total corrected 2026-08-06 from "≈$176–179" — the cold audit found it
 excluded row 3, the camera cable, i.e. the very item this BOM was written to
@@ -42,6 +47,20 @@ catch. Fixed rows sum to $176.32; + $2–5 cable = $178.32–$181.32.)*
 *(⚠️ That "2026-08-06" is wrong: this file's mtime is **2026-08-05 23:57 CDT**.
 23:57 CDT = 04:57 UTC on 08-06 — the date was stamped in UTC, against the
 Central-time rule. Left in place as written; flagged here, not silently edited.)*
+
+*(**TOTAL raised 2026-09-01 ~21:20 CDT from ≈$222–225 to ≈$232–249** by rows
+17–20, the lighting and I2C hardware (Appendix AY, `docs/LIGHTING_SPEC.md`).
+Recomputed from the rows, not carried forward: rows 1–16 sum to
+**$221.82–$224.82**, rows 17–20 add **$10.50–$24.00**, giving
+**$232.32–$248.82 before shipping** and **≈$247–274 with the $15–25 shipping
+estimate**. The earlier "≈$237–250" figure was the WITH-shipping number for the
+old row set — the TOTAL row has always been pre-shipping, so the two were never
+in conflict.*
+*(**The $200 ceiling is now breached on every path, including the 2GB Pi.**
+Swapping the Pi 5 4GB for the 2GB at $65 takes the build to **$187–204 before
+shipping, ≈$202–229 with**. That was the swap that previously restored the
+ceiling; with lighting it no longer does. Evan's call whether the ceiling moves
+or the lighting waits — nothing here is ordered.)*
 
 **⚠️ RE-PRICED 2026-08-08 ~23:03 CDT against live vendor pages — the total rose
 ≈$44 and the BOM's Pi price was already stale when this file was written.**
@@ -119,16 +138,38 @@ paralleled TB6612 is enough).
 [USB POWER BANK 5V/3A] --USB-C--> [Raspberry Pi 5 4GB]  ... and nothing else
                                           |
                                           |  GND (single fat wire, star point at driver)
-                                          |  + GPIO: PWM/DIR to driver, PWM to servo
+                                          |  + I2C: SDA/SCL + 3.3V logic --> [PCA9685]
+                                          |  + GPIO: 2x DIR to driver (not on I2C)
                                           v
 [2x 18650 = 7.4V] --fuse--switch--+--> [TB6612FNG VM] --> [N20 motor] --> Lego diff
    + USB-C BMS board             |          (both channels PARALLELED)
-                                 +--> [LM2596 @ 5.2V] --> [MG90S servo]
+                                 +--> [LM2596 @ 5.2V] --+--> [MG90S servo]
+                                                        +--> [PCA9685 V+] --> LEDs
+
+                    [PCA9685] 6 of 16 channels:
+                       ch0 motor PWM --> TB6612 PWMA/PWMB     ch2 headlights
+                       ch1 servo PWM --> MG90S                ch3 tail lights
+                                                              ch4 left indicator
+                                                              ch5 right indicator
 ```
 
-**The one rule that matters:** the Pi and the motor pack share **ground
-only** — one wire, star-grounded at the driver. That reference is required
-for the PWM/direction logic. Nothing else crosses between them.
+**The one rule that matters (amended 2026-09-01):** **no power path crosses
+between the Pi and the motor pack.** What crosses is signal and reference only —
+**ground** (one fat wire, star point at the driver), **SDA/SCL**, the
+**PCA9685's 3.3V logic supply**, and the TB6612's **two direction lines**.
+
+*(Previously this read "they share **ground only** … Nothing else crosses
+between them", which was already self-contradictory — the same paragraph
+required the ground as a reference "for the PWM/direction logic", i.e. PWM and
+direction wires crossed all along. Adding I2C did not break a clean rule, it
+exposed a loose one. The invariant that was always meant, and is still true, is
+the power one. Corrected, not silently extended.)*
+
+**Why the PCA9685 sits on the motor rail, not the Pi:** its **V+** (the LED and
+servo supply) comes off the LM2596, so ~160mA of LEDs never touches the Pi's
+5V/3A bank with its 600mA peripheral cap. Its **VCC** (logic) references the Pi
+at 3.3V so I2C levels match. Those are two different pins and must not be
+bridged.
 
 **Why not one battery:** a simultaneous Pi peak + servo stall + motor stall
 draws **4.62A**, which collapses a 3A rail and hard-resets the Pi mid-run
@@ -151,6 +192,15 @@ with the SD card mounted. The split is structural, not stylistic.
    **DONE 2026-08-08 ~23:03 CDT** — see the re-pricing table above. Total is
    **≈$237–250**, not ≈$195. Checks 1–3 remain open and are all physical
    inspection; this was the only one of the four that did not need Evan's hands.
+   *(Amended 2026-09-01: that "≈$237–250" was the with-shipping figure for the
+   pre-lighting row set; it is now **≈$247–274**. And "Checks 1–3 remain open"
+   is superseded by the addition of check 5 below — the open set is **1–3 and
+   5**. Prices need re-checking again anyway, since rows 17–20 are estimates.)*
+5. **Which LEDs** — forward voltage and current set every series-resistor value
+   in row 19, and decide whether the PCA9685 can sink them directly (25mA/channel)
+   or needs a transistor per channel. The **~160mA total is an ESTIMATE** at
+   20mA × 8 LEDs (`docs/LIGHTING_SPEC.md` §3); nothing has been measured. Pick
+   the LEDs before ordering resistors, not after.
 
 ## Caveats carried into the build
 
