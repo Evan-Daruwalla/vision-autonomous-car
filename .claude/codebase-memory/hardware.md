@@ -406,3 +406,36 @@ traps in `sim-harness.md`.
 | 300 (old, defective) | 54 deg (60%) | 19.2 deg | 2.872 x wheelbase |
 | **450 (current)** | **81 deg (90%)** | **28.8 deg** | **1.819 x wheelbase** |
 | 500 (geometric max) | 90 deg (100%) | 32.0 deg | 1.600 x wheelbase |
+
+## Steering coupler + servo calibration (added 2026-09-02, Appendix BV)
+
+- **THE STEERING COUPLER IS THE HIGHEST-TORQUE JOINT ON THE CAR, and a printed
+  cross-axle stub FAILS THERE.** Exact inverse of the drive coupler. Scaling the
+  drive research's own figure (6.64 MPa at the N20's 55.9 mN.m stall, vs
+  ~15-25 MPa PLA interlayer shear):
+
+  | joint | stall torque | stress | SF |
+  |---|---|---|---|
+  | N20 drive coupler | 55.9 mN.m | 6.64 MPa | 2.26-3.77 |
+  | **MG90S steering coupler** | **~216 mN.m** | **26.1 MPa** | **0.57-0.96 FAILS** |
+  | MG996R fallback (BOM row 7) | ~1079 mN.m | 128.3 MPa | 0.12-0.19 |
+
+  **Grip a real Lego axle; never print the cross profile here.** And note the
+  MG996R fallback is ~5x worse — choosing it makes the coupling problem harder,
+  not just the servo stronger.
+- **Limiting servo travel is what keeps the COUPLER alive, not just the servo.**
+  All the numbers above are STALL. At working torque the coupler is fine. So
+  `SERVO_US_SPAN` and any centre calibration are structural, not comfort.
+- **A HOBBY SERVO GIVES THE UNO NO POSITION FEEDBACK.** The MG90S's internal pot
+  serves its own loop and is not exposed. **The board cannot detect a hard stop**
+  — it can only command a pulse width. Any "drive to both locks and find the
+  centre" scheme needs a SENSOR (servo current sense on a free analog pin
+  A1-A5 + a shunt) or an operator in the loop. It cannot be done with what is
+  on the board today.
+- **NEVER auto-calibrate on boot.** Opening the serial port RESETS the board, so
+  "every boot" means "every time the Pi connects" — the steering would slam into
+  both hard stops on every reconnect, at the stall torque that the table above
+  shows breaks the coupler. **Calibrate once on an explicit command, store in
+  EEPROM (ATmega328P has 1024 B), reload on boot.**
+- **MG996R is ~11 kg.cm / ~1079 mN.m** for reference; MG90S ~2.2 kg.cm /
+  ~216 mN.m. (Nominal spec figures, not measured on a real unit.)

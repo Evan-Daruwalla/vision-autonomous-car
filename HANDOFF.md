@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-02 ~18:05 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-02 ~18:30 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 68 appendices A–BP; BM/BN/BP are corrections to BL/BO). When this file and the record disagree about
+(append-only, 75 appendices A–BV; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -74,6 +74,8 @@ track generator — but it is a negative, and the write-up must say so.
 | 1 | ~~Give the floor-space number.~~ **ANSWERED 2026-09-01: 3.0 × 3.0 m.** Track v1 and v2 are both drawn against it (`cad/track_layout_v*.py`). | — |
 | 2 | ~~Commit or discard the uncommitted AL audit fixes~~ **DONE 2026-09-01** (AO/AP, commit `3f58804`). The central fix was WRONG and broke `train_cte_probe.py`; repaired and every runnable reader re-run. | — |
 | 3 | **Print the tolerance coupon (M1.3).** Needs no parts — only the printer and Lego. Gates every chassis dimension. | **Evan** |
+| 3a | **WEIGH THE CAR / MEASURE FRONT-AXLE LOAD.** Turns "is 14.7 N of rack force enough" from Evan's 50/50 judgement into arithmetic. Currently the only thing keeping the Geekservo 270 formally open. | **Evan (parts)** |
+| 3c | **CHOOSE THE SERVO-TO-PINION COUPLING** — unspecified until 2026-09-02, constraint now written in `docs/WIRING_PROTOSHIELD.md` §2.4a. ⚠️ **A printed cross-axle stub FAILS here** (SF 0.57–0.96 at MG90S stall; the MG996R fallback is ~5× worse). Must grip a real Lego axle. Adafruit #4252 ($0.75) is the manufactured candidate, spline fit unverified. | **Evan** |
 | 3b | **MEASURE WHEELBASE** (front to rear axle centres). With steering confirmed at **32°** (2026-09-02), `R = wheelbase / tan(32°)` = **1.600 × wheelbase** — wheelbase is the LAST unmeasured input to the turn radius, and the turn radius is what unfreezes corner geometry. Blocked: Evan does not have the parts yet. | **Evan (parts)** |
 | 4 | **Pi 2GB ($65) vs 4GB ($110).** Purchase window is now; the 4GB has taken every DRAM hike and the 2GB none. | **Evan** |
 | 5 | **Place the order** (`docs/BOM.md`). Nothing downstream of M1.5 moves until parts exist. **Now ≈$235–243 + shipping = ≈$250–268**, and the $200 ceiling is breached on EVERY path including the 2GB Pi (≈$205–223 with shipping). Both 2026-09-02 increments are parts the design already required and the BOM had failed to list — row 5 was buying a motor with no encoder, and the encoder cable was missing entirely (Appendix BO). | **Evan** |
@@ -183,7 +185,7 @@ plan-view geometry. Keep the layout itself in a dimensioned plan.
 |---|---|---|
 | floor space | **3.0 × 3.0 m — CONFIRMED by Evan 2026-09-01** (9 m², vs 4.48 m² for the old 1.6×2.8 plan) | Evan |
 | **car width** | **114.75 mm — MEASURED 2026-09-02** (rear tire track, the widest point; front is 107.75 mm). Supersedes the 130 mm estimate. **Caveat: tire track, not whole-vehicle** — confirm nothing on the assembled car exceeds it | Evan, Appendix BL |
-| **max steer** | **32° — confirmed by Evan 2026-09-02** (was eyeballed at 45, then 30). Gives `R = 1.600 × wheelbase`. ⚠️ **32° is the wheel's DEVIATION from straight ahead** — Evan measured with 90° = straight, angle = 90 − protractor reading. Reading it as 58° instead gives 0.625 × wheelbase, a **2.6× error** | Evan, Appendix BQ |
+| **max steer** | **32° — confirmed by Evan 2026-09-02** (was eyeballed at 45, then 30). Gives `R = 1.600 × wheelbase`. ⚠️ **32° is the wheel's DEVIATION from straight ahead** — Evan measured with 90° = straight, angle = 90 − protractor reading. Reading it as 58° instead gives 0.625 × wheelbase, a **2.6× error** Pinion sweeps **~180° full-lock to full-lock** (Evan, 2026-09-02), so an MG90S at 180° is an **exact 1:1 match** with no gearing | Evan, Appendices BQ/BU |
 | lane width | **229.5 mm** = 2.0 x the measured 114.75 mm. Rule corrected 2026-09-01 — the old fixed-85 mm rule gave 2.31-2.70x, wider than real roads (1.98x) or Duckietown (1.4-1.6x) | `SIM_TRANSFER_SPEC` §3 |
 | corner radius | **≥500–670 mm centreline** — *estimate on an estimate* | Appendix L |
 | layout | **figure-8**, never an oval | `gotchas.md` |
@@ -236,7 +238,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Track layout | M1.4 | **v1 + v2 drawn, NOT committed** | 2026-09-01, Appendices AM/AT/AX/AY. `cad/track_layout_v1.py` = figure-8 with a flat causeway bridge + 5 landmarks; `cad/track_layout_v2.py` = 3x3 city grid, 9 intersections, figure-8 route through the centre, 8.31 m, **171 mm spare at R=500** (re-run 2026-09-02 on the measured car width: lane 260→230 mm, span 2660→2629 mm, tiles 79→73). Both parametric and self-checking; `--car-width` flag added. **Corner geometry FROZEN until the T2 turning test** |
 | Track: sim rehearsal | — | **IMPOSSIBLE, settled** | 2026-09-01, Appendix AX. gym-donkeycar's protocol has ten message types and none defines a road; `load_scene` picks from 11 prebuilt Unity scenes. A custom track needs a Unity build. Costs little: M3 trains on real laps, not the sim corpus |
 | Track surface | T3 | **Decided: hybrid** | 2026-09-01, Appendix AX. NOT 225 printed panels (~12.6 kg, 169-900 h, 225 bed clears, 28 camera-visible seams). Print the 6.28 m of corner arcs + 9.36 m of intersection boxes as ~79 tiles (~970 g); tape the 31.9 m of straight street lines |
-| Uno firmware | — | **CONTROL FIRMWARE RUNS ON THE BOARD (2026-09-02)** | Appendices BD/BJ/BO. `firmware/` — `uno_bringup` (board proven), `uno_memtest` (2048 B SRAM, 16.0042 MHz), `uno_echo` (link p99 1.069 ms), `uno_packguard` (SELFTEST 27/27), **`uno_control` (implements `SERIAL_PROTOCOL.md` v0.2: SELFTEST 37/37, `host_test.py` 11/11 exit 0, 7134 B flash / 312 B SRAM, loop 2-3 ms)** — **CURRENTLY FLASHED as of 2026-09-02 ~18:15 CDT**. `SERIAL_PROTOCOL.md` is no longer design-only. **ACTUATORS UNWIRED** — link + state machine only |
+| Uno firmware | — | **CONTROL FIRMWARE RUNS ON THE BOARD (2026-09-02)** | Appendices BD/BJ/BO. `firmware/` — `uno_bringup` (board proven), `uno_memtest` (2048 B SRAM, 16.0042 MHz), `uno_echo` (link p99 1.069 ms), `uno_packguard` (SELFTEST 27/27), **`uno_control` (implements `SERIAL_PROTOCOL.md` v0.2: SELFTEST 37/37, `host_test.py` 11/11 exit 0, 7134 B flash / 312 B SRAM, loop 2-3 ms, **SELFTEST 39/39** after the servo-span fix)** — **CURRENTLY FLASHED as of 2026-09-02 ~18:30 CDT**. `SERIAL_PROTOCOL.md` is no longer design-only. **ACTUATORS UNWIRED** — link + state machine only |
 | Vehicle lighting | — | **Spec written, nothing wired** | 2026-09-01, Appendix AY. `docs/LIGHTING_SPEC.md`. Headlights/tail/DRL/indicators. Only the headlight beam is in the camera's view. ~~Settles the PCA9685.~~ Superseded 2026-09-02 (BC): an **Arduino Uno** takes actuation instead. Turn signals are a THIRD policy head and gate the M3 collection run via PRD task 11b |
 | **Harness trustworthiness** | **P6** | **OPEN — BLOCKING all closed-loop claims** | 2026-08-11, Appendix AD. Same checkpoint across 7 gate-valid launches: 106.5–471.5 steps, CV 55%. Rate, track and start state ruled out; cause unknown. Nothing may be ranked on closed-loop steps until this is fixed or quantified |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
@@ -346,6 +348,12 @@ original floor and the pre-2026-08-12 scale decision.)*
   cannot guard a pack while the firmware is off.** Close it with a protection
   board that states over-discharge cutoff, or protected cells. BOM Verify
   item 6 has the options. **Evan's call.**
+- ⚠️ **THE STEERING COUPLER IS THE HIGHEST-TORQUE JOINT ON THE CAR AND A PRINTED
+  ONE FAILS** (2026-09-02, Appendix BV). MG90S stall ~216 mN·m gives SF 0.57–0.96
+  against PLA interlayer shear; the MG996R fallback in BOM row 7 is SF 0.12–0.19.
+  The drive coupler was carefully shown survivable at SF 2.26–3.77 and **nobody
+  ran the same check on the steering side, which sees ~4× the torque.** Grip a
+  real Lego axle, never a printed cross profile. **No coupling is chosen.**
 - **Pi 5 2GB ($65) or 4GB ($110)?** Recommended 2GB — identical silicon, and the 4GB has absorbed every DRAM price rise while the 2GB has absorbed none. Purchase window is now.
 - ~~**PWM path: straight-to-GPIO or a PCA9685 breakout?**~~ ~~RESOLVED 2026-09-01 (AY): PCA9685~~ **SUPERSEDED 2026-09-02 (Appendix BC): an ARDUINO UNO Evan already owns** takes motor PWM + servo + 4 light channels, and adds encoder counting and a throttle watchdog the PCA9685 cannot do. $0. BOM row 17; pin map in `firmware/SERIAL_PROTOCOL.md`.
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).

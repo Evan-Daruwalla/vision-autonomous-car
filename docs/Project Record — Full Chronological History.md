@@ -108,6 +108,7 @@ the dated entry, not the digest.
 - [BS — Steering: the servo-to-pinion coupling is specified nowhere, and Geekservo 270 is a real candidate the drive-motor argument wrongly excludes](#appendix-bs---steering-the-servo-to-pinion-coupling-is-specified-nowhere-and-geekservo-270-is-a-real-candidate-the-drive-motor-argument-wrongly-excludes-2026-09-02-1810-cdt) (09-02)
 - [BT — Board re-flashed to uno_control; the upload had not landed and only checking caught it](#appendix-bt---board-re-flashed-to-uno_control-the-upload-had-not-landed-and-only-checking-caught-it-2026-09-02-1811-cdt) (09-02)
 - [BU — Pinion sweeps 180 degrees: SERVO_US_SPAN was capping steering at 60% of lock, and BS.3's 270-degree advantage was backwards](#appendix-bu---pinion-sweeps-180-degrees-servo_us_span-was-capping-steering-at-60-of-lock-and-bs3s-270-degree-advantage-was-backwards-2026-09-02-1818-cdt) (09-02)
+- [BV — The steering coupler is the highest-torque joint and a printed one fails; the self-calibrating centre cannot work as described](#appendix-bv---the-steering-coupler-is-the-highest-torque-joint-and-a-printed-one-fails-the-self-calibrating-centre-cannot-work-as-described-2026-09-02-1828-cdt) (09-02)
 
 ---
 
@@ -8278,3 +8279,106 @@ concluded.** No decision made.
 ordered, nothing is wired, no servo has ever moved.** The span of 450 is
 derived from a measured pinion sweep and a NOMINAL servo pulse range — the
 second half of that is still an assumption until an MG90S is on the bench.
+
+# Appendix BV - The steering coupler is the highest-torque joint and a printed one fails; the self-calibrating centre cannot work as described (2026-09-02, ~18:28 CDT)
+Evan closed the Geekservo question by judgement, asked for the coupling to be
+specified, hit an `arduino-cli` error, and proposed a self-calibrating steering
+centre. The coupling numbers turned out to bear directly on the calibration idea.
+
+## BV.1 The steering coupler is the HIGHEST-torque joint, and a printed one fails
+
+Specifying the coupling (Appendix BS flagged it as specified nowhere) produced
+the number that should have been computed months ago. Scaling the drive-motor
+research's own figure — a printed Lego cross-axle stub sees **6.64 MPa at the
+N20's 55.9 mN·m stall**, against **~15-25 MPa PLA interlayer shear**:
+
+| joint | stall torque | stress | safety factor |
+|---|---|---|---|
+| N20 drive coupler | 55.9 mN·m | 6.64 MPa | 2.26 - 3.77 |
+| **MG90S steering coupler** | **~216 mN·m** | **26.1 MPa** | **0.57 - 0.96 — FAILS** |
+| MG996R fallback (BOM row 7) | ~1079 mN·m | 128.3 MPa | 0.12 - 0.19 |
+
+**This is the exact inverse of the drive side.** The drive research went to real
+length establishing that the motor coupler is the *lowest*-torque joint and
+therefore survivable. **Nobody ran the same check on the steering coupler, which
+sees roughly 4x the torque and does not survive.**
+
+Two consequences, both now in `docs/WIRING_PROTOSHIELD.md` §2.4a:
+
+1. **Grip a real Lego axle; never print the cross profile here.** On the drive
+   side that was advice. Here it is the difference between a car and a sheared
+   coupler.
+2. **The MG996R fallback in BOM row 7 makes the coupling problem ~5x worse**, not
+   just the servo stronger. It is listed as the answer "if it stalls" — but
+   stalling harder is precisely what breaks the joint downstream.
+
+## BV.2 Evan's calibration idea: right instinct, and it cannot work as described
+
+**His proposal:** on every startup, drive to full left lock and full right lock,
+measure the span, and go to half of it to find centre.
+
+**The instinct is right and it fixes a real defect in what I shipped.** The
+current `SERVO_US_SPAN = 450` assumes servo centre and rack centre are aligned by
+hand and holds 10% margin per side against that assumption. Deriving the centre
+from the mechanism is strictly better than assuming it.
+
+**Three things block the implementation as stated:**
+
+1. **A hobby servo gives the Uno no position feedback.** The MG90S's internal
+   potentiometer serves the servo's own loop and is not exposed on its three
+   wires. The board **cannot detect that a stop has been reached** — it can only
+   command a pulse width and hope. "Finding how far it turned" is not an
+   operation the hardware supports.
+2. **Detection requires a sensor that is not in the BOM.** The realistic one is
+   servo current sensing — a stalled MG90S draws far more than a moving one — on
+   a free analog pin (A1-A5 are free) through a shunt. That is new hardware, and
+   the ADC reference is already committed to the internal 1.1 V band gap for the
+   pack guard, so the shunt would have to be sized around that.
+3. **"Every startup" is the dangerous part, and the reason is a documented
+   project trap: OPENING THE SERIAL PORT RESETS THE BOARD.** So "every boot"
+   means "every time the Pi connects" — and the routine would slam the steering
+   into both hard stops on every reconnect, **at exactly the stall torque BV.1
+   shows breaks the coupler.** A calibration routine that destroys the part it
+   calibrates.
+
+**The corrected shape, cheapest rung first:**
+
+- **Calibrate ONCE, on an explicit command, on the bench** — not on boot.
+- **Operator in the loop, zero new hardware:** sweep slowly in small steps, the
+  operator types a key when the wheels stop moving at each end. Never dwells at
+  a stop, so it never sustains stall. `uno_packguard` already established the
+  serial-command pattern this would reuse.
+- **Store the two endpoints in EEPROM** (ATmega328P has 1024 bytes), reload on
+  boot. Centre becomes the measured midpoint instead of an assumed 1500 µs.
+- Current-sense stall detection stays available if the manual route proves
+  insufficient, but it is a later rung and needs a BOM change.
+
+**Not implemented.** Recorded as the design; Evan's call whether to build it.
+
+## BV.3 Geekservo is effectively out
+
+Evan: **"I'm 50% sure 14.7 N won't be enough."** That is his judgement on the
+rack force computed in BS.3, and it is the deciding input — the number could not
+be resolved from this side without the car's mass and front-axle load, neither
+measured. Combined with BU.2 (the 270° servo overtravels a 180° pinion and
+throws away a third of its resolution), **the Geekservo 270 is effectively out
+and the MG90S stands.** Not struck from the record as an option, because the
+mass measurement could still change it; but it is no longer a live candidate.
+
+## BV.4 `arduino-cli upload` needs a prior compile
+
+Evan hit **"compiled sketch not found in path"** running `upload` on
+`firmware/uno_packguard`. Cause: `upload` alone expects build output from a
+previous `compile`, which lives in a temp directory that does not persist.
+**Fix — one command that does both:**
+
+    arduino-cli compile --fqbn arduino:avr:uno --upload -p COM3 firmware/uno_packguard
+
+Verified 2026-09-02 by running that form against `firmware/uno_control`: it
+compiled and uploaded, and the board came back `SELFTEST PASS 39/39`.
+
+## BV.5 State
+
+`uno_control` is on the board at 39/39, actuators unwired. **No coupling chosen,
+no calibration built, nothing ordered, nothing wired.** BV.1 states a constraint
+the coupling choice must satisfy; it does not make the choice.

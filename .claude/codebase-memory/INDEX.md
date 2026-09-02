@@ -7,7 +7,7 @@ Core bins:
 - features.md — inventory of the 31 ml/ scripts by pipeline stage (updated 2026-08-25)
 - conventions.md — general code style observed across ml/ (argparse, seeding, no logging) (updated 2026-08-25)
 - gotchas.md — **SPLIT 2026-09-02, now a 24-line ROUTER only.** Kept because CLAUDE.md/HANDOFF reference it by name; follow its pointers
-- hardware.md — printing + Lego fit, power, motors/drivers, the Uno, Arduino build traps, measured vehicle geometry (new 2026-09-02; 408 lines, over the ~150 cap but one coherent domain)
+- hardware.md — printing + Lego fit, power, motors/drivers, the Uno, Arduino build traps, measured vehicle geometry (new 2026-09-02; 441 lines, over the ~150 cap but one coherent domain)
 - track.md — track layout, markings, surface, what the camera sees of the environment (new 2026-09-02; 54 lines)
 - sim-harness.md — the simulator, the eval harness, training-time GPU limits (new 2026-09-02; 131 lines)
 - ml-training.md — GPU memory + world-model training facts MEASURED on this

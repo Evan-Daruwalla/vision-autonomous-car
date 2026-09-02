@@ -117,6 +117,52 @@ protoboard — buy Pololu's mating cable and solder its far end to the shield.
 Servo peak ~700 mA. Its return current must not share a conductor with the
 encoder return (§3).
 
+#### 2.4a The servo-to-pinion coupling — MECHANICAL, and it was missing
+
+*Not electrical, and it does not belong in a wiring document. It is here because
+nothing else owned it and it was specified NOWHERE until 2026-09-02 (Appendix
+BS) — `BOM.md` row 7 is "MG90S metal-gear servo | Steering" and this section
+covered only three wires. Move it when a mechanical assembly doc exists.*
+
+**The steering coupler is the HIGHEST-torque joint on the car, and a printed one
+fails.** This is the exact inverse of the drive coupler, which
+`docs/research/2026-07-23_drive-motor-selection.md` correctly identified as the
+*lowest*-torque joint. Scaling that document's own figure — a printed Lego
+cross-axle stub sees **6.64 MPa at the N20's 55.9 mN·m stall**, against
+**~15–25 MPa PLA interlayer shear**:
+
+| joint | stall torque | stress | safety factor |
+|---|---|---|---|
+| N20 drive coupler | 55.9 mN·m | 6.64 MPa | **2.26 – 3.77** |
+| **MG90S steering coupler** | **~216 mN·m** | **26.1 MPa** | **0.57 – 0.96 — FAILS** |
+| MG996R fallback (BOM row 7) | ~1079 mN·m | 128.3 MPa | **0.12 – 0.19 — fails badly** |
+
+**So a printed cross-axle stub must not be used here**, and the MG996R fallback
+makes it roughly 5× worse. Two consequences:
+
+1. **Grip a real Lego axle; never print the cross profile.** The drive-motor
+   research already says this for the drive side; here it is not advice, it is
+   the difference between a working car and a sheared coupler.
+2. **The servo must never reach stall.** At working torque the coupler is fine —
+   these numbers are all *stall*. Limiting travel so the servo never drives into
+   a Lego hard stop is therefore **not just servo protection, it is what keeps
+   the coupler intact.** That is what `SERVO_US_SPAN` (§ `uno_control.ino`) and
+   any future centre calibration are actually for.
+
+**Manufactured option: Adafruit #4252, $0.75** — micro-servo spline to a 16 mm
+Lego cross axle. ⚠️ Adafruit will not guarantee the spline fit beyond their own
+micro servo, and **it is injection-moulded plastic at the joint that just failed
+the printed check.** Injection moulding is stronger than FDM — no interlayer
+planes — but no torque rating is published, so it is **unverified, not safe**.
+Confirm the spline against a real MG90S, and treat it as working-torque-only.
+
+**Printed alternatives already known:** Printables 61922 / 147626
+(`docs/research/2026-07-23_sensor-compute-stack.md` lines 132, 255). Same
+caveat: socket gripping a real axle, never a printed cross stub.
+
+**UNRESOLVED.** No coupling is chosen. This section states the constraint the
+choice must satisfy, not the choice.
+
 ### 2.5 Lights
 
 Each channel drives **two** LEDs in parallel, each through **its own**
