@@ -90,6 +90,7 @@ the dated entry, not the digest.
 - [BA — Vehicle envelope derived (height provably blocked); camera height attempt 2 is a second negative and the curvature hypothesis is refuted; indicator logging lands](#appendix-ba---vehicle-envelope-derived-height-provably-blocked-camera-height-attempt-2-is-a-second-negative-and-the-curvature-hypothesis-is-refuted-indicator-logging-lands-2026-09-01-2204-cdt) (09-01)
 - [BB — claude CLI verified installed, and the 3dstreet MCP blocker was pending APPROVAL all along - not a restart and not the browser tab](#appendix-bb---claude-cli-verified-installed-and-the-3dstreet-mcp-blocker-was-pending-approval-all-along---not-a-restart-and-not-the-browser-tab-2026-09-01-2214-cdt) (09-01)
 - [BC — Arduino Uno supersedes the PCA9685 one day old: encoder counting and a watchdog for $0, the $200 ceiling is reachable again, and the record write-guard is confirmed firing](#appendix-bc---arduino-uno-supersedes-the-pca9685-one-day-old-encoder-counting-and-a-watchdog-for-0-the-200-ceiling-is-reachable-again-and-the-record-write-guard-is-confirmed-firing-2026-09-02-1520-cdt) (09-02)
+- [BD — First verified hardware: the Uno runs our firmware (signature 1E 95 0F, F_CPU 16 MHz), and an FTDI clone needs an explicit --fqbn forever](#appendix-bd---first-verified-hardware-the-uno-runs-our-firmware-signature-1e-95-0f-f_cpu-16-mhz-and-an-ftdi-clone-needs-an-explicit---fqbn-forever-2026-09-02-1526-cdt) (09-02)
 
 ---
 
@@ -6630,3 +6631,95 @@ record was untouched by the test.
 - **The FTDI latency timer is unmeasured** and sits on the 20 Hz control path.
 - Everything else remains BLOCKED-ON-EVAN: coupon print, rack-and-diff
   measurement, diff teeth, Pi 2GB vs 4GB, which LEDs, and the order.
+
+# Appendix BD - First verified hardware: the Uno runs our firmware (signature 1E 95 0F, F_CPU 16 MHz), and an FTDI clone needs an explicit --fqbn forever (2026-09-02, ~15:26 CDT)
+**The first piece of hardware in this project is verified working.** Everything
+until now has been "nothing built, nothing printed, nothing ordered". The Uno
+adopted in BC now runs firmware this project wrote.
+
+## BD.1 Bring-up, and why it is not stock Blink
+
+Clones very often ship with the factory Blink already flashed, so a 1 Hz LED
+proves **nothing** about whether an upload landed. The test sketch is therefore
+unambiguous two ways: a **3-fast-blinks-then-pause** pattern, and a **serial
+banner plus tick counter** at 115200 so the result is READ, not eyeballed.
+
+Toolchain: `arduino-cli` **ships inside the Arduino IDE** and needed no separate
+install --
+`~/AppData/Local/Programs/Arduino IDE/resources/app/lib/backend/resources/arduino-cli.exe`,
+version 1.5.1, with `arduino:avr 1.8.8` already present.
+
+```
+$ arduino-cli compile --fqbn arduino:avr:uno firmware/uno_bringup
+Sketch uses 2430 bytes (7%) of program storage space. Maximum is 32256 bytes.
+Global variables use 192 bytes (9%) of dynamic memory, leaving 1856 bytes...
+
+$ arduino-cli upload -p COM3 --fqbn arduino:avr:uno firmware/uno_bringup -v
+Programmer type       : Arduino
+Description           : Arduino bootloader using STK500 v1 protocol
+HW Version            : 3
+FW Version            : 4.4
+Device signature = 1E 95 0F (ATmega328P, ATA6614Q, LGT8F328P)
+Writing 2430 bytes to flash
+Writing | ################################################## | 100% 0.30s
+2430 bytes of flash written
+```
+
+Read back off COM3 at 115200:
+
+```
+UNO-BRINGUP-OK build=2026-09-02 pattern=3fast+pause
+F_CPU=16000000
+tick 0
+```
+
+**That is our exact compiled string, so the board is running OUR code and not a
+factory image.** Device signature `1E 95 0F` confirms a real ATmega328P, and
+`F_CPU=16000000` is the chip reporting its own clock. Upload path, bootloader,
+and serial in both directions all work.
+
+## BD.2 One thing that will bite every future upload
+
+`arduino-cli board list` reports COM3 as **`Unknown`, with no FQBN**:
+
+```
+Port Protocol Type              Board Name FQBN Core
+COM3 serial   Serial Port (USB) Unknown
+```
+
+That is **normal for an FTDI clone** and not a fault. A genuine Uno R3 announces
+itself through an ATmega16U2 carrying Arduino's USB vendor ID; an FT232RL is a
+generic serial bridge and carries none. **Every compile and upload must pass
+`--fqbn arduino:avr:uno` explicitly**, and the Arduino IDE's board dropdown will
+not auto-select either. Recorded in `firmware/README.md` so it is not
+rediscovered as a bug.
+
+## BD.3 Artifacts
+
+- `firmware/uno_bringup/uno_bringup.ino` -- the bring-up sketch, out of scratch
+  and into the repo, because it is the reference for "the board works".
+- `firmware/README.md` -- verified board facts (signature, F_CPU, bootloader
+  version, FTDI IDs, COM3), the exact build/upload commands, the FQBN trap
+  above, and what is NOT done.
+
+## BD.4 Still not done, stated plainly
+
+- **No control firmware exists.** The serial protocol is on paper only. Blink
+  proves the board and the toolchain, nothing about the actuation design.
+- **The FTDI latency timer (default 16 ms) is UNMEASURED** and sits on the 20 Hz
+  control path whose entire budget is 50 ms per step. It is now the most
+  concrete unmeasured number in the hardware lane. The tick cadence in the
+  capture above cannot serve as the measurement -- those ticks had accumulated
+  in the FTDI buffer since the upload reset, so they time the buffer, not the
+  loop.
+- Nothing is ordered. Coupon, rack-and-diff measurement, diff teeth, Pi RAM,
+  LED choice and the order itself all remain BLOCKED-ON-EVAN.
+
+## BD.5 3dstreet: still absent after a fifth check
+
+Checked again this session; no `mcp__3dstreet__*` tool exists. The CLI reports
+the server `Connected` and Evan has both approved it and paired the tab. The
+remaining untested variable is ORDER: the relay publishes its tool list from the
+paired tab, so the tab must be paired **before** the session starts, not after.
+That sequence has not yet been tried. Recorded so the next session tries it
+rather than re-diagnosing from scratch.

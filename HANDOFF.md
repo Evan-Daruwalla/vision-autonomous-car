@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-01 ~16:12 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-02 ~15:25 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 51 appendices A–AY). When this file and the record disagree about
+(append-only, 55 appendices A–BC). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -18,8 +18,8 @@ the physical car and documented as a college-portfolio engineering artifact.
 
 ## Where the project actually is
 
-**The software lane is four milestones ahead of the hardware lane, and the
-hardware lane has not started.** SIM-POC (P1–P5) is built and its findings are
+**The software lane is four milestones ahead of the hardware lane. The hardware
+lane has now STARTED — one piece of hardware is verified working (2026-09-02).** SIM-POC (P1–P5) is built and its findings are
 banked. **Nothing has been printed and nothing has been ordered since
 2026-07-23.**
 
@@ -52,10 +52,14 @@ track generator — but it is a negative, and the write-up must say so.
   southbridge; fails with `Cannot determine SOC peripheral base address`). Use
   **`rpi-lgpio`**, a drop-in. This is a defect in the *current* plan, not a
   board comparison — it would surface as a mystery bench failure otherwise.
-- **DonkeyCar's `pins.py` has only three PWM backends** (RPI_GPIO, PCA9685,
-  PIGPIO). The BOM wires the servo and TB6612FNG **straight to GPIO**, which
-  locks the project to a Pi. A **PCA9685 breakout** would make actuation
-  board-agnostic. Decide before ordering. (Appendix AH.)
+- ~~**DonkeyCar's `pins.py` has only three PWM backends** (RPI_GPIO, PCA9685,
+  PIGPIO) ... A **PCA9685 breakout** would make actuation board-agnostic.~~
+  **RESOLVED 2026-09-02 (Appendix BC): an ARDUINO UNO Evan already owns takes
+  all actuation**, so `pins.py` is out of the path entirely. The Uno also brings
+  encoder counting (D2/D3 interrupts) and a throttle watchdog, which no PWM
+  backend can. Cost: no DonkeyCar backend exists for it, so the actuator path is
+  custom firmware + a serial protocol. **It is bring-up tested and running our
+  code** — `firmware/`.
 
 ---
 
@@ -63,7 +67,7 @@ track generator — but it is a negative, and the write-up must say so.
 
 | # | Action | Blocked on |
 |---|---|---|
-| 1 | **Give the floor-space number.** "More floor space" was chosen 2026-08-12 but never quantified. Every track dimension scales off it. | **Evan** |
+| 1 | ~~Give the floor-space number.~~ **ANSWERED 2026-09-01: 3.0 × 3.0 m.** Track v1 and v2 are both drawn against it (`cad/track_layout_v*.py`). | — |
 | 2 | ~~Commit or discard the uncommitted AL audit fixes~~ **DONE 2026-09-01** (AO/AP, commit `3f58804`). The central fix was WRONG and broke `train_cte_probe.py`; repaired and every runnable reader re-run. | — |
 | 3 | **Print the tolerance coupon (M1.3).** Needs no parts — only the printer and Lego. Gates every chassis dimension. | **Evan** |
 | 4 | **Pi 2GB ($65) vs 4GB ($110).** Purchase window is now; the 4GB has taken every DRAM hike and the 2GB none. | **Evan** |
