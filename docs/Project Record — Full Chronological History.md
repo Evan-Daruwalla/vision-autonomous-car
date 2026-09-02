@@ -95,6 +95,7 @@ the dated entry, not the digest.
 - [BF — FTDI latency timer measured: configured at 16 ms but costs ~0.9 ms on the wire, so the risk flagged in BD and BE was wrong](#appendix-bf---ftdi-latency-timer-measured-configured-at-16-ms-but-costs-09-ms-on-the-wire-so-the-risk-flagged-in-bd-and-be-was-wrong-2026-09-02-1550-cdt) (09-02)
 - [BG — Serial protocol v0.1 drafted, and drafting it caught D3 double-booked between the encoder interrupt and motor PWM in yesterday's diagram](#appendix-bg---serial-protocol-v01-drafted-and-drafting-it-caught-d3-double-booked-between-the-encoder-interrupt-and-motor-pwm-in-yesterdays-diagram-2026-09-02-1558-cdt) (09-02)
 - [BH — landing-check returned FIX FIRST: nine items closed, including a wrong PWM budget the D3 fix silently created and a stale price in the public README](#appendix-bh---landing-check-returned-fix-first-nine-items-closed-including-a-wrong-pwm-budget-the-d3-fix-silently-created-and-a-stale-price-in-the-public-readme-2026-09-02-1611-cdt) (09-02)
+- [BI — Rows 11/13/14 linked, and row 11's board does NOT document the over-discharge protection the BOM credited it with - the 2S pack has no low-voltage cutoff](#appendix-bi---rows-111314-linked-and-row-11s-board-does-not-document-the-over-discharge-protection-the-bom-credited-it-with---the-2s-pack-has-no-low-voltage-cutoff-2026-09-02-1634-cdt) (09-02)
 
 ---
 
@@ -7136,3 +7137,81 @@ remain unverified. Handoffs the sweep raised: `/code-review` for the three
 `.ino` files and that Python; and the latency percentiles came from **scratch
 PowerShell that was never committed**, so those headline numbers are not
 reproducible from the repo by anyone but this session.
+
+# Appendix BI - Rows 11/13/14 linked, and row 11's board does NOT document the over-discharge protection the BOM credited it with - the 2S pack has no low-voltage cutoff (2026-09-02, ~16:34 CDT)
+Found the three missing BOM links (rows 11, 13, 14). **Row 11 turned up a safety
+gap, not just a URL** \u2014 the board the BOM calls a "BMS" does not document the
+protection the BOM credits it with.
+
+## BI.1 The safety finding: the 2S pack has no low-voltage cutoff
+
+`docs/BOM.md` row 11 claimed the Adeept USB-C 2S board "provides overcharge,
+**over-discharge** and short protection." Adeept's own product page lists:
+
+> "Battery charger board has strong adaptability to input power and **over
+> voltage protection** for battery"
+> "Boost lithium battery module preserves the battery voltage below the input
+> voltage and battery **short circuit**"
+
+**Over-discharge protection is not listed.** The board is a charger with a boost
+converter and over-voltage/short protection, sold under a "BMS" title.
+
+**And the cells are bare.** Row 9's EVE 25P are unprotected cells. So as the BOM
+is written today, **nothing stops the pack being run flat under motor load** \u2014
+which is exactly what a driving robot does to a battery.
+
+Why this is worth stopping for rather than noting: below ~2.5 V/cell, lithium
+takes permanent capacity loss, and in the worst case grows internal copper
+shunts that become a **fire risk on the NEXT charge**. Short-circuit is already
+covered independently by the mandatory inline fuse (row 15). This is
+specifically the low-voltage end, and it is uncovered.
+
+**Three ways to close it, added as Verify item 6:**
+(a) a 2S protection board that explicitly states over-discharge cutoff;
+(b) protected cells;
+(c) **firmware cutoff on the Arduino** \u2014 A0-A5 are free
+(`firmware/SERIAL_PROTOCOL.md` \u00a71), so a resistor divider on the pack lets the
+Uno cut throttle at a voltage threshold, reusing the watchdog path already
+designed. **(c) costs two resistors and is the only option that also LOGS the
+event**, which matters for a project whose point is the evidence trail.
+
+Not decided here. It is Evan's call and it is BLOCKED-ON-EVAN with the order.
+
+**Honest limit on this finding:** a vendor page not mentioning a feature is not
+proof the hardware lacks it. What is certain is that **the BOM asserted a safety
+property the vendor does not document**, and on a lithium pack that gap has to
+be closed deliberately rather than assumed away.
+
+## BI.2 The three links
+
+| row | part | link | verified |
+|---|---|---|---|
+| 11 | USB-C 2S BMS | `adeept.com/li-ion-battery-charger-m-2s2a_p0374.html` | **$7.99** (list $9.99). \u26a0\ufe0f **http only, no TLS** |
+| 13 | XT30 pair | `alofthobbies.com/products/xt30-plugs` | **$1.10**, ONE male+female pair, genuine Amass, in stock |
+| 14 | SPST rocker | `sparkfun.com/products/11138` | **$0.75**, SPST round, **10A @ 125VAC**, in stock |
+
+**Row 14 vindicates the caution recorded in BH.5.** The previous pass refused to
+link `COM-08837` because it looked like a right-angle variant rather than the
+10 A part specified. Correct: the right part is **COM-11138 (round)**, and
+guessing would have put the wrong SKU in an order.
+
+Row 13 confirms a quantity assumption that had never been checked: one unit is
+**one male + one female**, which is what the build needs.
+
+## BI.3 Prices now stand at 12 of 20 rows verified
+
+Combined with BH's pass: Pi 5 4GB $110 \u00b7 Pi 5 2GB $65 \u00b7 Camera Wide $38.50 \u00b7
+Pololu #1093 $23.95 \u00b7 Pololu #713 $4.95 \u00b7 BMS $7.99 \u00b7 XT30 $1.10 \u00b7 rocker $0.75
+\u2014 **all matching the figures already in the BOM.** The total is live, not stale.
+
+Still unverified prices: rows 9, 10, 12, 15. Still `any` by design: 4, 7, 16,
+18-20. Row 15 keeps its warning that BC Robotics' 14AWG and 18AWG fuse-holder
+listings have inconsistent titles.
+
+## BI.4 A numbering slip, caught and fixed
+
+Inserting the new Verify item produced the order `1,2,3,4,6,5`. Item 5 could not
+simply be renumbered because `docs/BOM.md` row 19 cross-references "Verify item
+5" for the LED question, so the new item was moved after it instead. Also
+removed a dangling clause left in item 5 by an earlier edit ("or needs a
+transistor per channel", orphaned mid-sentence).

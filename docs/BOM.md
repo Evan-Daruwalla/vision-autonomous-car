@@ -27,11 +27,11 @@ split-source power path costs almost nothing.
 | 8 | USB power bank, **5V/3A** | → Pi ONLY. **You own this — check the label says 5V/3A** (see Verify below) | **$0.00** | owned |
 | 9 | 2× EVE 25P 18650 cells | → motor + servo pack (7.4V). **Buy both from the same order** (matched cells — see caveat) | **$3.70** | [18650batterystore.com/products/eve-18650-25p](https://www.18650batterystore.com/products/eve-18650-25p) — price NOT re-verified |
 | 10 | 2-cell 18650 series holder | | **$1.25** | [addicore.com 2-place 18650 holder](https://www.addicore.com/products/2-place-18650-battery-holder-with-wires) — price NOT re-verified |
-| 11 | USB-C 2S BMS / charge board | Charges the pack in place from USB-C; provides overcharge, over-discharge and short protection. **No hobby balance charger needed** | **$7.99** | adeept.com |
+| 11 | USB-C 2S BMS / charge board | Charges the pack in place from USB-C. ~~provides overcharge, over-discharge and short protection~~ ⚠️ **SAFETY CLAIM NOT SUPPORTED BY THE VENDOR PAGE (checked 2026-09-02, Appendix BI).** Adeept documents **over-voltage/overcharge and short-circuit protection only** — **over-discharge protection is NOT listed.** Bare EVE cells have none either, so as specified **the pack has no low-voltage cutoff**. Must be closed before ordering — see Verify item 6. **No hobby balance charger needed** (unverified: balancing is also not documented) | **$7.99** *(list $9.99)* | [adeept.com p0374](http://www.adeept.com/li-ion-battery-charger-m-2s2a_p0374.html) ⚠️ **http only** · ✅ $7.99 verified 2026-09-02 |
 | 12 | LM2596 buck module | 7.4V → 5.2V for the servo only (700mA peak — well within it). **Not for the Pi** | **$2.48** | [addicore.com LM2596](https://www.addicore.com/products/lm2596-step-down-adjustable-dc-dc-switching-buck-converter) — price NOT re-verified |
 | **Wiring + protection** |
-| 13 | XT30 connector pair | | **$1.10** | alofthobbies.com |
-| 14 | SPST rocker switch, 10A | Main switch on the motor pack | **$0.75** | sparkfun.com |
+| 13 | XT30 connector pair | | **$1.10** | [alofthobbies.com/products/xt30-plugs](https://alofthobbies.com/products/xt30-plugs) ✅ **verified 2026-09-02: $1.10, ONE male+female pair, genuine Amass, in stock** |
+| 14 | SPST rocker switch, 10A | Main switch on the motor pack | **$0.75** | [sparkfun.com COM-11138](https://www.sparkfun.com/products/11138) ✅ **verified 2026-09-02: $0.75, SPST round, 10A @ 125VAC, in stock.** NOT COM-08837, which is the right-angle variant |
 | 15 | Inline ATO/ATC fuse holder + 3A fuse | **Mandatory** — unprotected 18650s can deliver enormous short-circuit current | **~$2.15** | [bc-robotics.com inline ATO/ATC holder](https://bc-robotics.com/shop/inline-ato-atc-fuse-holder-14awg/) ⚠️ **the 14AWG and 18AWG listings have inconsistent titles — confirm gauge and that it is ATO/ATC, not 5x20mm, at checkout**. Fuse bought separately |
 | 16 | Wire, heat-shrink, bulk caps, headers | ~22AWG for motor, ~26AWG signal; 470–1000µF across the motor rail | **~$8.00** | any |
 | **Lighting + I/O** |
@@ -248,10 +248,25 @@ with the SD card mounted. The split is structural, not stylistic.
 5. **Which LEDs** — forward voltage and current set every series-resistor value
    in row 19, and decide whether the Uno can drive them directly (20mA/pin,
    **200mA absolute max across ALL pins** — 8 LEDs at 20mA is 160mA, 80% of
-   that hard limit) or whether they need MOSFETs off the LM2596 rail
-   or needs a transistor per channel. The **~160mA total is an ESTIMATE** at
+   that hard limit) or whether they need MOSFETs off the LM2596 rail instead.
+   The **~160mA total is an ESTIMATE** at
    20mA × 8 LEDs (`docs/LIGHTING_SPEC.md` §3); nothing has been measured. Pick
    the LEDs before ordering resistors, not after.
+6. ⚠️ **OVER-DISCHARGE PROTECTION FOR THE 2S PACK — unresolved safety gap
+   (found 2026-09-02, Appendix BI).** Row 11's board is titled "BMS" but Adeept's
+   own page documents only over-voltage/overcharge and short-circuit protection.
+   **Over-discharge protection is not listed**, and the EVE 25P cells in row 9 are
+   bare (unprotected). So nothing in the BOM as written stops the pack being run
+   flat under motor load. Below ~2.5 V/cell lithium suffers permanent capacity
+   loss and, in the worst case, internal copper shunts that become a fire risk on
+   the NEXT charge. Short-circuit is separately covered by the mandatory fuse
+   (row 15); this is specifically the low-voltage end. **Close it one of three
+   ways before ordering:** (a) a 2S protection board that explicitly states
+   over-discharge cutoff, (b) protected cells, or (c) **firmware cutoff on the
+   Arduino** — A0-A5 are free (`firmware/SERIAL_PROTOCOL.md` §1), so a resistor
+   divider on the pack lets the Uno cut throttle at a voltage threshold, reusing
+   the watchdog path that already exists. (c) costs two resistors and is the only
+   option that also *logs* the event.
 
 ## Caveats carried into the build
 
