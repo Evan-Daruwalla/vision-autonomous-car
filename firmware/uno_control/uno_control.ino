@@ -4,10 +4,11 @@
  * anything; uno_bringup/uno_memtest/uno_echo were measurements and
  * uno_packguard was one safety subsystem.
  *
- * NOT RUN ON HARDWARE. Compiled only (see the record entry for the real
- * compiler output and size figures). No motor, servo, encoder, LED or pack
- * exists yet — nothing in docs/BOM.md is ordered. Every timing, current and
- * travel figure below is DESIGN INTENT, not measurement.
+ * VERIFIED ON THE BOARD, ACTUATORS UNWIRED. SELFTEST 37/37 and host_test.py
+ * 11/11 on a real Uno (2026-09-02). The LINK and the STATE MACHINE are tested;
+ * no motor, servo, encoder, LED or pack exists — nothing in docs/BOM.md is
+ * ordered — so every actuator path is verified only as a DECISION this firmware
+ * made, never as something that physically moved.
  *
  * THE SAFETY MODEL, which is the point of this file:
  *   Four independent things can stop the car, and they do NOT share one code
@@ -81,14 +82,36 @@ const uint8_t ST_CRC_BAD  = 0x04;
 const uint8_t ST_DROPPED  = 0x08;
 const uint8_t ST_PACK_SHIFT = 4;    // 2 bits: PackState
 
-// ---- actuator calibration — ALL PROVISIONAL --------------------------------
-// Servo travel: the rack-and-pinion exists (12-tooth pinion, 37.70 mm of rack
-// per pinion revolution) and Evan reports max steer ~30 degrees, BUT the
-// servo-to-roadwheel mapping has never been measured and the Lego hard stops
-// may bind before the servo does. These numbers are a safe starting span, not
-// a calibration. DRIVING INTO A HARD STOP STALLS THE SERVO AND COOKS IT.
+// ---- actuator calibration --------------------------------------------------
+/* THE PINION SWEEP IS MEASURED: ~180 degrees full-left to full-right (Evan,
+ * 2026-09-02). That makes the span derivable instead of guessed.
+ *
+ * A standard hobby servo maps 1000-2000 us onto 180 degrees, i.e. 500 us per
+ * 90 degrees. Centre-to-full-lock is half the sweep = 90 degrees = 500 us, so
+ * the GEOMETRIC maximum is SERVO_US_SPAN = 500, and an MG90S at 180 degrees is
+ * a 1:1 match to this rack with no gearing at all.
+ *
+ * THE OLD VALUE OF 300 WAS A REAL DEFECT, not just conservative: it reached
+ * 54 of the 90 available degrees (60% of lock), giving ~19.2 degrees at the
+ * road wheel against the measured 32, which is a turn radius 1.79x LARGER than
+ * the mechanism can actually achieve. The car would have failed corners it is
+ * geometrically capable of, and nothing would have said why.
+ *
+ * WHY 450 AND NOT 500. Servo centre and rack centre are aligned by hand at
+ * assembly, and that alignment is unmeasured. At the full 500 any centring
+ * error drives one side into a Lego hard stop, which stalls the servo and cooks
+ * it. 450 keeps 10% of margin per side (81 of 90 degrees, ~28.8 degrees at the
+ * road wheel, R = 1.819 x wheelbase).
+ * shortcut: one symmetric span, no per-side trim. CEILING: it wastes lock on
+ * whichever side has more clearance. UPGRADE TRIGGER: if bench centring cannot
+ * get both stops within ~5 degrees, split this into LEFT and RIGHT limits.
+ *
+ * STILL UNVERIFIED: MG90S pulse range varies by unit (some are 500-2400 us for
+ * 180 degrees, not 1000-2000). Confirm the real endpoints on the bench before
+ * trusting 450, and never command full lock until you have. */
 const uint16_t SERVO_US_CENTRE = 1500;
-const uint16_t SERVO_US_SPAN   = 300;   // +/- from centre; deliberately narrow
+const uint16_t SERVO_US_SPAN   = 450;   // +/- from centre; 90% of measured lock
+const uint16_t SERVO_US_SPAN_GEOMETRIC = 500;  // 100% of lock, for SELFTEST
 
 // Duty cap: the N20 is a 6 V motor on a pack that reaches 8.4 V. 71% of full
 // scale keeps mean voltage at ~6 V (docs/BOM.md row 5 reasoning).
@@ -263,6 +286,13 @@ void selftest() {
   CHECK(steerToUs(100)  == SERVO_US_CENTRE + SERVO_US_SPAN, "steer +100 is full right");
   CHECK(steerToUs(-100) == SERVO_US_CENTRE - SERVO_US_SPAN, "steer -100 is full left");
   CHECK(steerToUs(127)  == steerToUs(100),  "over-range steer clamps");
+  /* Guards the defect fixed 2026-09-02: a span far under the measured lock
+   * silently caps steering. The pinion sweeps 180 deg, so centre-to-lock is
+   * 500 us; anything below ~85% of that is throwing away turning circle. */
+  CHECK(SERVO_US_SPAN <= SERVO_US_SPAN_GEOMETRIC,
+        "span must not exceed the measured mechanical lock");
+  CHECK(SERVO_US_SPAN * 100 / SERVO_US_SPAN_GEOMETRIC >= 85,
+        "span must reach >=85% of lock, or the car loses turning circle");
   CHECK(steerToUs(-128) == steerToUs(-100), "under-range steer clamps");
 
   // throttle map, including the duty cap that protects a 6V motor on 8.4V

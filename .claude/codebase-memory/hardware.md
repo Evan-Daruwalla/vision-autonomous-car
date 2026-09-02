@@ -370,3 +370,39 @@ traps in `sim-harness.md`.
 - **Firmware impact of a 270° servo:** `SERVO_US_CENTRE`/`SERVO_US_SPAN` in
   `uno_control.ino` are calibrated for a 180° part and are already marked
   provisional. A 270° servo needs them re-derived, not just re-tuned.
+
+## Steering geometry MEASURED, and it inverts the 270-degree argument (2026-09-02, Appendix BU)
+
+- **THE PINION SWEEPS ~180 DEGREES FULL-LEFT TO FULL-RIGHT** (Evan, 2026-09-02).
+  Centre-to-full-lock is therefore **90 degrees**.
+- **An MG90S at 180 degrees is an EXACT 1:1 match to this rack — no gearing, no
+  reduction, nothing.** That is a strong point in its favour that was not known
+  when the servo was chosen.
+- **A 270-degree servo now OVERTRAVELS by 90 degrees.** `track.md`/Appendix BS
+  listed "50% more rack travel" as a Geekservo ADVANTAGE. **That was wrong** —
+  travel beyond what the mechanism has is not headroom, it is a way to drive
+  into the Lego hard stops. Its built-in clutch mitigates the damage, but you
+  would use only the middle 180 of its 270 degrees, **throwing away a third of
+  the positional resolution** across the steering range. Corrected in BU.
+- **Standard hobby servo scaling: 1000-2000 us over 180 degrees = 500 us per
+  90 degrees.** So centre-to-lock = **500 us**, the geometric maximum span.
+  ⚠️ **MG90S pulse range varies by unit** — some are 500-2400 us for 180 degrees,
+  not 1000-2000. **Confirm the real endpoints on the bench before commanding
+  full lock.**
+- **`SERVO_US_SPAN = 300` was a REAL DEFECT, shipped and flashed 2026-09-02
+  before this measurement existed.** It reached 54 of the 90 available degrees
+  (**60% of lock**), giving ~19.2 degrees at the road wheel against the measured
+  32 — a **turn radius 1.79x LARGER than the mechanism can achieve**. The car
+  would have failed corners it is geometrically capable of, with nothing
+  indicating why. **Now 450** (81 of 90 degrees, ~28.8 degrees road wheel,
+  R = 1.819 x wheelbase), holding 10% margin per side because servo centre and
+  rack centre are aligned by hand and that alignment is unmeasured.
+- **Two SELFTEST checks now pin this** (`uno_control`, 39/39 on the board): the
+  span may not exceed the mechanical lock, and it must reach **>=85% of it**.
+  A future narrowing that silently costs turning circle now fails the gate.
+
+| span | pinion from centre | road wheel | R |
+|---|---|---|---|
+| 300 (old, defective) | 54 deg (60%) | 19.2 deg | 2.872 x wheelbase |
+| **450 (current)** | **81 deg (90%)** | **28.8 deg** | **1.819 x wheelbase** |
+| 500 (geometric max) | 90 deg (100%) | 32.0 deg | 1.600 x wheelbase |

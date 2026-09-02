@@ -107,6 +107,7 @@ the dated entry, not the digest.
 - [BR — Lego-mountable motors: none work, but the bin overstated its source and the real constraint is now the encoder](#appendix-br---lego-mountable-motors-none-work-but-the-bin-overstated-its-source-and-the-real-constraint-is-now-the-encoder-2026-09-02-1806-cdt) (09-02)
 - [BS — Steering: the servo-to-pinion coupling is specified nowhere, and Geekservo 270 is a real candidate the drive-motor argument wrongly excludes](#appendix-bs---steering-the-servo-to-pinion-coupling-is-specified-nowhere-and-geekservo-270-is-a-real-candidate-the-drive-motor-argument-wrongly-excludes-2026-09-02-1810-cdt) (09-02)
 - [BT — Board re-flashed to uno_control; the upload had not landed and only checking caught it](#appendix-bt---board-re-flashed-to-uno_control-the-upload-had-not-landed-and-only-checking-caught-it-2026-09-02-1811-cdt) (09-02)
+- [BU — Pinion sweeps 180 degrees: SERVO_US_SPAN was capping steering at 60% of lock, and BS.3's 270-degree advantage was backwards](#appendix-bu---pinion-sweeps-180-degrees-servo_us_span-was-capping-steering-at-60-of-lock-and-bs3s-270-degree-advantage-was-backwards-2026-09-02-1818-cdt) (09-02)
 
 ---
 
@@ -8205,3 +8206,75 @@ a healthy pack.
 servo, encoder, LED or pack exists. To put the pack guard back:
 
     arduino-cli upload -p COM3 --fqbn arduino:avr:uno firmware/uno_packguard
+
+# Appendix BU - Pinion sweeps 180 degrees: SERVO_US_SPAN was capping steering at 60% of lock, and BS.3's 270-degree advantage was backwards (2026-09-02, ~18:18 CDT)
+Evan: **the pinion spins ~180 degrees full-left to full-right.** One number,
+and it both closes the servo-selection question and exposes a defect in
+firmware flashed an hour earlier.
+
+## BU.1 `SERVO_US_SPAN = 300` was shipped, flashed, and wrong
+
+A standard hobby servo maps 1000-2000 us onto 180 degrees, so **500 us per
+90 degrees**. With the pinion sweeping 180 degrees, centre-to-full-lock is
+90 degrees = **500 us**. The value in `uno_control.ino` was **300**.
+
+| span | pinion from centre | road wheel | turn radius |
+|---|---|---|---|
+| **300 — shipped 2026-09-02, defective** | 54 deg (**60% of lock**) | **19.2 deg** | **2.872 x wheelbase** |
+| **450 — now** | 81 deg (90%) | 28.8 deg | 1.819 x wheelbase |
+| 500 — geometric max | 90 deg (100%) | 32.0 deg | 1.600 x wheelbase |
+
+**The car would have driven with a turn radius 1.79x larger than its own
+mechanism allows, failing corners it is geometrically capable of, with nothing
+in any log indicating why.** The constant was written when the pinion sweep was
+unknown and was labelled "deliberately narrow" against an unquantified fear of
+the Lego hard stops — a guess standing in for a measurement, which is exactly
+the failure mode this project keeps finding.
+
+**Why 450 and not 500.** Servo centre and rack centre are aligned by hand at
+assembly and that alignment is unmeasured; at the full 500 any centring error
+drives one side into a hard stop, stalling the servo. 450 holds 10% of margin
+per side. Marked in-code as a shortcut, with the upgrade trigger: **if bench
+centring cannot get both stops within ~5 degrees, split the span into separate
+LEFT and RIGHT limits.**
+
+**Still unverified and it matters:** MG90S pulse range varies by unit — some are
+500-2400 us for 180 degrees rather than 1000-2000. **Confirm the real endpoints
+on the bench before commanding full lock.**
+
+**Two new SELFTEST checks pin the geometry** so this cannot silently return: the
+span may not exceed the mechanical lock, and it must reach **>= 85%** of it.
+Verified on the board: **SELFTEST PASS 39/39** (was 37/37), `host_test.py`
+11/11, exit 0, 7232 B flash.
+
+## BU.2 CORRECTION to BS.3: the 270-degree servo's extra travel is a LIABILITY
+
+**BS.3 listed "+/-14.14 mm vs +/-9.42 mm, 50% more rack travel" as a Geekservo
+270 ADVANTAGE. That was wrong**, and this measurement is what shows it.
+
+The pinion has only **180 degrees of sweep**. A 270-degree servo therefore
+**overtravels by 90 degrees** — it can drive the rack straight into the Lego
+hard stops. Its built-in clutch limits the damage, which is why this downgrades
+the option rather than killing it, but the honest accounting is:
+
+- you would use only the **middle 180 of its 270 degrees**
+- that discards **a third of its positional resolution** across the steering
+  range, on the one actuator where positional resolution is the whole point
+
+**And the MG90S's 180 degrees is now revealed as an EXACT 1:1 match to this
+rack** — no gearing, no reduction, no linkage ratio. That is a real point in its
+favour that nobody knew when it was chosen; it was picked for metal gears and
+torque, and the travel match is luck rather than design.
+
+**Revised standing:** the Geekservo 270's remaining genuine advantages are the
+**native Lego cross-axle mount** (which deletes the unspecified servo-to-pinion
+coupling of BS.1) and the **clutch**. Its disadvantages are now 2.4x less torque
+**and** a third less usable resolution. **The MG90S looks stronger than BS
+concluded.** No decision made.
+
+## BU.3 State
+
+`uno_control` is flashed and passing 39/39 with actuators unwired. **Nothing is
+ordered, nothing is wired, no servo has ever moved.** The span of 450 is
+derived from a measured pinion sweep and a NOMINAL servo pulse range — the
+second half of that is still an assumption until an MG90S is on the bench.
