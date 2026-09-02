@@ -126,8 +126,22 @@ follow-up (BeagleY-AI, x86, phone, off-board WiFi):
 ## Track layout — IN PROGRESS, and the geometry is frozen
 
 Evan is designing the street layout in **3dstreet.app**; `.mcp.json` wires the
-`3dstreet-mcp` server (project scope, loads on restart). **The `claude` CLI is
-not on PATH here**, so `claude mcp add` must be run by Evan.
+`3dstreet-mcp` server (project scope). ~~**The `claude` CLI is not on PATH
+here**, so `claude mcp add` must be run by Evan.~~ **CLI INSTALLED 2026-09-01**
+(`~/.local/bin/claude.exe`, 2.1.258, OAuth; still no `ANTHROPIC_API_KEY`).
+
+**The 3dstreet blocker was never the CLI, and never the browser tab.**
+`claude mcp list` reports:
+
+> `3dstreet: npx -y 3dstreet-mcp - ⏸ Pending approval (run `claude` to approve)`
+
+A **project-scoped** `.mcp.json` server requires Evan's explicit approval on
+first load, which is why the server was absent from the session's tool list
+entirely rather than failing — and why pairing the 3dstreet browser tab changed
+nothing. **Evan must run `claude` interactively in this directory and approve
+it**; a model cannot approve a server that will run `npx -y 3dstreet-mcp` under
+his account. Until then no `mcp__3dstreet__*` tool exists, whatever the tab
+says.
 
 **Fit caveat (Appendix AM):** 3DStreet is a street *cross-section* tool —
 linear segments plus 90° / T / dead-end intersections, **no curved streets

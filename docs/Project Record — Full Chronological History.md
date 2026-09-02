@@ -88,6 +88,7 @@ the dated entry, not the digest.
 - [AY — CORRECTION to AX.2: the street pitch never needed a lane term, so the city fits at R=500/550/600; v2 shrunk; lighting spec settles the PCA9685](#appendix-ay---correction-to-ax2-the-street-pitch-never-needed-a-lane-term-so-the-city-fits-at-r500550600-v2-shrunk-lighting-spec-settles-the-pca9685-2026-09-01-2106-cdt) (09-01)
 - [AZ — PCA9685 and lighting added to the BOM: the $200 ceiling is breached on every path, and the wiring rule was already self-contradictory](#appendix-az---pca9685-and-lighting-added-to-the-bom-the-200-ceiling-is-breached-on-every-path-and-the-wiring-rule-was-already-self-contradictory-2026-09-01-2139-cdt) (09-01)
 - [BA — Vehicle envelope derived (height provably blocked); camera height attempt 2 is a second negative and the curvature hypothesis is refuted; indicator logging lands](#appendix-ba---vehicle-envelope-derived-height-provably-blocked-camera-height-attempt-2-is-a-second-negative-and-the-curvature-hypothesis-is-refuted-indicator-logging-lands-2026-09-01-2204-cdt) (09-01)
+- [BB — claude CLI verified installed, and the 3dstreet MCP blocker was pending APPROVAL all along - not a restart and not the browser tab](#appendix-bb---claude-cli-verified-installed-and-the-3dstreet-mcp-blocker-was-pending-approval-all-along---not-a-restart-and-not-the-browser-tab-2026-09-01-2214-cdt) (09-01)
 
 ---
 
@@ -6403,3 +6404,76 @@ compatible -- old episodes simply carry no indicator key.
 - Nothing ordered; every hardware item remains BLOCKED-ON-EVAN.
 - The indicator channel exists in the writer but **nothing writes it yet** --
   the teleop rig that would set it is task 11, which needs hardware.
+
+# Appendix BB - claude CLI verified installed, and the 3dstreet MCP blocker was pending APPROVAL all along - not a restart and not the browser tab (2026-09-01, ~22:14 CDT)
+Evan reported the `claude` CLI should now be available. Verified, and checking
+what it unlocks answered a question that had been wrong in two previous entries.
+
+## BB.1 The CLI is installed
+
+```
+$ which claude
+/c/users/evan.evanfredy/.local/bin/claude
+$ claude --version
+2.1.258 (Claude Code)
+```
+
+`claude.exe`, 218 MB, installed 2026-09-01 21:40. **`ANTHROPIC_API_KEY` is
+still NOT set** — the CLI authenticates by OAuth, so the half of the standing
+environment note about the API key stands and only the CLI half is falsified.
+
+The global `~/.claude/CLAUDE.md` had **already** been corrected at lines 73-74
+before this session looked; the stale copy was the session-start snapshot in
+context. `HANDOFF.md:129-130` still claimed the CLI was absent and is now
+struck and replaced.
+
+## BB.2 The 3dstreet MCP blocker was neither the CLI nor the browser tab
+
+This is the correction that matters. Across AT.1 and the exchange that followed
+I reported that `3dstreet-mcp` exposed zero tools and inferred, twice, that the
+cause was the server not being loaded into the session and needing a restart,
+and separately that pairing the browser tab was the missing step. **Both were
+wrong.** `claude mcp list` gives the actual state:
+
+```
+3dstreet: npx -y 3dstreet-mcp - ⏸ Pending approval (run `claude` to approve)
+```
+
+A **project-scoped** server declared in `.mcp.json` requires the user's
+explicit approval the first time it is seen. Until that happens it is not
+loaded at all — which is exactly why the server never appeared in the session's
+server list, not even as a failure, and why pairing the 3dstreet tab did
+nothing: there was no relay client to pair with.
+
+**Evan must run `claude` interactively in this project directory and approve
+it.** A model cannot and should not approve a server that will execute
+`npx -y 3dstreet-mcp` under his account.
+
+Note this does not change the design conclusion in AT.1: even once approved,
+3DStreet is a street **cross-section** tool with no curved streets, so the
+figure-8 and the city grid still live in `cad/track_layout_v*.py`. Approval buys
+the marking design and a portfolio render, nothing about plan-view geometry.
+
+## BB.3 Other MCP state, for the record
+
+`claude mcp list` also reports, unprompted:
+
+- `claude.ai Google Drive`, `Gmail`, `Google Calendar` — connected
+- `context7` — connected
+- `plugin:github:github` — **failed**, HTTP 400 "Authorization header is badly
+  formatted" (the same failure this session's tool listing reported)
+- `plugin:railway:railway`, `plugin:stripe:stripe` — need authentication
+
+None of these are project blockers; recorded so a future session does not
+re-diagnose the GitHub failure as new.
+
+## BB.4 What the CLI actually unlocks
+
+- `claude mcp add` / `list` / `remove` — MCP management without Evan hand-editing
+  JSON.
+- Any skill that shells out to `claude`. **Still gated by the missing
+  `ANTHROPIC_API_KEY`** for anything that needs raw API access rather than the
+  CLI's OAuth session, so the standing caveat is narrowed, not removed.
+
+Nothing in the project's build, sim or CAD path depended on the CLI, so no
+blocked work becomes unblocked by this alone.
