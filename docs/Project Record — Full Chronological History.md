@@ -106,6 +106,7 @@ the dated entry, not the digest.
 - [BQ — Max steer confirmed 32 degrees and the measurement convention that makes it a 2.6x trap; board restored; HANDOFF synced](#appendix-bq---max-steer-confirmed-32-degrees-and-the-measurement-convention-that-makes-it-a-26x-trap-board-restored-handoff-synced-2026-09-02-1802-cdt) (09-02)
 - [BR — Lego-mountable motors: none work, but the bin overstated its source and the real constraint is now the encoder](#appendix-br---lego-mountable-motors-none-work-but-the-bin-overstated-its-source-and-the-real-constraint-is-now-the-encoder-2026-09-02-1806-cdt) (09-02)
 - [BS — Steering: the servo-to-pinion coupling is specified nowhere, and Geekservo 270 is a real candidate the drive-motor argument wrongly excludes](#appendix-bs---steering-the-servo-to-pinion-coupling-is-specified-nowhere-and-geekservo-270-is-a-real-candidate-the-drive-motor-argument-wrongly-excludes-2026-09-02-1810-cdt) (09-02)
+- [BT — Board re-flashed to uno_control; the upload had not landed and only checking caught it](#appendix-bt---board-re-flashed-to-uno_control-the-upload-had-not-landed-and-only-checking-caught-it-2026-09-02-1811-cdt) (09-02)
 
 ---
 
@@ -8175,3 +8176,32 @@ mechanical angle.
 specified steering servo. What changed: the coupling gap is now recorded rather
 than latent, and the Geekservo option is on the table with real numbers instead
 of being wrongly excluded by the drive-motor argument.
+
+# Appendix BT - Board re-flashed to uno_control; the upload had not landed and only checking caught it (2026-09-02, ~18:11 CDT)
+Short entry, because it changes a physical fact that BQ.2 recorded and a future
+session would otherwise read stale.
+
+**BQ.2 said the board was restored to `uno_packguard`. That is no longer true.**
+The board now runs **`uno_control`**, re-flashed 2026-09-02 ~18:15 CDT.
+
+Evan supplied the PowerShell upload command (his shell needed the `&` call
+operator; the version handed to him earlier was bash syntax and had failed to
+parse). **The upload had not landed** — reading the board's boot banner showed
+`== UNO PACK GUARD ==` with `SELFTEST PASS 27/27`, so either the command was
+pasted rather than run, or it failed on his end. **Checked rather than assumed,
+which is the only reason it was caught.**
+
+Re-flashed and verified end to end:
+
+    == UNO CONTROL == protocol v0.2, ACTUATORS UNWIRED
+    SELFTEST PASS 37/37
+    host_test: PASS (0 failed)   EXIT=0
+
+Floating pack sense read **10266 mV** this run, consistent with the 10164-10248
+range seen across earlier runs, and still correctly classified FAULT rather than
+a healthy pack.
+
+**State: the board runs `uno_control`. Actuators remain unwired** — no motor,
+servo, encoder, LED or pack exists. To put the pack guard back:
+
+    arduino-cli upload -p COM3 --fqbn arduino:avr:uno firmware/uno_packguard
