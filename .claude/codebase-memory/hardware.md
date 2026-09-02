@@ -68,13 +68,34 @@ traps in `sim-harness.md`.
   that assumes a free reused Power Functions motor is stale — the drive
   motor must be bought (PRD M1.1b) and its dimensions gate the rear-module
   CAD.
-- **Every Lego motor is TOO SLOW for this car — rejected on physics, not
-  price** (2026-07-23, math in
-  `docs/research/2026-07-23_drive-motor-selection.md`). Through any
-  differential arrangement the best case is PF M at **0.88 m/s**, below the
-  1.0 m/s floor; PF L 0.84, PF XL 0.50. Every diff option *reduces* speed
-  further, so the only fix is an added step-up layshaft. Don't
-  "helpfully" re-propose a Lego motor.
+- **Lego motors: rejected, but be precise about WHY — the bin used to overstate
+  its own source.** (Corrected 2026-09-02, Appendix BR.)
+  `docs/research/2026-07-23_drive-motor-selection.md` measures best-case Lego
+  through any diff arrangement as **PF M 0.88 / PF L 0.84 / PF XL 0.50 m/s**,
+  all under the 1.0 m/s floor. **But the same doc says a 20t->8t step-up
+  layshaft brings PF M to 0.92-1.74 m/s and calls that "workable."** So after a
+  step-up it is NOT rejected on physics — it is rejected on two extra gears, an
+  extra layshaft, more rear-module volume, and used-part cost (PF M ~$19 used /
+  ~$28 new, i.e. no cheaper than a new fully-spec'd N20). The old wording
+  ("rejected on physics, not price" / "Don't helpfully re-propose a Lego motor")
+  was stronger than the evidence.
+- **THE BINDING CONSTRAINT IS NOW THE ENCODER, NOT SPEED** (2026-09-02, and this
+  did not exist when the motor was chosen). `ticks` from #5159's 12 CPR encoder
+  is the car's ONLY odometry: D2/D3 are spent on its interrupts, the protocol
+  reply frame carries it in bytes 2-5, and `uno_control` decodes it. **No Lego PF
+  motor has an encoder at all.** Powered Up motors do, but reaching them needs
+  the Build HAT, rejected on four independent grounds (8V +/-10% vs a 6.4-8.4 V
+  2S pack; takes GPIO 0/1/4/14/15/16/17 incl. the primary UART; no Trixie
+  support; $65). **Switching to a Lego motor now also costs the odometry.**
+- **Geekservo is the genuinely Lego-mountable motor, and it is far too slow.**
+  70 rpm (standard) / 90 rpm at 3 V (2kg version), vs the N20's 1000 rpm and the
+  already-rejected PF M's 400 rpm — roughly 4-6x slower than the slowest option
+  already ruled out. Torque ~500 g.cm (~49 mN.m) is comparable to the N20's
+  55.9 mN.m stall, but at a small fraction of the speed. No encoder either.
+  (Checked 2026-09-02: RobotShop / Pimoroni / Kittenbot listings.)
+- **Pololu #1011 is discontinued AND was never the right part**: it adapts 3mm
+  HEXAGONAL shafts to LEGO WHEEL hubs, not to a Technic CROSS AXLE, so it could
+  never have driven through the differential. Verified 2026-09-02.
 - **Lego gears are metric module 1** ⇒ pitch diameter (mm) = tooth count.
   Mesh centres: 12t→28t = **20.0 mm (2.5 studs)**; 20t→28t = **24.0 mm
   (3.0 studs)**. Diff 62821 = 28-tooth ring; 6573 = 24/16. Lego tire part

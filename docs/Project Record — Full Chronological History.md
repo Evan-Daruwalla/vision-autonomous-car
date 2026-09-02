@@ -104,6 +104,7 @@ the dated entry, not the digest.
 - [BO — Control firmware runs on the board (37/37, host 11/11); T1 re-run gives 171 mm not 201; BOM row 5 corrected; gotchas split four ways](#appendix-bo---control-firmware-runs-on-the-board-3737-host-1111-t1-re-run-gives-171-mm-not-201-bom-row-5-corrected-gotchas-split-four-ways-2026-09-02-1755-cdt) (09-02)
 - [BP — CORRECTION to BL.1 and BO.1 - the 40mm/10mm sensitivity rule is from Appendix AZ, not HANDOFF](#appendix-bp---correction-to-bl1-and-bo1---the-40mm10mm-sensitivity-rule-is-from-appendix-az-not-handoff-2026-09-02-1757-cdt) (09-02)
 - [BQ — Max steer confirmed 32 degrees and the measurement convention that makes it a 2.6x trap; board restored; HANDOFF synced](#appendix-bq---max-steer-confirmed-32-degrees-and-the-measurement-convention-that-makes-it-a-26x-trap-board-restored-handoff-synced-2026-09-02-1802-cdt) (09-02)
+- [BR — Lego-mountable motors: none work, but the bin overstated its source and the real constraint is now the encoder](#appendix-br---lego-mountable-motors-none-work-but-the-bin-overstated-its-source-and-the-real-constraint-is-now-the-encoder-2026-09-02-1806-cdt) (09-02)
 
 ---
 
@@ -7995,3 +7996,94 @@ board with no actuators attached.
 
 Committed at the end of this session; **not pushed** — pushing was not
 authorised.
+
+# Appendix BR - Lego-mountable motors: none work, but the bin overstated its source and the real constraint is now the encoder (2026-09-02, ~18:06 CDT)
+Evan asked whether there are easily Lego-Technic-mountable motors he could use.
+The answer is no — but the 2026-07-23 rejection answered a **narrower** question
+than he asked, and checking it found that `hardware.md` had been overstating its
+own source. Both corrected.
+
+## BR.1 The bin overstated the research it cited
+
+`hardware.md` said: *"Every Lego motor is TOO SLOW for this car — rejected on
+physics, not price ... Don't 'helpfully' re-propose a Lego motor."*
+
+**`docs/research/2026-07-23_drive-motor-selection.md` does not support the
+strong form.** Its own table gives PF M 0.88 / PF L 0.84 / PF XL 0.50 m/s
+against a 1.0 m/s floor — but then says a **20t -> 8t step-up layshaft brings
+PF M to 0.92-1.74 m/s** and calls that **"workable, but two extra gears, an
+extra layshaft, and more rear-module volume than the N20 route it was meant to
+simplify."**
+
+So after a step-up, Lego is **not** rejected on physics. It is rejected on
+mechanism count, packaging volume, and cost (PF M ~$19 used / ~$28 new — no
+cheaper than a new fully-spec'd N20, and the doc's own line is that buying a
+used, undocumented, warranty-less part for the same money is a bad trade on a
+project where the process is the deliverable).
+
+That is still a sound rejection. But "rejected on physics" was a stronger claim
+than the evidence, and a bin that overstates its source is exactly the failure
+the write protocol exists to catch. Corrected in place.
+
+## BR.2 The binding constraint has CHANGED, and it is now the encoder
+
+**This did not exist when the motor was chosen on 2026-07-23.** As of Appendix
+BO (2026-09-02), `ticks` from #5159's 12 CPR encoder is the car's **only**
+odometry:
+
+- D2 and D3 — the ATmega328P's only two external interrupts — are spent on it
+- the protocol reply frame carries it in bytes 2-5
+- `uno_control` decodes it in 4x quadrature, verified 37/37 on the board
+
+**No Lego Power Functions motor has an encoder at all.** Powered Up motors
+(88013/88014) do have integrated encoders, but reaching them needs the Build
+HAT, already rejected on four independent grounds: 8 V +/-10% against a
+6.4-8.4 V 2S pack; it takes GPIO 0/1/4/14/15/16/17 including the primary UART;
+no Trixie support; $65 against the remaining budget.
+
+**So switching to a Lego motor now costs the odometry as well as the speed** —
+a cost that simply was not on the table in July. This is the strongest current
+argument and it is newer than the decision it supports.
+
+## BR.3 What Lego-MOUNTABLE actually exists, checked rather than assumed
+
+Evan's question was about Lego-*mountable* motors, not Lego-*brand* ones — a
+distinction the original research never addressed. Checked 2026-09-02:
+
+| option | speed | encoder | verdict |
+|---|---|---|---|
+| **Geekservo** (Kittenbot; genuine Lego-compatible body + cross-axle output) | **70 rpm** standard, **90 rpm at 3 V** (2 kg version) | none | **Dead on arrival.** N20 is 1000 rpm; the already-rejected PF M is 400. This is 4-6x slower than the slowest thing already ruled out |
+| Lego PF M / L / XL | 400 / 375 / 220 rpm | none | already rejected, BR.1 |
+| Powered Up 88013/88014 | unpublished | yes | needs the rejected Build HAT |
+
+Geekservo torque (~500 g.cm ~= 49 mN.m) is actually comparable to the N20's
+55.9 mN.m stall — it is purely the speed that kills it.
+
+## BR.4 The better answer to what the question was probably pointing at
+
+If the motivation is avoiding the **printed coupler** — which the research
+itself flags as SF 2-4 in torsion at stall, "collapsing toward 1 with sparse
+infill", and which has never been printed or tested — then the fix is not a
+different motor. It is a **manufactured adapter on the N20 already chosen**.
+
+- **Pimoroni "Micro Metal Gearmotor to LEGO Axle Adaptor", pack of 4, GBP 3.25,
+  in stock, injection moulded, made in the UK.** ("Micro metal gearmotor" is
+  Pololu's own term for the N20 form factor, so #5159 is one.)
+- ⚠️ **NOT a recommendation yet, and the reason is specific.** The page says it
+  fits micro metal gearmotors *"with extended back shafts"* and **states neither
+  the shaft diameter nor the profile**. On a #5159 the extended back shaft is
+  **where the encoder magnet lives.** If the adaptor is a back-shaft part it
+  both fails to drive anything and collides with the encoder. **Confirm which
+  shaft it fits before buying.**
+- **Pololu #1011 is discontinued** (record was right) **and was never the right
+  part anyway**: verified 2026-09-02, it adapts 3 mm **hexagonal** shafts to
+  LEGO **wheel hubs**, not to a Technic **cross axle** — so it could never have
+  driven through the differential. The record's earlier mention of it as a lost
+  option slightly overrates what was lost.
+
+## BR.5 State
+
+No decision changed. The N20 #5159 remains the drive motor. **Nothing ordered,
+nothing wired.** What changed is that one bin now matches its source, and the
+live reason for the choice is recorded as the encoder rather than as speed
+alone — so the next session re-litigating this starts from the real constraint.
