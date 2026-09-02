@@ -83,6 +83,7 @@ the dated entry, not the digest.
 - [AT — Track layout v1: twisty is geometrically impossible at 3x3 m, the bridge cannot be an overpass, and the destinations are landmarks not junctions](#appendix-at---track-layout-v1-twisty-is-geometrically-impossible-at-3x3-m-the-bridge-cannot-be-an-overpass-and-the-destinations-are-landmarks-not-junctions-2026-09-01-2012-cdt) (09-01)
 - [AU — Scheduled daily-audit: AP/AQ/AR/AS re-verified against disk, 3 findings, and a stale artifact that would mislead the next auditor](#appendix-au---scheduled-daily-audit-apaqaras-re-verified-against-disk-3-findings-and-a-stale-artifact-that-would-mislead-the-next-auditor-2026-09-01-2014-cdt) (09-01)
 - [AV — Record letter-collision race repaired, and the AU audit's two findings against AR's artifacts fixed](#appendix-av---record-letter-collision-race-repaired-and-the-au-audits-two-findings-against-ars-artifacts-fixed-2026-09-01-2018-cdt) (09-01)
+- [AW — CORRECTION to AV.1: the append script was never the race; the daily-audit prompt never named it. Prompt fixed and a write-time guard added](#appendix-aw---correction-to-av1-the-append-script-was-never-the-race-the-daily-audit-prompt-never-named-it-prompt-fixed-and-a-write-time-guard-added-2026-09-01-2036-cdt) (09-01)
 
 ---
 
@@ -5621,3 +5622,161 @@ measurement in prose does not fix the artifacts the earlier measurement
 already wrote.** When a method is retracted, every file that method produced
 has to be regenerated or deleted, and neither AR.8's artifact list nor the
 commit caught it. The cold audit did.
+
+# Appendix AW - CORRECTION to AV.1: the append script was never the race; the daily-audit prompt never named it. Prompt fixed and a write-time guard added (2026-09-01, ~20:36 CDT)
+AV flagged the record-corruption race and explicitly left it unfixed
+("Flagged, not fixed -- the scheduled task's code was not touched"). Evan asked
+for the source fix. Investigating it showed **AV named the wrong cause**, so
+that correction comes first.
+
+## AW.1 CORRECTION to AV.1: the append script was never at fault
+
+AV.1 states:
+
+> "The `--next-letter` lookup and the append are not atomic, so two writers two
+> minutes apart can both be told 'AT'."
+
+**That is wrong.** `append-record-entry.js:278-296` already takes an **O_EXCL
+lockfile** around the whole read-modify-write and publishes by **temp-file +
+rename**. Its own header comment records why, and it is not theoretical: the
+previous `writeFileSync -> verify -> roll back` shape was measured destroying
+records, "3 of 5 trials at 433KB losing up to 146 of 164 appendices, 10/10 at
+1MB", and the rollback itself "WAS the corruption". The tool is sound, and its
+canary passes 45/45 untouched.
+
+**The real cause: neither incident used the script at all.** The tool always
+writes the heading and the TOC line together, so an entry with a heading and no
+TOC line is proof it was hand-spliced. Both AS and AU were hand-spliced, and a
+hand-splice takes no lock and derives its own letter — which is how AU landed
+on a letter this session had already taken two minutes earlier.
+
+AV's diagnosis pointed at the one component that had already been hardened
+against exactly this, and away from the instruction gap that actually caused
+it. Recorded here rather than edited into AV, which is committed and
+append-only.
+
+## AW.2 The instruction gap, found
+
+`~/.claude/scheduled-tasks/daily-audit/SKILL.md:74-76`, verbatim before this
+change:
+
+> CONSTRAINTS — READ-ONLY: no code edits, no fixes applied, no commits, no
+> HANDOFF edits. ONE exception: after each project's audit, append one dated
+> record entry ("Audit run — N findings, top: <item>") so future sweeps can
+> detect it ran.
+
+"Append one dated record entry" and nothing else. It never names the script,
+the TOC line, or the lock. The "APPEND WITH THE SCRIPT, never by hand" rule
+lives in `~/.claude/skills/project-memory/SKILL.md:128-147`, and the audit run
+has no reason to load it -- its prompt invokes `/audit` and `/landing-check`,
+never `/project-memory`. Worse, the task's own STEP 1 tells it to READ the
+record, so it sees `# Appendix X` headings and imitates them. Heading only.
+
+The audit skills themselves (`audit/`, `audit-code/`, `audit-docs/`) contain no
+record-writing instruction at all, so nothing else could have redirected it.
+
+**And the project's own `CLAUDE.md:9-11` does not close the gap either** -- it
+says entries are "`# Appendix <X>` headings + TOC line", which describes the
+FORMAT and still points at no tool. A model following it faithfully still
+hand-writes.
+
+## AW.3 Why fixing only the prompt was not enough
+
+Appendix AS came from an **ordinary interactive session** doing a LEGO Technic
+lookup, not from the audit. Fixing the daily-audit prompt would not have
+prevented it, and would not prevent the next skill or task that grows a reason
+to append. Evan chose prompt + guard.
+
+## AW.4 What was changed
+
+Three files, all under `C:\Users\evan.EVANFREDY\.claude\` -- **outside this
+repo, and `~/.claude` is not a git repository, so none of this is versioned.**
+Only this entry is committed here.
+
+1. **`scheduled-tasks/daily-audit/SKILL.md`** -- the bare instruction now
+   carries the full script invocation, plus why: that an entry is a heading AND
+   a TOC line written together, that writing the heading alone blocks every
+   later append until a human repairs it, and that picking the letter yourself
+   races other sessions. It names both 2026-09-01 incidents.
+
+2. **`skills/project-memory/hooks/pretooluse-record-guard.js`** -- NEW. A
+   PreToolUse hook on `Edit|Write` that DENIES a direct write to any
+   `...Full Chronological History.md`, with a message naming the exact script
+   invocation. Mirrors `pretooluse-commit-gate.js`'s contract exactly: reads
+   the event from fd 0, **always exits 0**, expresses the block as
+   `permissionDecision:"deny"` in JSON rather than by crashing.
+
+   Deliberate carve-outs, each because denying would be worse than allowing:
+   a record that does not exist yet (BOOTSTRAP legitimately creates it with
+   `Write`); `record_<date>.md` of the `## YYYY-MM-DD` convention, which the
+   script explicitly REFUSES to handle, so a deny would leave no legal path;
+   and unparseable/absent input, which allows LOUDLY because denying there
+   would wedge every Edit and Write in the session. Once the target is KNOWN
+   to be a record, every error path denies -- a false block is recoverable, a
+   false allow re-opens the corruption.
+
+   Repair hatch `PM_RECORD_UNLOCK=1`, which matters because repairing an
+   already-broken record needs a hand edit. It must be set in the environment
+   that LAUNCHED Claude Code; a model running `export` in a Bash call cannot
+   reach the hook's process, so the model cannot unlock itself.
+
+3. **`settings.json`** -- registered as a new `PreToolUse` element with matcher
+   `Edit|Write` (there was none before; the existing `Edit|Write` entry is
+   PostToolUse).
+
+## AW.5 Verified
+
+```
+$ node ~/.claude/skills/project-memory/hooks/pretooluse-record-guard.js --canary
+CANARY PASS 23/23
+```
+
+23 cases: deny on Edit and Write, on backslash / lowercase / quoted / `/d/...`
+Git-Bash spellings and on `notebook_path`; the deny text contains the script,
+all four flags, the hand-splice line and the hatch; allow for another `.md`, a
+code file, the `.html` twin, a `.bak`, and a not-yet-existing record; warn for
+`record_<date>.md`, `PM_RECORD_UNLOCK=1`, malformed stdin and empty stdin; and
+every path exits 0.
+
+Against the real record and a real non-record:
+
+```
+$ ... | node pretooluse-record-guard.js      # the project's own record
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny",...}}
+exit=0
+$ ... | node pretooluse-record-guard.js      # HANDOFF.md
+exit=0   (empty stdout - allowed)
+```
+
+`append-record-entry.js --canary` still **PASS 45/45**: the script was not
+touched, and it is spawned via Bash so the `Edit|Write` matcher never fires on
+it. This entry was appended with that script, which is itself the end-to-end
+proof that the sanctioned path still works.
+
+## AW.6 The canary caught a bug in the guard
+
+First run was **22/23**. The failing case was `quoted/padded path -> deny`, and
+the cause was real rather than cosmetic: the name match ran on a cleaned path
+(trimmed, quotes stripped) while `existsSync` ran on the RAW string with its
+quotes still attached. So the guard's matcher said "this is a record" and its
+stat said "this file does not exist", and the not-yet-exists carve-out let the
+write through. **A guard whose two halves disagree about which file they are
+looking at fails open on exactly the input designed to slip past it.** Fixed by
+routing both through one `cleanPath()`; the comment in the source says why they
+must never diverge again.
+
+## AW.7 Not fixed, and stated
+
+- **The guard cannot be confirmed live this session.** Hooks are read at
+  startup, so it will not fire until Claude Code is restarted. What is proven
+  is the hook's own behaviour against real payloads, not that the harness is
+  calling it.
+- **Delete-then-Write defeats the `existsSync` carve-out.** `pre-commit-record`
+  still fails closed at commit time, which is the remaining net.
+- **A record under a different filename is not matched** -- the same blind spot
+  `pre-commit-record` already has, since both key on the naming convention.
+- **Editing a typo inside a prior entry is now blocked.** That enforces what
+  `project-memory/SKILL.md` already stated ("APPEND ONLY - corrections are NEW
+  entries"), but it is new friction people will feel.
+- **`~/.claude` is not a git repository.** The prompt fix, the hook and the
+  settings change are unversioned; if that directory is lost they go with it.
