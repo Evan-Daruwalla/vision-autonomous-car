@@ -109,6 +109,7 @@ the dated entry, not the digest.
 - [BT — Board re-flashed to uno_control; the upload had not landed and only checking caught it](#appendix-bt---board-re-flashed-to-uno_control-the-upload-had-not-landed-and-only-checking-caught-it-2026-09-02-1811-cdt) (09-02)
 - [BU — Pinion sweeps 180 degrees: SERVO_US_SPAN was capping steering at 60% of lock, and BS.3's 270-degree advantage was backwards](#appendix-bu---pinion-sweeps-180-degrees-servo_us_span-was-capping-steering-at-60-of-lock-and-bs3s-270-degree-advantage-was-backwards-2026-09-02-1818-cdt) (09-02)
 - [BV — The steering coupler is the highest-torque joint and a printed one fails; the self-calibrating centre cannot work as described](#appendix-bv---the-steering-coupler-is-the-highest-torque-joint-and-a-printed-one-fails-the-self-calibrating-centre-cannot-work-as-described-2026-09-02-1828-cdt) (09-02)
+- [BW — Full project-memory pass: PRD_ROADMAP and auto-memory had gone untouched all session](#appendix-bw---full-project-memory-pass-prd_roadmap-and-auto-memory-had-gone-untouched-all-session-2026-09-02-1833-cdt) (09-02)
 
 ---
 
@@ -8382,3 +8383,77 @@ compiled and uploaded, and the board came back `SELFTEST PASS 39/39`.
 `uno_control` is on the board at 39/39, actuators unwired. **No coupling chosen,
 no calibration built, nothing ordered, nothing wired.** BV.1 states a constraint
 the coupling choice must satisfy; it does not make the choice.
+
+# Appendix BW - Full project-memory pass: PRD_ROADMAP and auto-memory had gone untouched all session (2026-09-02, ~18:33 CDT)
+Full `/project-memory` pass. **`PRD_ROADMAP.md` and the auto-memory had gone
+untouched for the whole session** while HANDOFF, the record and the bins were
+updated repeatedly — so the roadmap still described a project without firmware
+and with an unmeasured car.
+
+## BW.1 PRD_ROADMAP — five edits, all append-or-strike, nothing deleted
+
+- **T1 "Confirm scale" CLOSED.** Struck with its original text intact and the
+  result appended: car width 114.75 mm measured, `cad/track_layout_v2.py`
+  re-run, **lane 260 -> 230 mm, span 2660 -> 2629 mm, spare 140 -> 171 mm,
+  tiles 79 -> 73**. Two caveats carried into the task rather than dropped: it
+  is tire track and not whole-vehicle width, and **the marking table itself
+  (line widths, dash pattern) is still NOT recomputed** — T1's own done-check
+  named that table, so this is a partial close stated as one.
+- **M1.4b updated, and deliberately NOT closed.** Max steer confirmed at 32
+  degrees with the convention spelled out (deviation from straight ahead;
+  reading it as 58 is a 2.6x error), giving `R_min = 1.600 x wheelbase` and
+  leaving wheelbase as the single remaining input. **Says explicitly that this
+  does not close T2**, which asks for an EMPIRICAL turning test — a geometric
+  radius is better than arithmetic-on-estimates but is not the measurement the
+  task names.
+- **Task 8's price note revised to ≈$235-243 / ≈$250-268 with shipping**, with
+  the reason stated as drift repair rather than new scope, and the ceiling now
+  breached on every path including the 2GB Pi.
+- **Tasks 8b and 8c APPENDED.** 8b is the Uno control firmware, marked DONE
+  with its done-check evidence (SELFTEST 39/39, host_test 11/11, 7232 B flash,
+  312 B SRAM) and the standing caveat that actuators are unwired. **It is
+  appended retroactively and says so** — the Arduino only entered the design on
+  2026-09-02, it needed no parts, and that is why it ran ahead of task 8, the
+  order. 8c is the open steering work: one-shot EEPROM calibration, and the
+  coupling choice with its failing safety factors written into the task.
+- **The tail gotchas pointer** now names `hardware.md`, since `gotchas.md` is a
+  router after the split.
+
+## BW.2 Auto-memory — one file corrected, one added
+
+`project-doc-layout.md` still claimed a `.claude/codebase-memory/` "full bin
+set", which stopped being true when `gotchas.md` was split. Corrected, with the
+read order for the three new bins.
+
+**Added `car-doc-tooling-traps.md`**, because three separate mechanical failures
+this session came from editing these docs rather than from the engineering:
+
+1. The record's append-only guard and `append-record-entry.js` requiring
+   `--date` — a timestamp typed before reading the clock became Appendix BM.
+2. **Every doc here is CRLF**, so an `\n`-only search string silently fails.
+3. **A Bash heredoc eats backticks even when quoted** — writing an edit script
+   inline deleted `` `SERVO_US_SPAN` `` from the middle of a sentence in
+   `hardware.md`. Write the `.js` to the scratchpad, then run it.
+
+`MEMORY.md` index updated to two lines.
+
+## BW.3 What is deliberately NOT updated
+
+- **The marking table** (T1's own artifact — line widths, stop-line width, dash
+  pattern) has not been recomputed from 114.75 mm. Recorded as an open half of
+  T1 rather than quietly counted as done.
+- **`docs/SIM_TRANSFER_SPEC.md` §3's lane table** still shows the 100 mm /
+  130 mm columns. The RULE it states (lane = 2.0 x measured width) is correct
+  and unchanged; only the illustrative columns are pre-measurement. Left alone
+  rather than edited mid-session.
+- **`docs/LIGHTING_SPEC.md`** still contains the per-pin current error found in
+  BO — its chip-total arithmetic is right and its per-pin conclusion is wrong.
+  The correction lives in `hardware.md` and the record; the spec itself is
+  unamended.
+
+## BW.4 State
+
+Docs now agree with disk. **Nothing ordered, nothing wired, no actuator has
+moved.** `uno_control` is flashed at 39/39 with actuators unwired. Open on
+Evan: the order and its breached ceiling, wheelbase, car mass, the coupling
+choice, and whether to build 8c(i).

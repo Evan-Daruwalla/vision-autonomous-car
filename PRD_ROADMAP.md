@@ -307,12 +307,60 @@ transfer gap) must not block the capstone.
      ≈$226–234 before shipping, ≈$241–259 with.** The $200 ceiling is still
      breached on the 4GB Pi; the **2GB path now reaches ≈$196–214**, whose low
      end clears $200 for the first time since lighting was added.)*
+   - *(**Revised again 2026-09-02 (Appendix BO) to ≈$235-243 before shipping,
+     ≈$250-268 with.** Two changes, both DRIFT REPAIR rather than new scope:
+     **row 5 was buying the WRONG MOTOR** — #1093, which has no encoder — while
+     Evan chose the **#5159 encoder motor on 2026-08-12** and the firmware pin
+     map has spent D2/D3 on encoder interrupts ever since (+$6.00); and **new
+     row 5b**, the **#4763 JST SH cable Pololu explicitly does not include**
+     with #5159 (+$3.00), same defect class as row 3's camera cable.
+     ⚠️ **The $200 ceiling is now breached on EVERY path, including the 2GB Pi**,
+     which lands at ≈$205-223 with shipping. The 2GB path was the last one whose
+     low end cleared it.)*
    - *(Amended 2026-09-01, again 2026-09-02: the "four items" are now **six** — check 5, which
      LEDs, sets every series-resistor value. And the **PWM-path question is
      RESOLVED** — ~~PCA9685~~ **an ARDUINO UNO (2026-09-02, Appendix BC)**,
      carrying motor PWM + servo + 4 light channels and adding encoder counting
      plus a throttle watchdog the PCA9685 could not. That was BLOCKED-ON-EVAN
      and no longer is. Pin map: `firmware/SERIAL_PROTOCOL.md`.)*
+8b. ~~**Uno actuation firmware**~~ **DONE 2026-09-02 (Appendices BO/BU).**
+    Appended retroactively: this work was not in the PRD because the Arduino
+    only entered the design on 2026-09-02 (Appendix BC), superseding the
+    PCA9685. **It needed NO parts**, which is why it ran ahead of task 8.
+    `firmware/uno_control/` implements `firmware/SERIAL_PROTOCOL.md` v0.2 —
+    7-byte command, 9-byte reply, CRC8, ARMED-per-frame, 150 ms watchdog,
+    4x quadrature encoder, the pack-guard throttle inhibit, and D10 -> TB6612
+    `STBY`. Done-check MET: **firmware SELFTEST 39/39 on the real board** and
+    **`firmware/host_test.py` 11/11, exit 0**; 7232 B flash (22%), 312 B SRAM
+    (15%), loop 2-3 ms of the 50 ms budget.
+    ⚠️ **ACTUATORS UNWIRED.** The link and the state machine are verified; no
+    motor, servo, encoder, LED or pack exists, so every actuator path is
+    verified only as a DECISION the firmware made, never as something that
+    physically moved.
+
+8c. **Steering calibration + the servo-to-pinion coupling** (appended
+    2026-09-02, Appendices BS/BU/BV). **OPEN, and 8c(ii) is a hard constraint
+    on the mechanical design, not a preference.**
+    (i) **One-shot centre calibration into EEPROM.** Evan proposed calibrating
+        every startup by driving to both locks. **It cannot work as stated:** a
+        hobby servo gives the Uno no position feedback, so the board cannot
+        detect a stop; and **opening the serial port RESETS the board**, so
+        "every startup" means "every Pi reconnect" and would slam the steering
+        into both hard stops each time. Corrected shape: calibrate ONCE on an
+        explicit command with an operator in the loop (zero new hardware),
+        store both endpoints in EEPROM (1024 B available), reload on boot.
+        Done: measured endpoints in EEPROM, centre derived not assumed, and a
+        SELFTEST that fails if the stored span is absent or implausible.
+    (ii) **Choose a coupling that survives.** ⚠️ **The steering coupler is the
+        HIGHEST-torque joint on the car and a PRINTED cross-axle stub FAILS
+        there** — SF **0.57-0.96** at MG90S stall (~216 mN·m), against SF
+        2.26-3.77 for the N20 drive coupler it was modelled on. **The MG996R
+        fallback named in BOM row 7 is SF 0.12-0.19**, i.e. choosing it makes
+        the coupling problem ~5x worse rather than solving a stall. Must grip a
+        real Lego axle; never print the cross profile. Constraint written to
+        `docs/WIRING_PROTOSHIELD.md` §2.4a. Done: a coupling selected with its
+        stall-torque margin stated.
+
 9. **Bench bring-up.** Pi OS (64-bit Bookworm), SSH, camera test; TB6612 +
    PF motor on bench PSU; servo sweep test. Done: each subsystem's real
    output (photo/log) in record.
@@ -463,8 +511,21 @@ stop line 22-44 mm · **dash compressed to ~60/180 mm** (true scale is
 the deviation is deliberate and documented). Yellow separates opposing
 directions; white separates same-direction.
 
-T1. **Confirm scale.** Recompute the marking table from the MEASURED car
-    width (needs B2/B3). Done: table in the record with measured input.
+T1. ~~**Confirm scale.** Recompute the marking table from the MEASURED car
+    width (needs B2/B3). Done: table in the record with measured input.~~
+    **DONE 2026-09-02 (Appendix BO).** Evan measured tire track: front
+    107.75 mm, **rear 114.75 mm — the governing width**, superseding the
+    130 mm ESTIMATE every track document had used since Appendix L.
+    `cad/track_layout_v2.py` re-run on it (a `--car-width` flag was added to
+    mirror the existing `--radius`): **lane 260 -> 230 mm, span 2660 ->
+    2629 mm, spare 140 -> 171 mm, tiles 79 -> 73 (~902 g of filament).**
+    ⚠️ **Two caveats carried forward:** it is TIRE TRACK, not whole-vehicle
+    width — confirm nothing on the assembled car exceeds 114.75 mm — and the
+    HANDOFF-era rule of thumb "40 mm of span per 10 mm of car width" is
+    **WRONG for this geometry** (Appendix BP): `best_straight` is capped at
+    MAX_STRAIGHT = 200 mm, so pitch never moves and span tracks the lane
+    delta at **2x** the car-width change, not 4x. The marking table itself
+    (line widths, dash pattern) is NOT yet recomputed.
 T2. **Measure minimum turning radius empirically** on the rolling chassis
     (needs M1.7). Estimate is ~330 mm centerline (wheelbase ÷ tan(max
     steer)) ⇒ corners want 500-670 mm, but that is arithmetic on an
@@ -761,6 +822,17 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
       which fits the full 500-670 mm corner range at either car width.
       Still BLOCKED on (b) the B3 turning test — corner geometry must not be
       committed before it** (Appendix L, AM.2).
+      **UPDATE 2026-09-02:** car width is now MEASURED (T1) and **max steer is
+      confirmed at 32°** (Appendix BQ), where 32° is the wheel's DEVIATION from
+      straight ahead — Evan measured with 90° = straight, angle = 90 − protractor
+      reading, and reading it as 58° instead is a **2.6× error**. That gives
+      `R_min = wheelbase / tan(32°)` = **1.600 × wheelbase**, so **wheelbase is
+      the single remaining input** — and it is blocked on parts. For reference the
+      standing ~330 mm estimate implies a ~206 mm wheelbase, so the frozen
+      500-670 mm corner band probably does NOT shrink. **This still does not
+      close T2**, which asks for an EMPIRICAL turning test on the rolling
+      chassis; a geometric radius is better than arithmetic-on-estimates but is
+      not the measurement the task names.
 
 ## 6b. EXECUTION PLAN (dated 2026-08-05, approved by Evan — schedules the tasks above; adds no new milestones)
 
@@ -844,7 +916,9 @@ sitting; finish (done-check + record entry) before the next.
   peripheral cap**, and this build has no USB peripherals — so the chosen
   architecture is the OPPOSITE of this line: a **USB power bank feeds the Pi
   alone**, and a separate 2S pack feeds motor + servo, sharing only ground.
-  See `gotchas.md` and `docs/research/2026-07-23_power-system.md`.
+  See **`hardware.md`** (`gotchas.md` was SPLIT 2026-09-02 into
+  `hardware.md` / `track.md` / `sim-harness.md` and is now only a router)
+  and `docs/research/2026-07-23_power-system.md`.
 - Lego pin holes print tight: ~5.1mm pin fit / 5.3-5.6mm rotating bore,
   but CALIBRATE ON THIS PRINTER (task 3) before cutting chassis parts.
 - Don't drive Powered Up motors from a raw H-bridge (loses encoder, fights
