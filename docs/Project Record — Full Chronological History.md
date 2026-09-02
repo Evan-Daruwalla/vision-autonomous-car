@@ -79,6 +79,10 @@ the dated entry, not the digest.
 - [AP — Option 1 applied: load_cached_mu resolves three states, and every runnable AL-touched reader re-run](#appendix-ap---option-1-applied-load_cached_mu-resolves-three-states-and-every-runnable-al-touched-reader-re-run-2026-09-01-1550-cdt) (09-01)
 - [AQ — CORRECTION to AP.5: ml/data/sim was never missing - verify_corpus.py's cwd-relative default was, and P2 re-verified PASS](#appendix-aq---correction-to-ap5-mldatasim-was-never-missing---verify_corpuspys-cwd-relative-default-was-and-p2-re-verified-pass-2026-09-01-1555-cdt) (09-01)
 - [AR — Sim camera pose: the FOV trick does not extend to extrinsics; fov proved VERTICAL, pitch measured 16.3 deg down, height NOT identified](#appendix-ar---sim-camera-pose-the-fov-trick-does-not-extend-to-extrinsics-fov-proved-vertical-pitch-measured-163-deg-down-height-not-identified-2026-09-01-1610-cdt) (09-01)
+- [AS — Reference lookup: LEGO Technic rack-and-pinion steering, set 42111 as the donor precedent](#appendix-as---reference-lookup-lego-technic-rack-and-pinion-steering-set-42111-as-the-donor-precedent-2026-09-01-1725-cdt) (09-01)
+- [AT — Track layout v1: twisty is geometrically impossible at 3x3 m, the bridge cannot be an overpass, and the destinations are landmarks not junctions](#appendix-at---track-layout-v1-twisty-is-geometrically-impossible-at-3x3-m-the-bridge-cannot-be-an-overpass-and-the-destinations-are-landmarks-not-junctions-2026-09-01-2012-cdt) (09-01)
+- [AU — Scheduled daily-audit: AP/AQ/AR/AS re-verified against disk, 3 findings, and a stale artifact that would mislead the next auditor](#appendix-au---scheduled-daily-audit-apaqaras-re-verified-against-disk-3-findings-and-a-stale-artifact-that-would-mislead-the-next-auditor-2026-09-01-2014-cdt) (09-01)
+- [AV — Record letter-collision race repaired, and the AU audit's two findings against AR's artifacts fixed](#appendix-av---record-letter-collision-race-repaired-and-the-au-audits-two-findings-against-ars-artifacts-fixed-2026-09-01-2018-cdt) (09-01)
 
 ---
 
@@ -5239,3 +5243,381 @@ designed, not after.
   `diag_camera_pose self_check: PASS`.
 - `ml/runs/camera_aspect/` -- the three aspect-test frames and their JSON.
 - `ml/runs/camera_pose/camera_pose.json` -- the pitch measurement.
+
+---
+
+# Appendix AS - Reference lookup: LEGO Technic rack-and-pinion steering, set 42111 as the donor precedent (2026-09-01, ~17:25 CDT)
+
+No code, CAD, or sim change this entry. Evan asked for a Technic steering
+mechanism modelled on Dom Toretto's Dodge Charger, with part numbers, so this
+records what was *verified* versus what is still assumption, since the numbers
+will be used to order parts later.
+
+## AS.1 What was verified
+
+Official set **42111 Dom's Dodge Charger** (2020, 1,076-1,077 parts) exists and
+uses rack-and-pinion steering. Steering-relevant inventory pulled from the
+BrickOwl inventory page for 42111 (Rebrickable and Bricker both refused the
+fetch, HTTP 403 / menu-only):
+
+- Steering wheel 2741 x1
+- Gear Rack 7 - 65127 / 87761 x1
+- Technic Hole with 3 Ball Joints - 15460 / 67325 (the modern steering
+  knuckle) - quantity was truncated in the fetch, NOT confirmed
+- Beam 4 with Ball Joint Socket - 15459 / 31794 x4
+- Pin with Ball - 6628 / 66906 x8
+- Bevel Gear 12t - 32270 x2; Bevel 20t reinforced - 18575 x3;
+  Gear 16t reinforced - 94925 x3; Bevel half 12t - 6589 x5
+- Differential casing 62821 x1
+- Small shock absorber, extra hard spring - 76537 x4
+
+## AS.2 What is NOT verified
+
+- Which gear meshes the rack (the pinion). Inventory alone cannot say; it needs
+  the official instruction PDF or a physical build.
+- Whether 42111's front geometry implements true Ackermann. Expectation is that
+  it does not - LEGO ball-jointed knuckles with a straight tie rod give
+  near-parallel steer unless the steering arms are deliberately angled - but
+  that is an expectation, not a measurement.
+
+Both belong in the same bucket as every other untested physical claim in this
+project: unverified until built or read off the instructions.
+
+# Appendix AT - Track layout v1: twisty is geometrically impossible at 3x3 m, the bridge cannot be an overpass, and the destinations are landmarks not junctions (2026-09-01, ~20:12 CDT)
+Evan asked for the track layout "using the mcp to make a twisty road layout,
+at least 5 destinations and 1 bridge". **Three of those four cannot be done as
+asked**, each for a measured reason. The layout was built anyway, to the
+closest thing the constraints allow, and is verified.
+
+## AT.1 The MCP is not usable, and would not have helped
+
+`3dstreet-mcp` is configured in `.mcp.json` but **no tab is paired**, so the
+server exposes zero tools this session. Pairing needs Evan to open
+`https://3dstreet.app/#mcp` -- it cannot be done from here.
+
+That is the smaller problem. **Appendix AM already recorded that 3DStreet
+cannot draw this track**: it is Streetmix-lineage, its competence is the street
+CROSS-SECTION extruded along a line, and its own materials describe linear
+streets plus 4-way/T/dead-end intersections with **no curved streets found**.
+A twisty road is precisely the thing it does not do. AM's recommendation --
+markings and render in 3DStreet, geometry in a dimensioned plan -- is what this
+entry follows.
+
+## AT.2 "Twisty" is geometrically impossible at this scale
+
+Twisty means many tight curves. The tightest curve permitted is the frozen
+minimum corner radius, so the question is how many minimum-radius features fit
+across the floor at all.
+
+| car / lane | R | one 180 deg hairpin spans | fit across 2.80 m | one S-bend spans | fit |
+|---|---|---|---|---|---|
+| 100 / 200 mm | 500 mm | 1200 mm | 2.33 | 2000 mm | 1.40 |
+| 100 / 200 mm | 670 mm | 1540 mm | 1.82 | 2680 mm | 1.04 |
+| 130 / 260 mm | 500 mm | 1260 mm | 2.22 | 2000 mm | 1.40 |
+| 130 / 260 mm | 670 mm | 1600 mm | 1.75 | 2680 mm | 1.04 |
+
+**Barely two hairpins, or one S-bend, fit across the WHOLE room.** The tightest
+legal curve is already about half the floor. There is no arrangement of a 3.0 x
+3.0 m space at this radius that reads as twisty.
+
+Worse, the figure-8 itself is near the edge. Bounding box is
+(2R + lane) x (d + 2R + lane) with d > 2R required for the crossing tangents to
+exist:
+
+| R | lane | bbox | fits 2.80 m? |
+|---|---|---|---|
+| 500 mm | 260 mm | 1260 x 2360 mm | yes |
+| 550 mm | 260 mm | 1360 x 2570 mm | yes |
+| 600 mm | 260 mm | 1460 x 2780 mm | yes |
+| **670 mm** | **260 mm** | **1600 x 3074 mm** | **NO** |
+
+**At the top of the frozen 500-670 mm band, the mandated figure-8 does not fit
+in the room.** That is a live risk on the B3 turning test, not a hypothetical:
+if B3 lands at the pessimistic end, either the lane width or the floor has to
+give. Worth knowing before B3, not after.
+
+## AT.3 The bridge cannot be an overpass -- three constraints, all binding
+
+An overpass needs the car to climb over itself. Every input below marked EST is
+unmeasured, and the car's height and mass are among them.
+
+**Ramp footprint.** Rise = car height + 6 mm deck + 15 mm margin; total bridge
+length = 2 x (rise / grade) + a 350 mm clear span over the road below.
+
+| car height | rise | 8% | 10% | 15% | 20% | 25% |
+|---|---|---|---|---|---|---|
+| 80 mm | 101 mm | 2.88 m | 2.37 m | 1.70 m | 1.36 m | 1.16 m |
+| 100 mm | 121 mm | **3.38 m X** | 2.77 m | 1.96 m | 1.56 m | 1.32 m |
+| 120 mm | 141 mm | **3.88 m X** | **3.17 m X** | 2.23 m | 1.76 m | 1.48 m |
+| 150 mm | 171 mm | **4.62 m X** | **3.77 m X** | 2.63 m | 2.06 m | 1.72 m |
+
+X = does not fit in the 3.0 m floor dimension at all, before one corner is
+drawn.
+
+**Torque caps the grade.** Pololu #1093 at 55.9 mN.m stall, 12t->28t, 71% duty
+cap, 30% of stall usable = 27.8 mN.m at the wheel = 0.89 N of tractive force:
+
+| mass | max grade (rolling resistance IGNORED) |
+|---|---|
+| 0.4 kg | 23% |
+| 0.6 kg | 15% |
+| 0.8 kg | 11% |
+| 1.0 kg | 9% |
+
+**The two close on each other.** A realistic 0.6-1.0 kg car is limited to
+9-15%, and at 10% a 100 mm car needs 2.77 m of ramp -- 92% of the floor. The
+feasible window is a sliver, and the bridge would consume the entire room it is
+supposed to sit inside.
+
+**And a grade breaks the projection measured this same day.** The corpus was
+collected entirely on flat ground; that is why its horizon row has sd 0.284 px
+(Appendix AR). A ramp rotates the car and the camera with it, moving the
+horizon by f*tan(grade):
+
+| grade | angle | horizon shift | in training sd |
+|---|---|---|---|
+| 5% | 2.86 deg | 3.00 px | **11 sd** |
+| 10% | 5.71 deg | 6.00 px | **21 sd** |
+| 15% | 8.53 deg | 9.00 px | **32 sd** |
+| 25% | 14.04 deg | 15.00 px | **53 sd** |
+
+The encoder has never seen a horizon more than about 1 px off row 41.97. Every
+frame on a ramp would be far out of distribution in exactly the dimension the
+projection is most sensitive to.
+
+**Resolution: a FLAT CAUSEWAY.** Deck at floor level, parapets, a void either
+side. It reads unmistakably as a bridge, has zero grade and zero projection
+cost, and the parapets add strong near-lane vertical features that the
+open-desert training corpus completely lacks -- so it is a perception asset
+rather than merely a decoration.
+
+## AT.4 Five destinations, as landmarks and not as routing targets
+
+A behaviourally-cloned lane-follower **has no goal input**. It cannot choose at
+a junction. Five spur roads to five destinations would create five junctions
+the policy is architecturally unable to handle, and would silently turn M3 from
+lane-following into goal-conditioned navigation.
+
+So the five are **landmarks beside the loop**: D1 school, D2 market, D3 depot,
+D4 station, D5 park. They cost the policy nothing, give the visual diversity
+the corpus lacks, and are localisation targets later. Goal-conditioned routing
+is a real and interesting extension, but it is a different task and should be
+chosen deliberately, not acquired by accident from a track drawing.
+
+## AT.5 The layout, verified
+
+`cad/track_layout_v1.py` -- parametric, self-checking, writes an SVG plan and a
+JSON of every dimension.
+
+```
+$ python cad/track_layout_v1.py
+track_layout_v1 self_check: PASS
+floor            3.000 x 3.000 m  (usable 2.800 m)
+car width        130 mm   UNMEASURED, set at B2
+lane width       260 mm   = 2.0 x car width
+corner radius    550 mm nominal; measured min on path 550 mm   NOT COMMITTED until B3
+lobe separation  1440 mm
+crossing straights 929 / 929 mm
+centreline length 7.227 m
+road bounding box 1360 x 2800 mm inside 2800 mm usable
+destinations (landmarks beside the loop, NOT spur junctions):
+   D1  school     at (   -838,    +656) mm
+   D2  market     at (    +16,    +979) mm
+   D3  depot      at (   +753,    +348) mm
+   D4  station    at (   -234,    -833) mm
+   D5  park       at (   +246,    -803) mm
+bridge: FLAT causeway, 0% grade, 387 mm deck on a lobe arc, 387 mm clear of the rest of the track
+```
+
+The road bbox fills the usable floor exactly in one dimension (2800 of 2800),
+because the generator takes the largest lobe separation the floor allows --
+longer crossing straights, at the cost of no slack in height.
+
+## AT.6 Two design errors the self-check caught
+
+Both were caught by assertions, not by looking at the picture, and both are now
+permanent checks.
+
+1. **Four cusps.** The first cut paired tangent points from *different* tangent
+   lines, producing external tangents at x = +-355 mm rather than the internal
+   ones through the origin. The path had a heading discontinuity at all four
+   tangent points -- jumps of 2.271 and 0.866 rad -- which a pointwise
+   minimum-radius check reports as "min radius 1 mm" without saying why. Fixed
+   by choosing each arc's sweep direction **by measuring which one exits along
+   the departing straight**, rather than hardcoding a sign. `self_check` now
+   asserts max heading jump < 0.05 rad directly.
+2. **The bridge sat on the crossing.** A deck placed on a crossing straight
+   covers the OTHER straight, because the two meet at 80.4 deg. Measured: the
+   deck must start 294 mm from the crossing to clear the other road, and the
+   tangent point is only 465 mm out, leaving **171 mm of clear run against a
+   350 mm deck**. It does not fit. `place_bridge` now searches the whole
+   centreline for a run with real clearance and refuses rather than guessing;
+   it selects a lobe arc, 387 mm deck with 387 mm clearance. A flat deck on a
+   550 mm curve is still a flat deck.
+
+## AT.7 Standing caveat
+
+**No corner geometry is committed.** R = 550 mm is a parameter chosen to fit
+the room, inside a frozen band that is arithmetic on an unmeasured 130 mm car
+width. Appendix L already ruled that corner tiles must not be cut until B3.
+Re-run the generator with the measured numbers the day B2 gives a car width and
+B3 gives a turning radius; if B3 lands near 670 mm, AT.2 says the layout has to
+change, not just rescale.
+
+## AT.8 A record-invariant repair, made before this entry could be appended
+
+The append refused: `TOC lines (45) != appendix headings (46)`. Cause was NOT
+this session. **Appendix AS (LEGO Technic rack-and-pinion steering, 42111),
+written at ~17:25 CDT by another session, landed as a heading with no TOC
+line** and was still uncommitted in the working tree. That imbalance blocks
+every subsequent append, so it had to be repaired first.
+
+Repaired additively: the missing TOC line was generated by calling the tool's
+OWN `slugify()` on the existing heading rather than hand-deriving the anchor,
+then inserted after AR's line. The AS entry's content was not touched. The
+tool then reported the next free letter as AT, so this entry is AT and no
+letter was consumed or reused.
+
+# Appendix AU - Scheduled daily-audit: AP/AQ/AR/AS re-verified against disk, 3 findings, and a stale artifact that would mislead the next auditor (2026-09-01, ~20:14 CDT)
+
+**Audit run — 3 findings, top: `ml/runs/camera_aspect/camera_aspect.json` still holds the debunked
+pre-fix horizon measurement (offset ratio 0.0867) rather than the corrected 1.3460 that AR.2 reports.**
+
+Cold, read-only, budget-constrained (single agent, no fan-out — the unconstrained fan-out
+exhausted the session quota earlier this evening; see the report for why).
+
+## AU.1 Findings
+1. `ml/runs/camera_aspect/camera_aspect.json:1` — stale artifact from the debunked gradient
+   detector that locked onto the pink stripe; recomputing with the content-based
+   `horizon_rows()` (`ml/diag_camera_pose.py:69`) over `a_160x120.npy`/`b_160x160.npy`
+   reproduces 1.34597 ≈ 1.3460. **AR.2's claim is TRUE; only the saved JSON is wrong.**
+   Fix: regenerate and overwrite that JSON.
+2. `docs/Project Record — Full Chronological History.md:5245` — Appendix AS has no TOC line
+   (TOC ends at AR) and the entry is uncommitted (39 inserted lines). Fix: add the AS TOC line
+   and commit. Also dirty, pre-existing: `.claude/pm-cadence.json`,
+   `ml/runs/controller/history_linear_seed0.json`.
+3. AR.2's secondary number (horizon→pink-stripe separation ratio 1.2713) has NO artifact on
+   disk anywhere and is not listed in AR.8 — prose-only, unverifiable. Not shown false.
+   Fix: persist it alongside the primary ratio or strike it.
+
+## AU.2 Verified HEALTHY by re-running, not reading
+- `python splits.py` → `splits self_check: PASS`; `load_cached_mu` (`ml/splits.py:63-92`)
+  really does resolve the same three states `rollout_eval.py:190` decides.
+- `train_cte_probe.py` re-run to a throwaway out-dir → `val MSE 0.0100, R^2 0.9572`,
+  matching AP.3 to four decimals. A real re-run, not a copy of prose.
+- AQ confirmed: `ml/verify_corpus.py:392` default is now absolute (`REPO/ml/data/sim`).
+  Re-run from inside `ml/` — the exact cwd that caused the original false failure — gives
+  `total frames: 102888` / `P2 CORPUS CHECK: PASS`, RC=0.
+- `python diag_camera_pose.py --self-check` → PASS. `camera_pose.json` matches AR.4 exactly
+  (pitch 16.28°, n=3187, sd 0.2835); `fov_is_vertical=True` at `diag_camera_pose.py:96`.
+- **Height: no artifact and no committed code produces a height number.** "NOT identified"
+  holds — nothing was smuggled in.
+- AS's LEGO 42111 citation is real, including part numbers 65127/87761 and 62821. The entry
+  honestly admits its failed fetches. **0 fabrications detected across all four appendices.**
+
+## AU.3 Not checked
+Three of AP.3's five claimed reader re-runs (`diag_copycat`, `probe_cone`,
+`compare_encoders`/`train_controller`) were not re-executed — GPU/VAE-heavy, dropped under the
+tool budget after 2/5 reproduced exactly. AR.3's HTTP 403 claim is third-party history,
+unverifiable from here.
+
+# Appendix AV - Record letter-collision race repaired, and the AU audit's two findings against AR's artifacts fixed (2026-09-01, ~20:18 CDT)
+Two things happened while AT was being written: a **letter collision** with a
+concurrent writer, and an **audit (AU) that found a real defect in AR's
+artifacts**. Both are resolved here.
+
+## AV.1 The record has a concurrent-write race, and it is not a one-off
+
+Appending AT was refused with `TOC lines (45) != appendix headings (46)`.
+Then, after that was repaired and AT landed, the commit was refused again with
+`duplicate Appendix AT`. Two separate collisions in six minutes:
+
+| entry | writer | time | defect |
+|---|---|---|---|
+| AS | another session (LEGO Technic 42111 steering lookup) | ~17:25 CDT | heading written, **no TOC line** |
+| AT | this session (track layout) | ~20:12 CDT | fine |
+| AT (dup) | scheduled daily-audit | ~20:14 CDT | heading written, **no TOC line**, **letter already taken** |
+
+**Both foreign writers omitted the TOC line, and one of them also read the same
+"next free letter" this session had just taken.** The `--next-letter` lookup and
+the append are not atomic, so two writers two minutes apart can both be told
+"AT". The pre-commit hook catches it, which is why nothing corrupt was
+committed -- but it catches it at commit time, after the work is done.
+
+**Repairs, both additive, neither touching a foreign entry's content:**
+
+- AS's missing TOC line was regenerated by calling the tool's own `slugify()`
+  on the existing heading rather than hand-deriving an anchor, and inserted
+  after AR's.
+- The audit's entry was renumbered **AT -> AU**, because its 20:14 timestamp
+  is later than this session's 20:12, and its `## AT.x` subsection headings
+  were renumbered to match. Its TOC line was generated the same way. Its prose
+  is untouched.
+
+This is worth fixing at the source rather than repairing after the fact: a
+scheduled task that writes the record needs to take the same lock an
+interactive session does, or to write its TOC line in the same commit as its
+heading. Flagged, not fixed -- the scheduled task's code was not touched.
+
+## AV.2 The audit was right about AR's artifacts
+
+Appendix AU raised three findings. Two are against work committed earlier
+today, and both are real.
+
+**AU finding 1 -- a stale artifact that contradicts the entry citing it.**
+`ml/runs/camera_aspect/camera_aspect.json` still held the **debunked 0.0867**
+offset ratio, because it was written by the gradient horizon detector before
+AR.3 established that detector fails on `sparkfun_avc`'s pink stripe. AR.2
+reports 1.3460 in prose; the committed JSON said 0.0867. The audit
+independently recomputed 1.34597 from the saved frames and confirmed **AR.2's
+claim is true and only the file was wrong** -- but a file that contradicts the
+record is exactly what misleads the next reader, and it was committed in
+410dd62 as supporting evidence.
+
+**AU finding 3 -- a prose-only number.** AR.2's second, independent ratio
+(horizon-to-pink-stripe separation, 1.2713) had **no artifact anywhere on
+disk** and was not listed in AR.8. Not shown false, but unverifiable from the
+repo. That is the weaker half of the fov-convention argument being
+unreproducible.
+
+**Both fixed by making the measurement reproducible rather than by editing the
+JSON.** `ml/diag_camera_pose.py` gains `pink_stripe_row()`, `aspect_ratios()`
+and a `--recompute-aspect` mode that re-derives every number from the saved
+frames with the content-based detector and rewrites the file:
+
+```
+$ python ml/diag_camera_pose.py --recompute-aspect
+a_160x120        H=120  horizon  35.643  pink  57.763  offset  23.857
+b_160x160        H=160  horizon  47.389  pink  75.510  offset  32.111
+c_160x120_rep    H=120  horizon  35.643  pink  57.763  offset  23.857
+
+repeatability            0.000 px
+offset ratio b/a         1.3460
+stripe separation ratio  1.2713
+  predicted VERTICAL     1.3333
+  predicted HORIZONTAL   1.0000
+VERDICT: fov is VERTICAL
+```
+
+Both ratios now live in `camera_aspect.json`, both are regenerable from the
+frames by one command, and the file carries a note saying why it was rewritten.
+`self_check` gains an assertion on `pink_stripe_row` against a synthetic band,
+so the second reference cannot silently rot either.
+
+**AU finding 2** (AS's missing TOC line, entry uncommitted) is resolved by
+AV.1. The two dirty files it also lists -- `.claude/pm-cadence.json` and
+`ml/runs/controller/history_linear_seed0.json` -- are known: the first is a
+counter, and the second is deliberately held out of every commit this session
+because it is a result artifact with no account of which run produced it
+(AO.6).
+
+## AV.3 What this says about the day's work
+
+AR.3 already recorded that a repeatability check of 0.000 px was a false
+confirmation of a broken detector. AU then found that the same broken
+detector's output had been **committed as an artifact** alongside the entry
+that debunks it. The lesson generalises past this one file: **fixing the
+measurement in prose does not fix the artifacts the earlier measurement
+already wrote.** When a method is retracted, every file that method produced
+has to be regenerated or deleted, and neither AR.8's artifact list nor the
+commit caught it. The cold audit did.

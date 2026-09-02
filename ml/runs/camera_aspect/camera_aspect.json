@@ -1,44 +1,44 @@
 {
-  "a_160x120": {
-    "requested": [
-      160,
-      120
-    ],
-    "got": [
-      120,
-      160,
-      3
-    ],
-    "cy": 59.5,
-    "horizon_row": 39.797297298908234,
-    "offset": 19.702702701091766
+  "frames": {
+    "a_160x120": {
+      "shape": [
+        120,
+        160,
+        3
+      ],
+      "cy": 59.5,
+      "horizon_row": 35.642857142857146,
+      "offset_above_centre_px": 23.857142857142854,
+      "pink_stripe_row": 57.7627544688069
+    },
+    "b_160x160": {
+      "shape": [
+        160,
+        160,
+        3
+      ],
+      "cy": 79.5,
+      "horizon_row": 47.388888888888886,
+      "offset_above_centre_px": 32.111111111111114,
+      "pink_stripe_row": 75.50954064233366
+    },
+    "c_160x120_rep": {
+      "shape": [
+        120,
+        160,
+        3
+      ],
+      "cy": 59.5,
+      "horizon_row": 35.642857142857146,
+      "offset_above_centre_px": 23.857142857142854,
+      "pink_stripe_row": 57.7627544688069
+    }
   },
-  "b_160x160": {
-    "requested": [
-      160,
-      160
-    ],
-    "got": [
-      160,
-      160,
-      3
-    ],
-    "cy": 79.5,
-    "horizon_row": 77.79092475771904,
-    "offset": 1.70907524228096
-  },
-  "c_160x120_rep": {
-    "requested": [
-      160,
-      120
-    ],
-    "got": [
-      120,
-      160,
-      3
-    ],
-    "cy": 59.5,
-    "horizon_row": 39.797297298908234,
-    "offset": 19.702702701091766
-  }
+  "repeatability_px": 0.0,
+  "offset_ratio_b_over_a": 1.3459747172322025,
+  "stripe_separation_ratio_b_over_a": 1.2712831049380728,
+  "predicted_if_fov_vertical": 1.3333333333333333,
+  "predicted_if_fov_horizontal": 1.0,
+  "note": "Recomputed with the CONTENT-based horizon detector. The original file was written by the gradient detector, which locked onto sparkfun_avc's pink ground stripe and gave 0.0867 -- see Appendix AR.3.",
+  "verdict": "VERTICAL"
 }

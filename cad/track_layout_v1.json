@@ -1,0 +1,66 @@
+{
+  "floor_m": 3.0,
+  "wall_margin_m": 0.1,
+  "car_width_m_ESTIMATE": 0.13,
+  "lane_width_m": 0.26,
+  "corner_radius_m_NOT_COMMITTED": 0.55,
+  "measured_min_radius_m": 0.5499999999903339,
+  "lobe_separation_m": 1.4399999999999997,
+  "crossing_straights_m": [
+    0.929300812439115,
+    0.929300812439115
+  ],
+  "centreline_length_m": 7.226840760889713,
+  "road_bbox_m": [
+    1.359993818355199,
+    2.799992594758832
+  ],
+  "bridge": {
+    "type": "flat causeway",
+    "grade": 0.0,
+    "deck_len_m": 0.38748192259931363,
+    "clearance_m": 0.3870854786992353,
+    "centre_xy_m": [
+      0.22893559498182042,
+      -1.2200884855206324
+    ],
+    "reason": "overpass infeasible - see module docstring"
+  },
+  "destinations": [
+    {
+      "name": "D1  school",
+      "xy_m": [
+        -0.8375278600759682,
+        0.6556021460251239
+      ]
+    },
+    {
+      "name": "D2  market",
+      "xy_m": [
+        0.016207987247652038,
+        0.9794943181446943
+      ]
+    },
+    {
+      "name": "D3  depot",
+      "xy_m": [
+        0.7532979207788341,
+        0.34832508485198305
+      ]
+    },
+    {
+      "name": "D4  station",
+      "xy_m": [
+        -0.23392975707514002,
+        -0.8334762915976986
+      ]
+    },
+    {
+      "name": "D5  park",
+      "xy_m": [
+        0.2462319658030957,
+        -0.8034854419449469
+      ]
+    }
+  ]
+}

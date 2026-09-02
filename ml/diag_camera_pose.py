@@ -101,6 +101,63 @@ def pitch_deg(horizon_row: float, height_px: int = IMG_H,
     return float(np.degrees(np.arctan((cy - horizon_row) / f)))
 
 
+def pink_stripe_row(img: np.ndarray) -> float:
+    """Centroid row of the saturated pink ground stripe on `sparkfun_avc`.
+
+    The second, independent vertical reference in the aspect test: the ratio of
+    (stripe row - horizon row) between two image heights measures the vertical
+    scale without relying on the horizon's absolute position.
+    """
+    f = np.asarray(img, np.float32)
+    prof = (f[..., 0] - f[..., 1]).mean(axis=1)
+    i = int(np.argmax(prof))
+    lo, hi = max(0, i - 6), min(len(prof), i + 7)
+    w = np.clip(prof[lo:hi] - prof[lo:hi].min(), 0, None)
+    return float((np.arange(lo, hi) * w).sum() / max(w.sum(), 1e-9))
+
+
+def aspect_ratios(run_dir: Path):
+    """Recompute the fov-convention test from the frames saved by the run.
+
+    Exists because the run's original JSON was written by the DEBUNKED gradient
+    detector and reports an offset ratio of 0.0867 -- a number AR.3 explains as
+    a detector failure, not a measurement. An artifact that contradicts the
+    entry citing it will mislead the next reader, so the numbers are derived
+    from the frames on demand rather than trusted from the file.
+    """
+    out = {}
+    for tag in ("a_160x120", "b_160x160", "c_160x120_rep"):
+        p = run_dir / f"{tag}.npy"
+        if not p.exists():
+            raise SystemExit(f"missing aspect frame {p}")
+        img = np.load(p)
+        h = float(horizon_rows(img[None])[0])
+        cy = (img.shape[0] - 1) / 2.0
+        out[tag] = {"shape": list(img.shape), "cy": cy, "horizon_row": h,
+                    "offset_above_centre_px": cy - h,
+                    "pink_stripe_row": pink_stripe_row(img)}
+    a, b, c = out["a_160x120"], out["b_160x160"], out["c_160x120_rep"]
+    sep_a = a["pink_stripe_row"] - a["horizon_row"]
+    sep_b = b["pink_stripe_row"] - b["horizon_row"]
+    res = {
+        "frames": out,
+        "repeatability_px": abs(a["offset_above_centre_px"]
+                                - c["offset_above_centre_px"]),
+        "offset_ratio_b_over_a": b["offset_above_centre_px"] / a["offset_above_centre_px"],
+        "stripe_separation_ratio_b_over_a": sep_b / sep_a,
+        "predicted_if_fov_vertical": 160 / 120,
+        "predicted_if_fov_horizontal": 1.0,
+        "note": ("Recomputed with the CONTENT-based horizon detector. The "
+                 "original file was written by the gradient detector, which "
+                 "locked onto sparkfun_avc's pink ground stripe and gave "
+                 "0.0867 -- see Appendix AR.3."),
+    }
+    r = res["offset_ratio_b_over_a"]
+    res["verdict"] = ("VERTICAL" if abs(r - 160 / 120) < abs(r - 1.0)
+                      else "HORIZONTAL")
+    return res
+
+
 def corpus_horizon(track_prefix: str = "generated-roads", stride: int = 10):
     from episode_writer import load_episode
     rows = []
@@ -130,6 +187,14 @@ def self_check() -> None:
     img[41:] = (160, 140, 120)
     img[70:78] = (255, 60, 60)
     assert abs(horizon_rows(img[None])[0] - 40.5) <= 1.0, horizon_rows(img[None])[0]
+    # the pink-stripe reference finds a band it is given, and is what makes
+    # the aspect test's SECOND ratio checkable rather than prose (AU finding 3)
+    img = np.zeros((IMG_H, IMG_W, 3), np.uint8)
+    img[:41] = (40, 90, 200)
+    img[41:] = (160, 140, 120)
+    img[70:78] = (255, 60, 60)
+    assert abs(pink_stripe_row(img) - 73.5) <= 1.5, pink_stripe_row(img)
+
     # geometry: horizon above centre => pitched DOWN => positive
     assert pitch_deg(41.974) > 0
     assert abs(pitch_deg(59.5)) < 1e-9, "horizon at centre must be zero pitch"
@@ -148,11 +213,33 @@ def main() -> int:
                          "tree-lined and yields nothing usable")
     ap.add_argument("--stride", type=int, default=10)
     ap.add_argument("--self-check", action="store_true")
+    ap.add_argument("--recompute-aspect", action="store_true",
+                    help="rewrite ml/runs/camera_aspect/camera_aspect.json from "
+                         "the saved frames using the content horizon detector")
     ap.add_argument("--out", default=str(RUNS / "camera_pose"))
     args = ap.parse_args()
 
     if args.self_check:
         self_check()
+        return 0
+
+    if args.recompute_aspect:
+        run = RUNS / "camera_aspect"
+        res = aspect_ratios(run)
+        for tag, f in res["frames"].items():
+            print(f"{tag:16s} H={f['shape'][0]:3d}  horizon {f['horizon_row']:7.3f}  "
+                  f"pink {f['pink_stripe_row']:7.3f}  offset "
+                  f"{f['offset_above_centre_px']:7.3f}")
+        print()
+        print(f"repeatability            {res['repeatability_px']:.3f} px")
+        print(f"offset ratio b/a         {res['offset_ratio_b_over_a']:.4f}")
+        print(f"stripe separation ratio  {res['stripe_separation_ratio_b_over_a']:.4f}")
+        print(f"  predicted VERTICAL     {res['predicted_if_fov_vertical']:.4f}")
+        print(f"  predicted HORIZONTAL   {res['predicted_if_fov_horizontal']:.4f}")
+        print(f"VERDICT: fov is {res['verdict']}")
+        (run / "camera_aspect.json").write_text(json.dumps(res, indent=2),
+                                                encoding="utf-8")
+        print(f"-> {run / 'camera_aspect.json'}")
         return 0
 
     r = corpus_horizon(args.track, args.stride)
