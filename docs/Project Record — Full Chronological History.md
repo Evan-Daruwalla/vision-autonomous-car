@@ -93,6 +93,7 @@ the dated entry, not the digest.
 - [BD — First verified hardware: the Uno runs our firmware (signature 1E 95 0F, F_CPU 16 MHz), and an FTDI clone needs an explicit --fqbn forever](#appendix-bd---first-verified-hardware-the-uno-runs-our-firmware-signature-1e-95-0f-f_cpu-16-mhz-and-an-ftdi-clone-needs-an-explicit---fqbn-forever-2026-09-02-1526-cdt) (09-02)
 - [BE — SRAM measured at 2048 B and the clock at 16.0042 MHz; CORRECTION to BD (F_CPU was never measured), and the silicon's signature says 328PB while avrdude says 328P](#appendix-be---sram-measured-at-2048-b-and-the-clock-at-160042-mhz-correction-to-bd-f_cpu-was-never-measured-and-the-silicons-signature-says-328pb-while-avrdude-says-328p-2026-09-02-1541-cdt) (09-02)
 - [BF — FTDI latency timer measured: configured at 16 ms but costs ~0.9 ms on the wire, so the risk flagged in BD and BE was wrong](#appendix-bf---ftdi-latency-timer-measured-configured-at-16-ms-but-costs-09-ms-on-the-wire-so-the-risk-flagged-in-bd-and-be-was-wrong-2026-09-02-1550-cdt) (09-02)
+- [BG — Serial protocol v0.1 drafted, and drafting it caught D3 double-booked between the encoder interrupt and motor PWM in yesterday's diagram](#appendix-bg---serial-protocol-v01-drafted-and-drafting-it-caught-d3-double-booked-between-the-encoder-interrupt-and-motor-pwm-in-yesterdays-diagram-2026-09-02-1558-cdt) (09-02)
 
 ---
 
@@ -6936,3 +6937,89 @@ mechanism is unexplained.
   link, not the design.
 - The Pi-side measurement above.
 - Everything physical remains BLOCKED-ON-EVAN.
+
+# Appendix BG - Serial protocol v0.1 drafted, and drafting it caught D3 double-booked between the encoder interrupt and motor PWM in yesterday's diagram (2026-09-02, ~15:58 CDT)
+Serial protocol drafted (`firmware/SERIAL_PROTOCOL.md`, v0.1, DESIGN ONLY).
+Drafting it **found a pin conflict in the diagram committed yesterday**.
+
+## BG.1 D3 was double-booked, and it would have failed on the bench
+
+`docs/BOM.md` line 153 assigned D3 to the encoder's second interrupt; line 164
+assigned D3 to motor PWM. **Both, in the same diagram, in commit 5ee14a9.**
+
+The conflict is not cosmetic. The ATmega328P has exactly **two** external
+interrupts, INT0 on D2 and INT1 on D3, so a quadrature encoder consumes both and
+D3 cannot also carry PWM. Wired as drawn, the encoder would have lost a channel
+and the motor would have fought it -- and the symptom would have been erratic
+counts, i.e. the exact failure mode BC.2 says the Arduino was adopted to avoid.
+
+**Corrected pin map**, now in both the BOM diagram and the protocol doc:
+
+| pin | use | |
+|---|---|---|
+| D2 / D3 | encoder A / B | INT0 / INT1, the only two |
+| D5 / D6 | headlights / tail lights | PWM, Timer0 |
+| D4 / D7 | left / right indicator | digital |
+| D8 / D12 | motor DIR | |
+| D9 | steering servo | Servo lib claims Timer1 |
+| D11 | motor PWM | **Timer2** |
+| D13 | status LED | |
+
+**Motor PWM is forced onto Timer2 and this is the one non-arbitrary assignment.**
+Timer0 also drives `millis()`, so its frequency cannot be changed; motor PWM is
+the only channel that may need raising above ~20 kHz to move the whine out of
+the audible band. Lights never need that, so they take the frequency-locked
+Timer0 pins.
+
+## BG.2 The protocol, and why binary
+
+Fixed-length binary frames, sync byte plus CRC8. **7-byte command, 9-byte
+reply.** Full field tables in the doc.
+
+**Binary was chosen for the failure mode, not for speed.** At 115200 with a
+50 ms budget even 100 ASCII bytes costs 8.7 ms, so size is irrelevant here --
+the measurement in BF already showed the link is ~2% of the budget. What matters
+is that a desynchronised stream must not reach the actuators: a sync byte plus a
+checksum lets the Uno REJECT a corrupt frame and fall to a safe state, whereas a
+line-oriented ASCII parser silently accepts a truncated number as a valid one.
+
+One ASCII escape hatch is kept: a lone `?` outside a frame prints human-readable
+status, so the board is inspectable from any terminal without a decoder. `?` is
+not a valid sync byte, so it cannot collide.
+
+`int8` for steer and throttle is deliberate: 200 steps against a servo that
+resolves perhaps 60 positions across its useful travel, so quantisation is an
+order of magnitude finer than the actuator. Upgrade trigger recorded in the doc.
+
+## BG.3 Safety rules
+
+1. **ARMED is opt-in in every frame.** Actuators inert on boot, after reset, and
+   after any watchdog trip. Stray bytes cannot start the car.
+2. **Watchdog 150 ms** = three missed frames at 20 Hz. On expiry: **throttle to
+   zero, HOLD last steering, flash both indicators as hazards.** Throttle-zero
+   is the safety action; holding steering rather than centring avoids a jerk at
+   the moment control is lost; hazards make the state visible across the room.
+3. **A bad CRC is a dropped frame, never a guessed one** -- reply with the bad-CRC
+   status bit and take no actuator action.
+4. The watchdog is **SAFETY, not security**: it does nothing against something
+   else writing valid frames to the port.
+
+## BG.4 Budget, against measured numbers rather than guesses
+
+Round trip p99 **1.069 ms** (BF) plus 1.39 ms of wire time for 16 bytes at
+115200 = roughly **5% of the 50 ms step**; worst observed sample 5.753 ms = 12%.
+RAM cost is two 16-byte buffers and an int32 against **1705 bytes free** (BE.2).
+
+**Carried caveat, not resolved:** the BF numbers are Windows-to-Uno on one
+cable, and the mechanism producing 0.9 ms against a configured 16 ms FTDI
+latency timer is still unexplained. **Re-measure on the Pi before relying on
+this.**
+
+## BG.5 Not done
+
+- **Nothing implements this.** No firmware, no Pi-side client. It is a design
+  document, and the pin conflict it caught is the argument for writing such
+  documents before wiring rather than after.
+- Encoder counts-per-revolution unknown until the motor exists, so `ticks` is
+  raw counts and conversion is the Pi's job.
+- Throttle-to-duty mapping (linear vs calibrated) deliberately left to firmware.

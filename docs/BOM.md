@@ -150,8 +150,8 @@ paralleled TB6612 is enough).
                                     [ARDUINO UNO]  5V logic, FTDI, COM3
                                           |
                     +---------------------+----------------+
-                    |  D9 servo    D3/5/6/11 PWM+digital   |  D2/D3 INT
-                    |  D7/D8 DIR   -> lights               |  <- encoder
+                    |  D9 servo   D5/D6 lights (PWM)       |  D2/D3 INT
+                    |  D11 motor PWM  D4/D7 indicators     |  <- encoder
                     v                                      v
 [2x 18650 = 7.4V] --fuse--switch--+--> [TB6612FNG] --> [N20 motor] --> Lego diff
    + USB-C BMS board             |       (both channels PARALLELED)
@@ -159,11 +159,16 @@ paralleled TB6612 is enough).
                                                         +--> [UNO 5V pin]
                                                         +--> LED commons
 
-                    [UNO] pin budget, 6 of ~14 usable:
-                       D9  servo (Servo lib -> Timer1, kills PWM on 9/10)
-                       D3  motor PWM -> TB6612        D5  headlights (PWM)
-                       D7/D8 motor DIR -> TB6612      D6  tail lights (PWM)
-                       D2  encoder A (INT0)           D11 indicators (digital)
+                    [UNO] pin budget (CORRECTED 2026-09-02 -- the earlier
+                    map double-booked D3; see firmware/SERIAL_PROTOCOL.md):
+                       D2  encoder A (INT0)    D5  headlights  (PWM Timer0)
+                       D3  encoder B (INT1)    D6  tail lights (PWM Timer0)
+                       D9  servo (Timer1)      D4  left  indicator (digital)
+                       D11 motor PWM (Timer2)  D7  right indicator (digital)
+                       D8/D12 motor DIR        D13 status LED
+                    Motor PWM MUST be Timer2: Timer0 also drives millis(), so
+                    its frequency cannot move, and motor PWM is the one channel
+                    that may need raising above the audible band.
 ```
 
 **The one rule that matters (amended again 2026-09-02):** **no power path
