@@ -35,11 +35,11 @@ split-source power path costs almost nothing.
 | 15 | Inline ATO/ATC fuse holder + 3A fuse | **Mandatory** — unprotected 18650s can deliver enormous short-circuit current | **~$2.15** | bc-robotics.com |
 | 16 | Wire, heat-shrink, bulk caps, headers | ~22AWG for motor, ~26AWG signal; 470–1000µF across the motor rail | **~$8.00** | any |
 | **Lighting + I/O** |
-| 17 | **PCA9685** 16-ch I2C PWM/LED driver | ✅ **RESOLVES the open PWM-path question 2026-09-01 (Appendix AH, AY).** Carries motor PWM + servo + 4 light channels = **6 of 16 used**. DonkeyCar's `pins.py` has a PCA9685 backend, so actuation stops being Pi-locked — that was AH's argument before lighting existed; the lights only made the channel count decide it too. 12-bit per-channel dimming is what the daytime-running mode needs. **The TB6612's 2 direction pins stay on GPIO** — the backend drives PWM, not direction logic | **~$6–15** | adafruit.com $14.95 / any |
+| 17 | ~~**PCA9685** 16-ch I2C PWM/LED driver~~ **Arduino Uno R3 clone — OWNED** | ✅ **SUPERSEDES the PCA9685 2026-09-02 (Appendix BC).** Evan has an Uno R3 clone on hand: ATmega328P, 5V logic, FTDI FT232RL, working on COM3. It does everything the PCA9685 would (motor PWM + servo + 4 light channels, fits with one PWM pin spare after the Servo library takes Timer1) **plus two things the PCA9685 cannot**: quadrature **encoder counting** on hardware interrupts D2/D3, and a **throttle watchdog** that stops the car if the Pi hangs. ⚠️ **5V logic — connect over USB, NEVER to Pi GPIO** (`gotchas.md`). Cost of the swap: no DonkeyCar backend exists, so the actuator path becomes custom firmware + a serial protocol | **$0.00** | owned |
 | 18 | 8× 3mm LEDs (2 white, 2 red, 4 amber) | Headlights, tail lights, 4 indicators. Amber for indicators; rear lamps are never in the forward camera's view, so they are realism at zero ML cost (`docs/LIGHTING_SPEC.md` §1) | **~$1.50–3** | any |
-| 19 | LED series resistors | One per LED; value set by the chosen LEDs' forward voltage — see Verify item 5. PCA9685 sinks 25mA/channel, enough for a 20mA LED direct | **~$1–2** | any |
-| 20 | JST/Dupont jumpers + I2C wire | 4-wire run Pi→PCA9685 (GND, SDA, SCL, 3.3V logic) plus LED leads | **~$2–4** | any |
-| | | **TOTAL** | **≈ $232–249** | |
+| 19 | LED series resistors | One per LED; value set by the chosen LEDs' forward voltage — see Verify item 5. ⚠️ **Current budget is tight on an Uno:** an ATmega328P pin sources 20mA (one LED) but the chip's ABSOLUTE MAX across all I/O is **200mA**. 8 LEDs at 20mA = 160mA, i.e. 80% of the hard limit. In practice only 4 are on continuously (2 head + 2 tail = 80mA) with 2 indicators blinking (+40mA) = **~120mA peak**, which is fine. If brighter LEDs are chosen, switch them with small N-channel MOSFETs off the LM2596 rail instead of driving pins directly — not currently in this BOM | **~$1–2** | any |
+| 20 | Dupont jumpers + **data-only USB cable** | Pi→Uno is **USB, not GPIO** (5V logic would damage the Pi's 3.3V pins). The USB 5V wire must be **cut or omitted**: the Uno's 5V pin is fed from the LM2596 rail so LED current stays off the Pi's bank, and two supplies must not back-feed each other. Plus LED and servo leads | **~$2–4** | any |
+| | | **TOTAL** | **≈ $226–234** | |
 
 *(Total corrected 2026-08-06 from "≈$176–179" — the cold audit found it
 excluded row 3, the camera cable, i.e. the very item this BOM was written to
@@ -56,11 +56,19 @@ Recomputed from the rows, not carried forward: rows 1–16 sum to
 estimate**. The earlier "≈$237–250" figure was the WITH-shipping number for the
 old row set — the TOTAL row has always been pre-shipping, so the two were never
 in conflict.*
-*(**The $200 ceiling is now breached on every path, including the 2GB Pi.**
+*(~~**The $200 ceiling is now breached on every path, including the 2GB Pi.**
 Swapping the Pi 5 4GB for the 2GB at $65 takes the build to **$187–204 before
 shipping, ≈$202–229 with**. That was the swap that previously restored the
-ceiling; with lighting it no longer does. Evan's call whether the ceiling moves
-or the lighting waits — nothing here is ordered.)*
+ceiling; with lighting it no longer does.~~ **SUPERSEDED 2026-09-02.**)*
+*(**TOTAL lowered 2026-09-02 ~15:17 from ≈$232–249 to ≈$226–234** (Appendix BC):
+row 17's PCA9685 is superseded by an **Arduino Uno R3 clone Evan already owns**,
+taking rows 17–20 from $10.50–$24.00 to **$4.50–$9.00**. Recomputed from the
+rows, not carried forward: **$226.32–$233.82 before shipping**, **≈$241–259
+with** the $15–25 shipping estimate.)*
+*(**The $200 ceiling is REACHABLE again at the low end — but only with the 2GB
+Pi**, which now lands at **$181–189 before shipping, ≈$196–214 with**. The
+bottom of that range clears $200; the top does not. On the 4GB Pi every path is
+still over. Evan's call, and nothing is ordered.)*
 
 **⚠️ RE-PRICED 2026-08-08 ~23:03 CDT against live vendor pages — the total rose
 ≈$44 and the BOM's Pi price was already stale when this file was written.**
@@ -137,39 +145,54 @@ paralleled TB6612 is enough).
 ```
 [USB POWER BANK 5V/3A] --USB-C--> [Raspberry Pi 5 4GB]  ... and nothing else
                                           |
-                                          |  GND (single fat wire, star point at driver)
-                                          |  + I2C: SDA/SCL + 3.3V logic --> [PCA9685]
-                                          |  + GPIO: 2x DIR to driver (not on I2C)
+                                          |  USB (DATA ONLY - 5V wire cut)
                                           v
-[2x 18650 = 7.4V] --fuse--switch--+--> [TB6612FNG VM] --> [N20 motor] --> Lego diff
-   + USB-C BMS board             |          (both channels PARALLELED)
+                                    [ARDUINO UNO]  5V logic, FTDI, COM3
+                                          |
+                    +---------------------+----------------+
+                    |  D9 servo    D3/5/6/11 PWM+digital   |  D2/D3 INT
+                    |  D7/D8 DIR   -> lights               |  <- encoder
+                    v                                      v
+[2x 18650 = 7.4V] --fuse--switch--+--> [TB6612FNG] --> [N20 motor] --> Lego diff
+   + USB-C BMS board             |       (both channels PARALLELED)
                                  +--> [LM2596 @ 5.2V] --+--> [MG90S servo]
-                                                        +--> [PCA9685 V+] --> LEDs
+                                                        +--> [UNO 5V pin]
+                                                        +--> LED commons
 
-                    [PCA9685] 6 of 16 channels:
-                       ch0 motor PWM --> TB6612 PWMA/PWMB     ch2 headlights
-                       ch1 servo PWM --> MG90S                ch3 tail lights
-                                                              ch4 left indicator
-                                                              ch5 right indicator
+                    [UNO] pin budget, 6 of ~14 usable:
+                       D9  servo (Servo lib -> Timer1, kills PWM on 9/10)
+                       D3  motor PWM -> TB6612        D5  headlights (PWM)
+                       D7/D8 motor DIR -> TB6612      D6  tail lights (PWM)
+                       D2  encoder A (INT0)           D11 indicators (digital)
 ```
 
-**The one rule that matters (amended 2026-09-01):** **no power path crosses
-between the Pi and the motor pack.** What crosses is signal and reference only —
-**ground** (one fat wire, star point at the driver), **SDA/SCL**, the
-**PCA9685's 3.3V logic supply**, and the TB6612's **two direction lines**.
+**The one rule that matters (amended again 2026-09-02):** **no power path
+crosses between the Pi and the motor pack.** As of the Arduino swap, what
+crosses is **USB data only** — the 5V conductor is cut, so even the data link
+carries no power. Every actuator signal (PWM, direction, servo, lights) now
+originates on the Uno, on the motor-pack side. **This is the cleanest the
+separation has ever been:** the previous PCA9685 design had ground, SDA, SCL,
+a 3.3V logic supply and two direction lines crossing; the Uno design has two
+data wires and a shared ground reference.
 
-*(Previously this read "they share **ground only** … Nothing else crosses
-between them", which was already self-contradictory — the same paragraph
-required the ground as a reference "for the PWM/direction logic", i.e. PWM and
-direction wires crossed all along. Adding I2C did not break a clean rule, it
-exposed a loose one. The invariant that was always meant, and is still true, is
-the power one. Corrected, not silently extended.)*
+*(History, kept because the rule was wrong twice. It originally read "they
+share **ground only** … Nothing else crosses between them", which was already
+self-contradictory — the same paragraph required the ground as a reference "for
+the PWM/direction logic", so PWM and direction wires crossed all along. The
+2026-09-01 amendment fixed the wording for I2C. The 2026-09-02 Arduino swap
+then made the strong version true for the first time.)*
 
-**Why the PCA9685 sits on the motor rail, not the Pi:** its **V+** (the LED and
-servo supply) comes off the LM2596, so ~160mA of LEDs never touches the Pi's
-5V/3A bank with its 600mA peripheral cap. Its **VCC** (logic) references the Pi
-at 3.3V so I2C levels match. Those are two different pins and must not be
-bridged.
+**Why the Uno sits on the motor rail, not on USB power:** its **5V pin** is fed
+from the LM2596, so LED current (~120mA peak, see row 19) never touches the
+Pi's 5V/3A bank with its 600mA peripheral cap. **Do NOT power it from VIN off
+the 7.4V pack** — the pack sags under motor stall, and below ~7V the on-board
+AMS1117 drops out and browns the Uno out mid-drive, taking the servo and the
+watchdog with it. Feeding the 5V pin bypasses that regulator entirely.
+
+**Why the USB 5V wire must be cut:** with the Uno powered from the LM2596 and
+USB plugged in, two 5V supplies meet on one rail and back-feed. A data-only
+cable removes the conflict rather than relying on the board's power-select
+circuit, which is unverified on a clone.
 
 **Why not one battery:** a simultaneous Pi peak + servo stall + motor stall
 draws **4.62A**, which collapses a 3A rail and hard-resets the Pi mid-run
@@ -197,7 +220,9 @@ with the SD card mounted. The split is structural, not stylistic.
    is superseded by the addition of check 5 below — the open set is **1–3 and
    5**. Prices need re-checking again anyway, since rows 17–20 are estimates.)*
 5. **Which LEDs** — forward voltage and current set every series-resistor value
-   in row 19, and decide whether the PCA9685 can sink them directly (25mA/channel)
+   in row 19, and decide whether the Uno can drive them directly (20mA/pin,
+   **200mA absolute max across ALL pins** — 8 LEDs at 20mA is 160mA, 80% of
+   that hard limit) or whether they need MOSFETs off the LM2596 rail
    or needs a transistor per channel. The **~160mA total is an ESTIMATE** at
    20mA × 8 LEDs (`docs/LIGHTING_SPEC.md` §3); nothing has been measured. Pick
    the LEDs before ordering resistors, not after.

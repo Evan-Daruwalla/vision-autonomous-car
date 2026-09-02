@@ -46,4 +46,40 @@
   teleop → behavioral cloning (+ lane-segmentation experiment) → offline
   world model / offline RL on the car's own logs (capstone) → optional
   parallel sim-RL. Rationale and evidence: PRD_ROADMAP.md §1 and the brief.
+- **ACTUATION MOVES TO AN ARDUINO UNO (decided 2026-09-02 ~15:17, supersedes
+  the PCA9685 decision of 2026-09-01 ~21:06, Appendix AY).** Evan has an
+  **Uno R3 clone** on hand: ATmega328P (TQFP), **5V logic**, FTDI FT232RL USB
+  bridge, enumerating as **COM3** with the driver already working. Cost **$0**.
+  - **The split:** Pi does vision and policy at 20 Hz and sends commands over
+    **USB serial**; the Uno owns everything real-time — motor PWM, steering
+    servo, the four light channels, encoder counting, and a throttle watchdog.
+    This is the conventional robotics division of labour, and it is the first
+    time this project has had one.
+  - **Why it beats the PCA9685 it replaces:** the PCA9685 is a PWM expander and
+    nothing else. The Uno additionally does (a) **quadrature encoder counting**
+    on hardware interrupts D2/D3 — exactly one encoder's worth, which is what
+    the chosen encoder motor needs, and which a Pi does badly because Linux
+    guarantees no interrupt latency and silently drops counts at speed; and
+    (b) a **failsafe** — firmware cuts throttle if no command arrives within a
+    timeout, so a hung Pi or a diverging policy stops the car instead of
+    driving it into a wall. Neither is possible on an I2C PWM chip.
+  - **Channel budget, checked:** the Servo library claims Timer1, killing PWM
+    on pins 9/10 and leaving PWM on **3, 5, 6, 11**. Needed: motor + headlights
+    + tail = 3 PWM, servo on its own library, and the two indicators are on/off
+    so plain digital pins serve. **Fits with one PWM pin spare.**
+  - **The cost, stated plainly:** DonkeyCar's `pins.py` has a PCA9685 backend
+    and **no Arduino backend**, so the actuator path in PRD task 11 becomes
+    custom firmware plus a serial protocol this project writes and debugs.
+    Consistent with a project whose differentiator is already custom PyTorch,
+    but it is real work that the $6-15 part would have avoided.
+  - **Power, and it is not free:** `docs/research/2026-07-23_power-system.md`
+    states "This build has zero USB peripherals, so the [600mA] cap is
+    irrelevant." **A USB-connected Uno makes that false.** The board alone is
+    ~50mA; the danger is it sourcing LED current from its pins, which would put
+    up to 160mA back on the Pi's 5V/3A bank — precisely what LIGHTING_SPEC §3
+    was written to prevent. **The Uno supplies LOGIC; LED current comes off the
+    LM2596 rail.** Powering the Uno from the 7.4V pack instead has its own
+    failure: the pack sags under motor stall and the AMS1117 drops out,
+    browning out the Uno mid-drive. Preferred: feed its 5V pin from the LM2596
+    rail and use a **data-only USB cable** so nothing back-feeds.
 - gotchas.md holds the hardware traps; this bin stays about system shape.

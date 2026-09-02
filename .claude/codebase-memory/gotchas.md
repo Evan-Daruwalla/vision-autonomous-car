@@ -269,3 +269,40 @@ not yet verified on this car. Mark them verified when a build task confirms.
   at** — a real portability trap for the physical car, whose loop will not run
   at the sim's 18.87 Hz. Also means any throttled-expert number confounds rate
   with silent gain re-tuning.
+
+## Arduino Uno (added 2026-09-02)
+
+- **The Pi 5's GPIO is 3.3V and NOT 5V tolerant; this Uno clone is a 5V board.**
+  Wiring its TX straight to a Pi RX pin can damage the Pi. **Connect over USB**,
+  which sidesteps level shifting entirely. This is the single hardware-
+  destroying mistake available in this build.
+- **It is an FTDI FT232RL board, not a CH340** (verified 2026-09-02 from the USB
+  IDs: `VID_0403&PID_6001`, serial `A5069RR4`, enumerating OK as COM3). The
+  driver is already installed; nothing to install. Identifying it from the chip
+  package in a photo gave the WRONG answer — the USB vendor/product ID is
+  authoritative, the silkscreen and package outline are not.
+- **FTDI has twice shipped Windows drivers that disable COUNTERFEIT FT232RL
+  chips** — the 2014 driver bricked them by zeroing the USB PID, a later one
+  made them transmit `NON GENUINE DEVICE FOUND` instead of data. Clone Unos are
+  where counterfeit FT232RLs live, and genuine-vs-fake is not determinable from
+  here. **If COM3 dies or the board starts sending garbage after a Windows
+  update, that is the cause — not your wiring or firmware.** The fix is rolling
+  back the FTDI driver.
+- **The Servo library claims Timer1**, which kills `analogWrite` on pins 9 and
+  10. Usable PWM after that: 3, 5, 6, 11. Discovering this after wiring the
+  board is how a "dead" LED channel gets misdiagnosed as a bad solder joint.
+- **Pins 5 and 6 share Timer0 with `millis()`.** `analogWrite` works there, but
+  changing their PWM frequency breaks timekeeping — so the watchdog and the
+  dimming cannot both be tuned freely on those pins.
+- **An Uno on USB makes the power brief's "zero USB peripherals" claim FALSE**
+  (`docs/research/2026-07-23_power-system.md`). The board is ~50mA, but if it
+  sources LED current from its pins that is up to 160mA on the Pi's 5V/3A bank
+  with its 600mA peripheral cap — the exact thing `LIGHTING_SPEC` §3 avoids.
+  **The Uno supplies logic; LED current comes off the LM2596 rail.**
+- **Do not power the Uno from the 7.4V pack's VIN.** The pack sags under motor
+  stall; if VIN falls below ~7V the AMS1117 regulator drops out and the Uno
+  browns out MID-DRIVE, taking the servo and the watchdog with it. Feed its 5V
+  pin from the LM2596 rail and use a **data-only USB cable** (5V wire cut) so
+  the two supplies cannot back-feed each other.
+- **2KB of SRAM.** Fine for a command loop and encoder counters; it will hold no
+  model, no buffer of frames, and no meaningful history. Nothing ML goes here.

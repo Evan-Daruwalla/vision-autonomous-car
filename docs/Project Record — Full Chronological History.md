@@ -89,6 +89,7 @@ the dated entry, not the digest.
 - [AZ — PCA9685 and lighting added to the BOM: the $200 ceiling is breached on every path, and the wiring rule was already self-contradictory](#appendix-az---pca9685-and-lighting-added-to-the-bom-the-200-ceiling-is-breached-on-every-path-and-the-wiring-rule-was-already-self-contradictory-2026-09-01-2139-cdt) (09-01)
 - [BA — Vehicle envelope derived (height provably blocked); camera height attempt 2 is a second negative and the curvature hypothesis is refuted; indicator logging lands](#appendix-ba---vehicle-envelope-derived-height-provably-blocked-camera-height-attempt-2-is-a-second-negative-and-the-curvature-hypothesis-is-refuted-indicator-logging-lands-2026-09-01-2204-cdt) (09-01)
 - [BB — claude CLI verified installed, and the 3dstreet MCP blocker was pending APPROVAL all along - not a restart and not the browser tab](#appendix-bb---claude-cli-verified-installed-and-the-3dstreet-mcp-blocker-was-pending-approval-all-along---not-a-restart-and-not-the-browser-tab-2026-09-01-2214-cdt) (09-01)
+- [BC — Arduino Uno supersedes the PCA9685 one day old: encoder counting and a watchdog for $0, the $200 ceiling is reachable again, and the record write-guard is confirmed firing](#appendix-bc---arduino-uno-supersedes-the-pca9685-one-day-old-encoder-counting-and-a-watchdog-for-0-the-200-ceiling-is-reachable-again-and-the-record-write-guard-is-confirmed-firing-2026-09-02-1520-cdt) (09-02)
 
 ---
 
@@ -6477,3 +6478,155 @@ re-diagnose the GitHub failure as new.
 
 Nothing in the project's build, sim or CAD path depended on the CLI, so no
 blocked work becomes unblocked by this alone.
+
+# Appendix BC - Arduino Uno supersedes the PCA9685 one day old: encoder counting and a watchdog for $0, the $200 ceiling is reachable again, and the record write-guard is confirmed firing (2026-09-02, ~15:20 CDT)
+Evan produced an Arduino he had lying around. Identified it, verified it works,
+and it turns out to beat the part chosen 18 hours earlier — so the PCA9685
+decision of Appendix AY is superseded one day old. Also: the record write-guard
+added yesterday is now confirmed FIRING.
+
+## BC.1 The board, identified from the USB IDs and not from the photo
+
+**Arduino Uno R3 clone: ATmega328P (TQFP), 5V logic, FTDI FT232RL, COM3.**
+
+```
+USB Serial Converter   USB\VID_0403&PID_6001\A5069RR4     Status: OK
+USB Serial Port (COM3) FTDIBUS\VID_0403+PID_6001+A5069RR4A\0000
+```
+
+**I guessed CH340G from the photo and was WRONG.** The chip beside the USB jack
+is an FT232RL in SSOP-28, not a CH340G in SOIC-16; I read a nearby crystal as
+evidence for CH340 (which needs one) when FT232RL has an internal oscillator.
+The lesson is not "look harder at the photo" -- it is that **the USB vendor and
+product ID is authoritative and a package outline is not.** Driver already
+installed; nothing to install. Arduino IDE is already present at
+`~/AppData/Local/Programs/Arduino IDE`.
+
+A separate Windows prompt to install "Adafruit Industries LLC" port software
+appeared and is unrelated: no `VID_239A` device is connected, and every device
+in a non-OK state is `CM_PROB_PHANTOM` (ghost entries for unplugged hardware),
+not a driver failure. Almost certainly the Arduino IDE installing its bundled
+driver bundle. Not needed for this board.
+
+## BC.2 The decision: actuation moves to the Uno, PCA9685 dropped
+
+The PCA9685 is a PWM expander and nothing else. The Uno does everything it would
+have done **plus two things it cannot**:
+
+1. **Quadrature encoder counting** on hardware interrupts D2/D3 -- exactly one
+   encoder's worth, which is what the chosen encoder motor needs. A Pi does this
+   badly because Linux guarantees no interrupt latency, so it silently
+   undercounts at speed, and the symptom reads as "the model is bad" rather than
+   "the odometry is wrong".
+2. **A throttle watchdog.** Firmware cuts throttle if no command arrives inside a
+   timeout, so a hung Pi or a diverging policy stops the car instead of driving
+   it into a wall. Not possible on an I2C PWM chip.
+
+**Channel budget, checked rather than assumed.** The Servo library claims
+Timer1, killing PWM on pins 9/10 and leaving PWM on **3, 5, 6, 11**. Needed:
+motor + headlights + tail = 3 PWM, servo on its own library, and the two
+indicators are on/off so plain digital pins serve. **Fits with one PWM spare.**
+
+**The cost, stated and not buried:** DonkeyCar's `pins.py` has a PCA9685 backend
+and **no Arduino backend**, so PRD task 11's actuator path becomes custom
+firmware plus a serial protocol this project writes and debugs. Consistent with
+a project whose differentiator is already custom PyTorch, but it is real work the
+$6-15 part would have avoided.
+
+## BC.3 The budget moves, and the $200 ceiling is reachable again
+
+Recomputed from the rows, not carried forward. Rows 17-20 fall from
+**$10.50-$24.00** to **$4.50-$9.00** because row 17 is now $0 (owned).
+
+| | before shipping | with $15-25 shipping |
+|---|---|---|
+| TOTAL (4GB Pi) | $232-249 -> **$226-234** | $247-274 -> **~$241-259** |
+| with the 2GB Pi | $187-204 | $202-229 -> **~$196-214** |
+
+**The 2GB path's low end now clears $200 for the first time since lighting was
+added.** The top does not, and on the 4GB Pi every path is still over. So the
+ceiling is reachable rather than restored -- a real change from 2026-09-01, when
+every path was over. Nothing is ordered.
+
+## BC.4 The wiring rule finally becomes true
+
+`docs/BOM.md`'s "one rule that matters" has now been wrong twice and is right
+once. It originally claimed the Pi and motor pack share "ground only ... Nothing
+else crosses between them" while the same paragraph required the ground as a
+reference "for the PWM/direction logic" -- so PWM and direction wires crossed all
+along. AY amended the wording to cover I2C. **The Arduino swap makes the strong
+version true for the first time:** every actuator signal now originates on the
+Uno, on the motor-pack side, and the only Pi link is **USB with its 5V conductor
+cut**. Two data wires and a ground reference, no power path.
+
+## BC.5 Power, and two ways to get it wrong
+
+- **An Uno on USB makes the power brief's "zero USB peripherals" claim FALSE.**
+  The board is ~50 mA, but if it sourced LED current from its pins that is up to
+  160 mA onto the Pi's 5V/3A bank with its 600 mA peripheral cap -- exactly what
+  `LIGHTING_SPEC` section 3 exists to prevent. **The Uno's 5V pin is fed from the
+  LM2596 rail**, so LED current stays on the motor pack.
+- **Do NOT power it from VIN off the 7.4V pack.** The pack sags under motor
+  stall; below ~7V the on-board AMS1117 drops out and the Uno browns out
+  MID-DRIVE, taking the servo and the watchdog with it. Feeding the 5V pin
+  bypasses that regulator entirely.
+- **The USB 5V wire must be cut.** With the Uno on the LM2596 rail and USB
+  plugged in, two 5V supplies meet and back-feed. A data-only cable removes the
+  conflict rather than trusting a clone's unverified power-select circuit.
+
+**A current limit tighter than the PCA9685's**, and easy to miss: an ATmega328P
+pin sources 20 mA, but the absolute maximum across ALL I/O together is **200 mA**
+-- a shared budget, where the PCA9685's 25 mA was per channel and independent.
+8 LEDs at 20 mA is 160 mA, 80% of the hard limit; realistically ~120 mA peak
+(4 lamps steady, 2 indicators blinking). Workable; brighter LEDs need MOSFETs.
+
+## BC.6 The counterfeit-FTDI trap
+
+FTDI has twice shipped Windows drivers that deliberately disabled **counterfeit**
+FT232RL chips -- the 2014 driver bricked them by zeroing the USB PID, a later one
+made them transmit `NON GENUINE DEVICE FOUND` in place of data. Clone Unos are
+where counterfeit FT232RLs live, and genuine-versus-fake is not determinable from
+here. **If COM3 dies or the board starts sending garbage after a Windows update,
+that is the cause -- not the wiring and not the firmware.** The fix is rolling
+back the FTDI driver. In `gotchas.md` so nobody debugs their own code for a day.
+
+## BC.7 Bins updated -- and three deliberately not
+
+The pm-cadence hook had flagged the codebase-memory bins three times.
+
+- **`architecture.md`** -- the actuation decision above, superseding the PCA9685
+  entry. This bin had been 40 days stale and the staleness was real.
+- **`gotchas.md`** -- a new Arduino section: the 3.3V/5V hazard, FT232RL
+  identification, the counterfeit-driver trap, Timer1 stealing pins 9/10,
+  pins 5/6 sharing Timer0 with `millis()`, the USB-peripheral cap, the VIN
+  brownout, and 2KB of SRAM meaning nothing ML goes there.
+- **`performance.md`** -- was a dated stub. Now real: real-time actuation moves
+  off the Pi, and **the FTDI latency timer (default 16 ms) is now on the control
+  path against a 50 ms budget at 20 Hz, and is UNMEASURED.**
+- **`security.md`** -- was a dated stub. Now real: a serial actuator surface
+  exists that did not before, and the watchdog is a SAFETY feature, not a
+  security one -- it does nothing against a hostile writer on the port.
+- **`ui.md`, `conventions.md`, `dependencies.md` NOT touched.** Nothing about
+  them changed. `ui.md`'s "N/A, no frontend planned" is still true, so its
+  40-day staleness is CORRECT rather than drift. Writing something there to
+  satisfy a hook would be padding.
+
+## BC.8 The record write-guard is confirmed firing
+
+Yesterday's `pretooluse-record-guard.js` (Appendix AW) could not be verified in
+the session that wrote it, because hooks load at startup. Tested today on a
+**decoy** file named to match the guard's pattern, so the real record was never
+at risk. The Edit was DENIED with the full remediation text naming
+`append-record-entry.js` and all four flags. **The guard works, and the hook
+config from yesterday loaded.** Decoy deleted; `git status` confirms the real
+record was untouched by the test.
+
+## BC.9 Not done
+
+- **No firmware exists.** The serial protocol is designed on paper only; nothing
+  has been uploaded to the board, and the board has not been proven to run code
+  at all. Blink on COM3 is the next five-minute step and would rule out a dead
+  bootloader, which clones sometimes ship with.
+- **The FTDI latency timer is unmeasured** and sits on the 20 Hz control path.
+- Everything else remains BLOCKED-ON-EVAN: coupon print, rack-and-diff
+  measurement, diff teeth, Pi 2GB vs 4GB, which LEDs, and the order.

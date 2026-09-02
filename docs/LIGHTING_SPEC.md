@@ -26,7 +26,20 @@ the portfolio, they cost nothing in risk.
 
 ---
 
-## 2. Channels, and why this settles the PCA9685 question
+## 2. Channels
+
+> **SUPERSEDED 2026-09-02 (Appendix BC): the driver is an ARDUINO UNO, not a
+> PCA9685.** Evan has an Uno R3 clone on hand, so the part costs $0 and also
+> brings encoder counting and a throttle watchdog, neither of which a PCA9685
+> can do. The channel reasoning below still holds — four light channels, two
+> needing PWM — and it is what proved a dedicated driver was necessary at all.
+> What changed is which driver. On the Uno the Servo library claims Timer1,
+> leaving PWM on pins 3, 5, 6, 11: motor + headlights + tail = 3 PWM, servo on
+> its library, indicators on plain digital pins. **Fits with one PWM spare.**
+> Series-resistor sizing changes too: an Uno pin sources 20 mA and the chip's
+> absolute max across ALL pins is **200 mA**, where the PCA9685 sank 25 mA per
+> channel independently. See `docs/BOM.md` rows 17-20 and `gotchas.md`.
+> The section below is left as written for the reasoning trail.
 
 Minimum channel count:
 
@@ -64,8 +77,19 @@ a measured CNN draw of 1.40 A (`docs/research/2026-07-23_power-system.md`).
 160 mA is small, but it belongs on the rail that already exists for actuators,
 and it keeps the one-shared-ground star topology unchanged.
 
-Series resistor per LED. The PCA9685 sinks up to 25 mA per channel, which
-covers a 20 mA LED directly; anything brighter needs a transistor per channel.
+Series resistor per LED. ~~The PCA9685 sinks up to 25 mA per channel, which
+covers a 20 mA LED directly; anything brighter needs a transistor per channel.~~
+**AMENDED 2026-09-02 (Appendix BC), and the limit is tighter than the PCA9685's
+was:** an ATmega328P pin sources 20 mA, but the chip's absolute maximum across
+**ALL** I/O together is **200 mA** — a shared budget, where the PCA9685's 25 mA
+was per channel and independent. 8 LEDs at 20 mA = 160 mA, 80% of the hard
+limit; realistically ~120 mA peak (4 lamps steady + 2 indicators blinking).
+Workable, but brighter LEDs need MOSFETs off the LM2596 rail rather than pins.
+
+**The rail argument is unchanged and now easier to satisfy:** the Uno's 5 V pin
+is fed from the LM2596, so LED current comes off the motor pack either way — and
+the USB link to the Pi is data-only with its 5 V conductor cut, so no LED
+current can reach the Pi's bank even by accident.
 
 ---
 
