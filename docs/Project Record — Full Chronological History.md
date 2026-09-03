@@ -126,6 +126,7 @@ the dated entry, not the digest.
 - [CK — The pack safety hole is closed: a charger is not a BMS, and the requirement was aimed at the wrong part; EVE 25P replaced by Samsung 25R](#appendix-ck---the-pack-safety-hole-is-closed-a-charger-is-not-a-bms-and-the-requirement-was-aimed-at-the-wrong-part-eve-25p-replaced-by-samsung-25r-2026-09-03-1700-cdt) (09-03)
 - [CL — DigiKey falsified as a consolidator (Marketplace ships separately) but cheapest on three Pi parts; 4GB restock 2026-10-05; a second search-snippet lie](#appendix-cl---digikey-falsified-as-a-consolidator-marketplace-ships-separately-but-cheapest-on-three-pi-parts-4gb-restock-2026-10-05-a-second-search-snippet-lie-2026-09-03-1703-cdt) (09-03)
 - [CM — Vilros checked before checkout: the linked variant is a $179.99 kit, not a bare board, and two checks disagreed on Board Only pricing](#appendix-cm---vilros-checked-before-checkout-the-linked-variant-is-a-17999-kit-not-a-bare-board-and-two-checks-disagreed-on-board-only-pricing-2026-09-03-1712-cdt) (09-03)
+- [CN — Pi decision finalized: Vilros Basic Starter Kit $179.99, folds three BOM rows into one, +$48.04](#appendix-cn---pi-decision-finalized-vilros-basic-starter-kit-17999-folds-three-bom-rows-into-one-4804-2026-09-03-1715-cdt) (09-03)
 
 ---
 
@@ -10235,3 +10236,75 @@ Evan asked to push. Confirmed via `git fetch` immediately before this entry:
 **Nothing ordered.** The Pi purchase remains open across at least five verified
 sources (2 GB pishop $65; 4 GB CanaKit $110, Adafruit $130, Vilros kit $179.99,
 DigiKey 4 GB backordered to 2026-10-05). Push is queued, not executed.
+
+# Appendix CN - Pi decision finalized: Vilros Basic Starter Kit $179.99, folds three BOM rows into one, +$48.04 (2026-09-03, ~17:15 CDT)
+Evan finalized the Pi purchase: **Vilros Basic Starter Kit, 4GB, $179.99**,
+confirmed in stock by him directly at checkout — stronger evidence than
+Appendix CM's browser check, which hit a render failure before confirming
+Board Only availability at that vendor.
+
+## CN.1 The kit folds three BOM rows into one purchase
+
+Contents, from Evan's message: Pi 5 (4GB), a metal case with passive+active
+PWM cooling, a 32GB Class 10 microSD preloaded with RPi OS, a Vilros 27W
+5V/5A USB-C PSU, a Standard-to-Micro HDMI adapter cable, a quickstart guide, a
+neoprene storage bag, an LIR2032 RTC battery connector, and a Mini-to-Standard
+Camera Module Adapter Cable (120mm).
+
+**Superseded, both marked in place rather than deleted, per the append-only
+convention:**
+
+- **Row 4 (microSD 32GB A2/U3, $21.95) → $0, included.** ⚠️ Flagged, not
+  silently absorbed: the kit's card is **Class 10**, a lower speed class than
+  the A2/U3 this row specified. Whether DonkeyCar's logging workload actually
+  needs A2/U3 is unverified either way — recorded as an open question, not a
+  confirmed problem.
+- **The flagged Active Cooler row ($5.00 at DigiKey, never added to the total)
+  → $0, included.** The thermal argument from Appendix CI (soft throttle
+  80°C, hard 85°C, the 20.00 Hz control-rate risk) is unchanged; it is now
+  answered by the kit's cooling rather than a separate purchase. ⚠️ The kit's
+  specific solution — fan CFM, PWM control via the official header vs a
+  simpler always-on fan — is unverified. **Confirm against the same 80/85°C
+  thresholds once it arrives**, per PRD task 10's existing `vcgencmd` check.
+
+**Not superseded, flagged as unconfirmed rather than assumed:** row 3 (the
+22-pin-0.5mm-to-15-pin-1mm FPC camera cable). The kit includes "Mini to
+Standard Camera Module Adapter Cable (120mm)," which may be the same part —
+but the kit is a generic Pi 5 accessory bundle, not matched to Camera Module 3
+Wide specifically, and its length (120mm) differs from row 3's spec'd 200mm.
+**Row 3 stays a live purchase line until the kit's cable is checked against
+the actual camera on arrival.**
+
+**Noted, not acted on:** the bundled PSU does not fit this project's
+split-source power architecture (`docs/research/2026-07-23_power-system.md`
+specifies a USB power bank feeding the Pi alone). It costs nothing marginal —
+it ships with the kit regardless — so it is unused capacity, not a defect.
+Not re-litigated: Evan already reaffirmed the kit with full contents after
+Appendix CM's overlap caveat, which is his decision to make.
+
+## CN.2 Cost
+
+| | before | after |
+|---|---|---|
+| row 1 (Pi) | $110.00 (bare board, unconfirmed vendor) | **$179.99** (Vilros kit, confirmed in stock) |
+| row 4 (microSD) | $21.95 | $0.00 (included) |
+| Active Cooler | $5.00 (flagged, not counted) | $0.00 (included) |
+| **BOM total** | $262.44 – $268.69 | **$310.48 – $316.73** |
+
+**Net +$48.04** against the unbundled parts — the kit buys one shipment
+covering the Pi, storage, cooling and a spare PSU rather than a price
+advantage. Blocker #1 in the ORDER SHEET ("Pi 5 4GB is out of stock at pishop,
+SparkFun and DigiKey") is **resolved**, struck in place; only the two Addicore
+backorders remain open.
+
+## CN.3 Push
+
+Confirmed via `git fetch` before this entry: local was **5 commits ahead of
+`origin/main`, 0 behind**. Claude cannot push — the trading-guard hook blocks
+it categorically. Evan runs it himself.
+
+## CN.4 State
+
+**Nothing ordered yet by either party** — this closes the Pi decision but the
+purchase itself has not been placed. BOM total is now $310.48–$316.73 before
+shipping, **≈$325–342 all-in** across the remaining 3-4 vendors.
