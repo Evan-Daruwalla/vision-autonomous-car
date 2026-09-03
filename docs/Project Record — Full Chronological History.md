@@ -127,6 +127,7 @@ the dated entry, not the digest.
 - [CL — DigiKey falsified as a consolidator (Marketplace ships separately) but cheapest on three Pi parts; 4GB restock 2026-10-05; a second search-snippet lie](#appendix-cl---digikey-falsified-as-a-consolidator-marketplace-ships-separately-but-cheapest-on-three-pi-parts-4gb-restock-2026-10-05-a-second-search-snippet-lie-2026-09-03-1703-cdt) (09-03)
 - [CM — Vilros checked before checkout: the linked variant is a $179.99 kit, not a bare board, and two checks disagreed on Board Only pricing](#appendix-cm---vilros-checked-before-checkout-the-linked-variant-is-a-17999-kit-not-a-bare-board-and-two-checks-disagreed-on-board-only-pricing-2026-09-03-1712-cdt) (09-03)
 - [CN — Pi decision finalized: Vilros Basic Starter Kit $179.99, folds three BOM rows into one, +$48.04](#appendix-cn---pi-decision-finalized-vilros-basic-starter-kit-17999-folds-three-bom-rows-into-one-4804-2026-09-03-1715-cdt) (09-03)
+- [CO — BMS row corrected: $9.59 buys an 8-pack, not one board — the spares answer Appendix CK's sourcing problem](#appendix-co---bms-row-corrected-959-buys-an-8-pack-not-one-board--the-spares-answer-appendix-cks-sourcing-problem-2026-09-03-1732-cdt) (09-03)
 
 ---
 
@@ -10308,3 +10309,43 @@ it categorically. Evan runs it himself.
 **Nothing ordered yet by either party** — this closes the Pi decision but the
 purchase itself has not been placed. BOM total is now $310.48–$316.73 before
 shipping, **≈$325–342 all-in** across the remaining 3-4 vendors.
+
+# Appendix CO - BMS row corrected: $9.59 buys an 8-pack, not one board — the spares answer Appendix CK's sourcing problem (2026-09-03, ~17:32 CDT)
+Evan asked whether the build really needs 8 ACEIRMC BMS boards. **No — one
+board is needed. The question caught a real BOM error: the $9.59 price is for
+an 8-pack, not a single unit, and the BOM had been describing it as one.**
+
+## CO.1 What was wrong
+
+Row 11b (added in Appendix CK, closing the pack over-discharge safety hole)
+read: *"2S BMS protection board — ACEIRMC 2S 8A ... $9.59"* — written
+and priced as if $9.59 bought one board. It does not.
+
+Verified live via the Amazon browser tab (not a summarized fetch — the
+listing title itself states the pack size): **"ACEIRMC 2S 7.4V 8.4V 8A 18650
+Charger PCB BMS Protection Board for Li-ion Lithium Battery Cell (8pcs)"**,
+$9.59, In Stock. The page's quantity/variant selector offers **no single-unit
+option** — the smallest available pack on this listing is 5-for-$8.59.
+
+## CO.2 Corrected, and it is good news twice over
+
+- **Per-unit cost is actually lower than recorded**: $9.59/8 = $1.20/board,
+  versus the 5-pack's $8.59/5 = $1.72/board. The 8-pack is the better deal on
+  a per-unit basis, not just the only one checked.
+- **The 7 spare boards are not waste — they directly answer Appendix
+  CK's finding.** CK established that **no vendor reliably stocks a 2S BMS
+  documenting an over-discharge cutoff** — Adafruit, SparkFun and Pololu
+  all came up empty, and this Amazon listing was the one board found with a
+  tight, quoted set point (2.9 V ±0.05 V). A part that hard to re-source
+  is exactly the kind where having spares on hand matters: a board damaged
+  during hand-soldering, or one that fails on the pack, no longer means a
+  second multi-week search.
+- **BOM total is unchanged** — $9.59 was already the correct total
+  price; only the "1 board for $9.59" framing was wrong, and that framing has
+  now been corrected in both row 11b and the ORDER SHEET's Amazon line.
+
+## CO.3 State
+
+**Nothing ordered.** BOM total remains $310.48–$316.73 before shipping
+— this was a description fix, not a price change. 8 commits ahead of
+`origin/main` before this one; push remains Evan's.

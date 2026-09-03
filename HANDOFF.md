@@ -2,7 +2,7 @@
 
 **Last updated: 2026-09-03 ~21:50 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 92 appendices A–CN; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 93 appendices A–CO; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
