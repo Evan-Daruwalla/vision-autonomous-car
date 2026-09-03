@@ -341,3 +341,22 @@ Three numbers, and the governing one is unchanged:
   package**; battery sales are typically **final** (5-day DOA window only); and
   IMR Batteries and 18650BatteryStore appear to be the same operation — not two
   independent sources for redundancy.
+
+## Search snippets lie about purchase-critical facts — TWICE in one session (2026-09-03, CK/CL)
+
+- **Read the vendor page, never the search summary, for any claim you would spend
+  money or safety on.** Two independent instances on 2026-09-03:
+  1. Summaries asserted Type-C 2S charge modules "include over-discharge
+     protection". **The live pages contradict it** — the strings
+     "over-discharge", "low voltage" and "under-voltage" appear nowhere.
+  2. A snippet claimed DigiKey gives free shipping over $50. It traces to
+     `digikey.com/en/help/set-rate-shipping/`**`th`** — **the THAILAND page.**
+     Verified US shipping is **$4.99 USPS Ground Advantage and up, no threshold.**
+- **Two instances in one session is a pattern, not bad luck.**
+- **A distributor relationship does not imply consolidation.** DigiKey is an
+  authorized distributor for Adafruit, SparkFun and Pololu, yet the Pololu parts
+  are **DigiKey MARKETPLACE, not DigiKey inventory**: *"Will ship in
+  approximately 1 days from Pololu. A separate shipping fee may apply."* A second
+  parcel and a second shipping charge — check who actually SHIPS the item.
+- **DigiKey stocks no high-drain 18650** — their cells top out at a **520 mA**
+  continuous rating. Distributor breadth does not extend to power cells.

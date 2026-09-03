@@ -124,6 +124,7 @@ the dated entry, not the digest.
 - [CI — Width fully measured (front 107.5, rear 148.25, body 135.75 - rear governs); Pi decided at 4GB by stock; ONNX task added; cooling raised for the first time; cells sold out](#appendix-ci---width-fully-measured-front-1075-rear-14825-body-13575---rear-governs-pi-decided-at-4gb-by-stock-onnx-task-added-cooling-raised-for-the-first-time-cells-sold-out-2026-09-03-1649-cdt) (09-03)
 - [CJ — Vendor consolidation: no single vendor exists; SparkFun's N20 fails the same speed floor that killed the Lego motors; the 2S BMS exists nowhere](#appendix-cj---vendor-consolidation-no-single-vendor-exists-sparkfuns-n20-fails-the-same-speed-floor-that-killed-the-lego-motors-the-2s-bms-exists-nowhere-2026-09-03-1656-cdt) (09-03)
 - [CK — The pack safety hole is closed: a charger is not a BMS, and the requirement was aimed at the wrong part; EVE 25P replaced by Samsung 25R](#appendix-ck---the-pack-safety-hole-is-closed-a-charger-is-not-a-bms-and-the-requirement-was-aimed-at-the-wrong-part-eve-25p-replaced-by-samsung-25r-2026-09-03-1700-cdt) (09-03)
+- [CL — DigiKey falsified as a consolidator (Marketplace ships separately) but cheapest on three Pi parts; 4GB restock 2026-10-05; a second search-snippet lie](#appendix-cl---digikey-falsified-as-a-consolidator-marketplace-ships-separately-but-cheapest-on-three-pi-parts-4gb-restock-2026-10-05-a-second-search-snippet-lie-2026-09-03-1703-cdt) (09-03)
 
 ---
 
@@ -10069,3 +10070,103 @@ purchases remain BLOCKED-ON-EVAN.
 and the reason the search kept failing is now understood and recorded in
 `hardware.md` so it is not repeated. Evan's decisions still open: RAM/vendor for
 the Pi, the Active Cooler, and whether to place the order.
+
+# Appendix CL - DigiKey falsified as a consolidator (Marketplace ships separately) but cheapest on three Pi parts; 4GB restock 2026-10-05; a second search-snippet lie (2026-09-03, ~17:03 CDT)
+The consolidation research closes. **DigiKey — the one hypothesis that might
+have collapsed the whole order into a single vendor — is FALSIFIED**, but it is
+the cheapest source for three Pi-ecosystem parts and it produced the first hard
+restock date anyone has published.
+
+## CL.1 DigiKey does not consolidate, and the reason is structural
+
+DigiKey is an authorized distributor for Adafruit, SparkFun **and** Pololu, so
+on paper it should have collapsed the three-vendor split. It does not.
+
+**The Pololu parts are DigiKey MARKETPLACE, not DigiKey inventory.** #5159
+($29.95, 143 in stock) and #4763 ($3.00, 926) both carry: *"Will ship in
+approximately 1 days from Pololu. A separate shipping fee may apply."*
+
+**That is a Pololu order with a DigiKey invoice — a second parcel and a second
+shipping charge, on exactly the items that made consolidation attractive.** Zero
+gained.
+
+It also fails the battery half outright: **no high-drain 18650 — their stocked
+cells top out at a 520 mA continuous rating**, against the ≥5 A this build needs
+(CI.5). No 2S USB-C BMS. No LM2596. MG90S not found.
+
+**The three-vendor structure from CJ stands.**
+
+## CL.2 But DigiKey is the cheapest Pi source, by a wide margin on small parts
+
+| item | DigiKey | pishop | saving |
+|---|---|---|---|
+| Camera Module 3 Wide (SC1224) | **$35.00**, 7,215 in stock | $38.50 | −$3.50 |
+| Pi 5 camera cable 200 mm (SC1892) | **$1.00**, 3,728 in stock | $2.95 | −$1.95 |
+| Active Cooler (SC1148) | **$5.00**, 27,926 in stock | $10.95 | −$5.95 |
+
+**−$11.40.** Two things worth drawing out:
+
+- **The camera cable is a THIRD of pishop's price** — and it is the part this
+  BOM exists to catch (Camera Module 3 ships with a cable that does not fit the
+  Pi 5's mini port).
+- **The Active Cooler at $5.00 is less than half** what it was priced at when
+  cooling was raised in CI.4. At $5.00 the argument is much cheaper to accept.
+
+## CL.3 Third confirmation on the Pi, and the first restock date
+
+**DigiKey SC1431 $110.00 — 0 in stock, 180 due 2026-10-05.** So the 4 GB is
+unavailable at **pishop, SparkFun and DigiKey**; **CanaKit remains the only
+verified in-stock source**, at the same $110.00. The 2026-10-05 date is the
+first hard timeline any vendor has published, and it matters against the
+schedule: CF's escalation put M1 completion at ~late September on parts ordered
+now. **A 4 GB bought from the restock would land after that.**
+
+## CL.4 A SECOND search-snippet lie, in the same session
+
+A snippet claiming DigiKey gives free shipping over $50 traces to
+`digikey.com/en/help/set-rate-shipping/`**`th`** — **the THAILAND page.** No US
+page confirms it. **Verified US shipping is $4.99 USPS Ground Advantage and up,
+no threshold, no minimum order.**
+
+That is the second time today a search summary asserted a commercially material
+fact the live page contradicts — the first being CK.2's claim that Type-C 2S
+modules document over-discharge protection. **Two independent instances in one
+session is a pattern, not bad luck: for any purchase-critical claim, read the
+vendor page.** Recorded in `hardware.md`.
+
+## CL.5 Three more price corrections applied
+
+Found while reconciling, all against the BOM's own placeholders:
+
+- **microSD (row 4): the ~$10.00 was an unverified placeholder and is less than
+  HALF the real price.** Verified: SanDisk Extreme 32 GB **$21.95** at pishop.
+  SparkFun's nearest A2 card is $34.95; Adafruit's only A2 card is 64 GB and out
+  of stock. The spec is A2/U3, not a brand — but **$10 was never a real price.**
+- **Fuse holder (row 15): a CURRENCY error.** bc-robotics is **Canadian** —
+  **$2.95 CAD**, not the ~$2.15 the BOM implied in USD, and it ships
+  cross-border, which **cuts against consolidation rather than helping.** It
+  includes a 20 A fuse, so the **3 A fuse is still a separate line.**
+- Camera cable row rewritten to the DigiKey SKU and price.
+
+**TOTAL ≈$254-263 → ≈$260-269** before shipping. The microSD correction
+(+$11.95) outweighs the DigiKey savings (−$5.45 on counted rows; the cooler is
+flagged, not counted).
+
+## CL.6 Coverage, stated honestly
+
+**Mouser is UNASSESSED, not ruled out** — five fetch attempts timed out with no
+block page, so its 0-of-22 is a connectivity result, not a finding. Battery
+Junction's policy pages (404/403) and NKON (403) also remain unverified from
+CK.5.
+
+**The coordinating agent reported one status prematurely** — a completion waiter
+that watched five zero-byte files and read that as "settled" — and corrected
+itself unprompted before any of its claims reached this record. **Every figure
+above came from a page it or I opened.** Worth recording as a method note: a
+completion signal is not a result.
+
+## CL.7 State
+
+Consolidation research is CLOSED. **Three vendors remains the answer**, with
+DigiKey as the cheapest source for the Pi-ecosystem small parts and CanaKit the
+only in-stock 4 GB. **Nothing ordered.**
