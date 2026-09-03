@@ -1,10 +1,10 @@
 {
   "floor_m": 3.0,
-  "car_width_m_ESTIMATE": 0.11475,
-  "lane_width_m": 0.2295,
+  "car_width_m_MEASURED": 0.14825,
+  "lane_width_m": 0.2965,
   "corner_radius_m_NOT_COMMITTED": 0.5,
   "street_pitch_m": 1.2,
-  "span_m": 2.6294999999999997,
+  "span_m": 2.6965,
   "streets_per_axis": 3,
   "blocks": 4,
   "intersections": 9,
@@ -12,13 +12,13 @@
   "route": "figure-8: 3 lefts round the top-left block, straight through the centre, 3 rights round the bottom-right block",
   "print_plan": {
     "arc_len_m": 6.283185307179586,
-    "box_len_m": 8.262,
-    "street_line_len_m": 31.553999999999995,
-    "total_line_m": 46.09918530717958,
-    "filament_g": 901.8014890451343,
-    "filament_g_if_all_lines_printed": 2858.1494890451345,
-    "printed_tiles_200mm": 73,
-    "printed_len_m": 14.545185307179587
+    "box_len_m": 10.674,
+    "street_line_len_m": 32.358,
+    "total_line_m": 49.31518530717958,
+    "filament_g": 1051.3454890451342,
+    "filament_g_if_all_lines_printed": 3057.5414890451348,
+    "printed_tiles_200mm": 85,
+    "printed_len_m": 16.957185307179586
   },
   "RISK": "3x3 fits ONLY at R=500mm, the optimistic end of the frozen 500-670mm band. B3 above 500mm leaves a 2x2 grid."
 }

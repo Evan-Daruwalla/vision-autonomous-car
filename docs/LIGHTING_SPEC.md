@@ -72,7 +72,9 @@ Arduino Uno Evan already owns supersedes it, at $0.**
 
 ## 3. Power — off the motor rail, never off the Pi
 
-8 LEDs (2 head, 2 tail, 4 indicator) at ~20 mA each = **~160 mA peak**  EST
+~~8 LEDs (2 head, 2 tail, 4 indicator) at ~20 mA each = **~160 mA peak**  EST~~
+**CORRECTED 2026-09-03 (PRD task A6): run them at 10 mA.** 8 LEDs at 10 mA =
+**~80 mA peak**, and the binding limit was never the 160 mA total — see below.
 
 Feed from the **LM2596 5 V rail** that already supplies the servo, not from the
 Pi. The Pi 5 runs on a 5 V/3 A bank with a **600 mA cap on USB peripherals** and
@@ -82,12 +84,30 @@ and it keeps the one-shared-ground star topology unchanged.
 
 Series resistor per LED. ~~The PCA9685 sinks up to 25 mA per channel, which
 covers a 20 mA LED directly; anything brighter needs a transistor per channel.~~
-**AMENDED 2026-09-02 (Appendix BC), and the limit is tighter than the PCA9685's
+~~**AMENDED 2026-09-02 (Appendix BC), and the limit is tighter than the PCA9685's
 was:** an ATmega328P pin sources 20 mA, but the chip's absolute maximum across
 **ALL** I/O together is **200 mA** — a shared budget, where the PCA9685's 25 mA
 was per channel and independent. 8 LEDs at 20 mA = 160 mA, 80% of the hard
 limit; realistically ~120 mA peak (4 lamps steady + 2 indicators blinking).
-Workable, but brighter LEDs need MOSFETs off the LM2596 rail rather than pins.
+Workable, but brighter LEDs need MOSFETs off the LM2596 rail rather than pins.~~
+
+⚠️ **CORRECTED 2026-09-03 (PRD task A6, first found 2026-09-02 in Appendix BO).
+THE PARAGRAPH ABOVE CHECKED THE WRONG LIMIT.** The 200 mA all-I/O budget is real
+but is not what binds here. There are **4 channels driving 2 LEDs each**, so at
+20 mA per LED every *pin* sources **40 mA — the ATmega328P's ABSOLUTE per-pin
+maximum**, against a 20 mA recommended figure. The per-channel reasoning was
+inherited from the PCA9685, which sank 25 mA per channel independently; the Uno
+does not.
+
+**Run the LEDs at 10 mA:** 20 mA per pin (in spec), 80 mA chip total (40% of the
+limit), and 3 mm LEDs are plainly bright at 10 mA. **No MOSFETs needed** — the
+transistor fallback stays unbuilt. Provisional series resistors at 10 mA and a
+5.0 V pin: **white 200 Ω, red 300 Ω, amber 300 Ω**; recompute from the real
+datasheet once `docs/BOM.md` Verify item 5 (which LEDs) is answered.
+
+*This correction lived in `docs/WIRING_PROTOSHIELD.md` §2.5, `hardware.md` and
+`docs/BOM.md` row 19 for a day before reaching this spec — the doc a future
+session would most likely read first.*
 
 **The rail argument is unchanged and now easier to satisfy:** the Uno's 5 V pin
 is fed from the LM2596, so LED current comes off the motor pack either way — and

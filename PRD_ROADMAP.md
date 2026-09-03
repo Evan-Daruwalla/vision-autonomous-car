@@ -1058,7 +1058,7 @@ Each item carries its own done-check.
       `train_controller.py:191` and `diag_copycat.py:80` also drop the RNN dict
       (follow-up); `exp_recovery.py:159-167` is an 11th hand-rolled split on a
       different corpus, out of scope.**
-- [ ] **A3 — `ml/preprocess.py:85` claims an atomic four-file swap it does not
+- [x] **A3 — DONE 2026-09-03 (Appendix CH): guarded on READ in `splits.load_proc` (three torn shapes refused, verified red and green) and the false comment corrected. — `ml/preprocess.py:85` claims an atomic four-file swap it does not
       perform** — `:138` is four sequential `os.replace`; `splits.py:95`
       `load_proc()` has no cross-array length check, so a kill between renames
       leaves a new-size image array beside old-size index arrays and every
@@ -1093,17 +1093,17 @@ Each item carries its own done-check.
       frame corpus still PASS with mode -1. **NOT done: `verify_corpus.py` is
       still in no CI or scheduled run, which is the condition that let this rot
       for three weeks.**
-- [ ] **A5 — `scripts/git-hooks/pre-commit:24-37` says "fails CLOSED" and fails
+- [x] **A5 — DONE 2026-09-03 (Appendix CH): both guards fail closed with an explicit `CAR_ALLOW_UNGATED_COMMIT` opt-out; all three branches exercised. — `scripts/git-hooks/pre-commit:24-37` says "fails CLOSED" and fails
       OPEN.** No `exit 1` in the missing-file branch, and both gates depend on
       untracked `~/.claude/skills/` paths — on any other machine both are
       silently absent. Done: missing scanner ⇒ `exit 1`, verified by renaming
       the scanner and watching a commit refuse.
-- [ ] **A6 — `docs/LIGHTING_SPEC.md:75,88-90` still specifies 20 mA/LED** —
+- [x] **A6 — DONE 2026-09-03 (Appendix CH): struck in place with the per-pin arithmetic; 10 mA. — `docs/LIGHTING_SPEC.md:75,88-90` still specifies 20 mA/LED** —
       40 mA per pin with two LEDs per channel, the ATmega328P's absolute
       per-pin maximum. The 10 mA correction lives in `WIRING_PROTOSHIELD.md`
       §2.5 and `hardware.md` and never reached the spec. Done: spec amended by
       dated strike.
-- [ ] **A7 — small; batch when touching the files:** `ml/measure_operating_
+- [x] **A7 — DONE 2026-09-03 (Appendix CH): dead imports re-found by AST (the audit's line numbers were stale), noqa added, JSON key renamed — and it uncovered 224 lone-CR bytes of corruption across four bins, repaired. — small; batch when touching the files:** `ml/measure_operating_
       point.py:62-65` lacks the mid-warmup guard its six siblings carry ·
       `build_expert_labels.py:76-79` and `exp_recovery.py:151-153` check
       alignment by frame count only (a same-length reorder passes) ·

@@ -55,7 +55,7 @@ import torch
 import torch.nn as nn
 
 from collect_sim_data import (PIDDriver, SIM_EXE, STEER_LIMIT, THROTTLE,
-                              THROTTLE_CORNER, WARMUP_STEPS)
+                              THROTTLE_CORNER)
 from eval_in_sim import SIZE, run_episode
 from provenance import write_result
 from sim_conf import base_sim_conf

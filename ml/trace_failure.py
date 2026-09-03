@@ -43,7 +43,7 @@ from collect_sim_data import PIDDriver, SIM_EXE, THROTTLE, WARMUP_STEPS
 from eval_in_sim import SIZE, LatentPolicy
 from provenance import write_result
 from sim_conf import base_sim_conf
-from models import HIDDEN, MDNRNN, ConvVAE
+from models import MDNRNN, ConvVAE
 from plan_cem import CEMPlanner, load_probe
 from train_controller import Controller
 

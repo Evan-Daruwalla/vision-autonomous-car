@@ -119,10 +119,41 @@ def split_seed_of(ckpt: dict, name: str = "checkpoint") -> int:
 
 
 def load_proc(split: str, proc: Path = PROC):
+    """Load a preprocessed split, REFUSING a torn one.
+
+    preprocess.py writes four files and renames them one at a time (four
+    sequential os.replace -- not one atomic swap, whatever its comment used to
+    say). Kill a re-run between renames and a NEW-size images array survives
+    next to OLD-size index arrays. Nothing downstream notices: train_vae.py
+    would happily train on the overlap and report normal-looking losses.
+
+    The lengths are the tell, and they are free to check. (PRD task A3,
+    2026-09-03.)
+    """
     imgs = np.load(proc / f"{split}_images.npy", mmap_mode="r")
     actions = np.load(proc / f"{split}_actions.npy")
     episodes = np.load(proc / f"{split}_episodes.npy")
     tracks = np.load(proc / f"{split}_tracks.npy")
+    # images and actions are PER-FRAME; episodes is (N, 2) of [start, length]
+    # and tracks is (N,) -- both PER-EPISODE.
+    if len(imgs) != len(actions):
+        raise ValueError(
+            f"{split}: torn preprocess output -- {len(imgs)} images vs "
+            f"{len(actions)} actions. Re-run: python ml/preprocess.py")
+    if len(episodes) != len(tracks):
+        raise ValueError(
+            f"{split}: {len(episodes)} episodes vs {len(tracks)} track labels "
+            f"-- {split}_tracks.npy is from a different run than "
+            f"{split}_episodes.npy. Re-run: python ml/preprocess.py")
+    # The cross-check that actually catches a half-swapped set: the episode
+    # index must account for exactly as many frames as the image array holds.
+    if len(episodes):
+        covered = int(episodes[-1][0]) + int(episodes[-1][1])
+        if covered != len(imgs):
+            raise ValueError(
+                f"{split}: the episode index covers {covered} frames but "
+                f"{split}_images.npy holds {len(imgs)} -- these two files are "
+                f"from DIFFERENT preprocess runs. Re-run: python ml/preprocess.py")
     return imgs, actions, episodes, tracks
 
 

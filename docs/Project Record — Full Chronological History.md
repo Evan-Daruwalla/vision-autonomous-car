@@ -120,6 +120,7 @@ the dated entry, not the digest.
 - [CE — Status LED quiet on a bench board: a floating pin and a wire that fell off differ only in history, so history is what decides](#appendix-ce---status-led-quiet-on-a-bench-board-a-floating-pin-and-a-wire-that-fell-off-differ-only-in-history-so-history-is-what-decides-2026-09-02-2315-cdt) (09-02)
 - [CF — A1 done: every result names its commit; the module shipped a path-truncation bug and reading its own output found it; BOM audited](#appendix-cf---a1-done-every-result-names-its-commit-the-module-shipped-a-path-truncation-bug-and-reading-its-own-output-found-it-bom-audited-2026-09-03-1600-cdt) (09-03)
 - [CG — Landing-check on A1: two false claims in CF, a second clobbered file that git could not restore, and A1's own checkbox unticked](#appendix-cg---landing-check-on-a1-two-false-claims-in-cf-a-second-clobbered-file-that-git-could-not-restore-and-a1s-own-checkbox-unticked-2026-09-03-1614-cdt) (09-03)
+- [CH — A3/A5/A6/A7 close out the audit; rear track is 148.25 mm; and A7 uncovered 224 lone-CR bytes my own split script wrote](#appendix-ch---a3a5a6a7-close-out-the-audit-rear-track-is-14825-mm-and-a7-uncovered-224-lone-cr-bytes-my-own-split-script-wrote-2026-09-03-1634-cdt) (09-03)
 
 ---
 
@@ -9563,3 +9564,141 @@ to `/code-review`.
 
 `ml/runs/cte_probe/` is self-consistent again and deterministic-verified.
 **Nothing ordered, nothing wired.** PRD A1, A2, A4 done; A3, A5, A6, A7 open.
+
+# Appendix CH - A3/A5/A6/A7 close out the audit; rear track is 148.25 mm; and A7 uncovered 224 lone-CR bytes my own split script wrote (2026-09-03, ~16:34 CDT)
+Audit tasks **A3, A5, A6 and A7 closed** — every PRD audit task is now done. The
+long-dirty result file is explained and closed. `hardware.md` split. And the new
+rear track measurement moves the number every track document rests on, for the
+**third time in two days**.
+
+## CH.1 Rear track is 148.25 mm — new wheels, and the third value in two days
+
+Evan fitted **new rear wheels** and measured outside-wheel to outside-wheel:
+**148.25 mm**. That is **+33.5 mm** on the 114.75 mm measured yesterday, which
+had itself superseded a 130 mm estimate.
+
+Re-ran `cad/track_layout_v2.py` (self-check PASS):
+
+| car width | lane | span | spare of 2800 |
+|---|---|---|---|
+| 130 mm (estimate) | 260.0 | 2660.0 | 140.0 |
+| 114.75 mm (2026-09-02) | 229.5 | 2629.5 | 170.5 |
+| **148.25 mm (2026-09-03)** | **296.5** | **2696.5** | **103.5** |
+
+**It still fits, with 103.5 mm to spare — the tightest of the three, and less
+than the original estimate allowed.** Pitch is unchanged at 1200 mm because
+`best_straight` is still capped at 200 mm, so span tracks the lane delta at 2x
+the width change, exactly as Appendix BP established.
+
+**Two things this measurement does NOT settle, and one is new:**
+
+1. **FRONT TRACK IS NOW UNKNOWN.** 107.75 mm was measured against the OLD
+   wheels; only the rear was re-measured. The governing width is the widest
+   point, so if the front wheels also changed, 148.25 may not be it.
+2. Still tire track, not whole-vehicle width.
+
+**Recorded in the constant itself**: this is the third value `CAR_WIDTH` has
+held in two days, so the comment now says to treat it as provisional until the
+chassis exists rather than as settled fact.
+
+## CH.2 A3 — the torn-preprocess guard, put where it bites
+
+`preprocess.py` claimed **"All four outputs are written to .tmp and swapped in
+together."** It renames four files one at a time; four sequential `os.replace`
+cannot be one atomic swap. `splits.load_proc()` then mmapped whatever it found.
+
+Fixed on the **read** side, which is where the corruption actually reaches a
+trainer, and the comment made honest. `load_proc` now refuses three shapes:
+
+- per-frame arrays disagreeing (`images` vs `actions`)
+- per-episode arrays disagreeing (`episodes` vs `tracks`)
+- **the cross-check that actually catches a half-swapped set**: the episode
+  index must account for exactly as many frames as the image array holds
+  (`episodes[-1][0] + episodes[-1][1] == len(images)`)
+
+**The first guard I wrote was WRONG and the green run caught it.** I asserted
+`episodes` was per-frame; it is `(N, 2)` of `[start, length]`, per-episode. The
+real corpus failed my own check (`{'images': 91678, 'actions': 91678,
+'episodes': 78}`) — which is exactly what running it is for.
+
+**GREEN:** train 91,678 frames / 78 episodes / covered 91,678; holdout 11,210 /
+10 / 11,210. **RED:** all three torn shapes fabricated in a temp dir and each
+refused. Marked in-code as a shortcut — guard on read, not atomicity on write —
+with the upgrade trigger named (versioned directory + one pointer rename).
+
+## CH.3 A5 — a hook that said "Fails CLOSED" and failed open
+
+`scripts/git-hooks/pre-commit` line 30 said **"Fails CLOSED"** while lines 34-37
+printed a warning and fell through to `exit 0`. The secret gate above it was
+also fail-open, though that one *said* so.
+
+Both now fail closed. Because both guards live under `~/.claude/skills/`, which
+is **not tracked in this repo**, a fresh clone would otherwise be unable to
+commit at all — so the refusal names an explicit, greppable opt-out
+(`CAR_ALLOW_UNGATED_COMMIT=1`) instead of silently skipping.
+
+**All three branches exercised, without touching any global file** (ran the hook
+with `HOME` pointed at an empty temp dir):
+
+    guards absent, no opt-out  -> commit-gate REFUSED ... exit=1
+    guards absent, opt-out set -> allowed by CAR_ALLOW_UNGATED_COMMIT, exit=0
+    real HOME, guards present  -> exit=0
+
+## CH.4 A6 — the 20 mA error finally reached the spec
+
+`docs/LIGHTING_SPEC.md` still specified 20 mA per LED at two places. The
+correction had lived in `WIRING_PROTOSHIELD.md`, `hardware.md` and `BOM.md`
+row 19 since 2026-09-02 **without reaching the spec a future session would read
+first.** Struck in place with the per-pin arithmetic: 4 channels x 2 LEDs means
+**40 mA per pin at 20 mA/LED — the ATmega328P's absolute per-pin maximum**. At
+10 mA: 20 mA/pin, 80 mA chip total, no MOSFETs.
+
+## CH.5 A7 — and the corruption it uncovered
+
+The small batch: four genuinely dead imports removed (`MAX_EPISODE_STEPS`,
+`WARMUP_STEPS`, `HIDDEN`, and a bare `import pathlib` shadowed by
+`from pathlib import Path`), a `# noqa: BLE001` added to the one bare
+`except Exception: pass` missing it, and `car_width_m_ESTIMATE` renamed to
+`car_width_m_MEASURED` in both track generators.
+
+**The audit's line numbers were all stale** — the A1 conversion had shifted
+every file by one import line — so the dead imports were re-found by AST rather
+than trusted. That also showed the audit's "four unused imports" included
+`annotations` and `gym_donkeycar` entries that are deliberate (a `__future__`
+convention and side-effect env registration).
+
+**THEN THE LINE COUNTS DISAGREED WITH THEMSELVES.** `wc -l` said `hardware.md`
+was 481 lines; Python said 705. The cause: **224 lone `\\r` bytes** — `\\r\\r\\n`
+sequences from a **double CRLF conversion in my own gotchas-split script**
+(`s.replace(/\\n/g, EOL)` applied to text that already had `\\r\\n`). Python's
+universal newlines counts each stray `\\r` as a line break; `wc` does not; git
+sees only content and never complained.
+
+**Four bins were corrupted** — `hardware.md` (224), `sim-harness.md` (118),
+`track.md` (44), `tooling.md` (9) — all from the 2026-09-02 split. Repaired;
+every bin now has zero lone `\\r` and both counters agree. **The 705 I wrote into
+INDEX yesterday was an artifact of my own corruption, not real growth.**
+
+## CH.6 `hardware.md` split, and the dirty file closed
+
+**Split** (6 sections parsed, 6 placed, invariant asserted): `hardware.md` 481 →
+**278** (print/Lego fit, power, motors, the Uno's pin budget and current limits,
+the pack, vehicle geometry) · new **`firmware-traps.md`** 80 (toolchain, clock
+handling, status-LED semantics) · new **`steering.md`** 141 (servo, measured
+rack geometry, the coupler, calibration). One block landed in the wrong bin on
+the first pass — the 32° facts under the Arduino section — caught by a
+placement spot-check and moved.
+
+**`ml/runs/controller/history_linear_seed0.json` is explained and closed.**
+Dirty since 2026-08-25 with no session owning it. Evidence: same 30 epochs,
+**`val_mse` bit-identical to the committed 2026-08-07 file**, `fit_mse` differing
+only in float accumulation, and three `args` keys (`no_history`, `proc`,
+`recovery_weight`) that entered `train_controller.py` in `2cbb84e`. So: a
+faithful re-run under newer code, never a divergence. Regenerated with
+`--arch linear --seed 0 --epochs 30`; final `val_mse 0.008574513174115768`
+reproduces exactly, and it now carries provenance and matches its `.pt`.
+
+## CH.7 State
+
+**Every PRD audit task A1-A7 is now done.** Nothing ordered, nothing wired.
+Front track unknown; corner geometry still frozen until T2.

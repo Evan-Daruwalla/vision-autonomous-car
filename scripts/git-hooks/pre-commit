@@ -12,12 +12,27 @@
 # policy, so a gate fix lands once instead of in four forks.
 # Emergency bypass: git commit --no-verify (don't make it a habit).
 
+# FAILS CLOSED as of 2026-09-03 (PRD task A5, Appendix CH). It used to print
+# "fail-open" and let the commit through: this repo is PUBLIC, and a secret gate
+# that silently disappears when the scanner is missing is not a gate. Both
+# guards below live under ~/.claude/skills/, which is NOT tracked here, so on a
+# fresh clone they are simply absent — hence the explicit, greppable opt-out
+# rather than a silent skip.
+allow_ungated() {
+  [ -n "$CAR_ALLOW_UNGATED_COMMIT" ]
+}
+
 GATE="${HOME}/.claude/skills/commit-gate/hooks/pre-commit"
 if [ -f "$GATE" ]; then
   sh "$GATE" || exit 1
+elif allow_ungated; then
+  echo "commit-gate: scanner missing, allowed by CAR_ALLOW_UNGATED_COMMIT." >&2
 else
-  echo "commit-gate WARNING: gate not found at $GATE — secret gate SKIPPED (fail-open)." >&2
-  echo "The commit proceeds UNSCANNED." >&2
+  echo "commit-gate REFUSED: secret scanner not found at $GATE" >&2
+  echo "  This repo is public and nothing scanned this commit." >&2
+  echo "  Install the scanner, or set CAR_ALLOW_UNGATED_COMMIT=1 to accept the" >&2
+  echo "  risk for this commit (or use git commit --no-verify)." >&2
+  exit 1
 fi
 
 
@@ -27,13 +42,19 @@ fi
 # fork. Added 2026-08-20: this block previously existed in the Skills repo
 # ALONE, so a hand-splice — the failure that silently overwrote another
 # session's entry (record BT) — was blocked there and free everywhere else.
-# No-op unless the record is actually staged. Fails CLOSED.
+# No-op unless the record is actually staged. Fails CLOSED -- and as of
+# 2026-09-03 that is TRUE; before then this comment claimed it and the code
+# below fell through to exit 0 (PRD A5).
 REC_GUARD="${HOME}/.claude/skills/project-memory/hooks/pre-commit-record"
 if [ -f "$REC_GUARD" ]; then
   sh "$REC_GUARD" || exit 1
+elif allow_ungated; then
+  echo "record-check: guard missing, allowed by CAR_ALLOW_UNGATED_COMMIT." >&2
 else
-  echo "record-check WARNING: record guard not found at $REC_GUARD" >&2
-  echo "  record invariants NOT verified for this commit." >&2
+  echo "record-check REFUSED: record guard not found at $REC_GUARD" >&2
+  echo "  The append-only record could be silently overwritten (record BT)." >&2
+  echo "  Install the guard, or set CAR_ALLOW_UNGATED_COMMIT=1 for this commit." >&2
+  exit 1
 fi
 
 exit 0

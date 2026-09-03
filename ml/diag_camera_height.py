@@ -191,7 +191,7 @@ def collect(track: str, episodes: int, steps: int, port: int):
                   f"cte range [{min(ctes):.2f}, {max(ctes):.2f}]")
     finally:
         try: env.close()
-        except Exception: pass
+        except Exception: pass  # noqa: BLE001 - best-effort cleanup
         time.sleep(3.0)
     return np.asarray(imgs), np.asarray(ctes, np.float32)
 

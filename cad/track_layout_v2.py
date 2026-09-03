@@ -74,9 +74,15 @@ REPO = Path(__file__).resolve().parent.parent
 
 FLOOR = 3.000          # m   CONFIRMED by Evan 2026-09-01
 WALL_MARGIN = 0.100    # m                                          EST
-CAR_WIDTH = 0.11475    # m   MEASURED 2026-09-02 (Appendix BL): rear tire track,
-                       #     the widest point. Front is 107.75 mm. Supersedes the
-                       #     0.130 ESTIMATE this file used until then.
+CAR_WIDTH = 0.14825    # m   MEASURED 2026-09-03 (Appendix CH): rear tire track,
+                       #     outside-wheel to outside-wheel, after Evan fitted NEW
+                       #     REAR WHEELS. Supersedes 0.11475 (2026-09-02, itself
+                       #     superseding a 0.130 ESTIMATE) -- +33.5 mm, and the
+                       #     third value this constant has held in two days, so
+                       #     treat it as provisional until the chassis is built.
+                       #     FRONT TRACK IS NOW UNKNOWN: 107.75 mm was measured
+                       #     against the OLD wheels and only the rear was
+                       #     re-measured. Governing width is the widest point.
                        #     CAVEAT: tire track, not whole-vehicle width -- the
                        #     assembled car (chassis, electronics stack, camera
                        #     mount) has never been measured and may be wider.
@@ -443,7 +449,7 @@ def main() -> int:
     usable = FLOOR - 2 * WALL_MARGIN
     route = path_len(g["route"])
     print(f"floor           {FLOOR:.3f} x {FLOOR:.3f} m (usable {usable:.3f})")
-    print(f"car width       {args.car_width*1000:.2f} mm  MEASURED 2026-09-02 "
+    print(f"car width       {args.car_width*1000:.2f} mm  MEASURED 2026-09-03 "
           f"(tire track, not whole-vehicle)")
     print(f"lane width      {g['lane']*1000:.0f} mm")
     print(f"corner radius   {g['R']*1000:.0f} mm  NOT COMMITTED until B3")
@@ -470,7 +476,7 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     svg(g, out / "track_layout_v2.svg")
     (out / "track_layout_v2.json").write_text(json.dumps({
-        "floor_m": FLOOR, "car_width_m_ESTIMATE": CAR_WIDTH,
+        "floor_m": FLOOR, "car_width_m_MEASURED": CAR_WIDTH,
         "lane_width_m": g["lane"], "corner_radius_m_NOT_COMMITTED": g["R"],
         "street_pitch_m": g["pitch"], "span_m": g["span"],
         "streets_per_axis": args.streets,

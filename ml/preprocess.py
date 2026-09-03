@@ -82,7 +82,16 @@ def process_split(split: str, out: Path, device: str, chunk: int = 256,
     print(f"{split:8s}: {len(files)} episodes, {total} frames")
 
     out.mkdir(parents=True, exist_ok=True)
-    # **All four outputs are written to .tmp and swapped in together.**
+    # **All four outputs are written to .tmp, then renamed ONE AT A TIME.**
+    # NOT an atomic four-file swap -- this comment claimed one until
+    # 2026-09-03 (PRD task A3) and four sequential os.replace calls cannot
+    # give one. A kill between renames is still possible; what changed is
+    # that splits.load_proc() now REFUSES the torn result instead of
+    # mmapping it silently. A true swap needs a versioned directory and one
+    # pointer rename.
+    # shortcut: guard on read, not atomicity on write. CEILING: a torn
+    # write still happens, it just cannot be consumed. UPGRADE TRIGGER: if
+    # a torn write is ever hit in practice, move to a versioned dir.
     # open_memmap(mode="w+") allocates the FULL-SIZE images file up front and
     # fills it progressively, while the three index arrays are only written
     # after the loop. Interrupt the loop on a re-run and the old index files

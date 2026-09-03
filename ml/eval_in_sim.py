@@ -56,7 +56,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from collect_sim_data import (MAX_EPISODE_STEPS, PIDDriver, SIM_EXE,
+from collect_sim_data import (PIDDriver, SIM_EXE,
                               THROTTLE, WARMUP_STEPS)
 from models import HIDDEN, MDNRNN, ConvVAE
 from preprocess import SIZE

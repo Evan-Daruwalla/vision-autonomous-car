@@ -437,7 +437,7 @@ def main() -> int:
     svg(pts, spans, tps, d, usable, out / "track_layout_v1.svg")
     (out / "track_layout_v1.json").write_text(json.dumps({
         "floor_m": FLOOR, "wall_margin_m": WALL_MARGIN,
-        "car_width_m_ESTIMATE": CAR_WIDTH, "lane_width_m": LANE,
+        "car_width_m_MEASURED": CAR_WIDTH, "lane_width_m": LANE,
         "corner_radius_m_NOT_COMMITTED": R_NOM, "measured_min_radius_m": rmin,
         "lobe_separation_m": d, "crossing_straights_m": spans,
         "centreline_length_m": total,
