@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-03 ~18:48 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-03 ~18:52 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 95 appendices A–CQ; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 96 appendices A–CR; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -363,7 +363,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.
-- **THE ORDER (`docs/BOM.md`, $452.20 + shipping = ≈$465-480, after the 2026-09-03 Vilros kit, Amazon consolidation, and full commodity-link verification — every row now has a live-verified price, no more ranges).** Nothing is bought.
+- **THE ORDER (`docs/BOM.md`, $447.08 + shipping = ≈$460-475, after the 2026-09-03 Vilros kit, Amazon consolidation, full commodity-link verification, and dropping the USB-A-to-B cable — Evan already owns one, plugged into the Arduino).** Nothing is bought.
   ⚠️ **TWO NEW SOURCING PROBLEMS, 2026-09-03:** the **EVE 25P cells are SOLD OUT** —
   but do NOT hunt for another 20 A cell, that rating was never load-driven (worst-case
   pack draw ~2.5 A against a 3 A fuse; **real spec is flat-top unprotected 18650,

@@ -130,6 +130,7 @@ the dated entry, not the digest.
 - [CO — BMS row corrected: $9.59 buys an 8-pack, not one board — the spares answer Appendix CK's sourcing problem](#appendix-co---bms-row-corrected-959-buys-an-8-pack-not-one-board--the-spares-answer-appendix-cks-sourcing-problem-2026-09-03-1732-cdt) (09-03)
 - [CP — Small-order problem and general items folded onto Amazon -- resolves 3 scattered vendors, but costs +$105 in bulk-pack overbuy](#appendix-cp---small-order-problem-and-general-items-folded-onto-amazon----resolves-3-scattered-vendors-but-costs-105-in-bulk-pack-overbuy-2026-09-03-1744-cdt) (09-03)
 - [CQ — Every unlinked BOM commodity now live-verified — six wire/hardware items, five stale row placeholders, total recomputed to $452.20](#appendix-cq---every-unlinked-bom-commodity-now-live-verified--six-wirehardware-items-five-stale-row-placeholders-total-recomputed-to-45220-2026-09-03) (09-03)
+- [CR — USB cable already owned — row 20 drops $5.12, BOM total $447.08](#appendix-cr---usb-cable-already-owned--row-20-drops-512-bom-total-44708-2026-09-03) (09-03)
 
 ---
 
@@ -10543,3 +10544,46 @@ link or an explicit statement that no marketplace match exists (row 22,
 Appendix CP). The only remaining un-browser-verified price in the whole BOM
 is the resistor kit (KSOPUERT, $7.38, priced from a search snippet) — flagged
 as such in row 19, not hidden.
+
+# Appendix CR - USB cable already owned — row 20 drops $5.12, BOM total $447.08 (2026-09-03)
+Evan: "i already have a like 3ft USB2.0 cable thats plugged into the arduino
+right now." Row 20's USB-A-to-B cable purchase (Appendix CQ, $5.12,
+live-verified minutes earlier) is unnecessary — he owns the part already,
+and it's already in the correct physical role (connected to the Arduino).
+
+## CR.1 What changed
+
+Row 20 struck the cable purchase, marked **CABLE OWNED**, price line reduced
+to $6.98 (Dupont jumpers only). The ORDER SHEET Amazon-folded row drops from
+17 to 16 items, subtotal $167.02 → $161.90.
+
+**The 5V-cut requirement in row 20 still applies to this cable.** Owning it
+doesn't change the constraint from Appendix CN/the wiring notes: Pi↔Uno is
+USB, not GPIO, and the Uno's 5V pin is meant to be fed from the LM2596 rail,
+not from the Pi's USB 5V line — two supplies must not back-feed each other.
+A standard USB cable is molded, so isolating and cutting the red 5V
+conductor inside it is still a real, undone task, flagged rather than
+assumed away by "it's already plugged in."
+
+## CR.2 Totals, re-verified with an independent hand-sum before writing
+
+    fixed vendors (unchanged):                                    $281.45
+    Amazon-folded row, 16 items (was 17):                         $161.90
+    Addicore backordered (unchanged):                               $3.73
+    TOTAL:                                                        $447.08
+
+Down from $452.20 (Appendix CQ). All-in estimate, same rough shipping-margin
+method: **≈$460–$475** (was ≈$465–$480).
+
+Consolidation-cost callout restated: net **+$130.35 to +$136.60** over the
+pre-fold scattered-vendor estimate (was +$135.47 to +$141.72 in CQ, which
+still had the cable priced in).
+
+## CR.3 State
+
+**Nothing ordered.** BOM total: $447.08 before shipping, ≈$460-475 all-in.
+One open question this doesn't answer: whether Evan's existing cable stays
+on his workbench for Arduino programming/debugging and a *second* cable gets
+bought for the permanent Pi↔Uno link, or whether this one cable is
+repurposed and he loses the always-connected programming cable. Not decided
+here — surfaced, not assumed.
