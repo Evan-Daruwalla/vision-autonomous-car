@@ -5,6 +5,16 @@ research brief. Standing document — the executing model works through TASK
 BREAKDOWN top to bottom, one task at a time, and checks off SUCCESS
 CRITERIA.**
 
+**HOW TO READ THIS FILE (added 2026-09-02 ~19:31 CDT, Appendix BY):** it has
+accreted six weeks of dated amendments under the rule *ADD by appending ·
+REMOVE by dated strikethrough · never delete*, so the current state is no
+longer readable top to bottom. **`HANDOFF.md` is the live snapshot; this file
+is the plan.** A task's most recent dated note is its current status. Where a
+term in the original text is now wrong ("PF motor", "LiPo + UBEC",
+"1.6 × 2.8 m") it is struck in place with the correction beside it — the
+original stays so the reasoning trail survives. `/milestone-track` cannot
+parse this file's numbered-prose tasks; **do not trust its percentage here.**
+
 **GOAL:** Build a mini autonomous car — Lego Technic differential, steering
 geometry, and wheels in a 3D-printed frame, Pi 5 + wide mono camera onboard —
 that (1) drives under human teleop, (2) drives a track autonomously via a
@@ -56,6 +66,18 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   *Open sub-question: "none" may mean none of the PF/Powered-Up families
   specifically; EV3/NXT/9V-Technic motors, if owned, would reopen the
   encoder path — confirm during M1.2 inventory.*
+- **What exists (2026-09-02, Appendix BY) — supersedes "Docs only" above:**
+  a git repo (github.com/Evan-Daruwalla/vision-autonomous-car) · `ml/` — 31
+  scripts, **SIM-POC P1-P6 complete** (102,888-frame corpus, V+M+C and
+  DreamerV3-S trained, the paired eval harness) · `firmware/` — four Uno
+  sketches; **`uno_control` runs on the real board** (SELFTEST 39/39,
+  `host_test.py` 11/11) · `cad/` — tolerance coupon STL (**unprinted**), track
+  layouts v1/v2 (parametric, self-checking, **uncommitted geometry**) ·
+  `docs/BOM.md`, `docs/WIRING_PROTOSHIELD.md`, `docs/SIM_TRANSFER_SPEC.md`,
+  `docs/LIGHTING_SPEC.md`, `firmware/SERIAL_PROTOCOL.md` · a 77-appendix
+  record. **Hardware in hand: an Arduino Uno R3 clone (owned) and a Lego
+  rack-and-pinion Evan built and measured. Nothing purchased, nothing printed,
+  nothing wired.**
 
 ### Must not break
 - Record append-only discipline; absolute dates; no invented data.
@@ -153,6 +175,29 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   (64-bit Bookworm, Py 3.11) for plumbing + custom PyTorch models ·
   training on **RTX 3060 Ti, 8GB VRAM** — a real constraint on M4, see
   below.
+- **Stack (CURRENT, 2026-09-02 — supersedes both stack lines above; each
+  item traces to a dated appendix):** Pi 5 — **BOM row 1 says 4GB ($110),
+  the 2026-08-12 research recommends 2GB ($65), Evan has not decided** ·
+  Camera Module 3 Wide (confirmed the correct part for the sim's `fov=90`
+  VERTICAL, Appendix AR) + Standard-Mini cable · **Pololu #5159 N20 30:1 HP
+  6V *with 12 CPR encoder*** (BOM row 5 corrected 2026-09-02 — it had listed
+  the encoderless #1093 for three weeks after Evan chose the encoder) +
+  TB6612FNG, both channels paralleled, duty capped 71% · MG90S servo — its
+  180° is a **1:1 match to the measured 180° pinion sweep**; ⚠️ the MG996R
+  fallback is now a **liability**, SF 0.12-0.19 at the steering coupler ·
+  **Arduino Uno R3 clone (OWNED, $0) owns all real-time actuation**: motor
+  PWM on Timer2, servo, 4 light channels, quadrature encoder on D2/D3, pack
+  guard on A0, TB6612 `STBY` on D10 — **zero PWM spare, A1-A5 the only free
+  pins**; Pi↔Uno over USB with the 5 V conductor cut, binary serial protocol
+  v0.2 (7-byte command, 9-byte reply, CRC8, ARMED per frame, 150 ms
+  watchdog) · power: USB bank → Pi ONLY; 2× EVE 25P 18650 + 2S BMS board →
+  TB6612 VM and → LM2596 @ 5.2 V → servo, Uno 5V pin, LEDs, encoder; 3 A
+  fuse at the pack, XT30, rocker; ⚠️ **the 2S BMS documents NO over-discharge
+  cutoff — open safety item, guarded by firmware only while the firmware is
+  on** · DonkeyCar 5.x for Pi-side plumbing **minus its actuator backend,
+  which cannot drive the Uno** (task 11 amendment); `rpi-lgpio` not
+  `RPi.GPIO` on the Pi 5 · custom PyTorch models · training on RTX 3060 Ti
+  8 GB with Sysmem Fallback still ON (capped in code, not in the driver).
 - **M4 VRAM constraint (recorded 2026-07-23 ~17:21 CDT):** 8GB is below the
   ~24GB figure the brief cited (single-source) for DreamerV3 on 64×64
   vision. M3 behavioral cloning is unaffected (tiny CNN). M4's exact
@@ -258,6 +303,9 @@ transfer gap) must not block the capstone.
    diff type, steering parts), printer model, filament on hand; pick CAD
    tool (recommend Onshape free tier unless Evan prefers Fusion). Done:
    `tooling.md` bin + record entry updated. (Not blocked — can run before 1.)
+   **STATUS 2026-09-02: OPEN.** CAD tool, printer model, filament stock and
+   donor set numbers are all still uncatalogued. The desktop side of
+   `tooling.md` is current (Python 3.12.10 venv, arduino-cli location).
 3. **Print tolerance coupons.** ~~Print the Printables 660885 test board (or
    equivalent self-modeled coupon)~~ (changed 2026-07-23 ~20:46: a
    self-generated coupon replaces the third-party download — its contents
@@ -276,18 +324,47 @@ transfer gap) must not block the capstone.
    diff: kingpin spacing, steering arm lengths, axle spans, wheel hub
    interfaces. Done: dimensioned sketch (photo or CAD screenshot) in
    `docs/` + record entry.
+   **PARTIAL 2026-09-02 (Appendices BL/BQ/BU):** measured so far — front tire
+   track **107.75 mm**, rear **114.75 mm** (the governing width), steering
+   pinion **12 teeth**, pinion sweep **~180° lock-to-lock**, max steer **32°**
+   (the wheel's DEVIATION from straight ahead — Evan measured with 90° =
+   straight, angle = 90 − protractor reading; taking the raw 58° instead is a
+   2.6× error in turn radius). **NOT yet measured:** wheelbase (Evan does not
+   have the parts), kingpin spacing, steering-arm lengths, hub interfaces,
+   and whether any part of the assembled car exceeds the 114.75 mm tire
+   track. No dimensioned sketch exists yet.
 5. **CAD: front steering module.** Printed frame holding the Lego steering
    geometry + servo mount accepting MG90S AND MG996R footprints + printed
    servo-horn→Lego-axle link (adapt Printables 61922/147626). Done: STL
    exported, printed, Lego parts seat without force.
-6. **CAD: rear drive module.** Diff mounts, PF motor cradle, axle bores at
+   ⚠️ **HARD CONSTRAINT ADDED 2026-09-02 (Appendix BV): the "printed
+   servo-horn→Lego-axle link" named above FAILS at MG90S stall.** The steering
+   coupler is the HIGHEST-torque joint on the car — the exact inverse of the
+   drive side, which the 2026-07-23 research carefully showed survivable. A
+   printed cross-axle stub is SF **0.57-0.96** at ~216 mN·m; the MG996R the
+   mount also accepts is SF **0.12-0.19**. The link must **grip a real Lego
+   axle and never print the cross profile**, and the servo must never reach
+   stall (task 8c). Printables 61922/147626 are acceptable only as
+   socket-style adapters. Constraint: `docs/WIRING_PROTOSHIELD.md` §2.4a.
+6. **CAD: rear drive module.** Diff mounts, ~~PF motor~~ **N20 #5159 motor**
+   cradle (10 × 12 × 26 mm body, +3-4 mm on the connector side for the
+   encoder board, 3 mm D-shaft; drive coupler is a socket gripping a real
+   Lego axle — SF 2.26-3.77 at stall, the survivable side), axle bores at
    coupon-calibrated size (PETG). Done: printed; axle+diff spin freely by
-   hand with motor engaged.
-7. **CAD: chassis plate.** Bays for Pi, LiPo (low, central), TB6612+UBEC,
-   camera mast with adjustable pitch, reserved RPLIDAR C1 footprint,
+   hand with motor engaged. *(Term corrected 2026-09-02 — "PF motor" has been
+   wrong since 2026-07-23 ~17:21, when Evan confirmed he owns no Lego motors.)*
+7. **CAD: chassis plate.** Bays for Pi, ~~LiPo (low, central), TB6612+UBEC~~
+   **2× 18650 holder (low, central) · the Arduino Uno + proto shield (68.6 ×
+   53.4 mm — 60% of the 114.75 mm car width, so it mounts lengthwise; stack
+   height unbudgeted against the camera) · TB6612 + LM2596 living on that
+   shield · the USB power bank for the Pi**, camera mast with adjustable
+   pitch (**mount target: true horizon on row 42 of a 120-row frame at 90°
+   vertical FOV** — `SIM_TRANSFER_SPEC`), reserved RPLIDAR C1 footprint,
    front/rear module attachment (real Lego pins/beams as load path where
    the coupons say printed holes are marginal). Done: full assembly
-   printed + test-fit; M1 success criterion checked.
+   printed + test-fit; M1 success criterion checked. *(Power terms corrected
+   2026-09-02 — LiPo/UBEC was superseded by the split-source 18650 design on
+   2026-07-23 ~17:59; the Uno bay is new since 2026-09-02, Appendix BC.)*
 
 ### M2 — Electronics + teleop
 
@@ -362,14 +439,39 @@ transfer gap) must not block the capstone.
         stall-torque margin stated.
 
 9. **Bench bring-up.** Pi OS (64-bit Bookworm), SSH, camera test; TB6612 +
-   PF motor on bench PSU; servo sweep test. Done: each subsystem's real
-   output (photo/log) in record.
-10. **Power integration.** LiPo + UBEC + split rails on the chassis;
-    measure 5V rail under motor stall + Pi load. Done: no brownout/UV
-    warning in `vcgencmd` during stall test; measurements recorded.
+   ~~PF motor~~ **N20** on bench PSU; servo sweep test. Done: each
+   subsystem's real output (photo/log) in record.
+   **PARTIAL 2026-09-02 — the Uno half is done AHEAD of parts:** board proven
+   (`uno_bringup`), SRAM and clock measured (`uno_memtest`: 2048 B, 16.0042
+   MHz), link measured (`uno_echo`: p99 1.069 ms), pack guard and control
+   firmware verified on the board (task 8b). **Everything that needs a part —
+   Pi, camera, TB6612, motor, servo — is untouched.** For the servo sweep:
+   use `uno_control`'s calibrated span, never a raw full-range sweep, or the
+   first bench test drives the servo into the Lego hard stop (task 8c).
+10. **Power integration.** ~~LiPo + UBEC + split rails~~ **2× 18650 + 2S BMS
+    + LM2596 @ 5.2 V for the actuator side, USB bank for the Pi, one star
+    ground** on the chassis; measure ~~5V rail~~ **both rails** under motor
+    stall + Pi load. Done: no brownout/UV warning in `vcgencmd` during stall
+    test; measurements recorded. *(Terms corrected 2026-09-02; the split-source
+    architecture itself dates from 2026-07-23 ~17:59 and is unchanged. Net
+    list and an 8-step build order: `docs/WIRING_PROTOSHIELD.md`.)*
+    ⚠️ **GATE: BOM Verify item 6.** The 2S BMS board documents NO over-discharge
+    cutoff, and firmware cannot guard a pack while the firmware is off. Close
+    it (protection board that states over-discharge cutoff, or protected
+    cells) before any pack is charged. **Evan's call.**
 11. **Teleop + logging.** DonkeyCar install, web/gamepad teleop, tub
     recorder verified (images + steering/throttle synced). Done: M2 success
     criterion (full-session drive + ≥10 readable laps).
+    - *(**AMENDED 2026-09-02 (Appendix BC): DonkeyCar cannot drive this car's
+      actuators.** Its `pins.py` has three PWM backends — RPI_GPIO, PCA9685,
+      PIGPIO — and the actuators sit behind an Arduino Uno speaking a binary
+      serial protocol none of them knows. Task 11 is therefore: DonkeyCar for
+      the camera, teleop UI and tub recorder, **plus a custom DonkeyCar part
+      that speaks `firmware/SERIAL_PROTOCOL.md` v0.2** — sends the 7-byte
+      command at 20 Hz with ARMED set, reads the 9-byte reply, and surfaces
+      `ticks` (the car's only odometry) and pack state. `firmware/host_test.py`
+      is the seed of that part. Also: `donkeycar[pi]` pulls in `RPi.GPIO`,
+      which does not work on the Pi 5 — use `rpi-lgpio`.)*
 
 11b. **Indicator state in the logger — GATES TASK 12** (appended 2026-09-01,
     Appendix AY / `docs/LIGHTING_SPEC.md` §5). Task 11's done-check names two
@@ -401,6 +503,14 @@ transfer gap) must not block the capstone.
     - *(Amended 2026-09-01: **gated by task 11b.** Collecting these laps before
       the logger records indicator state forfeits the multi-task head for this
       dataset. Check 11b's status before starting the run.)*
+    - *(Amended 2026-09-02 from the P5 follow-up (Appendix W) and the paired
+      eval (Appendix AJ): collect a **separate off-centre recovery set, exempt
+      from the quality filter**. In sim the 69-110-step wall was perception
+      going out of distribution — the clean corpus had no off-centre frames —
+      and the same wall will appear on the physical car. **But Appendix AJ
+      then found that recovery data mildly HURT closed-loop driving in sim**
+      (negative in 4/4 launches, n.s.). So: collect it, and evaluate it as a
+      separate arm. Do not assume it helps.)*
 13. **Baseline train + deploy.** DonkeyCar's stock trainer as baseline;
     deploy; measure. Done: autonomous attempt logged (laps, interventions).
 14. **Custom PyTorch model.** Swap PyTorch CNN into the inference path;
@@ -412,6 +522,18 @@ transfer gap) must not block the capstone.
 ### M4 — Offline world model (capstone) — tasks to be REFINED after M3
 (deliberately coarse now; detail them in a dated PRD append once M3's
 dataset format and eval harness exist)
+
+**STATUS 2026-09-02:** every M4 task below already has a working **SIM**
+implementation from SIM-POC — `ml/episode_writer.py` + `verify_corpus.py`
+(16), `train_vae.py` + `train_mdnrnn.py` (17), `run_dreamer_p4.py` + the 8 GB
+fitting table (18), `train_controller.py` / `plan_cem.py` / `eval_paired.py`
+(19). **All sim-only.** M4 proper needs real-car logs → M2 → parts. The sim
+result to carry forward honestly: **no learned policy drove reliably in sim
+across five attempts** (Appendix AJ); the causes are understood (perception
+out of distribution; a track generator that regenerates per launch); and the
+trustworthy results are the open-loop ones (aux-head probe AUC 0.673 → 1.000,
+the copycat refutation, the readout improvement). **Held-out MSE ranks
+policies backwards here — never select a controller on it.**
 
 16a. ~~**Architecture + VRAM gate (NEW, added 2026-07-23 ~17:21 CDT).** Pick
     the world-model architecture that actually fits 8GB of VRAM on the
@@ -481,6 +603,9 @@ dataset format and eval harness exist)
 
 20. **gym-donkeycar PPO baseline; honest transfer attempt + report.** The
     report's value is the measured transfer gap itself.
+    **STATUS 2026-09-02: never started, and deliberately so.** *(Numbering
+    note: this "20" collides with M4's task 20, the writeup. Pre-existing;
+    not renumbered because record entries reference both by number.)*
 
 ### TRACK — the physical driving environment (ADDED 2026-08-05; needed before M2 data collection, i.e. by ~week 5)
 
@@ -488,6 +613,16 @@ dataset format and eval harness exist)
 kept · figure-8 layout · print MARKINGS, not the road surface.** Full
 reasoning, MUTCD verification, and the rejected alternative are in record
 Appendix L.
+
+**SUPERSEDED IN PART, 2026-09-01/02 (Appendices AM/AX/BO/BX):** the floor is
+**3.0 × 3.0 m** (Evan, 2026-09-01), not 1.6 × 2.8; the layout is
+`cad/track_layout_v2.py` — a 3×3 city grid **driven as** a figure-8 through
+the centre intersection, 8.31 m route, **171 mm spare at R = 500 mm** — not a
+plain figure-8; the lane is **230 mm** on the measured 114.75 mm car, not
+261 mm on an estimated 130. The figure-8 rule and print-markings-not-surface
+both stand, the latter now as a **hybrid**: ~73 printed tiles for corner arcs
+and intersection boxes (~902 g), tape for ~31.5 m of straights (Appendix AX).
+**The marking table below is stale and NOT yet recomputed** (T1 is partial).
 
 **The core decision and why:** printing the road surface costs ~6.4 kg of
 filament and ~150-250 print-hours for a minimum two-lane loop; printing only
@@ -531,10 +666,25 @@ T2. **Measure minimum turning radius empirically** on the rolling chassis
     steer)) ⇒ corners want 500-670 mm, but that is arithmetic on an
     estimate. **No corner tile is cut before this measurement.** Done:
     measured radius in the record.
-T3. **Design the figure-8** to fit 1.6 × 2.8 m at the confirmed scale;
-    vector/CAD layout with tile boundaries chosen so **seams run parallel to
-    travel** where possible (a perpendicular seam reads as a stop bar to the
-    model). Done: layout drawing + tile cut list.
+    **UPDATE 2026-09-02 (Appendix BQ):** max steer is now MEASURED at **32°**,
+    so the only unknown in `wheelbase ÷ tan(max steer)` is wheelbase:
+    **R_min = 1.600 × wheelbase.** The ~330 mm estimate implies ~206 mm of
+    wheelbase, which is plausible for a 114.75 mm-wide car, so the 500-670 mm
+    band probably does not shrink. This is still not T2 — T2 is the empirical
+    test — but once wheelbase is calipered the geometric radius can bound the
+    corner tiles before the rolling chassis exists.
+T3. **Design the figure-8** to fit ~~1.6 × 2.8 m~~ **3.0 × 3.0 m** at the
+    confirmed scale; vector/CAD layout with tile boundaries chosen so **seams
+    run parallel to travel** where possible (a perpendicular seam reads as a
+    stop bar to the model). Done: layout drawing + tile cut list.
+    **PARTIAL 2026-09-01/02:** two parametric, self-checking layouts exist —
+    `cad/track_layout_v1.py` (figure-8 with a causeway bridge + 5 landmarks)
+    and **`cad/track_layout_v2.py`** (3×3 grid, 9 intersections, figure-8
+    route through the centre; `--radius` and `--car-width` flags). Both write
+    an SVG plan. **Neither is committed geometry** (corner radius frozen until
+    T2) and **no tile cut list exists.** A sim rehearsal of the track was
+    investigated and is IMPOSSIBLE — gym-donkeycar has no road-definition
+    message (Appendix AX).
 T4. **Fabricate substrate** — dark matte tiles, cut to the T3 list. Done:
     tiles laid out flat, photographed.
 T5. **Generate + print markings, sign, and stencils** — parametric generator
@@ -586,6 +736,8 @@ P1. **ML environment.** ~~Pinned **Python 3.11 venv** (matches DonkeyCar
     stale; GitHub is v25.10.06) + the DonkeySimWin binary (~236 MB). Done:
     `torch.cuda.is_available()` prints True from the venv AND a
     gym-donkeycar env connects to the sim and returns a camera frame.
+    **DONE 2026-08-05** (commit 83e966b; `ml/verify_env.py` is the runnable
+    done-check and exits non-zero on failure).
 P2. **Sim data corpus.** Drive the sim (scripted PID lane-follower or
     keyboard) and record camera + steering/throttle into the
     dreamerv3-torch episode format; ~100k frames; held-out split defined
@@ -606,9 +758,17 @@ P2. **Sim data corpus.** Drive the sim (scripted PID lane-follower or
     design survives (2 train + 1 entirely unseen holdout) and remains far
     stronger than a random frame split, but the phrase "four tracks" must
     never be used. Layout diversity is properly an M3/M4 real-car concern.
+    **DONE 2026-08-06 (Appendix R):** 102,888 frames, 88/88 episodes verified
+    on BOTH alignment axes, split disjoint — `ml/verify_corpus.py` PASS;
+    re-verified PASS 2026-09-01. Train is unbalanced 51:27 across the two
+    surviving layouts.
 P3. **Small world model first (Ha & Schmidhuber V+M+C).** Conv-VAE →
     z∈R^32; MDN-RNN over (z_t, a_t, h_t). Done: multi-step latent rollouts
     on held-out sim data are recognisably track-like; rollout frames saved.
+    **DONE 2026-08-06 (Appendix S):** V+M+C trained (VAE 4,348,547 params —
+    an exact match to the paper's count, asserted in code). 30-step
+    imagination beats a frozen-frame baseline **30/30 steps in-domain, 0/30
+    cross-domain**; `ml/rollout_eval.py` is the gate and exits 1 below 90%.
 P4. **DreamerV3-S offline on the same corpus.** dreamerv3-torch repo
     defaults, `offline_traindir`, imag_horizon 5, fp32 first; **Sysmem
     Fallback disabled before the first run**; log
@@ -742,8 +902,15 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
     under direct supervision, the escalation is a larger z or a detection path
     that bypasses the latent, and this item reopens.
 
-- [ ] **P6 (NEW, 2026-08-11, BLOCKING all future closed-loop claims; CAUSE
-      FOUND 2026-08-13, Appendix AI): make the
+- [x] **P6 (NEW, 2026-08-11, BLOCKING all future closed-loop claims; CAUSE
+      FOUND 2026-08-13, Appendix AI; DONE 2026-08-13, Appendix AJ — checkbox
+      ticked 2026-09-02, it had been left open for three weeks and made
+      HANDOFF and /milestone-track both report the harness as still blocking.
+      Precisely what closed it: the PAIRED design in `ml/eval_paired.py`. The
+      done-check's clause "eval_in_sim.py refuses to emit a comparison the
+      noise floor cannot support" is met by routing every comparison through
+      `eval_paired.py` — `eval_in_sim.py` itself has only the expert-survival
+      BATCH INVALID gate, not a noise-floor refusal): make the
       sim evaluation harness trustworthy, or characterise its noise well
       enough to design around.** This is not optional polish — it invalidated
       a headline result (Appendix AB, retracted in AC) and it gates every
@@ -881,6 +1048,21 @@ Lane C is why the shipping window isn't dead time.
 **Float ≈1-2 weeks, in weeks 4-6, shared with four other projects.** The
 design absorbs it: Nov 1 needs only weeks 0-9.
 
+**SCHEDULE STATUS 2026-09-02 — week 4 of the table above — and this is the
+ESCALATION the plan itself requires.** Lane C is AHEAD: SIM-POC P1-P6 complete
+and banked 2026-08-13, and the Uno actuation firmware — not in this plan at
+all — runs on the board. **Lanes A and B are ~4 weeks BEHIND:** nothing
+ordered (A2 targeted Aug 7), the coupon not printed (B1 was week 0), the
+donor only partly measured (B3), no CAD started (B4), M1 not done (was
+week 3). The plan says "anything that threatens M3-by-mid-October is
+escalated to Evan, not absorbed silently." **M3 by mid-October is now
+threatened:** with parts unordered on Sep 2 and a ~1-2 week ship, M1 cannot
+complete before ~late September, which pushes M2 into October and M3 past
+the Nov 1 soft target. The hard RD deadline (~Jan 1-15 2027) is **not** yet
+threatened. **The two moves that unstick the schedule are both Evan's and
+both cheap in time: print the coupon (needs no parts) and place the order.**
+The float has been spent.
+
 **Lane A — procurement (Evan, ~45 min then waiting).** A1 pre-order checks
 BEFORE checkout: power bank label reads 5V/3A · **count the diff ring teeth
 (28 = 62821, 24+16 = 6573)** — sets CAD mesh centres · confirm a 12-tooth
@@ -921,10 +1103,24 @@ sitting; finish (done-check + record entry) before the next.
   and `docs/research/2026-07-23_power-system.md`.
 - Lego pin holes print tight: ~5.1mm pin fit / 5.3-5.6mm rotating bore,
   but CALIBRATE ON THIS PRINTER (task 3) before cutting chassis parts.
-- Don't drive Powered Up motors from a raw H-bridge (loses encoder, fights
-  thermistor). PF motors only on the TB6612; PU motors only via Build HAT.
-- L298N is banned (1.4-3V drop wastes the 9V rail). MPU6050 is EOL — if an
-  IMU enters at M4, it's ICM-20948 or BNO055.
+- ~~Don't drive Powered Up motors from a raw H-bridge (loses encoder, fights
+  thermistor). PF motors only on the TB6612; PU motors only via Build HAT.~~
+  *(Stale since 2026-07-23: Evan owns no Lego motors, the drive is a Pololu
+  N20 with its own encoder, and the Build HAT is rejected. Struck 2026-09-02,
+  kept for history.)*
+- L298N is banned (1.4-3V drop wastes the ~~9V~~ **7.4 V** rail). MPU6050 is
+  EOL — if an IMU enters at M4, it's ICM-20948 or BNO055.
+- **TB6612 `STBY` is pulled LOW internally** — unwired, the motor is dead,
+  not degraded. It is D10. And `STBY` low is a COAST, not a stop: brake first,
+  then drop it. (2026-09-02, `hardware.md`)
+- **The steering coupler sees ~4× the drive coupler's torque, and a printed
+  cross-axle stub FAILS there** (SF 0.57-0.96). Grip a real Lego axle.
+  (2026-09-02, Appendix BV)
+- **Opening the serial port RESETS the Uno.** Never auto-arm or auto-calibrate
+  on boot — "every boot" means "every Pi reconnect". (2026-09-02)
+- **A floating analog pin reads near FULL SCALE, not zero** (10,164-10,266 mV
+  measured across runs). Any sensor guard needs an upper implausibility band.
+  (2026-09-02)
 - DonkeyCar needs 64-bit Bookworm + Python 3.11; its trainer is TF/Keras —
   the custom-model tasks exist because the portfolio story is PyTorch.
 - Sim-RL policies that win in sim can lose on hardware

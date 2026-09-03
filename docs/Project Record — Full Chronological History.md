@@ -111,6 +111,8 @@ the dated entry, not the digest.
 - [BV — The steering coupler is the highest-torque joint and a printed one fails; the self-calibrating centre cannot work as described](#appendix-bv---the-steering-coupler-is-the-highest-torque-joint-and-a-printed-one-fails-the-self-calibrating-centre-cannot-work-as-described-2026-09-02-1828-cdt) (09-02)
 - [BW — Full project-memory pass: PRD_ROADMAP and auto-memory had gone untouched all session](#appendix-bw---full-project-memory-pass-prd_roadmap-and-auto-memory-had-gone-untouched-all-session-2026-09-02-1833-cdt) (09-02)
 - [BX — HANDOFF's workstream table contradicted itself on P6; milestone-track cannot parse this PRD](#appendix-bx---handoffs-workstream-table-contradicted-itself-on-p6-milestone-track-cannot-parse-this-prd-2026-09-02-1927-cdt) (09-02)
+- [BY — Scheduled daily-audit: the watchdog trips on every good frame, and no experiment result records the commit that made it](#appendix-by---scheduled-daily-audit-the-watchdog-trips-on-every-good-frame-and-no-experiment-result-records-the-commit-that-made-it-2026-09-02-1927-cdt) (09-02)
+- [BZ — PRD cleanup: 24 dated strikes and appends, P1-P3 stamped, P6 ticked, and the schedule escalation the plan itself requires](#appendix-bz---prd-cleanup-24-dated-strikes-and-appends-p1-p3-stamped-p6-ticked-and-the-schedule-escalation-the-plan-itself-requires-2026-09-02-1936-cdt) (09-02)
 
 ---
 
@@ -8509,3 +8511,282 @@ unmeasured.
 
 No new engineering. Two stale HANDOFF rows corrected and one tooling limitation
 recorded. **Nothing ordered, nothing wired, no actuator has moved.**
+
+# Appendix BY - Scheduled daily-audit: the watchdog trips on every good frame, and no experiment result records the commit that made it (2026-09-02, ~19:27 CDT)
+Scheduled `daily-audit` cold sweep, findings only — nothing fixed, nothing
+committed. Four Sonnet workers under a file manifest (87 in-scope text files of
+225 tracked; 138 binary/generated excluded), plus session-model re-verification
+of every crit and high.
+
+## Landing-check on BW: clean
+
+BW's claims were tested against disk and all hold. `.claude/codebase-memory/hardware.md`
+exists (the `gotchas.md` split landed). `cad/track_layout_v2.json` reads
+`lane_width_m 0.2295` and `span_m 2.6295`, matching BW's "lane 230 mm, span
+2629 mm". PRD tasks 8b and 8c are present with their done-check evidence at
+`PRD_ROADMAP.md:326-342`. The auto-memory holds `project-doc-layout.md` and
+`car-doc-tooling-traps.md` with a two-line `MEMORY.md`, as claimed. All three
+items BW listed as **deliberately not updated** are genuinely not updated —
+the SIM_TRANSFER_SPEC lane table still shows its 100/130 mm columns. BW's
+honesty about its own partial closes checks out.
+
+## CRIT — the watchdog trips on every good frame; the car brakes instead of driving
+
+`firmware/uno_control/uno_control.ino` samples the clock twice per iteration and
+compares across the gap:
+
+- `:427` `uint32_t now = millis();`
+- `:433` `pack.poll(now);` — 16 blocking `analogRead` calls
+- `:446` `handleFrame(rxBuf, millis());` — a SECOND, LATER sample
+- `:365` `lastFrameMs = now;` (the fresher parameter, inside `handleFrame`)
+- `:458` `bool wd = (lastFrameMs == 0) || (now - lastFrameMs > WATCHDOG_MS);`
+  — uses the STALE `now`, with `WATCHDOG_MS = 150` at `:72`
+
+On any iteration that handles a valid frame, `lastFrameMs > now`, so the
+`uint32_t` subtraction underflows to about 4.29e9 and clears 150 immediately.
+`hardware.md:305-308` measured the loop at 2.0-3.0 ms, dominated by that ADC
+poll, so the gap is never zero — the false trip is the normal case, not a race.
+Effect once a motor is wired: `handleFrame` sets ARMED and drives, then the
+watchdog block in the same iteration clears `armed` and forces `OUT_BRAKE`.
+
+**Actuators are unwired, so nothing physical has happened.** This is latent, and
+it lands the moment the motor is attached.
+
+Why the existing tests miss it: SELFTEST calls `outputModeFor()` as a pure
+function with hand-supplied booleans, never the real `loop()`/`millis()` path,
+and `host_test.py`'s 20 Hz stream test checks `seq` only, never that
+`ST_WATCHDOG` stays clear during a healthy stream. "SELFTEST 39/39, host_test
+11/11" is not evidence this path works.
+
+Fix is one line: pass the loop-scope `now` at `:446` instead of a fresh
+`millis()`.
+
+## HIGH
+
+1. **No experiment result records the code that produced it.** 108 tracked
+   `ml/runs/*.json`; `git grep -ilE '"(commit|git_sha|git_commit|rev|sha)"'`
+   returns **0**, while 82 of 108 do record a seed. A result cannot be traced to
+   a commit. Cheapest fix: stamp `git rev-parse HEAD` in the shared result
+   writer. The 108 existing files cannot be retrofitted.
+2. **SELFTEST count stale in four places.** `grep -c "CHECK("` on
+   `uno_control.ino` = 40 (1 macro definition + 39 invocations), so 39/39 is
+   current. Still reading 37/37: `uno_control.ino:7`, `firmware/SERIAL_PROTOCOL.md:5`,
+   `HANDOFF.md:23`, `.claude/codebase-memory/testing.md:100`. `HANDOFF.md:241`
+   carries BOTH numbers in one row.
+3. **Split-seed leak in `ml/train_mdnrnn.py:165`.** Six VAE-checkpoint consumers
+   derive `split_seed = vae_ckpt.get("args", {}).get("seed", 0)`; this one passes
+   `seed=args.seed`. `rollout_eval.py:216-218` already carries an explicit
+   mismatch warning documenting this exact incident — the hardening was never
+   propagated upstream. A VAE trained at a non-default seed lets its own fit
+   episodes leak into the MDN-RNN's `val_indomain` set. (`exp_aux_head.py:306`
+   and `prep_dreamer_corpus.py:108` also pass `args.seed` and want the same look.)
+4. **`ml/preprocess.py` claims an atomic swap it does not perform.** The comment
+   at `:85` says all four outputs are "swapped in together"; `:138` is a loop of
+   four sequential `os.replace` calls. `ml/splits.py:95` `load_proc()` performs no
+   cross-array length check, so a kill between renames yields a new-size images
+   array beside old-size index arrays and every trainer accepts it silently.
+5. **`ml/collect_recovery.py:42-44` asserts a gate that cannot pass.** The
+   docstring claims the PID identity gate still passes; `verify_corpus.py:224-249`
+   diffs the recomputed PID against the executed, noise-injected action, so it is
+   guaranteed to fail on every recovery episode's noise-burst frames. A worker
+   reproduced it on real data (`max |diff| 1.663858 at index 128`). The claim was
+   written but never run.
+
+## MEDIUM
+
+- `docs/WIRING_PROTOSHIELD.md:284` says STBY "nothing implements it" — the doc
+  was edited 26 minutes AFTER `uno_control.ino` implemented it.
+- Same file, `:243-249`, says BOM row 5 "still lists #1093"; `docs/BOM.md:23`
+  was corrected to #5159 in the same commit that added the firmware.
+- `.claude/codebase-memory/data.md:124` still reads "DESIGN ONLY... nothing
+  implements it" while claiming a 2026-09-02 update — a same-day miss.
+- `PRD_ROADMAP.md:100` and `:310-311` give two different current BOM totals in
+  one file. `:100` still says ~$226-234; the corrected ~$235-243 is at `:310`.
+  This is the doc used to place an order.
+- `docs/LIGHTING_SPEC.md:75,88-90` still specifies 20 mA/LED (40 mA/pin with two
+  per channel), past the ATmega328P per-pin maximum. The 10 mA correction exists
+  in WIRING_PROTOSHIELD and `hardware.md` but never reached the spec. Nothing is
+  built yet.
+- `scripts/git-hooks/pre-commit:24-37` comments "Fails CLOSED" but has no
+  `exit 1` in its missing-file branch — it fails OPEN exactly like the secret
+  gate above it. Both depend on untracked `~/.claude/skills/` paths, so on any
+  other machine both gates are absent.
+- `ml/measure_operating_point.py:62-65` omits the mid-warmup termination guard
+  that all six sibling call sites carry.
+- `ml/build_expert_labels.py:76-79` (and `exp_recovery.py:151-153`) guard episode
+  alignment by total frame count only — a same-length reordering passes.
+- `ml/models.py` is imported by 14 of 33 modules with fan-out 0; only
+  `ConvVAE.__init__`'s parameter-count assert guards it.
+- `ml/data/proc/train_mu.npy` and `holdout_mu.npy` predate the encoder-fingerprint
+  convention; `splits.py` warns and uses them anyway. No `*latents.key` exists.
+
+## LOW
+
+`cad/track_layout_v2.json` keys a measured value `car_width_m_ESTIMATE`;
+`docs/LIGHTING_SPEC.md:124` cites a line range in PRD_ROADMAP that holds
+unrelated text; `features.md`/`conventions.md`/`INDEX.md` say "31 Python files
+under ml/" where `git ls-files` counts 33, and the 25/31-style fractions keyed to
+that denominator are no longer re-derivable; four genuinely unused imports
+(`compare_encoders.py:35`, `eval_in_sim.py:59`, `plan_cem.py:58`,
+`trace_failure.py:45`); four `except Exception: pass` sites missing the
+`# noqa: BLE001` their six siblings carry.
+
+## Verified healthy (load-bearing negatives)
+
+Ran, not read: `ml/models.py` self-check PASS at exactly 4,348,547 params;
+`ml/splits.py` PASS; `ml/verify_corpus.py` PASS at 102,888 frames, 88/88 both
+axes; `scripts/gen_tolerance_coupon.py` OVERALL PASS; both `cad/track_layout_v*.py`
+self-checks PASS with committed JSON regenerating byte-identical. All 36
+`ml/*.py` + `cad/*.py` byte-compile clean. Zero import cycles. Every dependency
+in `ml/requirements.txt` is pinned exactly, including two git dependencies pinned
+to commit SHAs, and all were verified actually installed at those pins
+(`pip check` clean). No committed secret or personal absolute path. `.gitignore`
+is genuinely effective — the 7.6 GB corpus and 4.2 GB venv are untracked. The
+record's own integrity is sound: 75 appendices A-BW, no duplicates or gaps,
+76/76 TOC anchors resolve. Every command-frame field is range-clamped before
+reaching an actuator call, and the servo-span fix from BU is internally
+consistent (450/500 = 90%, above the 85% SELFTEST guard).
+
+A ~99 MB orphaned loose git object exists (`git fsck --unreachable`), never
+reachable from any commit and never pushed — evidence the `ml/runs/**/images.npy`
+ignore rule caught a `git add` before it became a commit. Normal gc reclaims it.
+
+## Coverage and cost
+
+87 files in the manifest, all accounted for. Honest gaps: 5 of 7
+`docs/research/*.md` got a targeted grep rather than a full claim-by-claim read;
+roughly lines 118-900 of `PRD_ROADMAP.md` were not read line by line; no CVE
+database was reachable, so dependency vulnerability status is "could not
+determine", not "clean"; no firmware claim was verified on hardware — the CRIT is
+confirmed at the arithmetic level and corroborated by the project's own recorded
+loop-period measurement, not by flashing a board.
+
+4 workers, ~880K subagent tokens.
+
+# Appendix BZ - PRD cleanup: 24 dated strikes and appends, P1-P3 stamped, P6 ticked, and the schedule escalation the plan itself requires (2026-09-02, ~19:36 CDT)
+Evan: "clean up and edit PRD to reflect the current state of the project."
+Done under the standing rule — **ADD by appending · REMOVE by dated
+strikethrough · never delete · PIVOT by forking** — and the first decision was
+that there is **no pivot to fork**: the direction (M1 → M4, BC then an offline
+world model) is unchanged. What had happened is six weeks of drift: hardware
+substitutions, estimates replaced by measurements, and a schedule that slipped.
+So this is annotation, not a fork.
+
+## BY.1 The method, because it is the reason nothing was lost
+
+The whole file was read first (934 lines), then **24 exact-match substitutions**
+were written to one script that **aborts before writing anything if any
+substitution matches other than exactly once.** It aborted on the first run —
+one anchor was wrong (task 2 is followed by task 3, not 4) — and **wrote
+nothing**; the anchor was corrected and the second run applied all 24. Result:
+934 → 1130 lines, encoding sweep clean, `git diff` shows 216 insertions and 20
+"deletions" — every one of the 20 is a line re-wrapped in `~~ ~~` with its
+original words intact.
+
+## BY.2 What changed, by category
+
+**Terms that had been wrong for weeks, struck in place with the correction:**
+- "PF motor" in M1 task 6 and M2 task 9 — wrong since 2026-07-23 ~17:21, when
+  Evan confirmed he owns no Lego motors. Now **N20 #5159** with its dimensions.
+- "LiPo + UBEC" in M1 task 7 and M2 task 10 — superseded 2026-07-23 ~17:59 by
+  the split-source 18650 + LM2596 design. Task 7 also gains the **Uno + proto
+  shield bay** (68.6 × 53.4 mm, 60% of car width, mounts lengthwise) and the
+  camera mount target (horizon on row 42).
+- "1.6 × 2.8 m" in the TRACK header and T3 — floor is 3.0 × 3.0 m since
+  2026-09-01. Lane 261 → 230 mm on the measured car.
+- "9V rail" in §7 — it is 7.4 V.
+- §7's "PF motors only on the TB6612; PU motors only via Build HAT" — struck
+  as stale since 2026-07-23, kept for history.
+
+**Status stamps that were missing:**
+- **P1, P2, P3 had no DONE stamp** in the PRD despite HANDOFF and the record
+  saying so since 2026-08-05/06. Stamped with their evidence (commit 83e966b;
+  102,888 frames 88/88 verified; VAE 4,348,547 params 30/30 in-domain).
+- **P6's checkbox was `- [ ]` three weeks after it was closed** (2026-08-13,
+  Appendix AJ). This single unticked box is what made both HANDOFF's stale row
+  (BX.2) and `/milestone-track` report the harness as still blocking. Ticked,
+  with a precise note on WHAT closed it: the paired design in
+  `ml/eval_paired.py`. The done-check's "eval_in_sim.py refuses to emit a
+  comparison the noise floor cannot support" is met by routing comparisons
+  through `eval_paired.py` — **`eval_in_sim.py` itself has only the
+  expert-survival BATCH INVALID gate (lines 332-348), not a noise-floor
+  refusal.** Verified by grep before writing, not assumed.
+- Task 2 (inventory) marked OPEN — printer, filament, CAD tool, set numbers all
+  still uncatalogued. Task 4 marked PARTIAL with exactly what is and is not
+  measured. Task 9 marked PARTIAL — the Uno half done ahead of parts,
+  everything needing a part untouched. T3 marked PARTIAL — two layouts exist,
+  neither committed, no tile cut list. M5 marked never-started, and its
+  **task-number collision with M4's task 20** noted rather than renumbered.
+
+**Constraints that did not exist when the tasks were written, appended:**
+- M1 task 5 names a "printed servo-horn→Lego-axle link." **That link fails**
+  (BV: SF 0.57-0.96 at MG90S stall). Hard constraint appended to the task.
+- M2 task 11 assumes DonkeyCar drives the actuators. **It cannot** — its three
+  PWM backends do not speak the Uno's serial protocol. Amended: DonkeyCar for
+  camera/teleop/tub, plus a custom part speaking SERIAL_PROTOCOL.md v0.2, with
+  `firmware/host_test.py` as its seed; and `rpi-lgpio` not `RPi.GPIO`.
+- M2 task 10 gains the pack-safety gate (BOM Verify item 6).
+- M3 task 12 gains the off-centre recovery set — **with the caveat from AJ
+  that in sim it mildly hurt**, so it is collected as a separate arm, not
+  assumed to help.
+- M4 header gains a status: every task has a working SIM implementation, all
+  sim-only, and the honest carry-forward is that no learned policy drove
+  reliably in sim and held-out MSE ranks controllers backwards.
+- T2 gains the 32° measurement and `R_min = 1.600 × wheelbase`, stated as
+  still-not-T2.
+
+**Two new top-level blocks:**
+- **§2 "What exists (2026-09-02)"** — the original said "Docs only, no code,
+  no git repo, no hardware bought." Superseded by a dated inventory: repo,
+  31 ML scripts, four firmware sketches with one running on the board, coupon
+  STL unprinted, two uncommitted layouts, and the honest last line: *nothing
+  purchased, nothing printed, nothing wired.*
+- **§4 "Stack (CURRENT)"** — one bullet that finally names the whole current
+  stack in one place, with the Uno (absent from every prior stack line), the
+  encoder motor, the pin budget (zero PWM spare, A1-A5 free), the 2S BMS safety
+  gap, and the DonkeyCar actuator caveat.
+
+**A reading note at the top**, because a file that needs this much annotation
+needs to say how to read itself: HANDOFF is the snapshot, this is the plan, a
+task's latest dated note is its status, and **`/milestone-track`'s percentage
+is not to be trusted here** (numbered-prose tasks; it reads 1/7 after the
+P6 tick, still an artifact).
+
+## BY.3 The escalation — this is the part that matters
+
+§6b's execution plan (dated 2026-08-05) carries its own rule: *"anything that
+threatens M3-by-mid-October is escalated to Evan, not absorbed silently."*
+Appended to it, dated, as **SCHEDULE STATUS 2026-09-02 — week 4:**
+
+- **Lane C (software) is AHEAD.** SIM-POC P1-P6 complete and banked
+  2026-08-13; the Uno firmware — not in the plan at all — runs on the board.
+- **Lanes A and B (procurement, physical) are ~4 weeks BEHIND.** Nothing
+  ordered (A2 was targeted for Aug 7); coupon not printed (B1 was week 0);
+  donor only partly measured (B3); no CAD (B4); M1 not done (was week 3).
+- **M3 by mid-October is now threatened.** Parts unordered on Sep 2 plus a
+  1-2 week ship means M1 cannot complete before late September, pushing M2 into
+  October and M3 past the Nov 1 soft target. **The hard RD deadline
+  (~Jan 1-15 2027) is not yet threatened.** The plan's 1-2 weeks of float has
+  been spent.
+- **The two moves that unstick it are both Evan's and both cheap in time:
+  print the coupon (needs no parts) and place the order.**
+
+This is stated as the plan's own rule firing, not as a judgement. Lanes A and
+B are Evan's hands by design; the plan assumed 2-3 sittings a week across five
+concurrent projects.
+
+## BY.4 What was deliberately NOT done
+
+- **No fork.** Not a pivot.
+- **No renumbering** — record appendices reference task numbers; the M4/M5
+  "task 20" collision is noted, not fixed.
+- **No conversion of numbered tasks to checkboxes** to make `/milestone-track`
+  work — that would change the format the PRD system is built on.
+- **The marking table is still not recomputed** (T1's open half), and
+  `SIM_TRANSFER_SPEC.md` §3 / `LIGHTING_SPEC.md` are still unamended — same as
+  BW.3. Said again rather than silently counted.
+
+## BY.5 State
+
+The PRD now agrees with disk and with HANDOFF. **Nothing ordered, nothing
+printed, nothing wired, no actuator has moved.** Record at 77 appendices.
