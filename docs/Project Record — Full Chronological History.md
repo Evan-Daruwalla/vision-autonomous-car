@@ -125,6 +125,7 @@ the dated entry, not the digest.
 - [CJ — Vendor consolidation: no single vendor exists; SparkFun's N20 fails the same speed floor that killed the Lego motors; the 2S BMS exists nowhere](#appendix-cj---vendor-consolidation-no-single-vendor-exists-sparkfuns-n20-fails-the-same-speed-floor-that-killed-the-lego-motors-the-2s-bms-exists-nowhere-2026-09-03-1656-cdt) (09-03)
 - [CK — The pack safety hole is closed: a charger is not a BMS, and the requirement was aimed at the wrong part; EVE 25P replaced by Samsung 25R](#appendix-ck---the-pack-safety-hole-is-closed-a-charger-is-not-a-bms-and-the-requirement-was-aimed-at-the-wrong-part-eve-25p-replaced-by-samsung-25r-2026-09-03-1700-cdt) (09-03)
 - [CL — DigiKey falsified as a consolidator (Marketplace ships separately) but cheapest on three Pi parts; 4GB restock 2026-10-05; a second search-snippet lie](#appendix-cl---digikey-falsified-as-a-consolidator-marketplace-ships-separately-but-cheapest-on-three-pi-parts-4gb-restock-2026-10-05-a-second-search-snippet-lie-2026-09-03-1703-cdt) (09-03)
+- [CM — Vilros checked before checkout: the linked variant is a $179.99 kit, not a bare board, and two checks disagreed on Board Only pricing](#appendix-cm---vilros-checked-before-checkout-the-linked-variant-is-a-17999-kit-not-a-bare-board-and-two-checks-disagreed-on-board-only-pricing-2026-09-03-1712-cdt) (09-03)
 
 ---
 
@@ -10170,3 +10171,67 @@ completion signal is not a result.
 Consolidation research is CLOSED. **Three vendors remains the answer**, with
 DigiKey as the cheapest source for the Pi-ecosystem small parts and CanaKit the
 only in-stock 4 GB. **Nothing ordered.**
+
+# Appendix CM - Vilros checked before checkout: the linked variant is a $179.99 kit, not a bare board, and two checks disagreed on Board Only pricing (2026-09-03, ~17:12 CDT)
+Evan named a purchase link before checkout: Vilros, a vendor none of the five
+consolidation sweeps (Adafruit/SparkFun/Pololu/DigiKey/Mouser) had checked.
+Verified directly rather than accepted on the link text, because the linked
+variant is not what it first appears to be.
+
+## CM.1 The linked URL lands on a $179.99 KIT, not the ~$110 bare board the BOM specs
+
+Read the live page directly (`get_page_text`, not a summarized fetch). At
+`https://vilros.com/products/raspberry-pi-5?variant=40082990301278`:
+
+- **Style pre-selected: "Vilros Basic Starter Kit"** (SKU
+  `VR5-BK-4GB-V287B-BP`), **Add To Cart — $179.99.**
+- Style choices on the page, in order: **Board Only**, Vilros Essentials Kit,
+  Vilros Basic Starter Kit, Vilros Complete Kit. "Board Only" is a real option
+  on this listing — the variant link just does not select it.
+- The Basic Starter Kit bundles: 32 GB microSD (pre-flashed), a metal case with
+  passive+active PWM cooling, a Vilros 27W 5V/5A USB-C PSU, an HDMI adapter
+  cable, a quickstart guide, a neoprene storage bag, an LIR2032 RTC battery
+  connector, and a mini-to-standard camera adapter cable.
+
+**A second, independent check of the same URL disagreed with the first**,
+claiming $179.99 corresponds to "Board Only." That conflicts with the page
+text actually read off the rendered page, which showed the Basic Starter Kit
+selected at that price. **Trusted the direct read over the second check** — a
+summarizing pass is exactly the kind of source that gets a variant-to-price
+mapping wrong, and this is a real-money decision. **The Board Only price at
+Vilros was NOT confirmed** — the in-browser click-through to select it hit a
+render failure (blank screenshots, stale element refs) and was not forced
+through for one data point.
+
+## CM.2 What is confirmed, and what it's worth
+
+**Confirmed: the Basic Starter Kit, 4GB, is IN STOCK at $179.99** — Add To Cart
+is live, no sold-out marking on that combination. Only the **2GB capacity**
+carried an explicit "Variant sold out or unavailable" tag in the capacity list;
+4GB did not. This makes Vilros the **fourth 4GB source found in stock**, after
+CanaKit ($110), Adafruit ($130), and Amazon-class general retail — none of
+which was checked against Vilros specifically before now.
+
+**But $179.99 is 63.6% over CanaKit's $110 bare board**, and the bundle
+substantially overlaps rows already priced elsewhere in the BOM: the SD card
+(row 4, $21.95, already sourced), and cooling (the Active Cooler line, flagged
+at $5.00-10.95 depending on vendor). The kit's PSU does not fit this project's
+architecture at all — `HANDOFF.md` and the power research specify a
+**split-source** design (USB power bank to the Pi only, a separate 2S pack for
+actuators); a bundled Pi-side PSU is not part of that plan and would be unused
+capacity paid for.
+
+**Not recommended as read.** If Evan wants the Vilros *board*, "Board Only"
+needs its own price/stock check before checkout — it was not obtained here.
+
+## CM.3 Push
+
+Evan asked to push. Confirmed via `git fetch` immediately before this entry:
+**5 commits ahead of `origin/main`, 0 behind** — `ba43e9c` down through
+`d83a5f5`. The trading-guard hook blocks Claude from pushing; Evan runs it.
+
+## CM.4 State
+
+**Nothing ordered.** The Pi purchase remains open across at least five verified
+sources (2 GB pishop $65; 4 GB CanaKit $110, Adafruit $130, Vilros kit $179.99,
+DigiKey 4 GB backordered to 2026-10-05). Push is queued, not executed.
