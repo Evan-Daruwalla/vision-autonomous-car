@@ -39,9 +39,17 @@ So downstream consumers split cleanly:
   controller (C)   -> use `log_expert_steer`, or drop noise frames entirely.
                       Cloning the noise would teach the car to swerve.
 
-**The PID identity gate still passes**, because `log_cte` and the logged gains
-still reproduce `log_expert_steer` exactly; the executed action differs by the
-recorded noise, which is itself logged. Nothing about the verifier is relaxed.
+**The PID identity gate passes, and as of 2026-09-02 it actually checks this.**
+`log_cte` and the logged gains reproduce `log_expert_steer` exactly; the
+executed action differs by the recorded noise, which is itself logged. That was
+always true of the DATA -- but until cold audit A4 the verifier compared its
+recomputed PID steer against the EXECUTED action, so it failed on all 20
+recovery episodes (max |diff| 1.71) and this paragraph was a claim nobody had
+run. `verify_corpus.py` now checks the identity against `log_expert_steer`,
+checks throttle against the executed steer, and proves `log_noise` honest
+(executed == expert on clean frames, != on flagged ones). Nothing about the
+verifier is relaxed; it was made to check what this docstring says.
+Done-check: `python ml/verify_corpus.py ml/data/sim_recovery` -> PASS.
 
 Episodes are written to a SEPARATE directory. The P2-P5 corpus is untouched
 and every result in the record remains reproducible from it.

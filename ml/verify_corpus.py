@@ -30,6 +30,7 @@ from pathlib import Path
 
 import numpy as np
 
+from collect_recovery import MAX_MEAN_ABS_CTE_RECOVERY
 from collect_sim_data import MAX_MEAN_ABS_CTE, MIN_EPISODE_STEPS
 from episode_writer import load_episode
 
@@ -120,9 +121,20 @@ def check_structure(ep: dict, path: Path, failures: list) -> None:
     # F7, open since 2026-08-05.)
     if "log_mean_abs_cte" in ep:
         cte = float(ep["log_mean_abs_cte"])
-        if cte > MAX_MEAN_ABS_CTE:
+        # Recovery episodes are collected with a deliberately looser cap --
+        # MAX_MEAN_ABS_CTE is the threshold that excluded off-centre data in the
+        # first place, so applying it here would reject exactly the episodes
+        # collect_recovery.py exists to produce. The collector already logs
+        # log_recovery, so the gate reads the evidence instead of asserting a
+        # constant that is not constant. (Cold audit A4, 2026-09-02 -- same
+        # class as the omitted-log_ki misdiagnosis, Appendix P.2.)
+        recovery = float(ep.get("log_recovery", 0.0)) == 1.0
+        cap = MAX_MEAN_ABS_CTE_RECOVERY if recovery else MAX_MEAN_ABS_CTE
+        cap_name = ("MAX_MEAN_ABS_CTE_RECOVERY" if recovery
+                    else "MAX_MEAN_ABS_CTE")
+        if cte > cap:
             failures.append(f"{name}: mean|cte| {cte:.3f} exceeds the collector's "
-                            f"MAX_MEAN_ABS_CTE={MAX_MEAN_ABS_CTE}")
+                            f"{cap_name}={cap}")
     if T < MIN_EPISODE_STEPS:
         failures.append(f"{name}: {T} steps is below the collector's "
                         f"MIN_EPISODE_STEPS={MIN_EPISODE_STEPS}")
@@ -199,6 +211,17 @@ def check_pid_identity(ep: dict, acc: dict, failures: list) -> None:
     step. Measured 2026-08-05 -- on a known-good corpus the shift correlates
     better with action[i-1] than action[i]. That is physics, not a bug, and
     it makes peak-correlation-at-lag-zero the wrong test.)
+
+    RECOVERY EPISODES (cold audit A4, 2026-09-02). collect_recovery.py injects
+    noise bursts into the EXECUTED steer, so `action` is deliberately not the
+    PID output on those frames and this gate failed on all 20 of them -- while
+    that collector's docstring claimed it still passed. Both are now true:
+    where `log_expert_steer` and `log_noise` are present the identity is
+    checked against `log_expert_steer` (which is what the claim always meant),
+    throttle is checked against the EXECUTED steer exactly as both collectors
+    compute it, and `log_noise` itself is proven honest -- executed == expert
+    on every clean frame and != on every flagged one. A decorative flag would
+    otherwise let anything through.
     """
     name = ep.get("_name", "?")
     need = ("log_cte", "log_kp", "log_ki", "log_kd", "log_steer_sign",
@@ -210,6 +233,22 @@ def check_pid_identity(ep: dict, acc: dict, failures: list) -> None:
 
     cte = np.asarray(ep["log_cte"], np.float64)
     act = np.asarray(ep["action"], np.float64)
+    # Both or neither: half-recorded noise metadata cannot be checked, and
+    # must not be silently treated as a clean episode.
+    has_exp, has_noise = "log_expert_steer" in ep, "log_noise" in ep
+    if has_exp != has_noise:
+        failures.append(
+            f"pid-identity: {name}: half-recorded recovery metadata - "
+            f"log_expert_steer {'present' if has_exp else 'missing'} but "
+            f"log_noise {'present' if has_noise else 'missing'}")
+        return
+    expert = np.asarray(ep["log_expert_steer"], np.float64) if has_exp else None
+    noise = np.asarray(ep["log_noise"], np.float64) if has_noise else None
+    if expert is not None and not (len(expert) == len(noise) == len(act)):
+        failures.append(
+            f"pid-identity: {name}: log_expert_steer/log_noise length "
+            f"{len(expert)}/{len(noise)} != action {len(act)}")
+        return
     kp, ki, kd = float(ep["log_kp"]), float(ep["log_ki"]), float(ep["log_kd"])
     sign, lim = float(ep["log_steer_sign"]), float(ep["log_steer_limit"])
     thr, thr_c = float(ep["log_throttle"]), float(ep["log_throttle_corner"])
@@ -221,6 +260,7 @@ def check_pid_identity(ep: dict, acc: dict, failures: list) -> None:
 
     prev, integral = 0.0, 0.0
     max_err, worst = 0.0, -1
+    dishonest = []
     for i in range(1, len(act)):
         e = cte[i - 1]
         # mirror PIDDriver.act exactly, integral clamp included
@@ -228,11 +268,32 @@ def check_pid_identity(ep: dict, acc: dict, failures: list) -> None:
         steer = float(np.clip(
             sign * (kp * e + ki * integral + kd * (e - prev)), -lim, lim))
         prev = e
-        throttle = thr_c if abs(steer) > 0.5 else thr
-        err = max(abs(steer - act[i, 0]), abs(throttle - act[i, 1]))
+        # The reference is the EXPERT's steer where one was logged; on a plain
+        # corpus that is the executed action, so this is a strict generalisation.
+        ref = expert[i] if expert is not None else act[i, 0]
+        # Throttle follows the EXECUTED steer -- collect_sim_data.py and
+        # collect_recovery.py both compute it that way, from what they sent.
+        throttle = thr_c if abs(act[i, 0]) > 0.5 else thr
+        err = max(abs(steer - ref), abs(throttle - act[i, 1]))
         if err > max_err:
             max_err, worst = err, i
+        if expert is not None:
+            # log_noise must MEAN something: clean frames execute the expert
+            # exactly, flagged frames must differ from it.
+            clean = noise[i] == 0.0
+            if clean != bool(act[i, 0] == expert[i]):
+                dishonest.append(i)
+            elif not clean:
+                acc["noise_frames"] += 1
     acc["checked"] += 1
+
+    if dishonest:
+        failures.append(
+            f"pid-identity: {name}: log_noise is not honest at indices "
+            f"{dishonest[:5]} ({len(dishonest)} total) - the executed steer "
+            f"equals the expert on a frame flagged noisy, or differs from it "
+            f"on a frame flagged clean. The flag cannot be trusted to exempt "
+            f"anything.")
 
     # 1e-5 is safe ONLY because KI is currently 0.0. `integral` is replayed
     # here from float32-rounded log_cte while the collector accumulated it in
@@ -250,6 +311,7 @@ def check_pid_identity(ep: dict, acc: dict, failures: list) -> None:
 
 def finalize_pid_identity(acc: dict, total: int, failures: list) -> None:
     checked, skipped = acc["checked"], acc["skipped"]
+    noise_frames = acc["noise_frames"]
     if checked == 0:
         failures.append("pid-identity: no episode carried the log_cte metadata "
                         "needed to verify alignment exactly - recollect with "
@@ -264,8 +326,10 @@ def finalize_pid_identity(acc: dict, total: int, failures: list) -> None:
             f"{skipped[0][0]} (missing {skipped[0][1]}). Recollect them or "
             f"remove them - a partially verified corpus is not verified.")
     else:
+        extra = (f", {noise_frames} noise frames checked against "
+                 f"log_expert_steer" if noise_frames else "")
         print(f"  exact PID identity     : verified on {checked}/{total} "
-              f"episode(s), every action reproduced from log_cte")
+              f"episode(s), every action reproduced from log_cte{extra}")
 
 
 def check_alignment(ep: dict, acc: dict, failures: list) -> None:
@@ -368,14 +432,28 @@ def finalize_alignment(acc: dict, total: int, failures: list) -> None:
     # produces that signature at -2 (see the constants above). Stated, not
     # papered over: the action axis is what is covered exactly.
     peaks = [c[2] for c in checked]
-    mode = max(set(peaks), key=peaks.count)
     dist = {lag: peaks.count(lag) for lag in sorted(set(peaks))}
+    top = max(dist.values())
+    tied = [lag for lag, n in dist.items() if n == top]
+    # An exact tie has no mode. `max(set(peaks), key=peaks.count)` silently
+    # picked one by set-iteration order, so a 10/10 split reported "mode -2"
+    # and failed a corpus the per-episode band check had passed 20/20 (cold
+    # audit A4, 2026-09-02 -- the recovery corpus is exactly this shape).
+    # Abstaining is the module's own rule for an ambiguous measurement, not a
+    # widened tolerance. LIMIT, stated: a whole-corpus roll that happened to
+    # produce an exact tie would not be caught by the mode; the per-episode
+    # band check is the coverage that remains.
+    mode = tied[0] if len(tied) == 1 else None
     rs = [c[3] for c in checked]
+    mode_txt = f"mode {mode:+d}" if mode is not None else f"mode UNDETERMINED (tie {tied})"
     print(f"  image-axis gate        : {len(checked)}/{total} episodes in band "
-          f"{PLAUSIBLE_LAGS}, lag distribution {dist}, mode {mode:+d} "
+          f"{PLAUSIBLE_LAGS}, lag distribution {dist}, {mode_txt} "
           f"(|r| {min(rs):.2f}-{max(rs):.2f})")
 
-    if mode != EXPECTED_MODE_LAG:
+    if mode is None:
+        print(f"  note: lag mode undetermined ({dist}) - abstaining. The "
+              f"per-episode band check above is the coverage on this corpus.")
+    elif mode != EXPECTED_MODE_LAG:
         failures.append(
             f"image-axis: the corpus lag MODE is {mode:+d}, expected "
             f"{EXPECTED_MODE_LAG:+d} (distribution {dist}). Every episode "
@@ -399,12 +477,12 @@ def main():
 
     failures: list[str] = []
     split_tracks: dict[str, set] = {}
-    total_frames, n_episodes = 0, 0
+    total_frames, n_episodes, n_recovery = 0, 0, 0
     # Streaming accumulators: each episode is checked and then DISCARDED.
     # Retaining every image array cost 4.09 GB at 76k frames and would have
     # OOM'd near the PRD's own ~100k target -- i.e. the done-check would have
     # died exactly when P2 became finishable.
-    pid_acc = {"checked": 0, "skipped": []}
+    pid_acc = {"checked": 0, "skipped": [], "noise_frames": 0}
     lag_acc = {"checked": [], "weak": [], "bad": []}
 
     for split_dir in sorted(p for p in root.iterdir() if p.is_dir()):
@@ -429,6 +507,7 @@ def main():
             check_pid_identity(ep, pid_acc, failures)
             check_alignment(ep, lag_acc, failures)
             n_episodes += 1
+            n_recovery += float(ep.get("log_recovery", 0.0)) == 1.0
             del ep
         total_frames += frames
         print(f"{split:9s}: {len(files):3d} episodes, {frames:7d} frames, "
@@ -438,7 +517,15 @@ def main():
 
     # The layout split is P2's whole point, so "could not check it" must be a
     # failure, not silence. --only train produces exactly this state.
-    if "train" in split_tracks and "holdout" in split_tracks:
+    if set(split_tracks) == {"train"} and n_recovery == n_episodes > 0:
+        # collect_recovery.py writes train/ only, by design: recovery data
+        # augments the training corpus and has no holdout of its own. Decided
+        # by EVIDENCE in the npz (every episode carries log_recovery), never a
+        # CLI flag -- a flag is how a gate gets switched off silently.
+        print(f"  layout split          : not applicable - all {n_episodes} "
+              f"episodes are log_recovery, and collect_recovery.py writes "
+              f"train/ only")
+    elif "train" in split_tracks and "holdout" in split_tracks:
         overlap = split_tracks["train"] & split_tracks["holdout"]
         if overlap:
             failures.append(f"LEAKAGE: track(s) in both train and holdout: {sorted(overlap)}")

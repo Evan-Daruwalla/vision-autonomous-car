@@ -1058,14 +1058,34 @@ Each item carries its own done-check.
       trainer accepts it silently. Done: either a real atomic swap (write into a
       versioned dir, swap one pointer) or a loud length check in `load_proc()`,
       and the comment tells the truth either way.
-- [ ] **A4 — `ml/collect_recovery.py:42-44` asserts a gate that cannot pass.**
+- [x] **A4 — `ml/collect_recovery.py:42-44` asserts a gate that cannot pass.**
       Its docstring says the PID-identity gate still passes; `verify_corpus.py:
       224-249` diffs the recomputed PID against the executed, noise-injected
       action, so it fails on every noise-burst frame. A worker reproduced it on
       real data: `max |diff| 1.663858 at index 128`. The claim was written but
-      never run. Done: recovery episodes are exempted from that gate with the
+      never run. ~~Done: recovery episodes are exempted from that gate with the
       exemption recorded in the npz, or the gate subtracts the logged noise; the
-      docstring is made true or removed.
+      docstring is made true or removed.~~
+      **DONE 2026-09-02 (Appendix CD) — and NEITHER of those two routes was
+      taken.** The gate now checks the identity the data actually satisfies:
+      PID recomputed from `log_cte` against **`log_expert_steer`** (what the
+      docstring always meant), throttle against the **executed** steer as both
+      collectors compute it, and `log_noise` **proven honest** (executed ==
+      expert on clean frames, != on flagged ones) so a flag that exempts frames
+      is itself checked. **Scope was wider than this task**: the recovery corpus
+      failed FOUR gates, three of them the same class — the cte cap now reads
+      `log_recovery` and applies `MAX_MEAN_ABS_CTE_RECOVERY`; the holdout
+      requirement is "not applicable" when every episode is `log_recovery`
+      (decided by evidence in the npz, never a CLI flag); and the image-lag mode
+      **abstains on an exact tie** instead of picking one by set-iteration order,
+      which is what failed a corpus its own per-episode check passed 20/20.
+      Verified: RED exit 1 with all four classes; GREEN exit 0, 20/20, **805
+      noise frames checked**; both new gates made to FAIL on tampered copies
+      (zeroed `log_noise` → all 32 real noise frames caught; rolled `action` →
+      the ORIGINAL misalignment class still fires); regression on the 102,888-
+      frame corpus still PASS with mode -1. **NOT done: `verify_corpus.py` is
+      still in no CI or scheduled run, which is the condition that let this rot
+      for three weeks.**
 - [ ] **A5 — `scripts/git-hooks/pre-commit:24-37` says "fails CLOSED" and fails
       OPEN.** No `exit 1` in the missing-file branch, and both gates depend on
       untracked `~/.claude/skills/` paths — on any other machine both are

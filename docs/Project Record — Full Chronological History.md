@@ -116,6 +116,7 @@ the dated entry, not the digest.
 - [CA — Daily-audit CRIT confirmed on hardware and fixed: two clock samples per loop made the watchdog trip on every good frame; the audit's own suggested test was blind to it](#appendix-ca---daily-audit-crit-confirmed-on-hardware-and-fixed-two-clock-samples-per-loop-made-the-watchdog-trip-on-every-good-frame-the-audits-own-suggested-test-was-blind-to-it-2026-09-02-1946-cdt) (09-02)
 - [CB — Daily-audit findings given PRD homes as tasks A1-A7; A2 and A4 first](#appendix-cb---daily-audit-findings-given-prd-homes-as-tasks-a1-a7-a2-and-a4-first-2026-09-02-2202-cdt) (09-02)
 - [CC — A2 done: split-seed derivation is now a chokepoint, and rollout_eval asserts the MDN-RNN was selected on the same split](#appendix-cc---a2-done-split-seed-derivation-is-now-a-chokepoint-and-rollout_eval-asserts-the-mdn-rnn-was-selected-on-the-same-split-2026-09-02-2302-cdt) (09-02)
+- [CD — A4 done: the recovery gate was made TRUE rather than exempted, and three sibling gates of the same class went with it](#appendix-cd---a4-done-the-recovery-gate-was-made-true-rather-than-exempted-and-three-sibling-gates-of-the-same-class-went-with-it-2026-09-02-2306-cdt) (09-02)
 
 ---
 
@@ -9106,3 +9107,118 @@ docstring in `splits.py` that describes the removed line.
 
 Nothing ordered, nothing wired. This is a latent-defect fix in the sim/ML data
 path; no result on disk changes, and no number in the record is retracted.
+
+# Appendix CD - A4 done: the recovery gate was made TRUE rather than exempted, and three sibling gates of the same class went with it (2026-09-02, ~23:06 CDT)
+PRD task **A4**. The recovery corpus now passes `verify_corpus.py` because the
+gate was **made to check what the collector's docstring always claimed**, not
+because it was exempted or loosened.
+
+## A4.1 The defect, confirmed
+
+`collect_recovery.py:42-44` claimed *"The PID identity gate still passes,
+because `log_cte` and the logged gains still reproduce `log_expert_steer`
+exactly."* That sentence is true of the DATA and false of the GATE:
+`check_pid_identity` recomputed the PID steer and diffed it against
+`action` — the **executed** action, into which the collector deliberately
+injects noise bursts. Never run against `ml/data/sim_recovery` by any script,
+doc, or CI, so the claim survived unchallenged.
+
+**RED** — `python ml/verify_corpus.py ml/data/sim_recovery`, unmodified
+verifier, exit **1**, four distinct failure classes:
+
+    - pid-identity: ...-252.npz: recomputed action disagrees with the stored one (max |diff| 1.663858 at index 128). ...
+      [and 19 more, one per episode, max |diff| 1.62-1.71]
+    - ...-295.npz: mean|cte| 1.222 exceeds the collector's MAX_MEAN_ABS_CTE=1.2
+    - split check did NOT run - needs both train/ and holdout/, found ['train'].
+    - image-axis: the corpus lag MODE is -2, expected -1 (distribution {-2: 10, -1: 10}).
+
+`max |diff| 1.663858 at index 128` reproduces the audit's figure exactly.
+
+**Three of those four are the same defect class** — a gate asserting a constant
+the collector deliberately overrides, with the overriding evidence already in
+the npz and unread. The fourth is worse: a **10/10 tie** resolved by
+`max(set(peaks), key=peaks.count)`, i.e. by set-iteration order. It reported
+"mode -2" and failed a corpus whose per-episode band check had passed 20/20.
+
+## A4.2 Made true, not exempted
+
+The npz already carried everything needed — `collect_recovery.py:167-177` logs
+per-frame `log_noise`, per-frame `log_expert_steer`, and a scalar
+`log_recovery`. The verifier read none of them.
+
+- **PID identity** now checks against `log_expert_steer` where present (what
+  the claim always meant); throttle against the **executed** steer, exactly as
+  both collectors compute it. On a plain corpus the executed steer *is* the
+  recomputed one, so this is a strict generalisation, not a special case.
+- **`log_noise` is proven honest** rather than trusted: executed `==` expert on
+  every clean frame, `!=` on every flagged one. A flag that exempts frames must
+  itself be checked, or it exempts anything.
+- **Half-recorded metadata is a failure** — `log_expert_steer` without
+  `log_noise` or vice versa cannot be checked and must not read as clean.
+- **cte cap** reads `log_recovery` and applies `MAX_MEAN_ABS_CTE_RECOVERY`
+  (2.5) instead of `MAX_MEAN_ABS_CTE` (1.2); the message names which applied.
+- **Layout split** is "not applicable" only when the sole split is `train` AND
+  every episode carries `log_recovery` — decided by evidence in the data, never
+  by a CLI flag. A flag is how a gate gets switched off silently.
+- **Lag mode abstains on an exact tie**, printing the distribution. This is the
+  module's own UNVERIFIABLE-not-WRONG rule, not a widened tolerance. **Stated
+  limit:** a whole-corpus roll that happened to produce an exact tie would not
+  be caught by the mode; the per-episode band check is the remaining coverage.
+
+**GREEN** — same command, exit **0**:
+
+    train    :  20 episodes,    6552 frames, tracks ['donkey-generated-track-v0']
+      layout split          : not applicable - all 20 episodes are log_recovery, and collect_recovery.py writes train/ only
+      exact PID identity     : verified on 20/20 episode(s), every action reproduced from log_cte, 805 noise frames checked against log_expert_steer
+      image-axis gate        : 20/20 episodes in band (-2, -1), lag distribution {-2: 10, -1: 10}, mode UNDETERMINED (tie [-2, -1]) (|r| 0.73-0.87)
+      note: lag mode undetermined ({-2: 10, -1: 10}) - abstaining. The per-episode band check above is the coverage on this corpus.
+    P2 CORPUS CHECK: PASS
+
+**805 noise frames** actively verified against the expert — the gate is doing
+more work than before, not less.
+
+## A4.3 The new gates made to FAIL — the part that matters
+
+A gate that only ever passes is not a gate. Two tampered copies of one real
+episode (32 genuine noise frames):
+
+**Zero out `log_noise`** so the flag lies about every burst:
+
+    - pid-identity: ...-252.npz: log_noise is not honest at indices [61, 62, 63, 64, 65] (32 total) - the executed steer equals the expert on a frame flagged noisy, or differs from it on a frame flagged clean. The flag cannot be trusted to exempt anything.
+    EXIT=1
+
+Exactly 32 — every real noise frame caught.
+
+**Roll `action` by one frame** — the original misalignment bug class this gate
+has always existed to catch:
+
+    - pid-identity: ...: log_noise is not honest at indices [1, 2, 3, 4, 5] (93 total) ...
+    - pid-identity: ...: recomputed action disagrees with the stored one (max |diff| 0.200000 at index 1). ...
+    EXIT=1
+
+**Both** checks fire. The generalisation did not blunt the original gate.
+
+**REGRESSION** — the P2 done-check on the real corpus, exit **0**:
+
+    exact PID identity     : verified on 88/88 episode(s), every action reproduced from log_cte
+    image-axis gate        : 88/88 episodes in band (-2, -1), lag distribution {-2: 29, -1: 59}, mode -1 (|r| 0.74-0.96)
+    total frames: 102888
+    P2 CORPUS CHECK: PASS
+
+Mode -1 survives the tie handling; no noise-frame line, because that corpus has
+none. P2's guarantee is unchanged.
+
+## A4.4 Scope, stated
+
+**This is wider than PRD A4's own done-check**, which offered "exempt the
+episodes, or subtract the logged noise". Neither was taken: the gate now checks
+the identity the data actually satisfies, and three sibling gates of the same
+class (cte cap, holdout requirement, lag-mode tie) were fixed alongside because
+the recovery corpus fails all four and fixing one would have left the task
+un-closable. PRD wording corrected by dated strike.
+
+**NOT done:** `verify_corpus.py` is still not wired into any CI or scheduled
+run — nothing yet forces `ml/data/sim_recovery` to be re-checked, which is the
+condition that let this rot for three weeks. No consumer of recovery data
+(`exp_recovery.py`, `build_expert_labels.py`, `preprocess.py --extra-src`) ever
+needed PID identity, so **no training result changes and nothing is retracted.**
