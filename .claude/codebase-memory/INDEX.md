@@ -5,9 +5,9 @@ Core bins:
 - performance.md — empty, no perf work yet; live at M3 inference loop (updated 2026-07-23)
 - architecture.md — planned system shape + staged AI pipeline (updated 2026-07-23)
 - features.md — inventory of the 34 ml/ scripts by pipeline stage (updated 2026-09-03)
-- conventions.md — general code style observed across ml/ (argparse, seeding, no logging) (updated 2026-08-25)
+- conventions.md — general code style across ml/, counts re-derived to 34 files, + the provenance.write_result rule (updated 2026-09-03; 39 lines)
 - gotchas.md — **SPLIT 2026-09-02, now a 24-line ROUTER only.** Kept because CLAUDE.md/HANDOFF reference it by name; follow its pointers
-- hardware.md — printing + Lego fit, power, motors/drivers, the Uno, Arduino build traps, measured vehicle geometry (new 2026-09-02; 441 lines, over the ~150 cap but one coherent domain)
+- hardware.md — printing + Lego fit, power, motors/drivers, the Uno, Arduino build traps, measured vehicle geometry, status-LED semantics (updated 2026-09-03; **705 lines, 4.7x the ~150 cap — A SPLIT IS OVERDUE**, suggest print-and-fit / power / electronics-and-firmware)
 - track.md — track layout, markings, surface, what the camera sees of the environment (new 2026-09-02; 54 lines)
 - sim-harness.md — the simulator, the eval harness, training-time GPU limits (new 2026-09-02; 131 lines)
 - ml-training.md — GPU memory + world-model training facts MEASURED on this
@@ -18,7 +18,7 @@ Standards bins (only those the codebase actually commits to):
 - dependencies.md — planned stack (DonkeyCar 5.x plumbing + PyTorch models) (updated 2026-07-23)
 - ui.md — N/A, no frontend planned; teleop UI TBD at M2 (re-checked 2026-09-02, still N/A)
 - testing.md — the runnable done-checks + verification rules, ml AND firmware (updated 2026-09-02)
-- data.md — THE episode data contract: npz schema, t=0 rule, both alignment gates, 3-way split rule, the SPLIT-SEED rule (consumers read it from the VAE checkpoint), + the Pi/Uno serial frame contract, IMPLEMENTED (updated 2026-09-02)
+- data.md — THE episode data contract: npz schema, t=0 rule, both alignment gates, 3-way split rule, the SPLIT-SEED rule (consumers read it from the VAE checkpoint), + the Pi/Uno serial frame contract, IMPLEMENTED (updated 2026-09-03; 190 lines, over the ~150 cap)
 - tooling.md — Python 3.12.10 venv, machine facts, git -F quirk, shell/encoding traps from the gotchas split (updated 2026-09-02)
 
 Cross-bin invariants:

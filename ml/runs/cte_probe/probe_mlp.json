@@ -8,7 +8,19 @@
     "seed": 0,
     "arch": "mlp",
     "width": 256,
+    "vae": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\vae\\vae_best.pt",
     "out": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\cte_probe",
     "device": "cuda"
+  },
+  "provenance": {
+    "commit": "2aed9edad7acb94269690b1d04914df0e5416e30",
+    "dirty": true,
+    "dirty_files": [
+      "ml/runs/controller/history_linear_seed0.json"
+    ],
+    "ts_utc": "2026-09-03T21:11:12+00:00",
+    "python": "3.12.10",
+    "torch": "2.13.0+cu126",
+    "numpy": "2.5.1"
   }
 }

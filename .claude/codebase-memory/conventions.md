@@ -26,8 +26,12 @@ tooling.md; don't duplicate those here.
   assumptions before trusting its results (testing.md's gate philosophy).
 - Type hints on function signatures are present in **33/34** files.
 
-- **Every result JSON goes through `provenance.write_result(path, obj)`** (added
-  2026-09-03, PRD task A1). Never `write_text(json.dumps(...))` for a result --
+- **Every result JSON UNDER `ml/` goes through `provenance.write_result(path,
+  obj)`** (added 2026-09-03, PRD task A1). ⚠️ **Scope corrected 2026-09-03: the
+  first wording said "every result JSON" and that was false** — `cad/track_layout_v1.py:438`
+  and `v2.py:472` still write tracked `cad/track_layout_v*.json` with bare
+  `json.dumps`. They are geometry artifacts, not experiment results, so they are
+  out of A1's scope; but the universal as written was wrong (Appendix CG). Never `write_text(json.dumps(...))` for a result --
   it stamps `commit`, `dirty`, `dirty_files`, `ts_utc` and the python/torch/numpy
   versions, and **REFUSES to write when it cannot determine the commit**. The
   payload must be a dict; three call sites used to write bare lists and are now

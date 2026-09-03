@@ -400,6 +400,13 @@ transfer gap) must not block the capstone.
      ⚠️ **The $200 ceiling is now breached on EVERY path, including the 2GB Pi**,
      which lands at ≈$205-223 with shipping. The 2GB path was the last one whose
      low end cleared it.)*
+   - *(**Revised again 2026-09-03 (Appendix CF) to ≈$238-248 before shipping,
+     ≈$253-273 with.** Two more rows the design already required and the BOM had
+     never listed: **row 21**, the Arduino proto shield `WIRING_PROTOSHIELD.md` is
+     written against (+$3-4), and **row 22**, the servo-to-pinion coupling that was
+     specified nowhere until 2026-09-02 and whose printed form FAILS at MG90S
+     stall (+$0-0.75). **2GB path now $193.32-$202.57 before shipping, ≈$208-228
+     with — its HIGH end no longer clears $200 either.**)*
    - *(Amended 2026-09-01, again 2026-09-02: the "four items" are now **six** — check 5, which
      LEDs, sets every series-resistor value. And the **PWM-path question is
      RESOLVED** — ~~PCA9685~~ **an ARDUINO UNO (2026-09-02, Appendix BC)**,
@@ -1015,7 +1022,7 @@ on the board in Appendix CA.** Everything else it found is real, separate work,
 and this block exists so none of it vanishes. **Nothing below is started.**
 Each item carries its own done-check.
 
-- [ ] **A1 — No result file records the commit that produced it.** 0 of 108
+- [x] **A1 — DONE 2026-09-03 (Appendix CF/CG). No result file records the commit that produced it.** 0 of 108
       tracked `ml/runs/*.json` carry a commit; 82 carry a seed. Fix in the
       shared result writer: stamp `git rev-parse HEAD` + a dirty flag. **The
       108 existing files cannot be retrofitted** — any writeup citing them must
@@ -1102,9 +1109,11 @@ Each item carries its own done-check.
       alignment by frame count only (a same-length reorder passes) ·
       `ml/data/proc/train_mu.npy` + `holdout_mu.npy` predate the encoder
       fingerprint and have no `*latents.key` — regenerate · `cad/track_layout_
-      v2.json` keys the MEASURED width `car_width_m_ESTIMATE` · `features.md` /
+      v2.json` keys the MEASURED width `car_width_m_ESTIMATE` · ~~`features.md` /
       `conventions.md` / `INDEX.md` say "31 Python files" where `git ls-files`
-      counts 33 · four unused imports · four `except Exception: pass` without
+      counts 33~~ **CLOSED 2026-09-03 (Appendix CF): all three re-derived to 34,
+      by running the greps rather than incrementing. Both halves of the original
+      wording were stale — the bins said 31 and the real count was already 33** · four unused imports · four `except Exception: pass` without
       the `# noqa: BLE001` their siblings carry.
 
 **Priority, stated:** **A2 and A4 first** — both are silent correctness

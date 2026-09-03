@@ -115,10 +115,13 @@ shipping, ≈$253-273 with** the $15-25 estimate. The **2GB Pi path** lands at
 **$193.32-$202.57 before shipping, ≈$208-228 with**. Neither clears $200 with
 shipping.)*
 
-*(⚠️ **THE $200 CEILING IS NOW BREACHED ON EVERY PATH, INCLUDING THE 2GB Pi.**
+*(~~⚠️ **THE $200 CEILING IS NOW BREACHED ON EVERY PATH, INCLUDING THE 2GB Pi.**
 The 2GB swap saves $45, landing at **$190.32–$197.82 before shipping** — which
 still clears $200 — but **≈$205–223 with shipping**, which does not, at either
-end. The 2GB path was the last one whose low end cleared the ceiling and it no
+end.~~ **SUPERSEDED 2026-09-03 by the note above: rows 21–22 take the 2GB path
+to $193.32–$202.57 before shipping, whose HIGH end no longer clears $200 either.
+Struck rather than edited — a landing-check found it live and unstruck four
+lines under its own replacement (Appendix CG).** The 2GB path was the last one whose low end cleared the ceiling and it no
 longer does. **This is not a cost overrun from adding features**: both increments
 are parts the existing design already required and the BOM had failed to list.
 Evan decides whether the ceiling moves; nothing is ordered.)*

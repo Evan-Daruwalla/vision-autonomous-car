@@ -119,6 +119,7 @@ the dated entry, not the digest.
 - [CD — A4 done: the recovery gate was made TRUE rather than exempted, and three sibling gates of the same class went with it](#appendix-cd---a4-done-the-recovery-gate-was-made-true-rather-than-exempted-and-three-sibling-gates-of-the-same-class-went-with-it-2026-09-02-2306-cdt) (09-02)
 - [CE — Status LED quiet on a bench board: a floating pin and a wire that fell off differ only in history, so history is what decides](#appendix-ce---status-led-quiet-on-a-bench-board-a-floating-pin-and-a-wire-that-fell-off-differ-only-in-history-so-history-is-what-decides-2026-09-02-2315-cdt) (09-02)
 - [CF — A1 done: every result names its commit; the module shipped a path-truncation bug and reading its own output found it; BOM audited](#appendix-cf---a1-done-every-result-names-its-commit-the-module-shipped-a-path-truncation-bug-and-reading-its-own-output-found-it-bom-audited-2026-09-03-1600-cdt) (09-03)
+- [CG — Landing-check on A1: two false claims in CF, a second clobbered file that git could not restore, and A1's own checkbox unticked](#appendix-cg---landing-check-on-a1-two-false-claims-in-cf-a-second-clobbered-file-that-git-could-not-restore-and-a1s-own-checkbox-unticked-2026-09-03-1614-cdt) (09-03)
 
 ---
 
@@ -9436,3 +9437,129 @@ argparse 27/34, `--seed` 16/34, print 33/34, docstring 34/34, type hints 33/34.
 - **PRD A6** (LIGHTING_SPEC's 20 mA) named but not fixed. **A3, A5, A7** untouched.
 - `ml/runs/controller/history_linear_seed0.json` is still dirty from 2026-08-25,
   still unexplained, still not staged.
+
+# Appendix CG - Landing-check on A1: two false claims in CF, a second clobbered file that git could not restore, and A1's own checkbox unticked (2026-09-03, ~16:14 CDT)
+A `/landing-check` sweep on commit `2aed9ed` (A1) and `fa79791` (the status
+LED). Verdict **FIX FIRST**. No landing failure, no publication leak, and the
+core arithmetic re-derived exactly — but **two claims in CF are false**, one of
+them about data loss, and the commit titled "A1 done" left A1's own checkbox
+unticked.
+
+## CG.1 CORRECTION to CF.3 — the clobber was WIDER, and the other half is gone
+
+**CF.3 says "No other result file was touched." That is FALSE.**
+
+The `--epochs 1` smoke test also overwrote **`ml/runs/cte_probe/cte_probe_mlp.pt`**
+(`train_cte_probe.py:148-150` saves it beside the JSON). CF.3 did not look at it.
+
+**And `git checkout` could not have restored it:** `.gitignore:34` is `*.pt`, so
+the checkpoint is untracked. Confirmed with `git check-ignore -v` →
+`.gitignore:34:*.pt`. So after CF.3's "restore", the JSON claimed a 40-epoch
+R² = 0.9571 while **the checkpoint sitting next to it was a 1-epoch throwaway.
+The two files disagreed, and the record said the incident was closed.**
+
+**CF.3's stated lesson is also insufficient.** It says a live test must be
+followed by `git status ml/runs/`. That would **not** have caught this one — an
+ignored file never appears in `git status`.
+
+**Fixed properly by regenerating rather than by editing anything:** re-ran
+`train_cte_probe.py --arch mlp --epochs 40 --seed 0`, the committed settings.
+
+    committed val_r2: 0.9571505679593773
+    re-run    val_r2: 0.9571505679593773
+    identical? True   delta: 0.0
+
+**Bit-for-bit.** Both files now carry the same 16:11 timestamp and the JSON
+carries a provenance block. This is a better state than before the mistake, and
+it is incidental evidence the probe pipeline is **deterministic at a fixed
+seed** — which nothing in this project had demonstrated end-to-end before.
+
+**The corrected lesson, for `hardware.md`/`testing.md`:** `ml/runs/` holds
+tracked JSON beside **ignored `.pt` checkpoints**. A producer script rewrites
+both. `git status` protects only half of it, and `git checkout` can restore only
+that half. **The only safe live test of a producer writes to a scratch `--out`.**
+
+## CG.2 CORRECTION to CF.4 — the BOM has 23 numbered rows, not 27
+
+CF.4 says "now 27 rows". Re-derived: `grep -cE "^\\| [0-9]+b? \\|" docs/BOM.md`
+→ **23** (rows 1–22 plus 5b). 27 counts section-header rows and does not
+correspond to any real quantity. The row CONTENT described in CF.4 is correct;
+only the count is wrong.
+
+## CG.3 A false universal in a bin, caught before it settled
+
+`conventions.md` said **"Every result JSON goes through
+`provenance.write_result`."** False as written: `cad/track_layout_v1.py:438` and
+`v2.py:472` still write tracked `cad/track_layout_v*.json` with bare
+`json.dumps`. They are geometry artifacts rather than experiment results and are
+genuinely outside A1's scope — **but the sentence claimed all of them.** Scoped
+to "under `ml/`" with the exception named.
+
+## CG.4 What the sweep found in the docs, all now fixed
+
+- **`PRD_ROADMAP.md:1018` — A1's checkbox was still `- [ ]`** while the commit
+  was titled "A1 done". A2 and A4 were correctly ticked. **This is the one that
+  matters most: the PRD is the authority the commit claimed against.** Ticked.
+- **PRD task A7 had become self-refuting** — it described the defect as *bins say
+  "31 Python files" where `git ls-files` counts 33*. Both halves were stale
+  (bins now say 34, real count is 34). Struck and closed.
+- **`docs/BOM.md:118-123` — a superseded note left LIVE and UNSTRUCK four lines
+  under its own replacement**, still asserting the 2GB path "still clears $200"
+  at $190.32–$197.82. Struck, with the current $193.32–$202.57 beside it.
+- **`HANDOFF.md` was barely synced by the commit** — one line (the appendix
+  count). Fixed: the stale `Last updated`, a `SELFTEST 39/39` that **contradicted
+  line 245 of the same file** (49/49), row 3d still saying "A2 and A4 first,
+  none started" when A1/A2/A4 are done, and **four separate stale BOM figures**.
+- **`uno_control.ino:7` still read `SELFTEST 39/39`** while the file's own count
+  is 49 — left by `fa79791`.
+- **`INDEX.md` line counts re-derived**: `hardware.md` is **705 lines, 4.7× the
+  ~150 cap** (INDEX said 441) — **a split is overdue**; `data.md` is 190, also
+  over. `conventions.md` and `data.md` stamps were not bumped by the commit that
+  changed them.
+
+## CG.5 Confirmed — the load-bearing negatives
+
+Re-derived exactly, by methods independent of the ones that produced them:
+
+- **23 sites across 21 files** — `grep -c "write_result("` → 23 calls, 21 import
+  lines. **All 34 `ml/*.py` compile.** No unconverted `write_text(json.dumps)`
+  anywhere in `ml/`.
+- **The refusal control FIRES.** Planted independently against a non-git temp
+  dir: `RuntimeError` raised, **no file written**. Not inferred from the
+  self-check.
+- **No module shadowing** — one `provenance.py` in the tree; neither
+  `sys.path.insert` site can reach a competing copy.
+- **BOM arithmetic exact to the cent** — 23 row prices summed by hand reproduce
+  **$238.32** and **$247.57**; the 2GB swap reproduces **$193.32–$202.57**.
+- **All eight `conventions.md` fractions re-derive exactly** (docstrings and type
+  hints re-checked by AST, not grep): 34, 32/34, 31/34, 27/34, 16/34, 33/34,
+  34/34, 33/34.
+- **108 result files, 82 with a seed, 0 with a commit** — the numbers A1 was
+  built on.
+- **84 appendices A–CF, no duplicate letters, record append-only intact.**
+- **PUBLICATION LEAK: CLEAN.** Both diffs swept case-insensitively for absolute
+  Windows paths, the username, and the scratchpad — **zero hits**. On the
+  specific new vector: `provenance.dirty_files` is repo-relative by construction
+  (`git status --porcelain`), and the absolute repo path appears only in an
+  exception message and a stdout note, never in a file.
+
+## CG.6 NOT swept, stated rather than implied
+
+Anything needing the board flashed — CE.5's `SELFTEST 49/49`, `7888 B`,
+`host_test 13/13`, `period = 0`. The sweep had no `arduino-cli` and could verify
+the firmware only statically (it did confirm 49 = 50 `CHECK(` minus the
+`#define`, and that all four new watchdog asserts evaluate true against source).
+The 22 compile-only converted sites were not executed. Record appendices A–CD
+were not re-read.
+
+**One structural note the sweep raised, worth keeping:** the two new firmware
+asserts pin `outputModeFor()`, which the LED commit did not change; the LED
+decision it DID change is an inline expression in `loop()`, not a pure helper,
+so **no assert covers it**. CE.5 states this correctly, but the guard is weaker
+than "49/49" suggests. Extracting that expression into a pure helper is handed
+to `/code-review`.
+
+## CG.7 State
+
+`ml/runs/cte_probe/` is self-consistent again and deterministic-verified.
+**Nothing ordered, nothing wired.** PRD A1, A2, A4 done; A3, A5, A6, A7 open.

@@ -4,7 +4,7 @@
  * anything; uno_bringup/uno_memtest/uno_echo were measurements and
  * uno_packguard was one safety subsystem.
  *
- * VERIFIED ON THE BOARD, ACTUATORS UNWIRED. SELFTEST 39/39 on a real Uno;
+ * VERIFIED ON THE BOARD, ACTUATORS UNWIRED. SELFTEST 49/49 on a real Uno;
  * firmware/host_test.py is the Pi-side gate (2026-09-02). The LINK and the
  * STATE MACHINE are tested; no motor, servo, encoder, LED or pack exists —
  * nothing in docs/BOM.md is ordered — so every actuator path is verified only
