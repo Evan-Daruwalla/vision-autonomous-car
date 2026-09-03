@@ -110,6 +110,7 @@ the dated entry, not the digest.
 - [BU — Pinion sweeps 180 degrees: SERVO_US_SPAN was capping steering at 60% of lock, and BS.3's 270-degree advantage was backwards](#appendix-bu---pinion-sweeps-180-degrees-servo_us_span-was-capping-steering-at-60-of-lock-and-bs3s-270-degree-advantage-was-backwards-2026-09-02-1818-cdt) (09-02)
 - [BV — The steering coupler is the highest-torque joint and a printed one fails; the self-calibrating centre cannot work as described](#appendix-bv---the-steering-coupler-is-the-highest-torque-joint-and-a-printed-one-fails-the-self-calibrating-centre-cannot-work-as-described-2026-09-02-1828-cdt) (09-02)
 - [BW — Full project-memory pass: PRD_ROADMAP and auto-memory had gone untouched all session](#appendix-bw---full-project-memory-pass-prd_roadmap-and-auto-memory-had-gone-untouched-all-session-2026-09-02-1833-cdt) (09-02)
+- [BX — HANDOFF's workstream table contradicted itself on P6; milestone-track cannot parse this PRD](#appendix-bx---handoffs-workstream-table-contradicted-itself-on-p6-milestone-track-cannot-parse-this-prd-2026-09-02-1927-cdt) (09-02)
 
 ---
 
@@ -8457,3 +8458,54 @@ Docs now agree with disk. **Nothing ordered, nothing wired, no actuator has
 moved.** `uno_control` is flashed at 39/39 with actuators unwired. Open on
 Evan: the order and its breached ceiling, wheelbase, car mass, the coupling
 choice, and whether to build 8c(i).
+
+# Appendix BX - HANDOFF's workstream table contradicted itself on P6; milestone-track cannot parse this PRD (2026-09-02, ~19:27 CDT)
+Evan asked what work is left. Answering it turned up a **direct contradiction in
+HANDOFF's own workstream table** and one superseded spec, both of which distorted
+the answer.
+
+## BX.1 `/milestone-track` cannot read this PRD, and its 0% is an artifact
+
+Ran it (canary PASS 28/28 first, per its own done-check). Output:
+**"overall: 0/7 done (0.0%)"** across two buckets.
+
+**That is wrong, and the reason is format, not status.** The tool parses
+`- [ ]`/`- [x]` checkboxes and ☐/☑ table glyphs. **This PRD writes its tasks as
+NUMBERED PROSE** — `T1.`, `8b.`, `9.`, `10.` — so the tool sees only 7 of them,
+all in the SUCCESS CRITERIA and M5 lists, and misses SIM-POC P1-P5, the firmware,
+the research briefs and every M1/M2 task. **A 0% reading on a project with five
+completed SIM-POC milestones is a parser artifact.**
+
+Recorded because the next session will reach for the same tool: **do not use
+`/milestone-track` on this PRD** without converting its task lists to checkboxes
+first, or it will report near-zero forever.
+
+## BX.2 HANDOFF's workstream table contradicted itself on P6
+
+**Two rows, same workstream, opposite verdicts:**
+
+- `| Harness trustworthiness | P6 | **DONE 2026-08-13** |` — Appendix AI/AJ,
+  cause found: `donkey-generated-track-v0` regenerates the track per launch.
+- `| **Harness trustworthiness** | **P6** | **OPEN — BLOCKING all closed-loop
+  claims** |` — Appendix AD, **2026-08-11**, cause unknown.
+
+The OPEN row is **two days older** and was never struck when the cause was found.
+It has therefore been telling every reader since 2026-08-13 that all closed-loop
+claims are blocked, when they are not. **Struck in place** (never deleted, per the
+mutation rule), with a pointer to the row that supersedes it, and the narrower
+rule that actually survives recorded: never compare closed-loop numbers ACROSS
+launches — use `ml/eval_paired.py`.
+
+## BX.3 The Track-fabrication row still quoted the superseded floor
+
+It read *"figure-8, **1.6×2.8 m, 1:14**"* — the floor Evan replaced with
+**3.0 × 3.0 m on 2026-09-01**, and a scale predating the measured car width.
+Corrected to name `cad/track_layout_v2.py` at lane 230 mm / 171 mm spare on the
+measured 114.75 mm car, and to state what actually blocks it: **T2**, which needs
+an empirical turning test, with `R_min = 1.600 × wheelbase` and wheelbase
+unmeasured.
+
+## BX.4 State
+
+No new engineering. Two stale HANDOFF rows corrected and one tooling limitation
+recorded. **Nothing ordered, nothing wired, no actuator has moved.**

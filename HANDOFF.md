@@ -2,7 +2,7 @@
 
 **Last updated: 2026-09-02 ~18:30 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 75 appendices A–BW; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 76 appendices A–BX; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -240,8 +240,8 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Track surface | T3 | **Decided: hybrid** | 2026-09-01, Appendix AX. NOT 225 printed panels (~12.6 kg, 169-900 h, 225 bed clears, 28 camera-visible seams). Print the 6.28 m of corner arcs + 9.36 m of intersection boxes as ~79 tiles (~970 g); tape the 31.9 m of straight street lines |
 | Uno firmware | — | **CONTROL FIRMWARE RUNS ON THE BOARD (2026-09-02)** | Appendices BD/BJ/BO. `firmware/` — `uno_bringup` (board proven), `uno_memtest` (2048 B SRAM, 16.0042 MHz), `uno_echo` (link p99 1.069 ms), `uno_packguard` (SELFTEST 27/27), **`uno_control` (implements `SERIAL_PROTOCOL.md` v0.2: SELFTEST 37/37, `host_test.py` 11/11 exit 0, 7134 B flash / 312 B SRAM, loop 2-3 ms, **SELFTEST 39/39** after the servo-span fix)** — **CURRENTLY FLASHED as of 2026-09-02 ~18:30 CDT**. `SERIAL_PROTOCOL.md` is no longer design-only. **ACTUATORS UNWIRED** — link + state machine only |
 | Vehicle lighting | — | **Spec written, nothing wired** | 2026-09-01, Appendix AY. `docs/LIGHTING_SPEC.md`. Headlights/tail/DRL/indicators. Only the headlight beam is in the camera's view. ~~Settles the PCA9685.~~ Superseded 2026-09-02 (BC): an **Arduino Uno** takes actuation instead. Turn signals are a THIRD policy head and gate the M3 collection run via PRD task 11b |
-| **Harness trustworthiness** | **P6** | **OPEN — BLOCKING all closed-loop claims** | 2026-08-11, Appendix AD. Same checkpoint across 7 gate-valid launches: 106.5–471.5 steps, CV 55%. Rate, track and start state ruled out; cause unknown. Nothing may be ranked on closed-loop steps until this is fixed or quantified |
-| Track fabrication | T1-T6 | **Designed, not built** | figure-8, 1.6×2.8 m, 1:14, print markings not surface; T2 blocked on measured turning radius |
+| ~~Harness trustworthiness~~ | ~~P6~~ | ~~**OPEN — BLOCKING all closed-loop claims**~~ **STALE ROW, STRUCK 2026-09-02** | ⚠️ **This row contradicted the P6 row above it and was two days out of date.** It is dated 2026-08-11 (Appendix AD, cause unknown); the row above is dated **2026-08-13 (Appendix AI/AJ) and found the cause** — `donkey-generated-track-v0` regenerates the track per launch. **P6 is DONE.** The live rule that survives is narrower: never compare closed-loop numbers ACROSS launches; use `ml/eval_paired.py` |
+| Track fabrication | T1-T6 | **Designed, not built** | figure-8; print markings not surface. ~~1.6×2.8 m, 1:14~~ **SUPERSEDED — floor is 3.0 × 3.0 m (Evan, 2026-09-01) and the layout is `cad/track_layout_v2.py` at lane 230 mm / 171 mm spare on the MEASURED 114.75 mm car (2026-09-02, Appendix BO).** T1 scale is CLOSED except its marking table; **T2 still blocks every corner tile** — it needs an empirical turning test on the rolling chassis, and `R_min = 1.600 × wheelbase` with wheelbase unmeasured |
 
 ## Hardware & stack facts (from the 2026-07-23 brief — re-verify prices at purchase)
 
