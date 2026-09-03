@@ -47,7 +47,8 @@
  * setup(). Do not "helpfully" enable it earlier.
  *
  * Serial 115200, binary frames. A lone '?' outside a frame prints a
- * human-readable status line; 'T' runs SELFTEST. Neither is a valid sync byte.
+ * human-readable status line; 'T' runs SELFTEST; 'B' toggles bench-quiet (LED
+ * only -- see benchQuiet). None is a valid sync byte.
  */
 #include <Arduino.h>
 #include <Servo.h>
@@ -149,6 +150,32 @@ int8_t   lastSteer   = 0;          // watchdog HOLDS steering, does not centre
 uint8_t  lastSeq     = 0;
 uint8_t  statusBits  = 0;
 uint8_t  loopDt      = 0;
+
+/* QUIET STATUS LED ON A BENCH BOARD -- and why it is not just "stop flashing".
+ *
+ * A floating A0 reads ~10,248 mV (measured, Appendix BJ) and so does a sense
+ * wire that has FALLEN OFF. In the instant those are the same reading, which
+ * is the whole reason the upper fault band exists. Going quiet on sight of a
+ * floating pin would also go quiet when the wire drops off a moving car --
+ * the case the indicator exists for.
+ *
+ * They differ in HISTORY, though, and history is free: a board that has NEVER
+ * seen a plausible pack was never wired (a bench), while a car whose wire
+ * drops has seen one. pack.everPlausible carries that, so the common case --
+ * this board, on a desk, with nothing attached -- is quiet automatically and
+ * every power cycle, with no command to remember.
+ *
+ * 'B' remains as a manual override for the case history cannot cover: a board
+ * that HAS seen a real pack and is now deliberately being benched.
+ *
+ * NEITHER PATH TOUCHES SAFETY. Throttle inhibit, STBY and outputModeFor() are
+ * untouched -- the car stays exactly as disabled as it was, and SELFTEST
+ * asserts that. Only PACK_FAULT (no sensor) is ever silenced; a latched
+ * PACK_CUTOFF is a genuinely flat battery and keeps flashing regardless.
+ * Neither is persisted: any reset clears both, and the Pi opening the serial
+ * port resets the board.
+ */
+bool     benchQuiet  = false;
 
 // ---- pure helpers: everything SELFTEST can check ---------------------------
 
@@ -274,7 +301,9 @@ void printStatus() {
   Serial.print(F(" ticks=")); Serial.print(readTicks());
   Serial.print(F(" status=0x")); Serial.print(statusBits, HEX);
   Serial.print(F(" dt=")); Serial.print(loopDt);
-  Serial.print(F(" stby=")); Serial.println(digitalRead(PIN_STBY));
+  Serial.print(F(" stby=")); Serial.print(digitalRead(PIN_STBY));
+  Serial.print(F(" benchQuiet=")); Serial.print(benchQuiet);
+  Serial.print(F(" everPlausible=")); Serial.println(pack.everPlausible);
 }
 
 // ---- selftest --------------------------------------------------------------
@@ -330,6 +359,33 @@ void selftest() {
         "a sustained cutoff ends in hardware disable");
   CHECK(outputModeFor(true,  false, false, true,  9999) == OUT_DRIVE,
         "a healthy armed frame overrides a stale unsafe timer");
+
+  // everPlausible: false until a sane 2S reading is seen, then sticky.
+  PackGuard q; q.simMode = true;
+  CHECK(!q.everPlausible,                 "everPlausible starts false");
+  q.simMv = 10248; q.poll(1000);
+  CHECK(!q.everPlausible,                 "a floating-pin reading is NOT plausible");
+  CHECK(q.state == PACK_FAULT,            "...and still faults");
+  q.simMv = 7400;  q.poll(2000);
+  CHECK(q.everPlausible,                  "a real 2S reading sets it");
+  q.simMv = 10248; q.poll(3000);
+  CHECK(q.everPlausible,                  "it STAYS set - a wire that falls off after "
+                                          "a good reading must still be loud");
+  CHECK(q.state == PACK_FAULT,            "...and faults again");
+
+  // bench-quiet is an LED concession and must never be a safety one.
+  bool savedQuiet = benchQuiet;
+  benchQuiet = true;
+  CHECK(outputModeFor(true, true, false, true, 0) == OUT_BRAKE,
+        "bench-quiet must NOT re-enable drive while the pack inhibits");
+  CHECK(outputModeFor(true, true, false, true, BRAKE_MS + 1) == OUT_OFF,
+        "bench-quiet must NOT keep STBY up through a sustained inhibit");
+  // Silencing the watchdog BLINK must not silence the watchdog itself.
+  CHECK(outputModeFor(false, false, true, true, 0) == OUT_BRAKE,
+        "a watchdog trip still brakes even when its blink is suppressed");
+  CHECK(outputModeFor(false, false, true, false, 0) == OUT_OFF,
+        "...and before anything ever armed, the driver stays OFF");
+  benchQuiet = savedQuiet;
 
   // pack guard — the transitions that matter, against the copied logic
   PackGuard g; g.simMode = true;
@@ -450,6 +506,11 @@ void loop() {
       if (c == SYNC_CMD) rxBuf[rxLen++] = c;
       else if (c == '?') printStatus();
       else if (c == 'T') selftest();
+      else if (c == 'B') {
+        benchQuiet = !benchQuiet;
+        Serial.print(F("bench-quiet ")); Serial.print(benchQuiet ? F("ON") : F("OFF"));
+        Serial.println(F(" - LED only; throttle stays inhibited, cleared on reset"));
+      }
       continue;                              // resync: ignore anything else
     }
     rxBuf[rxLen++] = c;
@@ -479,6 +540,16 @@ void loop() {
     statusBits &= (uint8_t)~ST_WATCHDOG;
   }
 
-  uint16_t period = pack.inhibits() ? 150 : (wd ? 400 : (armed ? 1000 : 0));
+  // Quiet ONLY the no-sensor case, and only the LED: automatically when no
+  // real pack has ever been seen, or on the manual override.
+  bool quiet = pack.state == PACK_FAULT && (benchQuiet || !pack.everPlausible);
+  // The watchdog blink follows the SAME rule applyLights() already uses for the
+  // hazards: a watchdog "trip" before anything has ever armed is not a fault,
+  // it is simply no Pi connected yet. Blinking it on a bare bench board is
+  // crying wolf, and a light that always cries wolf is not read when it means
+  // something. Once everArmed is set -- the car has driven -- silence stops.
+  bool wd_alarm = wd && everArmed;
+  uint16_t period = (pack.inhibits() && !quiet) ? 150
+                    : (wd_alarm ? 400 : (armed ? 1000 : 0));
   digitalWrite(PIN_STATUS, period ? (uint8_t)((now / period) & 1) : LOW);
 }

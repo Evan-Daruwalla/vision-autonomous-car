@@ -117,6 +117,7 @@ the dated entry, not the digest.
 - [CB — Daily-audit findings given PRD homes as tasks A1-A7; A2 and A4 first](#appendix-cb---daily-audit-findings-given-prd-homes-as-tasks-a1-a7-a2-and-a4-first-2026-09-02-2202-cdt) (09-02)
 - [CC — A2 done: split-seed derivation is now a chokepoint, and rollout_eval asserts the MDN-RNN was selected on the same split](#appendix-cc---a2-done-split-seed-derivation-is-now-a-chokepoint-and-rollout_eval-asserts-the-mdn-rnn-was-selected-on-the-same-split-2026-09-02-2302-cdt) (09-02)
 - [CD — A4 done: the recovery gate was made TRUE rather than exempted, and three sibling gates of the same class went with it](#appendix-cd---a4-done-the-recovery-gate-was-made-true-rather-than-exempted-and-three-sibling-gates-of-the-same-class-went-with-it-2026-09-02-2306-cdt) (09-02)
+- [CE — Status LED quiet on a bench board: a floating pin and a wire that fell off differ only in history, so history is what decides](#appendix-ce---status-led-quiet-on-a-bench-board-a-floating-pin-and-a-wire-that-fell-off-differ-only-in-history-so-history-is-what-decides-2026-09-02-2315-cdt) (09-02)
 
 ---
 
@@ -9222,3 +9223,92 @@ run — nothing yet forces `ml/data/sim_recovery` to be re-checked, which is the
 condition that let this rot for three weeks. No consumer of recovery data
 (`exp_recovery.py`, `build_expert_labels.py`, `preprocess.py --extra-src`) ever
 needed PID identity, so **no training result changes and nothing is retracted.**
+
+# Appendix CE - Status LED quiet on a bench board: a floating pin and a wire that fell off differ only in history, so history is what decides (2026-09-02, ~23:15 CDT)
+Evan: "make light on arduino stop flashing." It was doing exactly what it was
+built to do, so the fix had to keep the signal and lose the noise.
+
+## CE.1 What it was saying
+
+Board status at the time: `pack=3 mv=10248` — `PACK_FAULT` from a **floating
+A0**, because no pack-sense divider is wired (nothing is ordered). Two separate
+blinks were firing at once, and only the first was obvious:
+
+- **150 ms**, from `pack.inhibits()` — "I have no battery sensor."
+- **400 ms**, from the watchdog — "no one is sending me command frames."
+
+Both are true, both are the indicator working. Neither is a defect.
+
+## CE.2 The trap in just silencing it
+
+**A floating pin and a sense wire that has fallen off read identically**
+(~10,248 mV — the measurement that put the upper fault band in
+`uno_packguard` in the first place, Appendix BJ). So a firmware that goes quiet
+on sight of a floating pin also goes quiet when the wire drops off a moving
+car, which is the one case the indicator exists for. Silence-on-inference is
+not available.
+
+## CE.3 The fix: they differ in HISTORY, and history is free
+
+They are identical in the instant and different over time. **A board that has
+NEVER seen a plausible 2S reading was never wired** — a bench. A car whose wire
+drops **has** seen one. `PackGuard::everPlausible` records that in one bool,
+set in `poll()` whenever a reading lands inside the fault band, and never
+cleared.
+
+The status LED then quiets `PACK_FAULT` only when no real pack has ever been
+seen. The common case — this board, on a desk, nothing attached — is quiet
+**automatically, every power cycle, with no command to remember.** A `B`
+command remains as a manual override for the case history cannot cover: a board
+that HAS seen a real pack and is now deliberately benched.
+
+**The watchdog blink got the same treatment**, and this is the half that was
+missed on the first attempt: the first build was flashed, still blinked, and
+the reason was that the watchdog was independently tripped because no Pi is
+connected. It now follows the rule `applyLights()` already used for the
+hazards — `wd && everArmed` — so a watchdog trip **before anything has ever
+armed** is "no Pi yet", not a fault. **A light that always cries wolf is not
+read when it means something.**
+
+## CE.4 What did NOT change, and the assertions that hold it
+
+Throttle inhibit, `STBY`, and `outputModeFor()` are untouched. Only
+`PACK_FAULT` is ever silenced — a latched `PACK_CUTOFF` is a genuinely flat
+battery and keeps flashing. Neither path is persisted; any reset clears both,
+and the Pi opening the port resets the board.
+
+SELFTEST went **39/39 → 49/49**, and the ten new checks are all of the form
+"this concession is not a safety concession":
+
+    everPlausible starts false
+    a floating-pin reading is NOT plausible ... and still faults
+    a real 2S reading sets it
+    it STAYS set - a wire that falls off after a good reading must still be loud
+    bench-quiet must NOT re-enable drive while the pack inhibits
+    bench-quiet must NOT keep STBY up through a sustained inhibit
+    a watchdog trip still brakes even when its blink is suppressed
+    ...and before anything ever armed, the driver stays OFF
+
+## CE.5 Verified on the board
+
+    == UNO CONTROL == protocol v0.2, ACTUATORS UNWIRED
+    SELFTEST PASS 49/49
+    ? armed=0 everArmed=0 pack=3 mv=10238 ticks=0 status=0x2 dt=20 stby=0 benchQuiet=0 everPlausible=0
+
+    LED decision: quiet = True | wd_alarm = False | armed = False  =>  period = 0
+
+`period = 0` is the steady-off branch. 7888 B flash (24%), 313 B SRAM (15%).
+`host_test.py` still **PASS 13/13, exit 0** — and note `everArmed` stays 0 even
+through it, because the pack inhibits, so the board remains quiet after a test
+run rather than re-arming the blink.
+
+**Stated honestly: I verified the LED DECISION, not the photons.** The firmware
+evaluates to the steady-off branch on the board's own reported state; whether
+the physical LED is dark is Evan's to see.
+
+## CE.6 State
+
+`uno_control` flashed and left in the quiet bench state. **Nothing ordered,
+nothing wired.** The moment a real divider is attached and reads a sane
+voltage, `everPlausible` latches and every fault after that is loud again —
+which is the behaviour that matters once there is a car.

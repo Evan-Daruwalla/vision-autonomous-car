@@ -64,7 +64,22 @@ struct PackGuard {
 
   bool inhibits() const { return state == PACK_CUTOFF || state == PACK_FAULT; }
 
-  void poll(uint32_t now) { state = step(readMv(), now); }
+  /* Has a plausible 2S reading EVER been seen since boot?
+   *
+   * This is what separates "no sensor has ever been wired to this board"
+   * from "the sense wire fell off". Both read ~10,248 mV on a floating pin
+   * and are indistinguishable in the instant -- but they differ in HISTORY,
+   * and history is free to record. A bench board never sees a real pack; a
+   * car whose wire drops has seen one. Consumers use it to decide how loudly
+   * to complain, NEVER whether to inhibit throttle. (2026-09-02.)
+   */
+  bool everPlausible = false;
+
+  void poll(uint32_t now) {
+    uint16_t mv = readMv();
+    if (mv >= PG_FAULT_MV && mv <= PG_FAULT_HI_MV) everPlausible = true;
+    state = step(mv, now);
+  }
 
   bool clearLatch() {
     if (readMv() < PG_RECOVER_MV) return false;
