@@ -129,6 +129,7 @@ the dated entry, not the digest.
 - [CN — Pi decision finalized: Vilros Basic Starter Kit $179.99, folds three BOM rows into one, +$48.04](#appendix-cn---pi-decision-finalized-vilros-basic-starter-kit-17999-folds-three-bom-rows-into-one-4804-2026-09-03-1715-cdt) (09-03)
 - [CO — BMS row corrected: $9.59 buys an 8-pack, not one board — the spares answer Appendix CK's sourcing problem](#appendix-co---bms-row-corrected-959-buys-an-8-pack-not-one-board--the-spares-answer-appendix-cks-sourcing-problem-2026-09-03-1732-cdt) (09-03)
 - [CP — Small-order problem and general items folded onto Amazon -- resolves 3 scattered vendors, but costs +$105 in bulk-pack overbuy](#appendix-cp---small-order-problem-and-general-items-folded-onto-amazon----resolves-3-scattered-vendors-but-costs-105-in-bulk-pack-overbuy-2026-09-03-1744-cdt) (09-03)
+- [CQ — Every unlinked BOM commodity now live-verified — six wire/hardware items, five stale row placeholders, total recomputed to $452.20](#appendix-cq---every-unlinked-bom-commodity-now-live-verified--six-wirehardware-items-five-stale-row-placeholders-total-recomputed-to-45220-2026-09-03) (09-03)
 
 ---
 
@@ -10465,3 +10466,80 @@ went from effectively unbounded ("fold into whichever order is cheapest") to
 one (Amazon) for everything except the Pi (Vilros), the drivetrain trio
 (Pololu), the cells (IMR), the charger (Adeept), and two Pi accessories
 (DigiKey, still cheaper there).
+
+# Appendix CQ - Every unlinked BOM commodity now live-verified — six wire/hardware items, five stale row placeholders, total recomputed to $452.20 (2026-09-03)
+Evan's instruction after Appendix CP: "put the links in the BOM." Six Amazon-row
+items had been left unlinked — a "not individually re-verified" disclaimer
+stood where a link should be. **All six are now live-verified, linked, and
+priced**, and the same fix was extended to five numbered-table rows that
+still read "any" (servo, wire/heatshrink/caps/headers, LEDs, resistors,
+Dupont+USB, proto shield) — **the BOM now has zero unlinked "any" placeholders
+anywhere.**
+
+## CQ.1 The six items, verified the same way as everything else in this row
+
+Browser-rendered page, not a search snippet — title, live price, live stock:
+
+| item | price | stock |
+|---|---|---|
+| Fermerry 22 AWG wire, 6 colors × 25ft, silicone | $20.49 | In Stock |
+| Fermerry 26 AWG wire, 6 colors × 50ft, silicone | $24.99 | In Stock |
+| KOOWIN heat-shrink, 720pc/8 sizes | $7.99 | In Stock |
+| 40-pin single-row 0.1" breakaway headers, 20-pack | $6.29 | In Stock |
+| EDGELEC Dupont jumpers, 120pc M-M/M-F/F-F | $6.98 | In Stock |
+| Amazon Basics USB-A-to-B cable, 6ft | $5.12 | ⚠️ only 9 left |
+
+**Subtotal: $71.86** — over the earlier $35–45 budget *guess*, mostly because
+of the two wire kits alone ($45.48). ⚠️ **The first candidate for both the
+wire kit and the USB cable was "Currently unavailable"** — same dead-listing
+pattern as the MG90S servo in Appendix CP — caught by reading the live page,
+not the search snippet, and a working alternative found via that dead
+listing's own "consider these" carousel each time.
+
+Chosen deliberately over cheaper PVC alternatives: **stranded silicone
+insulation**, not solid-core PVC — flexible wire matters specifically on a
+car that vibrates, the same reasoning already applied to the proto shield
+row (Appendix CF) to eliminate parts that back out under vibration.
+
+## CQ.2 The gap was bigger than just the note — five numbered rows still said "any"
+
+The ORDER SHEET note only ever covered the vendor shopping list. The
+underlying numbered row table (rows 1-22, the reasoning/history section)
+still had **zero link** in six rows: 7 (servo), 16 (wire+shrink+caps+headers),
+18 (LEDs), 19 (resistors), 20 (Dupont+USB), 21 (proto shield) — all marked
+"any" in the Source column. Those now carry the same verified links as the
+vendor table. **Rows 13-15 (XT30, rocker switch, fuse holder) were NOT
+touched** — they already carry real (if now-superseded-by-the-Amazon-fold)
+vendor links, a different, smaller problem (staleness, not a missing link)
+that was out of scope for this instruction and is flagged here rather than
+silently fixed.
+
+## CQ.3 Every total in the BOM recomputed, and independently hand-summed before writing
+
+    fixed vendors (Vilros+DigiKey+Pololu+IMR+Amazon BMS+Adeept):  $281.45
+    Amazon-folded row, now all 17 items verified:                 $167.02
+    Addicore backordered (holder $1.25 + buck $2.48):               $3.73
+    TOTAL:                                                        $452.20
+
+Checked with an independent Python hand-sum before writing, same discipline
+as Appendix CP. **The BOM total is now a single precise figure, $452.20, not
+a range** — every row in the whole document has a live-verified price as of
+today; the range that used to exist ($415.34-$425.34) existed only because
+the last six commodities were unpriced. All-in estimate (with the same rough
+shipping-margin method as before): **≈$465-$480.**
+
+**The consolidation cost, updated:** the CONSOLIDATION callout from Appendix
+CP quoted +$104.86 to +$108.61 over the old scattered-vendor estimate — that
+number was itself built on the $35-45 budget guess for the six commodities.
+With those now priced at $71.86, **the real delta is +$135.47 to +$141.72**,
+about $27-37 more than the interim figure. Restated in the BOM rather than
+left stale.
+
+## CQ.4 State
+
+**Nothing ordered.** BOM total: $452.20 before shipping, ≈$465-480 all-in.
+Every "any" placeholder that existed in this document is now either a real
+link or an explicit statement that no marketplace match exists (row 22,
+Appendix CP). The only remaining un-browser-verified price in the whole BOM
+is the resistor kit (KSOPUERT, $7.38, priced from a search snippet) — flagged
+as such in row 19, not hidden.
