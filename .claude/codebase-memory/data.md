@@ -121,8 +121,10 @@ unbalanced 51:27 in favour of `generated-track`.
 
 ## The OTHER contract: Pi <-> Uno serial frames (added 2026-09-02)
 
-**Status: DESIGN ONLY — `firmware/SERIAL_PROTOCOL.md` v0.1, nothing implements
-it.** Recorded here because it is the project's second wire-format contract and
+**Status: ~~DESIGN ONLY — `firmware/SERIAL_PROTOCOL.md` v0.1, nothing implements
+it.~~ IMPLEMENTED 2026-09-02 — `firmware/uno_control/` speaks v0.2 (status
+bits 4-5 added), verified on the board.** *(The strike is a same-day miss
+caught by the daily-audit, Appendix BY.)* Recorded here because it is the project's second wire-format contract and
 the episode format above is silent about it. Do not treat any field below as
 verified on hardware; only the *link* is measured (p50 0.869 / p99 1.069 ms
 round trip at 20 Hz, ~2% of the 50 ms budget).

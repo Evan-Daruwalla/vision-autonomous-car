@@ -4,11 +4,22 @@
  * anything; uno_bringup/uno_memtest/uno_echo were measurements and
  * uno_packguard was one safety subsystem.
  *
- * VERIFIED ON THE BOARD, ACTUATORS UNWIRED. SELFTEST 37/37 and host_test.py
- * 11/11 on a real Uno (2026-09-02). The LINK and the STATE MACHINE are tested;
- * no motor, servo, encoder, LED or pack exists — nothing in docs/BOM.md is
- * ordered — so every actuator path is verified only as a DECISION this firmware
- * made, never as something that physically moved.
+ * VERIFIED ON THE BOARD, ACTUATORS UNWIRED. SELFTEST 39/39 on a real Uno;
+ * firmware/host_test.py is the Pi-side gate (2026-09-02). The LINK and the
+ * STATE MACHINE are tested; no motor, servo, encoder, LED or pack exists —
+ * nothing in docs/BOM.md is ordered — so every actuator path is verified only
+ * as a DECISION this firmware made, never as something that physically moved.
+ *
+ * DEFECT FIXED 2026-09-02 (found by the scheduled daily-audit, Appendix BY;
+ * fix recorded in Appendix CA): loop() sampled millis() once at the top, then
+ * handed handleFrame() a SECOND, later millis(); the watchdog compared the
+ * stale sample against the fresher stamp, the unsigned subtraction wrapped,
+ * and the watchdog tripped in the SAME iteration as every good frame — after
+ * the reply had already been sent, so no status byte ever showed it. Effect
+ * with a motor wired: drive ~2 ms, brake ~48 ms, repeat. Both timestamps now
+ * come from the one sample. The test that catches it probes `armed` inside
+ * the watchdog window (host_test.py); the status-bit check that seemed
+ * obvious PASSES on the broken build, which is its own lesson.
  *
  * THE SAFETY MODEL, which is the point of this file:
  *   Four independent things can stop the car, and they do NOT share one code
@@ -443,7 +454,7 @@ void loop() {
     }
     rxBuf[rxLen++] = c;
     if (rxLen == CMD_LEN) {
-      if (crc8(rxBuf, CMD_LEN) == 0) handleFrame(rxBuf, millis());
+      if (crc8(rxBuf, CMD_LEN) == 0) handleFrame(rxBuf, now);   // ONE clock sample per iteration -- see header
       else {
         // A bad CRC is a DROPPED frame, never a guessed one: no actuator action,
         // and the watchdog keeps running so a stream of corrupt frames still

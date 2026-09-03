@@ -439,3 +439,19 @@ traps in `sim-harness.md`.
   EEPROM (ATmega328P has 1024 B), reload on boot.**
 - **MG996R is ~11 kg.cm / ~1079 mN.m** for reference; MG90S ~2.2 kg.cm /
   ~216 mN.m. (Nominal spec figures, not measured on a real unit.)
+
+## Firmware clock-sampling trap (added 2026-09-02, Appendices BY/CA)
+
+- **Take ONE `millis()` per loop iteration and pass it everywhere.** A second
+  sample taken after any blocking work (here ~2 ms of `analogRead`) is LATER
+  than the first; any `first - second` on `uint32_t` wraps to ~4.29e9 and
+  blows through every threshold. In `uno_control` this made the watchdog trip in
+  the same iteration as every good frame. **Symptom with a motor wired: drive
+  ~2 ms, brake ~48 ms, repeat** — a car that judders instead of driving, with
+  nothing in the telemetry saying why.
+- **The reply is built BEFORE the watchdog block runs**, so watchdog effects
+  never appear in the reply that triggered them. Probe `armed` via `?` inside
+  the window instead. See `testing.md` for the red/green evidence.
+- **A scheduled cold audit found this; the author's own tests did not.** The
+  audit's suggested test was also blind to it. Both facts are recorded so the
+  next "verified on the board" claim names what was and was not exercised.

@@ -97,8 +97,8 @@ have no pass/fail and exit nothing. They produced the board facts in
 
 | Command | Proves | Notes |
 |---|---|---|
-| firmware SELFTEST on `firmware/uno_control` (runs in `setup()`, or send `T`) | CRC8 against the 123456789=0xF4 reference vector, whole-frame CRC, steering/throttle clamping, the duty cap, the **whole four-input safety decision** (`outputModeFor`), the pack transitions, and the quadrature table's antisymmetry | **PASS 37/37 on the real board 2026-09-02.** Same discipline as `uno_packguard`: the safety decision is a PURE function, so the test drives shipping logic, not a copy |
-| `.venv/Scripts/python.exe firmware/host_test.py --port COM3` | the protocol end-to-end on hardware: reply framing and CRC, seq echo, a 20 Hz stream, bad-CRC rejection, the 150 ms watchdog, the `?` escape hatch, and that **STBY stays LOW with no pack sensor** | **PASS 11/11, exit 0, 2026-09-02.** Exits non-zero on any failure, so it is a gate. Needs `pyserial` (installed into `.venv` 2026-09-02) |
+| firmware SELFTEST on `firmware/uno_control` (runs in `setup()`, or send `T`) | CRC8 against the 123456789=0xF4 reference vector, whole-frame CRC, steering/throttle clamping, the duty cap, the **whole four-input safety decision** (`outputModeFor`), the pack transitions, and the quadrature table's antisymmetry | **PASS 39/39 on the real board 2026-09-02.** Same discipline as `uno_packguard`: the safety decision is a PURE function, so the test drives shipping logic, not a copy |
+| `.venv/Scripts/python.exe firmware/host_test.py --port COM3` | the protocol end-to-end on hardware: reply framing and CRC, seq echo, a 20 Hz stream, bad-CRC rejection, the 150 ms watchdog, the `?` escape hatch, and that **STBY stays LOW with no pack sensor** | **PASS 13/13, exit 0, 2026-09-02 ~19:55 CDT** (two checks added for the watchdog defect, CA). Exits non-zero on any failure, so it is a gate. Needs `pyserial` (installed into `.venv` 2026-09-02) |
 
 **Compiling is not running, and this is the evidence.** `uno_control` compiled
 clean (7134 B flash, 312 B SRAM) while carrying **three wrong assertions**. Only
@@ -112,3 +112,33 @@ nothing about any of them.
 no measurement has established.** Test the property that survives the
 convention instead — here, that the two directions are exact opposites and that
 `QTAB` is antisymmetric across all 16 entries, which is true either way.
+
+## The watchdog defect, and the test that looked right but could not see it (2026-09-02, Appendices BY/CA)
+
+**The scheduled daily-audit found a CRIT in firmware this bin had just called
+"verified on the board".** `loop()` sampled `millis()` at the top, burned ~2 ms
+in the pack guard's 16 `analogRead`s, then handed `handleFrame()` a SECOND,
+later `millis()` which became `lastFrameMs`. The watchdog then subtracted the
+fresher stamp from the stale sample — unsigned — and wrapped past 150 ms on
+every iteration that handled a good frame. **"SELFTEST 39/39, host_test 11/11"
+was true and was not evidence for this path**: SELFTEST tests `outputModeFor()`
+as a pure function, never the loop's clock handling, and host_test read `seq`.
+
+**The obvious test is blind, and that is the lesson.** The audit suggested
+asserting `ST_WATCHDOG` stays clear on healthy frames. Implemented, run on the
+unfixed build: **it passed** (`[False, False, False, False]`). The reply is
+sent from *inside* `handleFrame`, *before* the same iteration's watchdog block,
+and the previous iteration had already cleared the bit — so the false trip
+lives only in the ~2 ms after each reply and can never reach a status byte.
+What the trip *does* do is clear `armed`, and nothing re-arms until the next
+frame 50 ms later. The observable is therefore **`armed` probed via `?` inside
+the 150 ms window after an ARMED frame**: `armed=0` on the broken build,
+`armed=1` after the one-line fix (pass the loop-scope `now`). Red, then green,
+on the board — both runs pasted in Appendix CA.
+
+**Generalisation, added to the rules above:** when a defect's effect is on
+state the reply is built *before*, test the state, not the reply. And a bit
+that was visible in the script's own printed output (`status=0x33` in the
+very first run, bit 1 set) went unread for hours because the assertion next to
+it was about a different bit. **Read the whole status line, not the bit the
+assertion names.**

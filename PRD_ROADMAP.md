@@ -5,7 +5,7 @@ research brief. Standing document — the executing model works through TASK
 BREAKDOWN top to bottom, one task at a time, and checks off SUCCESS
 CRITERIA.**
 
-**HOW TO READ THIS FILE (added 2026-09-02 ~19:31 CDT, Appendix BY):** it has
+**HOW TO READ THIS FILE (added 2026-09-02 ~19:31 CDT, Appendix BZ):** it has
 accreted six weeks of dated amendments under the rule *ADD by appending ·
 REMOVE by dated strikethrough · never delete*, so the current state is no
 longer readable top to bottom. **`HANDOFF.md` is the live snapshot; this file
@@ -66,7 +66,7 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   *Open sub-question: "none" may mean none of the PF/Powered-Up families
   specifically; EV3/NXT/9V-Technic motors, if owned, would reopen the
   encoder path — confirm during M1.2 inventory.*
-- **What exists (2026-09-02, Appendix BY) — supersedes "Docs only" above:**
+- **What exists (2026-09-02, Appendix BZ) — supersedes "Docs only" above:**
   a git repo (github.com/Evan-Daruwalla/vision-autonomous-car) · `ml/` — 31
   scripts, **SIM-POC P1-P6 complete** (102,888-frame corpus, V+M+C and
   DreamerV3-S trained, the paired eval harness) · `firmware/` — four Uno
@@ -121,7 +121,13 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   PCA9685 is superseded by an Arduino Uno Evan already OWNS ($0), giving
   ≈$226-234 + $15-25 shipping = ≈$241-259.** The $200 ceiling is still breached
   on the 4GB Pi; the **2GB path reaches ≈$196-214**, whose low end clears $200.
-  Budget is NOT settled; it is Evan's open call.)* Itemised in `docs/BOM.md`. One part
+  Budget is NOT settled; it is Evan's open call.)* *(**Superseded again
+  2026-09-02 ~19:40 CDT (Appendices BO/BY): ≈$235-243 before shipping,
+  ≈$250-268 with** — row 5 corrected to the #5159 encoder motor (+$6) and the
+  #4763 encoder cable added (+$3). **The $200 ceiling is breached on EVERY
+  path, the 2GB Pi included (≈$205-223 with shipping).** The daily-audit
+  caught this bullet disagreeing with task 8's — and this is the document
+  used to place an order.)* Itemised in `docs/BOM.md`. One part
   was missing from every earlier estimate and is now included: a **camera
   cable, Standard-Mini (~$2-5)** — Camera Module 3 ships with a
   Standard-Standard cable that does NOT fit the Pi 5's mini 22-pin

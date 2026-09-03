@@ -247,6 +247,9 @@ a motor with no encoder — while the pin map has spent D2 and D3 on encoder
 interrupts and this net list wires six encoder conductors. **The BOM buys a
 motor that cannot feed the firmware that has been designed around it.** Not
 changed here: it moves the total (+$6) and purchases are Evan's call.
+**CORRECTED the same day (Appendix BO): BOM row 5 now reads #5159 and row 5b
+adds the #4763 cable.** This paragraph stays as the record of the defect;
+the daily-audit (BY) flagged it as reading like a live claim.
 
 **4.4 The motor/encoder connector is not hand-solderable.** 6-pin JST SH at
 1.0 mm pitch does not mate with 0.1" protoboard. Needs Pololu's cable, which is
@@ -281,8 +284,12 @@ measurements — this table is portfolio material, not ceremony.
 - **TB6612 parallel pin pairing** unverified against Toshiba, §2.2.
 - **LM2596 module current rating** unverified for the specific Addicore part;
   §2 loads sum to ≈840 mA peak.
-- **`STBY` in firmware.** `SERIAL_PROTOCOL.md` §1a and rule 4 specify the
-  behaviour; nothing implements it, because nothing implements the protocol.
+- ~~**`STBY` in firmware.** `SERIAL_PROTOCOL.md` §1a and rule 4 specify the
+  behaviour; nothing implements it, because nothing implements the protocol.~~
+  **IMPLEMENTED 2026-09-02** — `uno_control.ino` drives D10 per §1a: brake
+  for `BRAKE_MS`, then drop `STBY`; raised only after the first valid ARMED
+  frame, never in `setup()`. *(This line was written 26 minutes AFTER the
+  firmware existed — caught by the daily-audit, Appendix BY.)*
 - Shield footprint is 68.6 × 53.4 mm against a **measured 114.75 mm car
   width** — it fits, but it is 60 % of the width and the stack height is
   unbudgeted against the camera mount.

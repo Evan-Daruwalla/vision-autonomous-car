@@ -2,7 +2,11 @@
 
 **Status: IMPLEMENTED 2026-09-02 (Appendix BO) — `firmware/uno_control/`, with
 `firmware/host_test.py` as the Pi-side exerciser. Verified ON THE REAL BOARD:
-firmware SELFTEST 37/37, host_test 11/11, exit 0. ACTUATORS ARE UNWIRED — the
+firmware SELFTEST 39/39, host_test 13/13, exit 0 (2026-09-02 ~19:55 CDT, after
+the watchdog fix: the daily-audit, Appendix BY, found `loop()` taking two
+`millis()` samples per iteration so the watchdog tripped in the same iteration
+as every good frame — invisible in any reply byte; fixed and re-verified in
+Appendix CA). ACTUATORS ARE UNWIRED — the
 link and the state machine are tested; no motor, servo, encoder, LED or pack
 exists. Bumped to v0.2 by the status-bit extension in §2.**
 ~~Status: DESIGN ONLY. No firmware implements this yet.~~ Drafted after the link

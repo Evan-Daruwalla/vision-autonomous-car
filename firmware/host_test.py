@@ -113,14 +113,44 @@ def main() -> int:
 
     # 2. seq increments cleanly across a short stream
     ok = True
+    wd_mid = []                          # ST_WATCHDOG on each mid-stream reply
     for s in range(2, 8):
         ser.write(command(s, 20, 30, 0x01, armed=True))
         rr = read_reply(ser)
         if rr is None or rr["seq"] != s:
             ok = False
             break
+        if s >= 4:
+            wd_mid.append(bool(rr["status"] & ST_WATCHDOG))
         time.sleep(0.05)                 # the protocol's 20 Hz
     check(ok, "20 Hz stream: every frame answered with a matching seq")
+    # Appendix BY (scheduled daily-audit, 2026-09-02) found the watchdog tripping
+    # on EVERY good frame: loop() sampled millis() before ~2 ms of analogRead,
+    # handleFrame() stamped lastFrameMs from a LATER sample, and the unsigned
+    # subtraction wrapped past 150 ms. The stream check above read seq only and
+    # could not see it -- and the bit was visible in this script's own printed
+    # status (0x33) all along. Frames 4-7 give the boot-state bit two frames to
+    # clear; on the buggy firmware every one of them is set.
+    check(bool(wd_mid) and not any(wd_mid),
+          f"20 Hz stream: WATCHDOG stays CLEAR on healthy frames (got {wd_mid})")
+    # ^ That check PASSES on the buggy firmware (verified on the board
+    # 2026-09-02) and is therefore not the observable for the BY defect. The
+    # reply is sent from INSIDE handleFrame, BEFORE the same iteration's
+    # watchdog block runs, and the previous iteration already cleared the bit,
+    # so a false trip can never reach a status byte. What it DOES do is clear
+    # `armed` ~2 ms after every good frame, and nothing re-arms until the next
+    # frame 50 ms later: drive ~2 ms, brake ~48 ms, repeat. So probe `armed`
+    # well inside the 150 ms window after an ARMED frame.
+    ser.write(command(8, 0, 0, 0, armed=True))
+    read_reply(ser)
+    time.sleep(0.02)                     # 20 ms: << WATCHDOG_MS, >> one loop
+    ser.reset_input_buffer()
+    ser.write(b"?")
+    time.sleep(0.15)
+    probe = ser.read(300).decode("ascii", "replace").strip().split("\r\n")[0]
+    check("armed=1" in probe,
+          "armed stays 1 inside the watchdog window after an ARMED frame "
+          f"(a false trip clears it) -- got: {probe[:70]}")
 
     # 3. a corrupted frame must be REJECTED, not acted on
     bad = bytearray(command(8, 0, 0, 0, armed=True))

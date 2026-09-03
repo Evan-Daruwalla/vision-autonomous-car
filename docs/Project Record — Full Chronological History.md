@@ -113,6 +113,7 @@ the dated entry, not the digest.
 - [BX — HANDOFF's workstream table contradicted itself on P6; milestone-track cannot parse this PRD](#appendix-bx---handoffs-workstream-table-contradicted-itself-on-p6-milestone-track-cannot-parse-this-prd-2026-09-02-1927-cdt) (09-02)
 - [BY — Scheduled daily-audit: the watchdog trips on every good frame, and no experiment result records the commit that made it](#appendix-by---scheduled-daily-audit-the-watchdog-trips-on-every-good-frame-and-no-experiment-result-records-the-commit-that-made-it-2026-09-02-1927-cdt) (09-02)
 - [BZ — PRD cleanup: 24 dated strikes and appends, P1-P3 stamped, P6 ticked, and the schedule escalation the plan itself requires](#appendix-bz---prd-cleanup-24-dated-strikes-and-appends-p1-p3-stamped-p6-ticked-and-the-schedule-escalation-the-plan-itself-requires-2026-09-02-1936-cdt) (09-02)
+- [CA — Daily-audit CRIT confirmed on hardware and fixed: two clock samples per loop made the watchdog trip on every good frame; the audit's own suggested test was blind to it](#appendix-ca---daily-audit-crit-confirmed-on-hardware-and-fixed-two-clock-samples-per-loop-made-the-watchdog-trip-on-every-good-frame-the-audits-own-suggested-test-was-blind-to-it-2026-09-02-1946-cdt) (09-02)
 
 ---
 
@@ -8790,3 +8791,155 @@ concurrent projects.
 
 The PRD now agrees with disk and with HANDOFF. **Nothing ordered, nothing
 printed, nothing wired, no actuator has moved.** Record at 77 appendices.
+
+# Appendix CA - Daily-audit CRIT confirmed on hardware and fixed: two clock samples per loop made the watchdog trip on every good frame; the audit's own suggested test was blind to it (2026-09-02, ~19:46 CDT)
+**A scheduled daily-audit (Appendix BY, 19:27 CDT) ran while the PRD cleanup
+was in progress, appended findings to the record without committing, and was
+swept into commit db6f37a unread by a `git add`.** Its CRIT was in firmware
+this session had declared "verified on the board" an hour earlier. This entry
+verifies that CRIT independently, fixes it, and records why the earlier
+verification could not have caught it.
+
+## CA.1 The letter collision, first
+
+BY's arrival meant the PRD-cleanup entry was assigned **BZ**, not BY. Two
+references written into `PRD_ROADMAP.md` (the reading note and the "What
+exists" block) and HANDOFF's appendix count pointed at the wrong entry.
+Corrected. **Lesson: never write a record letter into another document before
+the append returns it.** Two automated processes now write to this record.
+
+## CA.2 The CRIT, confirmed against the code — not taken on the audit's word
+
+`uno_control.ino`, `loop()`:
+
+- `:428` `uint32_t now = millis();`
+- `:434` `pack.poll(now);` — 16 blocking `analogRead`, ~1.8 ms
+- `:446` `handleFrame(rxBuf, millis());` — a SECOND, LATER sample → becomes
+  `lastFrameMs` inside `handleFrame`
+- `:458` `wd = (now - lastFrameMs > WATCHDOG_MS)` — the STALE `now`
+
+`lastFrameMs > now` by 1-2 ms on every iteration that handles a frame; the
+`uint32_t` subtraction wraps to ~4.29e9 and clears 150. The audit's arithmetic
+is right, and the project's own recorded loop period (2.0-3.0 ms, dominated by
+that ADC burst) says the gap is never zero.
+
+**Effect once a motor is wired**, traced through the code rather than
+asserted: `handleFrame` sets `armed`, applies DRIVE, and sends the reply; the
+watchdog block in the same iteration then clears `armed` and applies BRAKE;
+nothing re-arms until the next frame 50 ms later. **Drive ~2 ms, brake ~48 ms,
+repeat — ~96% braked.** The audit's headline holds.
+
+## CA.3 The audit's suggested test is BLIND to it — proven on the board
+
+The audit said host_test "never checks that `ST_WATCHDOG` stays clear during
+a healthy stream". That check was implemented first and run against the
+**unfixed** build:
+
+    ok   20 Hz stream: WATCHDOG stays CLEAR on healthy frames (got [False, False, False, False])
+
+**It passed on the broken firmware.** The reply is sent from *inside*
+`handleFrame`, *before* the same iteration's watchdog block, and the previous
+iteration — which handled no frame — had already cleared the bit. The false
+trip lives only in the ~2 ms after each reply and can never reach a status
+byte. **Also: the bit WAS visible in this session's very first host_test output
+hours earlier — `status=0x33`, bit 1 set — and went unread because the
+assertion next to it was about bit 0.**
+
+The observable the mechanism actually produces is `armed`. New probe: send an
+ARMED frame, wait 20 ms (≪ 150, ≫ one loop), send `?`, read `armed=`.
+
+**RED — unfixed build, on the board:**
+
+    FAIL armed stays 1 inside the watchdog window after an ARMED frame (a false trip clears it)
+         -- got: ? armed=0 everArmed=0 pack=3 mv=10145 ticks=0 status=0x31 dt=20 stby=0
+    host_test: FAIL (1 failed)   EXIT=1
+
+Exactly one failure of 13, and `status=0x31` in the same probe — bit 1 clear —
+confirms the reply-ordering analysis in the same breath.
+
+## CA.4 The fix, and GREEN
+
+One line: `handleFrame(rxBuf, millis())` → `handleFrame(rxBuf, now)`. Both
+timestamps now come from the single top-of-loop sample. (`lastFrameMs` is then
+≤ one loop period early — ≤ 3 ms against a 150 ms watchdog — which is noise.)
+
+    Sketch uses 7222 bytes (22%)   [was 7232: one millis() call fewer]
+    SELFTEST PASS 39/39
+    ok   armed stays 1 inside the watchdog window after an ARMED frame (a false trip clears it)
+         -- got: ? armed=1 everArmed=0 pack=3 mv=10266 ticks=0 status=0x31 dt=20 stby=0
+    host_test: PASS (0 failed)   EXIT=0      13 checks
+
+Same probe, same board, opposite answer. **Red then green, both pasted.**
+
+## CA.5 What "verified on the board" meant before this, stated precisely
+
+It meant: the serial link, frame parsing, CRC rejection, seq echo, the pack
+guard's classification of a floating pin, the 150 ms watchdog *firing on
+silence*, and STBY staying low with no sensor — all real, all still true. It
+did **not** mean the watchdog stayed *quiet on a healthy stream*, because no
+assertion asked, and SELFTEST tests `outputModeFor()` as a pure function that
+never touches the loop's clock. That claim in BO, BQ, BT and BU was overstated
+by exactly that path. Recorded in `testing.md` as a rule: **when a defect's
+effect is on state the reply is built *before*, test the state, not the
+reply — and read the whole printed status line, not the bit the assertion
+names.**
+
+## CA.6 Board state
+
+Evan had re-flashed `uno_packguard` after the last verification (his board,
+his call). For this work the unfixed `uno_control` was flashed for the red
+run, then the fixed build for green. **The board now runs the FIXED
+`uno_control`, 39/39 + 13/13.** HANDOFF's firmware row no longer claims to know
+what is flashed — it says to read the boot banner.
+
+## CA.7 Also fixed from the audit (small, in scope)
+
+- HIGH-2: stale "37/37" in `uno_control.ino:7`, `SERIAL_PROTOCOL.md:5`,
+  `HANDOFF.md:23` and `:241`, `testing.md:100` → 39/39, and host_test → 13/13.
+- MEDIUM: `WIRING_PROTOSHIELD.md` said STBY "nothing implements it" 26 minutes
+  after it was implemented, and that BOM row 5 "still lists #1093" after it was
+  corrected; `data.md` still said "DESIGN ONLY"; `PRD_ROADMAP.md` §2 carried
+  ≈$226-234 while task 8 carried ≈$235-243 — **in the document used to place
+  an order**. All four struck-and-corrected with the date.
+
+## CA.8 Deferred — real, tracked, NOT done here
+
+The audit is findings-only and these are separate tasks. Named so they get
+PRD homes rather than vanish:
+
+- **HIGH-1: no `ml/runs/*.json` records the commit that produced it** (0 of
+  108; 82 record a seed). Fix in the shared result writer; the 108 existing
+  files cannot be retrofitted.
+- **HIGH-3: split-seed leak in `ml/train_mdnrnn.py:165`** — passes
+  `args.seed` where six sibling consumers derive it from the VAE checkpoint.
+  `rollout_eval.py:216-218` already warns about this exact incident; the fix
+  never propagated. `exp_aux_head.py:306`, `prep_dreamer_corpus.py:108` same.
+- **HIGH-4: `ml/preprocess.py:85` claims an atomic four-file swap it does not
+  perform** — four sequential `os.replace`; `splits.py` `load_proc()` does no
+  cross-array length check.
+- **HIGH-5: `ml/collect_recovery.py:42-44` asserts a gate that cannot pass** —
+  the PID-identity gate diffs against the noise-injected action; a worker
+  reproduced the failure (`max |diff| 1.663858 at index 128`). Claim written,
+  never run.
+- MEDIUM: `scripts/git-hooks/pre-commit:24-37` comments "fails CLOSED" but has
+  no `exit 1` — fails OPEN, and both gates depend on untracked `~/.claude`
+  paths; `docs/LIGHTING_SPEC.md:75,88-90` still specifies 20 mA/LED (the 10 mA
+  correction never reached the spec); `ml/measure_operating_point.py:62-65`
+  omits the mid-warmup guard its six siblings carry; `build_expert_labels.py`
+  and `exp_recovery.py` check alignment by count only; `proc/train_mu.npy` and
+  `holdout_mu.npy` predate the encoder fingerprint and are used with only a
+  warning.
+- LOW: `track_layout_v2.json` keys the measured width `car_width_m_ESTIMATE`;
+  three bins say "31 Python files" where `git ls-files` counts 33; four unused
+  imports; four un-annotated `except Exception: pass`.
+
+Audit coverage caveats it stated itself, carried forward: ~lines 118-900 of
+`PRD_ROADMAP.md` not read line by line; 5 of 7 research docs grep-checked
+only; no CVE database reachable; **no firmware claim verified on hardware by
+the audit** — that is what this entry did.
+
+## CA.9 State
+
+**Nothing ordered, nothing printed, nothing wired.** The board runs the fixed
+`uno_control`. The one thing a wired car would have done wrong on its first
+drive is now fixed before any part exists to be wired.
