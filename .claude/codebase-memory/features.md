@@ -1,6 +1,6 @@
 # features.md — Autonomous Car Project
 
-**31 Python files under `ml/`** (verified 2026-08-25: `git ls-files ml/ |
+**34 Python files under `ml/`** (was 31; re-derived 2026-09-03) (verified 2026-08-25: `git ls-files ml/ |
 grep -c '\.py$'`) plus `scripts/gen_tolerance_coupon.py` (CAD tolerance-coupon
 STL generator, zero-dependency — see tooling.md). Built over 2026-08-05 to
 2026-08-13 for SIM-POC P1-P5. This bin lists WHAT EXISTS; schema/format is

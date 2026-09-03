@@ -158,3 +158,33 @@ round trip at 20 Hz, ~2% of the 50 ms budget).
 only odometry source on the car, so whatever `action` means in a real-car
 episode npz must be defined against these int8 percentages, not against the
 sim's float [-1, 1]. That conversion is not written down anywhere yet.
+
+## WHICH episodes are held out: the split seed (added 2026-09-02, Appendix CC)
+
+- **The train/val split is a pure function of (tracks, seed)** —
+  `splits.fit_val_episodes`. Two scripts passing different seeds over the same
+  corpus produce **different, silently incompatible** partitions, and nothing on
+  disk records which partition an artifact was selected against.
+- **A script that CONSUMES a VAE checkpoint must take the split seed FROM that
+  checkpoint**, never from its own `--seed`, because the checkpoint was selected
+  against the split its own training run used. `--seed` varies init, batch order
+  and sampling only. Chokepoint: **`splits.split_seed_of(ckpt)`** — never
+  re-derive it inline.
+- **Producers** (`train_vae.py`, `exp_aux_head.py`) and standalone
+  `prep_dreamer_corpus.py` correctly take `--seed`. They *write* `args` into the
+  checkpoint, which is where consumers read it back from.
+- **`train_mdnrnn.py` leaked for three weeks** by splitting on `args.seed`
+  (fixed 2026-09-02). The failure it produced: a seed-0 VAE with
+  `train_mdnrnn --seed 3` trains and selects on the seed-3 split, then
+  `rollout_eval` rebuilds the seed-0 split and scores `val_indomain` on episodes
+  that model trained on. **Six sibling scripts already had the rule as six
+  copied lines — hand propagation is exactly why the one file that never binds
+  `vae_ckpt` to a variable was missed.**
+- **`mdnrnn_best.pt` now stamps `split_seed`**, so `rollout_eval` ASSERTS
+  agreement rather than noting it: missing stamp is UNVERIFIABLE and proceeds;
+  a different stamp is FAIL and exit 1 **before any number is produced**.
+  Checkpoints written before 2026-09-02 have no stamp.
+- **Still an 11th, separate split**: `exp_recovery.py:159-167` hand-rolls its
+  own with `--val-frac 0.2` against `VAL_FRACTION = 0.15`, stratified by
+  recovery-vs-original rather than by track, on a different corpus. Not wrong,
+  but not this contract.

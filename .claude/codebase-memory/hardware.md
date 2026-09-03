@@ -455,3 +455,27 @@ traps in `sim-harness.md`.
 - **A scheduled cold audit found this; the author's own tests did not.** The
   audit's suggested test was also blind to it. Both facts are recorded so the
   next "verified on the board" claim names what was and was not exercised.
+
+## Status-LED semantics: quiet on a bench, loud on a car (added 2026-09-02, Appendix CE)
+
+- **A floating analog pin and a sense wire that FELL OFF read identically**
+  (~10,248 mV). In the instant they are indistinguishable — which is why the
+  upper fault band exists at all. **So no fault indicator may go quiet by
+  inferring "probably just unwired".** It would also go quiet on the car.
+- **They differ in HISTORY, and history is one bool.** `PackGuard::everPlausible`
+  is set the first time a reading lands inside the fault band and never cleared.
+  A board that has NEVER seen a plausible pack was never wired. The status LED
+  silences `PACK_FAULT` only in that case — automatically, every power cycle.
+  **The moment a real divider reads sane, every later fault is loud again.**
+- **The watchdog blink follows the same rule**: `wd && everArmed`. A watchdog
+  trip before anything has ever armed is "no Pi connected yet", not a fault.
+  Missing this is what made the first attempt still blink after flashing.
+- **A light that always cries wolf is not read when it means something** — that
+  is the reason, not tidiness.
+- **What is never silenced**: a latched `PACK_CUTOFF` (a genuinely flat pack).
+  And silencing is LED-only — throttle inhibit, `STBY` and `outputModeFor()`
+  are untouched, with SELFTEST assertions saying so, including that a watchdog
+  trip still brakes when its blink is suppressed.
+- `B` over serial toggles a manual override for the one case history cannot
+  cover: a board that HAS seen a real pack and is deliberately benched. Not
+  persisted; any reset clears it, and opening the serial port resets the board.

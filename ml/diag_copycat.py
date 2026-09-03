@@ -44,6 +44,7 @@ import numpy as np
 import torch
 
 from models import MDNRNN, ConvVAE, Z_DIM
+from provenance import write_result
 from splits import (fit_val_episodes, load_cached_mu, load_proc,
                     split_seed_of)
 from train_controller import Controller, rnn_states
@@ -169,11 +170,11 @@ def main() -> int:
     print(f"\nhistory contribution at serve time: MSE {m_ctrl:.6f} with h, "
           f"{m_h0:.6f} with h=0 ({100*(m_h0-m_ctrl)/m_ctrl:+.0f}%)")
 
-    (out / "diag_copycat.json").write_text(json.dumps(
+    write_result(out / "diag_copycat.json", 
         {"args": vars(args), "n_frames": len(vi), "var_action": var,
          "mse_ctrl_vs_at": m_ctrl, "mse_prev_vs_at": m_copy,
          "mse_ctrl_vs_prev": m_prev, "mse_ctrl_h0_vs_at": m_h0,
-         "verdict": verdict}, indent=2))
+         "verdict": verdict})
     print(f"-> {out / 'diag_copycat.json'}")
     return 0
 

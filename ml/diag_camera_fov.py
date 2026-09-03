@@ -36,6 +36,7 @@ from pathlib import Path
 
 import numpy as np
 
+from provenance import write_result
 from collect_sim_data import SIM_EXE, THROTTLE, WARMUP_STEPS
 
 REPO = Path(__file__).resolve().parent.parent
@@ -163,9 +164,9 @@ def main() -> int:
           f"{spread:.3f}"
           f"{'   *** cam_config APPEARS TO BE IGNORED ***' if spread <= 3*max(noise,0.1) else ''}")
 
-    (out / "camera_fov.json").write_text(json.dumps(
+    write_result(out / "camera_fov.json", 
         {"args": vars(args), "noise_floor_mae": noise, "results": rows,
-         "explicit_fov_spread": spread, "verdict": verdict}, indent=2))
+         "explicit_fov_spread": spread, "verdict": verdict})
     print(f"-> {out / 'camera_fov.json'}")
     return 0
 

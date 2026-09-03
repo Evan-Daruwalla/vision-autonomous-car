@@ -36,6 +36,7 @@ import torch
 from PIL import Image
 
 from models import ConvVAE, MDNRNN, mdn_sample
+from provenance import write_result
 from splits import (cache_key_matches, encoder_fingerprint,
                     fit_val_episodes, load_proc, split_seed_of)
 
@@ -266,8 +267,8 @@ def main():
         beats[tag] = (better, len(mse))
         print(f"  beats the frozen-frame baseline on {better}/{len(mse)} steps\n")
 
-    (out / "rollout_metrics.json").write_text(json.dumps(
-        {"args": vars(args), "results": results}, indent=2))
+    write_result(out / "rollout_metrics.json", 
+        {"args": vars(args), "results": results})
     print(f"panels : {out}/rollout_{{val_indomain,holdout}}.png")
     print(f"metrics: {out / 'rollout_metrics.json'}")
 

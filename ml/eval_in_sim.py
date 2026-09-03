@@ -60,6 +60,7 @@ from collect_sim_data import (MAX_EPISODE_STEPS, PIDDriver, SIM_EXE,
                               THROTTLE, WARMUP_STEPS)
 from models import HIDDEN, MDNRNN, ConvVAE
 from preprocess import SIZE
+from provenance import write_result
 from sim_conf import base_sim_conf
 from train_controller import Controller
 
@@ -342,7 +343,7 @@ def main() -> int:
                    "Simulated only. These numbers say nothing about the "
                    "physical car; the controller has never seen real hardware. "
                    "The expert is a behavioural-cloning CEILING, not a rival.")}
-    (out / "p5_eval.json").write_text(json.dumps(payload, indent=2))
+    write_result(out / "p5_eval.json", payload)
     print(f"\n-> {out / 'p5_eval.json'}")
     print("NOTE: simulated only. No transfer claim is made or implied.")
     return 0 if batch_valid or exp is None else 2

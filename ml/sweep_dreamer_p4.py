@@ -43,6 +43,7 @@ import json
 import pathlib
 import subprocess
 import sys
+from provenance import write_result
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 RUNS = REPO / "ml" / "runs" / "dreamer_p4"
@@ -135,7 +136,7 @@ def main() -> int:
               f"{pct:>9} {secs:>12}  {r['status']}")
 
     out = RUNS / "sweep_summary.json"
-    out.write_text(json.dumps(rows, indent=2))
+    write_result(out, {"rows": rows})
     print(f"\n-> {out}")
     return 0
 

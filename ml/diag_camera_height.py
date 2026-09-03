@@ -54,6 +54,7 @@ import time
 from pathlib import Path
 
 import numpy as np
+from provenance import write_result
 
 REPO = Path(__file__).resolve().parent.parent
 RUNS = REPO / "ml" / "runs"
@@ -277,7 +278,7 @@ def main() -> int:
         print("  FREE 2-PARAM (extrapolates ~100 rows past its data - fragile):")
         print(f"    h / cos(pitch) = {res['free_fit_h_over_cos_pitch_m']:.4f}, "
               f"horizon {res['free_fit_horizon_row']:.2f} (vs 41.97 measured)")
-        (OUT / "camera_height.json").write_text(json.dumps(res, indent=2))
+        write_result(OUT / "camera_height.json", res)
         print(f"-> {OUT / 'camera_height.json'}")
     return 0
 

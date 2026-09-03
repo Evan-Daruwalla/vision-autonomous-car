@@ -118,6 +118,7 @@ the dated entry, not the digest.
 - [CC — A2 done: split-seed derivation is now a chokepoint, and rollout_eval asserts the MDN-RNN was selected on the same split](#appendix-cc---a2-done-split-seed-derivation-is-now-a-chokepoint-and-rollout_eval-asserts-the-mdn-rnn-was-selected-on-the-same-split-2026-09-02-2302-cdt) (09-02)
 - [CD — A4 done: the recovery gate was made TRUE rather than exempted, and three sibling gates of the same class went with it](#appendix-cd---a4-done-the-recovery-gate-was-made-true-rather-than-exempted-and-three-sibling-gates-of-the-same-class-went-with-it-2026-09-02-2306-cdt) (09-02)
 - [CE — Status LED quiet on a bench board: a floating pin and a wire that fell off differ only in history, so history is what decides](#appendix-ce---status-led-quiet-on-a-bench-board-a-floating-pin-and-a-wire-that-fell-off-differ-only-in-history-so-history-is-what-decides-2026-09-02-2315-cdt) (09-02)
+- [CF — A1 done: every result names its commit; the module shipped a path-truncation bug and reading its own output found it; BOM audited](#appendix-cf---a1-done-every-result-names-its-commit-the-module-shipped-a-path-truncation-bug-and-reading-its-own-output-found-it-bom-audited-2026-09-03-1600-cdt) (09-03)
 
 ---
 
@@ -9312,3 +9313,126 @@ the physical LED is dark is Evan's to see.
 nothing wired.** The moment a real divider is attached and reads a sane
 voltage, `everPlausible` latches and every fault after that is loud again —
 which is the behaviour that matters once there is a car.
+
+# Appendix CF - A1 done: every result names its commit; the module shipped a path-truncation bug and reading its own output found it; BOM audited (2026-09-03, ~16:00 CDT)
+PRD task **A1 is DONE**, and the BOM was audited against six weeks of decisions
+that never reached it. The A1 work also shipped a bug and caught it — that part
+is the entry worth reading.
+
+## CF.1 A1 — every result now names the code that produced it
+
+**`ml/provenance.py`** (new, stdlib only) provides `stamp()` and
+`write_result(path, obj)`. All **23 ad hoc `write_text(json.dumps(...))` sites
+across 21 files** now call it. Conversion was done by a paren-balancing
+transformer, not a regex, so a nested call could not be corrupted; it reported
+`converted 23 sites across 21 files` and all 34 `ml/*.py` compile.
+
+**Stamped:** `commit`, `dirty`, `dirty_files` (capped at 20, count always
+exact), `ts_utc`, `python`, `torch`, `numpy`.
+
+**Refuse on no commit, record on dirty**, and the asymmetry is deliberate: a
+missing commit means the stamp cannot do its job, so it raises (PRD A1's own
+done-check says "refuses to write without one"); a dirty tree is the normal
+state while iterating and hides nothing, because `dirty_files` is written into
+the file.
+
+**Live proof** — `train_cte_probe.py --epochs 1`, then reading the JSON back:
+
+    provenance keys: ['commit','dirty','dirty_files','numpy','python','torch','ts_utc']
+    commit == HEAD? True | fa79791176df7e2515ca9d778d3bb522b77a8327
+    dirty: True | listed: 20
+    ts_utc: 2026-09-03T20:54:36+00:00 | python 3.12.10 | torch 2.13.0+cu126 | numpy 2.5.1
+
+Three list payloads (`train_vae.py`, `train_mdnrnn.py`, `sweep_dreamer_p4.py`)
+were wrapped as `{"args":…, "history":…}` / `{"rows":…}` — `write_result`
+refuses a bare list, because `{"provenance": …}` has nowhere to live in one.
+
+## CF.2 The module shipped with a bug, and reading its own output found it
+
+`_git()` did `p.stdout.strip()`. **Porcelain's first line begins with a
+significant space** (`" M path"`), so stripping the whole output ate it and the
+3-character slice took one character too many **off the first entry only**. The
+very first result file this module wrote recorded
+`"claude/codebase-memory/INDEX.md"` — **the leading dot gone.**
+
+It was found by reading that file, not by any test. The self-check passed
+throughout, because nothing asserted anything about the CONTENT of
+`dirty_files`.
+
+Fixed: `rstrip("\\n")`, and the parse extracted into `_parse_porcelain()` with
+two checks —
+
+- a **pure** regression test on a crafted string whose first line has the
+  leading space (`" M .claude/a.md\\nMM docs/b.md\\n?? c.txt"` →
+  `[".claude/a.md", "docs/b.md", "c.txt"]`);
+- a **live** check that every listed path either exists on disk or is tracked
+  by `git ls-files` — a truncated path is neither.
+
+**Both verified red:** the old `.strip()` behaviour re-run against the real tree
+still yields `claude/codebase-memory/INDEX.md`, and the live assert rejects it
+(`truncated path passes assert? False`). The live assert *also* fired a false
+positive first (on `provenance.py` itself, untracked but real) — condition was
+inverted and fixed before the green run.
+
+## CF.3 A test run clobbered a real result, and it was caught and restored
+
+`train_cte_probe.py --epochs 1` was the live producer. `ml/runs/` is a
+**tracked** directory, so that 1-epoch throwaway **overwrote the committed
+40-epoch result**: `val_r2` **0.9571 → 0.1668**.
+
+That number is load-bearing — the record cites "cte probe R^2 0.957" twice
+(Appendix Y.3 and the P5 finding that the paper's linear controller is
+structurally wrong). **Restored with `git checkout`; verified back at
+0.9571505679593773.** No other result file was touched.
+
+**The lesson, recorded because it will recur:** in this repo a "harmless
+smoke-test run" mutates version-controlled evidence. Any future live test of a
+producer must either write to a scratch `--out`, or be followed by a
+`git status ml/runs/` check.
+
+## CF.4 The BOM audited — four things six weeks of decisions never reached it
+
+Evan asked for the parts list and for it to be current. **`docs/BOM.md`**, now
+27 rows.
+
+- **Row 7 (servo).** Still called the MG996R "the fallback if it stalls" with no
+  hint of Appendix BV. Corrected: at ~1079 mN·m it puts the steering coupler at
+  **SF 0.12–0.19** against the MG90S's already-failing 0.57–0.96 — **stalling
+  harder is what shears the joint downstream.** Also added the fact that the
+  MG90S's 180° is an exact 1:1 match to the measured pinion sweep, and the
+  unverified-pulse-range caveat.
+- **Row 19 (LED resistors).** Still carried the 20 mA-per-LED reasoning that
+  Appendix BO refuted. Corrected to **10 mA** with the per-pin arithmetic and
+  provisional resistor values (white 200 Ω, red/amber 300 Ω). *The same error is
+  still uncorrected in `LIGHTING_SPEC.md` — PRD task A6, left open and named.*
+- **Row 16.** Gained the **0.1 µF brush caps** `WIRING_PROTOSHIELD.md` §2.2 had
+  flagged as missing from it.
+- **NEW row 21 — Arduino proto shield, ~$3–4.** An entire document is written
+  against it and it was never a line item.
+- **NEW row 22 — servo-to-pinion coupling, $0–0.75, UNRESOLVED.** Adafruit
+  #4252 is the candidate with its spline caveat; a printed cross-axle stub
+  **fails** here. No coupling is chosen.
+
+**TOTAL ≈$235–243 → ≈$238–248** before shipping, **≈$253–273 with**. The 2GB Pi
+path is **$193.32–$202.57 before shipping, ≈$208–228 with**. **Neither clears
+$200 with shipping.** Both increments are parts the design already required.
+
+## CF.5 Bins
+
+`data.md` gained the split-seed rule (A2's contract); `hardware.md` gained the
+bench-LED history rule (CE). **The "31 Python files" claim in
+`conventions.md`/`features.md`/`INDEX.md` was stale before `provenance.py` even
+existed** — the real count was already 33. **Re-derived by running the greps
+rather than incrementing**: 34 files, `from __future__` 32/34, pathlib 31/34,
+argparse 27/34, `--seed` 16/34, print 33/34, docstring 34/34, type hints 33/34.
+`conventions.md` gained the `write_result` rule.
+
+## CF.6 NOT done
+
+- **1 of 23 converted sites was executed** (`train_cte_probe.py`); the other 22
+  are compile-verified only. Most need the simulator.
+- **The 108 pre-existing result files carry no commit and cannot be
+  retrofitted.** Anything citing them must say so.
+- **PRD A6** (LIGHTING_SPEC's 20 mA) named but not fixed. **A3, A5, A7** untouched.
+- `ml/runs/controller/history_linear_seed0.json` is still dirty from 2026-08-25,
+  still unexplained, still not staged.

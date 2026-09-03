@@ -41,6 +41,7 @@ import torch
 
 from collect_sim_data import PIDDriver, SIM_EXE, THROTTLE, WARMUP_STEPS
 from eval_in_sim import SIZE, LatentPolicy
+from provenance import write_result
 from sim_conf import base_sim_conf
 from models import HIDDEN, MDNRNN, ConvVAE
 from plan_cem import CEMPlanner, load_probe
@@ -183,7 +184,7 @@ def main() -> int:
 
     payload = {"args": vars(args), "probe_val_r2": probe_r2, "episodes": episodes}
     tag = args.driver
-    (out / f"trace_{tag}.json").write_text(json.dumps(payload, indent=2))
+    write_result(out / f"trace_{tag}.json", payload)
 
     # ---- the three-way verdict, computed not eyeballed -------------------
     print(f"\n{'':<22}{'first 25%':>12}{'last 25%':>12}")
@@ -215,7 +216,7 @@ def main() -> int:
         verdict["actual |cte|"] = (float(np.mean(ae)), float(np.mean(al)))
         print(f"{'actual |cte|':<22}{np.mean(ae):>12.3f}{np.mean(al):>12.3f}")
 
-    (out / f"verdict_{tag}.json").write_text(json.dumps(verdict, indent=2))
+    write_result(out / f"verdict_{tag}.json", verdict)
     print(f"\n-> {out / f'trace_{tag}.json'}")
     return 0
 

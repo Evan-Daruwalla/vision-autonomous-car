@@ -78,6 +78,7 @@ import ruamel.yaml as yaml  # noqa: E402
 
 import dreamer as dv3  # noqa: E402
 import tools as dv3_tools  # noqa: E402
+from provenance import write_result
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 DATA = REPO / "ml" / "data" / "dreamer"
@@ -351,7 +352,7 @@ def main() -> int:
         history=history,
     )
     out = logdir / "p4_result.json"
-    out.write_text(json.dumps(result, indent=2))
+    write_result(out, result)
 
     print()
     if oom_at:

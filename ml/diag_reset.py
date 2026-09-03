@@ -45,6 +45,7 @@ from pathlib import Path
 import numpy as np
 
 from collect_sim_data import SIM_EXE, THROTTLE, WARMUP_STEPS
+from provenance import write_result
 from sim_conf import base_sim_conf
 
 REPO = Path(__file__).resolve().parent.parent
@@ -154,10 +155,10 @@ def main() -> int:
     print(f"VERDICT: {verdict}")
 
     path = out / f"diag_reset_{args.tag}.json"
-    path.write_text(json.dumps(
+    write_result(path, 
         {"args": vars(args), "warmup_steps": WARMUP_STEPS,
          "post_reset": post_reset, "post_warmup": post_warmup,
-         "summary": summary, "verdict": verdict}, indent=2))
+         "summary": summary, "verdict": verdict})
     print(f"-> {path}")
     return 0
 

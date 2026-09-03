@@ -50,6 +50,7 @@ import torch
 import torch.nn as nn
 
 from models import ACTION_DIM, HIDDEN, MDNRNN, Z_DIM, ConvVAE, count_params
+from provenance import write_result
 from splits import (fit_val_episodes, load_cached_mu, load_proc,
                     split_seed_of)
 
@@ -320,8 +321,7 @@ def main() -> int:
                         "args": vars(args)},
                        out / f"controller_{args.arch}_seed{args.seed}.pt")
 
-    (out / f"history_{args.arch}_seed{args.seed}.json").write_text(
-        json.dumps({"args": vars(args), "history": history}, indent=2))
+    write_result(out / f"history_{args.arch}_seed{args.seed}.json", {"args": vars(args), "history": history})
     print(f"\nbest val_indomain MSE {best:.5f} -> "
           f"{out / f'controller_{args.arch}_seed{args.seed}.pt'}")
     return 0

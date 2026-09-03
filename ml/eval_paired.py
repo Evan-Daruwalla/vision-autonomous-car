@@ -44,6 +44,7 @@ import torch
 
 from collect_sim_data import PIDDriver, SIM_EXE
 from eval_in_sim import LatentPolicy, run_episode
+from provenance import write_result
 from sim_conf import base_sim_conf
 from models import MDNRNN, ConvVAE
 from train_controller import Controller
@@ -179,10 +180,10 @@ def main() -> int:
             print(f"  {a:<12} mean {v.mean():7.1f}  sd {v.std(ddof=1):6.1f}  "
                   f"range {v.min():.0f}-{v.max():.0f}")
 
-    (out / "eval_paired.json").write_text(json.dumps(
+    write_result(out / "eval_paired.json", 
         {"args": vars(args), "per_episode": records,
          "per_launch": {str(k): v for k, v in per_launch.items()},
-         "paired_vs_" + base: summary}, indent=2))
+         "paired_vs_" + base: summary})
     print(f"\n-> {out / 'eval_paired.json'}")
     print("NOTE: simulated only. No transfer claim is made or implied.")
     return 0

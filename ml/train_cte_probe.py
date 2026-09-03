@@ -35,6 +35,7 @@ import torch.nn as nn
 
 from episode_writer import load_episode
 from models import Z_DIM
+from provenance import write_result
 from splits import (fit_val_episodes, load_cached_mu, load_proc,
                     split_seed_of)
 
@@ -147,8 +148,8 @@ def main() -> int:
     torch.save({"model": model.state_dict(), "val_mse": mse, "val_r2": r2,
                 "arch": args.arch, "width": args.width,
                 "args": vars(args)}, out / f"cte_probe_{args.arch}.pt")
-    (out / f"probe_{args.arch}.json").write_text(json.dumps(
-        {"val_mse": mse, "val_r2": r2, "args": vars(args)}, indent=2))
+    write_result(out / f"probe_{args.arch}.json", 
+        {"val_mse": mse, "val_r2": r2, "args": vars(args)})
     print(f"\n{args.arch} z->cte probe: val MSE {mse:.4f}, R^2 {r2:.4f}")
     print(f"-> {out / f'cte_probe_{args.arch}.pt'}")
     # A planner scoring imagined latents through a probe this weak would be

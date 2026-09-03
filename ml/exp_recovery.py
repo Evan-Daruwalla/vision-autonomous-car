@@ -54,6 +54,7 @@ import torch.nn as nn
 
 from episode_writer import load_episode
 from models import Z_DIM, ConvVAE
+from provenance import write_result
 from splits import load_proc
 
 REPO = Path(__file__).resolve().parent.parent
@@ -230,9 +231,9 @@ def main() -> int:
                   "frozen encoder. The ConvVAE itself discards off-centre "
                   "information, so the fix is a VAE retrain (or a different "
                   "representation), not more probe data.")
-    (out / "exp_recovery.json").write_text(json.dumps(
+    write_result(out / "exp_recovery.json", 
         {"args": vars(args), "n_recovery_episodes": int(is_rec.sum()),
-         "results": results}, indent=2))
+         "results": results})
     print(f"\n-> {out / 'exp_recovery.json'}")
     return 0
 

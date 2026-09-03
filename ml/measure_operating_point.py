@@ -32,6 +32,7 @@ import numpy as np
 from collect_sim_data import (KD, KI, KP, PIDDriver, SIM_EXE, STEER_LIMIT,
                               STEER_SIGN, THROTTLE, THROTTLE_CORNER,
                               WARMUP_STEPS)
+from provenance import write_result
 from sim_conf import base_sim_conf
 
 REPO = Path(__file__).resolve().parent.parent
@@ -124,8 +125,8 @@ def main() -> int:
           f"max {ct.max():.3f}")
     print(f"|steer| mean {st.mean():.3f}  p95 {np.percentile(st,95):.3f} "
           f"(of limit {STEER_LIMIT})")
-    (out / "operating_point.json").write_text(json.dumps(
-        {"args": vars(args), "result": res, "per_step": rows}, indent=2))
+    write_result(out / "operating_point.json", 
+        {"args": vars(args), "result": res, "per_step": rows})
     print(f"-> {out / 'operating_point.json'}")
     return 0
 

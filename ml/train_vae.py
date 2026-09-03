@@ -32,6 +32,7 @@ import torch
 from PIL import Image
 
 from models import ConvVAE, count_params, vae_loss
+from provenance import write_result
 from splits import describe, fit_val_episodes, frame_indices, load_proc
 
 REPO = Path(__file__).resolve().parent.parent
@@ -175,7 +176,7 @@ def main():
         save_reconstructions(model, imgs, pool, args.device,
                              out / f"recon_{tag}.png",
                              np.random.default_rng(eval_rng_seed))
-    (out / "history.json").write_text(json.dumps(history, indent=2))
+    write_result(out / "history.json", {"args": vars(args), "history": history})
 
     print(f"\nbest val_indomain rec: {best:.2f}  ({out / 'vae_best.pt'})")
     print(f"reconstructions      : {out}/recon_{{fit,val_indomain,holdout}}.png")

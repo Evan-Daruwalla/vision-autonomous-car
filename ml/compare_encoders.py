@@ -40,6 +40,7 @@ import numpy as np
 import torch
 
 from models import ConvVAE
+from provenance import write_result
 from splits import fit_val_episodes, load_proc, split_seed_of
 
 REPO = Path(__file__).resolve().parent.parent
@@ -272,10 +273,10 @@ def main() -> int:
     except Exception as e:
         print(f"panel not written: {e}")
 
-    (out / "encoder_cmp.json").write_text(json.dumps(
+    write_result(out / "encoder_cmp.json", 
         {"args": vars(args), "n_frames": len(idx),
          "mean_cone_px": float(np.mean([c for _, c in picked])),
-         "summary": summary}, indent=2))
+         "summary": summary})
     print(f"-> {out / 'encoder_cmp.json'}")
     return 0
 

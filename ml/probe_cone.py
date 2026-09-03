@@ -48,6 +48,7 @@ import torch.nn as nn
 
 from compare_encoders import cone_mask
 from models import Z_DIM, ConvVAE
+from provenance import write_result
 from splits import fit_val_episodes, load_proc, split_seed_of
 
 REPO = Path(__file__).resolve().parent.parent
@@ -268,13 +269,13 @@ def main() -> int:
                    "the expensive branch of PRD 6(b).").format(a)
     print(f"VERDICT: {verdict}")
 
-    (out / "probe_cone.json").write_text(json.dumps(
+    write_result(out / "probe_cone.json", 
         {"args": vars(args), "min_cone_px": MIN_CONE_PX,
          "n_cone_frames": int(y.sum()), "base_rate": float(y.mean()),
          "auc": a, "auc_shuffled_control": a_ctrl,
          "score_pos": s_pos, "score_ablated": s_ab, "score_neg": s_neg,
          "ablation_gap_recovered": drop, "n_ablated": n_ab,
-         "cone_px_after_paint": left, "verdict": verdict}, indent=2))
+         "cone_px_after_paint": left, "verdict": verdict})
     print(f"-> {out / 'probe_cone.json'}")
     return 0
 

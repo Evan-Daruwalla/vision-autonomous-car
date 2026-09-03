@@ -31,6 +31,7 @@ import numpy as np
 import torch
 
 from models import MDNRNN, ConvVAE, count_params, mdn_loss
+from provenance import write_result
 from splits import (cache_key_matches, encoder_fingerprint,
                     fit_val_episodes, load_proc, split_seed_of,
                     write_cache_key)
@@ -228,7 +229,7 @@ def main():
                         "split_seed": split_seed},
                        out / "mdnrnn_best.pt")
 
-    (out / "history.json").write_text(json.dumps(history, indent=2))
+    write_result(out / "history.json", {"args": vars(args), "history": history})
     print(f"\nbest val_indomain nll: {best:.2f}  ({out / 'mdnrnn_best.pt'})")
 
 

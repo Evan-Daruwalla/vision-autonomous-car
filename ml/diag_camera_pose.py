@@ -57,6 +57,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+from provenance import write_result
 
 REPO = Path(__file__).resolve().parent.parent
 SIM = REPO / "ml" / "data" / "sim"
@@ -237,8 +238,7 @@ def main() -> int:
         print(f"  predicted VERTICAL     {res['predicted_if_fov_vertical']:.4f}")
         print(f"  predicted HORIZONTAL   {res['predicted_if_fov_horizontal']:.4f}")
         print(f"VERDICT: fov is {res['verdict']}")
-        (run / "camera_aspect.json").write_text(json.dumps(res, indent=2),
-                                                encoding="utf-8")
+        write_result(run / "camera_aspect.json", res)
         print(f"-> {run / 'camera_aspect.json'}")
         return 0
 
@@ -265,7 +265,7 @@ def main() -> int:
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    (out / "camera_pose.json").write_text(json.dumps(res, indent=2))
+    write_result(out / "camera_pose.json", res)
     print(f"-> {out / 'camera_pose.json'}")
     return 0
 

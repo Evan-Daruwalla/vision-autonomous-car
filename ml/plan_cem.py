@@ -57,6 +57,7 @@ import torch.nn as nn
 from collect_sim_data import (PIDDriver, SIM_EXE, STEER_LIMIT, THROTTLE,
                               THROTTLE_CORNER, WARMUP_STEPS)
 from eval_in_sim import SIZE, run_episode
+from provenance import write_result
 from sim_conf import base_sim_conf
 from models import HIDDEN, MDNRNN, Z_DIM, ConvVAE
 
@@ -271,12 +272,12 @@ def main() -> int:
         print(f"{name:<8} {len(rows):>4} {steps.mean():>12.1f} +-{steps.std():<5.1f} "
               f"{np.nanmean(ctes):>10.3f} {rev.mean():>9.2f} {surv:>7}/{len(rows)}")
 
-    (out / "p5_cem.json").write_text(json.dumps(
+    write_result(out / "p5_cem.json", 
         {"args": vars(args), "probe_val_r2": probe_r2,
          "per_episode": results, "summary": summary,
          "no_transfer_claim": (
              "Simulated only. Nothing here is evidence about the physical "
-             "car.")}, indent=2))
+             "car.")})
     print(f"\n-> {out / 'p5_cem.json'}")
     print("NOTE: simulated only. No transfer claim is made or implied.")
     return 0

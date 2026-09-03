@@ -56,6 +56,7 @@ import torch.nn as nn
 from compare_encoders import cone_mask
 from models import Z_DIM, ConvVAE, vae_loss
 from probe_cone import auc, scan_cones
+from provenance import write_result
 from splits import fit_val_episodes, frame_indices, load_proc
 
 REPO = Path(__file__).resolve().parent.parent
@@ -420,10 +421,10 @@ def main() -> int:
                    f"or a detection path that bypasses the latent.")
     print(f"VERDICT: {verdict}")
 
-    (out / "exp_aux_head.json").write_text(json.dumps(
+    write_result(out / "exp_aux_head.json", 
         {"args": vars(args), "n_fit": len(fit_i), "n_val": len(val_i),
          "arms": tags, "best_aux_arm": best,
-         "results": results, "verdict": verdict}, indent=2))
+         "results": results, "verdict": verdict})
     print(f"-> {out / 'exp_aux_head.json'}")
     return 0
 
