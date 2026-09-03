@@ -37,7 +37,7 @@ from PIL import Image
 
 from models import ConvVAE, MDNRNN, mdn_sample
 from splits import (cache_key_matches, encoder_fingerprint,
-                    fit_val_episodes, load_proc)
+                    fit_val_episodes, load_proc, split_seed_of)
 
 REPO = Path(__file__).resolve().parent.parent
 RUNS = REPO / "ml" / "runs"
@@ -176,7 +176,8 @@ def main():
     vae.load_state_dict(vae_ckpt["model"])
     vae.eval()
     rnn = MDNRNN().to(args.device)
-    rnn.load_state_dict(torch.load(args.rnn, map_location=args.device)["model"])
+    rnn_ckpt = torch.load(args.rnn, map_location=args.device)
+    rnn.load_state_dict(rnn_ckpt["model"])
     rnn.eval()
 
     tr_imgs, tr_act, tr_eps, tr_tracks = load_proc("train")
@@ -211,7 +212,7 @@ def main():
     # entirely on training data, recorded to json with no warning. P5 needs
     # >=3 seeds for its comparative claim, so this was one flag away from
     # publishing train-on-test numbers.
-    split_seed = vae_ckpt.get("args", {}).get("seed", 0)
+    split_seed = split_seed_of(vae_ckpt, Path(args.vae).name)
     fit_eps, val_eps = fit_val_episodes(tr_tracks, seed=split_seed)
     if split_seed != args.seed:
         print(f"note: sampling seed {args.seed}, but the split is rebuilt with "
@@ -220,6 +221,23 @@ def main():
     # The guard train_vae.py:115 has and this file did not.
     assert not (set(fit_eps.tolist()) & set(val_eps.tolist())), \
         "fit/val episodes overlap - the rollout split is not held out"
+
+    # The note above catches THIS script disagreeing with the VAE. It cannot
+    # see the MDN-RNN disagreeing, which is the leak cold audit A2 found: a
+    # model selected on a different split makes val_indomain its own training
+    # data. Missing stamp => UNVERIFIABLE (checkpoints predate it); present
+    # and different => WRONG, and we stop before producing a number.
+    rnn_split = rnn_ckpt.get("split_seed")
+    if rnn_split is None:
+        print(f"note: {Path(args.rnn).name} predates split_seed stamping - "
+              f"cannot verify it was selected on this split; re-run "
+              f"train_mdnrnn.py to stamp it")
+    elif int(rnn_split) != int(split_seed):
+        print(f"FAIL: the MDN-RNN was selected against split seed {rnn_split}, "
+              f"but the VAE's split is seed {split_seed}. val_indomain would "
+              f"contain episodes the MDN-RNN trained on. Re-run "
+              f"train_mdnrnn.py against {Path(args.vae).name}.")
+        return 1
 
     print(f"warmup {args.warmup} frames, then {args.horizon} imagined steps "
           f"following the real actions\n")

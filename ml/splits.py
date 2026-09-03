@@ -92,6 +92,32 @@ def load_cached_mu(split: str, vae_ckpt, proc: Path = PROC):
     return None
 
 
+def split_seed_of(ckpt: dict, name: str = "checkpoint") -> int:
+    """The seed the VAE was TRAINED under, for rebuilding its data split.
+
+    Chokepoint for every script that CONSUMES a VAE checkpoint, for the same
+    reason encoder_fingerprint() is one: the answer must be identical in all of
+    them, and a disagreement is silent. Six scripts each carried this same
+    `.get("args", {}).get("seed", 0)` line, and the one file that loads a
+    checkpoint without keeping the dict -- train_mdnrnn.py -- was missed when
+    the rule was propagated by hand in 2026-08-06, so it split on its own
+    --seed for three weeks. (Cold audit A2, 2026-09-02.)
+
+    The rule, from rollout_eval.py's comment: --seed varies init, batch order
+    and sampling; it must NOT re-derive the data split, because the checkpoint
+    was selected against the split its own training run used.
+
+    Missing seed => 0, unchanged from the six copies, but now audible: a
+    checkpoint predating the "args" format is UNVERIFIABLE, not known-zero.
+    """
+    args = ckpt.get("args") or {}
+    if "seed" not in args:
+        print(f"  note: {name} records no training seed - assuming split "
+              f"seed 0. Re-train it to stamp one.")
+        return 0
+    return int(args["seed"])
+
+
 def load_proc(split: str, proc: Path = PROC):
     imgs = np.load(proc / f"{split}_images.npy", mmap_mode="r")
     actions = np.load(proc / f"{split}_actions.npy")
@@ -153,6 +179,22 @@ def self_check() -> None:
     # a different seed gives a different split (otherwise the seed is ignored)
     f3, _ = fit_val_episodes(tracks, seed=1)
     assert not np.array_equal(fit, f3), "seed has no effect"
+
+    # split_seed_of: the three states, and the LEAK it prevents.
+    assert split_seed_of({"args": {"seed": 3}}) == 3, "stamped seed not returned"
+    assert split_seed_of({}) == 0, "no args -> 0"
+    assert split_seed_of({"args": {}}) == 0, "args without seed -> 0"
+    # Two consumers handed the same checkpoint must build the SAME split.
+    ck = {"args": {"seed": 3}}
+    a_fit, a_val = fit_val_episodes(tracks, seed=split_seed_of(ck))
+    b_fit, b_val = fit_val_episodes(tracks, seed=split_seed_of(ck))
+    assert np.array_equal(a_val, b_val), "same checkpoint, different split"
+    # THE LEAK, concretely: a consumer that used its own --seed 0 against a
+    # seed-3 checkpoint would score episodes 9 and 15 -- which that checkpoint
+    # TRAINED on -- as held-out val_indomain. This is the failure A2 fixes,
+    # and it is why the helper exists rather than seven copies of one line.
+    leaked = sorted(set(a_val.tolist()) & set(fit_val_episodes(tracks, seed=0)[0].tolist()))
+    assert leaked == [9, 15], f"expected the seed-3/seed-0 leak on [9, 15], got {leaked}"
 
     eps = np.array([[0, 5], [5, 7], [12, 3]])
     fr = frame_indices(eps, np.array([0, 2]))

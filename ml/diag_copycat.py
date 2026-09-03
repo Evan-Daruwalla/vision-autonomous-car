@@ -44,7 +44,8 @@ import numpy as np
 import torch
 
 from models import MDNRNN, ConvVAE, Z_DIM
-from splits import fit_val_episodes, load_cached_mu, load_proc
+from splits import (fit_val_episodes, load_cached_mu, load_proc,
+                    split_seed_of)
 from train_controller import Controller, rnn_states
 
 REPO = Path(__file__).resolve().parent.parent
@@ -102,7 +103,7 @@ def main() -> int:
                     x.permute(0, 3, 1, 2).float().div_(255.0))[0].cpu().numpy()
         del imgs
 
-    split_seed = vae_ckpt.get("args", {}).get("seed", 0)
+    split_seed = split_seed_of(vae_ckpt)
     _, val_eps = fit_val_episodes(tracks, seed=split_seed)
     val_i, val_h = rnn_states(rnn, mu, act, eps, val_eps, args.device)
 

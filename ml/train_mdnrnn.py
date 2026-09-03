@@ -32,7 +32,8 @@ import torch
 
 from models import MDNRNN, ConvVAE, count_params, mdn_loss
 from splits import (cache_key_matches, encoder_fingerprint,
-                    fit_val_episodes, load_proc, write_cache_key)
+                    fit_val_episodes, load_proc, split_seed_of,
+                    write_cache_key)
 
 REPO = Path(__file__).resolve().parent.parent
 PROC = REPO / "ml" / "data" / "proc"
@@ -153,7 +154,10 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
 
     vae = ConvVAE().to(args.device)
-    vae.load_state_dict(torch.load(args.vae, map_location=args.device)["model"])
+    # Keep the checkpoint dict: its "args" carries the seed this VAE's own
+    # train/val split was built with, and the MDN-RNN must inherit it.
+    vae_ckpt = torch.load(args.vae, map_location=args.device)
+    vae.load_state_dict(vae_ckpt["model"])
     print(f"VAE loaded from {args.vae}")
 
     print("encoding latents (cached after the first run)...")
@@ -162,7 +166,21 @@ def main():
 
     _, tr_act, tr_eps, tr_tracks = load_proc("train")
     _, ho_act, ho_eps, _ = load_proc("holdout")
-    fit_eps, val_eps = fit_val_episodes(tr_tracks, seed=args.seed)
+    # **The SPLIT seed comes from the VAE CHECKPOINT, never from --seed** --
+    # see rollout_eval.py's split_seed comment for the measured incident.
+    # This file split on args.seed until 2026-09-02 (cold audit A2): with a
+    # seed-0 VAE and --seed 3, the MDN-RNN trained on the seed-3 fit set and
+    # selected mdnrnn_best.pt on the seed-3 val set, while rollout_eval.py
+    # rebuilt the seed-0 split from the VAE and scored val_indomain on
+    # episodes this model had trained on. Exactly the P5 >=3-seed workflow.
+    split_seed = split_seed_of(vae_ckpt, Path(args.vae).name)
+    fit_eps, val_eps = fit_val_episodes(tr_tracks, seed=split_seed)
+    if split_seed != args.seed:
+        print(f"note: training seed {args.seed}, but the split is rebuilt with "
+              f"seed {split_seed} (the VAE's) so val_indomain stays genuinely "
+              f"held out")
+    assert not (set(fit_eps.tolist()) & set(val_eps.tolist())), \
+        "fit/val episodes overlap - the MDN-RNN split is not held out"
 
     fit_w = make_windows(tr_eps, fit_eps, args.seq)
     val_w = make_windows(tr_eps, val_eps, args.seq)
@@ -203,8 +221,11 @@ def main():
 
         if va_nll < best:
             best = va_nll
+            # split_seed is stamped so a consumer can ASSERT it was selected
+            # against the same split, rather than merely note a mismatch.
             torch.save({"model": model.state_dict(), "epoch": epoch,
-                        "val_indomain_nll": va_nll, "args": vars(args)},
+                        "val_indomain_nll": va_nll, "args": vars(args),
+                        "split_seed": split_seed},
                        out / "mdnrnn_best.pt")
 
     (out / "history.json").write_text(json.dumps(history, indent=2))

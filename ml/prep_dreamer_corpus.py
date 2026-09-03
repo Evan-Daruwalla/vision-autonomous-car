@@ -91,10 +91,13 @@ def main() -> None:
                     help="cap episodes per split (smoke runs)")
     ap.add_argument("--seed", type=int, default=0,
                     help="split seed; 0 is the split P3/P4 were trained on. "
-                         "The other three fit_val_episodes call sites take "
-                         "this from --seed, so hardcoding it here made the "
+                         "Scripts that CONSUME a VAE checkpoint derive this "
+                         "from it via splits.split_seed_of; the producers "
+                         "(train_vae.py, exp_aux_head.py) and this script "
+                         "take it from --seed, so hardcoding it here made the "
                          "docstring's 'byte for byte' claim true only by "
-                         "coincidence (cold audit finding 10)")
+                         "coincidence (cold audit finding 10; wording "
+                         "corrected 2026-09-02, cold audit A2)")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     args = ap.parse_args()
 

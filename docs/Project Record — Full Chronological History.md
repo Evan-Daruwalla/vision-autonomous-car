@@ -115,6 +115,7 @@ the dated entry, not the digest.
 - [BZ — PRD cleanup: 24 dated strikes and appends, P1-P3 stamped, P6 ticked, and the schedule escalation the plan itself requires](#appendix-bz---prd-cleanup-24-dated-strikes-and-appends-p1-p3-stamped-p6-ticked-and-the-schedule-escalation-the-plan-itself-requires-2026-09-02-1936-cdt) (09-02)
 - [CA — Daily-audit CRIT confirmed on hardware and fixed: two clock samples per loop made the watchdog trip on every good frame; the audit's own suggested test was blind to it](#appendix-ca---daily-audit-crit-confirmed-on-hardware-and-fixed-two-clock-samples-per-loop-made-the-watchdog-trip-on-every-good-frame-the-audits-own-suggested-test-was-blind-to-it-2026-09-02-1946-cdt) (09-02)
 - [CB — Daily-audit findings given PRD homes as tasks A1-A7; A2 and A4 first](#appendix-cb---daily-audit-findings-given-prd-homes-as-tasks-a1-a7-a2-and-a4-first-2026-09-02-2202-cdt) (09-02)
+- [CC — A2 done: split-seed derivation is now a chokepoint, and rollout_eval asserts the MDN-RNN was selected on the same split](#appendix-cc---a2-done-split-seed-derivation-is-now-a-chokepoint-and-rollout_eval-asserts-the-mdn-rnn-was-selected-on-the-same-split-2026-09-02-2302-cdt) (09-02)
 
 ---
 
@@ -8980,3 +8981,128 @@ session picks them up by reading the PRD top-to-bottom as the file instructs.
 
 Board: fixed `uno_control`, banner re-read this session (`SELFTEST PASS
 39/39`). **Nothing ordered, nothing printed, nothing wired.**
+
+# Appendix CC - A2 done: split-seed derivation is now a chokepoint, and rollout_eval asserts the MDN-RNN was selected on the same split (2026-09-02, ~23:02 CDT)
+PRD task **A2** (audit finding, Appendix BY/CB). The split-seed derivation is now
+a chokepoint helper, the one script that leaked is fixed, and a consumer can
+now **assert** the model it loads was selected against the same split instead of
+merely noting a mismatch.
+
+## A2.1 The audit was right about the leak and wrong about its extent
+
+Verified by reading every one of the 10 `fit_val_episodes` call sites:
+
+- **The leak is real and is `ml/train_mdnrnn.py` alone.** It loaded the VAE as
+  `torch.load(...)["model"]` — subscripting the dict away inline, so the seed
+  its own training split was built with was never read — then split on
+  `args.seed`.
+- **The audit's other two named consumers are NOT consumers.**
+  `exp_aux_head.py:306` *trains* VAEs and saves `"args": vars(args)`;
+  `prep_dreamer_corpus.py:108` opens no checkpoint at all. Both correctly take
+  `--seed`. **PRD task A2's wording is struck and corrected** in the same commit.
+- **Six siblings already had the rule**, as six literal copies of
+  `vae_ckpt.get("args", {}).get("seed", 0)` with hand-written cross-reference
+  comments. That manual propagation is *why* it missed `train_mdnrnn.py`: the
+  one file that never binds `vae_ckpt` to a variable does not appear in a
+  `vae_ckpt` grep.
+
+**The likelier trigger is the reverse of the audit's framing.** The audit
+described a VAE trained at a non-default seed. The workflow that actually fires
+is a **seed-0 VAE with `train_mdnrnn.py --seed 3`**: the MDN-RNN then trains on
+the seed-3 fit set and selects `mdnrnn_best.pt` on the seed-3 val set, while
+`rollout_eval.py` rebuilds the **seed-0** split from the VAE and scores
+`val_indomain` on episodes that model trained on. That is exactly the P5
+≥3-seeds workflow the existing `rollout_eval.py` comment cites as its own
+motivation — and `rollout_eval` could not see it, because its note only compares
+its own `--seed` against the VAE's.
+
+**Nothing on disk is contaminated.** Both `ml/runs/vae/vae_best.pt` and
+`ml/runs/mdnrnn/mdnrnn_best.pt` carry `args.seed == 0`; the leak was latent.
+
+## A2.2 What changed
+
+- **`ml/splits.py`** — new `split_seed_of(ckpt, name)`, in the style of the
+  module's existing `encoder_fingerprint()` / `load_cached_mu()` chokepoints and
+  for the same stated reason. Fallback semantics unchanged (missing seed → 0)
+  but now **audible**: a checkpoint predating the `args` format is UNVERIFIABLE,
+  not known-zero.
+- **`ml/train_mdnrnn.py`** — keeps the checkpoint dict, derives the split from
+  it, prints the mismatch note, gains the fit/val disjointness assert its three
+  siblings had, and **stamps `"split_seed"` into `mdnrnn_best.pt`**.
+- **`ml/rollout_eval.py`** — keeps the RNN dict and adds the cross-checkpoint
+  check: no stamp → UNVERIFIABLE note and proceed; different → **FAIL and
+  `return 1` before any rollout**. Same three-state shape as the latent-cache
+  fingerprint guard directly above it.
+- Five one-line swaps: `train_controller.py`, `train_cte_probe.py`,
+  `probe_cone.py`, `compare_encoders.py`, `diag_copycat.py`.
+- `prep_dreamer_corpus.py`'s `--seed` help text said "the other three
+  fit_val_episodes call sites take this from --seed" — stale (there are 10, and
+  the split is now consumer-vs-producer). Corrected.
+
+## A2.3 Red, then green — both on real artifacts
+
+**RED, the self-check assertion, proving it is not a tautology.** The new
+assertion claims a seed-3 checkpoint's val set intersects the seed-0 fit set at
+exactly `[9, 15]`. Pointed at seed 0 on *both* sides — i.e. no leak — it fails:
+
+    AssertionError: expected the seed-3/seed-0 leak on [9, 15], got []
+    EXIT=1
+
+**GREEN, the self-check:**
+
+    fit=[0, 1, 2, 3, 5, 7, 8, 9, 10, 11, 12, 14, 15]
+    val=[4, 6, 13]
+    splits self_check: PASS
+    EXIT=0
+
+**RED, the real gate.** `mdnrnn_best.pt` copied with `split_seed = 3` against
+the seed-0 VAE:
+
+    note: train latent cache has no encoder fingerprint - cannot verify it matches vae_best.pt; re-run train_mdnrnn.py to stamp it
+    note: holdout latent cache has no encoder fingerprint - cannot verify it matches vae_best.pt; re-run train_mdnrnn.py to stamp it
+    FAIL: the MDN-RNN was selected against split seed 3, but the VAE's split is seed 0. val_indomain would contain episodes the MDN-RNN trained on. Re-run train_mdnrnn.py against vae_best.pt.
+    EXIT=1
+
+**No rollout ran** — it stops before producing a number, which is the point.
+
+**GREEN, the same checkpoint stamped `split_seed = 0`:**
+
+    beats the frozen-frame baseline on 0/30 steps      [holdout, expected]
+    P3 DONE-CHECK: val_indomain beat the baseline on 30/30 steps (need >= 27)
+    P3 DONE-CHECK: PASS
+    EXIT=0
+
+**GREEN, the UNVERIFIABLE path** — the genuine on-disk checkpoint, which has no
+stamp:
+
+    note: mdnrnn_best.pt predates split_seed stamping - cannot verify it was selected on this split; re-run train_mdnrnn.py to stamp it
+    P3 DONE-CHECK: PASS
+    EXIT=0
+
+All three branches exercised on real artifacts. `py_compile` clean on all nine
+touched files. `grep 'get("args", {}).get("seed"' ml/*.py` returns only the
+docstring in `splits.py` that describes the removed line.
+
+## A2.4 NOT done, stated
+
+- **The on-disk MDN-RNN still has no `split_seed`**, so the UNVERIFIABLE branch
+  is what fires in normal use until `train_mdnrnn.py` is re-run. Not re-run here
+  — it also regenerates the latent caches, which task A7 wants for its own
+  reason; one re-run should serve both.
+- **PRD A2's own done-check is unfalsifiable as written.** "A test at a
+  non-default VAE seed shows zero fit/val overlap" cannot fail —
+  `fit_val_episodes` guarantees disjointness by construction for any single
+  seed. The real check is the cross-script one above, and the PRD text is
+  corrected to say so.
+- `train_controller.py:191` and `diag_copycat.py:80` also load the MDN-RNN
+  without keeping the dict. The consistency check went only into
+  `rollout_eval.py`, the P3 gate. Follow-up, not done.
+- `exp_recovery.py:159-167` is an **eleventh** split, hand-rolled with
+  `--val-frac 0.2` against `VAL_FRACTION = 0.15`, stratified by
+  recovery-vs-original rather than by track, on a different corpus. Out of A2's
+  scope; recorded so it is not mistaken for an oversight.
+
+## A2.5 State
+
+Nothing ordered, nothing wired. This is a latent-defect fix in the sim/ML data
+path; no result on disk changes, and no number in the record is retracted.

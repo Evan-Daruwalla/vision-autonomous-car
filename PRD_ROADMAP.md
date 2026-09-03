@@ -1021,14 +1021,36 @@ Each item carries its own done-check.
       108 existing files cannot be retrofitted** — any writeup citing them must
       say so. Done: a fresh run's JSON carries `commit`, and the writer refuses
       to write without one.
-- [ ] **A2 — Split-seed leak, `ml/train_mdnrnn.py:165`.** Passes `args.seed`
+- [x] **A2 — Split-seed leak, `ml/train_mdnrnn.py:165`.** Passes `args.seed`
       where six sibling VAE-checkpoint consumers derive `split_seed` from the
-      checkpoint. A VAE trained at a non-default seed leaks its own fit episodes
-      into the MDN-RNN's `val_indomain`. `rollout_eval.py:216-218` already warns
-      about this exact incident — the fix never propagated upstream. Same
-      pattern in `exp_aux_head.py:306` and `prep_dreamer_corpus.py:108`. Done:
-      all three derive from the checkpoint; a test at a non-default VAE seed
-      shows zero fit/val overlap.
+      checkpoint. ~~A VAE trained at a non-default seed leaks its own fit episodes
+      into the MDN-RNN's `val_indomain`.~~ **The likelier trigger is the reverse
+      (2026-09-02, Appendix CC): a seed-0 VAE with `train_mdnrnn --seed 3`
+      selects the MDN-RNN on the seed-3 val set, then `rollout_eval` rebuilds the
+      seed-0 split and scores `val_indomain` on episodes that model trained on —
+      the P5 >=3-seed workflow.** `rollout_eval.py:216-218` already warns
+      about this exact incident — the fix never propagated upstream. ~~Same
+      pattern in `exp_aux_head.py:306` and `prep_dreamer_corpus.py:108`.~~
+      **WRONG, struck 2026-09-02: neither is a consumer — `exp_aux_head`
+      *trains* VAEs, `prep_dreamer_corpus` opens no checkpoint. Both correctly
+      take `--seed`.** ~~Done: all three derive from the checkpoint; a test at a
+      non-default VAE seed shows zero fit/val overlap.~~ **That done-check was
+      unfalsifiable — `fit_val_episodes` guarantees disjointness for any single
+      seed by construction.**
+      **DONE 2026-09-02 (Appendix CC).** New chokepoint `splits.split_seed_of()`;
+      all 7 consumers converted; `train_mdnrnn` keeps the checkpoint dict, gains
+      the disjointness assert, and **stamps `split_seed` into `mdnrnn_best.pt`**;
+      `rollout_eval` **asserts** the MDN-RNN was selected on the same split —
+      missing stamp is UNVERIFIABLE, a different one is FAIL + exit 1 before any
+      rollout. Verified red-then-green on real artifacts: the self-check
+      assertion made to fail (`got []`), then PASS; a tampered checkpoint
+      (`split_seed=3`) → FAIL exit 1 with no rollout; stamped to 0 → P3
+      DONE-CHECK PASS exit 0; the real unstamped checkpoint → UNVERIFIABLE note,
+      PASS. **NOT done: the on-disk MDN-RNN is not re-stamped (needs a
+      `train_mdnrnn` re-run, which A7 also wants for the latent caches);
+      `train_controller.py:191` and `diag_copycat.py:80` also drop the RNN dict
+      (follow-up); `exp_recovery.py:159-167` is an 11th hand-rolled split on a
+      different corpus, out of scope.**
 - [ ] **A3 — `ml/preprocess.py:85` claims an atomic four-file swap it does not
       perform** — `:138` is four sequential `os.replace`; `splits.py:95`
       `load_proc()` has no cross-array length check, so a kill between renames

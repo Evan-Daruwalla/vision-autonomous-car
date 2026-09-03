@@ -35,7 +35,8 @@ import torch.nn as nn
 
 from episode_writer import load_episode
 from models import Z_DIM
-from splits import fit_val_episodes, load_cached_mu, load_proc
+from splits import (fit_val_episodes, load_cached_mu, load_proc,
+                    split_seed_of)
 
 REPO = Path(__file__).resolve().parent.parent
 SRC = REPO / "ml" / "data" / "sim" / "train"
@@ -101,7 +102,7 @@ def main() -> int:
     # Cold audit finding 2: the split seed comes from the VAE checkpoint that
     # produced these latents, never a hardcoded default -- see
     # rollout_eval.py's split_seed comment for why.
-    split_seed = vae_ckpt.get("args", {}).get("seed", 0)
+    split_seed = split_seed_of(vae_ckpt)
     fit_eps, val_eps = fit_val_episodes(tracks, seed=split_seed)
     fit_i = np.concatenate([np.arange(s, s + n) for s, n in eps[fit_eps]])
     val_i = np.concatenate([np.arange(s, s + n) for s, n in eps[val_eps]])

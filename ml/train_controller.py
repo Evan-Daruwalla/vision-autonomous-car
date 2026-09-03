@@ -50,7 +50,8 @@ import torch
 import torch.nn as nn
 
 from models import ACTION_DIM, HIDDEN, MDNRNN, Z_DIM, ConvVAE, count_params
-from splits import fit_val_episodes, load_cached_mu, load_proc
+from splits import (fit_val_episodes, load_cached_mu, load_proc,
+                    split_seed_of)
 
 REPO = Path(__file__).resolve().parent.parent
 PROC = REPO / "ml" / "data" / "proc"
@@ -229,7 +230,7 @@ def main() -> int:
     # Same rule as rollout_eval.py: the SPLIT seed comes from the checkpoint,
     # never from --seed. --seed varies this controller's init and batch order
     # so P5 can report >=3 seeds, and must not move the data split underneath.
-    split_seed = vae_ckpt.get("args", {}).get("seed", 0)
+    split_seed = split_seed_of(vae_ckpt)
     fit_eps, val_eps = fit_val_episodes(tracks, seed=split_seed)
     assert not (set(fit_eps.tolist()) & set(val_eps.tolist())), "fit/val overlap"
 
