@@ -15,7 +15,7 @@ split-source power path costs almost nothing.
 | # | Item | Why this one | Price | Source |
 |---|---|---|---|---|
 | **Compute + sensing** |
-| 1 | Raspberry Pi 5 **4GB** — ✅ **DECIDED 2026-09-03: 4 GB, because the 2 GB is SOLD OUT** (Evan). The 2 GB was the recommendation on price alone ($65 vs $110, identical 2.4 GHz Cortex-A76); **it was never a capability argument** — 4 GB is comfortably sufficient and always was. Consequence: the $45 saving is gone and the $200 ceiling stays breached. See `docs/research/2026-08-12_onboard-compute-selection.md` for why RAM was never the binding constraint (the real 20 Hz threat is per-frame Python overhead, which is RAM-invariant — PRD task 8d). | DonkeyCar's stated minimum; onboard work is inference-only, all training is on the 3060 Ti | **$110.00** ⚠️ *(was $70.00 — see re-pricing note)* | [pishop.us $110](https://www.pishop.us/product/raspberry-pi-5-4gb/) ✅ **verified 2026-09-02, in stock** · **2GB $65** [here](https://www.pishop.us/product/raspberry-pi-5-2gb/) ✅ in stock · adafruit 2GB $75 **OUT OF STOCK** |
+| 1 | Raspberry Pi 5 **4GB** — ✅ **DECIDED 2026-09-03: 4 GB, because the 2 GB is SOLD OUT** (Evan). The 2 GB was the recommendation on price alone ($65 vs $110, identical 2.4 GHz Cortex-A76); **it was never a capability argument** — 4 GB is comfortably sufficient and always was. Consequence: the $45 saving is gone and the $200 ceiling stays breached. See `docs/research/2026-08-12_onboard-compute-selection.md` for why RAM was never the binding constraint (the real 20 Hz threat is per-frame Python overhead, which is RAM-invariant — PRD task 8d). | DonkeyCar's stated minimum; onboard work is inference-only, all training is on the 3060 Ti | **$110.00** ⚠️ *(was $70.00 — see re-pricing note)* | [pishop.us $110](https://www.pishop.us/product/raspberry-pi-5-4gb/) ⚠️ **STOCK CONTRADICTION, 2026-09-03 — the 4 GB is NOT universally available and the 2 GB is NOT universally sold out. The two vendors are COMPLEMENTARY:** **pishop.us** 2 GB **$65 IN STOCK** (Add to Cart present, verified here), 4 GB $110 **no Add to Cart** (agent read the store data layer: `"stock":0,"instock":false`). **adafruit.com** 2 GB (#6007) **OUT OF STOCK**, 4 GB (#5812) **$130.00, 26 in stock** (verified here). So "the 2 GB is sold out" is TRUE at Adafruit and FALSE at pishop; the 4 GB is the reverse. **The RAM choice is now VENDOR-COUPLED, spread $65 / $110 / $130.** Third option, agent-verified but not re-checked here: **CanaKit PI5-4GB $110.00 In Stock**. Row 1 stays 4 GB per Evan 2026-09-03, but that decision rested on a premise true at only one vendor — **his call whether it stands** · **2GB $65** [here](https://www.pishop.us/product/raspberry-pi-5-2gb/) ✅ in stock · adafruit 2GB $75 **OUT OF STOCK** |
 | 2 | Camera Module 3 **Wide** | ✅ **HOLD LIFTED 2026-08-13 (Appendix AI): the sim FOV was identified as `fov=90`, i.e. ~106° H / ~118° diagonal, and the Wide (102° H / 120° D) matches within 2-4°. The standard module is ~40° off and would be wrong. Correct part — by luck, since nobody set or checked it.** Superseded warning: The sim's camera FOV/offset/rotation were NEVER SET (`cam_config` absent from every conf dict), so the whole corpus was captured at an unrecorded Unity default. If it differs from this camera's 120°, the encoder trained on a different projection than this part will produce. One short sim run settles it — see `docs/SIM_TRANSFER_SPEC.md` §5.2. Original rationale: ≥120° FOV is the consensus lever for track following; rolling shutter is fine at 1–3 m/s | **$38.50** *(was $35.00)* | [pishop.us](https://www.pishop.us/product/raspberry-pi-camera-module-3-wide/) ✅ **verified 2026-09-02, in stock** |
 | 3 | **Camera cable, Standard-Mini** | ⚠️ **Camera Module 3 ships with a Standard-Standard cable, which does NOT fit the Pi 5's mini 22-pin connector.** Verified against Raspberry Pi docs 2026-07-23. Without this, nothing works. | **~$2–5** | [adafruit.com #5818 200mm](https://www.adafruit.com/product/5818) · [#5820 500mm](https://www.adafruit.com/product/5820) — the 22-pin 0.5mm to 15-pin 1mm FPC cable |
 | 4 | microSD card, 32GB+, A2/U3 | OS + driving logs | **~$10.00** | any |
@@ -27,11 +27,11 @@ split-source power path costs almost nothing.
 | **Power (split source — bank owned)** |
 | 8 | USB power bank, **5V/3A** | → Pi ONLY. **You own this — check the label says 5V/3A** (see Verify below) | **$0.00** | owned |
 | 9 | ~~2× EVE 25P 18650 cells~~ **SOLD OUT at 18650batterystore, 2026-09-03 (Evan) — REPLACEMENT NEEDED.** ⚠️ **Do NOT hunt for another 20 A cell — that rating was never load-driven.** Worst-case simultaneous pack draw is motor stall 1.6 A + servo stall ~0.7 A + Uno/LEDs ~0.2 A = **~2.5 A**, and the inline 3 A fuse caps it below that anyway. **Real requirement: flat-top UNPROTECTED 18650, ~2500 mAh, ≥5 A continuous** (2× margin) — which is nearly every reputable cell in this class, so sourcing is wide open. Unprotected because protection is the BMS board's job (row 11); a protected cell adds a second cutoff that can fight it. | → motor + servo pack (7.4V). **Buy both from the same order** (matched cells — see caveat) | **$3.70** | [18650batterystore.com/products/eve-18650-25p](https://www.18650batterystore.com/products/eve-18650-25p) — price NOT re-verified |
-| 10 | 2-cell 18650 series holder | | **$1.25** | [addicore.com 2-place 18650 holder](https://www.addicore.com/products/2-place-18650-battery-holder-with-wires) — price NOT re-verified |
+| 10 | 2-cell 18650 series holder | | **$1.25** | [addicore.com 2-place 18650 holder ⚠️ **BACKORDERED 2026-09-03**](https://www.addicore.com/products/2-place-18650-battery-holder-with-wires) — price NOT re-verified |
 | 11 | USB-C 2S BMS / charge board | Charges the pack in place from USB-C. ~~provides overcharge, over-discharge and short protection~~ ⚠️ **SAFETY CLAIM NOT SUPPORTED BY THE VENDOR PAGE (checked 2026-09-02, Appendix BI).** Adeept documents **over-voltage/overcharge and short-circuit protection only** — **over-discharge protection is NOT listed.** Bare EVE cells have none either, so as specified **the pack has no low-voltage cutoff**. Must be closed before ordering — see Verify item 6. **No hobby balance charger needed** (unverified: balancing is also not documented) | **$7.99** *(list $9.99)* | [adeept.com p0374](http://www.adeept.com/li-ion-battery-charger-m-2s2a_p0374.html) ✅ $7.99 verified 2026-09-02 *(an earlier note here claimed "http only, no
 TLS" — **wrong**: the https URL resolves with a valid certificate; only the
 apex adeept.com downgrades. Corrected 2026-09-02, Appendix BK)* |
-| 12 | LM2596 buck module | 7.4V → 5.2V for the servo only (700mA peak — well within it). **Not for the Pi** | **$2.48** | [addicore.com LM2596](https://www.addicore.com/products/lm2596-step-down-adjustable-dc-dc-switching-buck-converter) — price NOT re-verified |
+| 12 | LM2596 buck module | 7.4V → 5.2V for the servo only (700mA peak — well within it). **Not for the Pi** | **$2.48** | [addicore.com LM2596 ⚠️ **BACKORDERED 2026-09-03**](https://www.addicore.com/products/lm2596-step-down-adjustable-dc-dc-switching-buck-converter) — price NOT re-verified |
 | **Wiring + protection** |
 | 13 | XT30 connector pair | | **$1.10** | [alofthobbies.com/products/xt30-plugs](https://alofthobbies.com/products/xt30-plugs) ✅ **verified 2026-09-02: $1.10, ONE male+female pair, genuine Amass, in stock** |
 | 14 | SPST rocker switch, 10A | Main switch on the motor pack | **$0.75** | [sparkfun.com COM-11138](https://www.sparkfun.com/products/11138) ✅ **verified 2026-09-02: $0.75, SPST round, 10A @ 125VAC, in stock.** NOT COM-08837, which is the right-angle variant |
@@ -340,3 +340,117 @@ with the SD card mounted. The split is structural, not stylistic.
   a printed axle cross-profile (SF 2–4 in torsion at stall).
 - **Weight:** this is the heaviest power option (~320g of battery). If the
   car turns out underpowered, the battery is the first thing to revisit.
+
+---
+
+## Vendor consolidation — researched 2026-09-03 (Appendix CJ). **VERDICT: NO SINGLE VENDOR EXISTS.**
+
+Evan asked to consolidate onto one vendor for a bulk order. Two sweeps have
+landed (Adafruit, SparkFun); Pololu and the DigiKey/Mouser hypothesis are still
+running. **The answer is already no**, and the reasons are structural rather
+than stock-related.
+
+### ⚠️ The Pi 5 4 GB is OUT OF STOCK at three of the four vendors checked
+
+| vendor | 2 GB | 4 GB |
+|---|---|---|
+| pishop.us | **$65, IN STOCK** | $110, **out of stock** |
+| adafruit.com | out of stock | **$130, 26 in stock** |
+| sparkfun.com | — | $110, **out of stock** (DEV-23550) |
+| CanaKit | — | **$110, In Stock** (PI5-4GB) |
+
+**Only Adafruit and CanaKit can supply a 4 GB today.** The 2 GB is available at
+pishop for $45 less. **This is Evan's call and it is now vendor-coupled.**
+
+### Adafruit — 10 of 22, and the gap is a CATALOG gap
+
+**Items 10–16 are a clean eight-item zero**: loose 18650s, 2-cell holder, 2S
+BMS, adjustable buck, XT30, rocker switch, fuse holder. Adafruit's power
+ecosystem is 1S-LiPo-with-JST-PH; loose-cell 2S is simply not a product line
+there, so waiting for stock changes nothing. Also **no 30:1 N20** (ladder is
+1:50 / 1:100 / 1:298) and their motors ship **bare leads, not JST SH**. Pi 5
+4 GB is **$130**, $20 over the others. **No free-shipping threshold — and a
+~$250 order CROSSES their $200 line, which removes the two cheapest services.**
+Consolidating into one large order makes their shipping worse, not better.
+
+### SparkFun — 18 of 22, free shipping at $100+, but TWO SPEC FAILURES
+
+**The only vendor found so far with a free-shipping threshold** (UPS Ground,
+$100+, under 10 lb, contiguous 48, logged in). That is a genuine consolidation
+win. But two substitutions fail on physics, not preference:
+
+- ⚠️ **ROB-28633 N20 encoder motor: 500 RPM no-load at 6 V — HALF the Pololu
+  #5159's 1000 RPM.** Config B gives 1.28 m/s at 1000 RPM, so this lands at
+  **~0.64 m/s — below the 1.0 m/s floor that rejected every Lego motor**
+  (best case PF M was 0.88 m/s). **Same rejection, same reason.** It is also
+  31.5:1 not 30:1, and 882 CPR at the output not 358 — the encoder is better,
+  the speed is disqualifying. Sold as a pair, $19.95, cable included.
+- ⚠️ **PRT-12895 18650: "0.2C to a maximum of 1C" = 2.6 A continuous.**
+  Worst-case pack draw is ~2.5 A, so margin is **1.04x** against a stated
+  requirement of ≥5 A (2x). **Do not buy these.** The page states neither
+  protected/unprotected nor flat-top/button-top.
+
+Also NOT FOUND at SparkFun: the 2S BMS, XT30 (only XT60), the blade fuse holder,
+and the LEGO servo adapter.
+
+### The safety item nobody stocks
+
+**No vendor checked has a 2S BMS whose page documents OVER-DISCHARGE
+protection.** SparkFun's nearest (Battery Babysitter, PRT-13777) is **1S only,
+microUSB, and its page names no protection features at all.** Adafruit has no 2S
+BMS in any form. **BOM Verify item 6 — the open safety hole — is still open, and
+is now the hardest item to source rather than merely the most overlooked.**
+
+### Where this leaves the order
+
+**Two vendors minimum, and realistically three.** No catalog carries both a
+30:1-class encoder motor at 1000 RPM *and* loose 2S lithium *and* automotive
+fusing. The residual after any single vendor is always the power/wiring half.
+
+### Pololu — 5 of 22 clean, and it owns the half nobody else does
+
+**The three BOM parts only Pololu carries are all IN STOCK** (checked
+2026-09-03, counts read from the page's own `data-available-stock`):
+**#5159 encoder motor $29.95 (32 in stock)** · **#4763 JST SH cable $3.00 (125)**
+· **#713 TB6612 carrier $4.95 (459)**. Basket **$37.90**.
+
+⚠️ **Their free-shipping threshold does NOT help this order.** It is *"Orders of
+$100 or more of **Pololu-branded, active-status** products"* — the drivetrain
+basket is $37.90, **$62.10 short**, and most of what would pad it out (wire,
+switches, LEDs, servo, jumpers) is Generic/PCX/FEETECH-branded and **does not
+count toward the threshold at all.**
+
+**Pololu cannot supply 13 of 22** — the entire compute half (no Pi 5, no camera,
+no CSI cable, no cooler, no SD card; their Raspberry Pi category is standoffs
+and headers), **no lithium cells or holders of any kind** (batteries are NiMH
+AA/AAA only), no 2S BMS, no XT30, no fuse holder, no proto shield, no LEGO
+adapter. Partials carry real compromises: their only metal-gear servo is **20 g
+with a standard spline, not a 9 g micro**; the adjustable buck is either ~600 mA
+(too weak) or a different topology; 3 mm LEDs are green/yellow only.
+
+### ⚠️ THE 2S BMS DOES NOT EXIST AT ANY OF THE THREE
+
+Confirmed independently by all three sweeps: **Adafruit has no 2S BMS in any
+form; SparkFun's nearest is 1S/microUSB and its page names no protection
+features at all; Pololu's only lithium charger is discontinued.** No page at any
+vendor could be quoted for over-discharge or low-voltage cutoff **because no
+such product is stocked.** BOM Verify item 6 is now the **hardest item in this
+build to source**, not merely the most overlooked — and it is the one guarding
+against a fire risk on the next charge.
+
+### RECOMMENDED STRUCTURE: three vendors, not one
+
+1. **Pololu** — #5159, #4763, #713 ($37.90, all in stock). Nothing else there is
+   worth the freight.
+2. **One general vendor for the bulk** — SparkFun is the only one found with a
+   usable free-shipping threshold ($100+, under 10 lb, contiguous 48), **but do
+   NOT take its N20 or its 18650s** (both fail on spec, above).
+3. **A dedicated battery/RC source** for the 18650 cells, a 2S BMS that actually
+   documents over-discharge cutoff, XT30, and the blade fuse holder.
+
+Plus the Pi itself from wherever it is in stock — currently Adafruit ($130) or
+CanaKit ($110) for a 4 GB, or pishop for a 2 GB ($65).
+
+**Untested hypothesis:** DigiKey and Mouser are authorized distributors for
+Adafruit, SparkFun *and* Pololu house-brand parts, so one of them might collapse
+steps 1–3. Both block automated fetches; **not verified, do not assume.**

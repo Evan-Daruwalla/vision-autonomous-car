@@ -122,6 +122,7 @@ the dated entry, not the digest.
 - [CG — Landing-check on A1: two false claims in CF, a second clobbered file that git could not restore, and A1's own checkbox unticked](#appendix-cg---landing-check-on-a1-two-false-claims-in-cf-a-second-clobbered-file-that-git-could-not-restore-and-a1s-own-checkbox-unticked-2026-09-03-1614-cdt) (09-03)
 - [CH — A3/A5/A6/A7 close out the audit; rear track is 148.25 mm; and A7 uncovered 224 lone-CR bytes my own split script wrote](#appendix-ch---a3a5a6a7-close-out-the-audit-rear-track-is-14825-mm-and-a7-uncovered-224-lone-cr-bytes-my-own-split-script-wrote-2026-09-03-1634-cdt) (09-03)
 - [CI — Width fully measured (front 107.5, rear 148.25, body 135.75 - rear governs); Pi decided at 4GB by stock; ONNX task added; cooling raised for the first time; cells sold out](#appendix-ci---width-fully-measured-front-1075-rear-14825-body-13575---rear-governs-pi-decided-at-4gb-by-stock-onnx-task-added-cooling-raised-for-the-first-time-cells-sold-out-2026-09-03-1649-cdt) (09-03)
+- [CJ — Vendor consolidation: no single vendor exists; SparkFun's N20 fails the same speed floor that killed the Lego motors; the 2S BMS exists nowhere](#appendix-cj---vendor-consolidation-no-single-vendor-exists-sparkfuns-n20-fails-the-same-speed-floor-that-killed-the-lego-motors-the-2s-bms-exists-nowhere-2026-09-03-1656-cdt) (09-03)
 
 ---
 
@@ -9844,3 +9845,122 @@ rarely stock an N20-class gearmotor *with* a quadrature encoder.
 **Nothing ordered, nothing wired, nothing printed.** Width is fully measured for
 the first time. Corner geometry still frozen until T2 — wheelbase remains the
 one unmeasured input, and it is blocked on parts.
+
+# Appendix CJ - Vendor consolidation: no single vendor exists; SparkFun's N20 fails the same speed floor that killed the Lego motors; the 2S BMS exists nowhere (2026-09-03, ~16:56 CDT)
+Evan asked to consolidate the order onto one vendor. **Three sweeps later the
+answer is no, and the research found four things that matter more than the
+shipping saving.**
+
+## CJ.1 The verdict: no single vendor, three is realistic
+
+| vendor | clean | partial | not carried |
+|---|---|---|---|
+| Adafruit | 10 | 4 | **8** — items 10-16, the whole power/wiring half |
+| SparkFun | 13 | 5 | 4 |
+| Pololu | 5 | 4 | **13** — the whole compute half |
+
+**These are CATALOG gaps, not stock gaps.** Adafruit's power ecosystem is
+1S-LiPo-with-JST-PH, so loose-cell 2S is not a product line there and waiting
+changes nothing. Pololu's battery category is NiMH AA/AAA only. No catalog
+carries a 1000 RPM 30:1-class encoder motor **and** loose 2S lithium **and**
+automotive fusing.
+
+**Recommended structure:** Pololu for #5159 + #4763 + #713 ($37.90, all
+verified in stock — 32/125/459 units); one general vendor for the bulk;
+a dedicated battery/RC source for cells, BMS, XT30 and fusing; plus the Pi
+wherever it is actually available.
+
+## CJ.2 The Pi 5 4 GB is out of stock at three of four vendors
+
+| vendor | 2 GB | 4 GB |
+|---|---|---|
+| pishop.us | **$65, IN STOCK** | $110, **out of stock** |
+| adafruit.com | out of stock | **$130, 26 in stock** |
+| sparkfun.com | — | $110, **out of stock** |
+| CanaKit | — | **$110, In Stock** |
+
+**Evan's "the 2 GB is sold out" and the research's "the 4 GB is sold out" are
+BOTH true — of different vendors.** The two are exactly complementary. So the
+2026-09-03 decision to take 4 GB rested on a premise that holds at Adafruit and
+fails at pishop, where the 2 GB is available for **$45 less than the cheapest
+4 GB**. `docs/BOM.md` row 1 also claimed "verified in stock" and was wrong.
+**Left as Evan's call; row 1 not changed.**
+
+## CJ.3 SparkFun's N20 fails the SAME physics test that killed the Lego motors
+
+ROB-28633 is a genuine N20 encoder motor at a tempting price, and its encoder is
+better than the specified part (882 CPR at the output vs 358). **It is
+disqualified on speed.**
+
+    SparkFun ROB-28633:  500 RPM no-load @ 6 V
+    Pololu  #5159:      1000 RPM no-load @ 6 V   <- the BOM part
+
+Config B gives **1.28 m/s at 1000 RPM**, so half the RPM is **~0.64 m/s** —
+**below the 1.0 m/s floor**, which is precisely the criterion that rejected
+every Lego motor on 2026-07-23 (best case PF M, 0.88 m/s). **Same floor, same
+rejection, three months apart.** It is also 31.5:1 rather than 30:1.
+
+Their 18650 fails too: PRT-12895 is rated *"0.2C to a maximum of 1C"* =
+**2.6 A continuous** against a ~2.5 A worst-case pack draw — **1.04x margin**,
+where CI.5 set the requirement at ≥5 A (2x). The page states neither
+protected/unprotected nor flat-top/button-top.
+
+**Both substitutions would have looked like sensible consolidation savings and
+both are unusable.** This is the concrete value of doing the sweep rather than
+assuming a cheaper equivalent exists.
+
+## CJ.4 The 2S BMS exists at NONE of them — the open safety hole is now the hardest item
+
+Confirmed independently three times: **Adafruit has no 2S BMS in any form**;
+**SparkFun's nearest is 1S with microUSB and its page names no protection
+features at all**; **Pololu's only lithium charger is marked "This product has
+been discontinued."** No page at any vendor could be quoted for over-discharge
+or low-voltage cutoff **because no such product is stocked**.
+
+BOM Verify item 6 — the pack having no hardware over-discharge cutoff, open
+since Appendix BI — is therefore **the hardest item in this build to source**,
+not merely the most overlooked. It guards against permanent cell damage and a
+fire risk on the NEXT charge, and firmware cannot guard a pack while the
+firmware is off.
+
+## CJ.5 Shipping thresholds mostly do not help
+
+- **Adafruit: no free-shipping threshold at all**, and **a ~$250 order CROSSES
+  their $200 line, which REMOVES the two cheapest services** (*"USPS Ground
+  Advantage™ is a low cost service only permitted for orders under $200"*).
+  **Consolidating into one large order makes their shipping worse, not better.**
+- **Pololu: $100+ free — but only of *Pololu-branded, active-status* products.**
+  The drivetrain basket is $37.90, **$62.10 short**, and the generic-branded
+  padding (wire, switches, LEDs, servo, jumpers) **does not count toward the
+  threshold**.
+- **SparkFun: $100+ free ground**, under 10 lb, contiguous 48, logged in. The
+  only threshold found that this order can actually use.
+- **pishop publishes no shipping policy at all** — their page is still the
+  unedited BigCommerce placeholder (*"To edit this page simply login to the
+  control panel"*), so no threshold can be quoted for them.
+
+Two further sourcing problems: **both Addicore items are backordered** (2-cell
+holder, LM2596), and **bc-robotics is Canadian and prices in CAD** — the fuse
+holder is $2.95 CAD, not the ~$2.15 USD the BOM implies, and it ships
+cross-border.
+
+## CJ.6 Method notes worth keeping
+
+- **An agent's first report was wrong and it corrected itself.** Its
+  completion-waiter watched file sizes that were all zero and read that as
+  "settled", so it announced results that had not landed. Everything it stated
+  it had *personally* verified held up; the sweeps it had not seen were simply
+  absent. **A completion signal is not a result.**
+- **The browser pane is shared between concurrent agents**, and one navigated
+  another's tab mid-run. The affected agent moved to a dedicated tab and
+  discarded nothing from the foreign page — but parallel browser agents can
+  collide, which is worth knowing before running five at once.
+- The DigiKey/Mouser hypothesis — that one authorized distributor might carry
+  Adafruit, SparkFun *and* Pololu house-brand parts and collapse the split —
+  **remains UNTESTED.** Both block automated fetches. Not assumed either way.
+
+## CJ.7 State
+
+**Nothing ordered.** Two decisions now sit with Evan: **which RAM** (2 GB at
+pishop $65, or 4 GB at CanaKit $110 / Adafruit $130), and **whether to keep
+chasing a single vendor** — the recommendation is to stop and plan for three.

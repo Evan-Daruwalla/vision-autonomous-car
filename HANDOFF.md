@@ -2,7 +2,7 @@
 
 **Last updated: 2026-09-03 ~21:50 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 87 appendices A–CI; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 88 appendices A–CJ; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -368,8 +368,12 @@ original floor and the pre-2026-08-12 scale decision.)*
   but do NOT hunt for another 20 A cell, that rating was never load-driven (worst-case
   pack draw ~2.5 A against a 3 A fuse; **real spec is flat-top unprotected 18650,
   ~2500 mAh, ≥5 A continuous**, which is nearly every cell in the class). And **vendor
-  consolidation is being researched** — shipping currently spans 8+ vendors; the item
-  expected to defeat a single-vendor order is the Pololu #5159 encoder motor.
+  consolidation is RESOLVED (Appendix CJ): **NO SINGLE VENDOR EXISTS** — Adafruit 10/22,
+  SparkFun 13/22, Pololu 5/22, and the gaps are CATALOG gaps not stock gaps. **Plan for
+  three vendors.** ⚠️ **The Pi 5 4 GB is OUT OF STOCK at pishop, SparkFun AND Adafruit-2GB;
+  only Adafruit ($130) and CanaKit ($110) have a 4 GB, while pishop has the 2 GB at $65.**
+  ⚠️ **A 2S BMS documenting over-discharge protection exists at NONE of the three** — BOM
+  Verify item 6 is now the hardest item to source, not just the most overlooked.
 - **COOLING — raised 2026-09-03 and never considered before in this project.**
   Pi 5 soft-throttles at 80 °C, hard at 85 °C, and sits above 85 °C under sustained
   load with no cooling. **The consequence is the 20.00 Hz CONTROL RATE, not a hot
