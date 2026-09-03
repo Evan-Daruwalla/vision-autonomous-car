@@ -128,6 +128,7 @@ the dated entry, not the digest.
 - [CM — Vilros checked before checkout: the linked variant is a $179.99 kit, not a bare board, and two checks disagreed on Board Only pricing](#appendix-cm---vilros-checked-before-checkout-the-linked-variant-is-a-17999-kit-not-a-bare-board-and-two-checks-disagreed-on-board-only-pricing-2026-09-03-1712-cdt) (09-03)
 - [CN — Pi decision finalized: Vilros Basic Starter Kit $179.99, folds three BOM rows into one, +$48.04](#appendix-cn---pi-decision-finalized-vilros-basic-starter-kit-17999-folds-three-bom-rows-into-one-4804-2026-09-03-1715-cdt) (09-03)
 - [CO — BMS row corrected: $9.59 buys an 8-pack, not one board — the spares answer Appendix CK's sourcing problem](#appendix-co---bms-row-corrected-959-buys-an-8-pack-not-one-board--the-spares-answer-appendix-cks-sourcing-problem-2026-09-03-1732-cdt) (09-03)
+- [CP — Small-order problem and general items folded onto Amazon -- resolves 3 scattered vendors, but costs +$105 in bulk-pack overbuy](#appendix-cp---small-order-problem-and-general-items-folded-onto-amazon----resolves-3-scattered-vendors-but-costs-105-in-bulk-pack-overbuy-2026-09-03-1744-cdt) (09-03)
 
 ---
 
@@ -10349,3 +10350,118 @@ option** — the smallest available pack on this listing is 5-for-$8.59.
 **Nothing ordered.** BOM total remains $310.48–$316.73 before shipping
 — this was a description fix, not a price change. 8 commits ahead of
 `origin/main` before this one; push remains Evan's.
+
+# Appendix CP - Small-order problem and general items folded onto Amazon -- resolves 3 scattered vendors, but costs +$105 in bulk-pack overbuy (2026-09-03, ~17:44 CDT)
+Evan asked to fold the "general / any" row and the "small-order problem" row
+into existing vendors, preferring Amazon/eBay for whatever couldn't fold in.
+**Both rows are resolved.** Every item that had "any" or a scattered
+sub-$3-shipping vendor now has a live, checked link on Amazon — except one,
+which genuinely has no Amazon/eBay match and is reported as such rather than
+forced. **The consolidation itself costs real money — +$105ish — and that is
+stated plainly, not buried, because it changes the decision Evan is actually
+making.**
+
+## CP.1 What was verified, and how
+
+Two tiers, disclosed rather than blended:
+
+**Live-verified via the browser** (title, price, stock all read off the
+rendered page, not a summarized fetch — WebFetch cannot see Amazon's dynamic
+price/stock, confirmed again this session):
+
+| item | finding |
+|---|---|
+| MG90S servo | **$7.99, 2-pack, In Stock, metal gear stated in title** — the first candidate checked (RCmall 4-pack) was **Currently unavailable**; found via that listing's own "consider these" carousel |
+| Proto shield | **$7.79, 2-pack + bonus breadboard, In Stock**, Uno R3 fit confirmed in title (HiLetgo) |
+| XT30 pairs | **$11.99, 20 pairs, In Stock, genuine Amass brand** (not a knockoff) |
+| Fuse holder + fuses | **$9.98, 10 holders + 70 assorted fuses INCLUDING 3A, In Stock (16 left)** — the first candidate checked shipped ONLY with 30A fuses, which would have provided no protection at all for this application; caught before it went in the doc |
+| Rocker switch | **$15.00, 10-pack, SPST 10A, In Stock** — confirmed the better per-unit deal against a 2-pack at $6.49-9.79 |
+| 470µF electrolytic caps | $7.07, 10-pack, In Stock |
+| 0.1µF ceramic caps | $6.99, 50-pack, In Stock |
+| 3mm white/red/amber LEDs | $6.99 each, 100-pack, **bundled with 100 resistors per color** — same EDGELEC family across all three colors, avoiding a wasteful full-rainbow assortment |
+
+⚠️ **The EDGELEC bundled resistors are NOT the resistors to use.** They're
+sized for 20 mA at a 6-12 V rail; this project's corrected spec (Appendix
+BO/CI) is 10 mA at 5.0 V with specific values (200Ω white, 300Ω red/amber).
+Treat the bundled resistors as backup stock at the wrong rating, not the
+working set — the separate resistor kit below covers the real values.
+
+**Found via search, price taken from listing snippets, not individually
+re-verified live this session** (5 items — genuine commodities where "any"
+was already the accepted spec):
+
+| item | representative link |
+|---|---|
+| Resistor kit, 600pc, 1Ω-1MΩ | [KSOPUERT](https://www.amazon.com/KSOPUERT-Resistor-Assortment-Resistance-Values/dp/B0CN6N5DC4), $7.38 |
+| 22 AWG + 26 AWG hookup wire | two separate spool kits, ~$8-10 each |
+| Heat shrink assortment | ~$10-15 |
+| 0.1" male headers | ~$5-8 |
+| Dupont jumpers | ~$8-10 |
+| USB-A-to-B cable | Amazon Basics, ~$7-8 |
+
+Budgeted **~$35-45** for these five together — a range, not a precise figure,
+disclosed as such in the BOM.
+
+## CP.2 One item genuinely has no Amazon/eBay match
+
+Row 22, the servo-to-pinion coupling (Appendix BS/BV's hard constraint —
+a printed cross-axle stub fails at MG90S stall). Checked eBay directly: the
+only hit is a *different* product (a motor+wheel assembly for LEGO/microbit
+robots, not an adapter for an existing servo). The only other manufactured
+option found anywhere is a laser-cut mindsensors.com adapter, not stocked on
+either marketplace. **Adafruit #4252 ($0.75) remains the sole source for this
+exact part.** Reported honestly rather than substituted with a near-miss.
+
+## CP.3 Consolidation costs ~$105, and that is the real finding here
+
+Computed precisely, not estimated:
+
+    Verified Amazon-row subtotal:  $95.16
+      MG90S servo 2-pack           $7.99
+      Proto shield 2-pack          $7.79
+      XT30 20-pack                 $11.99
+      Fuse holder+fuses 10-pack    $9.98
+      Rocker switch 10-pack        $15.00
+      470uF caps 10-pack           $7.07
+      0.1uF caps 50-pack           $6.99
+      White/Red/Amber LED+R 100pk  $6.99 x 3 = $20.97
+      Resistor kit 600pc           $7.38
+
+    old general+small-order: $25.30 - $31.55
+    new (Amazon verified + 5 commodities): $130.16 - $140.16
+    delta: +$104.86 to +$108.61
+
+**BOM total: $310.48-$316.73 → $415.34-$425.34.** Almost entirely driven by
+Amazon's hobby-electronics sellers pricing in bulk packs, not the 1x
+quantities this build needs: **1 of 10** rocker switches, **1 of 20** XT30
+pairs, **8 of 300** LEDs, **~20 of 600** resistors, **1 of 10** fuse holders.
+
+**This is the same pattern as the ACEIRMC BMS finding one turn earlier
+(Appendix CO)** — the per-unit price is often genuinely cheaper than the old
+scattered single-unit sources — **but repeated across ~10 items instead of
+one, the cumulative overshoot is real money, not a rounding error.** Stated
+plainly in the BOM rather than folded silently into a bigger number: this is
+a real tradeoff (one vendor instead of three-plus, no more sub-shipping-cost
+line items, no more CAD-currency problem — for roughly $105 more), and it has
+been surfaced, not decided, for Evan.
+
+## CP.4 What the fold-in actually resolves
+
+- **The old "small-order problem" is fully closed.** SPST rocker, XT30 pair,
+  and fuse holder — the three items that individually cost less than their
+  own shipping — now ship in the *same* Amazon order as the BMS and servo.
+- **The CAD-currency problem from Appendix CJ is gone.** The fuse holder no
+  longer comes from a Canadian vendor billing in CAD.
+- **Every remaining "any" placeholder in the BOM now has a real link and
+  price**, or is honestly marked as not individually re-verified (the five
+  commodities) or as having no marketplace match (row 22).
+
+## CP.5 State
+
+**Nothing ordered.** BOM total is $415.34-$425.34 before shipping,
+≈$430-450 all-in (a rough estimate — per-vendor shipping was not re-summed
+line by line after this consolidation). The vendor count for the "generals"
+went from effectively unbounded ("fold into whichever order is cheapest") to
+one (Amazon) for everything except the Pi (Vilros), the drivetrain trio
+(Pololu), the cells (IMR), the charger (Adeept), and two Pi accessories
+(DigiKey, still cheaper there).

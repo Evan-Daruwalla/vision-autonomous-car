@@ -2,7 +2,7 @@
 
 **Last updated: 2026-09-03 ~21:50 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 93 appendices A–CO; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 94 appendices A–CP; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -363,7 +363,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.
-- **THE ORDER (`docs/BOM.md`, ≈$238-248 + shipping = ≈$253-273).** Nothing is bought.
+- **THE ORDER (`docs/BOM.md`, ≈$415-425 + shipping = ≈$430-450, after the 2026-09-03 Vilros kit and Amazon consolidation).** Nothing is bought.
   ⚠️ **TWO NEW SOURCING PROBLEMS, 2026-09-03:** the **EVE 25P cells are SOLD OUT** —
   but do NOT hunt for another 20 A cell, that rating was never load-driven (worst-case
   pack draw ~2.5 A against a 3 A fuse; **real spec is flat-top unprotected 18650,
