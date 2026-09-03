@@ -7,7 +7,7 @@ Core bins:
 - features.md — inventory of the 34 ml/ scripts by pipeline stage (updated 2026-09-03)
 - conventions.md — general code style across ml/, counts re-derived to 34 files, + the provenance.write_result rule (updated 2026-09-03; 39 lines)
 - gotchas.md — **SPLIT 2026-09-02, now a 24-line ROUTER only.** Kept because CLAUDE.md/HANDOFF reference it by name; follow its pointers
-- hardware.md — printing + Lego fit, power, motors/drivers, the Uno's pin budget and current limits, the pack, measured vehicle geometry (**SPLIT 2026-09-03**; 278 lines, still over the ~150 cap)
+- hardware.md — printing + Lego fit, power, motors/drivers, the Uno's pin budget and current limits, the pack, measured vehicle geometry (**SPLIT 2026-09-03**; 313 lines, over the ~150 cap. Includes the charger-vs-BMS category error and cell C-rating traps)
 - firmware-traps.md — Arduino toolchain + firmware logic traps: build, clock handling, status-LED semantics (new 2026-09-03; 80 lines)
 - steering.md — servo choice, measured rack-and-pinion geometry, the coupler that must survive it, calibration (new 2026-09-03; 141 lines)
 - track.md — track layout, markings, surface, what the camera sees of the environment (new 2026-09-02; 54 lines)

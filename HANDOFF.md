@@ -2,7 +2,7 @@
 
 **Last updated: 2026-09-03 ~21:50 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 88 appendices A–CJ; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 89 appendices A–CK; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -342,7 +342,7 @@ original floor and the pre-2026-08-12 scale decision.)*
   the car land where it lands; set lane width for ≥85 mm/side from the
   MEASURED width. Note a smaller car also lowers the camera, and the
   sim's camera height/pitch are still unidentified (AI.3).
-- ⚠️ **THE 2S PACK HAS NO HARDWARE LOW-VOLTAGE CUTOFF — open safety item**
+- ✅ ~~**THE 2S PACK HAS NO HARDWARE LOW-VOLTAGE CUTOFF — open safety item**~~ **CLOSED 2026-09-03 (Appendix CK): it was a CATEGORY ERROR, not a sourcing gap.** A charger IC terminates CHARGE and has no discharge-path FET; over-discharge cutoff needs a series FET on the pack OUTPUT, which is a BMS job. Fix is TWO boards: Adeept p0374 stays the USB-C charger, plus **ACEIRMC 2S 8A BMS $9.59, documented cutoff 2.9 V ±0.05 V**, wired between charger and pack. +$9.59. Original note follows: ⚠️ **THE 2S PACK HAS NO HARDWARE LOW-VOLTAGE CUTOFF**
   (2026-09-02, Appendix BI). BOM row 11's board is titled "BMS" but Adeept
   documents **over-voltage and short-circuit protection only**; over-discharge
   is not listed, and the EVE 25P cells are bare. Below ~2.5 V/cell lithium takes

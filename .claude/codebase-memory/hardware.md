@@ -304,3 +304,40 @@ Three numbers, and the governing one is unchanged:
     front tyres — is what a kerb or a track edge will contact at the front.
 - **Nothing here is a chassis decision yet.** These are donor-part measurements;
   the printed frame does not exist.
+
+## A CHARGER IS NOT A BMS — the category error that kept a safety hole open (2026-09-03, Appendix CK)
+
+- **A charge board cannot give you over-discharge protection, and no amount of
+  shopping fixes that.** A charger IC terminates *charge*: it sits on the INPUT
+  side and has **no discharge-path FET to open**. Over-discharge cutoff requires
+  per-cell sensing and a **series FET on the pack OUTPUT** — structurally a
+  BMS's job. `docs/BOM.md` row 11 asked one board to do both, and the hole it
+  left stayed open from Appendix BI (2026-09-02) until this was understood.
+  **The part was never missing; the requirement was aimed at the wrong part.**
+- **The fix is two boards in series**, not a better single board: a USB-C
+  charger (Adeept p0374, $7.99) **plus** a 2S BMS wired BETWEEN the charger and
+  the pack (ACEIRMC 2S 8A, $9.59, documented cutoff **2.9 V ±0.05 V**). Once the
+  BMS owns over-discharge, the charger's silence on it stops being a defect.
+- **Verified negative worth keeping: NO established hobby vendor sells a 2S
+  USB-C board documenting an over-discharge cutoff.** Adafruit, SparkFun,
+  Pololu, Seeed, Waveshare, TinyCircuits and CanaKit have no 2S protection part
+  at all. This is a structural absence, not a stock problem — stop looking.
+- ⚠️ **Web-search summaries LIE about this specific part class.** Two separate
+  searches returned text asserting these Type-C 2S modules "include
+  over-discharge protection"; **the live pages contradict it** — the strings
+  "over-discharge", "low voltage" and "under-voltage" appear nowhere on the
+  Adeept page. The whole AITIAO/HiLetgo/Adeept family shares the same copy, so
+  buying a different brand of the same board changes nothing. **Read the vendor
+  page, never the snippet, for a protection claim.**
+- ⚠️ **Cell C-ratings are routinely inflated on retail listings.** Reject Vapcell
+  Z30's *"50A continuous"* (no 18650 chemistry sustains that; the listing's own
+  5 mΩ implies ~12.5 W of self-heating) and Orbtronic's VTC6 *"30A"* (Murata's
+  design CDR is **15 A**; 30 A is the 80 °C temperature-limited number). Prefer a
+  cell whose headline is an **unqualified datasheet continuous rating** — the
+  Samsung 25R's 20 A is one.
+- **TP5100-based chargers cannot be used here**: they are buck chargers needing
+  9–12 V in, so 5 V USB-C cannot drive them.
+- **Practical constraints on buying cells:** USPS caps lithium at **8 cells per
+  package**; battery sales are typically **final** (5-day DOA window only); and
+  IMR Batteries and 18650BatteryStore appear to be the same operation — not two
+  independent sources for redundancy.

@@ -123,6 +123,7 @@ the dated entry, not the digest.
 - [CH — A3/A5/A6/A7 close out the audit; rear track is 148.25 mm; and A7 uncovered 224 lone-CR bytes my own split script wrote](#appendix-ch---a3a5a6a7-close-out-the-audit-rear-track-is-14825-mm-and-a7-uncovered-224-lone-cr-bytes-my-own-split-script-wrote-2026-09-03-1634-cdt) (09-03)
 - [CI — Width fully measured (front 107.5, rear 148.25, body 135.75 - rear governs); Pi decided at 4GB by stock; ONNX task added; cooling raised for the first time; cells sold out](#appendix-ci---width-fully-measured-front-1075-rear-14825-body-13575---rear-governs-pi-decided-at-4gb-by-stock-onnx-task-added-cooling-raised-for-the-first-time-cells-sold-out-2026-09-03-1649-cdt) (09-03)
 - [CJ — Vendor consolidation: no single vendor exists; SparkFun's N20 fails the same speed floor that killed the Lego motors; the 2S BMS exists nowhere](#appendix-cj---vendor-consolidation-no-single-vendor-exists-sparkfuns-n20-fails-the-same-speed-floor-that-killed-the-lego-motors-the-2s-bms-exists-nowhere-2026-09-03-1656-cdt) (09-03)
+- [CK — The pack safety hole is closed: a charger is not a BMS, and the requirement was aimed at the wrong part; EVE 25P replaced by Samsung 25R](#appendix-ck---the-pack-safety-hole-is-closed-a-charger-is-not-a-bms-and-the-requirement-was-aimed-at-the-wrong-part-eve-25p-replaced-by-samsung-25r-2026-09-03-1700-cdt) (09-03)
 
 ---
 
@@ -9964,3 +9965,107 @@ cross-border.
 **Nothing ordered.** Two decisions now sit with Evan: **which RAM** (2 GB at
 pishop $65, or 4 GB at CanaKit $110 / Adafruit $130), and **whether to keep
 chasing a single vendor** — the recommendation is to stop and plan for three.
+
+# Appendix CK - The pack safety hole is closed: a charger is not a BMS, and the requirement was aimed at the wrong part; EVE 25P replaced by Samsung 25R (2026-09-03, ~17:00 CDT)
+**The pack safety hole is CLOSED** — open since Appendix BI on 2026-09-02 and
+called "the hardest item in the build to source" in CJ.4 yesterday. It was
+never a sourcing problem. **It was a category error in this BOM.**
+
+## CK.1 A charger is not a BMS, and no amount of shopping fixes that
+
+`docs/BOM.md` row 11 asked **one board to both charge the pack and protect it**.
+No established vendor sells such a board — and CJ.4 read that as an unlucky
+market. It is structural:
+
+**A charger IC terminates *charge*. It sits on the INPUT side and has no
+discharge-path FET to open.** Over-discharge cutoff needs per-cell sensing and a
+**series FET on the pack OUTPUT**. That is a BMS's job, not a charger's. **The
+part was never missing; the requirement was aimed at the wrong part.**
+
+**The fix is two boards in series, not a better single board:**
+
+| role | part | price | documented cutoff |
+|---|---|---|---|
+| USB-C charger | Adeept p0374 (unchanged, row 11) | $7.99 | — |
+| **protection (the safety-critical half)** | **ACEIRMC 2S 8A** (new row 11b) | **$9.59** | **2.9 V ±0.05 V** |
+
+Once the BMS owns over-discharge, **p0374's silence on it stops being a defect**
+— it is no longer the part responsible. The BMS wires BETWEEN the charger and
+the pack. Chosen over ElectronicNova 2S 10A ($7.11) and ABRA `BAT-C-2S-BMS`
+($4.99) because its page states a **single tight set point rather than a range**
+(2.82-2.98 V and 3.0 V ±0.1 V respectively), at 8 A continuous against a ~2.5 A
+worst-case draw.
+
+Optional third layer: **Pololu #2868** ($13.95, 60 in stock) has a user-set
+low-voltage cutoff — set it ABOVE the BMS trip so **the BMS latching off becomes
+the failure you never reach rather than the one you rely on.**
+
+⚠️ **Do NOT use TP5100-based boards** — buck chargers needing 9-12 V in, so 5 V
+USB-C cannot drive them.
+
+## CK.2 Two things that would have poisoned a snippet-based check
+
+**Web-search summaries actively assert the false claim.** Two separate searches
+returned text saying these Type-C 2S modules "include over-discharge
+protection". **The live pages contradict it**: on the Adeept page the strings
+"over-discharge", "low voltage" and "under-voltage" appear **nowhere**, and the
+only protection wording is *"over voltage protection"* and *"short circuit"*.
+The whole AITIAO / HiLetgo / Adeept family shares identical copy, **so buying a
+different brand of the same board changes nothing.** Read the vendor page, never
+the snippet, for a protection claim.
+
+**Retail C-ratings are routinely inflated.** Two rejected outright:
+- **Vapcell Z30 "50A continuous"** — no 18650 chemistry sustains 50 A; the
+  listing's own 5 mΩ internal resistance implies ~12.5 W of self-heating there.
+- **Orbtronic's VTC6 at "30A"** — Murata's design CDR is **15 A**; 30 A is the
+  80 °C temperature-limited characterization. Same cell, same datasheet, double
+  the headline versus two other vendors.
+
+## CK.3 Cells: EVE 25P confirmed sold out, six qualifying replacements in stock
+
+The incumbent is genuinely gone — the page offers only "Notify me when back in
+stock", and it is sold out at IMR too.
+
+**Chosen: 2× Samsung 25R, $4.99 each = $9.98.** 2500 mAh, *"Continuous Discharge
+Rating 20A"*, flat-top, unprotected. Picked because **its headline is an
+unqualified datasheet continuous rating with no thermal asterisk** — the only
+one of the six that is. Alternatives, all in stock and all comfortably over the
+real ~2.5 A requirement CI.5 established: Molicel P30B 3000 mAh $5.50 (cheapest
+tier-1 found), Molicel P26A 2600 mAh/35 A $5.99, EVE 30P $4.99, Samsung 30Q
+$6.99.
+
+**Buying constraints worth knowing before ordering:** USPS caps lithium at
+**8 cells per package**; battery sales are typically **final** (5-day DOA window
+only); and **IMR Batteries and 18650BatteryStore are almost certainly the same
+operation** — identical naming, identical sale prices, both shipping from
+Houston. Do not count them as two independent sources.
+
+Corroboration for the whole two-board answer, from IMR's own terms: *"Lithium-ion
+batteries must only be used in system integrations or battery packs with proper
+protection circuitry (e.g., BMS or PCB)."*
+
+## CK.4 Cost
+
+| | was | now |
+|---|---|---|
+| row 9 cells | $3.70 (EVE 25P, sold out) | **$9.98** |
+| row 11 power | $7.99 (p0374 alone) | **$17.58** (p0374 $7.99 + BMS $9.59) |
+| **TOTAL** | ≈$238-248 | **≈$254-263** before shipping, ≈$269-288 with |
+
+**+$15.87, and it buys the one thing this build was missing that could start a
+fire.** Below ~2.5 V/cell lithium takes permanent capacity loss and can grow
+internal shorts that become a fire risk on the NEXT charge — and firmware
+cannot guard a pack while the firmware is off.
+
+## CK.5 NOT verified
+
+Battery Junction's shipping/hazmat policy (all four URLs 404/403) and their
+18650 catalog; NKON.nl (HTTP 403); DFRobot `FIT0992`. **Nothing was ordered** —
+purchases remain BLOCKED-ON-EVAN.
+
+## CK.6 State
+
+**BOM Verify item 6 is closable.** The parts exist, are in stock, are priced,
+and the reason the search kept failing is now understood and recorded in
+`hardware.md` so it is not repeated. Evan's decisions still open: RAM/vendor for
+the Pi, the Active Cooler, and whether to place the order.
