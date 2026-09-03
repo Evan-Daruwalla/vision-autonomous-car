@@ -277,3 +277,30 @@ traps in `sim-harness.md`.
     **wheelbase** and **max road-wheel angle at the rack's hard stop**. That
     would be a GEOMETRIC radius; PRD **T2 still wants the EMPIRICAL** test on
     the rolling chassis.
+
+## Vehicle width FULLY measured (2026-09-03, Appendix CI)
+
+Three numbers, and the governing one is unchanged:
+
+| | mm | note |
+|---|---|---|
+| front track | **107.5** | outside-to-outside. The new rear wheels did NOT change it (was 107.75) |
+| **rear track** | **148.25** | **WIDEST — governs lane width** |
+| body | **135.75** | narrower than the rear track |
+
+- **148.25 mm is now a WHOLE-VEHICLE width, not just tire track.** The caveat
+  every prior entry carried ("tire track, not whole-vehicle") is CLOSED: the body
+  measures 135.75 mm, 12.5 mm narrower than the rear track, so **the rear wheels
+  are the widest point and stand 6.25 mm proud of the body per side.**
+- **Lane width, span and spare are UNCHANGED** — 296.5 mm / 2696.5 mm / 103.5 mm.
+  The measurement confirmed the number rather than moving it.
+- ⚠️ **The front track is only 72.5% of the rear — a 40.75 mm difference.** That
+  is a large split and it was never a design decision anyone recorded; it fell
+  out of which Lego parts were used. Two consequences to carry into T2:
+  - **Swept width in a corner is set by the rear outer wheel**, not the front.
+    The usual assumption that rear wheels cut INSIDE the front path does not
+    hold when the rear track is 40 mm wider.
+  - The front wheels sit **28.25 mm inside the body**, so the body — not the
+    front tyres — is what a kerb or a track edge will contact at the front.
+- **Nothing here is a chassis decision yet.** These are donor-part measurements;
+  the printed frame does not exist.

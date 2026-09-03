@@ -121,6 +121,7 @@ the dated entry, not the digest.
 - [CF — A1 done: every result names its commit; the module shipped a path-truncation bug and reading its own output found it; BOM audited](#appendix-cf---a1-done-every-result-names-its-commit-the-module-shipped-a-path-truncation-bug-and-reading-its-own-output-found-it-bom-audited-2026-09-03-1600-cdt) (09-03)
 - [CG — Landing-check on A1: two false claims in CF, a second clobbered file that git could not restore, and A1's own checkbox unticked](#appendix-cg---landing-check-on-a1-two-false-claims-in-cf-a-second-clobbered-file-that-git-could-not-restore-and-a1s-own-checkbox-unticked-2026-09-03-1614-cdt) (09-03)
 - [CH — A3/A5/A6/A7 close out the audit; rear track is 148.25 mm; and A7 uncovered 224 lone-CR bytes my own split script wrote](#appendix-ch---a3a5a6a7-close-out-the-audit-rear-track-is-14825-mm-and-a7-uncovered-224-lone-cr-bytes-my-own-split-script-wrote-2026-09-03-1634-cdt) (09-03)
+- [CI — Width fully measured (front 107.5, rear 148.25, body 135.75 - rear governs); Pi decided at 4GB by stock; ONNX task added; cooling raised for the first time; cells sold out](#appendix-ci---width-fully-measured-front-1075-rear-14825-body-13575---rear-governs-pi-decided-at-4gb-by-stock-onnx-task-added-cooling-raised-for-the-first-time-cells-sold-out-2026-09-03-1649-cdt) (09-03)
 
 ---
 
@@ -9702,3 +9703,144 @@ reproduces exactly, and it now carries provenance and matches its `.pt`.
 
 **Every PRD audit task A1-A7 is now done.** Nothing ordered, nothing wired.
 Front track unknown; corner geometry still frozen until T2.
+
+# Appendix CI - Width fully measured (front 107.5, rear 148.25, body 135.75 - rear governs); Pi decided at 4GB by stock; ONNX task added; cooling raised for the first time; cells sold out (2026-09-03, ~16:49 CDT)
+Vehicle width is now **fully measured** and the caveat every previous entry
+carried is closed. Plus: the Pi is decided at 4 GB (forced by stock, not by
+capability), the ONNX export finally has a task, cooling was raised for the
+first time in the project's life, and the 18650 cells are sold out.
+
+## CI.1 Width: three numbers, and the governing one did not move
+
+| | mm | |
+|---|---|---|
+| front track | **107.5** | outside-to-outside; the new rear wheels did NOT change it (was 107.75) |
+| **rear track** | **148.25** | **WIDEST — governs** |
+| body | **135.75** | 12.5 mm narrower than the rear track |
+
+**Two open caveats close at once.** Every prior width entry said "tire track,
+NOT whole-vehicle width — confirm nothing on the assembled car exceeds it", and
+Appendix CH added "FRONT TRACK IS NOW UNKNOWN". Both are answered: the body is
+narrower than the rear track, and the front was re-measured and unchanged. So
+**148.25 mm is now a whole-vehicle width**, and the rear wheels stand **6.25 mm
+proud of the body per side**.
+
+**Lane width, span and spare are UNCHANGED at 296.5 / 2696.5 / 103.5 mm.** The
+measurement confirmed the number instead of moving it — the first time in three
+days that a width measurement has not invalidated the track arithmetic.
+
+⚠️ **The front track is 72.5% of the rear — a 40.75 mm split**, and it was never
+a design decision anyone recorded; it fell out of which Lego parts were used.
+Two consequences carried into T2:
+
+- **Swept width in a corner is set by the rear outer wheel.** The usual
+  assumption that the rear wheels cut INSIDE the front path does not survive a
+  rear track 40 mm wider than the front.
+- The front wheels sit **28.25 mm inside the body**, so at the front it is the
+  BODY, not the tyres, that a kerb or track edge contacts first.
+
+`cad/track_layout_v2.py`'s own printed label said "tire track, not
+whole-vehicle" — now false, corrected to name all three numbers. Self-check PASS.
+
+## CI.2 Pi decided: 4 GB, because the 2 GB is sold out
+
+Evan asked whether 4 GB is really enough. **It is, with large margin — and the
+live question in the BOM was the opposite one**, whether 2 GB would do. The
+2026-08-12 research says yes: DonkeyCar's "4 GB minimum" is a hedged
+recommendation with **no justification anywhere in their docs**; the `pi` extra
+installs `tflite-runtime`, **not** TensorFlow; and a **512 MB Pi Zero 2 W already
+drives autonomously end-to-end**. Every reported 2 GB Pi 5 failure in the
+literature is a desktop workload.
+
+**Then stock decided it: the 2 GB is SOLD OUT** (Evan, 2026-09-03). Row 1 is
+4 GB at $110. Recorded honestly — **the 2 GB was a $45 price argument, never a
+capability one** — so nothing about the design changes, only the budget. The
+$200 ceiling stays breached. Struck the now-false "2 GB in stock" line and
+marked the standing 2026-08-12 recommendation MOOT, keeping its reasoning
+because that reasoning is what task 8d acts on.
+
+## CI.3 PRD task 8d — export the inference stack to ONNX
+
+The research recommended ONNX **independently of which board is bought**, and it
+had been sitting in a research document with **no task obligating anyone to do
+it**. Now PRD 8d, placed BEFORE bench bring-up so it happens ahead of the first
+drive rather than as a retrofit.
+
+The `torch` wheel is ~65-67 MB with a correspondingly large arena; **ONNX
+Runtime aarch64 is ~17 MB**, and the model is ~17 MB fp32 without the training
+graph. Model weights were never the constraint.
+
+⚠️ **Recorded with its own falsifier, because it would otherwise read as a
+performance promise:** the real 20 Hz threat is **per-frame Python overhead,
+which is RAM-invariant** — an MDN-RNN steps sequentially every frame inside the
+DonkeyCar vehicle loop. **Measure the loop, not the model.** And the done-check
+requires the ONNX/PyTorch comparison to be **re-measured on the Pi** before it is
+claimed: a desktop speedup does not transfer, and Appendices AD-AJ are an entire
+series on numbers that did not survive a change of harness.
+
+## CI.4 Cooling — never once considered in this project
+
+Evan asked whether the Pi needs cooling. **Grepping every doc found zero
+mentions of cooling, heatsinks, fans or thermal limits.** In a BOM about to be
+ordered.
+
+Raspberry Pi's own documentation: soft throttle begins at **80 °C** (max ARM
+frequency drops 100 MHz per degree), hard throttle at **85 °C**, and under heavy
+sustained load with no cooling a Pi 5 *"climbs to and then remains stable just
+above the 85 °C thermal limit."*
+
+**This workload qualifies**: continuous CNN inference at 20 Hz for a full battery
+session (M2's own success criterion), enclosed in a chassis bay, at 1.4 m/s where
+ram air is negligible — and this project's own research measured **1.40 A during
+Pi 5 CNN inference against 1.76 A all-core stress**, i.e. ~80% of a full stress
+load.
+
+**The consequence is not a hot chip — it is the CONTROL RATE.**
+`SIM_TRANSFER_SPEC.md` fixes **20.00 Hz** and states every PID gain and learned
+policy was tuned there. Throttling does not fail cleanly; it makes the rate
+*wander*, which is precisely the confound Appendices AD-AJ spent five attempts
+eliminating in simulation — and on the real car there is no re-running the
+launch.
+
+**Active Cooler $10.95, verified in stock at pishop.us** (the vendor already
+supplying the Pi and camera, so no second shipment). Added to `docs/BOM.md` as
+**RECOMMENDED, NOT ADDED TO THE TOTAL** — a purchase is Evan's call. Costs
+noted honestly: it adds stack height to a bay whose height is already
+unbudgeted, and puts an 8000 RPM bearing on a vibrating vehicle.
+
+**A free test already exists.** PRD task 10 already runs `vcgencmd` for
+brownout, and **`vcgencmd get_throttled` returns ONE bitfield covering both**
+under-voltage and thermal (bit 1 ARM capped, bit 3 soft temperature limit). The
+existing done-check extends to thermal at zero cost.
+
+## CI.5 The 18650 cells are sold out — and the replacement is barely constrained
+
+EVE 25P **SOLD OUT** at 18650batterystore (Evan, 2026-09-03).
+
+⚠️ **Do not hunt for another 20 A cell — that rating was never load-driven.**
+Worst-case simultaneous pack draw is motor stall 1.6 A + servo stall ~0.7 A +
+Uno/LEDs ~0.2 A = **~2.5 A**, and the **inline 3 A fuse caps it below that
+anyway**. The 25P's 20 A was 8x the requirement.
+
+**Real spec: flat-top UNPROTECTED 18650, ~2500 mAh, ≥5 A continuous** — 2x
+margin, which is nearly every reputable cell in this class. Unprotected is
+deliberate: protection is the BMS board's job (row 11), and a protected cell
+adds a second cutoff that can fight it.
+
+So the stock-out barely narrows the options. Recorded in row 9 so the next
+person sourcing it does not over-constrain the search.
+
+## CI.6 Vendor consolidation — IN FLIGHT, not concluded
+
+Evan asked to consolidate to one vendor for a bulk order (shipping currently
+spans 8+ vendors at $15-25). Research launched against Adafruit, Pololu and
+SparkFun for all 22 items with live prices and stock. **Not reported here — it
+had not returned when this entry was written.** The item expected to defeat full
+consolidation is the **Pololu #5159 encoder motor**: general electronics vendors
+rarely stock an N20-class gearmotor *with* a quadrature encoder.
+
+## CI.7 State
+
+**Nothing ordered, nothing wired, nothing printed.** Width is fully measured for
+the first time. Corner geometry still frozen until T2 — wheelbase remains the
+one unmeasured input, and it is blocked on parts.

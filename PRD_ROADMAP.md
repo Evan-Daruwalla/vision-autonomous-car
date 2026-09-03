@@ -451,6 +451,30 @@ transfer gap) must not block the capstone.
         `docs/WIRING_PROTOSHIELD.md` §2.4a. Done: a coupling selected with its
         stall-torque margin stated.
 
+8d. **Export the inference stack to ONNX — BEFORE the first drive, not after**
+    (appended 2026-09-03, Appendix CI). Recommended by
+    `docs/research/2026-08-12_onboard-compute-selection.md` **independently of
+    which Pi is bought**, and it has been sitting in a research doc with no task
+    obligating anyone to do it.
+    **Why:** the inference runtime is the single largest RAM consumer on the car
+    and the only one this project controls. The `torch` wheel is ~65-67 MB with a
+    correspondingly large arena; the **ONNX Runtime aarch64 wheel is ~17 MB**,
+    and the model drops to ~17 MB fp32 without the training graph. On a 4 GB
+    board that is headroom rather than necessity — **but the research's own
+    falsifier is that the real 20 Hz threat is per-frame Python overhead, not
+    FLOPs, and that threat is RAM-invariant.** A leaner runtime with a
+    C++ session is the one lever that attacks it. Do NOT expect RAM to fix loop
+    rate.
+    **Scope:** export ConvVAE, MDN-RNN and the controller; keep the PyTorch path
+    as the reference implementation, never delete it.
+    **Done:** ONNX outputs match the PyTorch outputs on the same held-out batch
+    to a stated tolerance (assert it, do not eyeball); the exported stack loads
+    and steps in `onnxruntime` on the desktop; and the per-step wall time is
+    measured for BOTH paths and recorded. ⚠️ **The comparison must be made on
+    the Pi as well before it is claimed as a win** — a desktop speedup does not
+    transfer, and this project has an entire appendix series (AD-AJ) on numbers
+    that did not survive a change of harness.
+
 9. **Bench bring-up.** Pi OS (64-bit Bookworm), SSH, camera test; TB6612 +
    ~~PF motor~~ **N20** on bench PSU; servo sweep test. Done: each
    subsystem's real output (photo/log) in record.

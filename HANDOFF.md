@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-03 ~16:15 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-03 ~21:50 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 86 appendices A–CH; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 87 appendices A–CI; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -188,7 +188,7 @@ plan-view geometry. Keep the layout itself in a dimensioned plan.
 | constraint | value | source |
 |---|---|---|
 | floor space | **3.0 × 3.0 m — CONFIRMED by Evan 2026-09-01** (9 m², vs 4.48 m² for the old 1.6×2.8 plan) | Evan |
-| **car width** | **148.25 mm — MEASURED 2026-09-03** (rear tire track, outside-to-outside, after NEW REAR WHEELS). Supersedes 114.75 (2026-09-02) which superseded a 130 mm estimate — **third value in two days, treat as provisional.** ⚠️ **FRONT TRACK IS NOW UNKNOWN** — 107.75 mm was measured against the old wheels. Still tire track, not whole-vehicle | Evan, Appendix CH |
+| **car width** | **148.25 mm — FULLY MEASURED 2026-09-03.** Front track 107.5 · **rear track 148.25 (WIDEST, governs)** · body 135.75. ✅ **Both old caveats CLOSED**: this is now a WHOLE-VEHICLE width (body is 12.5 mm narrower; rear wheels stand 6.25 mm proud per side), and the front was re-measured unchanged. Lane/span/spare did NOT move. ⚠️ Front is only **72.5%** of rear — a 40.75 mm split, never a recorded design decision; **swept corner width is set by the REAR outer wheel** | Evan, Appendix CI |
 | **max steer** | **32° — confirmed by Evan 2026-09-02** (was eyeballed at 45, then 30). Gives `R = 1.600 × wheelbase`. ⚠️ **32° is the wheel's DEVIATION from straight ahead** — Evan measured with 90° = straight, angle = 90 − protractor reading. Reading it as 58° instead gives 0.625 × wheelbase, a **2.6× error** Pinion sweeps **~180° full-lock to full-lock** (Evan, 2026-09-02), so an MG90S at 180° is an **exact 1:1 match** with no gearing | Evan, Appendices BQ/BU |
 | lane width | **296.5 mm** = 2.0 x the measured 148.25 mm. Rule corrected 2026-09-01 — the old fixed-85 mm rule gave 2.31-2.70x, wider than real roads (1.98x) or Duckietown (1.4-1.6x) | `SIM_TRANSFER_SPEC` §3 |
 | corner radius | **≥500–670 mm centreline** — *estimate on an estimate* | Appendix L |
@@ -358,12 +358,24 @@ original floor and the pre-2026-08-12 scale decision.)*
   The drive coupler was carefully shown survivable at SF 2.26–3.77 and **nobody
   ran the same check on the steering side, which sees ~4× the torque.** Grip a
   real Lego axle, never a printed cross profile. **No coupling is chosen.**
-- **Pi 5 2GB ($65) or 4GB ($110)?** Recommended 2GB — identical silicon, and the 4GB has absorbed every DRAM price rise while the 2GB has absorbed none. Purchase window is now.
+- ~~**Pi 5 2GB ($65) or 4GB ($110)?**~~ ✅ **DECIDED 2026-09-03: 4 GB — the 2 GB is SOLD OUT.** It was a $45 PRICE argument, never a capability one; 4 GB is comfortably sufficient and always was. Original reasoning kept: Recommended 2GB — identical silicon, and the 4GB has absorbed every DRAM price rise while the 2GB has absorbed none. Purchase window is now.
 - ~~**PWM path: straight-to-GPIO or a PCA9685 breakout?**~~ ~~RESOLVED 2026-09-01 (AY): PCA9685~~ **SUPERSEDED 2026-09-02 (Appendix BC): an ARDUINO UNO Evan already owns** takes motor PWM + servo + 4 light channels, and adds encoder counting and a throttle watchdog the PCA9685 cannot do. $0. BOM row 17; pin map in `firmware/SERIAL_PROTOCOL.md`.
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.
 - **THE ORDER (`docs/BOM.md`, ≈$238-248 + shipping = ≈$253-273).** Nothing is bought.
+  ⚠️ **TWO NEW SOURCING PROBLEMS, 2026-09-03:** the **EVE 25P cells are SOLD OUT** —
+  but do NOT hunt for another 20 A cell, that rating was never load-driven (worst-case
+  pack draw ~2.5 A against a 3 A fuse; **real spec is flat-top unprotected 18650,
+  ~2500 mAh, ≥5 A continuous**, which is nearly every cell in the class). And **vendor
+  consolidation is being researched** — shipping currently spans 8+ vendors; the item
+  expected to defeat a single-vendor order is the Pololu #5159 encoder motor.
+- **COOLING — raised 2026-09-03 and never considered before in this project.**
+  Pi 5 soft-throttles at 80 °C, hard at 85 °C, and sits above 85 °C under sustained
+  load with no cooling. **The consequence is the 20.00 Hz CONTROL RATE, not a hot
+  chip.** Active Cooler $10.95, in stock at pishop.us, **flagged in the BOM but NOT
+  added to the total — Evan's call.** `vcgencmd get_throttled` already covers thermal
+  in the same bitfield task 10 checks for brownout.
   Everything downstream of M1.5 waits on parts. Before ordering Evan should
   check the **six** items in the BOM's "Verify before ordering" section — most
   importantly that his power bank's label reads **5V/3A**, and now also **which

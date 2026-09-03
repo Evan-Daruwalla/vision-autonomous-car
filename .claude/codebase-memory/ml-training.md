@@ -2,8 +2,11 @@
 
 GPU-memory and world-model training facts, measured on **this** machine.
 Split out of `gotchas.md` on 2026-08-06: that bin was past its ~150-line cap
-and ML/GPU facts had become their own domain. Hardware/print/track traps stay
-in `gotchas.md`; anything about training a model lives here.
+and ML/GPU facts had become their own domain. ~~Hardware/print/track traps stay
+in `gotchas.md`~~ **— stale since 2026-09-02: `gotchas.md` was split and is now
+only a router. Hardware traps are in `hardware.md`, track in `track.md`,
+simulator/eval in `sim-harness.md`, firmware in `firmware-traps.md`, steering in
+`steering.md` (2026-09-03).** Anything about training a model lives here.
 
 **Machine under test:** RTX 3060 Ti, 8.0 GB VRAM (7.999 GiB reported), driver
 610.62, torch 2.13.0+cu126, Python 3.12.10, Windows 11.

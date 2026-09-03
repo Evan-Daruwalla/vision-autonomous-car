@@ -61,3 +61,28 @@ Remaining planned stack from the 2026-07-23 research brief:
   claims Timer1 and thereby sets the whole PWM budget.)*
 - The firmware toolchain is entirely separate from the Python venv; nothing in
   `ml/requirements.txt` touches the board.
+
+## On-car inference runtime (added 2026-09-03, PRD task 8d)
+
+- **Export ConvVAE + MDN-RNN + controller to ONNX for the car; keep PyTorch as
+  the reference implementation and never delete it.** Recommended by
+  `docs/research/2026-08-12_onboard-compute-selection.md` **independently of
+  which Pi is bought.**
+- **Why: the inference runtime is the largest RAM consumer on the car and the
+  only one this project controls.** The `torch` wheel is ~65-67 MB with a
+  correspondingly large arena; the **ONNX Runtime aarch64 wheel is ~17 MB**, and
+  the model is ~17 MB fp32 without the training graph. Model weights themselves
+  were never the constraint (<100 MB fp32).
+- ⚠️ **Do NOT expect this to fix loop rate.** The research's own falsifier: the
+  real 20 Hz threat is **per-frame Python overhead, which is RAM-invariant** —
+  an MDN-RNN steps sequentially every frame inside the DonkeyCar vehicle loop.
+  A leaner runtime helps only insofar as it shortens that per-step path.
+  **Measure the loop, not the model.**
+- **A desktop speedup does not transfer.** Any ONNX-vs-PyTorch timing claim must
+  be re-measured ON THE PI before it is stated as a win (Appendices AD-AJ are an
+  entire series on numbers that did not survive a change of harness).
+- **RAM was never the binding constraint.** DonkeyCar's "4 GB minimum" is a
+  hedged recommendation with no justification in their docs; the `pi` extra
+  installs `tflite-runtime`, NOT TensorFlow; and a 512 MB Pi Zero 2 W already
+  drives autonomously end-to-end. **4 GB bought 2026-09-03 because the 2 GB was
+  sold out, not because 2 GB was insufficient.**

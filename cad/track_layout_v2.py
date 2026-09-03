@@ -80,9 +80,12 @@ CAR_WIDTH = 0.14825    # m   MEASURED 2026-09-03 (Appendix CH): rear tire track,
                        #     superseding a 0.130 ESTIMATE) -- +33.5 mm, and the
                        #     third value this constant has held in two days, so
                        #     treat it as provisional until the chassis is built.
-                       #     FRONT TRACK IS NOW UNKNOWN: 107.75 mm was measured
-                       #     against the OLD wheels and only the rear was
-                       #     re-measured. Governing width is the widest point.
+                       #     CAVEATS CLOSED 2026-09-03 (Appendix CI): front track
+                       #     re-measured at 107.5 mm (the new rear wheels did not
+                       #     change it) and BODY width measured at 135.75 mm.
+                       #     Rear track is still the widest point, so 148.25 mm
+                       #     governs and this value is now whole-vehicle, not
+                       #     merely tire track. Front is only 72.5% of rear.
                        #     CAVEAT: tire track, not whole-vehicle width -- the
                        #     assembled car (chassis, electronics stack, camera
                        #     mount) has never been measured and may be wider.
@@ -450,7 +453,7 @@ def main() -> int:
     route = path_len(g["route"])
     print(f"floor           {FLOOR:.3f} x {FLOOR:.3f} m (usable {usable:.3f})")
     print(f"car width       {args.car_width*1000:.2f} mm  MEASURED 2026-09-03 "
-          f"(tire track, not whole-vehicle)")
+          f"(rear track; body 135.75 and front 107.5 are both narrower)")
     print(f"lane width      {g['lane']*1000:.0f} mm")
     print(f"corner radius   {g['R']*1000:.0f} mm  NOT COMMITTED until B3")
     print(f"street pitch    {g['pitch']*1000:.0f} mm  "
