@@ -114,6 +114,7 @@ the dated entry, not the digest.
 - [BY — Scheduled daily-audit: the watchdog trips on every good frame, and no experiment result records the commit that made it](#appendix-by---scheduled-daily-audit-the-watchdog-trips-on-every-good-frame-and-no-experiment-result-records-the-commit-that-made-it-2026-09-02-1927-cdt) (09-02)
 - [BZ — PRD cleanup: 24 dated strikes and appends, P1-P3 stamped, P6 ticked, and the schedule escalation the plan itself requires](#appendix-bz---prd-cleanup-24-dated-strikes-and-appends-p1-p3-stamped-p6-ticked-and-the-schedule-escalation-the-plan-itself-requires-2026-09-02-1936-cdt) (09-02)
 - [CA — Daily-audit CRIT confirmed on hardware and fixed: two clock samples per loop made the watchdog trip on every good frame; the audit's own suggested test was blind to it](#appendix-ca---daily-audit-crit-confirmed-on-hardware-and-fixed-two-clock-samples-per-loop-made-the-watchdog-trip-on-every-good-frame-the-audits-own-suggested-test-was-blind-to-it-2026-09-02-1946-cdt) (09-02)
+- [CB — Daily-audit findings given PRD homes as tasks A1-A7; A2 and A4 first](#appendix-cb---daily-audit-findings-given-prd-homes-as-tasks-a1-a7-a2-and-a4-first-2026-09-02-2202-cdt) (09-02)
 
 ---
 
@@ -8943,3 +8944,39 @@ the audit** — that is what this entry did.
 **Nothing ordered, nothing printed, nothing wired.** The board runs the fixed
 `uno_control`. The one thing a wired car would have done wrong on its first
 drive is now fixed before any part exists to be wired.
+
+# Appendix CB - Daily-audit findings given PRD homes as tasks A1-A7; A2 and A4 first (2026-09-02, ~22:02 CDT)
+Closes a promise CA.8 made and did not keep: the daily-audit's deferred
+findings now have PRD homes.
+
+## CB.1 What was added
+
+A new **AUDIT-2026-09-02** block in `PRD_ROADMAP.md` §6, immediately before
+§6b, with seven checkbox tasks **A1–A7**, each carrying the audit's file:line
+evidence and its own done-check:
+
+| task | finding | class |
+|---|---|---|
+| A1 | 0 of 108 `ml/runs/*.json` record the producing commit | provenance |
+| A2 | split-seed leak, `train_mdnrnn.py:165` (+ two siblings) | **silent correctness, M3/M4 data path** |
+| A3 | `preprocess.py` claims an atomic swap it does not perform | integrity |
+| A4 | `collect_recovery.py` asserts a gate that cannot pass (reproduced: `max diff 1.663858`) | **silent correctness, M3/M4 data path** |
+| A5 | `pre-commit` says fails-closed, fails open | tooling |
+| A6 | `LIGHTING_SPEC.md` still specifies 20 mA/LED | doc-vs-spec |
+| A7 | seven small items, batched | hygiene |
+
+**Priority stated in the block: A2 and A4 first, A1 before any result is
+cited, A5 before the repo is shared.** The audit's own coverage gaps are
+carried forward verbatim rather than dropped. HANDOFF gained a matching row
+(3d) in the next-actions table.
+
+## CB.2 What was NOT done
+
+**None of A1–A7 is started.** This entry is bookkeeping: it converts findings
+that lived only in an audit's output into tasks with done-checks, so a future
+session picks them up by reading the PRD top-to-bottom as the file instructs.
+
+## CB.3 State
+
+Board: fixed `uno_control`, banner re-read this session (`SELFTEST PASS
+39/39`). **Nothing ordered, nothing printed, nothing wired.**

@@ -2,7 +2,7 @@
 
 **Last updated: 2026-09-02 ~18:30 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 79 appendices A–CA; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 80 appendices A–CB; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -80,6 +80,7 @@ track generator — but it is a negative, and the write-up must say so.
 | 3a | **WEIGH THE CAR / MEASURE FRONT-AXLE LOAD.** Turns "is 14.7 N of rack force enough" from Evan's 50/50 judgement into arithmetic. Currently the only thing keeping the Geekservo 270 formally open. | **Evan (parts)** |
 | 3c | **CHOOSE THE SERVO-TO-PINION COUPLING** — unspecified until 2026-09-02, constraint now written in `docs/WIRING_PROTOSHIELD.md` §2.4a. ⚠️ **A printed cross-axle stub FAILS here** (SF 0.57–0.96 at MG90S stall; the MG996R fallback is ~5× worse). Must grip a real Lego axle. Adafruit #4252 ($0.75) is the manufactured candidate, spline fit unverified. | **Evan** |
 | 3b | **MEASURE WHEELBASE** (front to rear axle centres). With steering confirmed at **32°** (2026-09-02), `R = wheelbase / tan(32°)` = **1.600 × wheelbase** — wheelbase is the LAST unmeasured input to the turn radius, and the turn radius is what unfreezes corner geometry. Blocked: Evan does not have the parts yet. | **Evan (parts)** |
+| 3d | **Audit tasks A1–A7** (PRD, new AUDIT-2026-09-02 block). The daily-audit's CRIT is fixed (CA); the rest are homed as tasks with done-checks. **A2 (split-seed leak) and A4 (a gate that cannot pass) first** — silent correctness defects in the M3/M4 data path. None started. | — |
 | 4 | **Pi 2GB ($65) vs 4GB ($110).** Purchase window is now; the 4GB has taken every DRAM hike and the 2GB none. | **Evan** |
 | 5 | **Place the order** (`docs/BOM.md`). Nothing downstream of M1.5 moves until parts exist. **Now ≈$235–243 + shipping = ≈$250–268**, and the $200 ceiling is breached on EVERY path including the 2GB Pi (≈$205–223 with shipping). Both 2026-09-02 increments are parts the design already required and the BOM had failed to list — row 5 was buying a motor with no encoder, and the encoder cable was missing entirely (Appendix BO). | **Evan** |
 

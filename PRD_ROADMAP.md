@@ -1007,6 +1007,73 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
       chassis; a geometric radius is better than arithmetic-on-estimates but is
       not the measurement the task names.
 
+### AUDIT-2026-09-02 — findings from the scheduled daily-audit (Appendix BY), given homes here (added 2026-09-02, Appendix CB)
+
+**What this is.** A cold, findings-only audit ran at 19:27 CDT. Its CRIT — the
+watchdog tripping on every good frame — is **fixed and verified red-then-green
+on the board in Appendix CA.** Everything else it found is real, separate work,
+and this block exists so none of it vanishes. **Nothing below is started.**
+Each item carries its own done-check.
+
+- [ ] **A1 — No result file records the commit that produced it.** 0 of 108
+      tracked `ml/runs/*.json` carry a commit; 82 carry a seed. Fix in the
+      shared result writer: stamp `git rev-parse HEAD` + a dirty flag. **The
+      108 existing files cannot be retrofitted** — any writeup citing them must
+      say so. Done: a fresh run's JSON carries `commit`, and the writer refuses
+      to write without one.
+- [ ] **A2 — Split-seed leak, `ml/train_mdnrnn.py:165`.** Passes `args.seed`
+      where six sibling VAE-checkpoint consumers derive `split_seed` from the
+      checkpoint. A VAE trained at a non-default seed leaks its own fit episodes
+      into the MDN-RNN's `val_indomain`. `rollout_eval.py:216-218` already warns
+      about this exact incident — the fix never propagated upstream. Same
+      pattern in `exp_aux_head.py:306` and `prep_dreamer_corpus.py:108`. Done:
+      all three derive from the checkpoint; a test at a non-default VAE seed
+      shows zero fit/val overlap.
+- [ ] **A3 — `ml/preprocess.py:85` claims an atomic four-file swap it does not
+      perform** — `:138` is four sequential `os.replace`; `splits.py:95`
+      `load_proc()` has no cross-array length check, so a kill between renames
+      leaves a new-size image array beside old-size index arrays and every
+      trainer accepts it silently. Done: either a real atomic swap (write into a
+      versioned dir, swap one pointer) or a loud length check in `load_proc()`,
+      and the comment tells the truth either way.
+- [ ] **A4 — `ml/collect_recovery.py:42-44` asserts a gate that cannot pass.**
+      Its docstring says the PID-identity gate still passes; `verify_corpus.py:
+      224-249` diffs the recomputed PID against the executed, noise-injected
+      action, so it fails on every noise-burst frame. A worker reproduced it on
+      real data: `max |diff| 1.663858 at index 128`. The claim was written but
+      never run. Done: recovery episodes are exempted from that gate with the
+      exemption recorded in the npz, or the gate subtracts the logged noise; the
+      docstring is made true or removed.
+- [ ] **A5 — `scripts/git-hooks/pre-commit:24-37` says "fails CLOSED" and fails
+      OPEN.** No `exit 1` in the missing-file branch, and both gates depend on
+      untracked `~/.claude/skills/` paths — on any other machine both are
+      silently absent. Done: missing scanner ⇒ `exit 1`, verified by renaming
+      the scanner and watching a commit refuse.
+- [ ] **A6 — `docs/LIGHTING_SPEC.md:75,88-90` still specifies 20 mA/LED** —
+      40 mA per pin with two LEDs per channel, the ATmega328P's absolute
+      per-pin maximum. The 10 mA correction lives in `WIRING_PROTOSHIELD.md`
+      §2.5 and `hardware.md` and never reached the spec. Done: spec amended by
+      dated strike.
+- [ ] **A7 — small; batch when touching the files:** `ml/measure_operating_
+      point.py:62-65` lacks the mid-warmup guard its six siblings carry ·
+      `build_expert_labels.py:76-79` and `exp_recovery.py:151-153` check
+      alignment by frame count only (a same-length reorder passes) ·
+      `ml/data/proc/train_mu.npy` + `holdout_mu.npy` predate the encoder
+      fingerprint and have no `*latents.key` — regenerate · `cad/track_layout_
+      v2.json` keys the MEASURED width `car_width_m_ESTIMATE` · `features.md` /
+      `conventions.md` / `INDEX.md` say "31 Python files" where `git ls-files`
+      counts 33 · four unused imports · four `except Exception: pass` without
+      the `# noqa: BLE001` their siblings carry.
+
+**Priority, stated:** **A2 and A4 first** — both are silent correctness
+defects in the M3/M4 data path. **A1 before any result is cited in a writeup.**
+**A5 before the repo is shared.** A3, A6, A7 when touching those files.
+
+**The audit's own stated gaps, carried forward:** ~lines 118-900 of this file
+not read line by line; 5 of 7 research docs grep-checked only; no CVE database
+reachable, so dependency-vulnerability status is "could not determine", not
+"clean".
+
 ## 6b. EXECUTION PLAN (dated 2026-08-05, approved by Evan — schedules the tasks above; adds no new milestones)
 
 **Why this exists:** §6 says WHAT to build and in what order. This says WHEN,
