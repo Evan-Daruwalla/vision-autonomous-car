@@ -10,15 +10,22 @@
     TB6612FNG H-bridge (**both channels paralleled** — steering is a servo,
     so the second channel is free).
   - **Drive motor selected 2026-07-23 ~17:47 (pending Evan's purchase go):
-    Pololu #1093 N20 30:1 HP 6V, $23.95** — 1000 rpm no-load, 55.9 mN·m
+    ~~Pololu #1093~~ **#5159** N20 30:1 HP 6V, ~~$23.95~~ **$29.95** (encoder
+    variant; corrected 2026-09-02 Appendix BO, propagated here 2026-09-03 by
+    the landing-check sweep) — 1000 rpm no-load, 55.9 mN·m
     stall, 1.6 A stall, body 10 × 12 × 25-26 mm, 3 mm D-shaft 9 mm long,
     2 × M1.6 mounting holes. Supersedes both the 2026-07-23 ~16:17 "reuse
     an owned PF motor" plan and the ~17:21 "undecided" entry. Lego motors
     were rejected on physics (too slow), not availability. Full math:
     `docs/research/2026-07-23_drive-motor-selection.md`.
-  - **Drivetrain geometry:** config B (lower risk) = 62.4 mm tire (32019) +
+  - **Drivetrain geometry — SUPERSEDED 2026-09-03 (Appendix CS).** Evan's
+    actual differential is **20t → 28t, N = 1.400**, with a **measured 55.75 mm
+    tire** — config A's ratio, on a tire neither config modelled. **Real top
+    speed 1.83 m/s loaded / 2.09 m/s no-load, OVER the 1.0–1.5 m/s target
+    band.** The config-A in-plane mesh this bin called unverified is confirmed
+    real. Superseded text kept: ~~config B (lower risk) = 62.4 mm tire (32019) +
     12t bevel → 28t diff ring (62821), N = 2.333, mesh centres 20.0 mm,
-    top speed 1.28 m/s. Config A (faster, needs physical verification of an
+    top speed 1.28 m/s.~~ Config A (faster, needs physical verification of an
     in-plane 20t double-bevel mesh) = 43.2 mm tire (44309) + 20t → 28t,
     N = 1.400, centres 24.0 mm, 1.46 m/s.
   - **Power: SPLIT SOURCE** (chosen 2026-07-23 ~17:59, supersedes the
@@ -64,7 +71,10 @@
     timeout, so a hung Pi or a diverging policy stops the car instead of
     driving it into a wall. Neither is possible on an I2C PWM chip.
   - **Channel budget, checked:** the Servo library claims Timer1, killing PWM
-    on pins 9/10 and leaving PWM on **3, 5, 6, 11**. Needed: motor + headlights
+    on pins 9/10 and leaving PWM on **3, 5, 6, 11**. ⚠️ **Stale 2026-09-03
+    (Appendix CX): lighting is now two WS2812B strips on D4/D7, needing NO PWM
+    at all — D5 and D6 are FREE, the first PWM headroom this design has had.**
+    Superseded: ~~motor + headlights
     + tail = 3 PWM, servo on its own library, and the two indicators are on/off
     so plain digital pins serve. **Fits with ZERO PWM spare.** (Corrected 2026-09-02, Appendix BH — the D3 pin fix put the encoder on D3, so usable PWM is {5, 6, 11} and all three are used. There is NO headroom: another PWM channel needs a pin freed or a timer reconfigured.)
   - **The cost, stated plainly:** DonkeyCar's `pins.py` has a PCA9685 backend
@@ -77,6 +87,8 @@
     irrelevant." **A USB-connected Uno makes that false.** The board alone is
     ~50mA; the danger is it sourcing LED current from its pins, which would put
     up to 160mA back on the Pi's 5V/3A bank — precisely what LIGHTING_SPEC §3
+    *(figure superseded 2026-09-03: the WS2812B strips draw ~80 mA at working
+    brightness off the LM2596 rail, not through any ATmega pin — Appendix CZ)*
     was written to prevent. **The Uno supplies LOGIC; LED current comes off the
     LM2596 rail.** Powering the Uno from the 7.4V pack instead has its own
     failure: the pack sags under motor stall and the AMS1117 drops out,

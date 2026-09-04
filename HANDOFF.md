@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-03 ~20:29 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-03 ~20:53 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 105 appendices A–DA; BM/BN/BP/BU/CT/CY are corrections to earlier entries). When this file and the record disagree about
+(append-only, 106 appendices A–DB; BM/BN/BP/BU/CT/CY/DB are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -223,9 +223,9 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Doc system bootstrap | — | **Done** | 2026-07-23, this session |
 | Research brief | — | **Done** | docs/research/2026-07-23_sensor-compute-stack.md, 4 workers, spot-checked |
 | Decision gate | M1.1 | **Done** | 2026-07-23: 8GB · no Lego motors · 3060 Ti 8GB · ~$200 · ratified |
-| Drive motor selection | M1.1b | **Done (purchase pending)** | 2026-07-23: Pololu #1093 N20 30:1 HP 6V, $23.95; docs/research/2026-07-23_drive-motor-selection.md |
+| Drive motor selection | M1.1b | **Done (purchase pending)** | 2026-07-23: ~~Pololu #1093, $23.95~~ **#5159, $29.95** (encoder variant — corrected 2026-09-02 Appendix BO, propagated here 2026-09-03); docs/research/2026-07-23_drive-motor-selection.md |
 | Power system selection | M1.1c | **Done (purchase pending)** | 2026-07-23: split source, power bank owned; docs/research/2026-07-23_power-system.md |
-| BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced three times** | `docs/BOM.md`, **≈$238-248 + $15-25 shipping** (≈$253-273 all-in). Row 17 is an **Arduino Uno Evan already owns, $0**. **Row 5 corrected 2026-09-02 to the #5159 ENCODER motor** Evan chose on 2026-08-12 (+$6) and **new row 5b, the #4763 JST SH cable Pololu does not include** (+$3) — Appendix BO. **$200 ceiling breached on every path** |
+| BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced three times** | `docs/BOM.md`, ~~≈$238-248 + $15-25 shipping (≈$253-273 all-in)~~ **$401.70 + shipping ≈ $415-430** (2026-09-03; this row disagreed with the ORDER line lower in this same file until the landing-check sweep caught it). Row 17 is an **Arduino Uno Evan already owns, $0**. **Row 5 corrected 2026-09-02 to the #5159 ENCODER motor** Evan chose on 2026-08-12 (+$6) and **new row 5b, the #4763 JST SH cable Pololu does not include** (+$3) — Appendix BO. **$200 ceiling breached on every path** |
 | Chassis CAD + print | M1 | **Started** | M1.3 coupon generated + validated 2026-07-23; awaiting Evan's print + measurements |
 | Tolerance coupon | M1.3 | **Ready to print** | `cad/tolerance_coupon_v1.stl` + `cad/README.md`; gates every chassis dimension |
 | Electronics + teleop | M2 | **Not started** | purchase list is task 8 |
@@ -254,7 +254,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 - Camera Module 3 Wide $35 (120° diagonal, rolling shutter — fine at 1-3 m/s)
   **+ a Standard-Mini camera cable (~$2-5)** — the module ships with a
   Standard-Standard cable that does NOT fit the Pi 5's mini 22-pin port.
-- Drive: **Pololu #1093 N20 30:1 HP 6V, $23.95** (chosen 2026-07-23,
+- Drive: **Pololu ~~#1093~~ #5159 N20 30:1 HP 6V, ~~$23.95~~ $29.95** (encoder variant; chosen 2026-07-23,
   purchase pending). 1000 rpm, 55.9 mN·m stall, 1.6 A stall, 10×12×26 mm,
   3 mm D-shaft. Into the Lego diff via TB6612FNG with **both channels
   paralleled** (2 A cont.) and duty PWM-capped at ~71% of a full 8.4 V pack.
@@ -264,7 +264,7 @@ original floor and the pre-2026-08-12 scale decision.)*
   actual differential is 20t→28t (N=1.400), not config B's 12t→28t — and
   his tire measures 55.75 mm, not 43.2/62.4 mm.** Real top speed 1.83 m/s
   loaded / 2.09 m/s no-load (≈4.1-4.7 mph) — OVER the 1.0-1.5 m/s target
-  band. Accel current 1.24 A (76% of 1.6 A stall, up from 59%); traction
+  band. Accel current 1.24 A (**76% of stall TORQUE**, not of stall current — 1.24/1.6 A is 77.5%; gloss corrected 2026-09-03, Appendix DB); traction
   margin unchanged at 4.7x.
 - Steering: MG90S (MG996R fallback; mount takes both).
 - Print: calibrate coupons first; ~5.1mm pin / 5.3-5.6mm rotating bore;
@@ -367,7 +367,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.
-- **THE ORDER (`docs/BOM.md`, $401.70 + shipping = ≈$415-430 — after the Vilros kit, Amazon consolidation, right-sizing bulk items, and swapping 8 discrete LEDs for a WS2812B strip; Evan then chose the 144 LED/m density over 60/m, +$4.00).** Nothing is bought. **Lighting**: WS2812B strip, 2 segments on **D4 and D7** (data is one-way, cut halves cannot share a feed), freeing **D5/D6 — the first spare PWM this design has had**. Encoder-interrupt risk quantified at ~0.027% tick loss for 3 px/segment (Appendix CZ); it scales with pixels per segment, so **cut to pixel count, not length**. **`docs/WIRING_PROTOSHIELD.md` and `firmware/SERIAL_PROTOCOL.md` are now current (Appendix DA)** — the vet found §2.2 naming the wrong motor (#1093) and no strip pins assigned at all. ⚠️ **`docs/LIGHTING_SPEC.md` still describes the superseded 8-LED scheme — the one doc not yet updated.**
+- **THE ORDER (`docs/BOM.md`, $401.70 + shipping = ≈$415-430 — after the Vilros kit, Amazon consolidation, right-sizing bulk items, and swapping 8 discrete LEDs for a WS2812B strip; Evan then chose the 144 LED/m density over 60/m, +$4.00).** Nothing is bought. **Lighting**: WS2812B strip, 2 segments on **D4 and D7** (data is one-way, cut halves cannot share a feed), freeing **D5/D6 — the first spare PWM this design has had**. Encoder-interrupt risk quantified at ~0.027% tick loss for 3 px/segment (Appendix CZ); it scales with pixels per segment, so **cut to pixel count, not length**. **`docs/WIRING_PROTOSHIELD.md` and `firmware/SERIAL_PROTOCOL.md` are now current (Appendix DA)** — the vet found §2.2 naming the wrong motor (#1093) and no strip pins assigned at all. ⚠️ **`docs/LIGHTING_SPEC.md` still describes the superseded 8-LED scheme.** ~~the one doc not yet updated~~ — **false when written**: `firmware/uno_control/uno_control.ino` still *implements* that scheme on D4/D5/D6/D7 (now annotated do-not-flash, PRD task 8e), and `PRD_ROADMAP.md` / `architecture.md` also carried it. All corrected 2026-09-03 except LIGHTING_SPEC itself (Appendix DB).
   ⚠️ **TWO NEW SOURCING PROBLEMS, 2026-09-03:** the **EVE 25P cells are SOLD OUT** —
   but do NOT hunt for another 20 A cell, that rating was never load-driven (worst-case
   pack draw ~2.5 A against a 3 A fuse; **real spec is flat-top unprotected 18650,

@@ -2,8 +2,9 @@
 
 > **➡️ TO PLACE THE ORDER, READ [ORDER SHEET](#order-sheet--grouped-by-vendor-2026-09-03) BELOW.**
 > The row table is the reasoning and the dated history; the order sheet is the
-> shopping list, grouped by vendor with SKUs and live stock. Three things block
-> it today — they are listed there.
+> shopping list, grouped by vendor with SKUs and live stock. ~~Three things block~~
+> **One thing blocks it today** (2026-09-03: the Pi and the CAD fuse holder both
+> resolved) — it is listed there.
 
 **Status: FINAL pending Evan's order.** Every choice traces to a dated
 research brief in `docs/research/`. Prices are 2026-07-23 and were volatile
@@ -39,13 +40,13 @@ TLS" — **wrong**: the https URL resolves with a valid certificate; only the
 apex adeept.com downgrades. Corrected 2026-09-02, Appendix BK)* |
 | 12 | LM2596 buck module | 7.4V → 5.2V for the servo only (700mA peak — well within it). **Not for the Pi** | **$2.48** | [addicore.com LM2596 ⚠️ **BACKORDERED 2026-09-03**](https://www.addicore.com/products/lm2596-step-down-adjustable-dc-dc-switching-buck-converter) — price NOT re-verified |
 | **Wiring + protection** |
-| 13 | XT30 connector pair | | **$1.10** | [alofthobbies.com/products/xt30-plugs](https://alofthobbies.com/products/xt30-plugs) ✅ **verified 2026-09-02: $1.10, ONE male+female pair, genuine Amass, in stock** |
+| 13 | ~~XT30 connector pair~~ **SUPERSEDED 2026-09-03 — see the Amazon-folded order below** | Pack disconnect. **Missed by the 2026-09-03 fold that superseded rows 14 and 15**, and caught by the landing-check sweep: this row still priced the single alofthobbies pair while the order sheet bought the Amazon 20-pack, so the row table and the order sheet disagreed by $10.89 | **$11.99** (20 pairs) | [Amass XT30, 20-pack](https://www.amazon.com/Amass-Upgrade-Female-Connectors-Battery/dp/B0CFFJK4XH) ✅ verified 2026-09-03, In Stock, genuine Amass. ~~[alofthobbies](https://alofthobbies.com/products/xt30-plugs) $1.10/pair, verified 2026-09-02~~ — correct, but a 4th vendor for one $1.10 part |
 | 14 | ~~SPST rocker switch, 10A~~ **SUPERSEDED 2026-09-03 — see the Amazon-folded order below** | Main switch on the motor pack. Evan asked to right-size the Amazon bulk-pack items; SparkFun's single-unit price was fine but meant a 4th vendor for one $0.75 part (the old "small-order problem" this BOM already solved once in Appendix CP) | **$6.39** (5-pack) | [DaierTek KCD1 5-pack](https://www.amazon.com/dp/B07S1MV462) ✅ verified 2026-09-03, In Stock, Amazon's Choice, 12V DC/automotive rated (closer match than SparkFun's 125VAC household spec), pre-wired, 4.7★ (3,586 ratings) |
 | 15 | ~~Inline ATO/ATC fuse holder + 3A fuse~~ **SUPERSEDED 2026-09-03 — see the Amazon-folded order below** | **Mandatory** — unprotected 18650s can deliver enormous short-circuit current. The CAD-currency cross-border problem this row used to flag is gone — right-sizing the Amazon fuse holder (Appendix CP) already fixed it once; this is a further size cut on the SAME US listing family | **$7.99** (4 holders + 20 fuses, 3A-15A) | [Anyongora 4-pack](https://www.amazon.com/dp/B0F6NPV287) ✅ verified 2026-09-03, In Stock, Amazon's Choice, IP67 waterproof, 16AWG pre-wired leads, confirmed 3A included, 4.9★ (109 ratings) |
-| 16 | Wire, heat-shrink, bulk caps, headers | ~22AWG for motor, ~26AWG signal; 470–1000µF across the motor rail **+ 0.1 µF ceramic across the motor terminals for brush noise, and 0.1 µF at the TB6612 VM/GND** (added 2026-09-02 — `docs/WIRING_PROTOSHIELD.md` §2.2 flagged both as missing from this row) | **$49.09** | [Fermerry 22 AWG wire, 6×5ft](https://www.amazon.com/Fermerry-Stranded-Silicone-Flexible-Electrical/dp/B089D29FHC) $9.69 · [SCHDRA 26 AWG wire, 6×20ft](https://www.amazon.com/Silicone-Electrical-SCHDRA-Tinned-Copper/dp/B0C9MB4DTY) $9.99 · [KOOWIN heat-shrink, 720pc/8 sizes](https://www.amazon.com/Shrink-Tubing-Tubes-KOOWIN-Ratio/dp/B098LB9LTJ) $7.99 · [470µF 25V caps, 10-pack](https://www.amazon.com/Projects-Radial-Electrolytic-Capacitor-470uF/dp/B0CPTDPG6S) $7.07 · [0.1µF ceramic caps, 50-pack](https://www.amazon.com/BOJACK-Capacitors-Low-Voltage-Dielectric-Capacitor/dp/B07X5XTDPB) $6.99 · [40-pin 0.1" headers, 20-pack](https://www.amazon.com/Straight-Breakaway-Connector-Breadboard-Electronic/dp/B0FRZW75VS) $6.29 — ✅ all verified 2026-09-03, In Stock |
+| 16 | Wire, heat-shrink, bulk caps, headers | ~22AWG for motor, ~26AWG signal; 470–1000µF across the motor rail **+ 0.1 µF ceramic across the motor terminals for brush noise, and 0.1 µF at the TB6612 VM/GND** (added 2026-09-02 — `docs/WIRING_PROTOSHIELD.md` §2.2 flagged both as missing from this row) | **$48.02** *(was $49.09 — the 22 AWG revert to Fermerry changed this row's link but not its subtotal; caught by the landing-check sweep 2026-09-03)* | [Fermerry 22 AWG wire, 6×5ft](https://www.amazon.com/Fermerry-Stranded-Silicone-Flexible-Electrical/dp/B089D29FHC) $9.69 · [SCHDRA 26 AWG wire, 6×20ft](https://www.amazon.com/Silicone-Electrical-SCHDRA-Tinned-Copper/dp/B0C9MB4DTY) $9.99 · [KOOWIN heat-shrink, 720pc/8 sizes](https://www.amazon.com/Shrink-Tubing-Tubes-KOOWIN-Ratio/dp/B098LB9LTJ) $7.99 · [470µF 25V caps, 10-pack](https://www.amazon.com/Projects-Radial-Electrolytic-Capacitor-470uF/dp/B0CPTDPG6S) $7.07 · [0.1µF ceramic caps, 50-pack](https://www.amazon.com/BOJACK-Capacitors-Low-Voltage-Dielectric-Capacitor/dp/B07X5XTDPB) $6.99 · [40-pin 0.1" headers, 20-pack](https://www.amazon.com/Straight-Breakaway-Connector-Breadboard-Electronic/dp/B0FRZW75VS) $6.29 — ✅ all verified 2026-09-03, In Stock |
 | **Lighting + I/O** |
 | 17 | ~~**PCA9685** 16-ch I2C PWM/LED driver~~ **Arduino Uno R3 clone — OWNED** | ✅ **SUPERSEDES the PCA9685 2026-09-02 (Appendix BC).** Evan has an Uno R3 clone on hand: ATmega328P, 5V logic, FTDI FT232RL, working on COM3. It does everything the PCA9685 would (motor PWM + servo + 4 light channels, fits with **ZERO** PWM spare — corrected 2026-09-02 (Appendix BH): Servo takes Timer1 (kills D9/D10) and the encoder takes D3, leaving usable PWM {5, 6, 11}, all three consumed by motor + headlights + tail) **plus two things the PCA9685 cannot**: quadrature **encoder counting** on hardware interrupts D2/D3, and a **throttle watchdog** that stops the car if the Pi hangs. ⚠️ **5V logic — connect over USB, NEVER to Pi GPIO** (`gotchas.md`). Cost of the swap: no DonkeyCar backend exists, so the actuator path becomes custom firmware + a serial protocol | **$0.00** | owned |
-| 18 | ~~8× 3mm LEDs (2 white, 2 red, 4 amber)~~ **SUPERSEDED 2026-09-03: 2× WS2812B addressable RGB strip segments, cut from one 1m/60px reel** | Headlights, tail lights, 4 indicators — same zones, now individually-addressed pixels instead of 8 discrete LEDs on 4 GPIO channels. Evan's call: "much easier to wire and mount." **Real, and it's bigger than wiring**: the old scheme used the car's last 3 free PWM pins with zero spare; WS2812B needs no PWM hardware at all. ⚠️ **CORRECTED same day (Evan): "the led strip only moves data 1 way."** Right — DIN→DOUT only, so cutting one reel into 2 segments does NOT let them share a single data feed; each cut segment's exposed end is a fresh DIN, needing its own connection. **Two regular digital pins, one per segment** (not one) — still frees 2 of the 3 PWM pins either way, since neither option needs PWM hardware. Daisy-chaining them instead (a jumper wire from segment A's DOUT to segment B's DIN) would get back to one pin, but adds a wire routed across the chassis and a DIN/DOUT mix-up risk at the joint for no real benefit here — two independent pins is the simpler, more robust choice. Rear lamps still must clear the forward camera's FOV (`docs/LIGHTING_SPEC.md` §1) — now a pixel-placement constraint on the strip, not a discrete-LED position. **Both open figures quantified 2026-09-03** (Appendix CZ), under stated assumptions (3 pixels/segment; indicators blink at the firmware's existing `BLINK_MS`=340ms; brightness matched to the old scheme's 10mA "plainly bright" target, Appendix BO): current draw **~80mA realistic, 360mA absolute worst case** — either way the LM2596 keeps 1.8–2.1A of margin; encoder tick loss **~0.027%, ~1 in 3800, ~1.1 ticks/sec worst case**. Small and likely tolerable, but the firmware decision is still open — pixel count and update strategy aren't finalized, and this isn't verified on real hardware. Not blocking the purchase | **$11.99** | [BTF-LIGHTING WS2812B, 1m/**144px**, UL Listed](https://www.amazon.com/dp/B088B85G38) ✅ verified 2026-09-03, In Stock, **DC5V** (same rail, no power change), Amazon's Choice, 4.4★/446. **Evan chose 144/m over the 60/m ($7.99) for finer placement.** One reel cut into 2 segments — not two separate reels. ⚠️ **Cut to PIXEL count, not to length**: at 6.94mm spacing a 50mm run is 7 pixels, not 3, and the interrupt-blind window scales with pixels per segment whether they are lit or not — 0.062% tick loss instead of 0.027% (Appendix DA) |
+| 18 | ~~8× 3mm LEDs (2 white, 2 red, 4 amber)~~ **SUPERSEDED 2026-09-03: 2× WS2812B addressable RGB strip segments, cut from one 1m/**144px** reel** | Headlights, tail lights, 4 indicators — same zones, now individually-addressed pixels instead of 8 discrete LEDs on 4 GPIO channels. Evan's call: "much easier to wire and mount." **Real, and it's bigger than wiring**: the old scheme used the car's last 3 free PWM pins with zero spare; WS2812B needs no PWM hardware at all. ⚠️ **CORRECTED same day (Evan): "the led strip only moves data 1 way."** Right — DIN→DOUT only, so cutting one reel into 2 segments does NOT let them share a single data feed; each cut segment's exposed end is a fresh DIN, needing its own connection. **Two regular digital pins, one per segment** (not one) — still frees 2 of the 3 PWM pins either way, since neither option needs PWM hardware. Daisy-chaining them instead (a jumper wire from segment A's DOUT to segment B's DIN) would get back to one pin, but adds a wire routed across the chassis and a DIN/DOUT mix-up risk at the joint for no real benefit here — two independent pins is the simpler, more robust choice. Rear lamps still must clear the forward camera's FOV (`docs/LIGHTING_SPEC.md` §1) — now a pixel-placement constraint on the strip, not a discrete-LED position. **Both open figures quantified 2026-09-03** (Appendix CZ), under stated assumptions (3 pixels/segment; indicators blink at the firmware's existing `BLINK_MS`=340ms; brightness matched to the old scheme's 10mA "plainly bright" target, Appendix BO): current draw **~80mA realistic, 360mA absolute worst case** — either way the LM2596 keeps 1.8–2.1A of margin; encoder tick loss **~0.027%, ~1 in 3800, ~1.1 ticks/sec worst case**. Small and likely tolerable, but the firmware decision is still open — pixel count and update strategy aren't finalized, and this isn't verified on real hardware. Not blocking the purchase | **$11.99** | [BTF-LIGHTING WS2812B, 1m/**144px**, UL Listed](https://www.amazon.com/dp/B088B85G38) ✅ verified 2026-09-03, In Stock, **DC5V** (same rail, no power change), Amazon's Choice, 4.4★/446. **Evan chose 144/m over the 60/m ($7.99) for finer placement.** One reel cut into 2 segments — not two separate reels. ⚠️ **Cut to PIXEL count, not to length**: at 6.94mm spacing a 50mm run is 7 pixels, not 3, and the interrupt-blind window scales with pixels per segment whether they are lit or not — 0.062% tick loss instead of 0.027% (Appendix DA) |
 | 19 | ~~LED series resistors~~ **MOSTLY MOOT 2026-09-03 — see row 18.** 1x 100k and 1x 12k for the pack-sense divider (Appendix BJ), plus ~1x 300-500Ω in series with the WS2812B data line (standard practice, protects the first pixel from spikes) | WS2812B pixels have a built-in constant-current driver per LED — no external series resistor per LED anymore. The whole 10mA-vs-20mA/per-pin-current derivation this row used to carry (Appendix BO) no longer applies to the lighting load — the strip draws off the LM2596 rail directly, not through an ATmega pin. Divider resistors (100k/12k) are unrelated to lighting and still needed regardless | **$7.38** | [30-value resistor kit, 600pc, 1Ω-1MΩ](https://www.amazon.com/KSOPUERT-Resistor-Assortment-Resistance-Values/dp/B0CN6N5DC4) — price from listing snippet, not individually re-verified live |
 | 20 | Dupont jumpers + **data-only USB cable — CABLE OWNED** | Pi→Uno is **USB, not GPIO** (5V logic would damage the Pi's 3.3V pins). The USB 5V wire must be **cut or omitted**: the Uno's 5V pin is fed from the LM2596 rail so LED current stays off the Pi's bank, and two supplies must not back-feed each other. Plus LED and servo leads. ✅ **Evan already has a ~3ft USB 2.0 A-to-B cable, currently plugged into the Arduino (2026-09-03)** — no purchase needed, drops the $5.12 cable line entirely. ⚠️ The 5V-cut requirement above still applies to THIS cable once it moves to the permanent Pi↔Uno link: a standard USB cable is molded, so opening the jacket to find and isolate the red 5V conductor is still a real task, not skipped by already owning the cable | **$6.98** | [Dupont jumpers, 120pc M-M/M-F/F-F](https://www.amazon.com/EDGELEC-Optional-Breadboard-Assorted-Multicolored/dp/B07GCZ52WF) $6.98 — ✅ verified 2026-09-03, In Stock. USB cable: owned, no listing needed |
 | **Assembly (added 2026-09-02, Appendix CF)** |
@@ -216,13 +217,18 @@ paralleled TB6612 is enough).
 the history; this is the shopping list. Every price and stock string here was
 checked on a live page on 2026-09-03. **Nothing is ordered.**
 
-### ⚠️ Two things block placing it today
+### ⚠️ One thing blocks placing it today
+
+*(Was "Two", was "Three" at the top of this file — all three counts disagreed
+until the landing-check sweep 2026-09-03. Blockers 1 and 3 are struck below.)*
 
 1. ~~The Pi 5 4 GB is out of stock at pishop, SparkFun and DigiKey.~~ **RESOLVED 2026-09-03: Evan is buying the Vilros Basic Starter Kit ($179.99, includes SD card + cooling + PSU), confirmed in stock at checkout.** See row 1.
 2. **Both Addicore items are BACKORDERED** — 2-cell 18650 holder ($1.25) and
    LM2596 buck ($2.48). Substitutes needed, or wait.
-3. **The fuse holder is priced in CAD from a Canadian vendor** and ships
-   cross-border. Prefer a US source.
+3. ~~**The fuse holder is priced in CAD from a Canadian vendor** and ships
+   cross-border. Prefer a US source.~~ **RESOLVED 2026-09-03**: row 15 is now
+   a US Amazon 4-pack ($7.99, 3A included), in the same order as everything
+   else. **Only blocker 2 (the two Addicore backorders) is still open.**
 
 ### The order, by vendor
 
@@ -251,7 +257,7 @@ checked on a live page on 2026-09-03. **Nothing is ordered.**
 
 ⚠️ **CONSOLIDATION IS NOT FREE, AND THE JUMP IS LARGER THAN THE FIRST ESTIMATE — stated plainly rather than buried in a table.** Folding the small-order items and the generic parts onto Amazon (2026-09-03) cost **+$135.47 to +$141.72** over the previous piecemeal estimate, almost entirely because Amazon's hobby sellers sell in bulk packs, not the 1x quantities this build actually needs: **1 of 5** rocker switches (was 1 of 10), **1 of 20** XT30 pairs, **~20 of 600** resistors, **1 of 4** fuse holders (was 1 of 10), **1 of 6** wire spools per gauge — the LED multiple is gone entirely, not just smaller: the 3-pack LED buy (8 of 300) is superseded by a single WS2812B strip, a different lighting architecture, not a bulkier version of the same part. What remains is the same pattern as the ACEIRMC BMS (Appendix CO) — the individual per-unit price is often *cheaper* than the old single-unit sources — but repeated across ~14 items the cumulative overshoot is real money, not a rounding error. **The figure grew from an earlier +$104.86–$108.61 estimate once the last six commodity items were live-verified instead of budget-guessed, dropped once the USB cable turned out to already be owned, dropped again once the wire kits were right-sized, dropped once more when Evan found a cheaper wire listing (SCHDRA) himself, dropped a fourth time when a full sweep found smaller listings for the rocker switch and fuse holder, then dropped a fifth time when the LED scheme changed to a WS2812B strip, then rose $4.00 when Evan picked the denser 144/m strip: net **+$84.97 to +$91.22** over the pre-fold estimate.** **This is a genuine tradeoff (fewer vendors, no more sub-shipping-cost line items, no more CAD currency problem — for about $85–$91 more), and it has not been decided for Evan.**
 
-**SUM OF ROWS: $401.70** before shipping. *(Was $397.70 — briefly under $400 — until Evan chose the 144 LED/m strip over the 60 LED/m one, +$4.00 for finer cut spacing. Stated rather than quietly re-crossed: the sub-$400 mark lasted about twenty minutes.)* Still a single precise figure, not a range: every row in the BOM has a live-verified price as of 2026-09-03. With shipping now concentrated mostly on ONE Amazon order (free with Prime or over $35, easily cleared) plus Vilros/Pololu/IMR/Adeept/DigiKey separately:
+**SUM OF ROWS: $401.70** before shipping. *(Was $397.70 — briefly under $400 — until Evan chose the 144 LED/m strip over the 60 LED/m one, +$4.00 for finer cut spacing. Stated rather than quietly re-crossed: the sub-$400 mark lasted about twenty minutes.)* **Now a true sum of the row table**, as of the landing-check sweep 2026-09-03: it had been $9.82 off, because row 13 was never folded onto Amazon (+$10.89) and row 16's subtotal never followed the 22 AWG revert (−$1.07). Both rows fixed; the figure and the rows now agree. ~~Every row in the BOM has a live-verified price~~ — **not true and never was**: rows 10 and 12 say "price NOT re-verified" (both Addicore, both backordered), row 19 says "not individually re-verified live", and **row 22 is a range ($0.00–0.75), not a point** — the coupling is unchosen, so the total's low end assumes the free printed option that Appendix BV rejected. With shipping now concentrated mostly on ONE Amazon order (free with Prime or over $35, easily cleared) plus Vilros/Pololu/IMR/Adeept/DigiKey separately:
 **≈$415 – $430 all-in** — a rough estimate, since per-vendor shipping was not re-summed line by line after this consolidation.
 
 ### The practical lesson this sheet encodes
@@ -285,10 +291,10 @@ not a discount — it is not paying $8 to ship a 75-cent switch.**
                     [UNO] pin budget (CORRECTED 2026-09-02 -- the earlier
                     map double-booked D3, and BOTH files omitted STBY
                     entirely; see firmware/SERIAL_PROTOCOL.md SS1/SS1a):
-                       D2  encoder A (INT0)    D5  headlights  (PWM Timer0)
-                       D3  encoder B (INT1)    D6  tail lights (PWM Timer0)
-                       D9  servo (Timer1)      D4  left  indicator (digital)
-                       D11 motor PWM (Timer2)  D7  right indicator (digital)
+                       D2  encoder A (INT0)    D5  FREE (was headlights)
+                       D3  encoder B (INT1)    D6  FREE (was tail lights)
+                       D9  servo (Timer1)      D4  LED strip LEFT  DIN
+                       D11 motor PWM (Timer2)  D7  LED strip RIGHT DIN
                        D8/D12 motor DIR        D13 status LED
                        D10 TB6612 STBY         A0  pack sense divider
                     Motor PWM MUST be Timer2: Timer0 also drives millis(), so
@@ -313,7 +319,7 @@ the PWM/direction logic", so PWM and direction wires crossed all along. The
 then made the strong version true for the first time.)*
 
 **Why the Uno sits on the motor rail, not on USB power:** its **5V pin** is fed
-from the LM2596, so LED current (~120mA peak, see row 19) never touches the
+from the LM2596, so LED current (**~80mA at working brightness for the WS2812B strips, Appendix CZ**; was ~120mA peak for the superseded 8 discrete LEDs) never touches the
 Pi's 5V/3A bank with its 600mA peripheral cap. **Do NOT power it from VIN off
 the 7.4V pack** — the pack sags under motor stall, and below ~7V the on-board
 AMS1117 drops out and browns the Uno out mid-drive, taking the servo and the
@@ -340,7 +346,10 @@ with the SD card mounted. The split is structural, not stylistic.
    6573 (24/16). This sets the reduction and therefore the mesh centres in
    CAD. Count the teeth.
 3. **Which tires** — the part name states the real diameter (44309 = 43.2mm,
-   32019 = 62.4mm). Config B (62.4mm + 12t→28t) is the lower-risk drivetrain.
+   32019 = 62.4mm). ~~Config B (62.4mm + 12t→28t) is the lower-risk drivetrain.~~
+   **SUPERSEDED 2026-09-03 (Appendix CS): Evan's actual differential is
+   20t→28t (N=1.400) and his measured tire is 55.75 mm** — config A's ratio,
+   a tire neither config modelled. Real top speed 1.83 m/s loaded.
 4. ~~**Prices at checkout** — Pi pricing moved twice in three months this year.~~
    **DONE 2026-08-08 ~23:03 CDT** — see the re-pricing table above. Total is
    ~~**≈$237–250**~~ **≈$241–259 with shipping as of 2026-09-02**, not ≈$195. Checks 1–3 remain open and are all physical
@@ -353,9 +362,14 @@ with the SD card mounted. The split is structural, not stylistic.
    Prices: 7 of 20 rows re-verified 2026-09-02; rows 9, 10, 12 and 15 are
    linked but their prices are NOT re-checked.)*
 5. **Which LEDs** — forward voltage and current set every series-resistor value
-   in row 19, and decide whether the Uno can drive them directly (20mA/pin,
+   ~~in row 19, and decide whether the Uno can drive them directly (20mA/pin,
    **200mA absolute max across ALL pins** — 8 LEDs at 20mA is 160mA, 80% of
-   that hard limit) or whether they need MOSFETs off the LM2596 rail instead.
+   that hard limit) or whether they need MOSFETs off the LM2596 rail instead.~~
+   **MOOT 2026-09-03 (Appendix CX): there are no discrete LEDs to choose.**
+   WS2812B pixels carry their own constant-current driver and draw off the
+   LM2596 rail, not through an ATmega pin — no `Vf`, no per-pin budget, no
+   MOSFET question. What replaces this item: **how many pixels per segment**,
+   which sets the interrupt-blind window (Appendix CZ), not the current.
    The **~160mA total is an ESTIMATE** at
    20mA × 8 LEDs (`docs/LIGHTING_SPEC.md` §3); nothing has been measured. Pick
    the LEDs before ordering resistors, not after.
@@ -439,7 +453,10 @@ $100+, under 10 lb, contiguous 48, logged in). That is a genuine consolidation
 win. But two substitutions fail on physics, not preference:
 
 - ⚠️ **ROB-28633 N20 encoder motor: 500 RPM no-load at 6 V — HALF the Pololu
-  #5159's 1000 RPM.** Config B gives 1.28 m/s at 1000 RPM, so this lands at
+  #5159's 1000 RPM.** ~~Config B gives 1.28 m/s at 1000 RPM~~ **— superseded
+  2026-09-03 (Appendix CS): the real drivetrain is N=1.400 with a 55.75 mm
+  tire, giving 1.83 m/s loaded.** The figure below was computed when this
+  line still assumed config B, so this lands at
   **~0.64 m/s — below the 1.0 m/s floor that rejected every Lego motor**
   (best case PF M was 0.88 m/s). **Same rejection, same reason.** It is also
   31.5:1 not 30:1, and 882 CPR at the output not 358 — the encoder is better,

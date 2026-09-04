@@ -192,7 +192,7 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   180° is a **1:1 match to the measured 180° pinion sweep**; ⚠️ the MG996R
   fallback is now a **liability**, SF 0.12-0.19 at the steering coupler ·
   **Arduino Uno R3 clone (OWNED, $0) owns all real-time actuation**: motor
-  PWM on Timer2, servo, 4 light channels, quadrature encoder on D2/D3, pack
+  PWM on Timer2, servo, ~~4 light channels~~ **2 WS2812B strip data pins (D4/D7, no PWM — 2026-09-03, Appendix CX)**, quadrature encoder on D2/D3, pack
   guard on A0, TB6612 `STBY` on D10 — **zero PWM spare, A1-A5 the only free
   pins**; Pi↔Uno over USB with the 5 V conductor cut, binary serial protocol
   v0.2 (7-byte command, 9-byte reply, CRC8, ARMED per frame, 150 ms
@@ -261,7 +261,7 @@ transfer gap) must not block the capstone.
    go, dimensions recorded in `gotchas.md`/`architecture.md`, BOM updated.
    **RESEARCH RESOLVED 2026-07-23 ~17:47 CDT** —
    `docs/research/2026-07-23_drive-motor-selection.md`. Recommendation:
-   **Pololu #1093, N20 30:1 HP 6V, $23.95.** Every Lego motor path is
+   **Pololu ~~#1093~~ #5159, N20 30:1 HP 6V, ~~$23.95~~ $29.95** (encoder variant, corrected Appendix BO). Every Lego motor path is
    REJECTED ON PHYSICS (all PF motors top out at ≤0.88 m/s, below the
    1.0 m/s floor, through any diff configuration); Powered Up + Build HAT
    rejected on five grounds incl. its 8V ±10% supply requirement that a 2S
@@ -414,7 +414,7 @@ transfer gap) must not block the capstone.
    - *(Amended 2026-09-01, again 2026-09-02: the "four items" are now **six** — check 5, which
      LEDs, sets every series-resistor value. And the **PWM-path question is
      RESOLVED** — ~~PCA9685~~ **an ARDUINO UNO (2026-09-02, Appendix BC)**,
-     carrying motor PWM + servo + 4 light channels and adding encoder counting
+     carrying motor PWM + servo + ~~4 light channels~~ **2 strip data pins** and adding encoder counting
      plus a throttle watchdog the PCA9685 could not. That was BLOCKED-ON-EVAN
      and no longer is. Pin map: `firmware/SERIAL_PROTOCOL.md`.)*
 8b. ~~**Uno actuation firmware**~~ **DONE 2026-09-02 (Appendices BO/BU).**
@@ -478,6 +478,24 @@ transfer gap) must not block the capstone.
     the Pi as well before it is claimed as a win** — a desktop speedup does not
     transfer, and this project has an entire appendix series (AD-AJ) on numbers
     that did not survive a change of harness.
+
+8e. **Rewrite the lighting firmware for WS2812B** (ADDED 2026-09-03 by the
+    landing-check sweep, Appendix DB). `firmware/uno_control/uno_control.ino`
+    still implements the superseded discrete-LED scheme: `applyLights()`
+    `analogWrite`s D5/D6 and `digitalWrite`s D4/D7. Since Appendix CX the car
+    uses two WS2812B strip segments and `SERIAL_PROTOCOL.md`'s pin map reads
+    **D4 = left strip DIN, D7 = right strip DIN, D5/D6 FREE** — so the file
+    contradicts the document it says it implements. **Flashing the current
+    build with strips wired drives static levels into two data inputs**; the
+    file now carries a do-not-flash banner. Motor, servo, encoder, watchdog and
+    pack paths are unaffected. **Blocked, deliberately**: needs a NeoPixel-class
+    library, a pixel-per-zone layout that is not decided, and an answer to the
+    Appendix CZ interrupt question (pixel writes disable interrupts and can drop
+    encoder ticks on D2/D3 — estimated ~0.027 % worst case, never measured).
+    **Done-check:** both segments address independently from D4/D7; the LAST
+    pixel of each lights (not just the first — a cold DIN joint looks like a
+    working strip); `SELFTEST` still passes; and `ticks` counts cleanly with the
+    indicators blinking, which is the first real test of the CZ estimate.
 
 9. **Bench bring-up.** Pi OS (64-bit Bookworm), SSH, camera test; TB6612 +
    ~~PF motor~~ **N20** on bench PSU; servo sweep test. Done: each
@@ -1126,7 +1144,7 @@ Each item carries its own done-check.
       untracked `~/.claude/skills/` paths — on any other machine both are
       silently absent. Done: missing scanner ⇒ `exit 1`, verified by renaming
       the scanner and watching a commit refuse.
-- [x] **A6 — DONE 2026-09-03 (Appendix CH): struck in place with the per-pin arithmetic; 10 mA. — `docs/LIGHTING_SPEC.md:75,88-90` still specifies 20 mA/LED** —
+- [x] **A6 — DONE 2026-09-03 (Appendix CH): struck in place with the per-pin arithmetic; 10 mA.** *(The trailing clause here used to read "`LIGHTING_SPEC.md:75,88-90` still specifies 20 mA/LED", which made the line refute its own DONE mark; LIGHTING_SPEC:76 shows it corrected. Cleaned 2026-09-03, Appendix DB. The whole item is now moot anyway — Appendix CX removed discrete LEDs entirely.)* —
       40 mA per pin with two LEDs per channel, the ATmega328P's absolute
       per-pin maximum. The 10 mA correction lives in `WIRING_PROTOSHIELD.md`
       §2.5 and `hardware.md` and never reached the spec. Done: spec amended by

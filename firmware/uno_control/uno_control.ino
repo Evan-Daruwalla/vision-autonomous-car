@@ -1,5 +1,25 @@
 /* uno_control — the actuation firmware. Implements firmware/SERIAL_PROTOCOL.md.
  *
+ * ⚠⚠ STALE LIGHTING PATH — DO NOT FLASH WITH THE LED STRIPS WIRED ⚠⚠
+ * (added 2026-09-03 by the landing-check sweep, Appendix DB)
+ *
+ * applyLights() below drives FOUR discrete-LED channels on D4/D5/D6/D7. That
+ * scheme was superseded on 2026-09-03 (Appendix CX): the car now uses two
+ * WS2812B addressable strip segments, and SERIAL_PROTOCOL.md's pin map — the
+ * document THIS FILE claims to implement — now reads D4 = left strip DIN,
+ * D7 = right strip DIN, D5/D6 FREE.
+ *
+ * Flashing this build with strips wired to D4/D7 drives static digital levels
+ * into two WS2812B data inputs. The motor, servo, encoder, watchdog and pack
+ * paths are UNAFFECTED and still correct; only the light path is stale.
+ *
+ * Fixing it is a real rewrite, not a pin swap: WS2812B needs a NeoPixel-class
+ * library, a pixel-per-zone layout that is not yet decided, and an answer to
+ * the interrupt question in Appendix CZ (pixel writes disable interrupts and
+ * can drop encoder ticks on D2/D3). Deliberately NOT attempted here — the
+ * strip is not ordered and the layout is undecided, so it would be guesswork
+ * against hardware nobody has held. Tracked as PRD task 8e.
+ *
  * Written 2026-09-02 (Appendix BO). This is the first firmware that drives
  * anything; uno_bringup/uno_memtest/uno_echo were measurements and
  * uno_packguard was one safety subsystem.
@@ -57,11 +77,13 @@
 // ---- pin map: firmware/SERIAL_PROTOCOL.md section 1 ------------------------
 const uint8_t PIN_ENC_A  = 2;    // INT0
 const uint8_t PIN_ENC_B  = 3;    // INT1 — nothing else may use D3
-const uint8_t PIN_IND_L  = 4;
-const uint8_t PIN_HEAD   = 5;    // Timer0 PWM
-const uint8_t PIN_TAIL   = 6;    // Timer0 PWM
-const uint8_t PIN_IND_R  = 7;
-const uint8_t PIN_DIR_A  = 8;    // TB6612 AIN1+BIN1 (bridged: zero spare PWM)
+const uint8_t PIN_IND_L  = 4;    // STALE: D4 is the LEFT strip DIN as of 2026-09-03
+const uint8_t PIN_HEAD   = 5;    // STALE: D5 is FREE as of 2026-09-03
+const uint8_t PIN_TAIL   = 6;    // STALE: D6 is FREE as of 2026-09-03
+const uint8_t PIN_IND_R  = 7;    // STALE: D7 is the RIGHT strip DIN as of 2026-09-03
+const uint8_t PIN_DIR_A  = 8;    // TB6612 AIN1+BIN1 (bridged; the "zero spare
+                                 // PWM" reason died 2026-09-03 — one motor, two
+                                 // channels, paralleled for the 2 A rating)
 const uint8_t PIN_SERVO  = 9;    // Servo claims Timer1
 const uint8_t PIN_STBY   = 10;   // TB6612 STBY — master enable
 const uint8_t PIN_MOTOR  = 11;   // Timer2 PWM

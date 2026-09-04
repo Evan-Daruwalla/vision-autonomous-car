@@ -140,6 +140,7 @@ the dated entry, not the digest.
 - [CY — Correction: WS2812B data is one-way, cut strip segments need 2 pins not 1](#appendix-cy---correction-ws2812b-data-is-one-way-cut-strip-segments-need-2-pins-not-1-2026-09-03) (09-03)
 - [CZ — The 2 open WS2812B figures quantified - tick loss ~0.027%, current draw ~80mA realistic](#appendix-cz---the-2-open-ws2812b-figures-quantified---tick-loss-0027-current-draw-80ma-realistic-2026-09-03) (09-03)
 - [DA — Wiring diagram vetted and rewritten for the WS2812B strips - wrong motor named, no strip pins assigned, 8 stale items](#appendix-da---wiring-diagram-vetted-and-rewritten-for-the-ws2812b-strips---wrong-motor-named-no-strip-pins-assigned-8-stale-items-2026-09-03) (09-03)
+- [DB — landing-check sweep: the lighting change never reached the firmware; total was 9.82 off; three false universals](#appendix-db---landing-check-sweep-the-lighting-change-never-reached-the-firmware-total-was-982-off-three-false-universals-2026-09-03) (09-03)
 
 ---
 
@@ -11238,3 +11239,126 @@ inline in the wiring doc's companion-docs line as the stale one, so the
 two cannot be silently trusted as agreeing. Step 8 of the build order now
 carries the first real test of Appendix CZ's interrupt estimate: drive
 with the indicators blinking and watch whether `ticks` counts cleanly.
+
+# Appendix DB - landing-check sweep: the lighting change never reached the firmware; total was 9.82 off; three false universals (2026-09-03)
+A `/landing-check` sweep over this evening's ten commits (`7ed4666^..HEAD`),
+run by a fresh agent given the artifacts and **not** my account of them.
+Verdict: **FIX FIRST**. All the physics re-derived exactly; the failures were
+a mislanding, an arithmetic label, and three false universals. Everything
+below was re-verified by hand before it was touched.
+
+## DB.1 The mislanding — the lighting change never reached the file that runs
+
+`firmware/uno_control/uno_control.ino` is unchanged since 2026-09-02 and
+still implements the discrete-LED scheme:
+
+    60: const uint8_t PIN_IND_L  = 4;
+    61: const uint8_t PIN_HEAD   = 5;    // Timer0 PWM
+    62: const uint8_t PIN_TAIL   = 6;    // Timer0 PWM
+    63: const uint8_t PIN_IND_R  = 7;
+    272: analogWrite(PIN_HEAD, ...);  277: digitalWrite(PIN_IND_L, l);
+
+`SERIAL_PROTOCOL.md` — **the document this file's first line says it
+implements** — now reads D4 = left strip `DIN`, D7 = right strip `DIN`,
+D5/D6 FREE. Flashing this build with the strips wired drives static digital
+levels into two WS2812B data inputs. Motor, servo, encoder, watchdog and pack
+paths are unaffected; only the light path is stale.
+
+**Not fixed by rewriting it, deliberately.** That needs a NeoPixel-class
+library, a pixel-per-zone layout that is not decided, and an answer to CZ's
+interrupt question — against hardware nobody has held. Guessing it would be
+worse than leaving it visibly broken. Instead: a do-not-flash banner in the
+file header, `STALE` comments on all four pin constants, and **PRD task 8e**
+with a done-check.
+
+## DB.2 The claim that caused it was a misreading, and it was mine
+
+Appendix CX and `hardware.md` both said *"nothing implements lighting yet
+(`uno_control.ino`'s own header: 'no motor, servo, encoder, LED or pack
+exists'), so this is a clean slate, not a rewrite."*
+
+**That header is about unordered hardware, not about code.** The full
+sentence reads "no motor, servo, encoder, LED or pack exists — nothing in
+docs/BOM.md is ordered." I read a parts statement as a code statement, and
+then used it to conclude the firmware needed no work. It is a rewrite, and
+the sweep found the code by looking rather than by reading my summary of it.
+
+## DB.3 The total was $9.82 off, and the label was the tell
+
+`BOM.md` said **SUM OF ROWS: $401.70**. The price column summed to
+**$391.88**. Both numbers were right about different things — $401.70 is the
+vendor-subtotal order total — but the row table itself carried two defects
+the label exposed:
+
+- **Row 13 (XT30) was never folded onto Amazon.** It still priced the single
+  alofthobbies pair at $1.10 while the order sheet bought the 20-pack at
+  $11.99: **+$10.89**. Rows 14 and 15 were superseded on 2026-09-03; 13 was
+  in the same "stale but linked" group and was missed.
+- **Row 16's subtotal never followed the 22 AWG revert.** `revert_22awg.py`
+  changed the link inside the Source cell from SCHDRA $10.76 to Fermerry
+  $9.69 and left the row's own price at $49.09: **−$1.07**.
+
+Both rows fixed. 221.71 + 179.99 (row 1, in a shifted cell) = **$401.70** —
+the label is now literally true rather than accidentally true.
+
+## DB.4 Three false universals, all written this evening
+
+| claim | why false |
+|---|---|
+| "every row in the BOM has a live-verified price" | rows 10 and 12 say "price NOT re-verified"; row 19 says "not individually re-verified live" |
+| "Still a single precise figure, not a range" | row 22 is **$0.00–0.75** — the coupling is unchosen, so the total's low end silently assumes the printed option Appendix BV rejected |
+| "`LIGHTING_SPEC.md` … the one doc not yet updated" | `uno_control.ino`, `PRD_ROADMAP.md` and `architecture.md` all still carried the old scheme too |
+
+Also corrected: **"1.24 A, 76% of the 1.6 A stall rating"**, repeated in three
+files. 76 % is of stall **torque** (42.53/55.9 mN·m); 1.24/1.6 A is **77.5 %**,
+and the paired "was 59%" is 61.3 %. The number was right, the noun was wrong.
+
+## DB.5 Correction propagation — what the diff obligated and left
+
+Fixed this pass: `architecture.md` (never opened all session — config B,
+#1093, the PWM budget, the 160 mA figure) · `HANDOFF.md:228` carrying
+**≈$238-248** while line 370 of the same "only live snapshot" said $401.70 ·
+`README.md` (**public**) at ≈$226–234 · `PRD_ROADMAP.md` ×4 · `BOM.md`'s pin
+diagram, its two Config-B assertions, its LED-current prose, Verify item 5,
+and its blocker count — which read "Three" at the top of the file and "Two"
+in the order sheet, both wrong, now **one**.
+
+`PRD_ROADMAP.md:1129` marked audit task A6 DONE and then, in the same
+sentence, asserted the thing A6 fixed was still broken. Cleaned.
+
+## DB.6 What re-derived exactly — the load-bearing negatives
+
+- **Record is strictly append-only**: 773 insertions, **0 deletions**.
+- **No private identifier introduced** on any added line (`C:\Users`,
+  `D:\ClaudeCode`, `EVANFREDY`, `daruwallafam`, `AppData`), confirmed two
+  ways. The repo **is public** and unauthenticated `ls-remote` resolves;
+  nothing from this range is pushed (0 behind, 10 ahead).
+- **All seven Appendix CS drivetrain figures** re-derive from the July doc's
+  own constants. **Both CZ figures** re-derive; `BLINK_MS = 340` is real at
+  `uno_control.ino:134`. DA's 144/m arithmetic re-derives.
+- Appendix count 105, A→DA, no duplicates, TOC complete.
+- Hook census clean: `core.hooksPath=scripts/git-hooks`, live hook resolves,
+  **no dead `.git/hooks/pre-commit`**.
+- Every HANDOFF "Last updated" stamp matches its commit time to the minute.
+
+## DB.7 Not fixed, named
+
+- **Appendix CQ's heading says "five stale row placeholders"; there were six**
+  (rows 7, 16, 18, 19, 20, 21 — CQ's own body lists six). It is sealed in an
+  append-only heading and its TOC line. This entry is the correction.
+- **`docs/LIGHTING_SPEC.md`** still describes the 8-LED scheme — now genuinely
+  the last doc, flagged from three others rather than silently left.
+- `graphify-out/` (gitignored) is a stale generated twin built from pre-range
+  docs.
+- **No vendor price or stock string was re-checked** by the sweep; every
+  "verified 2026-09-03, In Stock" in the BOM rests on this session's browsing
+  alone.
+- Handed off: `/code-review` for whether the stale `analogWrite`/`digitalWrite`
+  path is inert or corrupting; `/audit` for the inherited 114.75 mm spread
+  across the PRD and four bins.
+
+## DB.8 State
+
+**Nothing ordered.** BOM total **$401.70** before shipping, ≈$415-430 all-in
+— and the row table now sums to it. Ten commits ahead of a public origin,
+none pushed.

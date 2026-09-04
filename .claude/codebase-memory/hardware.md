@@ -117,7 +117,9 @@ traps in `sim-harness.md`.
   checked 2026-09-03): **top speed 1.83 m/s loaded, 2.09 m/s no-load
   (≈4.1–4.7 mph) — OVER the 1.0–1.5 m/s target band**, not under it.
   Cruise torque 12.5% of stall (was 9.7% for Config A). Accel current
-  1.24 A, 76% of the 1.6 A stall rating (was 59%) — real headroom loss,
+  1.24 A at **76% of stall TORQUE** (not of stall current — 1.24/1.6 A is
+  77.5%; the "76%" is 42.53/55.9 mN·m. Gloss corrected 2026-09-03, Appendix
+  DB) — real headroom loss,
   still under the TB6612's 2 A paralleled rating. Accel-from-rest drops to
   1.38 m/s² (was 1.83). Traction margin unaffected: 4.7x, a vehicle-level
   check independent of drivetrain ratio. See Appendix CS.
@@ -208,14 +210,19 @@ traps in `sim-harness.md`.
     strategy that aren't finalized, and isn't verified on real hardware
     (nothing is built yet). Recompute once those are actually decided.
   This resolves the two figures as bounded estimates, not as a closed
-  question — the firmware still has to be written to match. Nothing
-  implements lighting yet (`uno_control.ino`'s own
-  header: "no motor, servo, encoder, LED or pack exists" as of the last
-  firmware pass), so this is a clean slate, not a rewrite. `docs/BOM.md`
-  row 18, Appendix CX. **`docs/LIGHTING_SPEC.md` and
-  `docs/WIRING_PROTOSHIELD.md` (its Step 7 LED check, its "8 LED resistors"
-  cargo note) both still describe the superseded discrete-LED scheme and
-  need updating to match — flagged, not done.**
+  question — the firmware still has to be written to match. ⚠️ **CORRECTED
+  2026-09-03 by the landing-check sweep (Appendix DB): the claim that used to
+  sit here — "nothing implements lighting yet, so this is a clean slate, not a
+  rewrite" — was FALSE, and it was a misreading.** `uno_control.ino`'s header
+  says "no motor, servo, encoder, LED or pack **exists**", which is about
+  unordered *hardware*, not about code. The code is there and complete:
+  `applyLights()` drives four channels on D4/D5/D6/D7 with `analogWrite` and
+  `digitalWrite`. **It is a rewrite, and the file now contradicts the pin map
+  it says it implements** — annotated in place with a do-not-flash warning,
+  tracked as PRD task 8e. `docs/BOM.md` row 18, Appendix CX.
+  **`docs/WIRING_PROTOSHIELD.md` was brought current 2026-09-03 (Appendix DA);
+  `docs/LIGHTING_SPEC.md` still describes the superseded discrete-LED scheme
+  and is the last doc not updated.**
 - **Do not power the Uno from the 7.4V pack's VIN.** The pack sags under motor
   stall; if VIN falls below ~7V the AMS1117 regulator drops out and the Uno
   browns out MID-DRIVE, taking the servo and the watchdog with it. Feed its 5V
