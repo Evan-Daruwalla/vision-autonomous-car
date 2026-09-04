@@ -150,23 +150,23 @@ servo-to-pinion coupler.
   answered by measurement**: the car was never weighed, the question no
   longer applies because Geekservo is out.
 - **Wheelbase: a GEOMETRIC ESTIMATE, not a direct axle-to-axle measurement.**
-  Evan measured **9.25 in (235.0 mm) from the back of the rear wheel to the
+  Evan measured **9.25 in (234.95 mm) from the back of the rear wheel to the
   front of the front wheel** — overall wheel-to-wheel length, not wheelbase.
-  Wheelbase = overall length − wheel diameter (axle centres sit one radius in
-  from each end, assuming front and rear wheels are the same diameter).
-  **Using the 55.75 mm tire diameter Appendix CS measured for the drive
-  (rear) wheels, unconfirmed for the front/steering wheels**:
+  Wheelbase = overall length − (front radius + rear radius). ~~Same-diameter
+  assumption, corrected 2026-09-03 (Appendix DE): front and rear tires do
+  NOT match~~ — **front tire 42.25 mm diameter, rear (drive) tire 55.75 mm
+  (Appendix CS)**:
 
-      wheelbase (est.) = 235.0 - 55.75 = 179.25 mm (7.06 in)
-      R_min = 1.600 x 179.25 = 286.8 mm
+      front radius 21.125 + rear radius 27.875 = 49.0 mm
+      wheelbase (est.) = 234.95 - 49.0 = 185.95 mm (7.32 in)
+      R_min = 1.600 x 185.95 = 297.5 mm
 
-  This is SMALLER than the ~330 mm estimate the frozen 500-670 mm corner band
-  was checked against — favourable (the car can turn tighter than assumed),
-  not a new risk, and it does not unfreeze corner geometry (`gotchas.md`/
-  Appendix L): **T2's empirical test on the rolling chassis is still the
-  gate**, this is a better arithmetic bound than before it, nothing more.
-  **Open: does the front/steering tire actually match the 55.75 mm rear
-  tire diameter?** If not, this number needs the real front diameter.
+  (Superseded the same-diameter estimate of 179.25 mm / R_min 286.8 mm from
+  earlier the same day — that assumption is now known wrong, not just
+  unconfirmed.) Still SMALLER than the ~330 mm estimate the frozen 500-670 mm
+  corner band was checked against — favourable, not a new risk — and still
+  does not unfreeze corner geometry (`gotchas.md`/Appendix L): **T2's
+  empirical test on the rolling chassis is still the gate.**
 - **Servo-to-pinion coupling: Evan reports a rack-and-pinion mechanism
   already built and "strong" — the specific part/method is not yet named in
   this file.** PRD task 8c(ii)'s done-check needs "a coupling selected with

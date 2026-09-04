@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-03 ~22:36 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-03 ~22:40 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 108 appendices A–DD; BM/BN/BP/BU/CT/CY/DB are corrections to earlier entries). When this file and the record disagree about
+(append-only, 109 appendices A–DE; BM/BN/BP/BU/CT/CY/DB/DE are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -79,7 +79,7 @@ track generator — but it is a negative, and the write-up must say so.
 | 3 | **Print the tolerance coupon (M1.3).** Needs no parts — only the printer and Lego. Gates every chassis dimension. | **Evan** |
 | 3a | ~~**WEIGH THE CAR / MEASURE FRONT-AXLE LOAD** to arithmetic-check the Geekservo 270's 14.7 N rack force.~~ **MOOT 2026-09-03: Evan keeps the MG90S** ("the more powerful servo" — 36.0 N vs Geekservo's 14.7-16.4 N). Closed by decision, not by weighing the car — see `steering.md`. | — |
 | 3c | **SERVO-TO-PINION COUPLING — Evan reports it built and "strong," specific part not yet named.** PRD task 8c(ii)'s done-check needs a stated stall-torque margin, which needs to know what physically bridges the MG90S spline to the Lego pinion. Asked directly this session. | **Evan (confirm which part)** |
-| 3b | **WHEELBASE — a geometric estimate now exists, not a direct measurement.** Evan measured 9.25 in (235.0 mm) wheel-to-wheel overall length; wheelbase ≈ overall length − wheel diameter ≈ **179.25 mm (7.06 in)**, using the 55.75 mm rear tire diameter (Appendix CS) — **unconfirmed for the front/steering wheel**. `R_min = 1.600 × wheelbase ≈ 286.8 mm`, smaller than the ~330 mm estimate the frozen 500-670 mm corner band was checked against (favourable). **Corner geometry stays frozen until T2's empirical test** — this is a better bound, not a substitute. `steering.md`, Appendix DD. | — |
+| 3b | **WHEELBASE — a geometric estimate now exists, not a direct measurement.** Evan measured 9.25 in (234.95 mm) wheel-to-wheel overall length; front and rear tires differ (**42.25 mm front, 55.75 mm rear** — confirmed 2026-09-03, Appendix DE). wheelbase ≈ overall length − (front radius + rear radius) ≈ **185.95 mm (7.32 in)**. `R_min = 1.600 × wheelbase ≈ 297.5 mm`, smaller than the ~330 mm estimate the frozen 500-670 mm corner band was checked against (favourable). **Corner geometry stays frozen until T2's empirical test** — this is a better bound, not a substitute. `steering.md`, Appendix DE. | — |
 | 3d | ~~**Audit tasks A3, A5, A6, A7**~~ **ALL DONE 2026-09-03 (Appendix CH, `PRD_ROADMAP.md:1107-1152`) — this row was stale, corrected in this session.** A1/A2/A4 also done (Appendices CC/CD/CF). | — |
 | 3e | **Task 8e: `uno_control.ino` rewritten for WS2812B, compiled clean (Appendix DC).** Not hardware-verified — no strip owned, nothing flashed. Next step needs a physical board + strip, not more decisions. | **Evan (parts)** |
 | 4 | ~~**Pi 2GB ($65) vs 4GB ($110).**~~ **CLOSED 2026-09-03: Vilros Basic Starter Kit, 4GB, $179.99, confirmed in stock at checkout (BOM row 1) — HANDOFF row was stale, corrected here.** | — |
@@ -336,10 +336,11 @@ original floor and the pre-2026-08-12 scale decision.)*
 - ~~**Car width: measure, don't choose.**~~ **ANSWERED 2026-09-02: 114.75 mm
   MEASURED** (rear tire track). Lane width follows at 229.5 mm; track v2 spare
   went 140 → 171 mm. ~~**Still open: WHEELBASE**~~ **A geometric estimate exists
-  2026-09-03: ≈179.25 mm, from Evan's 9.25 in overall wheel-to-wheel length
-  minus the 55.75 mm rear tire diameter — not a direct axle-to-axle
-  measurement, see action-table row 3b above.** Still open: confirming no part
-  of the assembled car exceeds the tire track. Original note kept below.
+  2026-09-03: ≈185.95 mm, from Evan's 9.25 in overall wheel-to-wheel length
+  minus the front (42.25 mm) and rear (55.75 mm) tire radii — not a direct
+  axle-to-axle measurement, see action-table row 3b above.** Still open:
+  confirming no part of the assembled car exceeds the tire track. Original
+  note kept below.
 - **Car width: measure, don't choose.** Evan asked about ~100 mm.
   Space does not require it — 3×3 m fits either. It would buy ~18% more
   clearance per side (100 mm vs 85 mm at a 300 mm lane), which targets

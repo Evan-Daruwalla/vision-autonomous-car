@@ -341,11 +341,12 @@ transfer gap) must not block the capstone.
    (the wheel's DEVIATION from straight ahead — Evan measured with 90° =
    straight, angle = 90 − protractor reading; taking the raw 58° instead is a
    2.6× error in turn radius). **Wheelbase: a GEOMETRIC ESTIMATE as of
-   2026-09-03 (Appendix DD), not a direct axle-to-axle caliper measurement.**
-   Evan measured 9.25 in (235.0 mm) overall wheel-to-wheel length;
-   wheelbase ≈ 235.0 − 55.75 (rear tire diameter, Appendix CS) ≈ **179.25 mm**,
-   **unconfirmed whether the front/steering tire matches that diameter**.
-   `R_min = 1.600 × 179.25 ≈ 286.8 mm` — smaller than the ~330 mm estimate the
+   2026-09-03 (Appendices DD/DE), not a direct axle-to-axle caliper
+   measurement.** Evan measured 9.25 in (234.95 mm) overall wheel-to-wheel
+   length; **front tire 42.25 mm diameter, rear (drive) tire 55.75 mm**
+   (Appendix CS) — confirmed different, not assumed equal.
+   wheelbase ≈ 234.95 − (21.125 + 27.875) ≈ **185.95 mm**.
+   `R_min = 1.600 × 185.95 ≈ 297.5 mm` — smaller than the ~330 mm estimate the
    frozen corner band was checked against (favourable), still not T2's
    empirical test. **Still NOT measured:** kingpin spacing, steering-arm
    lengths, hub interfaces, and whether any part of the assembled car exceeds

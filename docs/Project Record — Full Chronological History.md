@@ -143,6 +143,7 @@ the dated entry, not the digest.
 - [DB — landing-check sweep: the lighting change never reached the firmware; total was 9.82 off; three false universals](#appendix-db---landing-check-sweep-the-lighting-change-never-reached-the-firmware-total-was-982-off-three-false-universals-2026-09-03) (09-03)
 - [DC — Task 8e: uno_control.ino rewritten for WS2812B, compiled clean, not hardware-verified; LIGHTING_SPEC.md brought current](#appendix-dc---task-8e-uno_controlino-rewritten-for-ws2812b-compiled-clean-not-hardware-verified-lighting_specmd-brought-current-2026-09-03-2223-cdt) (09-03)
 - [DD — Geekservo 270 closed (MG90S kept); wheelbase geometric estimate 179.25mm; coupling built but margin unstated; Vilros kit already closed](#appendix-dd---geekservo-270-closed-mg90s-kept-wheelbase-geometric-estimate-17925mm-coupling-built-but-margin-unstated-vilros-kit-already-closed-2026-09-03-2236-cdt) (09-03)
+- [DE — Correction to DD: front/rear tires differ (42.25mm/55.75mm), wheelbase estimate revised to 185.95mm](#appendix-de---correction-to-dd-frontrear-tires-differ-4225mm5575mm-wheelbase-estimate-revised-to-18595mm-2026-09-03-2240-cdt) (09-03)
 
 ---
 
@@ -11568,3 +11569,41 @@ place: `steering.md`, `HANDOFF.md` (rows 3a/3b/3c/4/5 and the BLOCKED-ON-EVAN
 wheelbase note), `PRD_ROADMAP.md` (task 4's donor-geometry measurements,
 task 8c(ii)). One question still open and put to Evan directly: what
 physically bridges the MG90S spline to the Lego pinion.
+
+# Appendix DE - Correction to DD: front/rear tires differ (42.25mm/55.75mm), wheelbase estimate revised to 185.95mm (2026-09-03 22:40 CDT)
+Correction to Appendix DD's wheelbase estimate. Evan: "front tires are
+42.25mm diameter." DD's derivation had explicitly flagged the front tire
+diameter as unconfirmed and used the 55.75mm rear/drive diameter for both
+ends as a stated assumption. That assumption was wrong, not just
+unconfirmed — front and rear tires are different sizes.
+
+## DE.1 Corrected arithmetic
+
+Overall wheel-to-wheel length is unchanged (9.25 in = 234.95 mm, measured
+back of rear wheel to front of front wheel). The wheelbase derivation
+needs the front and rear radii separately, not one diameter doubled:
+
+    front radius = 42.25 / 2 = 21.125 mm
+    rear radius  = 55.75 / 2 = 27.875 mm
+    wheelbase (est.) = 234.95 - (21.125 + 27.875) = 185.95 mm (7.32 in)
+    R_min = 1.600 x 185.95 = 297.5 mm
+
+DD's same-diameter figure (179.25 mm wheelbase, R_min 286.8 mm) is
+superseded — the gap is 6.7 mm on wheelbase, about 10.7 mm on R_min, small
+relative to the frozen 500-670 mm corner band but wrong is wrong. Still
+smaller than the ~330 mm pre-existing estimate the corner band was checked
+against (favourable), still a geometric estimate rather than T2's empirical
+test, which remains the gate on corner geometry per `gotchas.md`/Appendix L.
+
+## DE.2 Corrected in place
+
+`steering.md`, `HANDOFF.md` (action-table row 3b and the BLOCKED-ON-EVAN
+wheelbase note), `PRD_ROADMAP.md` task 4. DD is left as written — append-only
+— with its now-superseded number struck in `steering.md` where the new
+figure replaces it, per the project's correction convention.
+
+## DE.3 State
+
+**Nothing measured with calipers, nothing weighed, nothing bench-tested.**
+The servo-to-pinion coupling question from Appendix DD is still open —
+unaddressed by this correction.
