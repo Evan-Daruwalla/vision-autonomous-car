@@ -133,6 +133,7 @@ the dated entry, not the digest.
 - [CR — USB cable already owned — row 20 drops $5.12, BOM total $447.08](#appendix-cr---usb-cable-already-owned--row-20-drops-512-bom-total-44708-2026-09-03) (09-03)
 - [CS — Real differential is 20t\u219228t (N=1.400), not the documented config B \u2014 top speed is 4.1-4.7mph, over the target band](#appendix-cs---real-differential-is-20tu219228t-n1400-not-the-documented-config-b-u2014-top-speed-is-41-47mph-over-the-target-band-2026-09-03) (09-03)
 - [CT — Correction: CS's heading has literal escape text where an arrow and dash belong](#appendix-ct---correction-css-heading-has-literal-escape-text-where-an-arrow-and-dash-belong-2026-09-03) (09-03)
+- [CU — Wire kits right-sized after Evan asked why so much - 450ft cut to 180ft, total 427.78](#appendix-cu---wire-kits-right-sized-after-evan-asked-why-so-much---450ft-cut-to-180ft-total-42778-2026-09-03) (09-03)
 
 ---
 
@@ -10718,3 +10719,68 @@ This entry is the correction, not a splice.
 No technical content changed. CS's math, its 20t-to-28t / N=1.400 finding,
 and the doc corrections (`hardware.md`, `PRD_ROADMAP.md`, `HANDOFF.md`)
 all stand as written.
+
+# Appendix CU - Wire kits right-sized after Evan asked why so much - 450ft cut to 180ft, total 427.78 (2026-09-03)
+Evan: "why do i need so much wire" — pointed question about the two Fermerry
+wire kits added to the BOM earlier today (Appendix CQ): 150 ft of 22 AWG
+(6 colors × 25 ft) and 300 ft of 26 AWG (6 colors × 50 ft), 450 ft total.
+**He was right to ask. That was the largest size pre-selected on each
+listing, not a considered choice against what the car actually needs.**
+
+## CU.1 The real number
+
+Every realistic wire run on this car: motor leads, battery/BMS/charger
+leads, servo leads (signal/power/ground), 8 LED pairs, the pack-sense
+divider. Generously estimated with slack for routing and soldering
+mistakes, that totals roughly **15-30 ft**, not 450 ft — a car this size
+(currently ~148 mm at its widest) simply doesn't have that many feet of
+cable runs in it.
+
+## CU.2 Both listings had smaller sizes on the same page
+
+Checked live: the 22 AWG listing (Fermerry, B089D29FHC) offers **5ft /
+10ft / 25ft / 100ft** per color; the 26 AWG listing (B089CSCY8S) offers
+**25ft / 50ft / 100ft** — no smaller tier than 25ft exists for 26 AWG on
+this listing. Switched to the smallest available that still gives full
+6-color runs:
+
+| | old | new |
+|---|---|---|
+| 22 AWG | 6×25ft, $20.49 | **6×5ft, $9.69** |
+| 26 AWG | 6×50ft, $24.99 | **6×25ft, $16.49** |
+| total | $45.48, 450 ft | **$26.18, 180 ft** |
+
+**Savings: $19.30.** Still more wire than the ~15-30 ft estimate needs
+(180 ft, mostly from 26 AWG's 25ft floor) — but the smallest real listing
+beats a hand-picked exact-length purchase that doesn't exist as a product.
+
+## CU.3 The bulk-pack pattern cuts the other way at the small end, and that's disclosed too
+
+Per-foot price for 22 AWG actually got WORSE going smaller: $0.14/ft at
+25ft vs $0.32/ft at 5ft — over 2x. Same bulk-economics pattern flagged
+repeatedly this session (ACEIRMC BMS, LEDs, resistor kit, XT30, rocker
+switch), just running in the direction that still favors buying less: the
+absolute dollar cost is lower even though the per-unit rate is worse,
+because the smallest tier is still closer to what's actually needed.
+
+## CU.4 Totals, re-verified with an independent hand-sum before writing
+
+    fixed vendors (unchanged):                                    $281.45
+    Amazon-folded row, wire right-sized:                          $142.60
+    Addicore backordered (unchanged):                               $3.73
+    TOTAL:                                                        $427.78
+
+Down from $447.08 (Appendix CR). All-in estimate, same rough method:
+**≈$440-$455** (was ≈$460-475). Consolidation-cost callout restated: net
+**+$111.05 to +$117.30** over the pre-fold estimate (was +$130.35 to
++$136.60 in CR).
+
+## CU.5 State
+
+**Nothing ordered.** BOM total: $427.78 before shipping, ≈$440-455 all-in.
+Three corrections in a row today (CR: owned cable, CS: real gear ratio,
+now this) all moved the same direction — toward what the car actually
+needs rather than what the first plausible listing sold. Not re-audited:
+whether the OTHER bulk-pack items in this row (LEDs, resistor kit, caps)
+have a similarly oversized default that a smaller listing tier would fix
+— flagged as an open question, not checked here.
