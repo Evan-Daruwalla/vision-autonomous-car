@@ -178,6 +178,26 @@ traps in `sim-harness.md`.
   sources LED current from its pins that is up to 160mA on the Pi's 5V/3A bank
   with its 600mA peripheral cap — the exact thing `LIGHTING_SPEC` §3 avoids.
   **The Uno supplies logic; LED current comes off the LM2596 rail.**
+- **LIGHTING ARCHITECTURE CHANGED 2026-09-03: WS2812B addressable RGB strip,
+  not 8 discrete 3mm LEDs.** Evan's call — "much easier to wire and mount" —
+  and it is, plus a real bonus: the old scheme spent the car's last 3 free
+  PWM pins with zero spare (`docs/PRD_ROADMAP.md` line ~415); the strip needs
+  ONE software-timed digital pin, freeing 2 of those 3. LM2596 headroom
+  checked: module rated 3A (Addicore listing, closing a gap
+  `WIRING_PROTOSHIELD.md` had flagged as unverified), existing peak load
+  840mA, ~2.16A margin — a strip at realistic (capped) brightness draws well
+  under that. **Open, genuinely unresolved by the purchase decision**:
+  Adafruit_NeoPixel/FastLED disable interrupts during each pixel write,
+  which can drop encoder ticks on D2/D3 — the car's only odometry. This
+  needs a firmware answer (short strips, update only between control-loop
+  ticks, or accept some tick loss as tolerable) before the lighting code
+  gets written; nothing implements lighting yet (`uno_control.ino`'s own
+  header: "no motor, servo, encoder, LED or pack exists" as of the last
+  firmware pass), so this is a clean slate, not a rewrite. `docs/BOM.md`
+  row 18, Appendix CX. **`docs/LIGHTING_SPEC.md` and
+  `docs/WIRING_PROTOSHIELD.md` (its Step 7 LED check, its "8 LED resistors"
+  cargo note) both still describe the superseded discrete-LED scheme and
+  need updating to match — flagged, not done.**
 - **Do not power the Uno from the 7.4V pack's VIN.** The pack sags under motor
   stall; if VIN falls below ~7V the AMS1117 regulator drops out and the Uno
   browns out MID-DRIVE, taking the servo and the watchdog with it. Feed its 5V

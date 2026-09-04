@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-03 ~19:29 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-03 ~20:04 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 101 appendices A–CW; BM/BN/BP/BU/CT are corrections to earlier entries). When this file and the record disagree about
+(append-only, 102 appendices A–CX; BM/BN/BP/BU/CT are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -367,7 +367,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.
-- **THE ORDER (`docs/BOM.md`, $410.68 + shipping = ≈$425-440, after the 2026-09-03 Vilros kit, Amazon consolidation, dropping the owned USB cable, and two rounds of right-sizing bulk-pack items — wire, then rocker switch + fuse holder).** Nothing is bought.
+- **THE ORDER (`docs/BOM.md`, $397.70 + shipping = ≈$410-425, UNDER $400 for the first time — after the Vilros kit, Amazon consolidation, right-sizing bulk items, and swapping 8 discrete LEDs for a WS2812B strip 2026-09-03).** Nothing is bought. **Lighting architecture changed**: WS2812B addressable strip frees 2 of the car's 3 PWM pins, but the encoder-interrupt-conflict question (NeoPixel writes can drop D2/D3 ticks) is still OPEN and gates the not-yet-written lighting firmware. `docs/LIGHTING_SPEC.md` and `docs/WIRING_PROTOSHIELD.md` still describe the superseded discrete-LED scheme — flagged, not yet updated.
   ⚠️ **TWO NEW SOURCING PROBLEMS, 2026-09-03:** the **EVE 25P cells are SOLD OUT** —
   but do NOT hunt for another 20 A cell, that rating was never load-driven (worst-case
   pack draw ~2.5 A against a 3 A fuse; **real spec is flat-top unprotected 18650,

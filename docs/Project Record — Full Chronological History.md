@@ -136,6 +136,7 @@ the dated entry, not the digest.
 - [CU — Wire kits right-sized after Evan asked why so much - 450ft cut to 180ft, total 427.78](#appendix-cu---wire-kits-right-sized-after-evan-asked-why-so-much---450ft-cut-to-180ft-total-42778-2026-09-03) (09-03)
 - [CV — Evan found a cheaper wire listing (SCHDRA) - further -5.43, total 422.35](#appendix-cv---evan-found-a-cheaper-wire-listing-schdra---further--543-total-42235-2026-09-03) (09-03)
 - [CW — 22 AWG revert plus full bulk-item audit - rocker switch and fuse holder right-sized, total 410.68](#appendix-cw---22-awg-revert-plus-full-bulk-item-audit---rocker-switch-and-fuse-holder-right-sized-total-41068-2026-09-03) (09-03)
+- [CX — 8 discrete LEDs replaced by a WS2812B strip - PWM pins freed, total under 400 for the first time](#appendix-cx---8-discrete-leds-replaced-by-a-ws2812b-strip---pwm-pins-freed-total-under-400-for-the-first-time-2026-09-03) (09-03)
 
 ---
 
@@ -10912,3 +10913,106 @@ all-in. Five corrections/right-sizings in one evening (CR/CS/CU/CV/CW) —
 this session's own pattern of catching bulk-pack overbuy (Appendix CP's
 own finding) applied to itself, twice, after Evan pushed on it directly
 both times.
+
+# Appendix CX - 8 discrete LEDs replaced by a WS2812B strip - PWM pins freed, total under 400 for the first time (2026-09-03)
+Evan proposed swapping the 8 discrete 3mm LEDs for 2 RGB LED strips —
+"much easier to wire and mount." Verified the claim, found a bigger reason
+to say yes than the one he gave, named the one real risk, priced two
+options, verified power headroom, and he picked one. **Done: BOM updated,
+architecture change recorded, two now-stale docs flagged for a rewrite
+that hasn't happened yet.**
+
+## CX.1 The technical case, verified rather than assumed
+
+**Wiring: true, and it comes with a real bonus.** The old scheme (row 18,
+8 LEDs across 4 GPIO channels) used the car's last 3 free PWM pins with
+zero spare (a constraint noted repeatedly in `PRD_ROADMAP.md` and
+`hardware.md` since Appendix BH). An addressable strip (WS2812B) needs
+ONE software-timed digital pin — not PWM hardware at all — freeing 2 of
+those 3 pins. This is bigger than the mounting convenience Evan named;
+it's real headroom back in a design that had none.
+
+**Power headroom: verified, not assumed.** `WIRING_PROTOSHIELD.md` had an
+open item: "LM2596 module current rating unverified for the specific
+Addicore part." Checked the live listing: **rated for a 3A load.**
+Existing documented peak on that rail (motor stalled + servo + all 8 old
+LEDs) is 840mA — **~2.16A of margin.** A strip at full white brightness
+across ~10 pixels draws roughly 480-600mA worst case, and realistic
+(brightness-capped) use far less. On paper, not close. Caveat stated
+plainly: that's the chip's rated capability, not a bench-verified number
+for THIS $2.48 board under sustained load — cheap LM2596 boards
+sometimes derate below nameplate from inductor heating with no
+heatsink. Nothing has been bench-tested; the module is still
+backordered. `WIRING_PROTOSHIELD.md`'s own Step 8 (full-load rail check)
+remains the real verification, not superseded by this analysis.
+
+**The one real risk, not softened**: Adafruit_NeoPixel/FastLED disable
+interrupts on AVR during each pixel write (~30µs/LED) because the
+protocol's timing is too tight to interleave safely. The encoder's ticks
+arrive on hardware interrupts D2/D3 and are the car's ONLY odometry — any
+tick landing inside a strip-update window is silently dropped, not
+errored. This is unresolved. It needs a firmware answer (short strips,
+update only between control-loop ticks) before the lighting code gets
+written, and buying the strip doesn't answer it.
+
+## CX.2 Two options priced, live-verified, same trusted UL-Listed brand
+
+| | density | price | cut spacing |
+|---|---|---|---|
+| BTF-LIGHTING 1m | 60 LED/m | $7.99 | ~16.7mm |
+| BTF-LIGHTING 1m | 100 LED/m | $10.99 | ~10mm |
+
+**Evan picked the 60/m option** — `https://www.amazon.com/dp/B088BRY2SH`,
+$7.99, In Stock, pre-installed JST-SM connectors. One reel, cut into 2
+segments for left/right sides — not two separate reels, same "buy the
+smallest real listing" logic as the wire-kit right-sizing earlier today.
+
+## CX.3 BOM updated: row 18 replaced, row 19 gutted, row 21 corrected
+
+- **Row 18**: struck the 8-LED description, superseded by the strip. Zone
+  logic (headlights/taillights/4 indicators) carries over as pixel groups
+  on one data line instead of 4 GPIO channels. The FOV-avoidance
+  constraint (`LIGHTING_SPEC.md` §1: rear lamps never in the forward
+  camera's view) still applies, now as a pixel-placement constraint on
+  the strip rather than a discrete-LED position.
+- **Row 19**: the entire 10mA-vs-20mA-per-pin derivation (Appendix BO),
+  provisional resistor values, and MOSFET fallback note are now moot —
+  WS2812B pixels have a built-in constant-current driver, no external
+  series resistor per LED. What's left: the pack-sense divider (100k/12k,
+  unrelated to lighting, still needed) and one small data-line resistor
+  (~300-500Ω, standard practice). Same resistor kit still covers it —
+  price unchanged, need shrank.
+- **Row 21**: the proto shield's cargo list said "8 LED resistors" —
+  corrected to "the WS2812B data-line resistor."
+
+## CX.4 Totals, re-verified with an independent hand-sum before writing
+
+    fixed vendors (unchanged):                                    $281.45
+    Amazon-folded row, LED packs -> WS2812B strip:                $112.52
+    Addicore backordered (unchanged):                               $3.73
+    TOTAL:                                                        $397.70
+
+Down from $410.68 (Appendix CW) — **under $400 for the first time.**
+All-in estimate: **≈$410-$425** (was ≈$425-440). Consolidation-cost
+callout restated: net **+$80.97 to +$87.22** over the pre-fold estimate
+(was +$93.95 to +$100.20) — the LED multiple (8 of 300) is gone from that
+list entirely, not just shrunk, since it's a different architecture, not
+a bulkier version of the same part.
+
+## CX.5 Flagged, not fixed
+
+`docs/LIGHTING_SPEC.md` and `docs/WIRING_PROTOSHIELD.md` (its Step 7 LED
+check, its now-corrected-in-BOM-only "8 LED resistors" cargo note) both
+still describe the superseded discrete-LED scheme. Noted in
+`hardware.md` and here rather than silently left stale. Nothing in
+firmware implements lighting yet (`uno_control.ino`'s own header: "no
+motor, servo, encoder, LED or pack exists" as of the last firmware pass)
+— this is unwritten work aimed at the right target now, not a rewrite of
+working code.
+
+## CX.6 State
+
+**Nothing ordered.** BOM total: $397.70 before shipping, ≈$410-425
+all-in. The interrupt-conflict question from two messages ago is still
+open and still gates the firmware work — pricing and power-budget
+verification didn't resolve it, and weren't meant to.
