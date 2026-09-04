@@ -473,6 +473,17 @@ transfer gap) must not block the capstone.
         ceiling without a destructive test; treated as sufficient for this
         build. MG90S kept over Geekservo 270 in the same exchange ("the more
         powerful servo," Appendix DD).
+        **A PRINTED STOPGAP EXISTS as of 2026-09-03 (Appendix DG)**:
+        `cad/servo_lego_coupler_v1.stl` from
+        `scripts/gen_servo_lego_coupler.py` — Ø4.65 mm MG90S bore → female
+        5.00 × 2.00 mm Lego cross socket, Ø10 × 16 mm, manifold + volume
+        self-validated. Built because Adafruit charges ~$10 shipping for the
+        $0.75 part and Amazon/eBay/AliExpress have no equivalent. It prints
+        **no** cross profile (obeys this task's own constraint) and does not
+        model the 20T spline (~0.76 mm pitch is under 0.4 mm-nozzle
+        resolution). ⚠️ **It carries no torque margin either**, so it does not
+        close this task — it gives a $0 thing to test first. Print PETG.
+        Never printed, never loaded.
 
 8d. **Export the inference stack to ONNX — BEFORE the first drive, not after**
     (appended 2026-09-03, Appendix CI). Recommended by

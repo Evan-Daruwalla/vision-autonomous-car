@@ -145,6 +145,7 @@ the dated entry, not the digest.
 - [DD — Geekservo 270 closed (MG90S kept); wheelbase geometric estimate 179.25mm; coupling built but margin unstated; Vilros kit already closed](#appendix-dd---geekservo-270-closed-mg90s-kept-wheelbase-geometric-estimate-17925mm-coupling-built-but-margin-unstated-vilros-kit-already-closed-2026-09-03-2236-cdt) (09-03)
 - [DE — Correction to DD: front/rear tires differ (42.25mm/55.75mm), wheelbase estimate revised to 185.95mm](#appendix-de---correction-to-dd-frontrear-tires-differ-4225mm5575mm-wheelbase-estimate-revised-to-18595mm-2026-09-03-2240-cdt) (09-03)
 - [DF — Steering coupling CHOSEN: Adafruit #4252, built and reported strong; no torque margin publishable; BOM total corrected to $402.45](#appendix-df---steering-coupling-chosen-adafruit-4252-built-and-reported-strong-no-torque-margin-publishable-bom-total-corrected-to-40245-2026-09-03-2244-cdt) (09-03)
+- [DG — Printed servo-to-Lego coupler STL generated and validated; no cheaper commercial source exists; no torque margin claimed](#appendix-dg---printed-servo-to-lego-coupler-stl-generated-and-validated-no-cheaper-commercial-source-exists-no-torque-margin-claimed-2026-09-03-2320-cdt) (09-03)
 
 ---
 
@@ -11675,3 +11676,117 @@ as written — append-only, correct at the time they were written.
 rounded range). The steering coupling is chosen and, per Evan, built and
 functioning; it has not been measured, weighed, or destructively tested
 by anyone in this project.
+
+# Appendix DG - Printed servo-to-Lego coupler STL generated and validated; no cheaper commercial source exists; no torque margin claimed (2026-09-03 23:20 CDT)
+Evan objected to the coupling purchase on shipping economics — "i dont want
+to pay $10 shipping for a $0.75 part" — then, after a failed hunt for a
+cheaper commercial source, asked for a printed one: "make an STL file from
+that spline to the female end of a lego axel." Built it, self-validated it,
+and it is written to `cad/servo_lego_coupler_v1.stl`. **Nothing about its
+strength is verified.**
+
+## DG.1 The alternative-source hunt came back empty, which is itself the finding
+
+Searched Amazon, eBay and AliExpress for a servo-spline-to-Lego-cross
+adapter. Results: the Adafruit #4252 itself (via overseas resellers —
+core-electronics.com.au, elmwoodelectronics.ca, smalldevices.com.au, all
+worse for US shipping), the two printed designs the docs already reject
+(Printables 61922/147626, Thingiverse equivalents), and nothing else. This
+**confirms** what BOM row 22 already recorded rather than overturning it:
+Adafruit is the sole commercial source. `docs/BOM.md:449`'s SparkFun
+analysis had already noted the LEGO servo adapter as one of the four items
+SparkFun does not stock; Adafruit has no free-shipping threshold, and
+consolidating other items onto them makes their shipping worse, not better
+(BOM's Adafruit section). So there is no bundling escape either.
+
+An Adafruit forum thread titled "MG90S servo spline size" would likely have
+settled the #4252-fits-MG90S question directly. It is behind a bot-check.
+**Not bypassed** — left for Evan to open:
+`https://forums.adafruit.com/viewtopic.php?t=95879`.
+
+## DG.2 The one hard number this needed
+
+MG90S output shaft: **20-tooth spline, ~4.8–4.9 mm outer diameter**
+(SkyStar/TinyTronics datasheet; servodatabase). Splined, not round — which
+is what makes the printed version hard, and is the reason the design below
+does what it does.
+
+## DG.3 The design, and the two things it deliberately refuses to do
+
+`scripts/gen_servo_lego_coupler.py` → `cad/servo_lego_coupler_v1.stl`.
+Ø10 × 16 mm (16 mm matches the #4252, so it drops into the same space):
+
+| end | feature | why |
+|---|---|---|
+| servo, z 0–8 | Ø4.65 mm plain round bore | 0.20 mm under the spline; the metal spline cuts its own seat |
+| middle, z 8–10 | Ø2.2 mm axial hole | screwdriver access to the servo's OWN retaining screw — zero new parts, and the coupler cannot walk off the shaft |
+| Lego, z 10–16 | 5.00 × 2.00 mm cross socket, 6 mm deep | receives a REAL Lego axle |
+
+**It prints no cross-axle profile, which is the whole point.** Appendix BV
+measured a printed male cross at SF 0.57–0.96 — thin cruciform fins shearing
+along layer lines — and `steering.md` permits socket-style printed adapters
+only. This obeys that rule rather than quietly relitigating it: the printed
+part is a thick-walled socket (2.50 mm wall at the socket, 2.68 mm at the
+bore) and the cross profile belongs to the real Lego axle.
+
+**It does not model the 20-tooth spline.** 20 teeth on a Ø4.85 mm circle is
+a ~0.76 mm tooth pitch, under what a 0.4 mm nozzle resolves. A modelled
+spline would print as a blurred round hole while claiming a fidelity it does
+not have, so the bore is honestly a press fit instead.
+
+## DG.4 Validation actually performed
+
+The generator carries the same self-check as `gen_tolerance_coupon.py`
+(closed + consistently-wound mesh, signed volume vs analytic, refuses to
+write on failure). Real output:
+
+    ring points: 72 (64 fill + exact cross corners)
+    triangles  : 1152
+    manifold   : duplicate-directed-edges=0 unmatched-edges=0  -> PASS
+    volume     : 1015.1211 mm^3 (expected 1015.1211, rel.err 1.05e-14)  -> PASS
+    OVERALL    : PASS
+
+**That self-check has a hole, so it was not trusted alone**: `build()` and
+`expected_volume()` both call `ring_cross()`, so a wrong cross profile
+cancels out and passes silently. Three independent checks were run against
+the profile from outside the module:
+
+    socket area   : mesh 16.000000 vs analytic 16.000000 mm^2  PASS
+                    (analytic = 2*(span*arm) - arm^2, two overlapping
+                     rectangles minus the double-counted centre square)
+    axle clearance: min 0.1000 max 0.2693 mm radial over a real 4.80 axle
+    cross corners : 12/12 present at exact angles  PASS
+
+The corner check matters more than it looks: the ring is sampled by angle,
+and if the 12 corner angles were not forced into the sample list the concave
+notches would round over, tightening exactly the corners a real axle needs
+to seat.
+
+## DG.5 What is NOT known, stated because the temptation is to skip it
+
+**No safety factor is claimed for this part and none can be computed.** The
+bore-to-spline grip is friction plus spline bite and has never been loaded.
+This is a printed STOPGAP to try before spending $10.75, not a proven
+replacement for the #4252 — and the #4252 has no published torque rating
+either (Appendix DF), so neither option has a real margin. What protects
+this joint is the existing rule that the servo never reaches stall
+(`SERVO_US_SPAN` limiting, task 8c). If it slips, the upgrade is a
+transverse M2 grub screw into the bore, **not** the MG996R, which makes the
+coupling problem ~5× worse (BOM row 7).
+
+Four constants are unmeasured and parameterised at the top of the generator:
+`AXLE_ARM` 1.80 (Lego cross-axle arm thickness — community value, and the
+authoritative source consulted, cailliau.org, documents only the 4.80 mm
+across-the-cross span, which IS confirmed), `SPLINE_DIA` 4.85 (datasheet
+range), `SOCKET_CLEAR` 0.20 and `BORE_INTERF` 0.20 (both provisional). The
+right source for `SOCKET_CLEAR` is the M1.3 tolerance coupon's axle row,
+**which has still not been printed** — so this part inherits that gap.
+
+## DG.6 State
+
+**Nothing ordered, nothing printed.** The BOM is unchanged at $402.45 —
+row 22 still buys the #4252, because a printed part with no torque margin
+does not retire a purchased part with no torque margin until one of them
+survives a test. `cad/README.md` documents the part, its four unmeasured
+constants, and PETG rather than PLA (Appendix BV's failing numbers were
+computed against PLA).

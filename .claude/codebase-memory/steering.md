@@ -185,3 +185,22 @@ servo-to-pinion coupler.
   evidence for a hobby-scale build but not a stated SF. Recommend treating
   that as sufficient for now rather than blocking on a number the vendor
   does not publish; flagged, not silently closed.
+- **A PRINTED alternative now exists as a stopgap: `cad/servo_lego_coupler_v1.stl`**
+  (2026-09-03, Appendix DG), from `scripts/gen_servo_lego_coupler.py`. Evan did
+  not want ~$10 Adafruit shipping for a $0.75 part; a search of Amazon, eBay and
+  AliExpress found **no other commercial source**, confirming BOM row 22 rather
+  than overturning it. Ø10 × 16 mm: Ø4.65 mm round bore on the servo end (0.20
+  under the spline — the metal spline cuts its own seat), Ø2.2 mm axial access
+  to the servo's own retaining screw, and a 5.00 × 2.00 mm **female** cross
+  socket 6 mm deep for a REAL Lego axle.
+  ⚠️ **It obeys Appendix BV rather than relitigating it** — no printed cross
+  profile anywhere; the printed part is a 2.50 mm-walled socket.
+  ⚠️ **The 20T spline is deliberately NOT modelled**: ~0.76 mm tooth pitch is
+  below 0.4 mm-nozzle resolution, so a modelled spline prints as a blurred round
+  hole while claiming fidelity it lacks.
+  ⚠️ **No safety factor is claimed and none can be computed** — friction plus
+  spline bite, never loaded. Print PETG, not PLA. **Neither option has a real
+  margin**, so this does not retire the #4252 purchase until one survives a test.
+- **MG90S output shaft: 20-tooth spline, ~4.8-4.9 mm OD** (SkyStar/TinyTronics
+  datasheet, servodatabase; 2026-09-03). Splined, not round — an adapter must
+  grip the spline pattern, not a plain bore diameter.
