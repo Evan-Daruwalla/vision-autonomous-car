@@ -480,22 +480,29 @@ transfer gap) must not block the capstone.
     that did not survive a change of harness.
 
 8e. **Rewrite the lighting firmware for WS2812B** (ADDED 2026-09-03 by the
-    landing-check sweep, Appendix DB). `firmware/uno_control/uno_control.ino`
-    still implements the superseded discrete-LED scheme: `applyLights()`
-    `analogWrite`s D5/D6 and `digitalWrite`s D4/D7. Since Appendix CX the car
-    uses two WS2812B strip segments and `SERIAL_PROTOCOL.md`'s pin map reads
-    **D4 = left strip DIN, D7 = right strip DIN, D5/D6 FREE** — so the file
-    contradicts the document it says it implements. **Flashing the current
-    build with strips wired drives static levels into two data inputs**; the
-    file now carries a do-not-flash banner. Motor, servo, encoder, watchdog and
-    pack paths are unaffected. **Blocked, deliberately**: needs a NeoPixel-class
-    library, a pixel-per-zone layout that is not decided, and an answer to the
-    Appendix CZ interrupt question (pixel writes disable interrupts and can drop
-    encoder ticks on D2/D3 — estimated ~0.027 % worst case, never measured).
-    **Done-check:** both segments address independently from D4/D7; the LAST
-    pixel of each lights (not just the first — a cold DIN joint looks like a
-    working strip); `SELFTEST` still passes; and `ticks` counts cleanly with the
-    indicators blinking, which is the first real test of the CZ estimate.
+    landing-check sweep, Appendix DB). ~~`firmware/uno_control/uno_control.ino`
+    still implements the superseded discrete-LED scheme~~ **REWRITTEN
+    2026-09-03 (Appendix DC), COMPILED CLEAN, NOT HARDWARE-VERIFIED.** Both
+    decisions this task was blocked on are resolved (Evan): the 3-pixel
+    layout was already settled by Appendix DA's cut-spacing math (white
+    front / red rear / amber indicator per segment), and **DRL folds into
+    the HEAD pixel only, never the tail**. `applyLights()` now drives two
+    `Adafruit_NeoPixel` objects on D4/D7, matching `SERIAL_PROTOCOL.md`'s pin
+    map. The Appendix CZ interrupt question has a firmware answer: strips are
+    short (3 px, per DA) and `applyLights()` rate-limits its own `show()`
+    calls to 20 ms so the watchdog branch's free-running `loop()` calls
+    can't turn a ~0.03%/tick estimate into a near-continuous encoder blind
+    spot — see the function's comment in the source. `arduino-cli` compiled
+    it clean (9680 B flash / 371 B SRAM); **that is the only verification
+    performed** — no strip is owned, nothing is flashed, SELFTEST has not run
+    against the 9 new checks (58 total) on real hardware.
+    **Remaining, now blocked on hardware alone, not on any decision:**
+    **Done-check (unchanged, still not met):** both segments address
+    independently from D4/D7; the LAST pixel of each lights (not just the
+    first — a cold DIN joint looks like a working strip); `SELFTEST` still
+    passes (pass count currently unknown); and `ticks` counts cleanly with
+    the indicators blinking, which is the first real test of the interrupt
+    estimate.
 
 9. **Bench bring-up.** Pi OS (64-bit Bookworm), SSH, camera test; TB6612 +
    ~~PF motor~~ **N20** on bench PSU; servo sweep test. Done: each

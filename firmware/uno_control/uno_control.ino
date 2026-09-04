@@ -1,34 +1,36 @@
 /* uno_control — the actuation firmware. Implements firmware/SERIAL_PROTOCOL.md.
  *
- * ⚠⚠ STALE LIGHTING PATH — DO NOT FLASH WITH THE LED STRIPS WIRED ⚠⚠
- * (added 2026-09-03 by the landing-check sweep, Appendix DB)
+ * LIGHTING REWRITTEN FOR WS2812B 2026-09-03 (PRD task 8e). applyLights() now
+ * drives two Adafruit_NeoPixel strip objects on D4/D7 (3 pixels each: white
+ * front / red rear / amber indicator, cut-to-pixel-count per Appendix DA)
+ * instead of the superseded 4-channel discrete-LED scheme this file used to
+ * carry on D4-D7. Decisions this rewrite depended on, both made by Evan
+ * 2026-09-03: the 3-pixel layout (Appendix DA), and DRL folds into the HEAD
+ * pixel only, never the tail — see headColor()/tailColor() below.
  *
- * applyLights() below drives FOUR discrete-LED channels on D4/D5/D6/D7. That
- * scheme was superseded on 2026-09-03 (Appendix CX): the car now uses two
- * WS2812B addressable strip segments, and SERIAL_PROTOCOL.md's pin map — the
- * document THIS FILE claims to implement — now reads D4 = left strip DIN,
- * D7 = right strip DIN, D5/D6 FREE.
+ * ⚠️ NOT VERIFIED ON HARDWARE. Compiled clean with arduino-cli (real output
+ * in the record entry) — that is the only check that has run. No strip is
+ * owned, nothing is wired, and this session has no serial/flash access, so
+ * SELFTEST has not executed on a real board against the new checks and its
+ * pass count is UNKNOWN until Evan flashes it and reads the real number.
+ * Never quote a SELFTEST count for this file without having just run it.
  *
- * Flashing this build with strips wired to D4/D7 drives static digital levels
- * into two WS2812B data inputs. The motor, servo, encoder, watchdog and pack
- * paths are UNAFFECTED and still correct; only the light path is stale.
- *
- * Fixing it is a real rewrite, not a pin swap: WS2812B needs a NeoPixel-class
- * library, a pixel-per-zone layout that is not yet decided, and an answer to
- * the interrupt question in Appendix CZ (pixel writes disable interrupts and
- * can drop encoder ticks on D2/D3). Deliberately NOT attempted here — the
- * strip is not ordered and the layout is undecided, so it would be guesswork
- * against hardware nobody has held. Tracked as PRD task 8e.
+ * The interrupt question Appendix CX left open ("needs a firmware answer:
+ * short strips, update only between control-loop ticks") is answered here in
+ * TWO parts: the strip is short (3 px/segment, Appendix DA), and
+ * applyLights() rate-limits its own NeoPixel::show() calls to 20 ms — see the
+ * comment on LIGHTS_MIN_INTERVAL_MS for why that matters even though
+ * handleFrame() only calls it once per 50 ms frame.
  *
  * Written 2026-09-02 (Appendix BO). This is the first firmware that drives
  * anything; uno_bringup/uno_memtest/uno_echo were measurements and
  * uno_packguard was one safety subsystem.
  *
- * VERIFIED ON THE BOARD, ACTUATORS UNWIRED. SELFTEST 49/49 on a real Uno;
- * firmware/host_test.py is the Pi-side gate (2026-09-02). The LINK and the
- * STATE MACHINE are tested; no motor, servo, encoder, LED or pack exists —
- * nothing in docs/BOM.md is ordered — so every actuator path is verified only
- * as a DECISION this firmware made, never as something that physically moved.
+ * LINK AND STATE MACHINE VERIFIED ON THE BOARD, ACTUATORS UNWIRED (2026-09-02,
+ * pre-dates this lighting rewrite). firmware/host_test.py is the Pi-side gate.
+ * No motor, servo, encoder, LED or pack exists — nothing in docs/BOM.md is
+ * ordered — so every actuator path is verified only as a DECISION this
+ * firmware made, never as something that physically moved.
  *
  * DEFECT FIXED 2026-09-02 (found by the scheduled daily-audit, Appendix BY;
  * fix recorded in Appendix CA): loop() sampled millis() once at the top, then
@@ -72,15 +74,16 @@
  */
 #include <Arduino.h>
 #include <Servo.h>
+#include <Adafruit_NeoPixel.h>
 #include "packguard.h"
 
 // ---- pin map: firmware/SERIAL_PROTOCOL.md section 1 ------------------------
-const uint8_t PIN_ENC_A  = 2;    // INT0
-const uint8_t PIN_ENC_B  = 3;    // INT1 — nothing else may use D3
-const uint8_t PIN_IND_L  = 4;    // STALE: D4 is the LEFT strip DIN as of 2026-09-03
-const uint8_t PIN_HEAD   = 5;    // STALE: D5 is FREE as of 2026-09-03
-const uint8_t PIN_TAIL   = 6;    // STALE: D6 is FREE as of 2026-09-03
-const uint8_t PIN_IND_R  = 7;    // STALE: D7 is the RIGHT strip DIN as of 2026-09-03
+const uint8_t PIN_ENC_A   = 2;    // INT0
+const uint8_t PIN_ENC_B   = 3;    // INT1 — nothing else may use D3
+const uint8_t PIN_STRIP_L = 4;    // LEFT strip DIN (Appendix DA). D5/D6 are FREE.
+const uint8_t PIN_STRIP_R = 7;    // RIGHT strip DIN — its own pin: WS2812B data
+                                  // is DIN->DOUT only, a cut segment cannot
+                                  // share a feed (Appendix CY)
 const uint8_t PIN_DIR_A  = 8;    // TB6612 AIN1+BIN1 (bridged; the "zero spare
                                  // PWM" reason died 2026-09-03 — one motor, two
                                  // channels, paralleled for the 2 A rating)
@@ -151,13 +154,30 @@ const uint16_t SERVO_US_SPAN_GEOMETRIC = 500;  // 100% of lock, for SELFTEST
 // scale keeps mean voltage at ~6 V (docs/BOM.md row 5 reasoning).
 const uint8_t MOTOR_DUTY_MAX = 181;     // 0.71 * 255
 
-const uint8_t LIGHT_FULL = 255;
-const uint8_t LIGHT_DIM  = 60;
+/* Provisional brightness, derived from Appendix CZ's stated current budget —
+ * never bench-verified, no strip owned. White scaled to ~33% of a WS2812B's
+ * ~60 mA full-white max (~20 mA); red/amber to ~50% of a single sub-LED's
+ * ~20 mA max (~10 mA), matching the old scheme's "plainly bright" 10 mA
+ * reference point (Appendix BO). Recompute once BOM Verify item 5 and a real
+ * bench brightness check exist. */
+const uint8_t STRIP_HEAD_FULL  = 85;    // 33% of 255
+const uint8_t STRIP_HEAD_DIM   = 20;    // DRL level — folds into the HEAD
+                                        // pixel only, never the tail (Evan,
+                                        // 2026-09-03); ratio matches the old
+                                        // scheme's LIGHT_DIM:LIGHT_FULL (60:255)
+const uint8_t STRIP_TAIL_LEVEL = 128;   // 50% of 255; tail never dims
+const uint8_t STRIP_AMBER_R    = 128;   // 50% of 255
+const uint8_t STRIP_AMBER_G    = 51;    // ~40% of R, a warm amber mix — not measured
 const uint16_t BLINK_MS  = 340;         // ~1.5 Hz, each half
+
+const uint8_t PIXELS_PER_STRIP = 3;     // cut to PIXEL count, not length (Appendix DA)
+const uint8_t PX_HEAD = 0, PX_TAIL = 1, PX_IND = 2;
 
 // ---- state -----------------------------------------------------------------
 Servo    steerServo;
 PackGuard pack;
+Adafruit_NeoPixel stripL(PIXELS_PER_STRIP, PIN_STRIP_L, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel stripR(PIXELS_PER_STRIP, PIN_STRIP_R, NEO_GRB + NEO_KHZ800);
 
 volatile int32_t encTicks = 0;
 volatile uint8_t encPrev  = 0;
@@ -222,6 +242,21 @@ uint8_t throttleToDuty(int8_t t) {
   int16_t a = t < 0 ? -(int16_t)t : (int16_t)t;
   if (a > 100) a = 100;
   return (uint8_t)((a * (int16_t)MOTOR_DUTY_MAX) / 100);
+}
+
+// Pure pixel-colour helpers, same discipline as steerToUs/throttleToDuty:
+// SELFTEST checks these directly rather than a copy of the logic.
+uint32_t headColor(uint8_t bits) {
+  if (!(bits & 0x01)) return 0;
+  uint8_t v = (bits & 0x10) ? STRIP_HEAD_DIM : STRIP_HEAD_FULL;
+  return Adafruit_NeoPixel::Color(v, v, v);
+}
+uint32_t tailColor(uint8_t bits) {
+  // bit4 (dim/DRL) deliberately does not touch this pixel — see file header.
+  return (bits & 0x02) ? Adafruit_NeoPixel::Color(STRIP_TAIL_LEVEL, 0, 0) : 0;
+}
+uint32_t indicatorColor(bool on) {
+  return on ? Adafruit_NeoPixel::Color(STRIP_AMBER_R, STRIP_AMBER_G, 0) : 0;
 }
 
 /* The whole safety decision, as a pure function of the four inputs, so
@@ -289,15 +324,41 @@ void applyOutputs(OutMode mode, int8_t steer, int8_t throttle) {
   steerServo.writeMicroseconds(steerToUs(steer));
 }
 
+uint32_t lastLightsMs = 0;
+const uint16_t LIGHTS_MIN_INTERVAL_MS = 20;
+/* Rate-limited on purpose, not for efficiency. handleFrame() calls this once
+ * per received 20 Hz command (every ~50 ms), so under a healthy link this
+ * limit never trips. But loop()'s watchdog branch below also calls
+ * applyLights() — on EVERY free-running loop() iteration while the link is
+ * down, which is thousands of times a second, not once per 50 ms.
+ * NeoPixel::show() disables interrupts for the duration of the bit-bang
+ * write (~30us/pixel x 3 = ~90us per strip, Appendix CZ); calling it
+ * unthrottled from a tight loop would make the encoder blind almost
+ * continuously during any watchdog trip, instead of the ~0.03%/tick Appendix
+ * CZ estimated for ONE call per control-loop tick. This is the firmware
+ * answer Appendix CX asked for ("update only between control-loop ticks"),
+ * and it holds for both call sites with no special-casing at either one.
+ * 20 ms is comfortably under the 50 ms frame period, so a real command never
+ * gets silently dropped by this gate (asserted in SELFTEST). */
 void applyLights(uint8_t bits, bool hazard, uint32_t now) {
-  bool dim = bits & 0x10;
-  analogWrite(PIN_HEAD, (bits & 0x01) ? (dim ? LIGHT_DIM : LIGHT_FULL) : 0);
-  analogWrite(PIN_TAIL, (bits & 0x02) ? (dim ? LIGHT_DIM : LIGHT_FULL) : 0);
+  if (lastLightsMs != 0 && now - lastLightsMs < LIGHTS_MIN_INTERVAL_MS) return;
+  lastLightsMs = now;
+
+  uint32_t head = headColor(bits);
+  uint32_t tail = tailColor(bits);
   bool phase = (now / BLINK_MS) & 1;
   bool l = hazard ? phase : ((bits & 0x04) && phase);
   bool r = hazard ? phase : ((bits & 0x08) && phase);
-  digitalWrite(PIN_IND_L, l);
-  digitalWrite(PIN_IND_R, r);
+
+  stripL.setPixelColor(PX_HEAD, head);
+  stripL.setPixelColor(PX_TAIL, tail);
+  stripL.setPixelColor(PX_IND,  indicatorColor(l));
+  stripL.show();
+
+  stripR.setPixelColor(PX_HEAD, head);
+  stripR.setPixelColor(PX_TAIL, tail);
+  stripR.setPixelColor(PX_IND,  indicatorColor(r));
+  stripR.show();
 }
 
 // ---- reply -----------------------------------------------------------------
@@ -363,6 +424,22 @@ void selftest() {
   CHECK(throttleToDuty(-100) == MOTOR_DUTY_MAX,  "reverse uses magnitude");
   CHECK(throttleToDuty(127)  == MOTOR_DUTY_MAX,  "over-range throttle clamps");
   CHECK(MOTOR_DUTY_MAX < 255,                    "duty MUST be capped below full scale");
+
+  // lighting: pure colour helpers (task 8e, WS2812B rewrite)
+  CHECK(headColor(0x00) == 0, "head off is pixel off");
+  CHECK(headColor(0x01) == Adafruit_NeoPixel::Color(STRIP_HEAD_FULL, STRIP_HEAD_FULL, STRIP_HEAD_FULL),
+        "head on, no dim, is full white");
+  CHECK(headColor(0x11) == Adafruit_NeoPixel::Color(STRIP_HEAD_DIM, STRIP_HEAD_DIM, STRIP_HEAD_DIM),
+        "head on + dim bit is the DRL level");
+  CHECK(tailColor(0x00) == 0, "tail off is pixel off");
+  CHECK(tailColor(0x02) == Adafruit_NeoPixel::Color(STRIP_TAIL_LEVEL, 0, 0), "tail on is red");
+  CHECK(tailColor(0x12) == tailColor(0x02),
+        "the dim bit does NOT touch the tail pixel -- DRL is head-only by decision");
+  CHECK(indicatorColor(false) == 0, "indicator off is pixel off");
+  CHECK(indicatorColor(true) == Adafruit_NeoPixel::Color(STRIP_AMBER_R, STRIP_AMBER_G, 0),
+        "indicator on is amber");
+  CHECK(LIGHTS_MIN_INTERVAL_MS < 50,
+        "the lights rate limit must stay under the 20 Hz frame period, or a real update gets dropped");
 
   // the safety decision
   CHECK(outputModeFor(true,  false, false, false, 0) == OUT_OFF,
@@ -484,9 +561,12 @@ void setup() {
   pinMode(PIN_DIR_B, OUTPUT); digitalWrite(PIN_DIR_B, LOW);
   pinMode(PIN_MOTOR, OUTPUT); analogWrite(PIN_MOTOR, 0);
 
-  pinMode(PIN_HEAD, OUTPUT);  pinMode(PIN_TAIL, OUTPUT);
-  pinMode(PIN_IND_L, OUTPUT); pinMode(PIN_IND_R, OUTPUT);
   pinMode(PIN_STATUS, OUTPUT);
+  // begin() sets DIN pinMode; show() with the zeroed default buffer blanks
+  // both strips on boot -- dark until the first valid frame, the same
+  // fail-safe shape as STBY staying low until the first ARMED frame.
+  stripL.begin(); stripL.show();
+  stripR.begin(); stripR.show();
 
   pinMode(PIN_ENC_A, INPUT);  pinMode(PIN_ENC_B, INPUT);
   // No internal pull-ups: the #5159 encoder already pulls its outputs to Vcc

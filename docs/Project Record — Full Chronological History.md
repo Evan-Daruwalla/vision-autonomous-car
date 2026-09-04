@@ -141,6 +141,7 @@ the dated entry, not the digest.
 - [CZ — The 2 open WS2812B figures quantified - tick loss ~0.027%, current draw ~80mA realistic](#appendix-cz---the-2-open-ws2812b-figures-quantified---tick-loss-0027-current-draw-80ma-realistic-2026-09-03) (09-03)
 - [DA — Wiring diagram vetted and rewritten for the WS2812B strips - wrong motor named, no strip pins assigned, 8 stale items](#appendix-da---wiring-diagram-vetted-and-rewritten-for-the-ws2812b-strips---wrong-motor-named-no-strip-pins-assigned-8-stale-items-2026-09-03) (09-03)
 - [DB — landing-check sweep: the lighting change never reached the firmware; total was 9.82 off; three false universals](#appendix-db---landing-check-sweep-the-lighting-change-never-reached-the-firmware-total-was-982-off-three-false-universals-2026-09-03) (09-03)
+- [DC — Task 8e: uno_control.ino rewritten for WS2812B, compiled clean, not hardware-verified; LIGHTING_SPEC.md brought current](#appendix-dc---task-8e-uno_controlino-rewritten-for-ws2812b-compiled-clean-not-hardware-verified-lighting_specmd-brought-current-2026-09-03-2223-cdt) (09-03)
 
 ---
 
@@ -11362,3 +11363,125 @@ sentence, asserted the thing A6 fixed was still broken. Cleaned.
 **Nothing ordered.** BOM total **$401.70** before shipping, ≈$415-430 all-in
 — and the row table now sums to it. Ten commits ahead of a public origin,
 none pushed.
+
+# Appendix DC - Task 8e: uno_control.ino rewritten for WS2812B, compiled clean, not hardware-verified; LIGHTING_SPEC.md brought current (2026-09-03 22:23 CDT)
+Evan resolved the two decisions PRD task 8e was deliberately blocked on
+("1 yes, fold DRL into headlight pixel"): rewrite `docs/LIGHTING_SPEC.md` for
+the WS2812B architecture now, and fold DRL into the HEAD pixel only, never
+the tail. Both done. `firmware/uno_control/uno_control.ino`'s stale
+discrete-LED lighting path (D4-D7, do-not-flash since Appendix DB) is
+rewritten for the two WS2812B strip segments and compiled clean — the only
+verification possible from this session; no strip is owned and this session
+has no serial/flash access to the board.
+
+## DC.1 Pixel layout was already decided, not invented here
+
+Appendix DA's cut-spacing table already settled the physical layout: "Cut to
+PIXEL count, not to length. 3 pixels at 144/m spans 21mm, which is a
+plausible headlight cluster on this car anyway." That reduces Appendix CZ's
+"3 pixels/segment, since the actual pixel layout isn't decided yet" from a
+stated assumption to the real number. This session used it as such: index 0
+white front (head), index 1 red rear (tail), index 2 amber indicator, per
+side.
+
+## DC.2 What Evan actually decided today: DRL scope
+
+The one open question was whether DRL (bit4 of the `lights` byte,
+`SERIAL_PROTOCOL.md` §2) still dims both head and tail pixels, as the
+original discrete-LED-era request framed it ("headlights + tail lights at
+reduced brightness"), or the head pixel only. **Evan: fold DRL into the
+headlight pixel.** Implemented as two pure, SELFTEST-checked functions —
+`headColor()` reads bit4, `tailColor()` does not.
+
+## DC.3 The firmware rewrite
+
+`firmware/uno_control/uno_control.ino`:
+- `PIN_IND_L`/`PIN_HEAD`/`PIN_TAIL`/`PIN_IND_R` (D4-D7, the stale 4-channel
+  map) replaced by `PIN_STRIP_L` (D4) / `PIN_STRIP_R` (D7), matching
+  `SERIAL_PROTOCOL.md`'s already-corrected pin map (Appendix DA).
+- Two `Adafruit_NeoPixel` objects, 3 pixels each, `NEO_GRB + NEO_KHZ800`
+  (WS2812B's real protocol, not WS2811's 400kHz).
+- `headColor()`, `tailColor()`, `indicatorColor()` — pure functions returning
+  a packed `uint32_t` colour, same discipline as `steerToUs`/`throttleToDuty`,
+  so SELFTEST exercises the real logic. 9 new CHECK() calls (58 total, up
+  from 49): head on/off/dim, tail on/off/dim-is-a-no-op, indicator on/off,
+  and one guard on the rate-limit interval itself (see DC.4).
+- Brightness levels (`STRIP_HEAD_FULL`=85, `STRIP_HEAD_DIM`=20,
+  `STRIP_TAIL_LEVEL`=128, `STRIP_AMBER_R`=128, `STRIP_AMBER_G`=51) are
+  PROVISIONAL, derived from Appendix CZ's stated current budget (white ~33%
+  of a 60mA max, red/amber ~50% of a 20mA max) — never bench-verified, no
+  strip owned. Marked as such in the source comment.
+- `setup()`: `stripL.begin(); stripL.show();` (and R) blank both strips on
+  boot, the same fail-safe shape as `STBY` staying low until the first ARMED
+  frame — dark until a valid command, not an arbitrary boot colour.
+
+## DC.4 The interrupt question Appendix CX left open, actually answered
+
+Appendix CX flagged this as unresolved and said fixing it "needs a firmware
+answer (short strips, update only between control-loop ticks)." Two parts:
+
+1. **Short strips** — already decided (DA), 3 px/segment, ~90us blind window
+   per strip per write.
+2. **Update only between control-loop ticks** — this was NOT automatic. The
+   watchdog branch in `loop()` calls `applyLights()` on every free-running
+   `loop()` iteration while the link is down, which is thousands of times a
+   second, not once per 50ms frame. Calling `NeoPixel::show()` unthrottled
+   there would make the encoder blind almost continuously during any
+   watchdog trip — a materially worse number than Appendix CZ's ~0.03%/tick
+   estimate, which assumed one call per control-loop tick. Fixed by
+   rate-limiting `applyLights()` itself to a 20ms minimum interval
+   (`LIGHTS_MIN_INTERVAL_MS`), comfortably under the 50ms/20Hz frame period
+   so a real command from `handleFrame()` is never silently dropped by the
+   gate (asserted in SELFTEST) — one code path, both call sites, no
+   special-casing at either one.
+
+**Both strips are written every applyLights() call** (head/tail/indicator
+state applies to both sides), which Appendix CZ's original ~90us/~0.027%
+figure did not account for — that number was for one segment write. Two
+consecutive `show()` calls per update roughly double the blind window to
+~180us and the tick-loss estimate to roughly double CZ's figure. Stated
+here rather than silently carried forward uncorrected; still unmeasured on
+real hardware either way.
+
+## DC.5 Verification actually performed, and what is still missing
+
+`arduino-cli` (`~/AppData/Local/Programs/Arduino IDE/.../arduino-cli.exe`,
+v1.5.1, already on this machine) compiled the rewritten sketch after
+installing `Adafruit NeoPixel@1.15.5` via `arduino-cli lib install`:
+
+    Sketch uses 9680 bytes (30%) of program storage space. Maximum is 32256 bytes.
+    Global variables use 371 bytes (18%) of dynamic memory, leaving 1677 bytes for local variables. Maximum is 2048 bytes.
+
+Up from the pre-change baseline (re-compiled first as a sanity check, matched
+the HANDOFF-stated 7888 B / 313 B exactly): +1792 B flash, +58 B SRAM, still
+comfortably inside both budgets.
+
+**What this does NOT prove**: the code has not run on a real Uno, SELFTEST
+has not executed against the new checks (its pass/fail count is unknown),
+and nothing about pixel colour, brightness, or the interrupt/tick-loss
+numbers has been bench-verified. No strip is owned. The file's header
+comment states this plainly and must not be quoted past without re-running
+SELFTEST on real hardware first.
+
+## DC.6 `docs/LIGHTING_SPEC.md` brought current
+
+Rewrote §2 (Channels) and §3 (Power) — both were still describing the
+PCA9685-then-4-channel-Uno-GPIO architecture, retired 2026-09-03 by
+Appendix CX before this file ever caught up. Old reasoning kept, compressed,
+clearly marked retired rather than deleted. §7 (Open items) rewritten to
+the current state (nothing ordered, firmware written but not
+hardware-verified, CZ's interrupt estimate still unmeasured). §1, §4, §5, §6
+were not WS2812B-specific and needed no change beyond a note that DRL is
+now head-only.
+
+## DC.7 State
+
+**Nothing ordered, nothing built, nothing flashed.** BOM total unchanged at
+$401.70. `docs/LIGHTING_SPEC.md` is current as of this entry — it was the
+last doc in the repo still describing the superseded 8-LED scheme (flagged
+in HANDOFF and Appendices DA/DB); that flag is now closed.
+`firmware/uno_control/uno_control.ino` compiles clean but carries no
+hardware verification of any kind for the lighting path — the do-not-flash
+urgency from Appendix DB is gone (nothing is wired to be damaged by the old
+code, and the old code is gone), but "compiled" and "verified" remain two
+different claims, and only the first one is true here.

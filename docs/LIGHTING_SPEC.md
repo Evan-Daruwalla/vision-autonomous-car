@@ -1,8 +1,21 @@
 # Vehicle lighting — spec and consequences
 
 **Status: SPEC ONLY. Nothing ordered, nothing wired, nothing built.**
-Requested by Evan 2026-09-01: headlights, tail lights, daytime running lights
-(headlights + tail lights at reduced brightness), and turn signals.
+Requested by Evan 2026-09-01: headlights, tail lights, daytime running lights,
+and turn signals.
+
+⚠️ **REWRITTEN 2026-09-03 for the WS2812B architecture (Appendices CX/CY/CZ/DA)
+and PRD task 8e's firmware rewrite.** This doc was the last place in the repo
+still describing the superseded 4-channel discrete-LED scheme (8 LEDs across
+D4-D7, per-LED series resistors) — flagged stale in Appendices DA/DB, fixed
+here. The car now uses **two WS2812B strip segments, 3 pixels each** (white
+front / red rear / amber indicator, one per side), driven from D4 (left) and
+D7 (right) with no PWM and no series resistor per LED. **DRL folds into the
+HEAD pixel only, at reduced brightness — never the tail** (Evan, 2026-09-03);
+the "headlights + tail lights at reduced brightness" framing above is the
+ORIGINAL request and is superseded by that decision. `firmware/uno_control/`
+implements this as of 2026-09-03 — compiled clean, **not yet run on real
+hardware** (no strip owned).
 
 Every number below marked EST is unmeasured.
 
@@ -28,91 +41,87 @@ the portfolio, they cost nothing in risk.
 
 ## 2. Channels
 
-> **SUPERSEDED 2026-09-02 (Appendix BC): the driver is an ARDUINO UNO, not a
-> PCA9685.** Evan has an Uno R3 clone on hand, so the part costs $0 and also
-> brings encoder counting and a throttle watchdog, neither of which a PCA9685
-> can do. The channel reasoning below still holds — four light channels, two
-> needing PWM — and it is what proved a dedicated driver was necessary at all.
-> What changed is which driver. On the Uno the Servo library claims Timer1,
-> leaving PWM on pins 3, 5, 6, 11: motor + headlights + tail = 3 PWM, servo on
-> its library, indicators on plain digital pins. **Fits with ZERO PWM spare** (corrected 2026-09-02, Appendix BH: the D3 fix moved the encoder onto D3, so usable PWM is {5, 6, 11} and all three are taken by motor + headlights + tail).
-> Series-resistor sizing changes too: an Uno pin sources 20 mA and the chip's
-> absolute max across ALL pins is **200 mA**, where the PCA9685 sank 25 mA per
-> channel independently. See `docs/BOM.md` rows 17-20 and `gotchas.md`.
-> The section below is left as written for the reasoning trail.
+**SUPERSEDED 2026-09-03 (Appendices CX/CY/DA): two WS2812B strip segments on
+plain digital pins, no PWM at all.** The section below (channel-count table,
+PCA9685-vs-Uno reasoning) described two earlier architectures in sequence —
+a PCA9685, then 4 discrete LEDs on Uno GPIO — both retired the same day
+Evan proposed addressable strips ("much easier to wire and mount," Appendix
+CX). Kept for the reasoning trail; nothing in it is current.
 
-Minimum channel count:
+**Current architecture:**
 
-| channel | needs PWM? | why |
-|---|---|---|
-| headlights | **yes** | full beam vs dimmed daytime running light |
-| tail lights | **yes** | same, dimmed with the DRL |
-| left indicator | no (on/off) | blink is generated in firmware, not by varying duty |
-| right indicator | no (on/off) | " |
+| segment | pin | pixels | zones |
+|---|---|---|---|
+| left strip | D4 (`DIN`) | 3 | white front (head+DRL) · red rear (tail) · amber (left indicator) |
+| right strip | D7 (`DIN`) | 3 | white front (head+DRL) · red rear (tail) · amber (right indicator) |
 
-Four new channels, two of them PWM, on top of the existing **1 servo PWM + 2
-motor PWM/DIR**.
+Cut **to pixel count, not to length** (Appendix DA) — 3 pixels at the chosen
+144 LED/m density spans 21 mm, a plausible headlight cluster on this car.
+WS2812B bit-bangs its own timing on a plain digital pin; **no PWM hardware
+and no per-LED series resistor are needed** (each pixel has a built-in
+constant-current driver). This is why the swap frees 2 of the car's 3
+previously-maxed-out PWM pins (D5/D6) rather than adding channels — the
+opposite of the table this section used to carry.
 
-~~**This resolves the open BLOCKED-ON-EVAN item "straight-to-GPIO or a
-PCA9685?" in favour of the PCA9685.**~~ **→ resolved in favour of an ARDUINO
-UNO instead (2026-09-02, Appendix BC).** The paragraph below is the original
-reasoning and is kept for the trail; the conclusion it reaches is superseded. The reasoning was previously about portability
-(DonkeyCar's `pins.py` has only three PWM backends, and straight-to-GPIO locks
-the project to a Pi). Lighting makes it a capacity question as well: a PCA9685
-is a **16-channel I2C LED controller** that costs **2 pins** total and is
-literally designed to drive LEDs at constant current with per-channel 12-bit
-dimming. Straight-to-GPIO would need four more pins and has no hardware PWM to
-spare for dimming.
+**DRL is head-only, not head+tail.** The original request (top of this doc)
+asked for "headlights + tail lights at reduced brightness." Evan decided
+2026-09-03 to fold DRL into the HEAD pixel alone: the `lights` byte's bit4
+(`dim`, `SERIAL_PROTOCOL.md` §2) now scales only the white front pixel; the
+red rear pixel is unaffected by that bit. Implemented in
+`firmware/uno_control/uno_control.ino`'s `headColor()`/`tailColor()`.
 
-~~Order the PCA9685. It is the same part either way, so this does not add a
-decision — it removes one.~~ **DO NOT ORDER IT (2026-09-02, Appendix BC): an
-Arduino Uno Evan already owns supersedes it, at $0.**
+**Retired reasoning, kept for the trail only — PCA9685, then 4-channel Uno
+GPIO, both superseded before purchase:** ~~the driver is an ARDUINO UNO, not
+a PCA9685 (Appendix BC)~~ — Evan has an Uno R3 clone on hand, $0, also brings
+encoder counting and a throttle watchdog. On the Uno the Servo library claims
+Timer1, leaving PWM on pins 3, 5, 6, 11: motor + headlights + tail = 3 PWM,
+servo on its library, indicators on plain digital pins — **fit with ZERO PWM
+spare (Appendix BH)**. Superseded in turn 2026-09-03 by the WS2812B swap
+above, which needs no PWM at all. Original PCA9685 reasoning: DonkeyCar's
+`pins.py` has only three PWM backends and straight-to-GPIO locks the project
+to a Pi; a PCA9685 is a 16-channel I2C LED controller, 2 pins total, built-in
+per-channel 12-bit dimming.
 
 ---
 
 ## 3. Power — off the motor rail, never off the Pi
 
-~~8 LEDs (2 head, 2 tail, 4 indicator) at ~20 mA each = **~160 mA peak**  EST~~
-**CORRECTED 2026-09-03 (PRD task A6): run them at 10 mA.** 8 LEDs at 10 mA =
-**~80 mA peak**, and the binding limit was never the 160 mA total — see below.
+⚠️ **REWRITTEN 2026-09-03 for WS2812B (Appendix CZ).** The per-pin-current
+derivation this section used to carry (8 discrete LEDs, 20 mA vs 10 mA per
+pin, provisional series resistors) is moot: WS2812B pixels have a built-in
+constant-current driver and draw off the strip's power pin directly, not
+through an ATmega I/O pin, so the 200 mA all-I/O / 40 mA per-pin limits that
+drove that analysis do not apply here at all.
 
-Feed from the **LM2596 5 V rail** that already supplies the servo, not from the
-Pi. The Pi 5 runs on a 5 V/3 A bank with a **600 mA cap on USB peripherals** and
-a measured CNN draw of 1.40 A (`docs/research/2026-07-23_power-system.md`).
-160 mA is small, but it belongs on the rail that already exists for actuators,
-and it keeps the one-shared-ground star topology unchanged.
+**Current draw, computed under stated assumptions (Appendix CZ), no strip
+owned, nothing bench-verified:**
 
-Series resistor per LED. ~~The PCA9685 sinks up to 25 mA per channel, which
-covers a 20 mA LED directly; anything brighter needs a transistor per channel.~~
-~~**AMENDED 2026-09-02 (Appendix BC), and the limit is tighter than the PCA9685's
-was:** an ATmega328P pin sources 20 mA, but the chip's absolute maximum across
-**ALL** I/O together is **200 mA** — a shared budget, where the PCA9685's 25 mA
-was per channel and independent. 8 LEDs at 20 mA = 160 mA, 80% of the hard
-limit; realistically ~120 mA peak (4 lamps steady + 2 indicators blinking).
-Workable, but brighter LEDs need MOSFETs off the LM2596 rail rather than pins.~~
+| case | draw |
+|---|---|
+| realistic (6 pixels lit, both sides, brightness per §2's provisional levels) | **~80 mA** |
+| absolute worst case (6 pixels, full white, 100% brightness — never commanded) | **~360 mA** |
+| existing peak (motor stalled + servo) | 840 mA |
+| + realistic strip | 920 mA — **2.08 A margin** to the LM2596's 3 A rating |
+| + worst-case strip | 1200 mA — **1.8 A margin** |
 
-⚠️ **CORRECTED 2026-09-03 (PRD task A6, first found 2026-09-02 in Appendix BO).
-THE PARAGRAPH ABOVE CHECKED THE WRONG LIMIT.** The 200 mA all-I/O budget is real
-but is not what binds here. There are **4 channels driving 2 LEDs each**, so at
-20 mA per LED every *pin* sources **40 mA — the ATmega328P's ABSOLUTE per-pin
-maximum**, against a 20 mA recommended figure. The per-channel reasoning was
-inherited from the PCA9685, which sank 25 mA per channel independently; the Uno
-does not.
+Either figure leaves comfortable headroom. Feed from the **LM2596 5 V rail**
+that already supplies the servo, not from the Pi — unchanged reasoning: the
+Pi 5 runs on a 5 V/3 A bank with a 600 mA cap on USB peripherals and a
+measured CNN draw of 1.40 A (`docs/research/2026-07-23_power-system.md`), so
+strip current belongs on the actuator rail regardless of how small it is,
+and it keeps the one-shared-ground star topology unchanged. The USB link to
+the Pi is data-only with its 5 V conductor cut, so no strip current can reach
+the Pi's bank even by accident.
 
-**Run the LEDs at 10 mA:** 20 mA per pin (in spec), 80 mA chip total (40% of the
-limit), and 3 mm LEDs are plainly bright at 10 mA. **No MOSFETs needed** — the
-transistor fallback stays unbuilt. Provisional series resistors at 10 mA and a
-5.0 V pin: **white 200 Ω, red 300 Ω, amber 300 Ω**; recompute from the real
-datasheet once `docs/BOM.md` Verify item 5 (which LEDs) is answered.
-
-*This correction lived in `docs/WIRING_PROTOSHIELD.md` §2.5, `hardware.md` and
-`docs/BOM.md` row 19 for a day before reaching this spec — the doc a future
-session would most likely read first.*
-
-**The rail argument is unchanged and now easier to satisfy:** the Uno's 5 V pin
-is fed from the LM2596, so LED current comes off the motor pack either way — and
-the USB link to the Pi is data-only with its 5 V conductor cut, so no LED
-current can reach the Pi's bank even by accident.
+**No per-LED series resistor.** One data-line resistor (~330-470 Ω) protects
+the first pixel's `DIN` from spikes — standard practice, not a current
+limiter — added to `docs/WIRING_PROTOSHIELD.md` §2.5 in Appendix DA. Two
+things the strip swap adds that the discrete-LED scheme never needed: **bulk
+capacitance at the strip feed** (a second 470 µF across the `+5V2`/GND pair
+the strip draws from — pixel drivers switch in step, and without local bulk
+that step lands on the rail the Uno itself runs from) and a **separate star-
+ground leg** for the strip returns, kept off the encoder's return conductor
+(both Appendix DA.4).
 
 ---
 
@@ -194,28 +203,28 @@ defensible. Passing a rule off as a learned behaviour is not.
 
 ## 7. Open items
 
-- ~~**Nothing is ordered.** The PCA9685, LEDs, resistors and wire are not in
-  `docs/BOM.md` yet, and adding them changes the ~$178-181 total.~~
-  **CLOSED 2026-09-01 ~21:20 CDT: added as BOM rows 17-20.** ~~(PCA9685, 8 LEDs,
-  resistors, I2C wire), ~$10.50-24.00 ... total $232-249 before shipping,
-  ≈$247-274 with ... the $200 ceiling is now breached on every path including
-  the 2GB Pi (≈$202-229).~~ **REVISED 2026-09-02 (Appendix BC):** row 17 is an
-  **Arduino Uno Evan already OWNS, $0**, so rows 17-20 are **$4.50-9.00** and the
-  total is **≈$226-234 before shipping, ≈$241-259 with**. The $200 ceiling is
-  still breached on the 4GB Pi, but the **2GB path reaches ≈$196-214**, whose low
-  end clears $200. **Nothing is ordered.** BLOCKED-ON-EVAN with the rest.
-- **Scope widened 2026-09-01 (Evan), then the PART CHANGED 2026-09-02:** ~~the
-  PCA9685~~ **the Arduino Uno** carries **motor PWM and the servo as well as the
-  four light channels** — ~~6 of 16~~ and on the Uno that leaves **ZERO PWM
-  spare**, not one (Appendix BH). That was Appendix
-  AH's original argument (DonkeyCar's `pins.py` has a PCA9685 backend, so
-  actuation stops being Pi-locked); lighting only made the channel count decide
-  it too. The TB6612's two direction pins stay on GPIO — the backend drives PWM,
-  not direction logic.
-- LED count, colour and forward voltage are unchosen; the 160 mA figure is EST
-  at 20 mA per LED.
+- ~~PCA9685/discrete-LED procurement and channel-fit history~~ **all
+  superseded 2026-09-03 by the WS2812B swap (Appendices CX/CY/DA)** — kept
+  in §2/§3 for the trail, not repeated here.
+- **Nothing is ordered.** BOM row 18: BTF-LIGHTING WS2812B, 1m/144px,
+  $11.99, part of the **$401.70** total (`docs/BOM.md`). BLOCKED-ON-EVAN
+  with the rest of the order.
+- **Firmware: written, not hardware-verified.** `firmware/uno_control/`
+  implements the 3-pixel-per-segment layout and the head-only DRL decision
+  (PRD task 8e, 2026-09-03) — compiled clean with `arduino-cli`, flash 9680 B
+  / SRAM 371 B. **Not flashed, not run on a real board**; no strip is owned.
+  SELFTEST has 9 new checks (58 total) whose pass/fail is unknown until Evan
+  flashes it.
+- **The Appendix CZ interrupt estimate (~0.03% encoder tick loss per pixel
+  write, worst case) is still unmeasured on hardware.** The firmware answers
+  the "update only between control-loop ticks" half by rate-limiting
+  `NeoPixel::show()` to 20 ms in `applyLights()` — see that function's
+  comment. First real test is wiring a strip and watching `ticks` count
+  cleanly while the indicators blink (`SERIAL_PROTOCOL.md` build order step
+  8, per Appendix DA.7).
 - Whether indicators become a learned head depends on the M2 logger change
-  (§5.2) landing before M3 data collection.
+  (§5.2) landing before M3 data collection — unaffected by the strip swap.
 - Mounting the lamps is downstream of a chassis nobody has built, and the
   headlight position relative to the camera decides where the beam lands in
   frame — which per §4 is a dataset-defining choice, not a styling one.
+  Unaffected by the strip swap: still open.

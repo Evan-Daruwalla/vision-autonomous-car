@@ -205,24 +205,20 @@ traps in `sim-harness.md`.
     Either way the LM2596's 3A rating keeps **1.8–2.1A of margin**.
   - **Encoder tick loss: ~0.027% of ticks, ~1 in 3800, ~1.1 ticks/sec**
     — worst case, continuous indicator blink at the no-load top speed
-    (Appendix CS). Small and likely tolerable, but **the firmware
-    decision is still open** — this assumes a pixel count and update
-    strategy that aren't finalized, and isn't verified on real hardware
-    (nothing is built yet). Recompute once those are actually decided.
-  This resolves the two figures as bounded estimates, not as a closed
-  question — the firmware still has to be written to match. ⚠️ **CORRECTED
-  2026-09-03 by the landing-check sweep (Appendix DB): the claim that used to
-  sit here — "nothing implements lighting yet, so this is a clean slate, not a
-  rewrite" — was FALSE, and it was a misreading.** `uno_control.ino`'s header
-  says "no motor, servo, encoder, LED or pack **exists**", which is about
-  unordered *hardware*, not about code. The code is there and complete:
-  `applyLights()` drives four channels on D4/D5/D6/D7 with `analogWrite` and
-  `digitalWrite`. **It is a rewrite, and the file now contradicts the pin map
-  it says it implements** — annotated in place with a do-not-flash warning,
-  tracked as PRD task 8e. `docs/BOM.md` row 18, Appendix CX.
-  **`docs/WIRING_PROTOSHIELD.md` was brought current 2026-09-03 (Appendix DA);
-  `docs/LIGHTING_SPEC.md` still describes the superseded discrete-LED scheme
-  and is the last doc not updated.**
+    (Appendix CS), for ONE segment write. `applyLights()` writes both
+    strips per call, so the real worst case is roughly double this —
+    stated in Appendix DC, not yet corrected here in the source figure.
+  ⚠️ **PIXEL LAYOUT AND FIRMWARE DECISIONS NOW RESOLVED (Evan, 2026-09-03,
+  Appendix DC) — the "still open" language below is HISTORICAL.** 3
+  pixels/segment was already settled by Appendix DA's cut-spacing math, not
+  just assumed; DRL folds into the HEAD pixel only, never the tail.
+  `firmware/uno_control/uno_control.ino`'s `applyLights()` is rewritten for
+  two `Adafruit_NeoPixel` objects on D4/D7, compiled clean (9680 B flash /
+  371 B SRAM) — **compiled only, NOT flashed, NOT run on real hardware; no
+  strip is owned.** The do-not-flash banner from Appendix DB is gone (the
+  stale code it warned about no longer exists), but "compiled" and
+  "hardware-verified" are still two different claims. `docs/LIGHTING_SPEC.md`
+  was brought current in the same pass — no longer the stale doc.
 - **Do not power the Uno from the 7.4V pack's VIN.** The pack sags under motor
   stall; if VIN falls below ~7V the AMS1117 regulator drops out and the Uno
   browns out MID-DRIVE, taking the servo and the watchdog with it. Feed its 5V
