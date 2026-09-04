@@ -131,6 +131,8 @@ the dated entry, not the digest.
 - [CP — Small-order problem and general items folded onto Amazon -- resolves 3 scattered vendors, but costs +$105 in bulk-pack overbuy](#appendix-cp---small-order-problem-and-general-items-folded-onto-amazon----resolves-3-scattered-vendors-but-costs-105-in-bulk-pack-overbuy-2026-09-03-1744-cdt) (09-03)
 - [CQ — Every unlinked BOM commodity now live-verified — six wire/hardware items, five stale row placeholders, total recomputed to $452.20](#appendix-cq---every-unlinked-bom-commodity-now-live-verified--six-wirehardware-items-five-stale-row-placeholders-total-recomputed-to-45220-2026-09-03) (09-03)
 - [CR — USB cable already owned — row 20 drops $5.12, BOM total $447.08](#appendix-cr---usb-cable-already-owned--row-20-drops-512-bom-total-44708-2026-09-03) (09-03)
+- [CS — Real differential is 20t\u219228t (N=1.400), not the documented config B \u2014 top speed is 4.1-4.7mph, over the target band](#appendix-cs---real-differential-is-20tu219228t-n1400-not-the-documented-config-b-u2014-top-speed-is-41-47mph-over-the-target-band-2026-09-03) (09-03)
+- [CT — Correction: CS's heading has literal escape text where an arrow and dash belong](#appendix-ct---correction-css-heading-has-literal-escape-text-where-an-arrow-and-dash-belong-2026-09-03) (09-03)
 
 ---
 
@@ -10587,3 +10589,132 @@ on his workbench for Arduino programming/debugging and a *second* cable gets
 bought for the permanent Pi↔Uno link, or whether this one cable is
 repurposed and he loses the always-connected programming cable. Not decided
 here — surfaced, not assumed.
+
+# Appendix CS - Real differential is 20t\u219228t (N=1.400), not the documented config B \u2014 top speed is 4.1-4.7mph, over the target band (2026-09-03)
+Evan: "the max unload rpm of the motor is 1k and with a 30/1 gear reduction
+and 55.75mm tires that means max speed is 0.2mph" — then, self-corrected:
+"i was wrong no load speed at the output not going into the gearbox is 1k
+rpm so ~6mph." Neither number is the build's actual top speed. Asked which
+final-drive gear the real differential uses; his answer identified hardware
+that doesn't match either config the docs had on file, and both his own
+numbers were off — one from double-applying the 30:1, the other from
+skipping the differential's external gear stage entirely.
+
+## CS.1 The two wrong numbers, and why
+
+**0.2 mph** double-counted the gearbox reduction: the N20's spec'd "1000 rpm
+no-load" is already the OUTPUT shaft speed with the 30:1 internal ratio
+applied (confirmed against `hardware.md`'s own note: "N20 speeds jump
+1000 → 2000 rpm" describes the 30:1 vs 15:1 *output* speeds directly).
+Dividing by 30 again is wrong.
+
+**~6 mph** dropped the external final-drive stage entirely — treating the
+gearbox output shaft as if it drove the wheel directly. It doesn't: the
+July research (`docs/research/2026-07-23_drive-motor-selection.md`) designed
+the gearbox output to drive a pinion gear that meshes into the
+differential's ring gear, an ADDITIONAL reduction stage on top of the
+30:1 internal one.
+
+## CS.2 What his actual differential is, and why it doesn't match either documented config
+
+Asked directly which gear the pinion meshes into. Evan: "it will basically
+go straight into the differential which has a 20 tooth on the shaft then
+the big ring gear is 28 and the smaller internal ones are 12." Parsed:
+
+- **20-tooth gear on the motor's output shaft, meshing the 28-tooth
+  differential ring gear** — the external final drive, N = 28/20 = **1.400**.
+- **The 12-tooth gears are the differential's internal spider/bevel
+  gears** — the mechanism that lets left and right wheels turn at
+  different speeds in a corner. They do not affect the overall ratio.
+
+`PRD_ROADMAP.md` and `HANDOFF.md` both called **config B (12t→28t,
+N=2.333, 62.4 mm tire, 1.28 m/s) "the lower-risk build"** and treated
+config A (20t→28t, N=1.400, 43.2 mm tire) as needing physical verification
+first, because the doc flagged its in-plane 20t↔28t mesh as "documented
+general behaviour but not confirmable against a set instruction for this
+specific ring." **Evan's actual differential IS config A's gear pair** —
+the doc's own open question is closed, it's real — **but paired with a
+tire the doc never modeled.** 55.75 mm doesn't match either catalog
+diameter (43.2 mm / 62.4 mm) used in the four configs.
+
+## CS.3 Re-derived from the July doc's own formulas, not re-guessed
+
+Reverse-engineered the doc's exact methodology from its four published
+configs (cross-checked against Config A's own numbers to 3 significant
+figures before trusting it for new inputs — `T_gearbox = F_roll×r /
+(N×η)`, loaded motor rpm = `rpm_noload×(1 - T/T_stall)`, current linear
+between no-load and stall, accel-from-rest from full stall torque minus
+rolling resistance):
+
+| | Config A (doc, 43.2mm) | **Actual hardware (55.75mm)** |
+|---|---|---|
+| N (external) | 1.400 | 1.400 (same — confirmed real) |
+| Cruise torque | 5.41 mN·m (9.7% stall) | **6.98 mN·m (12.5% stall)** |
+| Top speed, loaded | 1.46 m/s | **1.83 m/s** |
+| Top speed, no-load | — | **2.09 m/s (4.66 mph)** |
+| Cruise current | 0.25 A | 0.29 A |
+| Accel current | 0.98 A (59% stall) | **1.24 A (76% stall)** |
+| Accel from rest | 1.83 m/s² | **1.38 m/s²** |
+| Traction margin | 4.7x | 4.7x (vehicle-level check, config-independent — unchanged) |
+
+**Real top speed: 1.83 m/s loaded, 2.09 m/s no-load — ≈4.1–4.7 mph.** This
+is OVER the 1.0–1.5 m/s target band the whole motor selection was sized
+around, not under it — the opposite direction from Evan's first ("0.2
+mph") estimate and about 24% past the top of the band even loaded.
+**Not a current or traction problem** (1.24 A stays under the TB6612's
+2 A paralleled rating with margin, and the traction check doesn't depend
+on drivetrain ratio at all) — it is a **speed-and-acceleration-headroom**
+problem: less accel-from-rest available (1.38 vs 1.83 m/s²) and more of
+the current budget spent getting the target 1.0 m/s² of acceleration
+(76% of stall vs 59%).
+
+## CS.4 Docs corrected
+
+`hardware.md`, `PRD_ROADMAP.md`, `HANDOFF.md` all called config B
+"the lower-risk build" — none of the three matched the real hardware, and
+`HANDOFF.md` is supposed to be the live snapshot. All three updated in
+place with the corrected numbers above and a pointer to this entry.
+
+## CS.5 State
+
+**Nothing decided about what to DO with this** — Evan chose "record the
+correction, redo the torque/traction check," not "fix the mismatch." The
+speed-over-target finding is now documented and cross-linked; whether to
+accept the faster car, source a 12-tooth external gear to hit the
+originally-planned N=2.333, or re-target the whole speed band is open.
+
+# Appendix CT - Correction: CS's heading has literal escape text where an arrow and dash belong (2026-09-03)
+Correction to Appendix CS's heading, caught immediately after appending.
+
+## CT.1 What broke
+
+CS's `--title` argument was typed with the six-character sequences
+`backslash u 2 1 9 2` and `backslash u 2 0 1 4` where an arrow and an
+em-dash belonged, then passed through bash double-quotes, which do not
+interpret `\u` escapes. Both the append tool's CLI parsing and its
+heading/TOC generation took those six characters literally instead of
+decoding them. The heading and TOC line for CS now contain that literal
+escape text in place of the arrow between "20t" and "28t" and the dash
+before "top speed."
+
+**Scope: heading and TOC line only.** CS's body content was written
+through the Write tool with real Unicode characters already in the file
+(the `--body` argument points at a file, not an escaped CLI string), so
+every real em-dash and arrow inside CS's actual analysis is correct as
+written — confirmed by grepping CS's line range for the same broken
+sequence and finding it only on the heading/TOC lines, nowhere in the body.
+
+## CT.2 The corrected title, for the record
+
+Appendix CS's title should read, with a real arrow and a real em-dash:
+**"Real differential is 20t-to-28t (N=1.400), not the documented config
+B, top speed is 4.1-4.7mph, over the target band."** The append tool has
+no in-place heading edit, and the record is hook-guarded against direct
+edits (`car-doc-tooling-traps` memory) — same situation as Appendix BM.
+This entry is the correction, not a splice.
+
+## CT.3 State
+
+No technical content changed. CS's math, its 20t-to-28t / N=1.400 finding,
+and the doc corrections (`hardware.md`, `PRD_ROADMAP.md`, `HANDOFF.md`)
+all stand as written.

@@ -266,10 +266,14 @@ transfer gap) must not block the capstone.
    1.0 m/s floor, through any diff configuration); Powered Up + Build HAT
    rejected on five grounds incl. its 8V ±10% supply requirement that a 2S
    pack cannot meet. **Still BLOCKED-ON-EVAN for the purchase go.**
-   Drivetrain: config B (62.4 mm tire, 12t→28t, N=2.333, 20.0 mm centres,
-   1.28 m/s) is the lower-risk build; config A (43.2 mm, 20t→28t, N=1.400,
-   24.0 mm centres, 1.46 m/s) needs the in-plane mesh verified physically
-   first. Parallel BOTH TB6612 channels (steering is a servo, so both are
+   Drivetrain **CORRECTED 2026-09-03 (Appendix CS)**: Evan's actual
+   differential is 20t→28t (N=1.400) — config A, not the "lower-risk"
+   config B (12t→28t, N=2.333) this line used to call the build. His
+   measured tire is 55.75 mm, not either modeled diameter. Real top speed
+   1.83 m/s loaded / 2.09 m/s no-load (≈4.1-4.7 mph) — OVER the 1.0-1.5 m/s
+   target band. Accel current 1.24 A (76% of 1.6 A stall, up from 59%);
+   accel-from-rest 1.38 m/s² (down from 1.83). Traction margin unchanged,
+   4.7x. Parallel BOTH TB6612 channels (steering is a servo, so both are
    free) and PWM-cap duty at ~71% of a full 8.4V pack.
 
 1c. **Power system selection (NEW, added 2026-07-23 ~17:32 CDT — Evan owns

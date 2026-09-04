@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-03 ~18:52 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-03 ~19:12 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 96 appendices A–CR; BM/BN/BP/BU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 98 appendices A–CT; BM/BN/BP/BU/CT are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -260,8 +260,12 @@ original floor and the pre-2026-08-12 scale decision.)*
   paralleled** (2 A cont.) and duty PWM-capped at ~71% of a full 8.4 V pack.
   **All Lego motors were rejected on physics — too slow (≤0.88 m/s).**
   Build HAT rejected (needs 8 V ±10 %, takes the UART, no Trixie support).
-  L298N banned. Drivetrain config B: 62.4 mm tire + 12t→28t, 20.0 mm
-  centres, 1.28 m/s.
+  L298N banned. **Drivetrain corrected 2026-09-03 (Appendix CS): Evan's
+  actual differential is 20t→28t (N=1.400), not config B's 12t→28t — and
+  his tire measures 55.75 mm, not 43.2/62.4 mm.** Real top speed 1.83 m/s
+  loaded / 2.09 m/s no-load (≈4.1-4.7 mph) — OVER the 1.0-1.5 m/s target
+  band. Accel current 1.24 A (76% of 1.6 A stall, up from 59%); traction
+  margin unchanged at 4.7x.
 - Steering: MG90S (MG996R fallback; mount takes both).
 - Print: calibrate coupons first; ~5.1mm pin / 5.3-5.6mm rotating bore;
   PETG for bores. Real Lego beams as load path where precision matters.

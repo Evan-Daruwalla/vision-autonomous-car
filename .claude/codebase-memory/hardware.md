@@ -106,6 +106,21 @@ traps in `sim-harness.md`.
   132-153% of stall), 50:1 tops out below 0.9 m/s, and the low-current
   **30:1 MP variant fails at 101.8% of stall** — which is why the 1.6 A HP
   variant is forced (2026-07-23).
+- **Actual differential gearing is 20t→28t (N=1.400), confirmed by Evan
+  2026-09-03 — the July research doc's Config A, not the "lower-risk"
+  Config B (12t→28t, N=2.333) both `PRD_ROADMAP.md` and `HANDOFF.md`
+  assumed.** The doc's own caveat on the in-plane 20t mesh ("verify
+  physically before committing CAD") is now closed: it's the real part.
+  But his measured tire is 55.75 mm, not either modeled diameter
+  (43.2/62.4 mm). Re-derived with the July doc's own formulas
+  (`docs/research/2026-07-23_drive-motor-selection.md`, reproduced and
+  checked 2026-09-03): **top speed 1.83 m/s loaded, 2.09 m/s no-load
+  (≈4.1–4.7 mph) — OVER the 1.0–1.5 m/s target band**, not under it.
+  Cruise torque 12.5% of stall (was 9.7% for Config A). Accel current
+  1.24 A, 76% of the 1.6 A stall rating (was 59%) — real headroom loss,
+  still under the TB6612's 2 A paralleled rating. Accel-from-rest drops to
+  1.38 m/s² (was 1.83). Traction margin unaffected: 4.7x, a vehicle-level
+  check independent of drivetrain ratio. See Appendix CS.
 - **Parallel BOTH TB6612FNG channels** (AIN1+BIN1, AIN2+BIN2, AO1+BO1,
   AO2+BO2) for 2 A continuous — steering is a servo, so the second channel
   is free. Also **PWM-cap duty at ~71%** of a full 8.4V pack so the 6V motor
