@@ -142,6 +142,7 @@ the dated entry, not the digest.
 - [DA — Wiring diagram vetted and rewritten for the WS2812B strips - wrong motor named, no strip pins assigned, 8 stale items](#appendix-da---wiring-diagram-vetted-and-rewritten-for-the-ws2812b-strips---wrong-motor-named-no-strip-pins-assigned-8-stale-items-2026-09-03) (09-03)
 - [DB — landing-check sweep: the lighting change never reached the firmware; total was 9.82 off; three false universals](#appendix-db---landing-check-sweep-the-lighting-change-never-reached-the-firmware-total-was-982-off-three-false-universals-2026-09-03) (09-03)
 - [DC — Task 8e: uno_control.ino rewritten for WS2812B, compiled clean, not hardware-verified; LIGHTING_SPEC.md brought current](#appendix-dc---task-8e-uno_controlino-rewritten-for-ws2812b-compiled-clean-not-hardware-verified-lighting_specmd-brought-current-2026-09-03-2223-cdt) (09-03)
+- [DD — Geekservo 270 closed (MG90S kept); wheelbase geometric estimate 179.25mm; coupling built but margin unstated; Vilros kit already closed](#appendix-dd---geekservo-270-closed-mg90s-kept-wheelbase-geometric-estimate-17925mm-coupling-built-but-margin-unstated-vilros-kit-already-closed-2026-09-03-2236-cdt) (09-03)
 
 ---
 
@@ -11485,3 +11486,85 @@ hardware verification of any kind for the lighting path — the do-not-flash
 urgency from Appendix DB is gone (nothing is wired to be damaged by the old
 code, and the old code is gone), but "compiled" and "verified" remain two
 different claims, and only the first one is true here.
+
+# Appendix DD - Geekservo 270 closed (MG90S kept); wheelbase geometric estimate 179.25mm; coupling built but margin unstated; Vilros kit already closed (2026-09-03 22:36 CDT)
+Evan answered four open items from the HANDOFF action table in one message:
+keep the more powerful servo (closes the Geekservo 270 comparison), the
+rack-and-pinion coupling is already built and "strong," a wheel-to-wheel
+length measurement (9.25 in), and confirmed the Vilros kit purchase choice.
+Three were real updates; the fourth was already closed and needed no new
+work.
+
+## DD.1 Geekservo 270 CLOSED — MG90S kept
+
+Evan: "do the more powerful serve" (servo). Read against `steering.md`'s
+existing MG90S-vs-Geekservo table (36.0 N rack force vs Geekservo's
+14.7-16.4 N), this keeps the MG90S and drops Geekservo 270 from
+consideration. This closes `HANDOFF.md` action-table item 3a — "weigh the
+car to arithmetic-check whether Geekservo's 14.7 N is enough" — **as moot,
+not as answered**: the car was never weighed, and the question stopped
+applying the moment Geekservo was dropped. Recorded in `steering.md` and
+both HANDOFF/PRD_ROADMAP rows updated.
+
+## DD.2 Wheelbase: a geometric estimate, not the axle-to-axle measurement asked for
+
+Evan: "9.25 in from back of back wheel to front of front wheel." This is
+overall wheel-to-wheel LENGTH, not wheelbase (front-axle-centre to
+rear-axle-centre) — flagged rather than silently treated as the same
+number, since PRD task 4 and `steering.md` both define wheelbase the
+axle-to-axle way and `R_min = 1.600 × wheelbase` depends on getting that
+right.
+
+Derived: wheelbase = overall length − wheel diameter (both wheels' radii sit
+inboard of the measured endpoints by construction, so one wheel diameter
+separates the two quantities when front and rear wheel diameters match).
+Using the 55.75 mm rear/drive tire diameter Appendix CS measured:
+
+    235.0 mm (9.25 in) - 55.75 mm = 179.25 mm (7.06 in) estimated wheelbase
+    R_min = 1.600 x 179.25 = 286.8 mm
+
+This is smaller than the ~330 mm estimate the frozen 500-670 mm corner band
+was checked against — favourable (more turning capability than assumed),
+not a new risk. **Open: the 55.75 mm figure is specifically the rear/drive
+tire's measured diameter (Appendix CS); whether the front/steering tire
+matches it is unconfirmed.** Per `gotchas.md`/Appendix L, corner geometry
+stays frozen until T2's empirical test on the rolling chassis regardless —
+this is a better arithmetic bound than the pre-existing estimate, not a
+substitute for it.
+
+## DD.3 Servo-to-pinion coupling: reported built, not yet a stated margin
+
+Evan: "I have the rack and pinion set up already and it's strong." PRD task
+8c(ii)'s done-check is specifically "a coupling selected with its
+stall-torque margin stated" — a safety factor number, per the table in
+`steering.md` (printed cross-axle stub SF 0.57-0.96 at MG90S stall, FAILS).
+Evan's report names a physical build and a qualitative assessment ("strong")
+but not which part or method bridges the MG90S spline to the Lego pinion,
+so no SF can be computed from it. Recorded as a genuine partial: the
+coupling exists physically and Evan has assessed it directly, which this
+session cannot do — but the task's own bar (a stated margin) is not met
+without knowing what it actually is. Asked Evan directly in the same
+turn; PRD_ROADMAP.md task 8c(ii) and `steering.md` both carry the open
+question rather than a false DONE mark.
+
+## DD.4 Vilros Pi kit — already closed, no new work
+
+Evan: "Vilros Basic Starter kit Raspberry Pi 5 4gb from their website." This
+matches `docs/BOM.md` row 1's existing FINAL DECISION (2026-09-03, same day,
+earlier in the session before this one), $179.99, confirmed in stock at
+checkout. `HANDOFF.md`'s action-table row 4 had NOT been updated to match —
+it still read "Pi 2GB ($65) vs 4GB ($110)," a stale duplicate of a decision
+already recorded elsewhere in the same file (line ~365's BLOCKED-ON-EVAN
+section already said "DECIDED 2026-09-03: 4 GB"). Corrected the stale row
+while here; also corrected action-table row 5's order total, which still
+read the pre-lighting-swap "$238-248" figure against the current $401.70.
+Neither drift was introduced this session — both predate it — caught while
+touching the same table for the other three items.
+
+## DD.5 State
+
+**Nothing ordered, nothing weighed, nothing bench-tested.** Updated in
+place: `steering.md`, `HANDOFF.md` (rows 3a/3b/3c/4/5 and the BLOCKED-ON-EVAN
+wheelbase note), `PRD_ROADMAP.md` (task 4's donor-geometry measurements,
+task 8c(ii)). One question still open and put to Evan directly: what
+physically bridges the MG90S spline to the Lego pinion.

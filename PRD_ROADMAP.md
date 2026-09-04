@@ -335,14 +335,21 @@ transfer gap) must not block the capstone.
    interfaces. Done: dimensioned sketch (photo or CAD screenshot) in
    `docs/` + record entry.
    **PARTIAL 2026-09-02 (Appendices BL/BQ/BU):** measured so far — front tire
-   track **107.75 mm**, rear **114.75 mm** (the governing width), steering
+   track **107.75 mm**, rear **114.75 mm** (the governing width — superseded
+   2026-09-03 to 148.25 mm rear / 107.5 mm front, Appendix CI), steering
    pinion **12 teeth**, pinion sweep **~180° lock-to-lock**, max steer **32°**
    (the wheel's DEVIATION from straight ahead — Evan measured with 90° =
    straight, angle = 90 − protractor reading; taking the raw 58° instead is a
-   2.6× error in turn radius). **NOT yet measured:** wheelbase (Evan does not
-   have the parts), kingpin spacing, steering-arm lengths, hub interfaces,
-   and whether any part of the assembled car exceeds the 114.75 mm tire
-   track. No dimensioned sketch exists yet.
+   2.6× error in turn radius). **Wheelbase: a GEOMETRIC ESTIMATE as of
+   2026-09-03 (Appendix DD), not a direct axle-to-axle caliper measurement.**
+   Evan measured 9.25 in (235.0 mm) overall wheel-to-wheel length;
+   wheelbase ≈ 235.0 − 55.75 (rear tire diameter, Appendix CS) ≈ **179.25 mm**,
+   **unconfirmed whether the front/steering tire matches that diameter**.
+   `R_min = 1.600 × 179.25 ≈ 286.8 mm` — smaller than the ~330 mm estimate the
+   frozen corner band was checked against (favourable), still not T2's
+   empirical test. **Still NOT measured:** kingpin spacing, steering-arm
+   lengths, hub interfaces, and whether any part of the assembled car exceeds
+   the (now 148.25 mm) tire track. No dimensioned sketch exists yet.
 5. **CAD: front steering module.** Printed frame holding the Lego steering
    geometry + servo mount accepting MG90S AND MG996R footprints + printed
    servo-horn→Lego-axle link (adapt Printables 61922/147626). Done: STL
@@ -454,6 +461,12 @@ transfer gap) must not block the capstone.
         real Lego axle; never print the cross profile. Constraint written to
         `docs/WIRING_PROTOSHIELD.md` §2.4a. Done: a coupling selected with its
         stall-torque margin stated.
+        **PARTIAL 2026-09-03 (Appendix DD): Evan reports the rack-and-pinion
+        already built and "strong" — MG90S kept over Geekservo 270 the same
+        session ("the more powerful servo," Appendix DD). NOT done yet by this
+        task's own bar: the specific part/method bridging servo spline to Lego
+        pinion is not named, so no stall-torque margin can be stated. Asked
+        directly; update this line once named.**
 
 8d. **Export the inference stack to ONNX — BEFORE the first drive, not after**
     (appended 2026-09-03, Appendix CI). Recommended by

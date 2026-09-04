@@ -139,3 +139,39 @@ servo-to-pinion coupler.
   shrink. **Corner geometry stays frozen until T2 measures it empirically on the
   rolling chassis; a geometric radius from wheelbase + 32 degrees would be
   better than today's arithmetic-on-estimates but is still not T2.**
+
+## Geekservo 270 CLOSED, wheelbase geometric estimate, coupling status (2026-09-03, Appendix DD)
+
+- **Geekservo 270 REJECTED — Evan keeps the MG90S** ("do the more powerful
+  servo"). Closes the comparison table above in the MG90S's favour: 36.0 N
+  rack force vs Geekservo's 14.7-16.4 N, at the cost of the native Lego mount
+  and clutch. This also closes `HANDOFF.md`'s BLOCKED item 3a (weigh the car
+  to arithmetic-check whether 14.7 N is enough) — **moot by decision, not
+  answered by measurement**: the car was never weighed, the question no
+  longer applies because Geekservo is out.
+- **Wheelbase: a GEOMETRIC ESTIMATE, not a direct axle-to-axle measurement.**
+  Evan measured **9.25 in (235.0 mm) from the back of the rear wheel to the
+  front of the front wheel** — overall wheel-to-wheel length, not wheelbase.
+  Wheelbase = overall length − wheel diameter (axle centres sit one radius in
+  from each end, assuming front and rear wheels are the same diameter).
+  **Using the 55.75 mm tire diameter Appendix CS measured for the drive
+  (rear) wheels, unconfirmed for the front/steering wheels**:
+
+      wheelbase (est.) = 235.0 - 55.75 = 179.25 mm (7.06 in)
+      R_min = 1.600 x 179.25 = 286.8 mm
+
+  This is SMALLER than the ~330 mm estimate the frozen 500-670 mm corner band
+  was checked against — favourable (the car can turn tighter than assumed),
+  not a new risk, and it does not unfreeze corner geometry (`gotchas.md`/
+  Appendix L): **T2's empirical test on the rolling chassis is still the
+  gate**, this is a better arithmetic bound than before it, nothing more.
+  **Open: does the front/steering tire actually match the 55.75 mm rear
+  tire diameter?** If not, this number needs the real front diameter.
+- **Servo-to-pinion coupling: Evan reports a rack-and-pinion mechanism
+  already built and "strong" — the specific part/method is not yet named in
+  this file.** PRD task 8c(ii)'s done-check needs "a coupling selected with
+  its stall-torque margin stated" (an SF number, per the table above), which
+  needs to know what actually bridges the MG90S spline to the Lego pinion —
+  the Adafruit #4252 adapter, a native Lego Technic connector on the servo
+  horn, something else. **Not closed here — asked Evan directly, see the
+  chat reply this entry was written alongside.**
