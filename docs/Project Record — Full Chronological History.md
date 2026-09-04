@@ -135,6 +135,7 @@ the dated entry, not the digest.
 - [CT — Correction: CS's heading has literal escape text where an arrow and dash belong](#appendix-ct---correction-css-heading-has-literal-escape-text-where-an-arrow-and-dash-belong-2026-09-03) (09-03)
 - [CU — Wire kits right-sized after Evan asked why so much - 450ft cut to 180ft, total 427.78](#appendix-cu---wire-kits-right-sized-after-evan-asked-why-so-much---450ft-cut-to-180ft-total-42778-2026-09-03) (09-03)
 - [CV — Evan found a cheaper wire listing (SCHDRA) - further -5.43, total 422.35](#appendix-cv---evan-found-a-cheaper-wire-listing-schdra---further--543-total-42235-2026-09-03) (09-03)
+- [CW — 22 AWG revert plus full bulk-item audit - rocker switch and fuse holder right-sized, total 410.68](#appendix-cw---22-awg-revert-plus-full-bulk-item-audit---rocker-switch-and-fuse-holder-right-sized-total-41068-2026-09-03) (09-03)
 
 ---
 
@@ -10841,3 +10842,73 @@ pointed question or doing his own search, not by anything I checked
 proactively. Still open from CU: whether the LED/resistor-kit/cap
 bulk-packs in the same row have a cheaper or better-sized alternative,
 unchecked.
+
+# Appendix CW - 22 AWG revert plus full bulk-item audit - rocker switch and fuse holder right-sized, total 410.68 (2026-09-03)
+Two things from Evan in one message: (1) a correction — he only switched
+the 26 AWG wire to SCHDRA (Appendix CV), he still has the Fermerry 22 AWG
+6x5ft on hand; (2) an instruction — "all the other amazon items have very
+large part counts see if there are options for less," extending the
+wire-right-sizing exercise (Appendix CU) to the rest of the Amazon-folded
+row.
+
+## CW.1 The 22 AWG revert
+
+CV had switched BOTH gauges to SCHDRA. Wrong — Evan only meant 26 AWG.
+Reverted 22 AWG back to the Fermerry 6x5ft pick ($9.69) in both the row 16
+line and the ORDER SHEET, keeping SCHDRA only for 26 AWG ($9.99). Final
+wire cost: $19.68 (was $20.75 when both were SCHDRA).
+
+## CW.2 Audit of the other nine bulk items, checked live
+
+| item | old pack | real need | result |
+|---|---|---|---|
+| Rocker switch | 10-pack, $15.00 | 1 | **switched: DaierTek 5-pack, $6.39** |
+| Fuse holder+fuses | 10 holders/70 fuses, $9.98 | 1 holder, ~10 fuses | **switched: Anyongora 4-pack/20 fuses, $7.99** |
+| XT30 pairs | 20-pack, $11.99 | 1 | no better option (smaller genuine packs cost more/pair or ship in 3-7 weeks) |
+| 40-pin headers | 20-pack, $6.29 | 1-2 | already the cheapest listing found |
+| LEDs (x3 colors) | 100-pack each, $6.99 | 8 total | no smaller-count variant exists on the listing |
+| Resistor kit | 600pc, $7.38 | ~12 | smaller assortment kits found were BOTH pricier and larger |
+| Heat shrink | 720pc, $7.99 | ~20 | no smaller/cheaper option found |
+| 0.1uF caps | 50-pack, $6.99 | ~4 | already the smallest tier on the listing |
+| 470uF caps | 10-pack, $7.07 | ~3 | not checked (already modest) |
+| MG90S servo, proto shield | 2-packs | 1 each | not checked — both keep a deliberate spare for stated failure-mode reasons |
+
+**Two real wins out of nine checked; seven were already at or near the
+market floor.** This matches the "small-order problem" pattern from
+Appendix CP: components this cheap generally aren't sold in tiny
+quantities on Amazon because per-listing overhead dominates, so a smaller
+pack often costs the same or more per unit. The rocker switch and fuse
+holder were the exceptions — both had a genuinely smaller AND cheaper
+listing with equal or better specs (the rocker switch pick is also
+better-matched: 12V DC/automotive rated vs. the superseded SparkFun
+part's 125VAC household rating).
+
+## CW.3 Rows 14 and 15 also updated, closing an earlier flagged gap
+
+Appendix CT-CV's row-linking work deliberately left rows 14 (rocker
+switch) and 15 (fuse holder) alone — they already had real vendor links
+(SparkFun, bc-robotics) that were stale but not missing, flagged as
+out-of-scope at the time. Since both items are now being actively
+re-sourced, that staleness closes here too: rows 14 and 15 both marked
+SUPERSEDED, pointing at the same Amazon picks the ORDER SHEET uses.
+
+## CW.4 Totals, re-verified with an independent hand-sum before writing
+
+    fixed vendors (unchanged):                                    $281.45
+    Amazon-folded row, rocker+fuse right-sized:                  $125.50
+    Addicore backordered (unchanged):                               $3.73
+    TOTAL:                                                        $410.68
+
+Down from $422.35 (Appendix CV). All-in estimate, same rough method:
+**≈$425-$440** (was ≈$435-450). Consolidation-cost callout restated: net
+**+$93.95 to +$100.20** over the pre-fold estimate (was +$105.62 to
++$111.87 in CV) — the running total has now dropped under $100 for the
+first time since the fold, from $135-142 at Appendix CQ's peak.
+
+## CW.5 State
+
+**Nothing ordered.** BOM total: $410.68 before shipping, ≈$425-440
+all-in. Five corrections/right-sizings in one evening (CR/CS/CU/CV/CW) —
+this session's own pattern of catching bulk-pack overbuy (Appendix CP's
+own finding) applied to itself, twice, after Evan pushed on it directly
+both times.
