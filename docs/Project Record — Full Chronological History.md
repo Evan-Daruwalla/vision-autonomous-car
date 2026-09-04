@@ -134,6 +134,7 @@ the dated entry, not the digest.
 - [CS — Real differential is 20t\u219228t (N=1.400), not the documented config B \u2014 top speed is 4.1-4.7mph, over the target band](#appendix-cs---real-differential-is-20tu219228t-n1400-not-the-documented-config-b-u2014-top-speed-is-41-47mph-over-the-target-band-2026-09-03) (09-03)
 - [CT — Correction: CS's heading has literal escape text where an arrow and dash belong](#appendix-ct---correction-css-heading-has-literal-escape-text-where-an-arrow-and-dash-belong-2026-09-03) (09-03)
 - [CU — Wire kits right-sized after Evan asked why so much - 450ft cut to 180ft, total 427.78](#appendix-cu---wire-kits-right-sized-after-evan-asked-why-so-much---450ft-cut-to-180ft-total-42778-2026-09-03) (09-03)
+- [CV — Evan found a cheaper wire listing (SCHDRA) - further -5.43, total 422.35](#appendix-cv---evan-found-a-cheaper-wire-listing-schdra---further--543-total-42235-2026-09-03) (09-03)
 
 ---
 
@@ -10784,3 +10785,59 @@ needs rather than what the first plausible listing sold. Not re-audited:
 whether the OTHER bulk-pack items in this row (LEDs, resistor kit, caps)
 have a similarly oversized default that a smaller listing tier would fix
 — flagged as an open question, not checked here.
+
+# Appendix CV - Evan found a cheaper wire listing (SCHDRA) - further -5.43, total 422.35 (2026-09-03)
+Evan sent a link (SCHDRA 26 AWG wire kit, found via his own Amazon search)
+minutes after Appendix CU right-sized the wire to the Fermerry brand's
+smallest available tier. He found something better than what I picked.
+
+## CV.1 What the link is, verified live
+
+`https://www.amazon.com/dp/B0C9MB4DTY` — SCHDRA 26 AWG Silicone Wire Kit,
+6 colors x 20ft, **$9.99, In Stock, Amazon's Choice, 4.5 stars (130
+ratings)**. Cheaper than the Fermerry 26 AWG pick from an hour earlier
+($16.49 for 6x25ft) for slightly less wire (120ft vs 150ft) — better on
+both axes at once.
+
+**The listing is a multi-gauge, multi-length product family** — one page,
+a "Size" selector covering 18/20/22/24/26/28/30 AWG in both PVC and
+silicone, each a separately priced variant. Checked the 22 AWG silicone
+variant on the same family: **6 colors x 13ft, $10.76, In Stock, 4.3
+stars (147 ratings)**, its own ASIN `B0C7T9KYND`.
+
+## CV.2 Switched both gauges to SCHDRA
+
+| | Fermerry (Appendix CU, right-sized) | **SCHDRA (Evan's find)** |
+|---|---|---|
+| 22 AWG | 6x5ft, $9.69 | **6x13ft, $10.76** |
+| 26 AWG | 6x25ft, $16.49 | **6x20ft, $9.99** |
+| total | $26.18, 180 ft | **$20.75, 198 ft** |
+
+**Further $5.43 saved**, for slightly MORE total wire (198 ft vs 180 ft)
+and a better gauge balance — Fermerry's right-sized picks were skewed
+oddly toward 26 AWG (150 ft) against almost no 22 AWG (30 ft); SCHDRA's
+78ft/120ft split is closer to even. Both variants are silicone, keeping
+the flexibility rationale from Appendix CU (matters on a car that
+vibrates) intact.
+
+## CV.3 Totals, re-verified with an independent hand-sum before writing
+
+    fixed vendors (unchanged):                                    $281.45
+    Amazon-folded row, wire re-sourced:                           $137.17
+    Addicore backordered (unchanged):                               $3.73
+    TOTAL:                                                        $422.35
+
+Down from $427.78 (Appendix CU). All-in estimate, same rough method:
+**≈$435-$450** (was ≈$440-455). Consolidation-cost callout restated: net
+**+$105.62 to +$111.87** over the pre-fold estimate (was +$111.05 to
++$117.30 in CU).
+
+## CV.4 State
+
+**Nothing ordered.** BOM total: $422.35 before shipping, ≈$435-450 all-in.
+Four corrections in a row today (CR owned cable, CS real gear ratio, CU
+right-sized wire, now this) — three of the four caught by Evan asking a
+pointed question or doing his own search, not by anything I checked
+proactively. Still open from CU: whether the LED/resistor-kit/cap
+bulk-packs in the same row have a cheaper or better-sized alternative,
+unchecked.
