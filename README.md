@@ -125,7 +125,7 @@ Design decisions are settled and costed; nothing is bought.
 - **Power:** split source. USB power bank to the Pi, separate 2S pack to the
   motor and servo, one shared ground. Combining them puts 4.62 A on a 3 A
   rail during a stall and resets the Pi mid-run.
-- **Budget:** ~~≈$178–181, under a $200 ceiling~~ → ~~≈$226–234 before shipping~~ → **$401.70 before shipping, ≈$415–430 with** (re-priced 2026-08-08, 2026-09-02, and repeatedly on 2026-09-03 as the BOM was consolidated onto fewer vendors and each bulk-pack line was right-sized). The **$200 ceiling is long breached**; the largest single item is the Raspberry Pi 5 starter kit at $179.99. `docs/BOM.md` is the order list and the only current figure.
+- **Budget:** ~~≈$178–181, under a $200 ceiling~~ → ~~≈$226–234 before shipping~~ → **$402.45 before shipping, ≈$415–430 with** (re-priced 2026-08-08, 2026-09-02, and repeatedly on 2026-09-03 as the BOM was consolidated onto fewer vendors and each bulk-pack line was right-sized). The **$200 ceiling is long breached**; the largest single item is the Raspberry Pi 5 starter kit at $179.99. `docs/BOM.md` is the order list and the only current figure.
 
 A parametric Lego-fit tolerance coupon is generated and geometrically
 self-validated (manifold and signed-volume checks pass), but **it has not been

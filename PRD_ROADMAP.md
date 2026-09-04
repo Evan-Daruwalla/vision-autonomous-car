@@ -462,12 +462,17 @@ transfer gap) must not block the capstone.
         real Lego axle; never print the cross profile. Constraint written to
         `docs/WIRING_PROTOSHIELD.md` §2.4a. Done: a coupling selected with its
         stall-torque margin stated.
-        **PARTIAL 2026-09-03 (Appendix DD): Evan reports the rack-and-pinion
-        already built and "strong" — MG90S kept over Geekservo 270 the same
-        session ("the more powerful servo," Appendix DD). NOT done yet by this
-        task's own bar: the specific part/method bridging servo spline to Lego
-        pinion is not named, so no stall-torque margin can be stated. Asked
-        directly; update this line once named.**
+        **PARTIAL 2026-09-03 (Appendices DD/DF): CHOSEN — Adafruit #4252**,
+        already built by Evan, reports it "strong." That empirically confirms
+        the spline fit on his real MG90S (Adafruit's own listing does not
+        guarantee it beyond their own micro servo). **Still not fully closed
+        by this task's own bar**: no numeric stall-torque margin exists or can
+        be computed for this part — it is injection-moulded, not PLA, so
+        Appendix BV's interlayer-shear math does not transfer, and Adafruit
+        publishes no torque rating. Evan's field report is the practical
+        ceiling without a destructive test; treated as sufficient for this
+        build. MG90S kept over Geekservo 270 in the same exchange ("the more
+        powerful servo," Appendix DD).
 
 8d. **Export the inference stack to ONNX — BEFORE the first drive, not after**
     (appended 2026-09-03, Appendix CI). Recommended by

@@ -144,6 +144,7 @@ the dated entry, not the digest.
 - [DC — Task 8e: uno_control.ino rewritten for WS2812B, compiled clean, not hardware-verified; LIGHTING_SPEC.md brought current](#appendix-dc---task-8e-uno_controlino-rewritten-for-ws2812b-compiled-clean-not-hardware-verified-lighting_specmd-brought-current-2026-09-03-2223-cdt) (09-03)
 - [DD — Geekservo 270 closed (MG90S kept); wheelbase geometric estimate 179.25mm; coupling built but margin unstated; Vilros kit already closed](#appendix-dd---geekservo-270-closed-mg90s-kept-wheelbase-geometric-estimate-17925mm-coupling-built-but-margin-unstated-vilros-kit-already-closed-2026-09-03-2236-cdt) (09-03)
 - [DE — Correction to DD: front/rear tires differ (42.25mm/55.75mm), wheelbase estimate revised to 185.95mm](#appendix-de---correction-to-dd-frontrear-tires-differ-4225mm5575mm-wheelbase-estimate-revised-to-18595mm-2026-09-03-2240-cdt) (09-03)
+- [DF — Steering coupling CHOSEN: Adafruit #4252, built and reported strong; no torque margin publishable; BOM total corrected to $402.45](#appendix-df---steering-coupling-chosen-adafruit-4252-built-and-reported-strong-no-torque-margin-publishable-bom-total-corrected-to-40245-2026-09-03-2244-cdt) (09-03)
 
 ---
 
@@ -11607,3 +11608,70 @@ figure replaces it, per the project's correction convention.
 **Nothing measured with calipers, nothing weighed, nothing bench-tested.**
 The servo-to-pinion coupling question from Appendix DD is still open —
 unaddressed by this correction.
+
+# Appendix DF - Steering coupling CHOSEN: Adafruit #4252, built and reported strong; no torque margin publishable; BOM total corrected to $402.45 (2026-09-03 22:44 CDT)
+Evan answered the open question from Appendix DD: "it's the adafruit 4252
+adapter." The steering coupler — the highest-torque joint on the car,
+where a printed cross-axle stub was already proven to fail (Appendix BV,
+SF 0.57-0.96) — is chosen and, per Evan's earlier report (Appendix DD),
+already built.
+
+## DF.1 What this closes
+
+`docs/BOM.md` row 22 and `steering.md` already named the Adafruit #4252
+(micro-servo spline -> 16mm Lego cross axle, $0.75) as the one manufactured
+candidate, with two open flags: Adafruit's own listing does not guarantee
+the spline fit beyond their own micro servo (MG90S usually shares that
+spline class but it was unconfirmed), and no coupling had actually been
+chosen. Both close together: Evan built it on his real MG90S and reports
+it "strong" — that IS the spline-fit confirmation the listing withheld,
+arriving empirically rather than from the vendor.
+
+## DF.2 What this does NOT close
+
+PRD task 8c(ii)'s done-check asks for "a coupling selected with its
+stall-torque margin stated" — a number, the same shape as the printed-PLA
+SF table in `steering.md` (Appendix BV: 6.64 MPa at the N20's stall vs
+15-25 MPa PLA interlayer shear strength, giving SF 2.26-3.77 for the drive
+coupler and 0.57-0.96 for a printed steering coupler). That math worked
+because PLA's interlayer shear strength is a known material property.
+The Adafruit #4252 is injection-moulded plastic — a different process with
+no interlayer plane and an unpublished material — and Adafruit states no
+torque rating for the part anywhere in its listing. There is no published
+number to compute a margin from, and this session has no way to run a
+destructive test. **A part is selected. A numeric margin is not stated,
+and cannot be honestly stated from anything available.** Evan's "strong"
+is real evidence — his own hands on the assembled mechanism — but it is
+a field report, not an engineering number, and the record should not
+blur the two.
+
+## DF.3 Recommendation, stated rather than silently assumed
+
+Treat Evan's field assessment as sufficient to proceed for a hobby-scale
+build, and leave the numeric-margin half of the done-check open rather
+than force-closing it with an invented figure. If a real number is later
+wanted, the paths are: contact Adafruit for any internal spec, or test a
+spare unit to failure once parts arrive. Neither is scheduled.
+
+## DF.4 BOM correction: row 22 was a range, is now a point, total moves
+
+Row 22 previously priced at "$0.00-0.75" because the coupling was
+unchosen and the BOM's stated total ($401.70) used the LOW end — the
+free printed option Appendix BV had already proven fails. With the
+Adafruit #4252 now the actual choice, that low end no longer applies:
+
+    $401.70 (old sum, row 22 = $0.00) + $0.75 (row 22 = $0.75) = $402.45
+
+Corrected in `docs/BOM.md` (row 22, the TOTAL row, and the SUM OF ROWS
+prose) and propagated to every live doc quoting the old figure:
+`HANDOFF.md` (three places), `docs/LIGHTING_SPEC.md`, `README.md`. The
+record's own prior $401.70 mentions (Appendix DB and others) are left
+as written — append-only, correct at the time they were written.
+
+## DF.5 State
+
+**Nothing ordered.** BOM total now **$402.45** before shipping,
+≈$415-430 all-in (shipping estimate unchanged — $0.75 does not move a
+rounded range). The steering coupling is chosen and, per Evan, built and
+functioning; it has not been measured, weighed, or destructively tested
+by anyone in this project.

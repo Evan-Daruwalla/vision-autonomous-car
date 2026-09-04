@@ -207,7 +207,7 @@ defensible. Passing a rule off as a learned behaviour is not.
   superseded 2026-09-03 by the WS2812B swap (Appendices CX/CY/DA)** — kept
   in §2/§3 for the trail, not repeated here.
 - **Nothing is ordered.** BOM row 18: BTF-LIGHTING WS2812B, 1m/144px,
-  $11.99, part of the **$401.70** total (`docs/BOM.md`). BLOCKED-ON-EVAN
+  $11.99, part of the **$402.45** total (`docs/BOM.md`). BLOCKED-ON-EVAN
   with the rest of the order.
 - **Firmware: written, not hardware-verified.** `firmware/uno_control/`
   implements the 3-pixel-per-segment layout and the head-only DRL decision

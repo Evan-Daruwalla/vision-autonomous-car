@@ -167,11 +167,21 @@ servo-to-pinion coupler.
   corner band was checked against — favourable, not a new risk — and still
   does not unfreeze corner geometry (`gotchas.md`/Appendix L): **T2's
   empirical test on the rolling chassis is still the gate.**
-- **Servo-to-pinion coupling: Evan reports a rack-and-pinion mechanism
-  already built and "strong" — the specific part/method is not yet named in
-  this file.** PRD task 8c(ii)'s done-check needs "a coupling selected with
-  its stall-torque margin stated" (an SF number, per the table above), which
-  needs to know what actually bridges the MG90S spline to the Lego pinion —
-  the Adafruit #4252 adapter, a native Lego Technic connector on the servo
-  horn, something else. **Not closed here — asked Evan directly, see the
-  chat reply this entry was written alongside.**
+- **Servo-to-pinion coupling CHOSEN: Adafruit #4252** (Evan, 2026-09-03) —
+  the manufactured candidate this file and `docs/BOM.md` row 22 already
+  named, $0.75, micro-servo spline → 16 mm Lego cross axle. Evan reports it
+  already built and "strong," which is real information: it **empirically
+  confirms the spline fit** on his actual MG90S — the open question in the
+  first section of this file ("Adafruit's own wording... not guaranteed to
+  fit with any other kind of servo splines... verify the spline before
+  buying") is answered by his own build, not by the vendor's guarantee.
+  **PRD task 8c(ii)'s done-check ("a coupling selected with its stall-torque
+  margin stated") is only PARTIALLY met.** A part is selected. A numeric
+  margin is not, and cannot be computed the way the printed-PLA case was
+  (Appendix BV's SF 0.57-0.96 came from PLA's known interlayer shear
+  strength) — **Adafruit publishes no torque rating for this injection-
+  moulded part.** The honest ceiling without a published spec or a
+  destructive test is Evan's own field assessment ("strong"), which is real
+  evidence for a hobby-scale build but not a stated SF. Recommend treating
+  that as sufficient for now rather than blocking on a number the vendor
+  does not publish; flagged, not silently closed.
