@@ -138,6 +138,7 @@ the dated entry, not the digest.
 - [CW — 22 AWG revert plus full bulk-item audit - rocker switch and fuse holder right-sized, total 410.68](#appendix-cw---22-awg-revert-plus-full-bulk-item-audit---rocker-switch-and-fuse-holder-right-sized-total-41068-2026-09-03) (09-03)
 - [CX — 8 discrete LEDs replaced by a WS2812B strip - PWM pins freed, total under 400 for the first time](#appendix-cx---8-discrete-leds-replaced-by-a-ws2812b-strip---pwm-pins-freed-total-under-400-for-the-first-time-2026-09-03) (09-03)
 - [CY — Correction: WS2812B data is one-way, cut strip segments need 2 pins not 1](#appendix-cy---correction-ws2812b-data-is-one-way-cut-strip-segments-need-2-pins-not-1-2026-09-03) (09-03)
+- [CZ — The 2 open WS2812B figures quantified - tick loss ~0.027%, current draw ~80mA realistic](#appendix-cz---the-2-open-ws2812b-figures-quantified---tick-loss-0027-current-draw-80ma-realistic-2026-09-03) (09-03)
 
 ---
 
@@ -11062,3 +11063,66 @@ re-price.
 needs to target 2 independent NeoPixel/FastLED strip objects rather than
 1 combined array — a detail the eventual lighting code has to get right,
 now correctly reflected in the docs before anything gets soldered.
+
+# Appendix CZ - The 2 open WS2812B figures quantified - tick loss ~0.027%, current draw ~80mA realistic (2026-09-03)
+Evan: "resolve the 2 open figures in hardware.md and BOM." Appendix CX
+had flagged two things qualitatively — strip current draw ("well under
+that," no number) and encoder tick loss ("can drop ticks," no number) —
+without computing either. Computed both, using established project
+constants rather than fresh assumptions where they existed.
+
+## CZ.1 Figure 1 — encoder tick loss during pixel writes, quantified
+
+Inputs, all already established elsewhere in this project: 358
+counts/output rev (measured); N=1.4, 55.75mm tire, 12.5% cruise torque
+(Appendix CS); WS2812B protocol timing (~1.25µs/bit × 24 bits/pixel =
+30µs/pixel, standard); firmware's existing `BLINK_MS`=340ms constant
+(already in `uno_control.ino`, reused here for indicator blink rate).
+New assumption, stated explicitly: 3 pixels/segment (1 white front + 1
+red rear + 1 amber indicator per side), since the actual pixel layout
+isn't decided yet.
+
+    wheel rpm, no-load (worst case): 714.3
+    ticks/sec, no-load:              4261.9
+    disable time per segment write:  90us (3 pixels x 30us)
+    indicator toggle rate:           2.94/sec (from BLINK_MS=340ms)
+    fraction of time disabled:       0.0265%
+    ticks lost/sec, worst case:      1.13
+    -> about 1 tick lost per 3800
+
+**Small and likely tolerable — but the number is conditional on the
+pixel count and update strategy, neither of which is decided, and
+nothing is verified on real hardware.** Recompute once those are fixed.
+
+## CZ.2 Figure 2 — realistic current draw, quantified
+
+Grounded against the ALREADY-established old-scheme reference point
+(10 mA/LED called "plainly bright," Appendix BO) rather than picking an
+arbitrary brightness: red/amber pixels (1 sub-LED) scaled to 10mA (50%
+of their 20mA max); white pixels (3 sub-LEDs mixed) budgeted ~2x that
+for comparable visual brightness, 20mA (33% of their 60mA max).
+
+    busiest realistic case (6 pixels, all 3 zones both sides): ~80mA
+    absolute worst case (6 pixels, full white, 100% brightness):  360mA
+    existing peak (motor+servo+old LEDs):                        840mA
+    + realistic strip -> 920mA, margin to 3A rating:              2.08A
+    + worst-case strip -> 1200mA, margin to 3A rating:             1.8A
+
+Either figure leaves comfortable headroom. This doesn't change the
+purchase decision — the earlier "well under that" call was directionally
+right — but it's now a number instead of a hand-wave.
+
+## CZ.3 Corrected in place
+
+`hardware.md`'s WS2812B bullet and `docs/BOM.md` (row 18 + the Third-pass
+note paragraph) all updated with both figures and their stated
+assumptions, replacing the qualitative "can drop ticks" / "well under
+that" language.
+
+## CZ.4 State
+
+**Nothing ordered, nothing built.** Both figures are estimates under
+named assumptions, not measurements — flagged as such in both docs.
+The firmware decision (pixel layout, update strategy, whether to mitigate
+tick loss at all given how small it is) is still open and still gates
+writing the lighting code.

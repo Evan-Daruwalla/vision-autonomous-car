@@ -192,13 +192,24 @@ traps in `sim-harness.md`.
   risk — two independent pins is simpler. LM2596 headroom
   checked: module rated 3A (Addicore listing, closing a gap
   `WIRING_PROTOSHIELD.md` had flagged as unverified), existing peak load
-  840mA, ~2.16A margin — a strip at realistic (capped) brightness draws well
-  under that. **Open, genuinely unresolved by the purchase decision**:
-  Adafruit_NeoPixel/FastLED disable interrupts during each pixel write,
-  which can drop encoder ticks on D2/D3 — the car's only odometry. This
-  needs a firmware answer (short strips, update only between control-loop
-  ticks, or accept some tick loss as tolerable) before the lighting code
-  gets written; nothing implements lighting yet (`uno_control.ino`'s own
+  840mA. **Both open figures quantified 2026-09-03** (were qualitative —
+  "well under that" / "can drop ticks"), under stated assumptions (3
+  pixels/segment: 1 white front + 1 red rear + 1 amber indicator per
+  side; indicators blink at the firmware's existing `BLINK_MS`=340ms;
+  brightness scaled to the old scheme's established "plainly bright"
+  10mA/LED target — Appendix BO):
+  - **Current draw: ~80mA realistic, 360mA absolute worst case** (6
+    pixels, full white, 100% brightness, never actually commanded).
+    Either way the LM2596's 3A rating keeps **1.8–2.1A of margin**.
+  - **Encoder tick loss: ~0.027% of ticks, ~1 in 3800, ~1.1 ticks/sec**
+    — worst case, continuous indicator blink at the no-load top speed
+    (Appendix CS). Small and likely tolerable, but **the firmware
+    decision is still open** — this assumes a pixel count and update
+    strategy that aren't finalized, and isn't verified on real hardware
+    (nothing is built yet). Recompute once those are actually decided.
+  This resolves the two figures as bounded estimates, not as a closed
+  question — the firmware still has to be written to match. Nothing
+  implements lighting yet (`uno_control.ino`'s own
   header: "no motor, servo, encoder, LED or pack exists" as of the last
   firmware pass), so this is a clean slate, not a rewrite. `docs/BOM.md`
   row 18, Appendix CX. **`docs/LIGHTING_SPEC.md` and
