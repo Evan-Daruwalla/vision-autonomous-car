@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-03 ~20:13 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-03 ~20:29 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 104 appendices A–CZ; BM/BN/BP/BU/CT/CY are corrections to earlier entries). When this file and the record disagree about
+(append-only, 105 appendices A–DA; BM/BN/BP/BU/CT/CY are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -367,7 +367,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.
-- **THE ORDER (`docs/BOM.md`, $397.70 + shipping = ≈$410-425, UNDER $400 for the first time — after the Vilros kit, Amazon consolidation, right-sizing bulk items, and swapping 8 discrete LEDs for a WS2812B strip 2026-09-03).** Nothing is bought. **Lighting architecture changed**: WS2812B addressable strip (2 segments, 2 digital pins — data is one-way, they can't share one), frees 2 of the car's 3 PWM pins. Encoder-interrupt-conflict risk is now quantified (~0.027% tick loss, ~1 in 3800, worst case, under stated pixel/update assumptions — Appendix CZ) rather than just flagged, but the firmware decision itself is still OPEN and gates the not-yet-written lighting code. `docs/LIGHTING_SPEC.md` and `docs/WIRING_PROTOSHIELD.md` still describe the superseded discrete-LED scheme — flagged, not yet updated.
+- **THE ORDER (`docs/BOM.md`, $401.70 + shipping = ≈$415-430 — after the Vilros kit, Amazon consolidation, right-sizing bulk items, and swapping 8 discrete LEDs for a WS2812B strip; Evan then chose the 144 LED/m density over 60/m, +$4.00).** Nothing is bought. **Lighting**: WS2812B strip, 2 segments on **D4 and D7** (data is one-way, cut halves cannot share a feed), freeing **D5/D6 — the first spare PWM this design has had**. Encoder-interrupt risk quantified at ~0.027% tick loss for 3 px/segment (Appendix CZ); it scales with pixels per segment, so **cut to pixel count, not length**. **`docs/WIRING_PROTOSHIELD.md` and `firmware/SERIAL_PROTOCOL.md` are now current (Appendix DA)** — the vet found §2.2 naming the wrong motor (#1093) and no strip pins assigned at all. ⚠️ **`docs/LIGHTING_SPEC.md` still describes the superseded 8-LED scheme — the one doc not yet updated.**
   ⚠️ **TWO NEW SOURCING PROBLEMS, 2026-09-03:** the **EVE 25P cells are SOLD OUT** —
   but do NOT hunt for another 20 A cell, that rating was never load-driven (worst-case
   pack draw ~2.5 A against a 3 A fuse; **real spec is flat-top unprotected 18650,

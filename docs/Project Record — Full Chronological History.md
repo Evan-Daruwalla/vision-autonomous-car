@@ -139,6 +139,7 @@ the dated entry, not the digest.
 - [CX — 8 discrete LEDs replaced by a WS2812B strip - PWM pins freed, total under 400 for the first time](#appendix-cx---8-discrete-leds-replaced-by-a-ws2812b-strip---pwm-pins-freed-total-under-400-for-the-first-time-2026-09-03) (09-03)
 - [CY — Correction: WS2812B data is one-way, cut strip segments need 2 pins not 1](#appendix-cy---correction-ws2812b-data-is-one-way-cut-strip-segments-need-2-pins-not-1-2026-09-03) (09-03)
 - [CZ — The 2 open WS2812B figures quantified - tick loss ~0.027%, current draw ~80mA realistic](#appendix-cz---the-2-open-ws2812b-figures-quantified---tick-loss-0027-current-draw-80ma-realistic-2026-09-03) (09-03)
+- [DA — Wiring diagram vetted and rewritten for the WS2812B strips - wrong motor named, no strip pins assigned, 8 stale items](#appendix-da---wiring-diagram-vetted-and-rewritten-for-the-ws2812b-strips---wrong-motor-named-no-strip-pins-assigned-8-stale-items-2026-09-03) (09-03)
 
 ---
 
@@ -11126,3 +11127,114 @@ named assumptions, not measurements — flagged as such in both docs.
 The firmware decision (pixel layout, update strategy, whether to mitigate
 tick loss at all given how small it is) is still open and still gates
 writing the lighting code.
+
+# Appendix DA - Wiring diagram vetted and rewritten for the WS2812B strips - wrong motor named, no strip pins assigned, 8 stale items (2026-09-03)
+Evan switched the strip to the 144 LED/m variant of the same BTF-LIGHTING
+listing and asked two things: check the voltage, and vet the whole wiring
+diagram. **Voltage is fine. The wiring diagram had two things that would
+have stopped a build and eight that would have misled one** — rewritten,
+and the pin map it depends on was corrected to match.
+
+## DA.1 The 144/m variant — voltage fine, one real consequence
+
+`https://www.amazon.com/dp/B088B85G38`, **$11.99, In Stock, DC5V**, UL
+Listed, same BTF-LIGHTING ECO family, 4.4 stars (446 ratings). **DC5V is
+the same as the 60/m** — it runs off the existing 5.2 V LM2596 rail with
+no power-architecture change, which was the actual question.
+
+The consequence that is not obvious: **cut spacing drops from 16.67 mm to
+6.94 mm.** That is the upside (finer placement on a 148 mm car) and the
+trap together, because the interrupt-blind window scales with pixels per
+segment, not with how many are lit:
+
+| cut to | pixels/segment | write window | tick loss |
+|---|---|---|---|
+| same PIXEL count (3) | 3 | 90 us | 0.027 % |
+| same LENGTH (50 mm) | 7 | 210 us | 0.062 % |
+
+**Cut to pixel count, not to length.** 3 pixels at 144/m spans 21 mm,
+which is a plausible headlight cluster on this car anyway.
+
+## DA.2 Two findings that would have stopped a build
+
+1. **`WIRING_PROTOSHIELD.md` §2.2 named the wrong motor.** Prose said
+   "Pololu #1093 stall 1.6 A" — the **no-encoder** part — while §2.3 of
+   the same file wires six encoder conductors and §4.3 of the same file
+   documents the correction to #5159. The doc contradicted itself for
+   three weeks. The stall figure happened to be right for either part,
+   which is why nothing caught it.
+2. **No pin assignment existed for the strips at all.** §2.5 still
+   assigned four light channels (D4/D5/D6/D7) that no longer exist, and
+   zero pins for what replaced them. Anyone building from the document
+   had nowhere to land the two `DIN` lines.
+
+**Assigned D4 and D7.** All four were freed by the swap; NeoPixel
+bit-bangs its own timing and has no use for a PWM-capable pin, so
+spending D5 or D6 would burn the only two Timer0 PWM pins the design has
+left, for nothing.
+
+## DA.3 Eight stale items, all corrected
+
+§1 rows 5 and 7 (8 per-LED resistors, terminals for 8 LEDs) · §2.1's
+`+5V2` net (LED resistor commons) · §2.5 entirely (4 channels, the
+`Vf`/resistor table) · §3's star-ground list and its
+encoder-isolation rule · §5 step 7's "all 8 light" check and step 8's
+full-load check · §6's "which LEDs" open item · §6's LM2596 rating open
+item (**resolved: 3 A**) · §6's shield footprint citing a **114.75 mm car
+width** superseded a day earlier by Appendix CH (now 148.25 mm rear
+track / 135.75 mm body — the shield is 51 % of body width, not 60 %).
+
+**§2.2's paralleling rationale was false but its conclusion was right.**
+It justified bridging the TB6612 channels with "there is zero spare PWM,
+so the B channel cannot be driven independently." D5/D6 are free now, so
+that reason is dead — but bridging is still correct for the reason that
+always actually held: one motor, both channels drive it, and paralleling
+is what buys the 2 A rating. Rewritten to say so.
+
+## DA.4 Two gaps the new design needs that the old doc never had
+
+- **No bulk capacitance on the 5 V rail at the strip.** The existing
+  470–1000 uF sits across the TB6612's VM (the 7.4 V motor rail). WS2812B
+  pixels switch their drivers in step; without local bulk at the strip
+  feed that step lands on the 5.2 V rail, **which also feeds the Uno.**
+  Added a second 470 uF across `+5V2`/GND — parts already in `BOM.md`.
+- **No data-line series resistor in the net list.** `BOM.md` row 19
+  mentions one; the wiring doc never had it. Added, ~330–470 ohm, on the
+  shield at the pin end.
+
+Also added to §3: the strips are a **switching** load, so their returns
+join the star point on their own legs and specifically must not share a
+conductor with the encoder return.
+
+## DA.5 Checked and correct — no change
+
+**No level shifter needed, and that is worth stating because it usually
+is.** WS2812B wants `DIN` above ~0.7 x VDD = 3.64 V at 5.2 V; the Uno
+drives from the same 5.2 V rail, so there is over a volt of margin. The
+familiar 3.3 V-MCU problem does not exist on this car, and someone will
+otherwise "fix" it. Written into §2.5 so nobody adds a part.
+
+Encoder `Vcc` from `+5V2` and never `VBAT` (still the single most
+destructive thing in the file to get wrong), servo on D9/Timer1, motor
+PWM on D11/Timer2, fuse at the pack terminal, divider after the rocker —
+all still correct.
+
+## DA.6 The pin map was corrected too, for the same reason the vet exists
+
+`firmware/SERIAL_PROTOCOL.md` still listed D4/D5/D6/D7 as four light
+channels. Leaving it would have recreated the exact defect class this vet
+just found — a wiring doc disagreeing with the pin map it cites. D4/D7
+now read as the strip segments, **D5 and D6 as FREE**, and the "free
+pins" paragraph updated: the swap handed back two Timer0 PWM pins, the
+first PWM headroom this pin map has ever had. Its claim that "lights take
+the frequency-locked Timer0 pins" is struck — WS2812B brightness is data,
+not duty cycle.
+
+## DA.7 State
+
+**Nothing ordered, nothing built.** `docs/LIGHTING_SPEC.md` still
+describes the superseded 8-LED scheme and is **not** fixed here — flagged
+inline in the wiring doc's companion-docs line as the stale one, so the
+two cannot be silently trusted as agreeing. Step 8 of the build order now
+carries the first real test of Appendix CZ's interrupt estimate: drive
+with the indicators blinking and watch whether `ticks` counts cleanly.

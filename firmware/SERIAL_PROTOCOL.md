@@ -26,10 +26,10 @@ The map below is the corrected one. **`docs/BOM.md`'s diagram used to double-boo
 |---|---|---|
 | D2 | encoder A | INT0 — one of only two hardware interrupts |
 | D3 | encoder B | INT1 — **the other one; nothing else may use D3** |
-| D4 | left indicator | digital, on/off — blink is firmware |
-| D5 | headlights (PWM) | Timer0 |
-| D6 | tail lights (PWM) | Timer0 |
-| D7 | right indicator | digital |
+| D4 | **LED strip, LEFT segment `DIN`** | plain digital — NeoPixel bit-bangs its own timing, so a PWM-capable pin would be wasted here. Changed 2026-09-03 (Appendix DA); was "left indicator" |
+| D5 | **FREE** | ~~headlights (PWM), Timer0~~ — released 2026-09-03 when the 8 discrete LEDs became two WS2812B strips (Appendix CX). **First spare PWM this design has ever had** |
+| D6 | **FREE** | ~~tail lights (PWM), Timer0~~ — released 2026-09-03, same change. Timer0 PWM, frequency-locked to `millis()` |
+| D7 | **LED strip, RIGHT segment `DIN`** | plain digital. Two pins, not one: WS2812B data is `DIN`→`DOUT` only, so a cut strip's two halves cannot share a feed (Appendix CY) |
 | D8 | motor DIR A | → TB6612 AIN1 |
 | D9 | steering servo | Servo library, **claims Timer1** |
 | D10 | **TB6612 `STBY`** — master driver enable | added 2026-09-02, Appendix BL. Its PWM is already dead (Servo owns Timer1), so it is the cheapest free pin; spending it here keeps A1–A5 for future analog (motor current sense) |
@@ -40,13 +40,17 @@ The map below is the corrected one. **`docs/BOM.md`'s diagram used to double-boo
 **Motor PWM must be on Timer2 (D11), not Timer0 (D5/D6).** Timer0 also drives
 `millis()`, so its frequency cannot be changed without breaking timekeeping —
 and motor PWM is the one channel that may need its frequency raised above
-~20 kHz to get the whine out of the audible band. Lights never need that, so
-they take the frequency-locked Timer0 pins. This is the only pin assignment
-here that is forced rather than convenient.
+~20 kHz to get the whine out of the audible band. ~~Lights never need that, so
+they take the frequency-locked Timer0 pins.~~ **Stale 2026-09-03: the lights no
+longer take D5/D6, or any PWM pin — WS2812B brightness is data, not duty
+cycle.** D11-on-Timer2 is still forced, for the reason above; it is just no
+longer competing with anything for the pin.
 
-Free after this: ~~A0–A5~~ **A1–A5** ~~and D10~~, plus D0/D1 (the USB UART — **do
-not use**). **D10 became `STBY` on 2026-09-02**, so the only free pins left are
-the five analog ones. **A0 is the pack-sense divider input** as of 2026-09-02
+Free after this: ~~A0–A5~~ **A1–A5** ~~and D10~~ **plus D5 and D6**, and D0/D1
+(the USB UART — **do not use**). **D10 became `STBY` on 2026-09-02**, so ~~the
+only free pins left are the five analog ones~~ **the free pins are A1–A5 plus
+D5/D6 as of 2026-09-03** — the LED-strip swap handed back two Timer0 PWM pins,
+the first PWM headroom this pin map has ever had. **A0 is the pack-sense divider input** as of 2026-09-02
 (`firmware/uno_packguard/`, Appendix BJ) — corrected in BK.
 
 ### 1a. `STBY` — the gap this map had until 2026-09-02

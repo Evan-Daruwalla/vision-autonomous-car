@@ -1,9 +1,14 @@
 # Proto-shield wiring — the buildable schematic
 
 **Status: DESIGN, nothing is built and nothing is ordered.** Written
-2026-09-02 ~17:30 CDT. This is the point-to-point net list for an **Arduino
-proto shield** carrying every connection between the Uno, the TB6612, the
-motor/encoder, the servo, the lights and the pack.
+2026-09-02 ~17:30 CDT. **Vetted end-to-end and rewritten 2026-09-03 ~20:30 CDT
+(Appendix DA)** — the lighting scheme changed from 8 discrete LEDs to two
+WS2812B strip segments, which invalidated §2.5 outright and touched §1, §2.1,
+§3, §5 and §6. The vet also found §2.2 naming the wrong motor (#1093, the
+no-encoder part) three weeks after §4.3 recorded that exact correction, and
+§6 citing a car width superseded a day earlier. This is the point-to-point net
+list for an **Arduino proto shield** carrying every connection between the Uno,
+the TB6612, the motor/encoder, the servo, the lights and the pack.
 
 **It is deliberately not a PCB.** Not one component in this document has ever
 been in Evan's hands — no TB6612, no LM2596, no MG90S, no N20, no encoder. A
@@ -14,8 +19,10 @@ document has been built and driven, it becomes the verified schematic a PCB
 gets spun from — see §7 for exactly what changes at that point.
 
 Companion docs: pin map + protocol `firmware/SERIAL_PROTOCOL.md` · parts and
-prices `docs/BOM.md` · light channels `docs/LIGHTING_SPEC.md` · power
-architecture `docs/research/2026-07-23_power-system.md`.
+prices `docs/BOM.md` · light channels `docs/LIGHTING_SPEC.md` ⚠️ **still
+describes the superseded 8-discrete-LED scheme as of 2026-09-03 — this file is
+the current one where they disagree** · power architecture
+`docs/research/2026-07-23_power-system.md`.
 
 ---
 
@@ -26,10 +33,10 @@ architecture `docs/research/2026-07-23_power-system.md`.
 | 1 | Pololu #713 TB6612FNG carrier | soldered on 0.1" header, **not** flying leads |
 | 2 | LM2596 buck module @ 5.2 V | module, wired in — has its own trim pot, set it BEFORE connecting anything |
 | 3 | SPST rocker switch (or its leads to a panel mount) | switches the pack, not the Pi |
-| 4 | 470–1000 µF electrolytic + 0.1 µF ceramic | across VM/GND, physically at the TB6612 |
-| 5 | 8 × LED series resistors | one **per LED**, never one per channel — see §4.2 |
+| 4 | 470–1000 µF electrolytic + 0.1 µF ceramic | across VM/GND, physically at the TB6612. **Plus a second 470 µF across `+5V2`/GND at the strip feed point (added 2026-09-03)** — WS2812B pixels switch their drivers in step, and the strips sit at the end of a lead; without local bulk that step lands on the 5.2 V rail, which also feeds the Uno |
+| 5 | 2 × WS2812B data-line resistors, ~330–470 Ω | one in series with each segment's `DIN`. **Superseded the 8 per-LED resistors 2026-09-03 (Appendix CX)** — every WS2812B pixel has its own constant-current driver, so per-LED ballast no longer exists as a concept |
 | 6 | Pack-sense divider: 100 kΩ + 12 kΩ | ratio 0.10714, per `firmware/uno_packguard/` |
-| 7 | Screw terminals or JST for every off-board lead | motor+encoder, servo, 8 LEDs, pack |
+| 7 | Screw terminals or JST for every off-board lead | motor+encoder, servo, **2 × strip segment (3 conductors each: `+5V2`, `DIN`, GND)**, pack |
 
 **Zero flying Dupont jumpers is the point of the exercise.** Dupont crimps back
 out under vibration, and this vehicle vibrates. Every off-board connection
@@ -49,7 +56,7 @@ Signal wire ~26 AWG; motor and pack wire ~22 AWG (`BOM.md` row 16).
 | `PACK+F` | fuse out | XT30 male | 22 | disconnect point |
 | `PACK+SW` | XT30 female | rocker switch | 22 | on the shield |
 | `VBAT` | rocker out | TB6612 `VMOT`, LM2596 `VIN+`, divider top | 22 | the switched 7.4 V rail |
-| `+5V2` | LM2596 `VOUT+` | Uno `5V` pin, servo V+, LED resistor commons, encoder `Vcc` | 22 | **set the trim pot to 5.20 V with the module unloaded before connecting anything** |
+| `+5V2` | LM2596 `VOUT+` | Uno `5V` pin, servo V+, **both strip segments' +5V**, encoder `Vcc` | 22 | **set the trim pot to 5.20 V with the module unloaded before connecting anything** |
 | `GND` | see §3 | — | 22 | single star point |
 
 > ⚠️ **The Uno is fed at its `5V` pin, which BYPASSES the onboard regulator and
@@ -73,15 +80,22 @@ Signal wire ~26 AWG; motor and pack wire ~22 AWG (`BOM.md` row 16).
 | — | — | `AO1` + `BO1` bridged → motor M1 | output side of the parallel |
 | — | — | `AO2` + `BO2` bridged → motor M2 | |
 
-**Paralleling is forced, not tidy.** There is zero spare PWM on this Uno
-(`SERIAL_PROTOCOL.md` §1), so the B channel *cannot* be driven independently —
-the inputs must be bridged. Pololu states the 2 A paralleled rating but **does
-not document the pin pairing**; the pairing above is standard practice and is
-**unverified against the Toshiba datasheet — confirm before soldering.**
+**Paralleling is correct — but the reason this section used to give is dead.**
+It read "forced, not tidy: there is zero spare PWM, so the B channel *cannot*
+be driven independently." That stopped being true on 2026-09-03, when the LED
+strip freed D5 and D6 (Appendix CX). **Bridge them anyway**, for the reason
+that actually holds and always did: there is one motor, both channels drive
+it, and paralleling is what buys the 2 A continuous rating. Pololu states that
+rating but **does not document the pin pairing**; the pairing above is standard
+practice and is **unverified against the Toshiba datasheet — confirm before
+soldering.**
 
-Motor: Pololu #1093 stall 1.6 A vs 2 A paralleled continuous, duty capped
-~71 % of a full 8.4 V pack. Add **0.1 µF across the motor terminals** for brush
-noise; it is not in `BOM.md` row 16 and should be.
+Motor: **Pololu #5159** — *corrected 2026-09-03. This paragraph still said
+**#1093**, the no-encoder motor, long after §4.3 recorded the fix and while
+§2.3 below wires six encoder conductors. The stall figure was right for either
+part; the part number was not.* Stall 1.6 A vs 2 A paralleled continuous, duty
+capped ~71 % of a full 8.4 V pack. Add **0.1 µF across the motor terminals**
+for brush noise — `BOM.md` row 16 now carries it.
 
 ### 2.3 Encoder — Pololu #5159, 6-pin JST SH
 
@@ -163,30 +177,54 @@ caveat: socket gripping a real axle, never a printed cross stub.
 **UNRESOLVED.** No coupling is chosen. This section states the constraint the
 choice must satisfy, not the choice.
 
-### 2.5 Lights
+### 2.5 Lights — WS2812B strips
 
-Each channel drives **two** LEDs in parallel, each through **its own**
-resistor, sourcing from the pin to the LED anode; cathodes to star ground.
+**Rewritten 2026-09-03 (Appendices CX/CY/CZ).** This section used to specify 8
+discrete LEDs on 4 GPIO channels with a per-LED ballast resistor each. That
+whole scheme is superseded: two addressable strip segments, cut from one
+BTF-LIGHTING reel (`BOM.md` row 18), one per side of the car.
 
 | Net | Uno pin | Load | Type |
 |---|---|---|---|
-| `L_HEAD` | **D5** | 2 × white | PWM (Timer0) — dimmable for daytime mode |
-| `L_TAIL` | **D6** | 2 × red | PWM (Timer0) |
-| `L_IND_L` | **D4** | 2 × amber | digital, blink in firmware |
-| `L_IND_R` | **D7** | 2 × amber | digital |
+| `L_DAT_L` | **D4** | left segment `DIN`, via ~330–470 Ω | plain digital, software-timed |
+| `L_DAT_R` | **D7** | right segment `DIN`, via ~330–470 Ω | plain digital, software-timed |
 
-**Resistor sizing, at 10 mA per LED — not 20 (see §4.2):**
-`R = (5.0 − Vf) / 0.010`
+**Why D4 and D7 and not D5/D6.** All four were freed when the discrete LEDs
+went away. NeoPixel bit-bangs its own timing on any digital pin, so it has no
+use for a PWM-capable one — spending D5 or D6 here would burn the only two
+Timer0 PWM pins the car has left for nothing. D4 and D7 are plain digital and
+cost nothing to give up.
 
-| LED | Vf assumed | R computed | nearest E12 |
-|---|---|---|---|
-| white | 3.1 V | 190 Ω | **200 Ω** |
-| red | 2.0 V | 300 Ω | **300 Ω** |
-| amber | 2.1 V | 290 Ω | **300 Ω** |
+**Three conductors per segment**, both landing in screw terminals on the
+shield: `+5V2`, `DIN`, GND. The series resistor sits **on the shield at the pin
+end**, not at the strip.
 
-⚠️ **These `Vf` figures are placeholders.** `BOM.md` Verify item 5 — *which
-LEDs* — is still open and unanswered, and `Vf` is the only input to this table.
-**Recompute from the real datasheet before buying resistors.**
+⚠️ **Data is one-way — `DIN` → `DOUT`, and a cut severs it.** The two
+segments come from one reel but are two independent chains; they cannot share a
+data line. Each cut end exposes fresh `+5V`/`DIN`/GND pads — solder to those.
+Feeding a segment's `DOUT` end instead of its `DIN` end simply does nothing,
+and looks identical to a dead strip. **Mark the DIN end of each segment before
+it leaves the bench.**
+
+✅ **No level shifter, and this is worth stating because it usually is
+needed.** WS2812B wants `DIN` above ~0.7 × VDD ≈ 3.64 V on a 5.2 V rail. The
+Uno's outputs swing to the same 5.2 V rail that powers the strips, so the
+margin is over a volt. The usual 3.3 V-MCU problem does not exist here.
+
+**Zones are firmware, not wiring.** Headlights, tail lights and both
+indicators are now pixel indices inside each segment's array, not separate
+nets. The one constraint the wiring must respect is unchanged from
+`LIGHTING_SPEC.md` §1: **rear pixels must sit outside the forward camera's
+field of view.**
+
+**Current:** ~80 mA for both segments at working brightness, 360 mA if ever
+commanded full white (Appendix CZ). Both fit the `+5V2` budget — see §6.
+
+⚠️ **Pixel count per segment is not fixed, and it is not a free choice.**
+Every pixel in a chain is written on every update, whether lit or not, at
+~30 µs each — with interrupts off, which is where the encoder ticks get
+dropped (Appendix CZ). Longer segment = longer blind window. Cut to the pixels
+actually needed, not to a convenient length.
 
 ### 2.6 Pack sense
 
@@ -206,10 +244,12 @@ when the car is off, and a blown fuse reads 0 V → `FAULT`, which
 
 **One star point, at the TB6612's `GND` pad.** Everything returns there
 individually: pack negative, LM2596 `VOUT−`, Uno `GND`, servo GND, encoder GND,
-all 8 LED cathodes.
+**and each strip segment's GND on its own leg.**
 
 The rule that matters: **the encoder return must not share a conductor with the
-motor, servo, or LED returns.** Motor current is the noisiest thing on the
+motor, servo, or strip returns.** The strips belong in that list despite being
+small: a WS2812B segment steps its current every time a pixel changes, so it is
+a switching load, not a steady one. Motor current is the noisiest thing on the
 vehicle and the encoder is the one signal whose corruption is invisible —
 counts are just wrong, and `ticks` is the car's only odometry. Give the encoder
 its own return leg to the star point.
@@ -240,6 +280,13 @@ partly rewritten for the Uno. **Fix: run the LEDs at 10 mA** (20 mA/pin, in
 spec; 80 mA chip total, 40 % of the limit). 3 mm LEDs at 10 mA are plainly
 bright. No MOSFETs needed — `BOM.md` row 19's transistor fallback stays unbuilt.
 
+> **Superseded 2026-09-03 (Appendix CX), kept as the record of the defect.**
+> No LED current passes through an ATmega pin any more — the WS2812B strips
+> draw straight off `+5V2` and the Uno only sources a data line. The per-pin
+> limit this defect was about no longer binds. The finding still stands as
+> written: the original spec checked the chip-total limit and missed the
+> per-pin one, and that reasoning error is the reusable part.
+
 **4.3 `BOM.md` row 5 contradicts a decision Evan made on 2026-08-12.** The
 record (Appendix O, and again at three later points) has him choosing the
 **encoder** motor, **#5159 at $29.95**. Row 5 still lists **#1093 at $23.95**,
@@ -269,8 +316,8 @@ Nothing proceeds to the next row until the check passes.
 | 4 | Solder TB6612 + caps, including `STBY` to D10 | with D10 low, motor terminals high-Z; with D10 high and PWM 0, they short-brake |
 | 5 | Motor + encoder | drive at 20 % duty both directions; `ticks` counts up one way, down the other, ≈358 per output rev by hand |
 | 6 | Servo | sweeps full travel without buzzing at the ends; check the 5.2 V rail does not sag below 4.8 V at peak |
-| 7 | LEDs | all 8 light; measure one channel's pin current ≤ 20 mA |
-| 8 | Full-load rail check | motor stalled + servo moving + all lights on: 5.2 V rail holds, Uno does not reset |
+| 7 | LED strips | each segment addresses independently from its own pin; **check the LAST pixel of each, not just the first** — a cold `DIN` joint lights pixel 0 and nothing past it, which reads as "strip works" at a glance |
+| 8 | Full-load rail check | motor stalled + servo moving + both strips full white: 5.2 V rail holds, Uno does not reset. **Then repeat with the indicators blinking and watch `ticks`** — that is Appendix CZ's interrupt estimate (~0.027 % of ticks) meeting real hardware for the first time |
 
 Step 8 is the one that finds the LM2596 undersized if it is. Record the
 measurements — this table is portfolio material, not ceremony.
@@ -279,20 +326,38 @@ measurements — this table is portfolio material, not ceremony.
 
 ## 6. Open
 
-- **Which LEDs** (`BOM.md` Verify item 5) — gates every resistor in §2.5.
-- **Row 5 motor**, §4.3 — gates whether §2.3 is wired at all.
+- ~~**Which LEDs** (`BOM.md` Verify item 5) — gates every resistor in §2.5.~~
+  **MOOT 2026-09-03:** the discrete LEDs are gone and WS2812B has no `Vf`
+  question — the current source is inside each pixel.
+- ~~**Row 5 motor**, §4.3 — gates whether §2.3 is wired at all.~~ **CLOSED:**
+  `BOM.md` row 5 is #5159, and §2.2's prose was corrected to match on
+  2026-09-03 — it had been contradicting §4.3 in the same file until then.
 - **TB6612 parallel pin pairing** unverified against Toshiba, §2.2.
-- **LM2596 module current rating** unverified for the specific Addicore part;
-  §2 loads sum to ≈840 mA peak.
+- ~~**LM2596 module current rating** unverified for the specific Addicore
+  part~~ **RESOLVED 2026-09-03: rated 3 A**, per Addicore's own listing. §2
+  loads sum to ≈840 mA peak, plus ~80 mA for both strips at working
+  brightness (360 mA if driven full white) — **1.8–2.1 A of margin.** That is
+  a datasheet number on a $2.48 board, not a measurement: **step 8 is still
+  the real check**, and cheap LM2596 modules do derate when the inductor gets
+  hot.
+- **Pixels per segment, and how often they may be written.** Every pixel in a
+  chain is clocked out on every update with interrupts off (~30 µs each), and
+  the encoder is the car's only odometry. Appendix CZ puts the worst case at
+  ~0.027 % of ticks for 3 pixels/segment blinking at `BLINK_MS`. Nothing is
+  built and the pixel count is not fixed, so that number is an estimate
+  standing in for a measurement.
 - ~~**`STBY` in firmware.** `SERIAL_PROTOCOL.md` §1a and rule 4 specify the
   behaviour; nothing implements it, because nothing implements the protocol.~~
   **IMPLEMENTED 2026-09-02** — `uno_control.ino` drives D10 per §1a: brake
   for `BRAKE_MS`, then drop `STBY`; raised only after the first valid ARMED
   frame, never in `setup()`. *(This line was written 26 minutes AFTER the
   firmware existed — caught by the daily-audit, Appendix BY.)*
-- Shield footprint is 68.6 × 53.4 mm against a **measured 114.75 mm car
-  width** — it fits, but it is 60 % of the width and the stack height is
-  unbudgeted against the camera mount.
+- Shield footprint is 68.6 × 53.4 mm against the **current measured widths:
+  148.25 mm rear track, 135.75 mm body** (Appendix CH — the 114.75 mm figure
+  this line used to cite was superseded when Evan fitted new rear wheels). It
+  fits with more room than the old number implied — **51 % of body width**
+  rather than 60 % — but **the stack height is still unbudgeted against the
+  camera mount.**
 
 ---
 
