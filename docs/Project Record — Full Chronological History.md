@@ -137,6 +137,7 @@ the dated entry, not the digest.
 - [CV — Evan found a cheaper wire listing (SCHDRA) - further -5.43, total 422.35](#appendix-cv---evan-found-a-cheaper-wire-listing-schdra---further--543-total-42235-2026-09-03) (09-03)
 - [CW — 22 AWG revert plus full bulk-item audit - rocker switch and fuse holder right-sized, total 410.68](#appendix-cw---22-awg-revert-plus-full-bulk-item-audit---rocker-switch-and-fuse-holder-right-sized-total-41068-2026-09-03) (09-03)
 - [CX — 8 discrete LEDs replaced by a WS2812B strip - PWM pins freed, total under 400 for the first time](#appendix-cx---8-discrete-leds-replaced-by-a-ws2812b-strip---pwm-pins-freed-total-under-400-for-the-first-time-2026-09-03) (09-03)
+- [CY — Correction: WS2812B data is one-way, cut strip segments need 2 pins not 1](#appendix-cy---correction-ws2812b-data-is-one-way-cut-strip-segments-need-2-pins-not-1-2026-09-03) (09-03)
 
 ---
 
@@ -11016,3 +11017,48 @@ working code.
 all-in. The interrupt-conflict question from two messages ago is still
 open and still gates the firmware work — pricing and power-budget
 verification didn't resolve it, and weren't meant to.
+
+# Appendix CY - Correction: WS2812B data is one-way, cut strip segments need 2 pins not 1 (2026-09-03)
+Evan: "the led strip only moves data 1 way." Correcting a real gap in
+Appendix CX's plan, caught before anything was ordered.
+
+## CY.1 What was wrong
+
+CX described the 2 cut segments (from one BTF-LIGHTING 1m/60px reel) as
+needing "ONE software-timed digital pin," implicitly treating them as if
+they'd share a single data feed. WS2812B data is unidirectional
+(DIN→DOUT only, chip to chip) — it does not flow backward, and a physical
+cut severs the chain entirely. Two segments cut from one reel are two
+independent data chains, not one.
+
+## CY.2 The fix
+
+**Two digital pins, one per segment**, not one. Each cut segment's
+exposed end is a fresh DIN and can be driven independently once wired.
+The alternative — daisy-chaining them with a jumper from segment A's
+DOUT to segment B's DIN — would get back to a single pin, but costs a
+wire routed across the chassis between the two sides and a real risk of
+soldering it backward (DIN-to-DIN instead of DOUT-to-DIN, which simply
+doesn't work and is a nasty thing to debug blind). **Two independent
+pins is the simpler, more robust choice for this car.**
+
+**The PWM-pins-freed count is unaffected**: WS2812B needs no PWM
+hardware regardless of whether it's driven from 1 pin or 2 — the freed
+count stays 2 of the car's 3 previously-maxed-out PWM pins either way,
+since the Uno has non-PWM digital pins to spare for the extra line.
+
+## CY.3 Corrected in place
+
+`docs/BOM.md` row 18, its Third-pass note paragraph, and the
+`hardware.md` WS2812B bullet (Appendix CX) — all said "ONE...pin,"
+corrected to "TWO...pins, one per segment" with the daisy-chain
+alternative named and why it's not preferred. No BOM cost or purchase
+decision changes; this is a wiring-plan correction only, not a
+re-price.
+
+## CY.4 State
+
+**Nothing ordered.** BOM total unchanged at $397.70. Firmware still
+needs to target 2 independent NeoPixel/FastLED strip objects rather than
+1 combined array — a detail the eventual lighting code has to get right,
+now correctly reflected in the docs before anything gets soldered.

@@ -181,8 +181,15 @@ traps in `sim-harness.md`.
 - **LIGHTING ARCHITECTURE CHANGED 2026-09-03: WS2812B addressable RGB strip,
   not 8 discrete 3mm LEDs.** Evan's call — "much easier to wire and mount" —
   and it is, plus a real bonus: the old scheme spent the car's last 3 free
-  PWM pins with zero spare (`docs/PRD_ROADMAP.md` line ~415); the strip needs
-  ONE software-timed digital pin, freeing 2 of those 3. LM2596 headroom
+  PWM pins with zero spare (`docs/PRD_ROADMAP.md` line ~415); WS2812B needs
+  no PWM hardware at all, freeing 2 of those 3. ⚠️ **CORRECTED same day
+  (Evan): "the led strip only moves data 1 way."** DIN→DOUT only — cutting
+  one reel into 2 segments does NOT let them share a data feed; each cut
+  end needs its own pin. **Two digital pins, one per segment** (not one),
+  still non-PWM so the 2-freed-pins count is unchanged either way.
+  Daisy-chaining (a jumper from segment A's DOUT to segment B's DIN) would
+  get to one pin but adds a chassis-spanning wire and a DIN/DOUT mix-up
+  risk — two independent pins is simpler. LM2596 headroom
   checked: module rated 3A (Addicore listing, closing a gap
   `WIRING_PROTOSHIELD.md` had flagged as unverified), existing peak load
   840mA, ~2.16A margin — a strip at realistic (capped) brightness draws well
