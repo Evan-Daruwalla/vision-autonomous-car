@@ -7,12 +7,25 @@ beam pitch -- carrying three test features:
               Tests whether a real Lego pin pair / beam spans correctly, which
               catches printer dimensional scaling that a single hole cannot.
   PIN row     6 holes, 4.8 -> 5.3 mm. Target: a Lego pin pushes in and HOLDS.
-  AXLE row    6 holes, 5.2 -> 5.7 mm. Target: a Lego axle spins FREELY.
+  AXLE row    6 holes, 4.8 -> 5.3 mm. Target: a Lego axle spins FREELY.
 
 Nominal Lego pin hole is 4.8 mm, but FDM holes print undersize, so the useful
 answer is empirical -- hence the sweep. Community starting points are ~5.1 mm
 (pin fit) and 5.3-5.6 mm (free-rotating bore); those are unverified on THIS
 printer, which is the entire point of this part.
+
+v2 (2026-09-05): AXLE_LO moved from 5.2 to 4.8, same as PIN_LO. v1 (Bambu
+P1S, Bambu ABS Black, 99% shrinkage comp.) tested the axle row at 5.20-5.70
+and Evan reported ALL SIX too loose ("spin very smooth... seems a bit big"
+even at 5.20, the smallest). A round bore for a ROTATING cross-axle cannot
+go below the axle's tip-to-tip diagonal (~4.8 mm, same figure as the pin
+hole) without the corners binding, so 4.8 is the geometric floor, not a
+guess below anything tested -- the same reasoning `gen_servo_lego_coupler.py`
+uses for its `AXLE_ARM`/cross-socket sizing. v1's own pin-row sweep already
+found 4.80 mm the best PIN fit at these settings, so this range asks whether
+the same diameter that holds a pin also frees an axle, rather than assuming
+they land in the same place. v1's plate is kept on disk (`tolerance_coupon_v1.stl`,
+already measured) -- this is a new file, not an overwrite.
 
 Row identification (no text -- embossed fonts need a font engine):
   PIN row  = ONE 3 mm marker hole at the left end.
@@ -38,15 +51,19 @@ THICK = 8.0         # mm, matches a real Lego beam
 SEGMENTS = 64       # circle facets; must be divisible by 4
 PIN_REF = 5.1       # diameter used for the pitch row, mm
 MARKER = 3.0        # row-identification hole diameter, mm
+PIN_LO = 4.8        # pin-fit sweep low end, mm (unchanged since v1)
+AXLE_LO = 4.8       # axle-bore sweep low end, mm -- WAS 5.2 in v1; moved down
+                    # to the geometric floor (axle diagonal) after v1 found
+                    # the entire 5.2-5.7 mm range too loose. See module docstring.
 
 # (cell_x, cell_y) -> diameter in mm
 HOLES = {}
 for i, x in enumerate(range(4, 9)):                     # pitch row
     HOLES[(x, 1)] = PIN_REF
 for i, x in enumerate(range(1, 12, 2)):                 # pin-fit sweep
-    HOLES[(x, 3)] = round(4.8 + 0.1 * i, 4)
+    HOLES[(x, 3)] = round(PIN_LO + 0.1 * i, 4)
 for i, x in enumerate(range(1, 12, 2)):                 # axle-bore sweep
-    HOLES[(x, 5)] = round(5.2 + 0.1 * i, 4)
+    HOLES[(x, 5)] = round(AXLE_LO + 0.1 * i, 4)
 HOLES[(0, 3)] = MARKER                                  # 1 marker  -> PIN row
 HOLES[(0, 5)] = MARKER                                  # 2 markers -> AXLE row
 HOLES[(12, 5)] = MARKER
@@ -217,7 +234,7 @@ def write_stl(tris, path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("-o", "--out", default="cad/tolerance_coupon_v1.stl")
+    ap.add_argument("-o", "--out", default="cad/tolerance_coupon_v2.stl")
     args = ap.parse_args()
 
     tris = build()

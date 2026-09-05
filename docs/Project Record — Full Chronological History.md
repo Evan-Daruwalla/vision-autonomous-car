@@ -146,6 +146,8 @@ the dated entry, not the digest.
 - [DE — Correction to DD: front/rear tires differ (42.25mm/55.75mm), wheelbase estimate revised to 185.95mm](#appendix-de---correction-to-dd-frontrear-tires-differ-4225mm5575mm-wheelbase-estimate-revised-to-18595mm-2026-09-03-2240-cdt) (09-03)
 - [DF — Steering coupling CHOSEN: Adafruit #4252, built and reported strong; no torque margin publishable; BOM total corrected to $402.45](#appendix-df---steering-coupling-chosen-adafruit-4252-built-and-reported-strong-no-torque-margin-publishable-bom-total-corrected-to-40245-2026-09-03-2244-cdt) (09-03)
 - [DG — Printed servo-to-Lego coupler STL generated and validated; no cheaper commercial source exists; no torque margin claimed](#appendix-dg---printed-servo-to-lego-coupler-stl-generated-and-validated-no-cheaper-commercial-source-exists-no-torque-margin-claimed-2026-09-03-2320-cdt) (09-03)
+- [DH — Scheduled daily-audit: DG verified true against disk, and two self-checks that pass on the broken artifact - a track generator that validates its defaults instead of its output, and a split-seed guard installed at 1 of 3 sites](#appendix-dh---scheduled-daily-audit-dg-verified-true-against-disk-and-two-self-checks-that-pass-on-the-broken-artifact---a-track-generator-that-validates-its-defaults-instead-of-its-output-and-a-split-seed-guard-installed-at-1-of-3-sites-2026-09-04-0739-cdt) (09-04)
+- [DI — M1.3 tolerance coupon printed (Bambu P1S, ABS): pin row PASS at 4.80mm, axle row FAILS at every diameter, v2 sweep regenerated](#appendix-di---m13-tolerance-coupon-printed-bambu-p1s-abs-pin-row-pass-at-480mm-axle-row-fails-at-every-diameter-v2-sweep-regenerated-2026-09-05-1623-cdt) (09-05)
 
 ---
 
@@ -11790,3 +11792,208 @@ does not retire a purchased part with no torque margin until one of them
 survives a test. `cad/README.md` documents the part, its four unmeasured
 constants, and PETG rather than PLA (Appendix BV's failing numbers were
 computed against PLA).
+
+# Appendix DH - Scheduled daily-audit: DG verified true against disk, and two self-checks that pass on the broken artifact - a track generator that validates its defaults instead of its output, and a split-seed guard installed at 1 of 3 sites (2026-09-04, ~07:39 CDT)
+Scheduled `daily-audit` sweep. Classified ACTIVE by churn override: the last
+audit was Appendix BY (2026-09-02, ~19:27 CDT) and **31 non-audit commits**
+landed after it. Full cold `/audit` across code and docs, plus a
+`/landing-check` scoped to Appendix DG's claims. **Read-only — nothing was
+changed, nothing committed.** Manifest 230 tracked+untracked files reconciled
+against 878 on disk; the 648-file gap is `ml/data`, `ml/runs`,
+`sim/DonkeySimWin`, `graphify-out/cache`, `ml/vendor` and `__pycache__`, all
+gitignored and enumerated. No confirmed criticals.
+
+**Landing-check verdict: DG's claims are TRUE**, and it is the most honest entry
+in the recent window — it states its own validation hole (`build()` and
+`expected_volume()` share `ring_cross()`, so a wrong profile cancels), runs three
+checks from outside the module, and refuses to claim a torque margin.
+`cad/servo_lego_coupler_v1.stl` is byte-identical to what today's generator
+emits (57684 bytes, `cmp` clean) and DG.4's quoted output reproduces verbatim:
+ring points 72, triangles 1152, `duplicate-directed-edges=0
+unmatched-edges=0`, `volume 1015.1211 mm^3 (expected 1015.1211, rel.err
+1.05e-14)`, `OVERALL PASS`. An independent binary parse of the STL confirms
+1152 triangles and a bounding box of x/y -5.0000..5.0000, z 0.0000..16.0000 —
+the stated 10 x 16 mm — without trusting the generator. The generator prints an
+`UNVERIFIED: no torque margin is claimed` banner on every run, so the honesty
+rule is enforced in code, not only in prose.
+
+**What DG obligated and did not do.** Neither DF nor DG touched
+`docs/WIRING_PROTOSHIELD.md:177`, which still reads "UNRESOLVED. No coupling is
+chosen" — in the doc PRD task 8c(ii) names as that constraint's home, while
+`HANDOFF.md:376` separately claims the file "is now current".
+
+**Two false-green mechanisms, the same shape as the CA watchdog defect.**
+(1) `cad/track_layout_v2.py:448` calls `self_check()` — which builds from module
+constants — and only then at `:450` builds the real geometry from `args`.
+Reproduced: `--radius 0` prints `track_layout_v2 self_check: PASS` and writes an
+SVG/JSON for a track with 0 mm corners, exit 0. (2) The split-seed guard at
+`ml/rollout_eval.py:231-241` was built as a chokepoint and installed at one of
+three sites: `ml/train_controller.py:192` and `ml/diag_copycat.py:82` load the
+RNN checkpoint with an inline `torch.load(...)["model"]`, never binding the
+dict, so the guard is structurally unreachable there. Harmless only because
+every checkpoint on disk is seed 0; it goes live the moment the documented P5
+multi-seed workflow runs. Those two scripts produce the policy numbers and the
+18.2x copycat refutation. Smallest fix that holds: move the comparison into
+`ml/splits.py` as `assert_same_split(vae_ckpt, rnn_ckpt, name)` so a fourth
+consumer cannot be written without it.
+
+**The order sheet cannot execute the BOM.** `docs/BOM.md:235-244`, the section
+labelled "This is the section to buy from" at `:216`, sums to **$397.97**, not
+the $402.45 the row table sums to. Two independent summations agree. The
+$4.48 gap is three rows carrying no vendor line: row 22 (Adafruit #4252,
+$0.75 — Adafruit appears nowhere in the vendor table) and rows 10 + 12
+(Addicore, $1.25 + $2.48, both backordered). The row table itself is exact: an
+independent sum of all 24 rows is $402.45.
+
+**Other HIGHs.** `HANDOFF.md:370` still asserts "No coupling is chosen" in the
+BLOCKED-ON-EVAN list, 289 lines after `:81` records it as chosen.
+`firmware/README.md:75` says "No control firmware exists. The serial protocol is
+designed on paper only" — false since 2026-09-02, when `uno_control.ino` reached
+658 lines running on the board with 58 selftest checks; this is a public repo
+understating real verified work. `README.md:3` still opens "A 1/14-scale
+autonomous car" though `HANDOFF.md:215,250` strike 1:14 as superseded and the
+live lane rule (2.0 x 148.25 = 296.5 mm) implies about 1:12.1. The T3 hybrid
+print plan is stale by one car-width revision: docs say 9.36 m of boxes / ~79
+tiles / ~970 g / 31.9 m of street lines, the generator today says 10.674 m / 85
+tiles / 1051 g / 32.358 m — the 2026-09-03 re-measure propagated to lane, span
+and spare and then stopped, and the new figures appear in no markdown file.
+
+**HANDOFF has crossed the size where per-row correction is enough.** At 414
+lines it became self-contradictory four separate times on the same day's facts
+in this 31-commit window: coupling chosen vs not chosen, 148.25 vs 114.75 mm
+car, 296.5 vs 230 mm lane, and the $179.99 Vilros kit vs a struck-through "$70".
+Each row was correctly struck-and-appended in isolation; nothing checks the file
+against itself.
+
+Fifteen MEDIUM and eighteen LOW findings were reported to the console with
+file:line and a one-line fix each; they are not restated here.
+
+**Load-bearing negatives.** BOM row table sums to exactly $402.45 by two
+derivations. Record integrity exact: 111 `# Appendix` headings A-DG, unique and
+contiguous, 111 TOC entries, zero orphans either direction, **0 CR bytes** — the
+corruption Appendix CH found is fully cleaned. Append-only holds absolutely: 89
+commits touched the record and `git log --numstat` shows a deletion count of 0
+on every one. `pm-secretscan --history` over the full history returns 0 unique
+findings, and no private identifier appears in the six files `b1cfd18` touched.
+The pin map has zero conflicts across `WIRING_PROTOSHIELD.md`,
+`LIGHTING_SPEC.md`, `SERIAL_PROTOCOL.md` and the `.ino` constants. P2's
+done-check re-ran today: 102,888 frames, 88/88 episodes on both axes, split
+disjoint, `P2 CORPUS CHECK: PASS`, exit 0. **The CA watchdog defect cannot
+recur** — `loop()` samples `millis()` once at `:597` and threads that one `now`
+through `pack.poll()`, `handleFrame()` and the watchdog; no other site in
+`firmware/` has the two-sample shape, cross-checked two ways. The commit gate is
+live and fails closed: with the scanner absent it refuses with exit 1 unless
+`CAR_ALLOW_UNGATED_COMMIT` is set.
+
+**Not swept.** No `arduino-cli compile`, so the flash sizes 9680 B (source) and
+7888 B (flashed) rest on a captured transcript at record line 11456, not on an
+independent build. No mutation testing and no fuzzing — neither tool is
+installed and none was installed without asking; the floor check is that all 98
+firmware and host assertions compare against explicit expected values, none
+assertion-free. No `pip-audit`; `ml/requirements.txt` pinning was verified
+instead, including `--extra-index-url` as a real directive and `gym_donkeycar`
+at a commit SHA.
+
+# Appendix DI - M1.3 tolerance coupon printed (Bambu P1S, ABS): pin row PASS at 4.80mm, axle row FAILS at every diameter, v2 sweep regenerated (2026-09-05 16:23 CDT)
+M1.3's tolerance coupon (`cad/tolerance_coupon_v1.stl`, print-ready since
+2026-07-23) was printed and tested for the first time. Real result: the pin
+row closed cleanly, the axle row didn't — every commanded diameter tested
+was too loose, which is the exact "sweep brackets nothing" contingency the
+coupon's own README anticipated. Fixed with a v2 sweep, not a guess.
+
+## DH.1 Setup, as reported (no caliper data taken)
+
+Printer **Bambu P1S**, filament **Bambu ABS, Black** — replacing PLA+PETG
+as the standing chassis material (Evan, 2026-09-03/2026-09-05). 0.4 mm
+nozzle, 0.2 mm layer height, 2 walls (README suggests 3 — untested whether
+this matters for hole dimension, only flagged), 10% gyroid infill, 99%
+X/Y shrinkage compensation (Bambu Studio's ABS-specific setting — confirmed
+with Evan, not assumed). Exact print date/time not separately recorded.
+
+**No calipers were used.** Every verdict below is Evan's fit-by-feel
+against the coupon's own pass criteria (firm-thumb-press-and-holds for
+pins; free-spin-no-slop for axles), not a measured offset. This is a real
+gap against the coupon's own procedure ("also caliper each hole's actual
+printed diameter") — recorded as a gap, not backfilled with invented
+numbers.
+
+## DH.2 Row identification, resolved after three rounds of back-and-forth
+
+Evan initially described results by "top to bottom" position and hole
+count, which didn't disambiguate cleanly against the generator's own
+row-identification scheme (marker-hole count, orientation-independent).
+Confirmed by asking him to describe marker-hole counts directly:
+
+    row 1 (2 small holes)  = AXLE sweep (5.20-5.70 mm, 6 diameters)
+    row 2 (1 small hole)   = PIN sweep (4.80-5.30 mm, 6 diameters)
+    row 3 (5 holes, no markers) = PITCH row (uniform 5.10 mm x5)
+
+The first thing Evan reported testing ("5 holes in a line... spin very
+smooth even with the entire weight of the coupon") turned out to be the
+PITCH row, not the axle sweep — he'd run a Lego axle through the pitch
+row's uniform 5.10 mm holes rather than the actual 5.20-5.70 mm sweep.
+Caught before it got recorded as an axle-fit result under the wrong
+diameter; this is exactly the kind of mislabeling this coupon gates
+against, one level up (the record almost inherited it).
+
+## DH.3 Results
+
+**Pin row — PASS.** "Only the smallest 3 are a good fit with the smallest
+one being the best." Reading the sweep values (4.80/4.90/5.00/5.10/5.20/
+5.30): 4.80, 4.90, 5.00 mm all seat with firm-press-and-hold; 4.80 is best.
+**Chosen pin offset: 4.80 mm** — with the caveat that 4.80 is the bottom of
+the tested range, not a bracketed optimum; a smaller value might fit
+better still, untested.
+
+**Axle row — FAIL, all six.** "All the ones in the first row spin smooth,
+even the smallest ones seems a bit big." 5.20 mm, the smallest of the v1
+sweep, already spins with noticeable slop. The sweep brackets nothing at
+the tight end — the coupon's own contingency plan ("edit the ranges... and
+re-run rather than guessing beyond the ends of the sweep") applies, and
+was followed rather than skipped.
+
+**Pitch row — not tested as designed.** The beam-across-holes-1-2-then-1-5
+dimensional-scaling check was not run; Evan's axle-through-the-pitch-row
+test (see DH.2) stands in as informal evidence the pitch row's 5.10 mm
+holes are also on the loose side for an axle, consistent with the axle
+row's finding, but answers a different question than the one this row is
+for. Scale factor remains unknown.
+
+## DH.4 v2: why 4.80 mm is a floor, not a guess
+
+A ROUND bore for a ROTATING cross-profile Lego axle cannot go below the
+axle's tip-to-tip diagonal without the corners binding on every rotation.
+That diagonal is the same ~4.8 mm figure commonly cited for the pin hole
+(`gen_servo_lego_coupler.py`'s `AXLE_ARM`/cross-socket sizing already
+leans on this). So 4.80 mm is a physical lower bound, not an arbitrary
+step below 5.20 — going meaningfully below it risks a bore the axle can't
+even enter, wasting sweep positions on "doesn't fit" rather than "fits but
+tight."
+
+**v2 moves the axle sweep to 4.80-5.30 mm** — the same range already
+proven to work for a PIN. This asks a real question rather than assuming
+an answer: does the diameter that holds a pin also free an axle? They are
+different Lego parts (solid round peg vs. cross-shaped rotating shaft), so
+the two fits are not guaranteed to land at the same number even at
+identical commanded bore diameter.
+
+`scripts/gen_tolerance_coupon.py` changed: `PIN_LO`/`AXLE_LO` extracted as
+named constants (previously two separate magic numbers, 4.8 and 5.2,
+inline in the sweep loops); `AXLE_LO` moved 5.2 -> 4.8; default output
+path moved to `cad/tolerance_coupon_v2.stl` so v1's file and its (now
+historical) measured results are never overwritten. Real run:
+
+    manifold   : duplicate-directed-edges=0 unmatched-edges=0  -> PASS
+    volume     : 43677.842 mm^3 (expected 43677.842, rel.err 6.66e-16) -> PASS
+    OVERALL    : PASS
+    wrote      : cad\tolerance_coupon_v2.stl (902484 bytes)
+    axle row   : 4.80, 4.90, 5.00, 5.10, 5.20, 5.30 mm (2 marker holes)
+
+## DH.5 State
+
+**v1 printed and partially tested (pin PASS, axle FAIL-too-loose, pitch
+not run as designed). v2 generated, validated, NOT yet printed.** Neither
+coupon has been calipered. M1.3 stays open until v2's axle row closes and
+the pitch-row scale check actually runs. `cad/README.md` carries both
+result tables (v1 filled in from Evan's reports, v2 blank pending the next
+print) so the next session doesn't have to reconstruct this from chat.

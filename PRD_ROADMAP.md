@@ -324,12 +324,22 @@ transfer gap) must not block the capstone.
    2026-07-23:** `scripts/gen_tolerance_coupon.py` →
    `cad/tolerance_coupon_v1.stl` (104×56×8 mm, 20 holes; generator's manifold
    and signed-volume self-checks both PASS). Bench procedure, print settings
-   guidance, and the results table are in `cad/README.md`. **Print in BOTH
-   PLA and PETG** using the exact settings intended for the chassis.
+   guidance, and the results table are in `cad/README.md`. ~~**Print in BOTH
+   PLA and PETG**~~ **SUPERSEDED 2026-09-05: ABS is the standing chassis
+   material now (Evan), not PLA/PETG.**
+   **PARTIAL 2026-09-05 (Appendix DI): v1 printed, Bambu P1S/ABS.** Pin row
+   PASSES at 4.80mm (bottom of tested range). Axle row FAILS at every
+   tested diameter (5.20-5.70, all too loose) — the sweep bracketed
+   nothing at the tight end, so **v2 regenerated** with the axle sweep
+   moved to 4.80-5.30mm (`cad/tolerance_coupon_v2.stl`, manifold + volume
+   self-checks PASS), not yet printed. Pitch-row scale check (beam across
+   holes 1-2 then 1-5) not run. No calipers used on either coupon — every
+   verdict so far is fit-by-feel, not a measured offset.
    Done: measured table (commanded Ø vs measured Ø vs fit verdict) + print
    settings in the record; chosen offsets written into `gotchas.md`,
-   replacing the unverified community figures. **Runnable NOW — needs only
-   Evan's printer and Lego, not the parts order.**
+   replacing the unverified community figures. **NOT MET YET** — axle
+   offset and pitch scale factor still open, and no row has an actual
+   caliper measurement.
 4. **Measure donor geometry.** Calipers on the donor steering assembly +
    diff: kingpin spacing, steering arm lengths, axle spans, wheel hub
    interfaces. Done: dimensioned sketch (photo or CAD screenshot) in

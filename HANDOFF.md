@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-03 ~23:20 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-05 ~16:23 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 111 appendices A–DG; BM/BN/BP/BU/CT/CY/DB/DE are corrections to earlier entries). When this file and the record disagree about
+(append-only, 113 appendices A–DI; BM/BN/BP/BU/CT/CY/DB/DE are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -76,7 +76,7 @@ track generator — but it is a negative, and the write-up must say so.
 |---|---|---|
 | 1 | ~~Give the floor-space number.~~ **ANSWERED 2026-09-01: 3.0 × 3.0 m.** Track v1 and v2 are both drawn against it (`cad/track_layout_v*.py`). | — |
 | 2 | ~~Commit or discard the uncommitted AL audit fixes~~ **DONE 2026-09-01** (AO/AP, commit `3f58804`). The central fix was WRONG and broke `train_cte_probe.py`; repaired and every runnable reader re-run. | — |
-| 3 | **Print the tolerance coupon (M1.3).** Needs no parts — only the printer and Lego. Gates every chassis dimension. | **Evan** |
+| 3 | ~~**Print the tolerance coupon (M1.3).**~~ **PARTIALLY DONE 2026-09-05 (Appendix DI): v1 printed (Bambu P1S, ABS), pin row PASSES at 4.80mm, axle row FAILS at every diameter (5.20-5.70 all too loose). v2 regenerated with the axle sweep moved to 4.80-5.30mm — not yet printed.** No calipers used yet; pitch-row scale check not run. | **Evan** |
 | 3a | ~~**WEIGH THE CAR / MEASURE FRONT-AXLE LOAD** to arithmetic-check the Geekservo 270's 14.7 N rack force.~~ **MOOT 2026-09-03: Evan keeps the MG90S** ("the more powerful servo" — 36.0 N vs Geekservo's 14.7-16.4 N). Closed by decision, not by weighing the car — see `steering.md`. | — |
 | 3c | ~~**SERVO-TO-PINION COUPLING — part not yet named.**~~ **CHOSEN 2026-09-03: Adafruit #4252** (Appendix DF), already built, Evan reports "strong" — empirically confirms the spline fit on his MG90S. **PRD task 8c(ii) still not fully closed**: no numeric stall-torque margin exists or can be computed (injection-moulded, no published torque rating) — Evan's field report is the ceiling of what's known without a destructive test. **A printed stopgap now exists** — `cad/servo_lego_coupler_v1.stl` (Appendix DG), built because Adafruit charges ~$10 shipping for the $0.75 part and no other commercial source exists. Also unmargined; print PETG and test before trusting either. | — |
 | 3b | **WHEELBASE — a geometric estimate now exists, not a direct measurement.** Evan measured 9.25 in (234.95 mm) wheel-to-wheel overall length; front and rear tires differ (**42.25 mm front, 55.75 mm rear** — confirmed 2026-09-03, Appendix DE). wheelbase ≈ overall length − (front radius + rear radius) ≈ **185.95 mm (7.32 in)**. `R_min = 1.600 × wheelbase ≈ 297.5 mm`, smaller than the ~330 mm estimate the frozen 500-670 mm corner band was checked against (favourable). **Corner geometry stays frozen until T2's empirical test** — this is a better bound, not a substitute. `steering.md`, Appendix DE. | — |
@@ -227,8 +227,8 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Drive motor selection | M1.1b | **Done (purchase pending)** | 2026-07-23: ~~Pololu #1093, $23.95~~ **#5159, $29.95** (encoder variant — corrected 2026-09-02 Appendix BO, propagated here 2026-09-03); docs/research/2026-07-23_drive-motor-selection.md |
 | Power system selection | M1.1c | **Done (purchase pending)** | 2026-07-23: split source, power bank owned; docs/research/2026-07-23_power-system.md |
 | BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced three times** | `docs/BOM.md`, ~~≈$238-248 + $15-25 shipping (≈$253-273 all-in)~~ **$402.45 + shipping ≈ $415-430** (2026-09-03; this row disagreed with the ORDER line lower in this same file until the landing-check sweep caught it; row 22's coupling was chosen the same day, Appendix DF, +$0.75 over the interim $401.70). Row 17 is an **Arduino Uno Evan already owns, $0**. **Row 5 corrected 2026-09-02 to the #5159 ENCODER motor** Evan chose on 2026-08-12 (+$6) and **new row 5b, the #4763 JST SH cable Pololu does not include** (+$3) — Appendix BO. **$200 ceiling breached on every path** |
-| Chassis CAD + print | M1 | **Started** | M1.3 coupon generated + validated 2026-07-23; awaiting Evan's print + measurements |
-| Tolerance coupon | M1.3 | **Ready to print** | `cad/tolerance_coupon_v1.stl` + `cad/README.md`; gates every chassis dimension |
+| Chassis CAD + print | M1 | **Started** | M1.3 v1 printed + partially tested 2026-09-05 (Appendix DI): pin row done, axle row needs v2 |
+| Tolerance coupon | M1.3 | **v1 tested, v2 printing next** | `cad/tolerance_coupon_v1.stl` (pin row PASS @ 4.80mm; axle row FAIL, all 6 too loose) + `cad/tolerance_coupon_v2.stl` (axle sweep moved to 4.80-5.30mm, generated + validated, not printed) + `cad/README.md`; gates every chassis dimension. No caliper data yet, pitch-row scale check not run |
 | Steering coupler (printed) | 8c(ii) | **STL generated, never printed** | 2026-09-03, Appendix DG. `cad/servo_lego_coupler_v1.stl` + `scripts/gen_servo_lego_coupler.py` (manifold PASS, volume PASS 1.05e-14, 1152 tris, Ø10 × 16 mm). MG90S Ø4.65 bore → female 5.00 × 2.00 Lego cross socket. Prints NO cross profile (obeys Appendix BV); 20T spline deliberately not modelled (sub-nozzle pitch). ⚠️ **No torque margin claimed** — friction + spline bite, never loaded. Four constants unmeasured; `SOCKET_CLEAR` wants the M1.3 coupon, still unprinted. PETG not PLA |
 | Electronics + teleop | M2 | **Not started** | purchase list is task 8 |
 | Behavioral cloning | M3 | **Not started** | |
@@ -394,14 +394,15 @@ original floor and the pre-2026-08-12 scale decision.)*
   check the **six** items in the BOM's "Verify before ordering" section — most
   importantly that his power bank's label reads **5V/3A**, and now also **which
   LEDs** (item 5), whose forward voltage sets every series-resistor value.
-- **PRINT THE COUPON (M1.3)** — needs NO parts, only his printer and Lego.
-  `cad/tolerance_coupon_v1.stl`, once in PLA and once in PETG, using the
-  settings he intends for the chassis. Every chassis dimension in M1.5–M1.7
-  waits on these measurements, so this is the critical path while the order
-  ships. Procedure + results table: `cad/README.md`.
-- **Which printer?** PrusaSlicer and Bambu Studio are both installed on this
-  machine, but the actual printer model and filament stock are uncatalogued
-  (M1.2). The coupon's print settings must be recorded with its measurements.
+- ~~**PRINT THE COUPON (M1.3)**~~ **v1 PRINTED 2026-09-05 (Appendix DI)** — Bambu P1S,
+  Bambu ABS Black (replaces the PLA+PETG plan entirely, Evan's call), 0.4mm nozzle,
+  0.2mm layers, 2 walls, 10% gyroid, 99% shrinkage comp. Pin row PASS @ 4.80mm
+  (bottom of tested range, not bracketed). Axle row FAIL at every diameter — v2
+  moves the sweep to 4.80-5.30mm (`cad/tolerance_coupon_v2.stl`, generated +
+  validated, **not yet printed**). Pitch-row scale check still not run. No
+  calipers used on either coupon so far. Procedure + both result tables:
+  `cad/README.md`.
+- ~~**Which printer?**~~ **ANSWERED 2026-09-05: Bambu P1S, Bambu ABS Black.**
 - **Ask dad: soldering iron + solder, multimeter, USB SD reader.** Assumed
   owned 2026-08-05 (calipers confirmed). Any "no" is +$8-40 and counts as
   shop tooling, not car BOM — Evan decides whether the $200 ceiling covers it.
