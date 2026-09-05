@@ -409,10 +409,15 @@ original floor and the pre-2026-08-12 scale decision.)*
   shop tooling, not car BOM — Evan decides whether the $200 ceiling covers it.
 - **A1 pre-order checks** (PRD §6b): ~~power-bank label reads 5V/3A~~ ✅ done
   2026-09-05 (Appendix DJ) · ~~count the diff ring teeth~~ ✅ done via
-  Appendix CS (20t→28t) · confirm a 12-tooth bevel is in the parts bin ·
+  Appendix CS (20t→28t) · confirm a 12-tooth bevel is in the parts bin —
+  **STILL NOT CONFIRMED 2026-09-05: Evan "probably" has one, prints a
+  replacement if not.** Not the same difficulty as the coupon/coupler
+  prints — a bevel gear's meshing tooth profile is real geometry to get
+  right, not a round hole or a socket, so don't assume it's a quick
+  `gen_*.py` job if it comes to that ·
   ~~which tires~~ ✅ done via Appendix CS (55.75mm) · re-check prices ✅ done
-  2026-08-08, total since moved to $402.45. **Only the bevel-gear bin check
-  remains unconfirmed.**
+  2026-08-08, total since moved to $402.45. **Bevel-gear bin check is the
+  only item still open, and it's a "probably," not a confirmation.**
 - **Open question for Evan:** does "no Lego motors" mean none at all, or
   none of the PF/Powered-Up families? EV3/NXT/9V-Technic motors, if owned,
   would reopen the free-encoder odometry path. Confirm at M1.2 inventory.
