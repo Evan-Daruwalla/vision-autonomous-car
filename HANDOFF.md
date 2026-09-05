@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-05 ~16:23 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-05 ~18:06 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 113 appendices A–DI; BM/BN/BP/BU/CT/CY/DB/DE are corrections to earlier entries). When this file and the record disagree about
+(append-only, 114 appendices A–DJ; BM/BN/BP/BU/CT/CY/DB/DE are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -390,10 +390,11 @@ original floor and the pre-2026-08-12 scale decision.)*
   chip.** Active Cooler $10.95, in stock at pishop.us, **flagged in the BOM but NOT
   added to the total — Evan's call.** `vcgencmd get_throttled` already covers thermal
   in the same bitfield task 10 checks for brownout.
-  Everything downstream of M1.5 waits on parts. Before ordering Evan should
-  check the **six** items in the BOM's "Verify before ordering" section — most
-  importantly that his power bank's label reads **5V/3A**, and now also **which
-  LEDs** (item 5), whose forward voltage sets every series-resistor value.
+  Everything downstream of M1.5 waits on parts. ✅ **ALL SIX BOM "Verify before
+  ordering" items are now CLOSED (2026-09-05, Appendix DJ)** — the last one,
+  power bank rating, is **confirmed 5V/3A, 10,000 mAh** (matches the power
+  research's own working assumption exactly). Nothing on that checklist
+  blocks placing the order anymore.
 - ~~**PRINT THE COUPON (M1.3)**~~ **v1 PRINTED 2026-09-05 (Appendix DI)** — Bambu P1S,
   Bambu ABS Black (replaces the PLA+PETG plan entirely, Evan's call), 0.4mm nozzle,
   0.2mm layers, 2 walls, 10% gyroid, 99% shrinkage comp. Pin row PASS @ 4.80mm
@@ -406,10 +407,12 @@ original floor and the pre-2026-08-12 scale decision.)*
 - **Ask dad: soldering iron + solder, multimeter, USB SD reader.** Assumed
   owned 2026-08-05 (calipers confirmed). Any "no" is +$8-40 and counts as
   shop tooling, not car BOM — Evan decides whether the $200 ceiling covers it.
-- **A1 pre-order checks** (PRD §6b): power-bank label reads 5V/3A · **count
-  the diff ring teeth** (28 = 62821, 24+16 = 6573 — sets the CAD mesh
-  centres) · confirm a 12-tooth bevel is in the parts bin · which tires ·
-  re-check prices.
+- **A1 pre-order checks** (PRD §6b): ~~power-bank label reads 5V/3A~~ ✅ done
+  2026-09-05 (Appendix DJ) · ~~count the diff ring teeth~~ ✅ done via
+  Appendix CS (20t→28t) · confirm a 12-tooth bevel is in the parts bin ·
+  ~~which tires~~ ✅ done via Appendix CS (55.75mm) · re-check prices ✅ done
+  2026-08-08, total since moved to $402.45. **Only the bevel-gear bin check
+  remains unconfirmed.**
 - **Open question for Evan:** does "no Lego motors" mean none at all, or
   none of the PF/Powered-Up families? EV3/NXT/9V-Technic motors, if owned,
   would reopen the free-encoder odometry path. Confirm at M1.2 inventory.

@@ -148,6 +148,7 @@ the dated entry, not the digest.
 - [DG — Printed servo-to-Lego coupler STL generated and validated; no cheaper commercial source exists; no torque margin claimed](#appendix-dg---printed-servo-to-lego-coupler-stl-generated-and-validated-no-cheaper-commercial-source-exists-no-torque-margin-claimed-2026-09-03-2320-cdt) (09-03)
 - [DH — Scheduled daily-audit: DG verified true against disk, and two self-checks that pass on the broken artifact - a track generator that validates its defaults instead of its output, and a split-seed guard installed at 1 of 3 sites](#appendix-dh---scheduled-daily-audit-dg-verified-true-against-disk-and-two-self-checks-that-pass-on-the-broken-artifact---a-track-generator-that-validates-its-defaults-instead-of-its-output-and-a-split-seed-guard-installed-at-1-of-3-sites-2026-09-04-0739-cdt) (09-04)
 - [DI — M1.3 tolerance coupon printed (Bambu P1S, ABS): pin row PASS at 4.80mm, axle row FAILS at every diameter, v2 sweep regenerated](#appendix-di---m13-tolerance-coupon-printed-bambu-p1s-abs-pin-row-pass-at-480mm-axle-row-fails-at-every-diameter-v2-sweep-regenerated-2026-09-05-1623-cdt) (09-05)
+- [DJ — Power bank confirmed 5V/3A, 10,000mAh — last BOM Verify item closed, nothing blocks the order](#appendix-dj---power-bank-confirmed-5v3a-10000mah--last-bom-verify-item-closed-nothing-blocks-the-order-2026-09-05-1806-cdt) (09-05)
 
 ---
 
@@ -11997,3 +11998,30 @@ coupon has been calipered. M1.3 stays open until v2's axle row closes and
 the pitch-row scale check actually runs. `cad/README.md` carries both
 result tables (v1 filled in from Evan's reports, v2 blank pending the next
 print) so the next session doesn't have to reconstruct this from chat.
+
+# Appendix DJ - Power bank confirmed 5V/3A, 10,000mAh — last BOM Verify item closed, nothing blocks the order (2026-09-05 18:06 CDT)
+Evan: "5V/3A confirmed 10,000 mAh." Closes BOM Verify item 1, the last open
+item on the pre-order checklist (items 2, 3, 5, 6 were already closed by
+earlier appendices; item 4 was a one-time price check, done 2026-08-08).
+
+## DJ.1 What this closes
+
+`docs/BOM.md` row 8 and Verify item 1 both asked Evan to read his power
+bank's label rather than assume 5V/3A. Confirmed: 5V/3A, 10,000 mAh.
+
+## DJ.2 A bonus confirmation, not just a checklist tick
+
+`docs/research/2026-07-23_power-system.md` already used **10,000 mAh** as
+"Battery A" in its runtime table (~4.3h Pi-only) — a working assumption at
+write time, never checked against Evan's actual bank. It matches exactly.
+That runtime figure is now confirmed against real hardware rather than
+carried as an assumption; nothing needed recomputing since the number
+matched on the first check.
+
+## DJ.3 State
+
+**All six BOM Verify items are now closed.** Nothing else stands between
+Evan and placing the order (`docs/BOM.md`, $402.45 + shipping ≈ $415-430).
+Two Addicore rows (10, 12) remain price-unverified and backordered — flagged
+for a live re-check at checkout, not a new open item today. Nothing is
+ordered yet.
