@@ -156,6 +156,7 @@ the dated entry, not the digest.
 - [DO — Servo candidate found for the full 135deg range: HOOYIJ MG90D 270deg, same 20T spline as MG90S, not yet ordered](#appendix-do---servo-candidate-found-for-the-full-135deg-range-hooyij-mg90d-270deg-same-20t-spline-as-mg90s-not-yet-ordered-2026-09-05-2311-cdt) (09-05)
 - [DP — Servo swapped in BOM: MG90S to HOOYIJ MG90D-270, row 7 +$9.00, total $411.45](#appendix-dp---servo-swapped-in-bom-mg90s-to-hooyij-mg90d-270-row-7-900-total-41145-2026-09-06-0024-cdt) (09-06)
 - [DQ — 3DStreet MCP tools live and verified for the first time; scene empty, autosave ON, no mutations made](#appendix-dq---3dstreet-mcp-tools-live-and-verified-for-the-first-time-scene-empty-autosave-on-no-mutations-made-2026-09-06-1322-cdt) (09-06)
+- [DR — Session sync: coupons printed and M1.3 closed, steering rebuilt twice, servo swapped, 3DStreet live; drift sweep caught a 'nothing printed' claim and a missing bin router row](#appendix-dr---session-sync-coupons-printed-and-m13-closed-steering-rebuilt-twice-servo-swapped-3dstreet-live-drift-sweep-caught-a-nothing-printed-claim-and-a-missing-bin-router-row-2026-09-06-1326-cdt) (09-06)
 
 ---
 
@@ -12561,3 +12562,90 @@ predictable from position and defeats the M4 showcase).
 
 **Tools live, scene empty, nothing built, nothing mutated.** Awaiting
 Evan's direction on which of the three intended uses to start with.
+
+# Appendix DR - Session sync: coupons printed and M1.3 closed, steering rebuilt twice, servo swapped, 3DStreet live; drift sweep caught a 'nothing printed' claim and a missing bin router row (2026-09-06 13:26 CDT)
+End-of-session sync. Sixteen commits (`5349efe`..`015425b`), and a drift
+sweep across every live doc afterwards. This entry is the snapshot; the
+per-finding detail is in Appendices DC-DQ.
+
+## DR.1 What actually changed this session
+
+**Hardware, measured by Evan (all new, all physical):**
+
+    tolerance coupon v1 + v2 PRINTED (Bambu P1S, Bambu ABS Black,
+      0.4mm nozzle / 0.2mm layers / 2 walls / 10% gyroid / 99% shrink comp)
+    pin holes         4.80 mm   (v1; community's 5.1mm guess was too big)
+    rotating axle bore 5.00 mm  (v2; v1's 5.20-5.70 sweep was ALL too loose)
+    power bank        5V/3A, 10,000 mAh   -- closes the last BOM Verify item
+    front track       155 mm    (was 107.5 -- now WIDER than rear's 148.25)
+    steering rack     7-stud -> 13-stud
+    max steer         58 deg bare-linkage (was 32) -- servo NOT attached
+    pinion sweep      ~270 deg lock-to-lock (was ~180) -- servo NOT attached
+
+**Decisions Evan made:** ABS replaces the PLA+PETG plan as the standing
+chassis material · DRL folds into the head pixel only, never the tail ·
+MG90S kept over Geekservo 270 · Adafruit #4252 as the steering coupling ·
+45 deg planning margin (later found likely unachievable, DN) · servo
+swapped to the HOOYIJ MG90D-270 and added to the BOM.
+
+**Built:** `uno_control.ino`'s lighting path rewritten for WS2812B
+(compiled 9680 B / 371 B SRAM, 58 SELFTEST checks, never flashed) ·
+`cad/servo_lego_coupler_v1.stl` + generator (manifold + volume PASS, never
+printed) · `cad/tolerance_coupon_v2.stl` (axle sweep moved down after v1
+bracketed nothing) · `docs/LIGHTING_SPEC.md` rewritten for WS2812B, the
+last doc still describing the 8-LED scheme.
+
+**Unblocked:** 3DStreet MCP tools verified live for the first time
+(Appendix DQ) after three sessions of chasing the wrong cause.
+
+## DR.2 The two corrections that mattered most
+
+**The 58-degree steering figure nearly went in backwards, twice.** Evan
+first reported "67 degrees," then corrected to a 32-degree protractor
+reading, which under this project's convention (90 = straight ahead) gives
+a 58-degree deviation -- the exact complement of the old 32, and exactly
+the number `steering.md` documents as the historical WRONG reading. Asking
+"did the mechanism actually change?" before recording it is what separated
+a real 13-stud-rack change from a repeat of the 2026-09-02 convention
+error (Appendix DL).
+
+**Then the 58 turned out to be the rack's limit, not the servo's**
+(Appendix DN). Both the 58-degree wheel angle and the 270-degree pinion
+sweep were hand-measured with no servo attached. The MG90S is a fixed
+90-degrees-each-way part; the rack now travels 135 each way. Estimated
+servo-achievable wheel angle: ~38.7 deg, BELOW the 45-degree margin Evan
+had just asked for. That estimate rests on an unverified linearity
+assumption and is explicitly not a measurement.
+
+## DR.3 A real failing check, left failing
+
+`cad/track_layout_v2.py`'s own self-check now FAILS at R=500 with the
+155 mm front track: lane 310 mm, span 2710 mm, **90 mm spare against its
+required 100 mm**. Not patched by loosening the threshold -- that would
+defeat the reason the check exists. Turn radius has generous slack; floor
+space does not. Undecided (Appendix DM).
+
+## DR.4 Drift found and fixed in the sync sweep
+
+- `HANDOFF.md` still said **"Nothing has been printed and nothing has been
+  ordered since 2026-07-23"** -- false since 2026-09-05; two coupons exist.
+- `HANDOFF.md`'s Immediate-next-actions table had become a graveyard of
+  closed rows; rewritten to only what is open, cheapest-first.
+- `PRD_ROADMAP.md` and `README.md` both called the tolerance coupon
+  "unprinted"; PRD also carried SELFTEST 39/39 and a "77-appendix record".
+- `cad/README.md` said `SOCKET_CLEAR`'s source was "the coupon's axle row,
+  unprinted" -- now printed, but the axle row is a FREE-SPIN fit and the
+  coupler socket wants a GRIP; flagged rather than copied across.
+- **`gotchas.md`'s router never listed `steering.md`** despite that bin
+  being split out 2026-09-03 (Appendix CH) -- anyone following the router
+  for servo/rack/coupler facts was sent to the wrong file for three days.
+
+## DR.5 State
+
+**Nothing ordered. BOM $411.45 + shipping ~$424-439.** Printing has
+started (two coupons); the chassis has not. Firmware source and flashed
+build diverge and the source has never run. 16 commits sit unpushed
+(pushing is Evan's own command -- a guard blocks it from this side).
+Runnable-without-parts next: the pitch-row scale check, calipering the
+coupons, the bevel-gear bin check, the track floor-fit decision, and
+3DStreet scene work.

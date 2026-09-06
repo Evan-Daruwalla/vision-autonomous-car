@@ -70,11 +70,15 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   a git repo (github.com/Evan-Daruwalla/vision-autonomous-car) · `ml/` — 31
   scripts, **SIM-POC P1-P6 complete** (102,888-frame corpus, V+M+C and
   DreamerV3-S trained, the paired eval harness) · `firmware/` — four Uno
-  sketches; **`uno_control` runs on the real board** (SELFTEST 39/39,
-  `host_test.py` 11/11) · `cad/` — tolerance coupon STL (**unprinted**), track
+  sketches; **`uno_control` runs on the real board** (~~SELFTEST 39/39,
+  `host_test.py` 11/11~~ **49/49 and 13/13 after the 2026-09-02 watchdog fix,
+  Appendix CA — and the flashed build now DIVERGES from the repo source,
+  which has 58 checks and has never been flashed, Appendix DC**) · `cad/` — **tolerance coupons v1+v2 PRINTED and
+  tested 2026-09-05** (pin 4.80 mm, axle 5.00 mm; Appendices DI/DK), printed
+  servo-to-Lego coupler STL (**unprinted**), track
   layouts v1/v2 (parametric, self-checking, **uncommitted geometry**) ·
   `docs/BOM.md`, `docs/WIRING_PROTOSHIELD.md`, `docs/SIM_TRANSFER_SPEC.md`,
-  `docs/LIGHTING_SPEC.md`, `firmware/SERIAL_PROTOCOL.md` · a 77-appendix
+  `docs/LIGHTING_SPEC.md`, `firmware/SERIAL_PROTOCOL.md` · a 121-appendix
   record. **Hardware in hand: an Arduino Uno R3 clone (owned) and a Lego
   rack-and-pinion Evan built and measured. Nothing purchased, nothing printed,
   nothing wired.**

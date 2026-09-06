@@ -137,7 +137,7 @@ printed**, so every tolerance in it is a prediction, not a measurement.
 
 ```
 ml/            world-model pipeline: collection, verification, training, eval
-cad/           tolerance coupon (generated, unprinted)
+cad/           tolerance coupons v1+v2 (printed and tested 2026-09-05), servo coupler STL
 scripts/       parametric STL generation
 docs/          research briefs, BOM, and the append-only project record
 PRD_ROADMAP.md the standing plan, amended by strike-through, never deletion

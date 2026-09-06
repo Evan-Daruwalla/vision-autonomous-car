@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-06 ~13:22 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-06 ~13:26 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 121 appendices A–DQ; BM/BN/BP/BU/CT/CY/DB/DE/DN are corrections to earlier entries). When this file and the record disagree about
+(append-only, 122 appendices A–DR; BM/BN/BP/BU/CT/CY/DB/DE/DN are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -20,15 +20,23 @@ the physical car and documented as a college-portfolio engineering artifact.
 
 **The software lane is four milestones ahead of the hardware lane. The hardware
 lane has now STARTED — and as of 2026-09-02 the ACTUATION FIRMWARE RUNS ON THE
-BOARD** (`firmware/uno_control/`, **SELFTEST 49/49**, host_test 13/13,
-Appendices BO/CA/CE). ⚠️ **A watchdog defect that would have braked a wired car ~96% of the
+BOARD** (`firmware/uno_control/`, host_test 13/13, Appendices BO/CA/CE).
+⚠️ **A watchdog defect that would have braked a wired car ~96% of the
 time was found by the 2026-09-02 daily-audit (BY) and fixed the same evening
 (CA); "verified on the board" before CA covered the link, not this path.**
+⚠️ **The flashed build and the repo source now DIVERGE** (2026-09-03, Appendix
+DC): the board still runs the 2026-09-02 build (SELFTEST 49/49, 7888 B), while
+`uno_control.ino`'s lighting path was rewritten for WS2812B afterwards —
+compiled clean (58 checks, 9680 B) but **never flashed**. Read the boot banner,
+never a doc, for what the board is actually running.
 **Actuators are still unwired**: the link and state machine are verified, but no
 motor, servo, encoder, LED or pack exists, so every actuator path is verified
 only as a DECISION the firmware made. SIM-POC (P1–P5) is built and its findings are
-banked. **Nothing has been printed and nothing has been ordered since
-2026-07-23.**
+banked. ~~Nothing has been printed and nothing has been ordered since
+2026-07-23.~~ **PRINTING STARTED 2026-09-05** — two tolerance coupons (v1 and
+v2) printed on a Bambu P1S in Bambu ABS, giving M1.3's two headline numbers
+(pin holes 4.80 mm, rotating axle bores 5.00 mm, Appendices DI/DK). **Still
+nothing ORDERED** — the BOM stands at $411.45, unbought.
 
 The sim work ended in a **well-instrumented negative**: no learned policy
 drives reliably, across five separate attempts to make one. That is a
@@ -72,18 +80,28 @@ track generator — but it is a negative, and the write-up must say so.
 
 ## Immediate next actions
 
+*(Rewritten 2026-09-06. The old table had become a graveyard of closed rows —
+every one of them is in the record, Appendices DI–DQ. This lists only what is
+actually open, cheapest-first.)*
+
+**Runnable NOW — no parts, no purchase:**
+
+| # | Action | Why it matters |
+|---|---|---|
+| 1 | **Pitch-row scale check on the printed coupons.** Lego beam across holes 1–2, then 1–5 (nominal 32.00 mm span). If it binds across 5 but not 2, caliper the real span — that ratio is the printer's dimensional scaling error and it applies to every chassis part. | Last unclosed piece of M1.3. Needs only the coupons already printed + real Lego |
+| 2 | **Caliper the coupons.** Every fit verdict so far (pin 4.80 mm, axle 5.00 mm) is fit-by-feel, not a measured diameter — the procedure asks for commanded-vs-measured per hole. | Turns two working numbers into a measured offset that transfers to CAD |
+| 3 | **Confirm a 12-tooth bevel gear is in the parts bin.** Evan: "prob have one and if not i can print one" — not a confirmation. A bevel's meshing tooth profile is a harder print than the coupon or coupler, not a same-difficulty fallback. | Last unconfirmed pre-order check (PRD A1) |
+| 4 | **Decide the track-layout floor-fit** (Appendix DM). The 155 mm front track pushes lane to 310 mm; `cad/track_layout_v2.py`'s own self-check now FAILS at R=500 — 90 mm spare against its required 100 mm. Options: accept 90 mm, shrink `WALL_MARGIN` (100 mm, itself an EST), or hold. | Not urgent (corner geometry frozen until T2) but it is a real failing check |
+| 5 | **3DStreet scene work** — tools verified live 2026-09-06 (Appendix DQ), scene empty, **autosave ON**. Three intended uses: dash-pattern markings (~2:1, not MUTCD's 1:3), relocatable stop-sign placement, portfolio render. | Unblocked after three sessions of chasing the wrong cause |
+
+**Blocked on the order:**
+
 | # | Action | Blocked on |
 |---|---|---|
-| 1 | ~~Give the floor-space number.~~ **ANSWERED 2026-09-01: 3.0 × 3.0 m.** Track v1 and v2 are both drawn against it (`cad/track_layout_v*.py`). | — |
-| 2 | ~~Commit or discard the uncommitted AL audit fixes~~ **DONE 2026-09-01** (AO/AP, commit `3f58804`). The central fix was WRONG and broke `train_cte_probe.py`; repaired and every runnable reader re-run. | — |
-| 3 | ~~**Print the tolerance coupon (M1.3).**~~ **BOTH HEADLINE NUMBERS CLOSED 2026-09-05 (Appendices DI/DK): pin holes 4.80mm (v1), rotating axle bores 5.00mm (v2).** No calipers used on either coupon (fit-by-feel only); pitch-row scale check (beam across holes 1-2, then 1-5) still not run. | **Evan (pitch check only)** |
-| 3a | ~~**WEIGH THE CAR / MEASURE FRONT-AXLE LOAD** to arithmetic-check the Geekservo 270's 14.7 N rack force.~~ **MOOT 2026-09-03: Evan keeps the MG90S** ("the more powerful servo" — 36.0 N vs Geekservo's 14.7-16.4 N). Closed by decision, not by weighing the car — see `steering.md`. | — |
-| 3c | ~~**SERVO-TO-PINION COUPLING — part not yet named.**~~ **CHOSEN 2026-09-03: Adafruit #4252** (Appendix DF), already built, Evan reports "strong" — empirically confirms the spline fit on his MG90S. **PRD task 8c(ii) still not fully closed**: no numeric stall-torque margin exists or can be computed (injection-moulded, no published torque rating) — Evan's field report is the ceiling of what's known without a destructive test. **A printed stopgap now exists** — `cad/servo_lego_coupler_v1.stl` (Appendix DG), built because Adafruit charges ~$10 shipping for the $0.75 part and no other commercial source exists. Also unmargined; print PETG and test before trusting either. | — |
-| 3b | **WHEELBASE — a geometric estimate now exists, not a direct measurement.** Evan measured 9.25 in (234.95 mm) wheel-to-wheel overall length; front and rear tires differ (**42.25 mm front, 55.75 mm rear** — confirmed 2026-09-03, Appendix DE). wheelbase ≈ overall length − (front radius + rear radius) ≈ **185.95 mm (7.32 in)**. ~~`R_min = 1.600 × wheelbase ≈ 297.5 mm`~~ max steer moved from 32° to 58° when the rack changed (row above, Appendix DL) — **but 58° was hand-measured with no servo attached (Appendix DN), so it's the rack's limit, not the MG90S's (fixed 90° each way). Servo-achievable estimate ≈38.7° (unverified linear assumption), giving `R_min ≈ 232.4 mm`.** ~~Evan's 45° planning cap (Appendix DM)~~ may not be achievable by this servo at all. Both 116.2mm and 232.4mm sit comfortably inside the frozen 500-670 mm corner band regardless. **Corner geometry stays frozen until T2's empirical test** — this is a better bound, not a substitute. `steering.md`, Appendices DE/DL/DM/DN. | — |
-| 3d | ~~**Audit tasks A3, A5, A6, A7**~~ **ALL DONE 2026-09-03 (Appendix CH, `PRD_ROADMAP.md:1107-1152`) — this row was stale, corrected in this session.** A1/A2/A4 also done (Appendices CC/CD/CF). | — |
-| 3e | **Task 8e: `uno_control.ino` rewritten for WS2812B, compiled clean (Appendix DC).** Not hardware-verified — no strip owned, nothing flashed. Next step needs a physical board + strip, not more decisions. | **Evan (parts)** |
-| 4 | ~~**Pi 2GB ($65) vs 4GB ($110).**~~ **CLOSED 2026-09-03: Vilros Basic Starter Kit, 4GB, $179.99, confirmed in stock at checkout (BOM row 1) — HANDOFF row was stale, corrected here.** | — |
-| 5 | **Place the order** (`docs/BOM.md`, **$411.45 + shipping ≈ $424-439** — servo swapped 2026-09-05, Appendix DP, +$9.00). Nothing downstream of M1.5 moves until parts exist. | **Evan** |
+| 6 | **Place the order** (`docs/BOM.md`, **$411.45 + shipping ≈ $424-439**). All six BOM Verify items closed; only #3 above is unconfirmed. | **Evan** |
+| 7 | **Bench-measure the real wheel angle with a servo attached** — the sharpened task from Appendices DL/DN/DO. Measure the WHEEL directly at the servo's own limit; do not compute it from the bare-linkage 58°/270° figures. Then re-derive `SERVO_US_SPAN`, whose 10% margin was sized against the OLD rack's hard stops. | parts (servo) |
+| 8 | **Confirm the MG90D-270° physically fits the MG90S-sized mount** — one body dimension differs (22.4×12.1×22.8 vs ~22.8×12.2×31 mm). | parts (servo) |
+| 9 | **Task 8e: flash and verify the WS2812B firmware.** `uno_control.ino` compiles clean (9680 B, 58 SELFTEST checks) but has never run. Done-check needs both strip segments addressing independently, the LAST pixel of each lit, and `ticks` counting cleanly with indicators blinking. | parts (strip) |
 
 ---
 

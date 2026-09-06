@@ -12,6 +12,7 @@ several record appendices reference `gotchas.md` by name. Follow the pointer.
 | looking for | read |
 |---|---|
 | printing, Lego fit, power, motors, drivers, the Uno, vehicle geometry | **`hardware.md`** |
+| **the servo, the rack/pinion, max steer, turn radius, the servo-to-pinion coupler, servo calibration** | **`steering.md`** (split out 2026-09-03, Appendix CH — this row was missing from the router until 2026-09-06) |
 | track layout, markings, surface, what the camera sees of the environment | **`track.md`** |
 | the simulator, the eval harness, training-time GPU limits | **`sim-harness.md`** |
 | shell, encoding and build-tool traps | **`tooling.md`** |

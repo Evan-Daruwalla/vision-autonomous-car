@@ -217,7 +217,7 @@ coupling problem ~5× worse (BOM row 7).
 |---|---|---|
 | `SPLINE_DIA` | 4.85 | datasheet range 4.8–4.9; measure the real servo |
 | `AXLE_ARM` | 1.80 | Lego cross-axle arm thickness — community value, **unverified**. The 4.80 mm across-the-cross span IS confirmed |
-| `SOCKET_CLEAR` | 0.20 | provisional; the right source is the M1.3 coupon's axle row, unprinted |
+| `SOCKET_CLEAR` | 0.20 | still provisional. ⚠️ The M1.3 coupon IS now printed (2026-09-05) and its axle row closed at 5.00 mm — but that is a FREE-SPIN fit, and this socket needs a firm GRIP to transmit torque, which is closer to the coupon's PIN row (4.80 mm) in spirit. Do not copy 5.00 across without deciding which fit this joint actually wants |
 | `BORE_INTERF` | 0.20 | press interference — a guess; the first print settles it |
 
 Print it in **PETG**, not PLA: this is a loaded joint and PLA is the material
