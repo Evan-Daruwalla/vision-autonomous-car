@@ -149,6 +149,7 @@ the dated entry, not the digest.
 - [DH — Scheduled daily-audit: DG verified true against disk, and two self-checks that pass on the broken artifact - a track generator that validates its defaults instead of its output, and a split-seed guard installed at 1 of 3 sites](#appendix-dh---scheduled-daily-audit-dg-verified-true-against-disk-and-two-self-checks-that-pass-on-the-broken-artifact---a-track-generator-that-validates-its-defaults-instead-of-its-output-and-a-split-seed-guard-installed-at-1-of-3-sites-2026-09-04-0739-cdt) (09-04)
 - [DI — M1.3 tolerance coupon printed (Bambu P1S, ABS): pin row PASS at 4.80mm, axle row FAILS at every diameter, v2 sweep regenerated](#appendix-di---m13-tolerance-coupon-printed-bambu-p1s-abs-pin-row-pass-at-480mm-axle-row-fails-at-every-diameter-v2-sweep-regenerated-2026-09-05-1623-cdt) (09-05)
 - [DJ — Power bank confirmed 5V/3A, 10,000mAh — last BOM Verify item closed, nothing blocks the order](#appendix-dj---power-bank-confirmed-5v3a-10000mah--last-bom-verify-item-closed-nothing-blocks-the-order-2026-09-05-1806-cdt) (09-05)
+- [DK — Tolerance coupon v2: axle bore closes at 5.00mm -- both M1.3 headline numbers now determined](#appendix-dk---tolerance-coupon-v2-axle-bore-closes-at-500mm----both-m13-headline-numbers-now-determined-2026-09-05-2023-cdt) (09-05)
 
 ---
 
@@ -12025,3 +12026,62 @@ Evan and placing the order (`docs/BOM.md`, $402.45 + shipping ≈ $415-430).
 Two Addicore rows (10, 12) remain price-unverified and backordered — flagged
 for a live re-check at checkout, not a new open item today. Nothing is
 ordered yet.
+
+# Appendix DK - Tolerance coupon v2: axle bore closes at 5.00mm -- both M1.3 headline numbers now determined (2026-09-05 20:23 CDT)
+v2 of the tolerance coupon (Appendix DI's fix for v1's axle sweep bracketing
+nothing) was printed and tested. Evan: "3rd smallest hole is best for
+axel." Both of M1.3's headline numbers are now closed.
+
+## DK.1 The result
+
+v2's axle sweep, ascending: 4.80, 4.90, 5.00, 5.10, 5.20, 5.30 mm. Third
+smallest = **5.00 mm**. Sits between the pin row's snug-fit diameter
+(4.80 mm) and v1's smallest too-loose axle diameter (5.20 mm) — the
+physically sensible zone for a rotating cross-axle bore to land in
+relative to a static pin socket, and consistent with the reasoning in
+Appendix DI that led to shifting the sweep down in the first place.
+
+**M1.3's two headline numbers, both closed:**
+
+    pin holes model at:        4.80 mm  (v1, Appendix DI)
+    rotating axle bores model: 5.00 mm  (v2, this entry)
+
+## DK.2 What is NOT closed by this result
+
+Evan reported only the winner, not a verdict for every row. 4.80/4.90 mm
+being smaller than 5.00 and 5.10-5.30 mm being larger doesn't by itself
+say whether the smaller ones failed tight (didn't spin at all) or spun
+with detectable slop, or whether the larger ones were merely worse rather
+than also failing. Recorded as "not reported" in `cad/README.md`'s v2
+table, not assumed either way in either direction.
+
+**Still open, unaffected by this result:**
+- The pitch-row dimensional-scaling check (beam across holes 1-2, then
+  1-5, nominal 32.00 mm span) has never been run on either coupon.
+- No caliper measurements exist for either coupon. Every verdict across
+  both prints (Appendices DI and this one) is fit-by-feel against the
+  coupon's own pass criteria ("firm press and holds" / "spins free, no
+  slop"), not a measured offset in mm.
+- `cad/servo_lego_coupler_v1.stl`'s `SOCKET_CLEAR` constant wanted this
+  coupon's data, but the coupler's cross-socket needs a firm GRIP (torque
+  transmission), which is closer in spirit to the coupon's PIN row than
+  its AXLE row (free spin) — flagged in `HANDOFF.md` as unreconciled, not
+  silently resolved by reusing 5.00 mm for a different kind of fit.
+
+## DK.3 Corrected in place
+
+`cad/README.md`'s v2 results table filled in; `hardware.md`'s community-
+figures bullet updated with both final numbers, replacing the "unverified
+community figures" per M1.3's own done-check (which points at
+`gotchas.md` — that file has never held these figures; `hardware.md` is
+where they actually live, corrected pointer in `PRD_ROADMAP.md` rather
+than silently followed). `HANDOFF.md` and `PRD_ROADMAP.md` task 3 updated
+to reflect both offsets closed, pitch check and calipers still open.
+
+## DK.4 State
+
+**M1.3 is PARTIAL, not DONE.** Both bore-diameter offsets a chassis
+designer needs are real numbers now, which is what actually unblocks
+M1.5-M1.7 CAD work — but the task's own done-check also wants a measured
+table (not fit-by-feel) and the pitch-row scale factor, neither of which
+exists yet. Nothing ordered, nothing built beyond the two coupons.

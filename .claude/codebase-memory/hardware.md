@@ -16,11 +16,13 @@ traps in `sim-harness.md`.
   (2026-07-23). Community starting points: **~5.1mm pin fit, 5.3-5.6mm
   free-rotating axle bore** vs Ø4.8mm nominal; beam pitch 8mm. (inferred
   from published test boards, unverified on Evan's printer) **MEASURED
-  2026-09-05 (Appendix DI), v1, Bambu P1S/ABS: pin row PASSES at 4.80mm —
-  the community's 5.1mm guess was too big here. Axle row FAILS at every
-  tested diameter (5.20-5.70, all too loose)** — v2 moves the sweep to
-  4.80-5.30mm, printed but not yet re-tested. No calipers used; verdicts
-  are fit-by-feel.
+  2026-09-05, Bambu P1S/ABS (Appendices DI/DK) — BOTH numbers now closed:
+  pin holes 4.80mm (v1; community's 5.1mm guess was too big here), rotating
+  axle bores 5.00mm (v2; v1's 5.20-5.70 sweep was entirely too loose).**
+  No calipers used on either coupon; verdicts are fit-by-feel against the
+  coupon's own pass criteria, not measured offsets. Pitch-row dimensional-
+  scaling check (beam across holes 1-2, then 1-5) never run — scale factor
+  vs the nominal 32.00mm span is still unknown.
 - ~~**PETG (not PLA) for rotating bores** against Lego axles — PLA galls/wears
   (LDraw forum guidance, 2026-07-23). PLA fine for static holes.~~
   **SUPERSEDED 2026-09-05: ABS is the standing chassis material now, not

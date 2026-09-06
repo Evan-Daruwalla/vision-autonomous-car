@@ -113,32 +113,42 @@ holes instead (uniform 5.10 mm, also too loose for an axle, consistent with
 the axle-row finding) rather than the beam-span check the row is for. Scale
 factor still unknown.
 
-**Chosen so far:** pin holes model at **4.80 mm** (best of 3 tested passes,
-at the bottom of the tested range — not bracketed, could be even better
-below it). Rotating axle bores: **not yet determined** — v1's sweep (5.20-
-5.70) was entirely too loose, which is why v2 exists (below).
+**v1 chosen:** pin holes model at **4.80 mm** (best of 3 tested passes, at
+the bottom of the tested range — not bracketed, could be even better below
+it). Rotating axle bores: not determined in v1 — the 5.20-5.70 sweep was
+entirely too loose, which is why v2 exists.
 
-### Results — v2 (`tolerance_coupon_v2.stl`) — printed? ______
+### Results — v2 (`tolerance_coupon_v2.stl`) — printed and tested 2026-09-05, Appendix DK
 
-v2 moves the axle sweep to **4.80-5.30 mm** (same range as the pin row —
-see the generator's module docstring for why 4.8 mm is treated as a
-geometric floor, not a guess below anything tested). Same print settings as
-v1 unless changed.
+Same print settings as v1 (Bambu P1S, Bambu ABS Black, 0.4mm nozzle, 0.2mm
+layers, 2 walls, 10% gyroid, 99% shrinkage comp) unless Evan says otherwise
+— not independently confirmed unchanged, but no change was reported.
 
 | Row | Commanded Ø | Measured Ø | Offset | Fit verdict |
 |---|---|---|---|---|
-| Axle | 4.80 | | | |
-| Axle | 4.90 | | | |
-| Axle | 5.00 | | | |
-| Axle | 5.10 | | | |
-| Axle | 5.20 | | | |
-| Axle | 5.30 | | | |
+| Axle | 4.80 | not calipered | — | not reported |
+| Axle | 4.90 | not calipered | — | not reported |
+| Axle | 5.00 | not calipered | — | **PASS — best fit ("3rd smallest hole is best for axel")** |
+| Axle | 5.10 | not calipered | — | not reported |
+| Axle | 5.20 | not calipered | — | not reported |
+| Axle | 5.30 | not calipered | — | not reported |
 
-**Chosen offsets, once v2 closes:** rotating axle bores model at ______ mm.
-Pin holes stay at 4.80 mm from v1 unless v2's re-test of the same range (via
-the axle) turns up a reason to revisit — it shouldn't, since a pin and an
-axle are different Lego parts with different fit requirements at the same
-bore diameter.
+Evan reported only the winner, not a pass/fail for every row — 4.80/4.90
+being smaller and 5.10-5.30 being larger than the chosen 5.00 doesn't by
+itself tell us whether they failed tight, failed loose, or simply fit worse
+than 5.00. Recorded as "not reported," not assumed either way.
+
+**Chosen offsets — M1.3's two headline numbers, both closed:**
+**pin holes model at 4.80 mm** (v1) · **rotating axle bores model at
+5.00 mm** (v2). Sits between the pin's snug-fit diameter (4.80) and v1's
+smallest too-loose axle diameter (5.20), which is the physically sensible
+place for a rotating cross-axle bore to land relative to a static pin's
+socket.
+
+**Still open:** the pitch-row dimensional-scaling check (beam across holes
+1-2, then 1-5) has never been run, and no caliper measurements exist for
+either coupon — every verdict above is fit-by-feel against the coupon's
+pass criteria, not a measured offset.
 
 ### When you're done
 
