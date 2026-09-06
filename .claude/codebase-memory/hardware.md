@@ -288,10 +288,17 @@ traps in `sim-harness.md`.
   - **The "40 mm of span per 10 mm of car width" rule of thumb is WRONG for
     this geometry - do not use it.** (From **Appendix AZ**, 2026-09-01; an
     earlier note here wrongly credited HANDOFF - corrected in Appendix BP.)
-    `best_straight` is **capped at MAX_STRAIGHT = 200 mm**, and the uncapped
-    value exceeds that cap at BOTH widths, so **pitch does not move at all**;
-    span then changes by exactly the lane delta. **Real sensitivity is 2x the
-    car-width change, not 4x**, while the straight stays capped. The runnable,
+    ~~`best_straight` is **capped at MAX_STRAIGHT = 200 mm**~~ **190 mm as of
+    2026-09-06** (and mirrored in `cad/vehicle_envelope.py`, whose self-check
+    now imports the other file and FAILS if the two copies drift). The
+    uncapped value exceeds that cap at BOTH widths, so **pitch does not move
+    at all**; span then changes by exactly the lane delta. **Real sensitivity
+    is 2x the car-width change, not 4x**, while the straight stays capped.
+    ⚠️ **That 'pitch does not move' shortcut only holds while the CAP binds.**
+    Since 2026-09-06 `best_straight` also reserves `SPARE_MIN = 100 mm` of
+    wall spare, so once a car gets wide enough the RESERVE binds instead and
+    the straight (and therefore the pitch) shrinks to protect the spare —
+    already true at R=550 (straight 95 mm) and R=600 (0 mm). The runnable,
     self-checking generator is the authority; a rule of thumb is not.
   - **CAVEAT, not yet closed: this is TIRE track, not whole-vehicle width.**
     Lane width must key off the widest point of the assembled car including
@@ -364,12 +371,27 @@ FLIPPED 2026-09-05 (Appendix DM), see below:**
   6.75 mm. The front is the widest point and governs lane width.** This was
   true when written (2026-09-03) for the hardware that existed then.
 - ~~**Lane width, span and spare are UNCHANGED** — 296.5 mm / 2696.5 mm /
-  103.5 mm.~~ **CHANGED: lane 310 mm** (2.0 x 155 mm). Re-ran
-  `cad/track_layout_v2.py`: at R=500 span is now **2710 mm, spare only
-  90 mm** — UNDER the script's own 100 mm safety-margin self-check, which
-  now FAILS (`AssertionError: at R=500 the layout should leave >=100 mm
-  spare, not fill the floor`). Real output, not a projection. Flagged, not
-  silently patched by loosening the check — see Appendix DM for options.
+  103.5 mm.~~ **CHANGED: lane 310 mm** (2.0 x 155 mm). ~~at R=500 span is
+  now **2710 mm, spare only 90 mm** — UNDER the script's own 100 mm
+  safety-margin self-check, which now FAILS~~ **CLOSED 2026-09-06: span
+  2690 mm, spare 110 mm, self-check PASSES.**
+  **The cause was NOT that the car outgrew the floor.** Two functions in
+  `cad/track_layout_v2.py` held different definitions of usable width:
+  `best_straight()` sized the straight against the whole 2800 mm, while the
+  self-check demanded 100 mm of that 2800 be left unused. They had never
+  agreed; the 200 mm straight cap bound first and hid it while lane was
+  229.5 mm (171 mm spare). Lane going to 310 mm ate exactly the 80.5 mm of
+  slack that was masking it. Fix: a `SPARE_MIN = 0.100` constant that
+  `best_straight` now RESERVES and the self-check asserts, plus
+  `MAX_STRAIGHT` 200 -> 190 mm. **The layout now self-corrects** — a future
+  width increase shrinks the straight instead of failing the check, and it
+  only fails when the straight hits 0 and the span still does not fit.
+  ⚠️ **What the fix does NOT solve: at R=600 the straight is already 0 and
+  spare is 90 mm — under SPARE_MIN with nothing left to shrink.** A T2
+  result near 600 mm reopens the floor-fit as a real problem. The check
+  only asserts the R=500 case, so it will not catch that on its own.
+  ⚠️ **The print plan grew with the lane**: intersection boxes 10.67 -> 11.16 m,
+  tiles 85 -> 88, filament ~1051 -> ~1081 g. Route 8.31 -> 8.23 m.
 - ~~**The front track is only 72.5% of the rear**~~ **REVERSED: front is now
   104.5% of rear** (155/148.25). The two T2 consequences below are from the
   OLD geometry and no longer describe the car — kept for the trail, not as

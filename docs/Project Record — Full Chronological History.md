@@ -157,6 +157,9 @@ the dated entry, not the digest.
 - [DP — Servo swapped in BOM: MG90S to HOOYIJ MG90D-270, row 7 +$9.00, total $411.45](#appendix-dp---servo-swapped-in-bom-mg90s-to-hooyij-mg90d-270-row-7-900-total-41145-2026-09-06-0024-cdt) (09-06)
 - [DQ — 3DStreet MCP tools live and verified for the first time; scene empty, autosave ON, no mutations made](#appendix-dq---3dstreet-mcp-tools-live-and-verified-for-the-first-time-scene-empty-autosave-on-no-mutations-made-2026-09-06-1322-cdt) (09-06)
 - [DR — Session sync: coupons printed and M1.3 closed, steering rebuilt twice, servo swapped, 3DStreet live; drift sweep caught a 'nothing printed' claim and a missing bin router row](#appendix-dr---session-sync-coupons-printed-and-m13-closed-steering-rebuilt-twice-servo-swapped-3dstreet-live-drift-sweep-caught-a-nothing-printed-claim-and-a-missing-bin-router-row-2026-09-06-1326-cdt) (09-06)
+- [DS — Track floor-fit self-check closed at its root cause: two definitions of usable width in one file](#appendix-ds---track-floor-fit-self-check-closed-at-its-root-cause-two-definitions-of-usable-width-in-one-file-2026-09-06-1343-cdt) (09-06)
+- [DT — 3DStreet pairing mid-session proven insufficient; marking table recomputed and the model scale turns out to be derived, not chosen (1:11.80)](#appendix-dt---3dstreet-pairing-mid-session-proven-insufficient-marking-table-recomputed-and-the-model-scale-turns-out-to-be-derived-not-chosen-11180-2026-09-06-1357-cdt) (09-06)
+- [DU — Dash ratio DECIDED: dash:gap = 1:2, closing an ambiguity that sat in three documents for a month](#appendix-du---dash-ratio-decided-dashgap--12-closing-an-ambiguity-that-sat-in-three-documents-for-a-month-2026-09-06-1402-cdt) (09-06)
 
 ---
 
@@ -12649,3 +12652,285 @@ build diverge and the source has never run. 16 commits sit unpushed
 Runnable-without-parts next: the pitch-row scale check, calipering the
 coupons, the bevel-gear bin check, the track floor-fit decision, and
 3DStreet scene work.
+
+# Appendix DS - Track floor-fit self-check closed at its root cause: two definitions of usable width in one file (2026-09-06, ~13:43 CDT)
+**The failing check was never about the car being too wide.** `cad/track_layout_v2.py`
+held two different definitions of usable width in one file:
+
+- `best_straight()` sized the straight run between corners against
+  `FLOOR - 2*WALL_MARGIN` = **2800 mm**, the whole usable floor.
+- `self_check()` demanded the span leave **100 mm** of that 2800 unused.
+
+They had never agreed. The `MAX_STRAIGHT = 200 mm` cap bound first and hid the
+disagreement while lane was 229.5 mm (171 mm spare). When the 13-stud rack
+rebuild pushed the front track to 155 mm and lane to 310 mm (Appendix DM), the
+80.5 mm of slack that was masking it was consumed exactly. Span 2710 mm, spare
+90 mm, required 100 mm, `AssertionError` at line 315.
+
+## The fix
+
+1. **New constant `SPARE_MIN = 0.100`**, and `best_straight()` now RESERVES it.
+   This is the structural half: the layout self-corrects from here — a future
+   width increase shrinks the straight instead of failing the check, and it only
+   fails when the straight hits 0 and the span still does not fit, which is a
+   genuine geometric failure worth failing on.
+2. **`MAX_STRAIGHT` 200 -> 190 mm.** Needed for two reasons, not one. At 200,
+   `best_straight` returns exactly 195 mm and the span lands on exactly 2.700 m,
+   while the assert's right-hand side (`3.000 - 0.200 - 0.100`) evaluates to
+   `2.6999999999999997` in float — **it fails on the boundary.** 190 also leaves
+   110 mm of real spare rather than sitting on the 100 mm floor.
+3. **Line 315 now uses the constant** plus the `1e-9` epsilon that lines
+   295/303/347 already carry.
+
+## Real output, not projected
+
+    track_layout_v2 self_check: PASS
+    floor           3.000 x 3.000 m (usable 2.800)
+    car width       155.00 mm  FRONT track, MEASURED 2026-09-05 (Appendix DM) ...
+    lane width      310 mm
+    street pitch    1190 mm  (straight between corners 190 mm)
+    span            2690 mm of 2800 usable -> 110 mm SPARE
+    driven route    figure-8 through the centre intersection, 8.23 m
+
+Across the frozen 500-670 mm band, from the patched module:
+
+| R (mm) | straight | pitch | span | spare | spare >= 100 |
+|---|---|---|---|---|---|
+| **500** | **190** | **1190** | **2690** | **110** | **yes** |
+| 550 | 95 | 1195 | 2700 | 100 | yes |
+| 600 | 0 | 1200 | 2710 | 90 | **no** |
+| 670 | 0 | 1340 | 2990 | -190 | REFUSES (SystemExit) |
+
+## Two things this session found that were not in HANDOFF
+
+**1. The derived artifacts had been silently frozen since 2026-09-05.** `main()`
+calls `self_check()` BEFORE it writes, so the failing assert meant
+`cad/track_layout_v2.svg` and `.json` never regenerated. The committed JSON still
+read `car_width 0.14825 / lane 0.2965 / span 2.6965` — one revision behind the
+155 mm car. Both regenerated now. The print plan grew with the lane:
+intersection boxes 10.67 -> 11.16 m, tiles 85 -> 88, filament ~1051 -> ~1081 g,
+route 8.31 -> 8.23 m. (Self-check 8's `filament_g < 2000` still passes.)
+
+**2. `cad/vehicle_envelope.py` duplicated four of the constants** (`FLOOR`,
+`WALL_MARGIN`, `STREETS`, `MAX_STRAIGHT`) while its own `max_car_width`
+docstring says the two scripts "have to agree." Changing `MAX_STRAIGHT` in one
+file alone would have left it printing "200 mm is the cap track_layout_v2.py
+uses" — false, and silently so. Mirrored the constant AND added a guard to its
+`self_check()` that lazily imports `track_layout_v2` (inside the function, so a
+normal run stays stdlib-only and does not pull numpy) and asserts the four
+constants match.
+
+**The guard was proven to fire, not assumed to.** Monkeypatching the drift back
+in:
+
+    GUARD FIRES: MAX_STRAIGHT has drifted: track_layout_v2.py says 0.19,
+    this file says 0.2. One track, two scripts - they must agree.
+
+## What is NOT closed
+
+⚠️ **At R=600 the straight is already 0 mm and spare is 90 mm — under
+`SPARE_MIN`, with nothing left to shrink.** The fix does not hide this and does
+not solve it. A T2 turning test returning a radius near 600 mm reopens the
+floor-fit as a real problem, and the self-check asserts only the R=500 case, so
+it will not catch that on its own. Corner geometry stays FROZEN until T2
+regardless.
+
+## Stale doc text corrected as a consequence of the change
+
+- The header docstring's span table (`R=500 -> span 2780 mm FITS`, `550 -> 2980
+  NO`, `600 -> 3180 NO`) came from the over-constrained `2R + lane` pitch that
+  **Appendix AY already corrected** — self-check 2 has tested 500/550/600 all
+  building ever since, and the docstring never caught up. It contradicted the
+  code below it before this session; rewritten with real output rather than left
+  contradicting the numbers this entry adds.
+- `main()` printed `car width 155.00 mm MEASURED 2026-09-03 (rear track; body
+  135.75 and front 107.5 are both narrower)` — self-contradicting output (it
+  printed 155 while calling it rear track and front 107.5). Corrected to name
+  the front track and Appendix DM.
+
+## 3DStreet: blocked this session, and the failure mode is diagnostic
+
+Evan asked for 3DStreet work after this fix. **Zero `mcp__3dstreet__*` tools
+exist in this session** — three separate `ToolSearch` queries returned nothing.
+`.mcp.json` does configure the server (`npx -y 3dstreet-mcp`). The relay's own
+contract is that `tools/list` returns empty when no 3dstreet.app browser tab is
+paired, which is consistent with Appendix DQ's finding that a session's MCP
+registry is fixed at startup. Next step agreed with Evan: he pairs the tab at
+`https://3dstreet.app/#mcp`, this session retries `ToolSearch`, and whichever way
+that goes is itself a result — tools appearing would REFUTE the
+registry-fixed-at-startup reading, tools still absent would confirm it a second
+time.
+
+## Correction to the session-opening briefing
+
+The briefing stated 17 unpushed commits. **After a real `git fetch origin`, it is
+2** — `origin/main` is at `ab15bed` (the MG90D-270 BOM row) and `HEAD` is at
+`d15184b`. Unpushed: `015425b` and `d15184b`. Push remains Evan's own command.
+
+# Appendix DT - 3DStreet pairing mid-session proven insufficient; marking table recomputed and the model scale turns out to be derived, not chosen (1:11.80) (2026-09-06, ~13:57 CDT)
+Evan asked to start making street layouts, and paired the 3DStreet tab
+mid-session. Two results: the 3DStreet blocker is now diagnosed rather than
+suspected, and the marking table PRD_ROADMAP itself flags as stale is
+recomputed and runnable.
+
+## 1. 3DStreet: mid-session pairing is NOT sufficient. Appendix DQ confirmed a second time.
+
+Evan paired the tab. The 3DStreet page's own status feed reported
+**"MCP relay paired"** and logged **four `tools/list: Completed`** calls — the
+relay answered every one. The `3dstreet` MCP server also reconnected mid-session
+and its server instructions reappeared in context.
+
+**And the session still has ZERO `mcp__3dstreet__*` tools.** Six `ToolSearch`
+queries across this session, two of them after the pairing and after the
+reconnect.
+
+That is a much stronger result than the previous "tools absent, tab maybe not
+paired" reading. The relay is demonstrably answering `tools/list`, so the tool
+definitions exist on the wire and **the session's own tool registry is what is
+not picking them up.** Appendix DQ's diagnosis — a session's MCP registry is
+fixed at startup — is confirmed from a second, independent direction, and
+sharpened: **even a server disconnect/reconnect inside the session does not
+re-register the tools.**
+
+**Actionable rule, replacing "pair the tab and retry":** the 3DStreet tab must
+be open and paired BEFORE the Claude session starts. Pairing afterwards cannot
+be recovered from inside the session.
+
+**One distractor worth naming so it does not cost a third session.** The page's
+status bar reads **"WebMCP active (26 tools)"**. WebMCP is the page's PRIMARY
+transport, which registers its tools with an *agentic browser* (ChatGPT's
+desktop browser, Gemini in Chrome, Chrome 149+ behind
+`chrome://flags/#enable-webmcp-testing`). **That is not Claude Code.** Claude
+Code uses the MCP relay, which the page itself labels "fallback for clients
+without WebMCP". Reading "26 tools" as "Claude Code has 26 tools" is the
+obvious wrong inference and it is right there on screen.
+
+## 2. The marking table, recomputed — and the SCALE turns out to be derived, not chosen
+
+`PRD_ROADMAP.md` says in its own words that "the marking table below is stale
+and NOT yet recomputed". It was scaled **1:14 from an ESTIMATED 130 mm car**
+(Appendix L, 2026-08-05). Since then the car has been measured four times, the
+governing width flipped from rear track to front track (Appendix DM), and the
+lane rule itself changed from a fixed scale to `lane = 2.0 x car width`
+(`SIM_TRANSFER_SPEC` section 3).
+
+**THE DIRECTION OF THE DERIVATION SILENTLY REVERSED, and nobody noticed.**
+
+- Appendix L picked the SCALE first (1:14) and derived the lane from it:
+  12 ft / 14 = 261.3 mm.
+- The lane rule that replaced it derives the LANE from the car (2.0 x 155 mm =
+  310 mm), which means the scale is no longer free — it is whatever makes the
+  model lane represent a real lane.
+
+**Why the swap went unnoticed for a month:** at the 130 mm car of the era the
+two rules agree almost exactly — the lane rule gives 260.0 mm and a scale of
+1:14.07 against the published 261 mm at 1:14. They only diverge as the car
+grows. At today's 155 mm car:
+
+    scale = 12 ft / 310 mm = 1:11.80
+
+**1:14 is not a decision that was revisited and kept. It is one that was
+overtaken.** Nothing physical has been cut or printed to it, so correcting it
+now costs nothing. It also independently confirms Appendix AM's offhand
+estimate that this track runs at "roughly 1/11".
+
+### New file: `cad/marking_specs.py` (parametric, self-checking, stdlib-only)
+
+Real output at the measured 155 mm car:
+
+| feature | full scale (MUTCD) | model @ 1:11.80 |
+|---|---|---|
+| lane width | 12 ft | **310.0 mm** (the input, not an output) |
+| normal line | 4-6 in | **8.61 - 12.92 mm** |
+| stop line | 12-24 in | **25.83 - 51.67 mm** |
+| dash, TRUE scale | 10 + 30 ft | 258 + 775 mm — **only 8.0 cycles per lap, REJECTED** |
+| dash, USED | ratio only | **68.6 + 137.2 mm**, 40 cycles per lap |
+
+Yellow separates opposing directions, white separates same-direction (MUTCD,
+verified 2026-08-05, not recalled).
+
+Seven groups of self-checks, `marking_specs self_check: PASS`. The two worth
+naming:
+
+- **A regression against Appendix L's six published 1:14 numbers**, which
+  Appendix O.4's cold audit already re-verified ("all six MUTCD 1:14 numbers
+  reproduce exactly"). It pins the scaling arithmetic independently of the
+  scale. **This check found the direction-reversal above** — the first cut drove
+  it from a 130 mm car width and failed at `14.067692307692308`, which is
+  exactly the artefact of computing the scale from the lane rule instead of
+  reading it off. Rewritten to drive from an explicit 1:14, which is what
+  Appendix L actually did.
+- **The same cross-file drift guard added to `vehicle_envelope.py` in Appendix
+  DS**, now a third user: it lazily imports `track_layout_v2.py` inside the
+  check (so a normal run stays stdlib-only) and asserts `CAR_WIDTH` and the lane
+  agree. Proven to fire, not assumed:
+
+      GUARD FIRES: CAR_WIDTH has drifted: track_layout_v2.py says 0.155,
+      this file says 0.148. One track, two scripts - they must agree.
+
+### THE DASH RATIO IS UNRESOLVED, AND THE RECORD CONTRADICTS ITSELF
+
+This blocks printing any dashed marking, and it is a documentation defect, not
+an open design question.
+
+- `HANDOFF.md`, `track.md` and Appendix L all record the deviation as
+  **"Duckietown uses ~2:1"** — and **not one of them says which side is which.**
+- MUTCD's ratio is **dash:gap = 1:3** (10 ft dash, 30 ft gap). "2:1" could mean
+  gap:dash = 2:1 (dash 1 : gap 2, denser than MUTCD, plausible) or dash:gap =
+  2:1 (dash LONGER than its gap, which no road marking does).
+- **Appendix L's own worked example — "~60 mm dash / 180 mm gap" — is 1:3.**
+  It kept MUTCD's ratio and never applied the 2:1 at all. So the appendix that
+  introduced the 2:1 deviation contradicts it two paragraphs later.
+
+`marking_specs.py` defaults to `DASH_TO_GAP = 0.5` (gap twice the dash) as the
+reading that is both a plausible parse of "2:1" and denser than MUTCD, which was
+the entire point of the deviation. **It is flagged in-code and in the printed
+output as a DEFAULT, not a decision.** `--dash-to-gap` changes it and the table
+follows. A self-check asserts the dash is never longer than its gap.
+
+`TARGET_DASH_CYCLES = 40` (dash cycles the car should see in one 8.23 m lap) is
+an EST and is the other free parameter — it, not the ratio, sets the absolute
+size.
+
+## 3. Correction to what I told Evan earlier in this session
+
+I said the effective scale was **"~1:10"**, derived by assuming a 3.1 m real
+lane. **Using MUTCD's actual 12 ft standard — which is what Appendix L used and
+what this project's marking table has always been built on — it is 1:11.80.**
+The 1:10 figure came from picking a round real-lane width rather than the
+standard one. 1:11.80 is the number; it is also much closer to the old 1:14 than
+1:10 was, so the correction is smaller than I implied.
+
+# Appendix DU - Dash ratio DECIDED: dash:gap = 1:2, closing an ambiguity that sat in three documents for a month (2026-09-06, ~14:02 CDT)
+**Evan: "1:2".** Closes the ambiguity Appendix DT flagged one entry earlier,
+and it was the last thing blocking any dashed marking from being printed.
+
+**dash:gap = 1:2** — the gap is twice the dash. At the derived 1:11.80 scale on
+the 8.23 m lap that is **68.6 mm dash / 137.2 mm gap**, 40 cycles per lap.
+
+**What the decision actually resolves.** The project had recorded the deviation
+as "Duckietown uses ~2:1" in three separate places — Appendix L, `HANDOFF.md`,
+and `track.md` — and **not one of them said which side was which.** MUTCD's is
+dash:gap = 1:3 (10 ft dash, 30 ft gap). "2:1" admitted two readings:
+
+- gap:dash = 2:1, i.e. dash:gap = 1:2 — denser than MUTCD. **This is the call.**
+- dash:gap = 2:1 — a dash longer than its own gap, which no road marking uses.
+
+Worse, **Appendix L's own worked example (60 mm dash / 180 mm gap) is 1:3** — it
+kept MUTCD's ratio and never applied the 2:1 it had just introduced. The
+appendix contradicted itself, and that contradiction propagated into two live
+documents and survived a month.
+
+Evan's reading is the one that makes the deviation do its job: MUTCD's 1:3 was
+rejected because at this scale it gives too few dashes for a CNN seeing 64x64,
+so the replacement has to be DENSER, not sparser. 1:2 is denser; 2:1 would have
+been a different thing entirely.
+
+**Not claimed as MUTCD compliance.** It is a documented deliberate deviation,
+exactly as Appendix L intended — the difference is that it is now a single
+unambiguous number instead of a phrase that parsed two ways.
+
+`cad/marking_specs.py` carries it as a decision rather than a default now
+(docstring, the `DASH_TO_GAP` constant, and the printed output all say so).
+`--dash-to-gap` still re-runs the table at any other ratio. `self_check: PASS`,
+including the assert that a dash may never be longer than its gap.

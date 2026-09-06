@@ -1,14 +1,21 @@
 """Track v2: a 3x3 city street grid on a 3.0 x 3.0 m floor, driven as a figure-8.
 
 **NOTHING HERE IS COMMITTED GEOMETRY, AND THIS ONE IS AT RISK.** v1's caveat
-applies (corner radius FROZEN until the B3 turning test), but v2 is worse: the
-3x3 grid fits ONLY at R = 500 mm, the OPTIMISTIC end of the frozen 500-670 mm
-band, with 20 mm of margin on 2800 mm of usable floor. Measured:
+applies (corner radius FROZEN until the T2 turning test). ~~the 3x3 grid fits
+ONLY at R = 500 mm ... with 20 mm of margin on 2800 mm of usable floor~~
+**BOTH CLAIMS SUPERSEDED.** The "only at R=500" figure came from the
+over-constrained pitch (2R + lane) that Appendix AY corrected -- self-check 2
+below has tested 500/550/600 all building ever since, and this docstring simply
+never caught up. Real output of THIS file, 2026-09-06, at lane 310 mm
+(2.0 x the 155 mm front track, Appendix DM) and MAX_STRAIGHT = 190 mm:
 
-    R = 500 mm -> 3x3 streets, 4 blocks, 9 intersections, span 2780 mm  FITS
-    R = 550 mm -> span 2980 mm                                          NO
-    R = 600 mm -> span 3180 mm                                          NO
-    R = 670 mm -> span 3460 mm                                          NO
+    R = 500 mm -> straight 190 mm, pitch 1190, span 2690, spare 110  FITS
+    R = 550 mm -> straight  95 mm, pitch 1195, span 2700, spare 100  FITS
+    R = 600 mm -> straight   0 mm, pitch 1200, span 2710, spare  90  fits the
+                  floor but is UNDER SPARE_MIN -- tangent corners already, so
+                  there is nothing left to shrink. A T2 result near 600 mm
+                  reopens the floor-fit as a real problem.
+    R = 670 mm -> REFUSES (span 2990 > 2800 usable, even tangent)     NO
 
 And there is NO smaller-city fallback. A 2x2 grid has the space at those radii
 but cannot carry this route at all: the figure-8 needs a centre street to cross
@@ -74,6 +81,13 @@ REPO = Path(__file__).resolve().parent.parent
 
 FLOOR = 3.000          # m   CONFIRMED by Evan 2026-09-01
 WALL_MARGIN = 0.100    # m                                          EST
+SPARE_MIN = 0.100      # m   wall spare the layout must leave UNUSED. It is
+                       #     asserted in self_check AND reserved by
+                       #     best_straight -- the two disagreed until
+                       #     2026-09-06 (best_straight spent the whole floor
+                       #     while the check demanded 100 mm of it back).
+                       #     The 200 mm straight cap hid it until lane grew
+                       #     to 310 mm.                             EST
 CAR_WIDTH = 0.155      # m   MEASURED 2026-09-05 (Appendix DM): FRONT track,
                        #     outside-wheel to outside-wheel -- 155 mm, up from
                        #     107.5 mm (Appendix CI), after Evan's steering
@@ -95,7 +109,13 @@ R_NOM = 0.500          # m   FROZEN band 500-670; only 500 fits a 3x3 grid
 STREETS = 3            # per axis
 
 
-MAX_STRAIGHT = 0.200   # m  cap on the straight run between corners     EST
+MAX_STRAIGHT = 0.190   # m  cap on the straight run between corners     EST
+                       #    190, not 200: at 200 best_straight returns
+                       #    exactly 195 mm, span lands exactly on the
+                       #    SPARE_MIN boundary, and the float compare fails.
+                       #    190 also leaves 110 mm real spare, not 100.
+                       #    Mirrored in cad/vehicle_envelope.py, which
+                       #    asserts the two files agree.
 
 
 def grid_pitch(R: float, lane: float, straight: float) -> float:
@@ -123,7 +143,7 @@ def best_straight(R: float, lane: float, streets: int) -> float:
     than the largest that fits, and returns 0 when even tangent corners are too
     big.
     """
-    usable = FLOOR - 2 * WALL_MARGIN
+    usable = FLOOR - 2 * WALL_MARGIN - SPARE_MIN
     s = (usable - lane) / (streets - 1) - 2 * R
     return max(0.0, min(MAX_STRAIGHT, s))
 
@@ -309,10 +329,11 @@ def self_check() -> None:
         raise AssertionError("R=670 should not fit a 3x3 grid")
     # "Smaller is better" cannot mean "a bigger radius gives a smaller loop" --
     # a bigger turning circle FORCES a bigger loop, and at R=600 the straight is
-    # already squeezed to 70 mm. What it does mean: at the small end the cap
+    # already squeezed to ZERO (tangent corners) at lane 310 mm -- it was 70 mm
+    # back when lane was 230 mm. What it does mean: at the small end the cap
     # binds, so the layout leaves real margin instead of spending the whole
     # floor. That margin is the defence against B2 and B3 both landing badly.
-    assert build(R=0.500)["span"] <= FLOOR - 2 * WALL_MARGIN - 0.100, \
+    assert build(R=0.500)["span"] <= FLOOR - 2 * WALL_MARGIN - SPARE_MIN + 1e-9, \
         "at R=500 the layout should leave >=100 mm spare, not fill the floor"
     assert grid_pitch(0.6, LANE, 0.0) > grid_pitch(0.5, LANE, 0.0), \
         "pitch must grow with radius"
@@ -453,8 +474,9 @@ def main() -> int:
     usable = FLOOR - 2 * WALL_MARGIN
     route = path_len(g["route"])
     print(f"floor           {FLOOR:.3f} x {FLOOR:.3f} m (usable {usable:.3f})")
-    print(f"car width       {args.car_width*1000:.2f} mm  MEASURED 2026-09-03 "
-          f"(rear track; body 135.75 and front 107.5 are both narrower)")
+    print(f"car width       {args.car_width*1000:.2f} mm  FRONT track, MEASURED "
+          f"2026-09-05 (Appendix DM) -- front governs since the 13-stud "
+          f"rack rebuild; rear 148.25 and body 135.75 are both narrower")
     print(f"lane width      {g['lane']*1000:.0f} mm")
     print(f"corner radius   {g['R']*1000:.0f} mm  NOT COMMITTED until B3")
     print(f"street pitch    {g['pitch']*1000:.0f} mm  "

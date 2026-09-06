@@ -12,12 +12,47 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   (assessed 2026-09-01, Appendix AM). It does linear segments plus 90-deg /
   T / dead-end intersections; **no curved streets found**, and it works in
   real-world units (a real lane is 3-3.6 m, this track's is ~0.3 m, roughly
-  1/11). **Good for** marking design, dash patterns, sign placement and a
+  1/11 — **confirmed exactly 2026-09-06: the derived scale is 1:11.80**,
+  see the marking section below). **Good for** marking design, dash
+  patterns, sign placement and a
   portfolio render. **Bad for** the figure-8 plan-view geometry, which is
   the actual hard part. Keep the layout in a dimensioned plan. The
   `3dstreet-mcp` server (`.mcp.json`) is a bridge to a LIVE browser tab over
   WebSocket - alpha, no auth token, piggybacks on whichever tab is signed
   in - not a headless generator.
+- ⚠️ **THE TAB MUST BE PAIRED BEFORE THE SESSION STARTS. Pairing mid-session
+  does NOT work and cannot be recovered from inside the session**
+  (2026-09-06, Appendix DT). Proven, not guessed: Evan paired the tab, the
+  page's own feed showed `MCP relay paired` plus four `tools/list:
+  Completed`, the MCP server even disconnected and RECONNECTED mid-session —
+  and the session still had zero `mcp__3dstreet__*` tools across six
+  `ToolSearch` queries. Confirms Appendix DQ (a session's MCP tool registry
+  is fixed at startup) from a second direction.
+- ⚠️ **The page's `WebMCP active (26 tools)` banner is NOT about Claude
+  Code.** WebMCP is the page's primary transport for *agentic browsers*
+  (ChatGPT desktop browser, Gemini in Chrome, Chrome 149+). Claude Code uses
+  the MCP relay, which the page itself calls the fallback. Do not read '26
+  tools' as 'the session has 26 tools'.
+- **MARKING SPECS ARE NOW A RUNNABLE SCRIPT: `cad/marking_specs.py`**
+  (2026-09-06, Appendix DT), replacing the stale hand table in
+  `PRD_ROADMAP.md`. **The model scale is DERIVED, not chosen: 1:11.80.**
+  Appendix L picked the scale (1:14) and derived the lane from it; the lane
+  rule that replaced it (`lane = 2.0 x car width`) derives the lane from the
+  car, so the scale falls out as `12 ft / 310 mm`. The two agreed at the old
+  130 mm car (260.0 mm / 1:14.07 vs the published 261 mm / 1:14), which is
+  why the reversal went unnoticed. At 155 mm: normal line 8.61-12.92 mm,
+  stop line 25.83-51.67 mm, lane 310 mm.
+- **DASH RATIO DECIDED 2026-09-06 (Evan, Appendix DU): `dash:gap = 1:2`** —
+  gap twice the dash. At 1:11.80 on the 8.23 m lap that is **68.6 mm dash /
+  137.2 mm gap, 40 cycles per lap.** ~~UNRESOLVED — this file, `HANDOFF.md`
+  and Appendix L all said "Duckietown uses ~2:1" and none said which side
+  was which~~ closed. Keep the reason on the record: MUTCD's is dash:gap =
+  1:3, and **Appendix L's own worked example (60/180 mm) is 1:3** — it never
+  applied the 2:1 it had just introduced, so the appendix contradicted
+  itself and the contradiction propagated into two live docs for a month.
+  1:2 is the reading that makes the deviation do its job: MUTCD's 1:3 was
+  rejected for giving too FEW dashes at this scale, so the replacement had
+  to be denser. **Documented deviation, not MUTCD compliance.**
 - **CORNER GEOMETRY IS FROZEN until the T2 turning test** (Appendix L, AM.2)
   — **still true 2026-09-05 even though every input to the formula below is
   now measured or estimated from real numbers, and those numbers keep
@@ -34,9 +69,15 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   comfortably under the 330 mm estimate on TURN RADIUS. **But car width
   ALSO changed the same day** — ~~148.25 mm rear track governs~~ **front
   track is now 155 mm and governs instead (Appendix DM)** — and that pushes
-  lane width to 310 mm, which makes the FLOOR-FIT tight: `cad/
+  lane width to 310 mm. ~~which makes the FLOOR-FIT tight: `cad/
   track_layout_v2.py`'s own 100 mm safety-margin self-check now FAILS at
-  R=500 (only 90 mm spare). Turn radius has slack; floor space does not.
+  R=500 (only 90 mm spare)~~ **CLOSED 2026-09-06 — span 2690 mm, spare
+  110 mm, self-check PASSES.** The failure was two functions in that file
+  disagreeing about usable width, not the car outgrowing the floor; see
+  `hardware.md` for the mechanism. ⚠️ **Still true at the other end of the
+  frozen band: at R=600 the straight is already 0 mm and spare is 90 mm,
+  under the 100 mm reserve with nothing left to shrink.** Turn radius has
+  slack; floor space does not.
   **None of this unfreezes corner geometry.** A geometric estimate from real
   measurements is still not the same claim as T2's empirical test on the
   rolling chassis, and both the steering number and the car width have now

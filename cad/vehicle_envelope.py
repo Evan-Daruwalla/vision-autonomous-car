@@ -38,7 +38,11 @@ FLOOR = 3.000          # m   CONFIRMED by Evan 2026-09-01
 WALL_MARGIN = 0.100    # m                                              EST
 USABLE = FLOOR - 2 * WALL_MARGIN
 STREETS = 3            # per axis, track v2
-MAX_STRAIGHT = 0.200   # m   cap on the straight run between corners    EST
+MAX_STRAIGHT = 0.190   # m   cap on the straight run between corners    EST
+                       #     MIRRORS track_layout_v2.py, which is the
+                       #     authority. 200 -> 190 on 2026-09-06. Do not
+                       #     edit one file's copy alone -- self_check below
+                       #     imports the other file and fails if they drift.
 MIN_SIDE_CLEARANCE = 0.050   # m  clearance per side IN A CORNER        EST
 
 
@@ -114,6 +118,27 @@ def self_check() -> None:
 
     # corner clearance falls as the car lengthens
     assert corner_clearance(0.130, 0.100, 0.5) > corner_clearance(0.130, 0.180, 0.5)
+
+    # THE TWO SCRIPTS DESCRIBE ONE TRACK (see max_car_width's docstring), so a
+    # constant drifting in one file must FAIL here rather than diverge in
+    # silence. Added 2026-09-06 after MAX_STRAIGHT went 200 -> 190 in
+    # track_layout_v2.py and this file's copy would otherwise have kept
+    # printing 200 as 'the cap track_layout_v2.py uses'. Imported INSIDE the
+    # check so a normal run of this file stays stdlib-only (that file needs
+    # numpy; this one does not).
+    import importlib.util
+    from pathlib import Path
+    _f = Path(__file__).with_name('track_layout_v2.py')
+    _spec = importlib.util.spec_from_file_location('_track_layout_v2', _f)
+    _t = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_t)
+    for _name in ('FLOOR', 'WALL_MARGIN', 'STREETS', 'MAX_STRAIGHT'):
+        assert getattr(_t, _name) == globals()[_name], (
+            f'{_name} has drifted: {_f.name} says {getattr(_t, _name)}, '
+            f'this file says {globals()[_name]}. One track, two scripts - '
+            f'they must agree.')
+    assert _t.SPARE_MIN > 0, 'track_layout_v2 lost its wall-spare reserve'
+
     print("vehicle_envelope self_check: PASS")
 
 
@@ -139,7 +164,7 @@ def main() -> int:
     print("-" * 74)
     print("  The straight run between corners trades directly against width.")
     print("  At straight=0 the corners are tangent (no straight street at all);")
-    print("  200 mm is the cap track_layout_v2.py uses when the floor allows.")
+    print(f"  {MAX_STRAIGHT*1000:.0f} mm is the cap track_layout_v2.py uses when the floor allows.")
     print()
     print(f"{'corner R':>9} {'W max @ s=0':>13} {'W max @ s=200':>15}   "
           f"verdict for a 130 mm car")

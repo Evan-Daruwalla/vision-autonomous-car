@@ -782,13 +782,38 @@ model "always steer left", which looks perfect on the training track and
 fails everywhere else. The figure-8 also yields the intersection for the
 stop sign / traffic light for free.
 
-**Scaled marking specs (MUTCD-verified 2026-08-05; scale from an ESTIMATED
+~~**Scaled marking specs (MUTCD-verified 2026-08-05; scale from an ESTIMATED
 130 mm car width — recompute at T1):** lane 261 mm · normal line 7.3 mm ·
 stop line 22-44 mm · **dash compressed to ~60/180 mm** (true scale is
 218/653 mm, which shows only ~3.5 dashes on a 5 m loop — the MUTCD's own
 "similar ratio of line segments to gaps" latitude permits the compression;
 the deviation is deliberate and documented). Yellow separates opposing
-directions; white separates same-direction.
+directions; white separates same-direction.~~
+
+**RECOMPUTED 2026-09-06 (Appendix DT) — the table above is superseded and
+the specs are now a runnable script, `cad/marking_specs.py`.** The
+full-scale MUTCD figures are unchanged (they are the standard); everything
+downstream of them moved, because **the model scale is DERIVED now, not
+chosen: 1:11.80, not 1:14.** Appendix L picked the scale and derived the
+lane from it (12 ft / 14 = 261 mm); the lane rule that replaced it
+(`lane = 2.0 × car width`, `SIM_TRANSFER_SPEC` §3) derives the lane from the
+MEASURED car, so the scale falls out as 12 ft / 310 mm. **1:14 was never
+revisited and kept — it was overtaken.** The two rules agreed at the old
+130 mm car (260.0 mm / 1:14.07 vs 261 mm / 1:14), which is why the reversal
+went unnoticed for a month. At the measured 155 mm front track: **lane
+310 mm · normal line 8.61-12.92 mm · stop line 25.83-51.67 mm · dash
+68.6/137.2 mm** (true scale 258/775 mm gives only 8.0 cycles on the 8.23 m
+lap, so the compression stands; `TARGET_DASH_CYCLES = 40` is the EST that
+sets the absolute size). Yellow separates opposing directions; white
+separates same-direction. ~~⚠️ BLOCKED-ON-EVAN before anything prints: the
+"~2:1 Duckietown" dash deviation never records WHICH SIDE IS WHICH~~
+**DECIDED 2026-09-06 (Evan, Appendix DU): `dash:gap = 1:2`** — 68.6 mm dash
+/ 137.2 mm gap, 40 cycles per lap. Kept on the record because it sat
+ambiguous in three documents for a month: Appendix L's own worked example
+(60/180 mm) is 1:3, so the appendix that introduced the 2:1 never applied
+it. 1:2 is the reading that makes the deviation do its job — MUTCD's 1:3
+was rejected for giving too FEW dashes at this scale, so the replacement
+had to be denser. **A documented deviation, not MUTCD compliance.**
 
 T1. ~~**Confirm scale.** Recompute the marking table from the MEASURED car
     width (needs B2/B3). Done: table in the record with measured input.~~
