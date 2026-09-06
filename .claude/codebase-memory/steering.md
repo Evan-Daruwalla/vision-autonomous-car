@@ -223,24 +223,54 @@ exists to prevent.
   Until then, the safe assumption is that the servo's safe travel range is
   UNKNOWN on the new rack, not that it scales from the old numbers.
 
-## Design margin: PLANNING max steer capped at 45°, mechanical max stays 58° (2026-09-05, Appendix DM)
+## Design margin: PLANNING max steer capped at 45° (2026-09-05, Appendix DM — CORRECTED by DN below, see that section first)
 
-- **Evan: "add some margin so make the max curve be only 45 degrees."** Same
-  pattern as `SERVO_US_SPAN=450` already holding back from the 500
-  geometric max — deliberately not using the full mechanical range for
-  planning/corner-radius purposes. **58° is still the real, measured
-  mechanical deviation** (this file, above); 45° is a DESIGN CHOICE for
-  which numbers downstream geometry work should assume, not a new
-  measurement superseding 58°. Keep both: mechanical capability vs. planning
-  target are two different questions from here on.
-- **Planning R_min = wheelbase / tan(45°) = wheelbase exactly** (tan 45 = 1):
+- ~~**Evan: "add some margin so make the max curve be only 45 degrees."**
+  Same pattern as `SERVO_US_SPAN=450`... 45° is a DESIGN CHOICE... Keep
+  both: mechanical capability vs. planning target are two different
+  questions from here on.~~ **CORRECTED SAME DAY, Appendix DN: 45° is not a
+  safe cutback from 58° — it may not be ACHIEVABLE at all.** See below.
+- ~~**Planning R_min = wheelbase / tan(45°) = wheelbase exactly**... 185.95mm
+  is comfortably inside the frozen 500-670mm corner band~~ **superseded —
+  see DN.1 below before using any of these three numbers (58°, 116.2mm,
+  45°/185.95mm).**
 
-      R_min (planning, 45°) = 185.95 mm
-      R_min (mechanical max, 58°) = 116.2 mm  -- unchanged, still real
+## The 58°/270° figures were measured with NO SERVO attached — the real ceiling may be ~39°, not 58° (2026-09-05, Appendix DN)
 
-  185.95 mm is comfortably inside the frozen 500-670 mm corner band, same
-  conclusion as 116.2 mm was — the margin costs nothing against that band,
-  it only matters if some other constraint later needs the full 58°.
+- **Both the 58° wheel-deviation (Appendix DL) and the ~270° pinion sweep
+  (this section, above) were hand-measured on the bare linkage, servo
+  disconnected** — confirmed directly with Evan. That means both describe
+  what the RACK's own mechanical ends allow, not what the actual MG90S can
+  reach. **The MG90S is a fixed-spec 180° servo (90° each way) — that
+  number is independent of the rack** and does not grow when the rack does.
+- **The pinion/rack now travels further (135° each way) than the servo can
+  ever drive it (90° each way).** Assuming the same linear pinion-to-wheel
+  ratio this project has used throughout (58°/135° = 0.4296, itself
+  unverified — see the warning after the old SERVO_US_SPAN table):
+
+      servo-achievable wheel deviation ~= 90 x (58/135) = 38.7 deg
+      R_min at 38.7 deg = 185.95 / tan(38.7) = 232.4 mm
+
+  **38.7° is an ESTIMATE from an unverified linear assumption, not a
+  measurement** — flagged the same way the old table's ratio always was.
+  But even as an estimate it settles the immediate question: **Evan's 45°
+  planning target is likely ABOVE what the servo can physically deliver
+  (reaching a true 45° wheel angle would need ~104.7° of pinion rotation,
+  and the servo only has 90°), not a safe margin below a 58° mechanical
+  max.** The rack is no longer the constraint on this build; the servo is.
+- **The only way to get a real number is to bench-measure the wheel angle
+  with the actual MG90S attached and driven to its own limit** — the same
+  re-calibration Appendix DL already called for, now sharpened: measure the
+  WHEEL angle directly at the servo's real safe span, don't compute it from
+  the bare-linkage figures via the assumed ratio. Until that measurement
+  exists, treat 38.7° (or whatever margin Evan wants below it) as
+  provisional, and do not build to 45° as if it were a confirmed
+  achievable target.
+- **This does not undo the favourable part of Appendix DM**: the rack's own
+  hard stop is still further away than the servo can reach, so the
+  stall/cook risk from driving into the rack's end is reduced, not
+  worsened, by the longer rack — the open question is only how MUCH wheel
+  angle the servo itself yields, not whether the rack will bind first.
 - **Servo-to-pinion coupling CHOSEN: Adafruit #4252** (Evan, 2026-09-03) —
   the manufactured candidate this file and `docs/BOM.md` row 22 already
   named, $0.75, micro-servo spline → 16 mm Lego cross axle. Evan reports it

@@ -24,9 +24,13 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   moving.** Minimum turn radius = wheelbase / tan(max steer). ~~330 mm
   ESTIMATE, width/wheelbase/steer all unmeasured~~ superseded piece by
   piece: wheelbase estimated 185.95 mm (`steering.md`, Appendix DD/DE), max
-  steer measured 58° mechanical on the current 13-stud rack, capped 45° for
-  PLANNING margin (`steering.md`, Appendix DL/DM) — giving mechanical
-  **R_min ~ 116.2 mm**, planning **R_min = 185.95 mm exactly**. Both
+  steer 58° on the current 13-stud rack, hand-measured with the servo
+  DISCONNECTED (Appendix DL) — ~~capped 45° for planning margin (Appendix
+  DM)~~ **CORRECTED same day (Appendix DN): the MG90S is fixed at 90° each
+  way and is now out-travelled by the rack (135° each way), so 58° is the
+  rack's limit, not the servo's, and 45° may not be achievable at all.
+  Servo-achievable ESTIMATE (unverified): ~38.7°.** Giving bare-linkage
+  **R_min ~ 116.2 mm**, servo-estimate **R_min ~ 232.4 mm**. Both
   comfortably under the 330 mm estimate on TURN RADIUS. **But car width
   ALSO changed the same day** — ~~148.25 mm rear track governs~~ **front
   track is now 155 mm and governs instead (Appendix DM)** — and that pushes

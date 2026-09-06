@@ -152,6 +152,7 @@ the dated entry, not the digest.
 - [DK — Tolerance coupon v2: axle bore closes at 5.00mm -- both M1.3 headline numbers now determined](#appendix-dk---tolerance-coupon-v2-axle-bore-closes-at-500mm----both-m13-headline-numbers-now-determined-2026-09-05-2023-cdt) (09-05)
 - [DL — Rack swapped 7-stud to 13-stud: max steer genuinely 58deg (was 32), R_min 297.5mm to 116.2mm; SERVO_US_SPAN unvalidated on new rack](#appendix-dl---rack-swapped-7-stud-to-13-stud-max-steer-genuinely-58deg-was-32-r_min-2975mm-to-1162mm-servo_us_span-unvalidated-on-new-rack-2026-09-05-2220-cdt) (09-05)
 - [DM — Max steer capped at 45deg for planning margin; front track re-measured 155mm, governance flips, track layout floor-fit now fails its own check](#appendix-dm---max-steer-capped-at-45deg-for-planning-margin-front-track-re-measured-155mm-governance-flips-track-layout-floor-fit-now-fails-its-own-check-2026-09-05-2229-cdt) (09-05)
+- [DN — Correction to DM: 58deg/270deg both measured with no servo attached -- real wheel-angle ceiling is ~38.7deg estimate, 45deg target may be unachievable](#appendix-dn---correction-to-dm-58deg270deg-both-measured-with-no-servo-attached----real-wheel-angle-ceiling-is-387deg-estimate-45deg-target-may-be-unachievable-2026-09-05-2257-cdt) (09-05)
 
 ---
 
@@ -12282,3 +12283,86 @@ reports are now load-bearing facts in the docs; the third is an open
 question, not a guess. The track layout's floor-fit is now a real,
 undecided open item alongside the still-pending SERVO_US_SPAN
 recalibration from Appendix DL.
+
+# Appendix DN - Correction to DM: 58deg/270deg both measured with no servo attached -- real wheel-angle ceiling is ~38.7deg estimate, 45deg target may be unachievable (2026-09-05 22:57 CDT)
+Correction to Appendix DM, same day. Asked Evan which physical shaft his
+"~270 degrees" figure described: "the shaft that the servo will be
+connected too." Confirms the pinion, as suspected — but a follow-up
+question about HOW the 58 degree wheel figure (Appendix DL) was measured
+surfaced something DM did not know to check: "no servo involved."
+
+## DN.1 What this means
+
+Both load-bearing numbers from today (58 deg wheel deviation, ~270 deg
+pinion sweep) were hand-measured on the bare linkage with the servo
+disconnected. They describe what the RACK's own physical ends allow, not
+what the actual MG90S can drive. The MG90S is a fixed-spec 180 degree
+servo (90 degrees each way) -- a property of the PART, unrelated to the
+rack -- and that number does not grow just because the rack now allows
+more travel.
+
+The rack (135 degrees each way, from the new 270 degree figure divided by
+two) now travels further than the servo can ever reach (90 degrees each
+way). This is the mirror image of the old situation, where rack and servo
+were both ~180 degrees and closely matched (Appendix BU: "an MG90S at 180
+degrees is an EXACT 1:1 match to this rack -- no gearing, no reduction,
+nothing").
+
+## DN.2 The corrected estimate
+
+Using the same linear pinion-to-wheel ratio this project has assumed
+throughout (unverified, flagged every time it's used):
+
+    ratio = 58 / 135 = 0.4296  (wheel degrees per pinion degree)
+    servo-achievable wheel deviation ~= 90 x 0.4296 = 38.7 deg
+    R_min at 38.7 deg = 185.95 / tan(38.7) = 232.4 mm
+
+    for reference: reaching a TRUE 45 deg wheel angle would need
+    45 / 0.4296 = 104.7 deg of pinion rotation -- the servo only has 90.
+
+**Appendix DM's 45 degree planning target is not a safe margin below the
+58 degree mechanical max -- it may not be achievable by this servo at
+all.** The rack is no longer the binding constraint on this build (it has
+slack the servo can't use); the servo's own 90-degree-each-way limit is.
+
+## DN.3 What is and is not known
+
+38.7 degrees is an ESTIMATE from an assumption (linearity between pinion
+angle and wheel angle) that has never been verified and has real reason to
+be doubted at large angles -- rack-and-pinion-to-tie-rod geometry is not
+generally linear, the existing linear model was fit to three points on the
+OLD, shorter rack, and this estimate extrapolates it onto a mechanism that
+has since changed twice (Appendix DL, and now this). **The only way to get
+a real number is to bench-measure the wheel angle with the actual MG90S
+attached and driven to its own safe span** -- not computed from the
+bare-linkage figures. This sharpens, rather than replaces, the
+SERVO_US_SPAN re-calibration Appendix DL already flagged as the next real
+task: measure the WHEEL angle directly, at the servo's real limits, once
+mounted.
+
+**What DM got right and this does not undo**: the rack's own hard stop is
+further away than the servo can reach, so the risk of driving the coupler
+into the rack's END is reduced by the longer rack, not worsened. The open
+question was always how much wheel angle the servo itself yields -- that
+number is now understood to be smaller than 58, not larger, and possibly
+smaller than the 45 degree target Evan asked for.
+
+## DN.4 Corrected in place
+
+`steering.md`'s new dated section from Appendix DM (the 45 degree planning
+cap) is struck with a pointer here rather than silently edited to a new
+number -- the 45/185.95mm figures were a real, stated decision at the
+time, now known to rest on an unachievable premise. Live docs
+(HANDOFF.md, PRD_ROADMAP.md) updated to match. `docs/Project Record`
+Appendix DM is left as written -- append-only, and it was an honest
+record of the decision as understood at the time.
+
+## DN.5 State
+
+**Nothing built, nothing bench-tested.** The real wheel-angle ceiling with
+the actual servo mounted is unmeasured. 38.7 degrees (R_min 232.4mm) is
+the working estimate until Evan measures it directly; both remain
+comfortably inside the frozen 500-670mm corner band regardless of exactly
+where the true number lands, so this does not block anything today -- but
+building to a 45 degree target the servo may not reach would be a real
+mistake to carry into M1.5 CAD work.

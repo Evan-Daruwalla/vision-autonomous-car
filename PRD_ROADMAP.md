@@ -356,25 +356,31 @@ transfer gap) must not block the capstone.
    front now governs (155 > 148.25), not rear.** Steering
    pinion **12 teeth**, ~~pinion sweep **~180° lock-to-lock**, max steer **32°**~~
    **SUPERSEDED 2026-09-05 (Appendix DL): Evan replaced the 7-stud gear rack
-   with a 13-stud one. Mechanical max steer is now 58°** (same 90°-minus-
+   with a 13-stud one. Bare-linkage max steer is now 58°** (same 90°-minus-
    protractor-reading convention, checked directly — not the historical
-   convention error repeating). **Planning max steer capped at 45° for
-   margin (Appendix DM)** — same pattern as `SERVO_US_SPAN` holding back
-   from its geometric max. **The pinion-sweep and `SERVO_US_SPAN` figures
-   are UNVALIDATED on the new rack** — `steering.md` requires a fresh bench
-   measurement before either is trusted (the old rack may have been the
-   actual travel limit, not the pinion or servo). **Wheelbase: a GEOMETRIC
-   ESTIMATE as of 2026-09-03 (Appendices DD/DE), not a direct axle-to-axle
-   caliper measurement, and unaffected by either the rack or track-width
-   change.** Evan measured 9.25 in (234.95 mm) overall wheel-to-wheel
-   length; **front tire 42.25 mm diameter, rear (drive) tire 55.75 mm**
-   (Appendix CS) — confirmed different, not assumed equal.
+   convention error repeating). ⚠️ **CORRECTED SAME DAY (Appendix DN): 58°
+   and the ~270° pinion figure were BOTH measured with the servo
+   disconnected** — they describe the rack's own limit, not the MG90S
+   (fixed 180° spec, 90° each way), which is now OUT-travelled by the rack
+   (135° each way > servo's 90°) — the reverse of the old setup, where both
+   were ~180°. ~~Planning max steer capped at 45° for margin~~ **may not
+   be achievable by this servo at all** — a true 45° needs ~104.7° of
+   pinion rotation, more than the servo has. Servo-achievable ESTIMATE
+   (unverified linear ratio): **≈38.7°**. **The pinion-sweep and
+   `SERVO_US_SPAN` figures are UNVALIDATED on the new rack** — `steering.md`
+   requires a fresh bench measurement of the WHEEL angle with the actual
+   servo attached, not computed from bare-linkage figures. **Wheelbase: a
+   GEOMETRIC ESTIMATE as of 2026-09-03 (Appendices DD/DE), not a direct
+   axle-to-axle caliper measurement, and unaffected by either the rack or
+   track-width change.** Evan measured 9.25 in (234.95 mm) overall
+   wheel-to-wheel length; **front tire 42.25 mm diameter, rear (drive) tire
+   55.75 mm** (Appendix CS) — confirmed different, not assumed equal.
    wheelbase ≈ 234.95 − (21.125 + 27.875) ≈ **185.95 mm**.
-   ~~`R_min = 1.600 × 185.95 ≈ 297.5 mm`~~ mechanical `R_min = 0.625 × 185.95
-   ≈ 116.2 mm` (58°); **planning `R_min = 185.95 mm` exactly** (45°, tan
-   45°=1) as of 2026-09-05. Both comfortably inside the frozen 500-670 mm
-   corner band, still not T2's empirical test. ⚠️ **The wider front track
-   makes the floor-fit itself marginal now, separately from turn radius**:
+   ~~`R_min = 1.600 × 185.95 ≈ 297.5 mm`~~ bare-linkage `R_min = 0.625 ×
+   185.95 ≈ 116.2 mm` (58°); servo-estimate `R_min ≈ 232.4 mm` (38.7°,
+   Appendix DN). Both comfortably inside the frozen 500-670 mm corner band,
+   still not T2's empirical test. ⚠️ **The wider front track also
+   makes the floor-fit itself marginal, separately from turn radius**:
    `cad/track_layout_v2.py`'s own self-check FAILS at R=500 with the new
    155 mm width (lane 310mm, span 2710mm, only 90mm spare against the
    required 100mm) — real output, not projected, and unresolved (Appendix
@@ -801,14 +807,17 @@ T2. **Measure minimum turning radius empirically** on the rolling chassis
     estimate. **No corner tile is cut before this measurement.** Done:
     measured radius in the record.
     **UPDATE 2026-09-02 (Appendix BQ):** max steer is now MEASURED at
-    ~~**32°**~~ **58° mechanical, as of 2026-09-05 (Appendix DL) — the rack
+    ~~**32°**~~ **58°, as of 2026-09-05 (Appendix DL) — the rack
     changed from 7-stud to 13-stud, a real mechanical difference, not a
-    re-measurement of the same part.** Evan then capped **planning** max
-    steer at **45° for margin** (Appendix DM), same idea as
-    `SERVO_US_SPAN` holding back from its own geometric max. `R_min =
-    wheelbase ÷ tan(max steer)`, wheelbase now estimated at 185.95 mm
-    (Appendices DD/DE): mechanical **R_min = 0.625 × 185.95 ≈ 116.2 mm**,
-    planning **R_min = 185.95 mm exactly** (tan 45°=1). Both well under the
+    re-measurement of the same part.** ⚠️ **CORRECTED SAME DAY (Appendix
+    DN): 58° was hand-measured with the servo DISCONNECTED — it's the
+    rack's own limit, not the MG90S's (fixed 90° each way, now out-
+    travelled by the rack's 135° each way).** ~~Evan then capped planning
+    max steer at 45° for margin~~ — **may not be achievable by this servo**;
+    servo-achievable estimate (unverified linear ratio) is **≈38.7°**.
+    `R_min = wheelbase ÷ tan(max steer)`, wheelbase now estimated at
+    185.95 mm (Appendices DD/DE): bare-linkage **R_min = 0.625 × 185.95 ≈
+    116.2 mm** (58°), servo-estimate **R_min ≈ 232.4 mm** (38.7°). Both well under the
     ~330 mm estimate, so the 500-670 mm band has margin to spare — **but the
     front track also grew to 155 mm the same day (Appendix DM), which makes
     the FLOOR-FIT marginal even though the turn radius has slack: lane
@@ -1138,13 +1147,17 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
       DM) — lane 310 mm, and the layout's own floor-fit self-check FAILS at
       R=500 (90 mm spare, needs 100; see task 4 above for the full number).**
       ~~**max steer is confirmed at 32°**~~ **SUPERSEDED 2026-09-05 (Appendix
-      DL): 58° mechanical, after Evan replaced the 7-stud gear rack with a
+      DL): 58°, after Evan replaced the 7-stud gear rack with a
       13-stud one** — a real mechanical change, confirmed against the same
       convention (90° = straight ahead, deviation = 90 minus the protractor
-      reading) that already burned this project once. **Planning max steer
-      capped at 45° for margin (Appendix DM).** Wheelbase is also now
-      estimated (185.95 mm, Appendices DD/DE): mechanical `R_min = 0.625 ×
-      185.95 ≈ 116.2 mm`, planning `R_min = 185.95 mm` exactly — both well
+      reading) that already burned this project once. ⚠️ **CORRECTED SAME
+      DAY (Appendix DN): 58° was measured with the servo DISCONNECTED — the
+      MG90S itself is fixed at 90° each way, now out-travelled by the rack's
+      135° each way.** ~~Planning max steer capped at 45° for margin~~ may
+      not be achievable; servo-achievable estimate (unverified) **≈38.7°**.
+      Wheelbase is also now estimated (185.95 mm, Appendices DD/DE):
+      bare-linkage `R_min = 0.625 × 185.95 ≈ 116.2 mm` (58°), servo-estimate
+      `R_min ≈ 232.4 mm` (38.7°) — both well
       under the frozen 500-670 mm corner band on turn radius, even though the
       floor-fit above is now tight. **This still does not
       close T2**, which asks for an EMPIRICAL turning test on the rolling
