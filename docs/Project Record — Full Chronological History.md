@@ -153,6 +153,7 @@ the dated entry, not the digest.
 - [DL — Rack swapped 7-stud to 13-stud: max steer genuinely 58deg (was 32), R_min 297.5mm to 116.2mm; SERVO_US_SPAN unvalidated on new rack](#appendix-dl---rack-swapped-7-stud-to-13-stud-max-steer-genuinely-58deg-was-32-r_min-2975mm-to-1162mm-servo_us_span-unvalidated-on-new-rack-2026-09-05-2220-cdt) (09-05)
 - [DM — Max steer capped at 45deg for planning margin; front track re-measured 155mm, governance flips, track layout floor-fit now fails its own check](#appendix-dm---max-steer-capped-at-45deg-for-planning-margin-front-track-re-measured-155mm-governance-flips-track-layout-floor-fit-now-fails-its-own-check-2026-09-05-2229-cdt) (09-05)
 - [DN — Correction to DM: 58deg/270deg both measured with no servo attached -- real wheel-angle ceiling is ~38.7deg estimate, 45deg target may be unachievable](#appendix-dn---correction-to-dm-58deg270deg-both-measured-with-no-servo-attached----real-wheel-angle-ceiling-is-387deg-estimate-45deg-target-may-be-unachievable-2026-09-05-2257-cdt) (09-05)
+- [DO — Servo candidate found for the full 135deg range: HOOYIJ MG90D 270deg, same 20T spline as MG90S, not yet ordered](#appendix-do---servo-candidate-found-for-the-full-135deg-range-hooyij-mg90d-270deg-same-20t-spline-as-mg90s-not-yet-ordered-2026-09-05-2311-cdt) (09-05)
 
 ---
 
@@ -12366,3 +12367,79 @@ comfortably inside the frozen 500-670mm corner band regardless of exactly
 where the true number lands, so this does not block anything today -- but
 building to a 45 degree target the servo may not reach would be a real
 mistake to carry into M1.5 CAD work.
+
+# Appendix DO - Servo candidate found for the full 135deg range: HOOYIJ MG90D 270deg, same 20T spline as MG90S, not yet ordered (2026-09-05 23:11 CDT)
+Evan asked directly for a servo covering the full 135°-each-way range the
+new rack allows (Appendix DN found the MG90S caps out at 90° each way,
+leaving an estimated ~38.7° at the wheel instead of the intended range).
+Found a strong, well-specified candidate.
+
+## Candidate: HOOYIJ MG90D, 270°, $16.99/4-pack ($4.25/unit)
+
+Full spec sheet pulled from the live Amazon listing (B0D5YBL2JX), not a
+summary snippet:
+
+| spec | MG90D-270 | MG90S (current BOM row 7) | match? |
+|---|---|---|---|
+| horn gear spline | **20T, 4.9mm dia** | 20T, ~4.8-4.9mm (SkyStar/TinyTronics, Appendix DG) | SAME CLASS — existing coupler design (Adafruit #4252 and the printed `servo_lego_coupler_v1.stl`, both sized for a 4.85mm 20T spline) should fit without redesign |
+| gear material | Full metal (aluminium) | Metal (the stated reason MG90S was chosen) | same |
+| stall torque | 2.2 kg-cm @ 6V | ~2.2 kg-cm @ 4.8V (steering.md) | same class — does NOT worsen the coupler SF problem (Appendix BV) the way the MG996R fallback does |
+| voltage | 4.8-6.0V | 4.8-6.0V (nominal) | same |
+| weight | 13.5g | 13.4g | same |
+| size | 22.4 x 12.1 x 22.8mm | ~22.8 x 12.2 x 31mm (varies by source) | third dimension differs — physically verify before assuming the existing mount fits unmodified |
+| bearing | **None stated** | not documented either way in this project's notes | unverified both ways, not a new gap |
+| price | $16.99/4 ($4.25 ea) | $7.99/2 ($4.00 ea) | comparable |
+
+**The pulse-width-to-angle mapping is the actual point of this find**:
+500-2500us = full 270°; 500-1500us OR 1500-2500us (either HALF of that
+pulse range, split at the 1500us neutral) = 135°+/-3 deg. In this
+project's firmware terms (`uno_control.ino`: `SERVO_US_CENTRE=1500`,
+`SERVO_US_SPAN` = "+/- from centre"), the geometric max span for this part
+would be **1000us**, driving the pinion through +/-135 deg -- matching the
+new rack's measured travel (Appendix DN) with no wasted range on either
+side, if centering is good.
+
+## What this would fix, if adopted
+
+Appendix DN's core problem was a mismatch: the rack now travels further
+(135 deg each way) than the MG90S can reach (90 deg each way), capping
+the real wheel angle at an unverified ~38.7 deg estimate instead of
+something closer to the 58 deg the bare linkage allows. A 270 deg servo
+at this spec removes that mismatch entirely -- the servo would no longer
+be the binding constraint, the rack's own hard stop would be (same
+favourable direction Appendix DM/DN already noted: hitting the servo's own
+limit is safer than hitting a mechanical hard stop, and here the two
+would land close together by design instead of the servo stopping short).
+
+## What is NOT resolved by finding this part
+
+- **Not ordered. Not bench-tested. Not confirmed to physically fit the
+  existing mount** (`docs/WIRING_PROTOSHIELD.md`'s servo mount, sized
+  against MG90S's footprint) -- the differing third dimension above needs
+  a real caliper check against the mount, not an assumption.
+- **One negative review flags 3-of-4 dead on arrival** from this listing
+  (26 ratings, 4.2/5 average) -- a real quality-control risk at this price
+  point. The 4-pack already buys built-in spares, which mitigates it
+  somewhat without extra cost.
+- **The bench measurement Appendix DL/DN called for is still needed
+  regardless of which servo is used** -- wheel angle must be measured with
+  the real servo attached and driven to its actual limit, not assumed from
+  a datasheet pulse-width table.
+- **This is a candidate, not a BOM change.** Per this project's standing
+  rule (no hardware purchase without Evan's explicit go), `docs/BOM.md` row
+  7 still names the MG90S. Flagged here and in `steering.md` as the
+  recommended replacement pending Evan's confirmation.
+
+## Two sibling listings noted, not deep-specced
+
+Same brand's **TS90MD, 270°, $17.99/4-pack** and **RCmall's 180/270/360
+configurable 9g servo, $19.58/5-pack** turned up in the same search --
+both plausible alternates if the MG90D's DOA-rate review is a concern, not
+individually verified to the same depth as the recommended candidate above.
+
+## State
+
+**Nothing ordered, nothing changed in the BOM.** `steering.md` updated
+with the candidate and its fit against the coupler spline; `docs/BOM.md`
+row 7 left as the MG90S with a pointer to this finding, not silently
+swapped.

@@ -271,6 +271,35 @@ exists to prevent.
   stall/cook risk from driving into the rack's end is reduced, not
   worsened, by the longer rack — the open question is only how MUCH wheel
   angle the servo itself yields, not whether the rack will bind first.
+
+## Servo candidate found matching the full 135° range: HOOYIJ MG90D, 270° (2026-09-05, Appendix DO)
+
+- **Evan asked directly for a servo covering the full 135° each way.**
+  Found: **HOOYIJ MG90D-270, $16.99/4-pack** (Amazon B0D5YBL2JX). Same 20T
+  spline, ~4.9 mm dia as the MG90S — the existing coupler design (Adafruit
+  #4252 and `servo_lego_coupler_v1.stl`, both sized for this exact spline)
+  should not need redesign. Same torque class (2.2 kg-cm @6V vs MG90S's
+  ~2.2 kg-cm @4.8V) — does NOT worsen the coupler SF problem the way the
+  MG996R fallback does (BOM row 7's warning still applies to that part, not
+  this one).
+- **The pulse-width table is the actual find**: 500-2500us = 270° full
+  range; HALF that pulse range (500-1500us or 1500-2500us, split at the
+  1500us neutral) = 135°±3°. In this project's firmware terms
+  (`SERVO_US_CENTRE=1500`, `SERVO_US_SPAN` = "+/- from centre"), the
+  geometric max span for this part is **1000 us**, driving the pinion
+  through ±135° — matching the new rack's own measured travel (Appendix
+  DN) with no wasted range on either side, if centering is good. This
+  removes the servo-vs-rack mismatch DN found, rather than just estimating
+  around it.
+- ⚠️ **Not ordered, not bench-tested, not confirmed to fit the existing
+  mount** — one dimension (22.4×12.1×22.8 mm vs the MG90S's usual
+  ~22.8×12.2×31 mm) differs; check against `docs/WIRING_PROTOSHIELD.md`'s
+  mount before assuming a drop-in fit. One review on the listing reports
+  3-of-4 units dead on arrival (26 ratings, 4.2/5 avg) — the 4-pack's
+  built-in spares partly cover that risk. The bench measurement of real
+  wheel angle is still needed regardless of which servo is used.
+- **This is a candidate, not a BOM change** — `docs/BOM.md` row 7 still
+  names the MG90S per this project's no-purchase-without-Evan's-go rule.
 - **Servo-to-pinion coupling CHOSEN: Adafruit #4252** (Evan, 2026-09-03) —
   the manufactured candidate this file and `docs/BOM.md` row 22 already
   named, $0.75, micro-servo spline → 16 mm Lego cross axle. Evan reports it
