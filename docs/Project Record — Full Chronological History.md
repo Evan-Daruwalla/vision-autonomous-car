@@ -155,6 +155,7 @@ the dated entry, not the digest.
 - [DN — Correction to DM: 58deg/270deg both measured with no servo attached -- real wheel-angle ceiling is ~38.7deg estimate, 45deg target may be unachievable](#appendix-dn---correction-to-dm-58deg270deg-both-measured-with-no-servo-attached----real-wheel-angle-ceiling-is-387deg-estimate-45deg-target-may-be-unachievable-2026-09-05-2257-cdt) (09-05)
 - [DO — Servo candidate found for the full 135deg range: HOOYIJ MG90D 270deg, same 20T spline as MG90S, not yet ordered](#appendix-do---servo-candidate-found-for-the-full-135deg-range-hooyij-mg90d-270deg-same-20t-spline-as-mg90s-not-yet-ordered-2026-09-05-2311-cdt) (09-05)
 - [DP — Servo swapped in BOM: MG90S to HOOYIJ MG90D-270, row 7 +$9.00, total $411.45](#appendix-dp---servo-swapped-in-bom-mg90s-to-hooyij-mg90d-270-row-7-900-total-41145-2026-09-06-0024-cdt) (09-06)
+- [DQ — 3DStreet MCP tools live and verified for the first time; scene empty, autosave ON, no mutations made](#appendix-dq---3dstreet-mcp-tools-live-and-verified-for-the-first-time-scene-empty-autosave-on-no-mutations-made-2026-09-06-1322-cdt) (09-06)
 
 ---
 
@@ -12497,3 +12498,66 @@ BOM's dollar total.
 all-in. Servo choice is now settled on paper; physical verification
 (mount fit, bench-measured wheel angle) remains the real next step before
 this is trusted for CAD or firmware work.
+
+# Appendix DQ - 3DStreet MCP tools live and verified for the first time; scene empty, autosave ON, no mutations made (2026-09-06 13:22 CDT)
+The 3DStreet MCP tools are live in a Claude Code session for the first
+time. Evan pasted the relay's pairing confirmation; verified it with a real
+tool call rather than trusting the status text.
+
+## DQ.1 Verified, not assumed
+
+`mcp__3dstreet__getSessionInfo` returned:
+
+    build:      2026.8.0+70fef93c
+    sceneId:    87740b35-811b-4c80-a384-7adb7ad4742e
+    sceneUrl:   https://3dstreet.app/#/scenes/87740b35-811b-4c80-a384-7adb7ad4742e
+    saved:      true
+    isAuthor:   true
+    sceneTitle: null
+    viewport:   3440 x 1271
+
+26 tools are exposed: entity CRUD (`entityCreate`/`entityUpdate`/
+`entityClone`/`entityRemove`), components, `managedStreetCreate`/`Update`,
+`listMixins`, `listSegmentPresets`, camera (`focusCamera`,
+`orientPlanView`), `takeSnapshot`, `saveScene`, `loadScene`, `setLatLon`,
+`undo`/`redo`.
+
+## DQ.2 The diagnosis from 2026-09-01 was right, and it took three sessions
+
+Appendix-era note (HANDOFF, 2026-09-01 ~22:20): the blocker "was never the
+CLI, and never the browser tab" — the project-scoped `.mcp.json` server
+needed Evan's explicit approval, and then **a session's MCP registry is
+fixed at startup**, so even after approving and pairing, THAT session saw
+zero `mcp__3dstreet__*` tools. It needed a fresh session started after both.
+That is exactly what happened here. Recording the confirmation because the
+wrong diagnosis (bad tab, bad CLI, broken server) was chased more than once.
+
+## DQ.3 Two facts that change how this must be used
+
+- **AUTOSAVE IS ON.** `saved: true` + `isAuthor: true` means the cloud
+  scene exists and Evan authors it, so every mutation persists to his real
+  scene immediately. There is no sandbox or preview mode. `undo`/`redo`
+  exist as tools, and the relay page has a Read-only toggle that blocks
+  mutations entirely. **No scene edits were made in this session** — only
+  the two read calls above.
+- **The scene is EMPTY.** `getScene` returns just the three default
+  containers (`street-container`, `environment`, `reference-layers`),
+  untitled, no geometry, `selectedEntityId: null`. Nothing to preserve, but
+  also nothing built yet.
+
+## DQ.4 What it is FOR (unchanged, not re-litigated)
+
+Per HANDOFF and Appendix AM, 3DStreet cannot draw this track — it is a
+street CROSS-SECTION tool with no curved streets and real-world units (a
+real lane is 3-3.6 m; this track's is ~0.3 m). Plan-view geometry stays in
+`cad/track_layout_v2.py`. The MCP is for **marking design, dash patterns,
+sign placement, and a portfolio render**, which map onto real open work:
+the ~2:1 dash ratio deviation (MUTCD's 1:3 does not survive at this
+scale), the hybrid print plan's corner arcs and intersection boxes, and
+relocatable stop-sign placement (Appendix Y.3 — a fixed sign is
+predictable from position and defeats the M4 showcase).
+
+## DQ.5 State
+
+**Tools live, scene empty, nothing built, nothing mutated.** Awaiting
+Evan's direction on which of the three intended uses to start with.

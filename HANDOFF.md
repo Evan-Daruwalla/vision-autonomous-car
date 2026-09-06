@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-06 ~00:24 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-06 ~13:22 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 120 appendices A–DP; BM/BN/BP/BU/CT/CY/DB/DE/DN are corrections to earlier entries). When this file and the record disagree about
+(append-only, 121 appendices A–DQ; BM/BN/BP/BU/CT/CY/DB/DE/DN are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -156,16 +156,24 @@ first load, which is why the server was absent from the session's tool list
 entirely rather than failing — and why pairing the 3dstreet browser tab changed
 nothing on its own.
 
-**STATUS 2026-09-01 ~22:20 — approved and paired; the NEXT session gets the
-tools.** Evan approved it (`claude mcp list` → `3dstreet: npx -y 3dstreet-mcp -
-✔ Connected`) and paired the tab. The session that made those changes still saw
-zero `mcp__3dstreet__*` tools after three checks, because **a session's MCP
-registry is fixed at startup**. Nothing is broken; it just needs a fresh
-session with the tab left open.
-
-**THREE conditions, all now met except the restart:** server approved (done) ·
-browser tab paired at `https://3dstreet.app/#mcp`, kept open in the background
-(done) · session started AFTER the approval (**pending**).
+✅ **RESOLVED 2026-09-06 (Appendix DQ): the tools are LIVE and verified.**
+`mcp__3dstreet__getSessionInfo` returned a real response — build
+`2026.8.0+70fef93c`, scene `87740b35-811b-4c80-a384-7adb7ad4742e`,
+`saved: true`, `isAuthor: true`. All three conditions finally lined up
+(server approved · tab paired · session started after both). 26 tools
+available (`entityCreate`, `managedStreetCreate`, `takeSnapshot`, `undo`,
+etc.).
+⚠️ **`saved: true` + `isAuthor: true` means AUTOSAVE IS ON — every mutation
+persists to Evan's real cloud scene immediately.** There is no sandbox.
+`undo`/`redo` exist; the page's Read-only toggle blocks mutations entirely
+if wanted. **The scene is currently EMPTY** — just the three default
+containers (`street-container`, `environment`, `reference-layers`),
+untitled, no geometry.
+*(Original 2026-09-01 diagnosis, kept because it was right and cost three
+sessions to find: Evan approved the server and paired the tab, but that
+session still saw zero `mcp__3dstreet__*` tools, because **a session's MCP
+registry is fixed at startup** — it needed a fresh session with the tab
+left open, which is exactly what finally happened.)*
 
 **What to actually use it for — do not re-litigate this.** 3DStreet cannot draw
 this track: cross-section tool, no curved streets, real-world units (a real
