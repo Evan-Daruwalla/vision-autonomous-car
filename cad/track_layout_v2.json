@@ -2,7 +2,7 @@
   "floor_m": 3.0,
   "car_width_m_MEASURED": 0.155,
   "lanes_per_street": 2,
-  "lane_width_m_PER_DIRECTION": 0.49999999999999994,
+  "lane_width_m_PER_DIRECTION": 0.24999999999999997,
   "road_width_m_TOTAL": 0.49999999999999994,
   "corner_radius_m_NOT_COMMITTED": 0.5,
   "street_pitch_m": 1.0999999999999999,
@@ -15,10 +15,11 @@
   "print_plan": {
     "arc_len_m": 6.283185307179586,
     "box_len_m": 17.999999999999996,
+    "mark_w_m_DERIVED": 0.010416666666666664,
     "street_line_len_m": 32.4,
     "total_line_m": 56.683185307179585,
-    "filament_g": 1505.5574890451342,
-    "filament_g_if_all_lines_printed": 3514.357489045134,
+    "filament_g": 627.3156204354724,
+    "filament_g_if_all_lines_printed": 1464.3156204354723,
     "printed_tiles_200mm": 122,
     "printed_len_m": 24.283185307179583
   },

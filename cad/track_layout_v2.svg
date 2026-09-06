@@ -23,5 +23,5 @@
 <text x="40.0" y="944.0" font-family="sans-serif" font-size="12" fill="#444">street pitch 1100 mm, span 2700 mm of 2800 usable &#8212; 100 mm SPARE</text>
 <text x="40.0" y="959.0" font-family="sans-serif" font-size="12" fill="#444">corner radius 500 mm &#8212; ONLY 500 mm fits a 3&#215;3 grid; B3 above 500 leaves a 2&#215;2 plus sign</text>
 <text x="40.0" y="974.0" font-family="sans-serif" font-size="12" fill="#444">9 intersections, 4 blocks, driven as a figure-8 (both turn directions, level crossing at centre)</text>
-<text x="40.0" y="989.0" font-family="sans-serif" font-size="12" fill="#444">HYBRID print: 122 marking tiles for arcs + intersection boxes, ~1506 g &#8212; NOT 225 panels</text>
+<text x="40.0" y="989.0" font-family="sans-serif" font-size="12" fill="#444">HYBRID print: 122 marking tiles for arcs + intersection boxes, ~627 g &#8212; NOT 225 panels</text>
 </svg>

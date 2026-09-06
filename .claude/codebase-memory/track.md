@@ -83,6 +83,34 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   deliberately OVERSIZED, off-scale sign, because pixel share is what the
   training objective responds to. Scale-correct would be 64.6 mm; the
   standing decision is larger on purpose.
+- **MARKING + SUBSTRATE LAYOUT: `cad/marking_layout.py`** (2026-09-06,
+  Appendix DY). Owns no dimensions — geometry from `track_layout_v2`, dims
+  from `marking_specs`, drift-guarded against both.
+  - **THERE ARE TWO TILINGS and only one was ever counted.** Substrate
+    panels (foam board) vs printed marking strips. **The seam rule
+    constrains the SUBSTRATE**; `print_plan`'s 122 counts STRIPS — so the
+    rule was enforced by nothing until now. Now satisfied by construction:
+    strips run ALONG travel, 2 per 500 mm road, and **the one longitudinal
+    seam lands on the centreline and is covered by it**. Intersections are
+    single uncut 500 mm squares.
+  - Centreline BREAKS at every intersection (MUTCD). 12 runs, 7200 mm,
+    36 dashes.
+  - **Stop lines on EVERY approach of every driven intersection (28), or
+    none** — a painted stop line is as much a positional giveaway as a
+    fixed sign, so a subset would reintroduce the leak Y.3 closes.
+  - The 2 undriven intersections `(-1.1,-1.1)` and `(1.1,1.1)` are NOT
+    painted. ⚠️ The streets still cross there — small peripheral domain gap.
+- ⚠️ **THE DASH TARGET IS BASED ON A FALSE ASSUMPTION (Appendix DY, OPEN).**
+  `TARGET_DASH_CYCLES = 40` divided the full 7.51 m route by the cycle,
+  assuming the centreline runs through intersections. It does not.
+  **53% of the route (4000 mm) is inside a box**, so a lap delivers **18.7
+  cycles, not 40** — under half the target that justified deviating from
+  MUTCD's ratio at all. Accept 18.7, or shrink the cycle to ~87.5 mm
+  (dash 29.2 / gap 58.3). **Evan's call, not decided.**
+- ⚠️ **`MARK_W` WAS 25 mm, 2.4-3.6x the DERIVED 6.94-10.42 mm** — deleted
+  2026-09-06, now sourced from `marking_specs`. **Filament 1506 g -> 627 g.**
+  Every filament figure quoted before Appendix DY used the 25 mm estimate;
+  the hybrid-vs-225-panels conclusion is unaffected (627 g vs ~12,600 g).
 - **MARKING SPECS ARE NOW A RUNNABLE SCRIPT: `cad/marking_specs.py`**
   (2026-09-06, Appendix DT), replacing the stale hand table in
   `PRD_ROADMAP.md`. **The model scale is DERIVED, not chosen: 1:11.80.**

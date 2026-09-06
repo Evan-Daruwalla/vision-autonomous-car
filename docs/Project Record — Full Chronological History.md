@@ -163,6 +163,7 @@ the dated entry, not the digest.
 - [DV — 3DStreet startup rule confirmed by restart; the track has ONE lane, so DU's dash decision had nothing to mark; dashed edge lines chosen](#appendix-dv---3dstreet-startup-rule-confirmed-by-restart-the-track-has-one-lane-so-dus-dash-decision-had-nothing-to-mark-dashed-edge-lines-chosen-2026-09-06-1558-cdt) (09-06)
 - [DW — CORRECTION to DV: two-lane roads DO fit (span 2700, spare 100) — I held pitch fixed and ignored best_straight; stop sign placed and relocation proven](#appendix-dw---correction-to-dv-two-lane-roads-do-fit-span-2700-spare-100--i-held-pitch-fixed-and-ignored-best_straight-stop-sign-placed-and-relocation-proven-2026-09-06-1604-cdt) (09-06)
 - [DX — Track switched to TWO lanes at 250mm each (1.613x, deliberate); lane/road conflation refactored out; cornering clearance now 29.6mm, below the 50mm EST minimum](#appendix-dx---track-switched-to-two-lanes-at-250mm-each-1613x-deliberate-laneroad-conflation-refactored-out-cornering-clearance-now-296mm-below-the-50mm-est-minimum-2026-09-06-1622-cdt) (09-06)
+- [DY — Marking + substrate layout built; the seam rule was enforced by nothing; MARK_W was 2.4-3.6x too wide (1506g -> 627g); the dash target assumed a centreline through intersections](#appendix-dy---marking--substrate-layout-built-the-seam-rule-was-enforced-by-nothing-mark_w-was-24-36x-too-wide-1506g---627g-the-dash-target-assumed-a-centreline-through-intersections-2026-09-06-1638-cdt) (09-06)
 
 ---
 
@@ -13267,3 +13268,130 @@ letter** — the same rule I caught myself breaking in Appendix DU and then brok
 again here, this time writing it to disk in three files rather than catching it
 first. The letter happened to match again. The check after this entry is
 whether the references are right, not whether I guessed well.
+
+# Appendix DY - Marking + substrate layout built; the seam rule was enforced by nothing; MARK_W was 2.4-3.6x too wide (1506g -> 627g); the dash target assumed a centreline through intersections (2026-09-06, ~16:38 CDT)
+Evan: "plan out a street layout". The plan-view geometry was already committed
+(Appendix DX); what did not exist was the layer on top of it — where markings
+stop, and how the board is physically cut. New file `cad/marking_layout.py`,
+plus two defect fixes in `cad/track_layout_v2.py`.
+
+## Two defects fixed first, one of them mine and committed
+
+**1. `track_layout_v2.py:542` reported the road width as the lane width.**
+`"lane_width_m_PER_DIRECTION": g["road"]` — both that field and
+`road_width_m_TOTAL` emitted 0.4999…, when the lane is 0.25. Cause: in the DX
+change I ran a blanket `g["lane"]` -> `g["road"]` replace across the SVG
+writer, and it also caught the JSON field I had inserted one step earlier in the
+same script. `build()` itself was always correct.
+**Shipped in `415178d`.** This is the lane/road conflation that DX exists to
+end, reintroduced by the very edit that fixed it — the blanket replace was the
+mechanism.
+
+**2. `MARK_W = 0.025` contradicted the derived line width — every filament
+figure was inflated 2.4-3.6x.** `marking_specs.py` derives the MUTCD normal
+line at **6.94-10.42 mm** at 1:14.63; `MARK_W` was a 25 mm `EST` predating that
+file. Deleted, and `print_plan` now sources the width from `marking_specs`
+(6 in / 10.42 mm, the wide end — easier to lay and more visible at 64x64).
+
+    filament_g  1506 g -> 627 g          (real output, not projected)
+    all-lines   3514 g -> 1464 g
+
+These numbers have been quoted in the hybrid-vs-225-panels argument since
+Appendix AX. The argument's CONCLUSION is unaffected — 627 g against ~12,600 g
+for solid panels is if anything a stronger case — but the figures in the older
+entries were computed on the 25 mm estimate and should be read as such.
+
+## `cad/marking_layout.py` — the layout itself
+
+Owns **no dimensions**: geometry from `track_layout_v2.build()`, dimensions from
+`marking_specs.table()`, and a drift guard proving it still agrees with both.
+Both loaded lazily inside functions, because `marking_specs.self_check` already
+loads `track_layout_v2` and a module-level import would be a cycle.
+
+**THE TWO TILINGS — a distinction no document had ever drawn.** Substrate panels
+(foam board / coroplast) and printed marking strips are different objects.
+`gotchas.md`'s rule — *a seam running perpendicular to travel reads as a STOP
+BAR to the model* — constrains the SUBSTRATE. The only tiling ever computed
+before now (`print_plan`'s `ceil(printed_len / 0.200)` = 122) counts STRIPS.
+**So the one physical constraint on tiling was enforced by nothing.**
+
+Now satisfied by construction: substrate panels are strips running ALONG each
+street's travel axis, so every seam is parallel to travel. At a 500 mm road and
+`PANEL_MAX_W = 250 mm` that is exactly two strips per street — and **the single
+longitudinal seam lands on the centreline, where the centreline marking covers
+it.** Straight streets end up with no visible seam at all. Intersections are
+single uncut 500 mm squares; a seam inside a box would cross travel on one of
+the two streets whichever way it were oriented.
+
+Real output:
+
+    CENTRELINE   12 segments, 7200 mm total, dash 62.6 / gap 125.2, 36 dashes laid
+    STOP LINES   28, width 20.83-41.67 mm
+    NOT MARKED   [(-1.1, -1.1), (1.1, 1.1)]  never driven
+    SUBSTRATE    24 street strips (2 per road at 250 mm) + 9 uncut 500 mm squares
+
+## Three design calls, each a judgement call and recorded as one
+
+**Centreline breaks at every intersection** — MUTCD drops it through a junction.
+Free realism, and a line running straight through a junction is exactly the cue
+a model would use to decide it may proceed.
+
+**Stop lines on every approach of every driven intersection, or none.** This
+falls out of Appendix Y.3's own logic. Y.3 requires the SIGN be relocatable so
+the policy cannot memorise its position. **A painted stop line is exactly as
+much of a positional giveaway as a fixed sign** — painting a subset would
+reintroduce the leak Y.3 closes. All four approaches of all seven driven
+intersections: 28 lines, and the line then carries no information about where
+the sign is on a given run.
+
+**The two undriven intersections are not painted.** The route uses 7 of 9;
+(-1.1,-1.1) and (+1.1,+1.1) are the ends of the diagonal the figure-8 never
+touches. ⚠️ **Honest cost:** the streets still physically cross there, so an
+unmarked crossing can appear in peripheral frames. Small at 64x64, but it is a
+real domain gap, recorded rather than assumed away.
+
+## ⚠️ THE DASH TARGET WAS COMPUTED ON AN ASSUMPTION THAT IS FALSE
+
+`marking_specs.TARGET_DASH_CYCLES = 40` sized the dash so one lap shows 40
+cycles. It divided the FULL 7.51 m route by the cycle length — which assumes the
+centreline runs through intersections. It does not, by the decision above.
+
+    route            7507 mm
+    inside boxes     4000 mm (53%)  -- 8 box traversals, no centreline in any
+    carries a dash   3507 mm
+    cycles per lap   18.7           vs TARGET_DASH_CYCLES = 40
+
+**Over half the driven route is inside an intersection box**, so the lap
+delivers **18.7 cycles, not 40** — under half the design target, and the target
+was the entire reason for deviating from MUTCD's ratio in the first place
+(Appendix DU: MUTCD's 1:3 was rejected for giving too few dashes at this scale).
+
+Two ways out, neither taken here: accept 18.7, or shrink the cycle to ~87.5 mm
+(dash 29.2 / gap 58.3) so 40 cycles land on the 3507 mm that actually carries
+one. **Evan's call. Not decided.** Note the second option pushes the dash toward
+the printer's practical floor — `MIN_PRINTED_FEATURE_MM = 0.8` is far below it,
+so printability is not the constraint, but a 29 mm dash at 64x64 is.
+
+## Verification — every new check shown to FAIL, not merely to pass
+
+    track_layout_v2 self_check: PASS
+    vehicle_envelope self_check: PASS
+    marking_specs   self_check: PASS
+    marking_layout  self_check: PASS
+
+Each new check re-run against a deliberately broken input:
+
+    1 seam-rule        : FIRES -> street-NS: seam EW is not parallel to travel NS
+    2 strips-per-road  : FIRES -> strips_per_road = 3
+    3 centreline-in-box: FIRES -> centreline run (-0.850,-0.250) overlaps box (-1.750,-0.450)
+    4 stop-line-driven : FIRES -> 29
+
+Also fixed, because my own changes made them wrong: `track_layout_v2.py`'s
+header docstring still carried the single-lane R-band table (lane 310 mm), and
+the `LANE_TO_CAR` comment quoted only the 47.5 mm STATIC clearance without the
+29.6 mm cornering figure from Appendix DX.
+
+One check caught a fragility of mine during development: comparing the undriven
+intersection coords to `g["pitch"]` by equality failed, because the coords are
+rounded to 6 dp while pitch is `1.0999999999999999`. Now compared with
+tolerance.

@@ -6,16 +6,17 @@ ONLY at R = 500 mm ... with 20 mm of margin on 2800 mm of usable floor~~
 **BOTH CLAIMS SUPERSEDED.** The "only at R=500" figure came from the
 over-constrained pitch (2R + lane) that Appendix AY corrected -- self-check 2
 below has tested 500/550/600 all building ever since, and this docstring simply
-never caught up. Real output of THIS file, 2026-09-06, at lane 310 mm
-(2.0 x the 155 mm front track, Appendix DM) and MAX_STRAIGHT = 190 mm:
+never caught up. Real output of THIS file, 2026-09-06, at TWO lanes of
+250 mm (500 mm road, Appendix DX) and MAX_STRAIGHT = 190 mm:
 
-    R = 500 mm -> straight 190 mm, pitch 1190, span 2690, spare 110  FITS
-    R = 550 mm -> straight  95 mm, pitch 1195, span 2700, spare 100  FITS
-    R = 600 mm -> straight   0 mm, pitch 1200, span 2710, spare  90  fits the
-                  floor but is UNDER SPARE_MIN -- tangent corners already, so
-                  there is nothing left to shrink. A T2 result near 600 mm
-                  reopens the floor-fit as a real problem.
-    R = 670 mm -> REFUSES (span 2990 > 2800 usable, even tangent)     NO
+    R = 500 mm -> straight 100 mm, pitch 1100, span 2700, spare 100  FITS
+    R = 550 mm -> straight   0 mm, pitch 1100, span 2700, spare 100  FITS
+    R = 600 mm -> REFUSES (span 2900 > 2800 usable, even tangent)     NO
+    R = 670 mm -> REFUSES (span 2990)                                 NO
+
+R=600 FITTED AT ONE LANE and does not at two. That is the second lane's
+price, and self-check 2 pins it. The frozen 500-670 band is now covered
+only to 550, so a T2 result above 550 kills the 3x3 grid.
 
 And there is NO smaller-city fallback. A 2x2 grid has the space at those radii
 but cannot carry this route at all: the figure-8 needs a centre street to cross
@@ -118,8 +119,14 @@ LANE_TO_CAR = 250.0 / 155.0   # 1.613. ⚠️ DELIBERATELY BREAKS
                        #     T2 has run. At 1.613x (250 mm/lane) R=550 fits
                        #     too. 1.613x sits inside Duckietown's measured
                        #     1.4-1.6x band, so it is a sourced deviation,
-                       #     not an arbitrary one. COST: clearance per side
-                       #     drops 77.5 -> 47.5 mm for the 155 mm car.
+                       #     not an arbitrary one. COST: STATIC clearance per
+                       #     side drops 77.5 -> 47.5 mm for the 155 mm car,
+                       #     and CORNERING clearance drops 59.6 -> 29.6 mm
+                       #     once off-tracking (35.9 mm at the measured
+                       #     185.95 mm wheelbase, R=500) is counted -- BELOW
+                       #     vehicle_envelope.py's MIN_SIDE_CLEARANCE = 50 mm
+                       #     EST. Nothing asserts on that constant, so no
+                       #     check fails; it just prints TOO LONG. OPEN.
 LANE = LANE_TO_CAR * CAR_WIDTH   # m  ONE lane, one direction
 ROAD = LANES * LANE    # m  TOTAL paved width -- THIS is what the grid
                        #     geometry consumes. Keeping these two separate
@@ -296,10 +303,29 @@ def path_len(p: np.ndarray) -> float:
 # infill, 169-900 h, 225 bed clears, 28 camera-visible seams). Print only the
 # geometry that must be exact -- the corner arcs and the intersection boxes --
 # as MARKING tiles, and lay them on a flat board.
-MARK_W = 0.025         # m   painted/printed line width                EST
+# ~~MARK_W = 0.025~~ DELETED 2026-09-06. It was a 25 mm EST, and
+# cad/marking_specs.py now DERIVES the MUTCD normal line at 6.94-10.42 mm
+# (1:14.63) -- so the estimate was 2.4-3.6x too wide and inflated every
+# filament figure by that factor. Sourced from that file instead of copied,
+# because a second copy is the defect class Appendix DX exists to end.
 MARK_T = 0.002         # m   tile thickness                            EST
 PLA_DENSITY = 1.24     # g/cm^3
 INFILL_SOLID_FRAC = 1.0  # a 2 mm marking tile is all skin -- no sparse middle
+
+
+def _marking_specs():
+    """Load cad/marking_specs.py -- the AUTHORITY on marking dimensions.
+
+    Lazy, and inside a function on purpose: that file's own self_check loads
+    THIS one, so a module-level import would be a cycle. Neither module runs
+    the other's self_check, so the lazy load terminates.
+    """
+    import importlib.util
+    f = Path(__file__).with_name('marking_specs.py')
+    spec = importlib.util.spec_from_file_location('_marking_specs', f)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
 
 
 def print_plan(g):
@@ -315,13 +341,19 @@ def print_plan(g):
     # the first cut did, and it turned a 0.5 kg hybrid into a 3.0 kg one on
     # paper. (It also shows why gotchas.md's 0.15 kg figure does not carry over:
     # that was a MINIMUM LOOP, not 50 m of city grid lines.)
+    # 6 in, the WIDE end of MUTCD's 4-6 in normal line: a printed strip is
+    # easier to lay and more visible at 64x64 than the 4 in one, and this is
+    # the conservative choice for a filament estimate.
+    mark_w = _marking_specs().table()['normal_line_mm'][1] / 1000.0
+
     def grams_for(metres):
-        vol_mm3 = metres * 1000 * (MARK_W * 1000) * (MARK_T * 1000)
+        vol_mm3 = metres * 1000 * (mark_w * 1000) * (MARK_T * 1000)
         return vol_mm3 / 1000.0 * PLA_DENSITY * INFILL_SOLID_FRAC
 
     printed_len = arc_len + box_len
     tiles = math.ceil(printed_len / 0.200)
     return {"arc_len_m": arc_len, "box_len_m": box_len,
+            "mark_w_m_DERIVED": mark_w,
             "street_line_len_m": street_len,
             "total_line_m": arc_len + box_len + street_len,
             "filament_g": grams_for(printed_len),
@@ -539,7 +571,7 @@ def main() -> int:
     (out / "track_layout_v2.json").write_text(json.dumps({
         "floor_m": FLOOR, "car_width_m_MEASURED": CAR_WIDTH,
         "lanes_per_street": g["lanes"],
-        "lane_width_m_PER_DIRECTION": g["road"],
+        "lane_width_m_PER_DIRECTION": g["lane"],
         "road_width_m_TOTAL": g["road"],
         "corner_radius_m_NOT_COMMITTED": g["R"],
         "street_pitch_m": g["pitch"], "span_m": g["span"],
