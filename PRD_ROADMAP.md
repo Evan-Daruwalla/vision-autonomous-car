@@ -349,29 +349,38 @@ transfer gap) must not block the capstone.
    diff: kingpin spacing, steering arm lengths, axle spans, wheel hub
    interfaces. Done: dimensioned sketch (photo or CAD screenshot) in
    `docs/` + record entry.
-   **PARTIAL 2026-09-02 (Appendices BL/BQ/BU):** measured so far — front tire
-   track **107.75 mm**, rear **114.75 mm** (the governing width — superseded
-   2026-09-03 to 148.25 mm rear / 107.5 mm front, Appendix CI), steering
+   **PARTIAL 2026-09-02 (Appendices BL/BQ/BU):** measured so far — ~~front
+   tire track **107.75 mm**, rear **114.75 mm**~~ superseded 2026-09-03 to
+   148.25 mm rear / 107.5 mm front (Appendix CI), **then front SUPERSEDED
+   AGAIN 2026-09-05 to 155 mm after the steering rebuild (Appendix DM) —
+   front now governs (155 > 148.25), not rear.** Steering
    pinion **12 teeth**, ~~pinion sweep **~180° lock-to-lock**, max steer **32°**~~
    **SUPERSEDED 2026-09-05 (Appendix DL): Evan replaced the 7-stud gear rack
-   with a 13-stud one. Max steer is now 58°** (same 90°-minus-protractor-
-   reading convention, checked directly — not the historical convention
-   error repeating). **The pinion-sweep and `SERVO_US_SPAN` figures are
-   UNVALIDATED on the new rack** — `steering.md` requires a fresh bench
+   with a 13-stud one. Mechanical max steer is now 58°** (same 90°-minus-
+   protractor-reading convention, checked directly — not the historical
+   convention error repeating). **Planning max steer capped at 45° for
+   margin (Appendix DM)** — same pattern as `SERVO_US_SPAN` holding back
+   from its geometric max. **The pinion-sweep and `SERVO_US_SPAN` figures
+   are UNVALIDATED on the new rack** — `steering.md` requires a fresh bench
    measurement before either is trusted (the old rack may have been the
    actual travel limit, not the pinion or servo). **Wheelbase: a GEOMETRIC
    ESTIMATE as of 2026-09-03 (Appendices DD/DE), not a direct axle-to-axle
-   caliper measurement, and unaffected by the rack change.** Evan measured
-   9.25 in (234.95 mm) overall wheel-to-wheel length; **front tire 42.25 mm
-   diameter, rear (drive) tire 55.75 mm** (Appendix CS) — confirmed
-   different, not assumed equal.
+   caliper measurement, and unaffected by either the rack or track-width
+   change.** Evan measured 9.25 in (234.95 mm) overall wheel-to-wheel
+   length; **front tire 42.25 mm diameter, rear (drive) tire 55.75 mm**
+   (Appendix CS) — confirmed different, not assumed equal.
    wheelbase ≈ 234.95 − (21.125 + 27.875) ≈ **185.95 mm**.
-   ~~`R_min = 1.600 × 185.95 ≈ 297.5 mm`~~ **`R_min = 0.625 × 185.95 ≈
-   116.2 mm` as of 2026-09-05** (58° max steer) — comfortably inside the
-   frozen 500-670 mm corner band, still not T2's empirical test. **Still NOT
-   measured:** kingpin spacing, steering-arm
+   ~~`R_min = 1.600 × 185.95 ≈ 297.5 mm`~~ mechanical `R_min = 0.625 × 185.95
+   ≈ 116.2 mm` (58°); **planning `R_min = 185.95 mm` exactly** (45°, tan
+   45°=1) as of 2026-09-05. Both comfortably inside the frozen 500-670 mm
+   corner band, still not T2's empirical test. ⚠️ **The wider front track
+   makes the floor-fit itself marginal now, separately from turn radius**:
+   `cad/track_layout_v2.py`'s own self-check FAILS at R=500 with the new
+   155 mm width (lane 310mm, span 2710mm, only 90mm spare against the
+   required 100mm) — real output, not projected, and unresolved (Appendix
+   DM). **Still NOT measured:** kingpin spacing, steering-arm
    lengths, hub interfaces, and whether any part of the assembled car exceeds
-   the (now 148.25 mm) tire track. No dimensioned sketch exists yet.
+   the (now 155 mm, front-governed) tire track. No dimensioned sketch exists yet.
 5. **CAD: front steering module.** Printed frame holding the Lego steering
    geometry + servo mount accepting MG90S AND MG996R footprints + printed
    servo-horn→Lego-axle link (adapt Printables 61922/147626). Done: STL
@@ -792,14 +801,22 @@ T2. **Measure minimum turning radius empirically** on the rolling chassis
     estimate. **No corner tile is cut before this measurement.** Done:
     measured radius in the record.
     **UPDATE 2026-09-02 (Appendix BQ):** max steer is now MEASURED at
-    ~~**32°**~~ **58° as of 2026-09-05 (Appendix DL) — the rack changed from
-    7-stud to 13-stud, a real mechanical difference, not a re-measurement of
-    the same part.** `R_min = wheelbase ÷ tan(max steer)`, and with wheelbase
-    now also estimated (185.95 mm, Appendices DD/DE): **R_min = 0.625 ×
-    185.95 ≈ 116.2 mm** — well under the ~330 mm estimate, so the 500-670 mm
-    band has margin to spare. This is still not T2 — T2 is the empirical
-    test, and it matters more now, not less: the steering geometry has
-    changed twice already while the car is still being built.
+    ~~**32°**~~ **58° mechanical, as of 2026-09-05 (Appendix DL) — the rack
+    changed from 7-stud to 13-stud, a real mechanical difference, not a
+    re-measurement of the same part.** Evan then capped **planning** max
+    steer at **45° for margin** (Appendix DM), same idea as
+    `SERVO_US_SPAN` holding back from its own geometric max. `R_min =
+    wheelbase ÷ tan(max steer)`, wheelbase now estimated at 185.95 mm
+    (Appendices DD/DE): mechanical **R_min = 0.625 × 185.95 ≈ 116.2 mm**,
+    planning **R_min = 185.95 mm exactly** (tan 45°=1). Both well under the
+    ~330 mm estimate, so the 500-670 mm band has margin to spare — **but the
+    front track also grew to 155 mm the same day (Appendix DM), which makes
+    the FLOOR-FIT marginal even though the turn radius has slack: lane
+    widens to 310 mm and `cad/track_layout_v2.py`'s own self-check now fails
+    at R=500 (only 90 mm spare, needs 100).** This is still not T2 — T2 is
+    the empirical test — and it matters more now, not less: the steering
+    geometry and car width have both changed while the car is still being
+    built.
 T3. **Design the figure-8** to fit ~~1.6 × 2.8 m~~ **3.0 × 3.0 m** at the
     confirmed scale; vector/CAD layout with tile boundaries chosen so **seams
     run parallel to travel** where possible (a perpendicular seam reads as a
@@ -1116,15 +1133,20 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
       which fits the full 500-670 mm corner range at either car width.
       Still BLOCKED on (b) the B3 turning test — corner geometry must not be
       committed before it** (Appendix L, AM.2).
-      **UPDATE 2026-09-02:** car width is now MEASURED (T1) and ~~**max steer is
-      confirmed at 32°**~~ **SUPERSEDED 2026-09-05 (Appendix DL): 58°, after
-      Evan replaced the 7-stud gear rack with a 13-stud one** — a real
-      mechanical change, not a re-read of the same measurement, and confirmed
-      against the same convention (90° = straight ahead, deviation = 90 minus
-      the protractor reading) that already burned this project once. Wheelbase
-      is also now estimated (185.95 mm, Appendices DD/DE), so `R_min =
-      wheelbase / tan(58°)` = **0.625 × 185.95 ≈ 116.2 mm** — well under the
-      frozen 500-670 mm corner band, comfortable margin. **This still does not
+      **UPDATE 2026-09-02:** ~~car width is now MEASURED (T1)~~ **RE-MEASURED
+      AGAIN 2026-09-05: front track 155 mm, now the governing width (Appendix
+      DM) — lane 310 mm, and the layout's own floor-fit self-check FAILS at
+      R=500 (90 mm spare, needs 100; see task 4 above for the full number).**
+      ~~**max steer is confirmed at 32°**~~ **SUPERSEDED 2026-09-05 (Appendix
+      DL): 58° mechanical, after Evan replaced the 7-stud gear rack with a
+      13-stud one** — a real mechanical change, confirmed against the same
+      convention (90° = straight ahead, deviation = 90 minus the protractor
+      reading) that already burned this project once. **Planning max steer
+      capped at 45° for margin (Appendix DM).** Wheelbase is also now
+      estimated (185.95 mm, Appendices DD/DE): mechanical `R_min = 0.625 ×
+      185.95 ≈ 116.2 mm`, planning `R_min = 185.95 mm` exactly — both well
+      under the frozen 500-670 mm corner band on turn radius, even though the
+      floor-fit above is now tight. **This still does not
       close T2**, which asks for an EMPIRICAL turning test on the rolling
       chassis; a geometric radius is better than arithmetic-on-estimates but is
       not the measurement the task names, and matters more now that the

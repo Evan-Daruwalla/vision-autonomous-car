@@ -151,6 +151,7 @@ the dated entry, not the digest.
 - [DJ — Power bank confirmed 5V/3A, 10,000mAh — last BOM Verify item closed, nothing blocks the order](#appendix-dj---power-bank-confirmed-5v3a-10000mah--last-bom-verify-item-closed-nothing-blocks-the-order-2026-09-05-1806-cdt) (09-05)
 - [DK — Tolerance coupon v2: axle bore closes at 5.00mm -- both M1.3 headline numbers now determined](#appendix-dk---tolerance-coupon-v2-axle-bore-closes-at-500mm----both-m13-headline-numbers-now-determined-2026-09-05-2023-cdt) (09-05)
 - [DL — Rack swapped 7-stud to 13-stud: max steer genuinely 58deg (was 32), R_min 297.5mm to 116.2mm; SERVO_US_SPAN unvalidated on new rack](#appendix-dl---rack-swapped-7-stud-to-13-stud-max-steer-genuinely-58deg-was-32-r_min-2975mm-to-1162mm-servo_us_span-unvalidated-on-new-rack-2026-09-05-2220-cdt) (09-05)
+- [DM — Max steer capped at 45deg for planning margin; front track re-measured 155mm, governance flips, track layout floor-fit now fails its own check](#appendix-dm---max-steer-capped-at-45deg-for-planning-margin-front-track-re-measured-155mm-governance-flips-track-layout-floor-fit-now-fails-its-own-check-2026-09-05-2229-cdt) (09-05)
 
 ---
 
@@ -12189,3 +12190,95 @@ about hole diameters, not steering geometry. Corner geometry remains
 frozen pending T2. The pinion-sweep and SERVO_US_SPAN re-calibration on the
 new rack is now the most safety-relevant open item in the steering
 subsystem.
+
+# Appendix DM - Max steer capped at 45deg for planning margin; front track re-measured 155mm, governance flips, track layout floor-fit now fails its own check (2026-09-05 22:29 CDT)
+Evan sent three pieces of new information in one message: a design-margin
+decision for max steer, a new front-track measurement, and a new rotation
+figure for "the axle connected to the wheels." The first two are recorded
+here. The third is genuinely ambiguous about which mechanical part it
+describes and is left open pending confirmation rather than guessed.
+
+## DM.1 Planning max steer capped at 45°, mechanical max stays 58°
+
+"add some margin so make the max curve be only 45 degrees." This is a
+design choice layered on top of Appendix DL's measured 58° mechanical
+deviation, not a new measurement superseding it — same shape as
+`SERVO_US_SPAN=450` already holding back from the 500 geometric max
+rather than commanding the full mechanical range.
+
+    R_min (mechanical, 58 deg) = 116.2 mm  -- unchanged, still real
+    R_min (planning, 45 deg)   = wheelbase / tan(45) = wheelbase = 185.95 mm
+
+Both comfortably inside the frozen 500-670mm corner band on turn radius
+alone. `steering.md` now carries both numbers explicitly rather than
+picking one and losing the other.
+
+## DM.2 Front track re-measured: 155mm, governance flips
+
+"front wheel width of car outside to outside is now 155mm." Directly
+comparable to Appendix CI's front-track figure (107.5mm, same outside-to-
+outside convention) — a real jump, plausible given the steering rebuild
+(13-stud rack, Appendix DL) likely moved the tie-rod geometry outward.
+
+Consequence not previously true: **front (155mm) now exceeds rear
+(148.25mm) by 6.75mm.** Every doc that said "rear track governs" or "rear
+wheels are the widest point" was correct when written (Appendix CI,
+2026-09-03) and is now superseded by real hardware, not by a correction.
+
+## DM.3 Real consequence: the track layout's own self-check now fails
+
+Lane width follows the governing width (`SIM_TRANSFER_SPEC` §3: lane =
+2.0x), so lane moves 296.5mm -> 310mm. Re-ran `cad/track_layout_v2.py`
+after updating its `CAR_WIDTH` constant — real output, not a hand
+calculation:
+
+    $ .venv/Scripts/python.exe cad/track_layout_v2.py
+    AssertionError: at R=500 the layout should leave >=100 mm spare, not
+    fill the floor
+
+Extracted the actual numbers directly from `build()`:
+
+    span @ R=500:  2.71 m
+    spare @ R=500: 90 mm  (was 103.5mm before this change; needs >=100mm)
+
+**This is a real, marginal shortfall (10mm), not a projection, and not
+patched by loosening the self-check's threshold** — that would defeat the
+reason the check exists. Turn radius has generous slack (both 45deg and
+58deg R_min are far under the 500-670mm band); floor space does not. Left
+open for Evan to decide: accept 90mm as sufficient documented margin,
+reduce `WALL_MARGIN` (currently 100mm, itself an ESTIMATE), or hold — none
+of this blocks anything today since corner geometry is frozen until T2
+regardless.
+
+## DM.4 What was NOT recorded: the ~270 degree axle figure
+
+"also the axel connected to the wheels now spins almost 270 degress full
+lock left to full lock right." Read literally as the WHEEL's own pivot,
+135 degrees of deviation from centre each way is not mechanically
+plausible for this kind of steering rack. Far more likely this describes
+the PINION's own input rotation (previously measured ~180 degrees
+lock-to-lock on the old 7-stud rack, Appendix BU) now increased with the
+longer 13-stud rack allowing more input travel before the rack runs out --
+which would be exactly the bench re-measurement Appendix DL called for.
+**Not recorded as fact and no firmware or geometry number changed on it**
+-- asked Evan directly which part this describes before using it for
+anything, including the SERVO_US_SPAN recalibration Appendix DL already
+flagged as the next real task.
+
+## DM.5 Corrected in place
+
+`steering.md` (new dated section for the 45deg margin), `hardware.md`
+(Vehicle-width section, struck and superseded rather than rewritten),
+`track.md` (corner-geometry paragraph), `HANDOFF.md` (car-width row, lane-
+width row, max-steer row, wheelbase row, track-layout workstream row),
+`PRD_ROADMAP.md` (task 4, T2 x2, the T1 car-width UPDATE block),
+`cad/track_layout_v2.py` (`CAR_WIDTH` constant and its comment, self-check
+now failing and left failing rather than silenced).
+
+## DM.6 State
+
+**Nothing built, nothing ordered, nothing cut.** Two of Evan's three
+reports are now load-bearing facts in the docs; the third is an open
+question, not a guess. The track layout's floor-fit is now a real,
+undecided open item alongside the still-pending SERVO_US_SPAN
+recalibration from Appendix DL.

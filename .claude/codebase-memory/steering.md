@@ -222,6 +222,25 @@ exists to prevent.
   near its old value** — see the warning after the old span table above.
   Until then, the safe assumption is that the servo's safe travel range is
   UNKNOWN on the new rack, not that it scales from the old numbers.
+
+## Design margin: PLANNING max steer capped at 45°, mechanical max stays 58° (2026-09-05, Appendix DM)
+
+- **Evan: "add some margin so make the max curve be only 45 degrees."** Same
+  pattern as `SERVO_US_SPAN=450` already holding back from the 500
+  geometric max — deliberately not using the full mechanical range for
+  planning/corner-radius purposes. **58° is still the real, measured
+  mechanical deviation** (this file, above); 45° is a DESIGN CHOICE for
+  which numbers downstream geometry work should assume, not a new
+  measurement superseding 58°. Keep both: mechanical capability vs. planning
+  target are two different questions from here on.
+- **Planning R_min = wheelbase / tan(45°) = wheelbase exactly** (tan 45 = 1):
+
+      R_min (planning, 45°) = 185.95 mm
+      R_min (mechanical max, 58°) = 116.2 mm  -- unchanged, still real
+
+  185.95 mm is comfortably inside the frozen 500-670 mm corner band, same
+  conclusion as 116.2 mm was — the margin costs nothing against that band,
+  it only matters if some other constraint later needs the full 58°.
 - **Servo-to-pinion coupling CHOSEN: Adafruit #4252** (Evan, 2026-09-03) —
   the manufactured candidate this file and `docs/BOM.md` row 22 already
   named, $0.75, micro-servo spline → 16 mm Lego cross axle. Evan reports it

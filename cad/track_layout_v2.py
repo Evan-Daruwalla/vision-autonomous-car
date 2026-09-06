@@ -74,18 +74,19 @@ REPO = Path(__file__).resolve().parent.parent
 
 FLOOR = 3.000          # m   CONFIRMED by Evan 2026-09-01
 WALL_MARGIN = 0.100    # m                                          EST
-CAR_WIDTH = 0.14825    # m   MEASURED 2026-09-03 (Appendix CH): rear tire track,
-                       #     outside-wheel to outside-wheel, after Evan fitted NEW
-                       #     REAR WHEELS. Supersedes 0.11475 (2026-09-02, itself
-                       #     superseding a 0.130 ESTIMATE) -- +33.5 mm, and the
-                       #     third value this constant has held in two days, so
-                       #     treat it as provisional until the chassis is built.
-                       #     CAVEATS CLOSED 2026-09-03 (Appendix CI): front track
-                       #     re-measured at 107.5 mm (the new rear wheels did not
-                       #     change it) and BODY width measured at 135.75 mm.
-                       #     Rear track is still the widest point, so 148.25 mm
-                       #     governs and this value is now whole-vehicle, not
-                       #     merely tire track. Front is only 72.5% of rear.
+CAR_WIDTH = 0.155      # m   MEASURED 2026-09-05 (Appendix DM): FRONT track,
+                       #     outside-wheel to outside-wheel -- 155 mm, up from
+                       #     107.5 mm (Appendix CI), after Evan's steering
+                       #     rebuild (13-stud rack, Appendix DL). **GOVERNANCE
+                       #     FLIPS: front (155) now exceeds the old rear-track
+                       #     governor (148.25, Appendix CH/CI) by 6.75 mm.**
+                       #     ~~Rear track is still the widest point~~ no longer
+                       #     true -- swept corner width is now set by the FRONT
+                       #     outer wheel. History: 0.14825 rear (2026-09-03) <-
+                       #     0.11475 rear (2026-09-02) <- 0.130 ESTIMATE. Fourth
+                       #     value this constant has held; still provisional
+                       #     until the chassis is built and BOTH tracks are
+                       #     re-confirmed together on the same assembly.
                        #     CAVEAT: tire track, not whole-vehicle width -- the
                        #     assembled car (chassis, electronics stack, camera
                        #     mount) has never been measured and may be wider.

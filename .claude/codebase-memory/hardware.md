@@ -350,30 +350,42 @@ traps in `sim-harness.md`.
 
 ## Vehicle width FULLY measured (2026-09-03, Appendix CI)
 
-Three numbers, and the governing one is unchanged:
+Three numbers — ~~and the governing one is unchanged~~ **the governing one
+FLIPPED 2026-09-05 (Appendix DM), see below:**
 
 | | mm | note |
 |---|---|---|
-| front track | **107.5** | outside-to-outside. The new rear wheels did NOT change it (was 107.75) |
-| **rear track** | **148.25** | **WIDEST — governs lane width** |
-| body | **135.75** | narrower than the rear track |
+| front track | ~~**107.5**~~ **155 as of 2026-09-05** | outside-to-outside. Changed by the steering rebuild (13-stud rack, Appendix DL) |
+| rear track | **148.25** | outside-to-outside, unaffected by the steering rebuild |
+| body | **135.75** | narrower than either track |
 
-- **148.25 mm is now a WHOLE-VEHICLE width, not just tire track.** The caveat
-  every prior entry carried ("tire track, not whole-vehicle") is CLOSED: the body
-  measures 135.75 mm, 12.5 mm narrower than the rear track, so **the rear wheels
-  are the widest point and stand 6.25 mm proud of the body per side.**
-- **Lane width, span and spare are UNCHANGED** — 296.5 mm / 2696.5 mm / 103.5 mm.
-  The measurement confirmed the number rather than moving it.
-- ⚠️ **The front track is only 72.5% of the rear — a 40.75 mm difference.** That
-  is a large split and it was never a design decision anyone recorded; it fell
-  out of which Lego parts were used. Two consequences to carry into T2:
-  - **Swept width in a corner is set by the rear outer wheel**, not the front.
-    The usual assumption that rear wheels cut INSIDE the front path does not
-    hold when the rear track is 40 mm wider.
-  - The front wheels sit **28.25 mm inside the body**, so the body — not the
-    front tyres — is what a kerb or a track edge will contact at the front.
-- **Nothing here is a chassis decision yet.** These are donor-part measurements;
-  the printed frame does not exist.
+- ~~**148.25 mm is now a WHOLE-VEHICLE width... the rear wheels are the widest
+  point**~~ **SUPERSEDED 2026-09-05: front (155) now exceeds rear (148.25) by
+  6.75 mm. The front is the widest point and governs lane width.** This was
+  true when written (2026-09-03) for the hardware that existed then.
+- ~~**Lane width, span and spare are UNCHANGED** — 296.5 mm / 2696.5 mm /
+  103.5 mm.~~ **CHANGED: lane 310 mm** (2.0 x 155 mm). Re-ran
+  `cad/track_layout_v2.py`: at R=500 span is now **2710 mm, spare only
+  90 mm** — UNDER the script's own 100 mm safety-margin self-check, which
+  now FAILS (`AssertionError: at R=500 the layout should leave >=100 mm
+  spare, not fill the floor`). Real output, not a projection. Flagged, not
+  silently patched by loosening the check — see Appendix DM for options.
+- ~~**The front track is only 72.5% of the rear**~~ **REVERSED: front is now
+  104.5% of rear** (155/148.25). The two T2 consequences below are from the
+  OLD geometry and no longer describe the car — kept for the trail, not as
+  current guidance:
+  - ~~Swept width in a corner is set by the rear outer wheel, not the
+    front.~~ **Now the FRONT outer wheel governs**, the usual assumption for
+    most cars (rear cuts inside the front path in a turn).
+  - ~~The front wheels sit 28.25 mm inside the body~~ **no longer true** —
+    front track (155) now exceeds body width (135.75) by 19.25 mm, so the
+    front TYRES, not the body, are now the forward contact risk at a kerb
+    or track edge.
+- **Nothing here is a chassis decision yet.** These are donor-part
+  measurements; the printed frame does not exist. Both tracks should be
+  re-confirmed together on the same assembly before freezing anything —
+  they were measured on two different dates against two different states
+  of the steering.
 
 ## A CHARGER IS NOT A BMS — the category error that kept a safety hole open (2026-09-03, Appendix CK)
 

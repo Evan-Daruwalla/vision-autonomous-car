@@ -20,18 +20,25 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   in - not a headless generator.
 - **CORNER GEOMETRY IS FROZEN until the T2 turning test** (Appendix L, AM.2)
   — **still true 2026-09-05 even though every input to the formula below is
-  now measured or estimated from real numbers.** Minimum turn radius =
-  wheelbase / tan(max steer). ~~330 mm ESTIMATE, width/wheelbase/steer all
-  unmeasured~~ superseded piece by piece: car width measured 148.25 mm rear
-  track (Appendix CI), wheelbase estimated 185.95 mm from a real measurement
-  (`steering.md`, Appendix DD/DE), max steer measured 58° on the current
-  13-stud rack (`steering.md`, 2026-09-05) — giving **R_min ~ 116.2 mm**,
-  comfortably under the old 330 mm estimate. **None of this unfreezes corner
-  geometry.** A geometric estimate from real measurements is still not the
-  same claim as T2's empirical test on the rolling chassis, and the steering
-  number itself has changed twice already as the mechanism was built out —
-  cutting or printing corner tiles before T2 still risks a track sized for a
-  steering angle that changes again before the car is done.
+  now measured or estimated from real numbers, and those numbers keep
+  moving.** Minimum turn radius = wheelbase / tan(max steer). ~~330 mm
+  ESTIMATE, width/wheelbase/steer all unmeasured~~ superseded piece by
+  piece: wheelbase estimated 185.95 mm (`steering.md`, Appendix DD/DE), max
+  steer measured 58° mechanical on the current 13-stud rack, capped 45° for
+  PLANNING margin (`steering.md`, Appendix DL/DM) — giving mechanical
+  **R_min ~ 116.2 mm**, planning **R_min = 185.95 mm exactly**. Both
+  comfortably under the 330 mm estimate on TURN RADIUS. **But car width
+  ALSO changed the same day** — ~~148.25 mm rear track governs~~ **front
+  track is now 155 mm and governs instead (Appendix DM)** — and that pushes
+  lane width to 310 mm, which makes the FLOOR-FIT tight: `cad/
+  track_layout_v2.py`'s own 100 mm safety-margin self-check now FAILS at
+  R=500 (only 90 mm spare). Turn radius has slack; floor space does not.
+  **None of this unfreezes corner geometry.** A geometric estimate from real
+  measurements is still not the same claim as T2's empirical test on the
+  rolling chassis, and both the steering number and the car width have now
+  changed while the mechanism was still being built out — cutting or
+  printing corner tiles before T2 still risks a track sized for numbers
+  that move again before the car is done.
 - **Track: print MARKINGS, not the road surface** (2026-08-05). Full-surface
   printing is ~6.4 kg / ~150-250 h for a minimum loop vs ~0.15 kg / ~6 h for
   markings — 97% less for identical camera input, because at 120×160 the
