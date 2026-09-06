@@ -41,7 +41,22 @@ DASH -- THE ONE ROW THAT IS NOT A SCALING
   gaps as appropriate", so the absolute size is compressed and the RATIO is
   the thing preserved.
 
-  RESOLVED 2026-09-06 BY EVAN (Appendix DU): dash:gap = 1:2. It had been ambiguous, and the
+  WHERE THE DASH GOES, decided 2026-09-06 (Appendix DV): the LANE EDGES,
+  both sides. THE TRACK IS A SINGLE-LANE ROAD -- `SIM_TRANSFER_SPEC` s3's
+  rule is lane:vehicle = 2.0x (benchmarked against a 12 ft lane / 1850 mm
+  car body = 1.98x), so 310 mm is ONE lane, and `track_layout_v2.py` uses
+  `lane` as the road's TOTAL width in `span = (streets-1)*pitch + lane`.
+  There is no centreline to dash, and Appendix L's "yellow separates
+  opposing directions" applies to nothing here. Two lanes (620 mm) would
+  push span 2690 -> 3000 mm against 2800 usable and the 3x3 grid would not
+  fit at all. So the dash marks the EDGES -- a SECOND deliberate deviation
+  on top of the ratio one below: MUTCD edge lines are SOLID, and a dashed
+  edge line in the real standard means a lane ending or a passing-zone
+  boundary. Chosen over solid edges because solid throws away the
+  longitudinal signal the whole compression exists to provide.
+  Neither deviation is claimed as MUTCD compliance.
+
+  RATIO RESOLVED 2026-09-06 BY EVAN (Appendix DU): dash:gap = 1:2. It had been ambiguous, and the
   ambiguity is worth keeping on the record because it survived a month in
   three documents. The project recorded the deviation as "Duckietown uses
   ~2:1" (Appendix L, HANDOFF, track.md) and NONE of the three said which way

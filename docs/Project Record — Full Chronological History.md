@@ -160,6 +160,7 @@ the dated entry, not the digest.
 - [DS — Track floor-fit self-check closed at its root cause: two definitions of usable width in one file](#appendix-ds---track-floor-fit-self-check-closed-at-its-root-cause-two-definitions-of-usable-width-in-one-file-2026-09-06-1343-cdt) (09-06)
 - [DT — 3DStreet pairing mid-session proven insufficient; marking table recomputed and the model scale turns out to be derived, not chosen (1:11.80)](#appendix-dt---3dstreet-pairing-mid-session-proven-insufficient-marking-table-recomputed-and-the-model-scale-turns-out-to-be-derived-not-chosen-11180-2026-09-06-1357-cdt) (09-06)
 - [DU — Dash ratio DECIDED: dash:gap = 1:2, closing an ambiguity that sat in three documents for a month](#appendix-du---dash-ratio-decided-dashgap--12-closing-an-ambiguity-that-sat-in-three-documents-for-a-month-2026-09-06-1402-cdt) (09-06)
+- [DV — 3DStreet startup rule confirmed by restart; the track has ONE lane, so DU's dash decision had nothing to mark; dashed edge lines chosen](#appendix-dv---3dstreet-startup-rule-confirmed-by-restart-the-track-has-one-lane-so-dus-dash-decision-had-nothing-to-mark-dashed-edge-lines-chosen-2026-09-06-1558-cdt) (09-06)
 
 ---
 
@@ -12934,3 +12935,112 @@ unambiguous number instead of a phrase that parsed two ways.
 (docstring, the `DASH_TO_GAP` constant, and the printed output all say so).
 `--dash-to-gap` still re-runs the table at any other ratio. `self_check: PASS`,
 including the assert that a dash may never be longer than its gap.
+
+# Appendix DV - 3DStreet startup rule confirmed by restart; the track has ONE lane, so DU's dash decision had nothing to mark; dashed edge lines chosen (2026-09-06, ~15:58 CDT)
+First 3DStreet work that actually touched the scene, after a restart with the
+tab already paired. Three findings, one of them a defect in a decision made
+40 minutes earlier in this same session.
+
+## 1. The startup rule is CONFIRMED — restart with the tab paired works
+
+Appendix DT predicted it; this session tested it deliberately rather than by
+luck. Evan restarted Claude with the 3dstreet.app tab already open and paired.
+**All 26 `mcp__3dstreet__*` tools registered on the first `ToolSearch`.**
+
+That closes the loop opened 2026-09-01 and chased across four sessions:
+
+| condition | tools registered? |
+|---|---|
+| server unapproved | no (Appendix BB) |
+| server approved, tab paired, session started BEFORE pairing | **no** (DQ's original miss, and DT) |
+| server approved, tab paired mid-session, server even reconnected | **no** (DT — six ToolSearch queries) |
+| **server approved, tab paired, session started AFTER** | **YES** (DQ 2026-09-06, and reproduced here) |
+
+**The rule is now tested in both directions, not just observed once.**
+
+## 2. THE TRACK HAS ONE LANE, AND APPENDIX DU'S DASH DECISION HAD NOTHING TO MARK
+
+This is a defect in DU, written earlier today. I asked Evan to decide the dash
+ratio without first establishing how many lanes the track has.
+
+The chain, all from existing project sources:
+
+- `docs/SIM_TRANSFER_SPEC.md` section 3 sets **lane : vehicle = 2.0x**, and
+  benchmarks it against "US highway lane (12 ft = 3658 mm) / typical car body
+  (~1850 mm) = 1.98x". So **310 mm is ONE lane**, not a road.
+- `cad/track_layout_v2.py` uses `lane` exactly once, in
+  `span = (streets - 1) * pitch + lane`, i.e. as the road's TOTAL width. The
+  generator models a **single-lane road**.
+- A single-lane road has no centreline. Appendix L's "yellow separates opposing
+  directions" therefore applies to **nothing on this track**, and MUTCD edge
+  lines are SOLID, so a dashed line had no home either.
+- Two lanes would be 620 mm. Span goes 2690 -> 3000 mm against 2800 mm usable:
+  **the 3x3 grid would not fit at all.** Two lanes is not available without
+  changing the floor or the grid.
+
+So DU's `dash:gap = 1:2` was correct arithmetic attached to a marking the track
+did not have. Caught by building the cross-section in 3DStreet, which is exactly
+the use HANDOFF reserved it for.
+
+**RESOLVED by Evan the same session: option 2 — single lane, DASHED edge lines.**
+The alternatives were (1) solid edges and no dash anywhere, which throws away
+the longitudinal signal the compression exists to provide, and (3) two lanes,
+which does not fit the floor. **This is a SECOND deliberate deviation stacked on
+the first**: the ratio compression (DU) deviates from MUTCD's 1:3, and now the
+placement deviates too — MUTCD edge lines are solid, and a dashed edge line in
+the real standard means something specific (a lane ending, or a passing-zone
+boundary). Neither deviation is claimed as compliance.
+
+## 3. 3DStreet's striping enum accepts invalid values SILENTLY
+
+Worth its own note because the read-back does not catch it.
+
+`striping: "dashed"` was accepted by `managedStreetUpdate`, and
+`getManagedStreet` echoed it back verbatim — so the read-back looked like
+confirmation. **It rendered as a solid line.** Only a close-up snapshot showed
+the failure; the plan view at 53.3 m ground extent could not resolve dashes
+either way, and an intermediate check wrongly read as "probably fine".
+
+The real ids come from `listMixins` category **`lane-separator`**:
+`solid-stripe`, `dashed-stripe`, `short-dashed-stripe`,
+`short-dashed-stripe-yellow`, `solid-doubleyellow`, `solid-dashed`,
+`solid-dashed-yellow`, `crosswalk-zebra`.
+
+**`short-dashed-stripe` renders correctly** — verified by close-up, dashes
+clearly visible on both edges.
+
+**Operational rule: a `getManagedStreet` read-back proves a value MOUNTED, not
+that it is VALID.** Verify striping and stencil ids visually, at close-up
+range, or check them against `listMixins` first.
+
+## 4. Scene ID correction
+
+`getSessionInfo` reports scene **`ac08e443-9733-47aa-bb53-62a032a0d712`**, not
+the `87740b35-811b-4c80-a384-7adb7ad4742e` that Appendix DQ recorded and
+`HANDOFF.md` still carried. Different scene. `saved: true`, `isAuthor: true`,
+build `2026.8.0+70fef93c`.
+
+Titled **"Autonomous Car Project — track street cross-section (1:11.80)"** and
+saved: <https://3dstreet.app/#/scenes/ac08e443-9733-47aa-bb53-62a032a0d712>
+
+## What is in the scene now
+
+One managed street, `managed-street-bs3yss1hv`, 40 m long:
+
+| property | value |
+|---|---|
+| segments | 1 x drive-lane |
+| width | 3.6576 m (12 ft) = **310 mm at 1:11.80** |
+| surface | asphalt, `#3a3a3a` |
+| striping | `short-dashed-stripe`, both sides |
+| generated models | none (`generated: {}` suppresses the preset vehicles — `placedModels: 0`) |
+
+A two-lane alternative was built as a decision aid and **removed** once Evan
+chose option 2.
+
+⚠️ **3DStreet cannot carry our dash GEOMETRY, only its placement.**
+`short-dashed-stripe` is a fixed preset with no dash-length parameter, so the
+rendered pitch is 3DStreet's, not the 68.6 / 137.2 mm this project decided
+(re-derived from `cad/marking_specs.py` this session). The real geometry stays
+in that script and in the printed strips. 3DStreet answers WHERE markings go
+and what the street reads like; it does not size them.

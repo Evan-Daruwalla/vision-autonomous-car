@@ -22,7 +22,10 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   in - not a headless generator.
 - ⚠️ **THE TAB MUST BE PAIRED BEFORE THE SESSION STARTS. Pairing mid-session
   does NOT work and cannot be recovered from inside the session**
-  (2026-09-06, Appendix DT). Proven, not guessed: Evan paired the tab, the
+  (2026-09-06, Appendix DT). ✅ **CONFIRMED THE OTHER WAY 2026-09-06
+  (Appendix DV): Evan restarted with the tab already paired and all 26
+  tools registered on the FIRST ToolSearch.** The rule is now tested in
+  both directions, not observed once. Proven, not guessed: Evan paired the tab, the
   page's own feed showed `MCP relay paired` plus four `tools/list:
   Completed`, the MCP server even disconnected and RECONNECTED mid-session —
   and the session still had zero `mcp__3dstreet__*` tools across six

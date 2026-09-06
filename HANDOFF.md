@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-06 ~14:02 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-06 ~15:58 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 125 appendices A–DU; BM/BN/BP/BU/CT/CY/DB/DE/DN are corrections to earlier entries). When this file and the record disagree about
+(append-only, 126 appendices A–DV; BM/BN/BP/BU/CT/CY/DB/DE/DN are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -92,7 +92,7 @@ actually open, cheapest-first.)*
 | 2 | **Caliper the coupons.** Every fit verdict so far (pin 4.80 mm, axle 5.00 mm) is fit-by-feel, not a measured diameter — the procedure asks for commanded-vs-measured per hole. | Turns two working numbers into a measured offset that transfers to CAD |
 | 3 | **Confirm a 12-tooth bevel gear is in the parts bin.** Evan: "prob have one and if not i can print one" — not a confirmation. A bevel's meshing tooth profile is a harder print than the coupon or coupler, not a same-difficulty fallback. | Last unconfirmed pre-order check (PRD A1) |
 | 4 | ~~**Decide the track-layout floor-fit** (Appendix DM) ... self-check now FAILS at R=500 — 90 mm spare against its required 100 mm~~ **CLOSED 2026-09-06: span 2690 mm, spare 110 mm, `self_check: PASS`.** Root cause was NOT the car outgrowing the floor — `best_straight()` sized the straight against the whole 2800 mm usable while the self-check demanded 100 mm of it be left unused; the 200 mm straight cap hid the disagreement until lane grew to 310 mm. Fixed with a `SPARE_MIN = 0.100` constant that `best_straight` reserves and the check asserts, plus `MAX_STRAIGHT` 200 → 190 mm. `cad/vehicle_envelope.py` mirrored, and its self-check now imports the other file and fails on drift (guard proven to fire). ⚠️ **Residual, not closed: at R=600 the straight is already 0 mm and spare is 90 mm — under the reserve with nothing left to shrink.** A T2 result near 600 mm reopens this; the check only asserts R=500. | Row number kept stable — 5 below is the live one |
-| 5 | **3DStreet scene work** — scene empty, **autosave ON**. Three intended uses: dash-pattern markings, relocatable stop-sign placement, portfolio render. ⚠️ **START THE SESSION WITH THE TAB ALREADY PAIRED** — proven 2026-09-06 (Appendix DT): pairing mid-session does NOT register the tools and cannot be recovered from inside the session. Evan paired it, the page showed `MCP relay paired` + four `tools/list: Completed`, the server even reconnected, and six `ToolSearch` queries still found zero `mcp__3dstreet__*` tools. Confirms Appendix DQ from a second direction. **Ignore the page's `WebMCP active (26 tools)` banner — WebMCP is the agentic-browser transport, not Claude Code's.** | Feed it the FULL-SCALE column of `cad/marking_specs.py`: a 12 ft (3.6576 m) lane with 4-6 in lines. It works in real-world metres; the 1:11.80 model scale is ours, not its |
+| 5 | **3DStreet scene work — STARTED 2026-09-06 (Appendix DV).** ✅ Startup rule CONFIRMED by restart: tab paired first, all 26 tools registered on the first ToolSearch. Scene is **`ac08e443-9733-47aa-bb53-62a032a0d712`** (NOT the `87740b35…` DQ recorded), titled, saved, autosave ON: <https://3dstreet.app/#/scenes/ac08e443-9733-47aa-bb53-62a032a0d712>. Holds one 40 m managed street, `managed-street-bs3yss1hv`: a single 12 ft (3.6576 m) drive lane = **310 mm at 1:11.80**, `short-dashed-stripe` both edges, no vehicles. ⚠️ **3DStreet's striping enum accepts invalid ids SILENTLY** — `"dashed"` mounted, read back verbatim, and rendered SOLID; a read-back proves a value mounted, not that it is valid. Real ids come from `listMixins` category `lane-separator`. Still open: relocatable stop-sign placement, portfolio render. ~~scene empty, **autosave ON**.~~ Three intended uses: dash-pattern markings, relocatable stop-sign placement, portfolio render. ⚠️ **START THE SESSION WITH THE TAB ALREADY PAIRED** — proven 2026-09-06 (Appendix DT): pairing mid-session does NOT register the tools and cannot be recovered from inside the session. Evan paired it, the page showed `MCP relay paired` + four `tools/list: Completed`, the server even reconnected, and six `ToolSearch` queries still found zero `mcp__3dstreet__*` tools. Confirms Appendix DQ from a second direction. **Ignore the page's `WebMCP active (26 tools)` banner — WebMCP is the agentic-browser transport, not Claude Code's.** | Feed it the FULL-SCALE column of `cad/marking_specs.py`: a 12 ft (3.6576 m) lane with 4-6 in lines. It works in real-world metres; the 1:11.80 model scale is ours, not its |
 
 **Blocked on the order:**
 
@@ -176,7 +176,7 @@ nothing on its own.
 
 ✅ **RESOLVED 2026-09-06 (Appendix DQ): the tools are LIVE and verified.**
 `mcp__3dstreet__getSessionInfo` returned a real response — build
-`2026.8.0+70fef93c`, scene `87740b35-811b-4c80-a384-7adb7ad4742e`,
+`2026.8.0+70fef93c`, scene ~~`87740b35-811b-4c80-a384-7adb7ad4742e`~~ **`ac08e443-9733-47aa-bb53-62a032a0d712` as of 2026-09-06 (Appendix DV) — different scene**,
 `saved: true`, `isAuthor: true`. All three conditions finally lined up
 (server approved · tab paired · session started after both). 26 tools
 available (`entityCreate`, `managedStreetCreate`, `takeSnapshot`, `undo`,
