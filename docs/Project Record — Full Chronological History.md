@@ -150,6 +150,7 @@ the dated entry, not the digest.
 - [DI — M1.3 tolerance coupon printed (Bambu P1S, ABS): pin row PASS at 4.80mm, axle row FAILS at every diameter, v2 sweep regenerated](#appendix-di---m13-tolerance-coupon-printed-bambu-p1s-abs-pin-row-pass-at-480mm-axle-row-fails-at-every-diameter-v2-sweep-regenerated-2026-09-05-1623-cdt) (09-05)
 - [DJ — Power bank confirmed 5V/3A, 10,000mAh — last BOM Verify item closed, nothing blocks the order](#appendix-dj---power-bank-confirmed-5v3a-10000mah--last-bom-verify-item-closed-nothing-blocks-the-order-2026-09-05-1806-cdt) (09-05)
 - [DK — Tolerance coupon v2: axle bore closes at 5.00mm -- both M1.3 headline numbers now determined](#appendix-dk---tolerance-coupon-v2-axle-bore-closes-at-500mm----both-m13-headline-numbers-now-determined-2026-09-05-2023-cdt) (09-05)
+- [DL — Rack swapped 7-stud to 13-stud: max steer genuinely 58deg (was 32), R_min 297.5mm to 116.2mm; SERVO_US_SPAN unvalidated on new rack](#appendix-dl---rack-swapped-7-stud-to-13-stud-max-steer-genuinely-58deg-was-32-r_min-2975mm-to-1162mm-servo_us_span-unvalidated-on-new-rack-2026-09-05-2220-cdt) (09-05)
 
 ---
 
@@ -12085,3 +12086,106 @@ designer needs are real numbers now, which is what actually unblocks
 M1.5-M1.7 CAD work — but the task's own done-check also wants a measured
 table (not fit-by-feel) and the pitch-row scale factor, neither of which
 exists yet. Nothing ordered, nothing built beyond the two coupons.
+
+# Appendix DL - Rack swapped 7-stud to 13-stud: max steer genuinely 58deg (was 32), R_min 297.5mm to 116.2mm; SERVO_US_SPAN unvalidated on new rack (2026-09-05 22:20 CDT)
+Evan: "new steering angle 67 degrees" — then, after two rounds of
+clarification, a real answer: he replaced the steering's 7-stud gear rack
+with a 13-stud one, and the wheel's actual deviation from straight ahead is
+now 58°, up from 32°. Confirmed genuine before touching anything, because
+the numbers involved are the exact pair this project already has a
+documented history of confusing.
+
+## Why this took three messages to record
+
+1. "67 degrees" — ambiguous whether raw protractor reading or deviation.
+   Asked; both readings computed (23° or 67° deviation) so Evan could just
+   pick.
+2. "sorry protractor reading is 32 degrees" — a full correction, not an
+   answer to the format question. Applying the established convention
+   (`steering.md`: 90° = straight ahead, deviation = 90 − reading) to a
+   32° reading gives a 58° deviation. Before recording that, one more check:
+   **32 + 58 = 90 exactly** — the new raw reading (32) is numerically
+   identical to the OLD deviation, and the new deviation (58) is numerically
+   identical to what `steering.md` already documents as the historical WRONG
+   reading for the old measurement. That is too clean a coincidence to
+   accept silently, given this project already lost a 2.6x turn-radius
+   error to exactly this reading-vs-deviation confusion once (Appendix BQ's
+   own note). Asked directly: did the mechanism change, or is this the same
+   rig re-described backwards?
+3. **"i used a 13 stud long gear rack instead of the 7 length old one so
+   yes it is genuinely 58 degrees."** Real mechanical change. The
+   32-and-58-are-complementary coincidence is exactly that — a coincidence
+   of this particular remeasurement, not a sign of the old error recurring.
+
+## What changed, and what didn't
+
+**Changed:** max steer deviation, 32° -> 58°, a 13-stud rack replacing the
+old 7-stud one. Wheelbase is unaffected (185.95mm, Appendices DD/DE) — nothing
+about the wheelbase measurement depends on rack length.
+
+    R_min = wheelbase / tan(max steer)
+    old:  185.95 / tan(32) = 185.95 x 1.600 = 297.5 mm
+    new:  185.95 / tan(58) = 185.95 x 0.625 = 116.2 mm
+
+116.2mm is comfortably inside the frozen 500-670mm corner-radius band —
+favorable, and (as always) not a substitute for T2's empirical turning
+test on the rolling chassis, which still gates every corner tile.
+
+**NOT changed, and NOT assumed changed:** whether the pinion still sweeps
+~180 degrees lock-to-lock. `steering.md`'s existing SERVO_US_SPAN table
+(300/450/500us -> pinion angle -> road-wheel angle -> R) was built and
+measured against the OLD 7-stud rack. The 7-stud rack may well have been
+the actual mechanical travel limit before, not the pinion or the MG90S
+itself — a 13-stud rack has more linear travel available, and there is no
+measurement yet showing where the NEW hard stop actually is, or whether
+the wheel-angle-per-pinion-degree relationship is still the same linear
+ratio the old table assumed (0.3556 = 32/90). Extrapolating either from
+the old numbers would be a guess dressed as a measurement.
+
+## The safety-relevant consequence
+
+`uno_control.ino`'s `SERVO_US_SPAN = 450` and its 10% margin exist
+specifically to keep the servo from driving into a Lego hard stop, which
+stalls the servo and — per Appendix BV's own numbers — puts the steering
+coupler at SF 0.57-0.96, i.e. already marginal at the OLD rack's stall
+torque. That margin was sized against hard-stop positions that may no
+longer be correct. **This is now a real, safety-relevant open item, not
+just a documentation gap**: PRD task 8c(i)'s calibration must be re-run on
+the bench against the new rack before the servo is commanded anywhere near
+its old span. Not attempted here — it needs Evan's hands and a protractor
+on the actual new hardware, the same way the original 180-degree pinion
+sweep and the original 32-degree wheel angle were each measured by him
+directly.
+
+## Corrected in place
+
+`steering.md`: top-of-file warning banner rewritten (it previously named
+32/58 as THE historical trap pair in the old sense — now that 58 is a
+legitimate new deviation on different hardware, the banner needed to say
+which rack a number belongs to, not just "trust 32, distrust 58"); the old
+MAX STEER ANGLE bullet struck with a superseding note (not deleted — it was
+correct for the hardware it described); the SERVO_US_SPAN table flagged as
+7-stud-specific with an explicit warning against extrapolating a "58 row"
+into it; the wheelbase section's R_min recomputed; a new dated section
+added with the full derivation and the pinion-sweep caveat.
+`docs/Project Record` mentions of 32 degrees from prior appendices are left
+as written — they were true when written, describing the 7-stud rack.
+`HANDOFF.md` (three places: max-steer constraint row, wheelbase row, the
+T1-T6 track-fabrication row, the T2 naming-collision callout) and
+`PRD_ROADMAP.md` (task 4's measured-geometry block, T2's estimate, the
+M2.8-adjacent MG90S/pinion-sweep line, task 8c(i)'s new blocker) all
+updated to match. `.claude/codebase-memory/track.md`'s corner-geometry
+paragraph was also stale on car width and wheelbase independent of this
+change; corrected in the same pass since it directly quotes the R_min
+formula.
+
+## State
+
+**Nothing built, nothing ordered.** The steering rack swap is a real,
+physical, already-completed change to hardware Evan is hand-assembling;
+this project has no way to verify it independently. The two closed numbers
+from this session (M1.3's pin/axle bore offsets) are unaffected — they are
+about hole diameters, not steering geometry. Corner geometry remains
+frozen pending T2. The pinion-sweep and SERVO_US_SPAN re-calibration on the
+new rack is now the most safety-relevant open item in the steering
+subsystem.

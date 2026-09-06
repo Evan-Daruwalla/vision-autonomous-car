@@ -18,15 +18,20 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   `3dstreet-mcp` server (`.mcp.json`) is a bridge to a LIVE browser tab over
   WebSocket - alpha, no auth token, piggybacks on whichever tab is signed
   in - not a headless generator.
-- **CORNER GEOMETRY IS FROZEN until the B3 turning test** (Appendix L, AM.2).
-  Minimum turn radius ~ wheelbase / tan(max steer) ~ **330 mm is an ESTIMATE**
-  ~~resting on a **130 mm car width that is itself unmeasured** until B2/B3~~
-  **- WIDTH IS NOW MEASURED, 2026-09-02: 114.75 mm** (see the entry below), so
-  the width input is no longer an estimate. **The radius still is** - it also
-  needs wheelbase and max steer angle, neither measured, so
-  the ~500-670 mm centreline corner figure remains arithmetic on an estimate.
-  Designing the look now is fine; **cutting or printing corner tiles now
-  risks a track the car physically cannot drive**.
+- **CORNER GEOMETRY IS FROZEN until the T2 turning test** (Appendix L, AM.2)
+  — **still true 2026-09-05 even though every input to the formula below is
+  now measured or estimated from real numbers.** Minimum turn radius =
+  wheelbase / tan(max steer). ~~330 mm ESTIMATE, width/wheelbase/steer all
+  unmeasured~~ superseded piece by piece: car width measured 148.25 mm rear
+  track (Appendix CI), wheelbase estimated 185.95 mm from a real measurement
+  (`steering.md`, Appendix DD/DE), max steer measured 58° on the current
+  13-stud rack (`steering.md`, 2026-09-05) — giving **R_min ~ 116.2 mm**,
+  comfortably under the old 330 mm estimate. **None of this unfreezes corner
+  geometry.** A geometric estimate from real measurements is still not the
+  same claim as T2's empirical test on the rolling chassis, and the steering
+  number itself has changed twice already as the mechanism was built out —
+  cutting or printing corner tiles before T2 still risks a track sized for a
+  steering angle that changes again before the car is done.
 - **Track: print MARKINGS, not the road surface** (2026-08-05). Full-surface
   printing is ~6.4 kg / ~150-250 h for a minimum loop vs ~0.15 kg / ~6 h for
   markings — 97% less for identical camera input, because at 120×160 the

@@ -4,10 +4,16 @@
 getting a commanded angle to the road wheels: the servo choice, the measured
 rack-and-pinion geometry, the coupler that has to survive it, and calibration.
 
-⚠️ **The two facts most easily got wrong are both here**: max steer is the
-wheel's DEVIATION from straight ahead (32°, not a 58° protractor reading — a
-2.6× error in turn radius), and a PRINTED cross-axle stub FAILS as the
-servo-to-pinion coupler.
+⚠️ **The two facts most easily got wrong are both here.** (1) Max steer is
+the wheel's DEVIATION from straight ahead, never a raw protractor reading —
+and this number has now changed TWICE, for two different reasons: a
+units/convention mixup (2026-09-02, resolved as 32°) and a REAL mechanical
+change (2026-09-05: a 13-stud rack replaced the old 7-stud one, genuinely
+**58°** now — see the dated section below). **Always confirm which rack a
+given number in this file was measured against; do not reuse pre-2026-09-05
+figures (32°, the SERVO_US_SPAN table, the pinion-sweep measurement) without
+re-checking them against the new rack first.** (2) A PRINTED cross-axle stub
+FAILS as the servo-to-pinion coupler.
 
 ## Steering actuator + the servo-to-pinion coupling (added 2026-09-02, Appendix BS)
 
@@ -90,6 +96,20 @@ servo-to-pinion coupler.
 | **450 (current)** | **81 deg (90%)** | **28.8 deg** | **1.819 x wheelbase** |
 | 500 (geometric max) | 90 deg (100%) | 32.0 deg | 1.600 x wheelbase |
 
+⚠️ **TABLE ABOVE IS SPECIFIC TO THE OLD 7-STUD RACK (measured 2026-09-02) —
+NOT re-verified against the 13-stud rack installed 2026-09-05.** Two things
+are unknown with the new rack, not just one: whether the pinion still sweeps
+~180 deg lock-to-lock (the old rack may have been what stopped it, not the
+pinion/servo itself), and whether the wheel-angle-per-pinion-degree ratio
+(0.3556 = 32/90 above) still holds. **Do not compute a "new 58 deg row" for
+this table by extrapolating the old ratio** — that assumes linearity and an
+unchanged pinion range, neither confirmed. `SERVO_US_SPAN = 450`'s 10%
+safety margin (`uno_control.ino`) was sized against the OLD rack's hard
+stops; it is UNVALIDATED against the new one until the pinion sweep is
+re-measured on the bench. Driving anywhere near the old span on the new rack
+before that measurement risks the exact stall/cook failure this margin
+exists to prevent.
+
 ## Steering coupler + servo calibration (added 2026-09-02, Appendix BV)
 
 - **THE STEERING COUPLER IS THE HIGHEST-TORQUE JOINT ON THE CAR, and a printed
@@ -123,22 +143,29 @@ servo-to-pinion coupler.
 - **MG996R is ~11 kg.cm / ~1079 mN.m** for reference; MG90S ~2.2 kg.cm /
   ~216 mN.m. (Nominal spec figures, not measured on a real unit.)
 
-- **MAX STEER ANGLE = 32 degrees, confirmed by Evan 2026-09-02** (Appendix BQ).
-  Reported first as ~45 (eyeball), then 30, then measured at 32. Use 32.
+- ~~**MAX STEER ANGLE = 32 degrees, confirmed by Evan 2026-09-02** (Appendix BQ).~~
+  **SUPERSEDED 2026-09-05 (see dated section below): 58 degrees, on a 13-stud
+  rack.** 32° was correct for the 7-stud rack this bullet was measured on; it
+  is not a stale/wrong number, it describes different hardware. Reported
+  first as ~45 (eyeball), then 30, then measured at 32 (old rack); now 58
+  (new rack). **Always state which rack a steering-angle number refers to.**
 - **THE MEASUREMENT CONVENTION IS LOAD-BEARING — record it or it WILL be
-  misread.** Evan measured with **90 degrees = straight ahead on the protractor,
-  steering angle = 90 - (protractor reading)**. So 32 is the wheel's DEVIATION
-  from straight ahead, which is exactly the delta in `R = wheelbase / tan(delta)`.
-  **Getting this backwards is a 2.6x error, not a rounding error:**
-  `R = L/tan(32) = 1.600 L` versus `R = L/tan(58) = 0.625 L`. Anyone re-deriving
-  the turn radius must confirm which number they are holding.
-- **Turn radius is now ONE measurement away.** `R_min = 1.600 x wheelbase`, and
-  **wheelbase is unmeasured because the parts do not exist**. For reference the
-  standing ~330 mm estimate implies a ~206 mm wheelbase, which is plausible for
-  a 114.75 mm-wide car — so the frozen 500-670 mm corner band probably does NOT
-  shrink. **Corner geometry stays frozen until T2 measures it empirically on the
-  rolling chassis; a geometric radius from wheelbase + 32 degrees would be
-  better than today's arithmetic-on-estimates but is still not T2.**
+  misread, and this project has now needed it applied correctly TWICE.**
+  Evan measures with **90 degrees = straight ahead on the protractor,
+  steering angle = 90 - (protractor reading)**. Old rack: reading 58 -> 32°
+  deviation. New rack: reading 32 -> **58° deviation** — note these two
+  measurements' raw readings and deviations are each other's complement
+  (32+58=90), which is a genuine coincidence of this particular remeasurement,
+  not a sign either one is the old convention error repeating. **Getting the
+  reading-vs-deviation direction backwards is a 2.6x error either way:**
+  `R = L/tan(32) = 1.600 L` versus `R = L/tan(58) = 0.625 L`. Anyone
+  re-deriving the turn radius must confirm which number they are holding AND
+  which rack it was measured on.
+- **Turn radius, 13-stud rack (2026-09-05): `R_min = 0.625 x wheelbase`** —
+  ~~`R_min = 1.600 x wheelbase`~~, the 7-stud-rack figure, superseded. Using
+  the confirmed wheelbase (185.95 mm, Appendix DD/DE): **R_min = 0.625 x
+  185.95 = 116.2 mm** — see the dated section below for the full derivation
+  and what is and is not re-verified for the new rack.
 
 ## Geekservo 270 CLOSED, wheelbase geometric estimate, coupling status (2026-09-03, Appendix DD)
 
@@ -159,14 +186,42 @@ servo-to-pinion coupler.
 
       front radius 21.125 + rear radius 27.875 = 49.0 mm
       wheelbase (est.) = 234.95 - 49.0 = 185.95 mm (7.32 in)
-      R_min = 1.600 x 185.95 = 297.5 mm
+      ~~R_min = 1.600 x 185.95 = 297.5 mm~~  -- 7-stud-rack figure, see below
 
   (Superseded the same-diameter estimate of 179.25 mm / R_min 286.8 mm from
   earlier the same day — that assumption is now known wrong, not just
-  unconfirmed.) Still SMALLER than the ~330 mm estimate the frozen 500-670 mm
-  corner band was checked against — favourable, not a new risk — and still
-  does not unfreeze corner geometry (`gotchas.md`/Appendix L): **T2's
-  empirical test on the rolling chassis is still the gate.**
+  unconfirmed. The 297.5 mm R_min above is in turn superseded 2026-09-05 by
+  the 13-stud rack, NOT by a wheelbase correction — wheelbase itself is
+  unchanged at 185.95 mm.) Still does not unfreeze corner geometry
+  (`gotchas.md`/Appendix L): **T2's empirical test on the rolling chassis is
+  still the gate.**
+
+## Rack length changed 7-stud to 13-stud: max steer 32° -> 58°, R_min 297.5mm -> 116.2mm (2026-09-05)
+
+- **Evan replaced the 7-stud gear rack with a 13-stud one.** Re-measured
+  steering angle with the same protractor convention as before (90° =
+  straight ahead): new full-turn reading is 32° (was 58° on the old rack),
+  giving deviation **58°** (was 32°). Confirmed genuine, not a repeat of the
+  2026-09-02 convention mixup — the rack physically changed, and 32/58
+  happening to be each other's complement here is coincidence, checked
+  directly with Evan before recording it as real.
+- **New turn radius**, wheelbase unchanged at 185.95 mm (Appendix DD/DE):
+
+      R_min = wheelbase / tan(58°) = 185.95 / 1.6003 = 116.2 mm
+      (equivalently R_min = 0.625 x wheelbase, since tan(58°) = 1/tan(32°)
+      exactly — 58 and 32 are complementary angles)
+
+  Comfortably inside the frozen 500-670 mm corner-radius band with room to
+  spare — favourable, and still not a substitute for T2's empirical test.
+- ⚠️ **What this does NOT tell us, and must not be assumed:** whether the
+  pinion still sweeps ~180° lock-to-lock on the new rack (the OLD rack may
+  have been the actual travel limit, not the pinion or servo), and whether
+  the wheel-angle-per-pinion-degree relationship is still the same linear
+  ratio the old SERVO_US_SPAN table assumed. **Both need a fresh bench
+  measurement on the new rack before `SERVO_US_SPAN` is retuned or trusted
+  near its old value** — see the warning after the old span table above.
+  Until then, the safe assumption is that the servo's safe travel range is
+  UNKNOWN on the new rack, not that it scales from the old numbers.
 - **Servo-to-pinion coupling CHOSEN: Adafruit #4252** (Evan, 2026-09-03) —
   the manufactured candidate this file and `docs/BOM.md` row 22 already
   named, $0.75, micro-servo spline → 16 mm Lego cross axle. Evan reports it

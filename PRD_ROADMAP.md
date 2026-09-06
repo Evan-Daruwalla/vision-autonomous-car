@@ -189,8 +189,11 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   6V *with 12 CPR encoder*** (BOM row 5 corrected 2026-09-02 — it had listed
   the encoderless #1093 for three weeks after Evan chose the encoder) +
   TB6612FNG, both channels paralleled, duty capped 71% · MG90S servo — its
-  180° is a **1:1 match to the measured 180° pinion sweep**; ⚠️ the MG996R
-  fallback is now a **liability**, SF 0.12-0.19 at the steering coupler ·
+  180° was a **1:1 match to the measured 180° pinion sweep on the OLD
+  7-stud rack**; ⚠️ **UNVALIDATED since the rack changed to 13-stud
+  (2026-09-05, Appendix DL)** — re-measure before assuming this still holds;
+  the MG996R fallback is now a **liability**, SF 0.12-0.19 at the steering
+  coupler ·
   **Arduino Uno R3 clone (OWNED, $0) owns all real-time actuation**: motor
   PWM on Timer2, servo, ~~4 light channels~~ **2 WS2812B strip data pins (D4/D7, no PWM — 2026-09-03, Appendix CX)**, quadrature encoder on D2/D3, pack
   guard on A0, TB6612 `STBY` on D10 — **zero PWM spare, A1-A5 the only free
@@ -349,18 +352,24 @@ transfer gap) must not block the capstone.
    **PARTIAL 2026-09-02 (Appendices BL/BQ/BU):** measured so far — front tire
    track **107.75 mm**, rear **114.75 mm** (the governing width — superseded
    2026-09-03 to 148.25 mm rear / 107.5 mm front, Appendix CI), steering
-   pinion **12 teeth**, pinion sweep **~180° lock-to-lock**, max steer **32°**
-   (the wheel's DEVIATION from straight ahead — Evan measured with 90° =
-   straight, angle = 90 − protractor reading; taking the raw 58° instead is a
-   2.6× error in turn radius). **Wheelbase: a GEOMETRIC ESTIMATE as of
-   2026-09-03 (Appendices DD/DE), not a direct axle-to-axle caliper
-   measurement.** Evan measured 9.25 in (234.95 mm) overall wheel-to-wheel
-   length; **front tire 42.25 mm diameter, rear (drive) tire 55.75 mm**
-   (Appendix CS) — confirmed different, not assumed equal.
+   pinion **12 teeth**, ~~pinion sweep **~180° lock-to-lock**, max steer **32°**~~
+   **SUPERSEDED 2026-09-05 (Appendix DL): Evan replaced the 7-stud gear rack
+   with a 13-stud one. Max steer is now 58°** (same 90°-minus-protractor-
+   reading convention, checked directly — not the historical convention
+   error repeating). **The pinion-sweep and `SERVO_US_SPAN` figures are
+   UNVALIDATED on the new rack** — `steering.md` requires a fresh bench
+   measurement before either is trusted (the old rack may have been the
+   actual travel limit, not the pinion or servo). **Wheelbase: a GEOMETRIC
+   ESTIMATE as of 2026-09-03 (Appendices DD/DE), not a direct axle-to-axle
+   caliper measurement, and unaffected by the rack change.** Evan measured
+   9.25 in (234.95 mm) overall wheel-to-wheel length; **front tire 42.25 mm
+   diameter, rear (drive) tire 55.75 mm** (Appendix CS) — confirmed
+   different, not assumed equal.
    wheelbase ≈ 234.95 − (21.125 + 27.875) ≈ **185.95 mm**.
-   `R_min = 1.600 × 185.95 ≈ 297.5 mm` — smaller than the ~330 mm estimate the
-   frozen corner band was checked against (favourable), still not T2's
-   empirical test. **Still NOT measured:** kingpin spacing, steering-arm
+   ~~`R_min = 1.600 × 185.95 ≈ 297.5 mm`~~ **`R_min = 0.625 × 185.95 ≈
+   116.2 mm` as of 2026-09-05** (58° max steer) — comfortably inside the
+   frozen 500-670 mm corner band, still not T2's empirical test. **Still NOT
+   measured:** kingpin spacing, steering-arm
    lengths, hub interfaces, and whether any part of the assembled car exceeds
    the (now 148.25 mm) tire track. No dimensioned sketch exists yet.
 5. **CAD: front steering module.** Printed frame holding the Lego steering
@@ -465,6 +474,14 @@ transfer gap) must not block the capstone.
         store both endpoints in EEPROM (1024 B available), reload on boot.
         Done: measured endpoints in EEPROM, centre derived not assumed, and a
         SELFTEST that fails if the stored span is absent or implausible.
+        ⚠️ **NEW BLOCKER 2026-09-05 (Appendix DL): the rack changed from
+        7-stud to 13-stud, and `SERVO_US_SPAN=450`'s 10% safety margin was
+        sized against the OLD rack's hard stops.** Whether the pinion still
+        sweeps ~180° lock-to-lock on the new rack is unmeasured — the old
+        rack may have been the actual travel limit, not the pinion or servo.
+        This calibration must be re-measured on the new rack before the
+        servo is commanded anywhere near its old span; do not assume it
+        scales from the old numbers.
     (ii) **Choose a coupling that survives.** ⚠️ **The steering coupler is the
         HIGHEST-torque joint on the car and a PRINTED cross-axle stub FAILS
         there** — SF **0.57-0.96** at MG90S stall (~216 mN·m), against SF
@@ -774,13 +791,15 @@ T2. **Measure minimum turning radius empirically** on the rolling chassis
     steer)) ⇒ corners want 500-670 mm, but that is arithmetic on an
     estimate. **No corner tile is cut before this measurement.** Done:
     measured radius in the record.
-    **UPDATE 2026-09-02 (Appendix BQ):** max steer is now MEASURED at **32°**,
-    so the only unknown in `wheelbase ÷ tan(max steer)` is wheelbase:
-    **R_min = 1.600 × wheelbase.** The ~330 mm estimate implies ~206 mm of
-    wheelbase, which is plausible for a 114.75 mm-wide car, so the 500-670 mm
-    band probably does not shrink. This is still not T2 — T2 is the empirical
-    test — but once wheelbase is calipered the geometric radius can bound the
-    corner tiles before the rolling chassis exists.
+    **UPDATE 2026-09-02 (Appendix BQ):** max steer is now MEASURED at
+    ~~**32°**~~ **58° as of 2026-09-05 (Appendix DL) — the rack changed from
+    7-stud to 13-stud, a real mechanical difference, not a re-measurement of
+    the same part.** `R_min = wheelbase ÷ tan(max steer)`, and with wheelbase
+    now also estimated (185.95 mm, Appendices DD/DE): **R_min = 0.625 ×
+    185.95 ≈ 116.2 mm** — well under the ~330 mm estimate, so the 500-670 mm
+    band has margin to spare. This is still not T2 — T2 is the empirical
+    test, and it matters more now, not less: the steering geometry has
+    changed twice already while the car is still being built.
 T3. **Design the figure-8** to fit ~~1.6 × 2.8 m~~ **3.0 × 3.0 m** at the
     confirmed scale; vector/CAD layout with tile boundaries chosen so **seams
     run parallel to travel** where possible (a perpendicular seam reads as a
@@ -1097,17 +1116,19 @@ P5. **Policy extraction + in-sim eval.** Latent BC and/or CEM planning
       which fits the full 500-670 mm corner range at either car width.
       Still BLOCKED on (b) the B3 turning test — corner geometry must not be
       committed before it** (Appendix L, AM.2).
-      **UPDATE 2026-09-02:** car width is now MEASURED (T1) and **max steer is
-      confirmed at 32°** (Appendix BQ), where 32° is the wheel's DEVIATION from
-      straight ahead — Evan measured with 90° = straight, angle = 90 − protractor
-      reading, and reading it as 58° instead is a **2.6× error**. That gives
-      `R_min = wheelbase / tan(32°)` = **1.600 × wheelbase**, so **wheelbase is
-      the single remaining input** — and it is blocked on parts. For reference the
-      standing ~330 mm estimate implies a ~206 mm wheelbase, so the frozen
-      500-670 mm corner band probably does NOT shrink. **This still does not
+      **UPDATE 2026-09-02:** car width is now MEASURED (T1) and ~~**max steer is
+      confirmed at 32°**~~ **SUPERSEDED 2026-09-05 (Appendix DL): 58°, after
+      Evan replaced the 7-stud gear rack with a 13-stud one** — a real
+      mechanical change, not a re-read of the same measurement, and confirmed
+      against the same convention (90° = straight ahead, deviation = 90 minus
+      the protractor reading) that already burned this project once. Wheelbase
+      is also now estimated (185.95 mm, Appendices DD/DE), so `R_min =
+      wheelbase / tan(58°)` = **0.625 × 185.95 ≈ 116.2 mm** — well under the
+      frozen 500-670 mm corner band, comfortable margin. **This still does not
       close T2**, which asks for an EMPIRICAL turning test on the rolling
       chassis; a geometric radius is better than arithmetic-on-estimates but is
-      not the measurement the task names.
+      not the measurement the task names, and matters more now that the
+      steering geometry itself has changed mid-build.
 
 ### AUDIT-2026-09-02 — findings from the scheduled daily-audit (Appendix BY), given homes here (added 2026-09-02, Appendix CB)
 
