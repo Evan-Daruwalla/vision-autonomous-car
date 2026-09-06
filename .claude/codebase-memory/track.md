@@ -83,6 +83,26 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   deliberately OVERSIZED, off-scale sign, because pixel share is what the
   training objective responds to. Scale-correct would be 64.6 mm; the
   standing decision is larger on purpose.
+- **3DStreet scene holds the 3x3 grid as of 2026-09-06 (Appendix DZ):**
+  6 managed streets, pitch **16.0934 m**, length **39.5 m**, road
+  **7.3152 m** — the 1:14.63 full-scale equivalent of `track_layout_v2`.
+  ⚠️ **STREET NETWORK ONLY — no corner arcs and no figure-8 route.**
+  3DStreet has no curved streets, so the junctions are SQUARE and the
+  geometry the car actually follows is absent. Caption it as a network
+  diagram, never as the track.
+  ⚠️ **IT CONTRADICTS `marking_layout.py` AT EVERY INTERSECTION.** DY says
+  the centreline BREAKS at a junction; in the scene the dashes run straight
+  through all nine, and there are no stop lines — managed streets are
+  independent entities with no intersection-aware marking logic. **Never
+  check marking placement against the scene.**
+  - `managedStreetCreate` has NO rotation parameter; `entityUpdate` with
+    `rotation "0 90 0"` afterwards works and does not move the street.
+  - An unrotated street runs its LENGTH along Z (segment children sit at
+    +/-1.8288 on X). The plan view suggests the opposite — trust the child
+    positions.
+  - ⚠️ **After a plan snapshot the camera sticks top-down**: `focus`,
+    `birdseye`, `closeup` then all return a byte-identical frame. `closeup`
+    worked earlier the same session. Take angled shots BEFORE a plan one.
 - **MARKING + SUBSTRATE LAYOUT: `cad/marking_layout.py`** (2026-09-06,
   Appendix DY). Owns no dimensions — geometry from `track_layout_v2`, dims
   from `marking_specs`, drift-guarded against both.

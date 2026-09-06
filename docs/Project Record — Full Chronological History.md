@@ -164,6 +164,7 @@ the dated entry, not the digest.
 - [DW — CORRECTION to DV: two-lane roads DO fit (span 2700, spare 100) — I held pitch fixed and ignored best_straight; stop sign placed and relocation proven](#appendix-dw---correction-to-dv-two-lane-roads-do-fit-span-2700-spare-100--i-held-pitch-fixed-and-ignored-best_straight-stop-sign-placed-and-relocation-proven-2026-09-06-1604-cdt) (09-06)
 - [DX — Track switched to TWO lanes at 250mm each (1.613x, deliberate); lane/road conflation refactored out; cornering clearance now 29.6mm, below the 50mm EST minimum](#appendix-dx---track-switched-to-two-lanes-at-250mm-each-1613x-deliberate-laneroad-conflation-refactored-out-cornering-clearance-now-296mm-below-the-50mm-est-minimum-2026-09-06-1622-cdt) (09-06)
 - [DY — Marking + substrate layout built; the seam rule was enforced by nothing; MARK_W was 2.4-3.6x too wide (1506g -> 627g); the dash target assumed a centreline through intersections](#appendix-dy---marking--substrate-layout-built-the-seam-rule-was-enforced-by-nothing-mark_w-was-24-36x-too-wide-1506g---627g-the-dash-target-assumed-a-centreline-through-intersections-2026-09-06-1638-cdt) (09-06)
+- [DZ — 3x3 grid recreated in 3DStreet at 1:14.63 -- street NETWORK only: no curved corners, no figure-8, and it contradicts DY's marking layout at every intersection](#appendix-dz---3x3-grid-recreated-in-3dstreet-at-11463----street-network-only-no-curved-corners-no-figure-8-and-it-contradicts-dys-marking-layout-at-every-intersection-2026-09-06-1726-cdt) (09-06)
 
 ---
 
@@ -13395,3 +13396,87 @@ One check caught a fragility of mine during development: comparing the undriven
 intersection coords to `g["pitch"]` by equality failed, because the coords are
 rounded to 6 dp while pitch is `1.0999999999999999`. Now compared with
 tolerance.
+
+# Appendix DZ - 3x3 grid recreated in 3DStreet at 1:14.63 -- street NETWORK only: no curved corners, no figure-8, and it contradicts DY's marking layout at every intersection (2026-09-06, ~17:26 CDT)
+Evan: "recreate the layout in 3dstreet". Done as far as 3DStreet can go, which
+is less than the whole layout — and the gap is the point of this entry.
+
+## What was built
+
+Six managed streets on a 3x3 grid, scale-converted from `track_layout_v2.py`
+at 1:14.63:
+
+| model | full scale in the scene |
+|---|---|
+| street pitch 1100 mm | **16.0934 m** |
+| span 2700 mm | street length **39.5 m** |
+| road 500 mm (2 x 250) | **7.3152 m** (2 x 12 ft) |
+
+Three streets running along Z at x = -16.0934, 0, +16.0934; three running along
+X at z = -16.0934, ~0, +16.0934. Every street: two drive lanes, dashed yellow
+centreline (`short-dashed-stripe-yellow`), solid white edges (`solid-stripe`),
+no vehicle models.
+
+Verified by read-back, not by the picture: `managed-street-2lwz3p134` reports
+`position "0 0 16.0934"`, `rotation "0 90 0"`, `length: 39.5`.
+
+Scene retitled and saved:
+<https://3dstreet.app/#/scenes/ac08e443-9733-47aa-bb53-62a032a0d712>
+
+## WHAT IS MISSING, AND IT IS THE IMPORTANT HALF
+
+**No corner arcs and no figure-8 route.** 3DStreet has no curved streets
+(Appendix AM), so the R=500 mm rounded corners — the geometry that makes this a
+drivable track rather than a street plan — cannot be drawn. The junctions here
+are square.
+
+**So this render shows the street NETWORK, not the driven track.** It is
+correct about pitch, span, cross-section, lane count and marking style, and
+silent about the thing the car actually follows. HANDOFF already said 3DStreet
+could not do plan-view geometry; this is that claim demonstrated rather than
+asserted, and the render should be captioned as a network diagram wherever it
+is used.
+
+**It also does NOT implement Appendix DY's marking layout.** DY decided the
+centreline BREAKS at every intersection (MUTCD drops it through a junction). In
+the scene the yellow dashes run straight through all nine crossings, because
+managed streets are independent entities and 3DStreet has no intersection-aware
+marking logic. Stop lines are absent for the same reason. **The authority on
+markings remains `cad/marking_layout.py`; this scene contradicts it at every
+intersection and must not be used to check marking placement.**
+
+## Technique, worth not rediscovering
+
+- **`managedStreetCreate` has no rotation parameter.** Applying
+  `entityUpdate(component="rotation", value="0 90 0")` afterwards works, and
+  rotates about the street's own centre so its `position` is unaffected
+  (`street-align: length: middle`).
+- **An unrotated managed street runs its LENGTH along Z**, width along X. Read
+  off the segment children, which sit at `position "-1.8288 0.15 0"` and
+  `"1.8288 0.15 0"` — offsets on X. The plan view had suggested the opposite;
+  the child positions are the reliable signal.
+- ⚠️ **After a plan snapshot the camera gets stuck top-down.** `focus`,
+  `birdseye` and `closeup` then all return a byte-identical frame (85200 bytes,
+  camera `y=94.89, tiltDeg 90`). `closeup` had moved the camera earlier the
+  same session, when the scene held one street. **No angled portfolio render
+  was produced.** Unresolved; try the view types BEFORE a plan snapshot next
+  time, or move the camera another way.
+- The `zoomOut: 1.3` argument to `takeSnapshot` timed out ("Timed out waiting
+  for the plan view to zoom out"); plain `plan` succeeded.
+
+## Two shortcuts taken, both marked
+
+- **The centre E-W street sits at `z = 0.0001`, not 0** — a 0.1 mm offset to
+  avoid being exactly coplanar with the centre N-S street at the origin. A hack
+  against z-fighting, not a geometric choice; it is 0.0001 m at full scale,
+  i.e. 7 nanometres at model scale, so it changes nothing physical.
+- **All nine intersections have two road surfaces overlapping at the same
+  elevation (0.15).** Z-fighting was not visible in the render, but it is
+  present in the scene structure and may show at other camera angles.
+
+## Unchanged
+
+Nothing on disk changed this session — no CAD file, no generator output. This
+was scene work only. `cad/track_layout_v2.py` remains the authority on
+geometry and `cad/marking_layout.py` on markings; the scene is downstream of
+both and, as noted above, currently disagrees with the second.
