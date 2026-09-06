@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-05 ~23:11 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-06 ~00:24 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 119 appendices A–DO; BM/BN/BP/BU/CT/CY/DB/DE/DN are corrections to earlier entries). When this file and the record disagree about
+(append-only, 120 appendices A–DP; BM/BN/BP/BU/CT/CY/DB/DE/DN are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -83,7 +83,7 @@ track generator — but it is a negative, and the write-up must say so.
 | 3d | ~~**Audit tasks A3, A5, A6, A7**~~ **ALL DONE 2026-09-03 (Appendix CH, `PRD_ROADMAP.md:1107-1152`) — this row was stale, corrected in this session.** A1/A2/A4 also done (Appendices CC/CD/CF). | — |
 | 3e | **Task 8e: `uno_control.ino` rewritten for WS2812B, compiled clean (Appendix DC).** Not hardware-verified — no strip owned, nothing flashed. Next step needs a physical board + strip, not more decisions. | **Evan (parts)** |
 | 4 | ~~**Pi 2GB ($65) vs 4GB ($110).**~~ **CLOSED 2026-09-03: Vilros Basic Starter Kit, 4GB, $179.99, confirmed in stock at checkout (BOM row 1) — HANDOFF row was stale, corrected here.** | — |
-| 5 | **Place the order** (`docs/BOM.md`, **$402.45 + shipping ≈ $415-430** — stale $238-248 figure corrected here). Nothing downstream of M1.5 moves until parts exist. | **Evan** |
+| 5 | **Place the order** (`docs/BOM.md`, **$411.45 + shipping ≈ $424-439** — servo swapped 2026-09-05, Appendix DP, +$9.00). Nothing downstream of M1.5 moves until parts exist. | **Evan** |
 
 ---
 
@@ -229,7 +229,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Decision gate | M1.1 | **Done** | 2026-07-23: 8GB · no Lego motors · 3060 Ti 8GB · ~$200 · ratified |
 | Drive motor selection | M1.1b | **Done (purchase pending)** | 2026-07-23: ~~Pololu #1093, $23.95~~ **#5159, $29.95** (encoder variant — corrected 2026-09-02 Appendix BO, propagated here 2026-09-03); docs/research/2026-07-23_drive-motor-selection.md |
 | Power system selection | M1.1c | **Done (purchase pending)** | 2026-07-23: split source, power bank owned; docs/research/2026-07-23_power-system.md |
-| BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced three times** | `docs/BOM.md`, ~~≈$238-248 + $15-25 shipping (≈$253-273 all-in)~~ **$402.45 + shipping ≈ $415-430** (2026-09-03; this row disagreed with the ORDER line lower in this same file until the landing-check sweep caught it; row 22's coupling was chosen the same day, Appendix DF, +$0.75 over the interim $401.70). Row 17 is an **Arduino Uno Evan already owns, $0**. **Row 5 corrected 2026-09-02 to the #5159 ENCODER motor** Evan chose on 2026-08-12 (+$6) and **new row 5b, the #4763 JST SH cable Pololu does not include** (+$3) — Appendix BO. **$200 ceiling breached on every path** |
+| BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced four times** | `docs/BOM.md`, ~~≈$238-248 + $15-25 shipping (≈$253-273 all-in)~~ **$411.45 + shipping ≈ $424-439** (row 7's servo swapped to the MG90D-270° 2026-09-05, Appendix DP, +$9.00 over the interim $402.45 — the rack now needs 135° each way, past the MG90S's reach, Appendix DN). Row 17 is an **Arduino Uno Evan already owns, $0**. **Row 5 corrected 2026-09-02 to the #5159 ENCODER motor** Evan chose on 2026-08-12 (+$6) and **new row 5b, the #4763 JST SH cable Pololu does not include** (+$3) — Appendix BO. **$200 ceiling breached on every path** |
 | Chassis CAD + print | M1 | **Started** | M1.3's two headline numbers closed 2026-09-05 (Appendices DI/DK): pin 4.80mm, axle 5.00mm — pitch-row scale check still open |
 | Tolerance coupon | M1.3 | **Pin + axle offsets both closed; pitch check open** | `cad/tolerance_coupon_v1.stl` (pin row PASS @ 4.80mm; axle row FAIL, all 6 too loose) + `cad/tolerance_coupon_v2.stl` (axle sweep 4.80-5.30mm, PASS @ 5.00mm — "3rd smallest is best") + `cad/README.md`. No caliper data on either coupon (fit-by-feel only), pitch-row scale check (beam across holes 1-2, then 1-5) never run |
 | Steering coupler (printed) | 8c(ii) | **STL generated, never printed** | 2026-09-03, Appendix DG. `cad/servo_lego_coupler_v1.stl` + `scripts/gen_servo_lego_coupler.py` (manifold PASS, volume PASS 1.05e-14, 1152 tris, Ø10 × 16 mm). MG90S Ø4.65 bore → female 5.00 × 2.00 Lego cross socket. Prints NO cross profile (obeys Appendix BV); 20T spline deliberately not modelled (sub-nozzle pitch). ⚠️ **No torque margin claimed** — friction + spline bite, never loaded. Four constants unmeasured; `SOCKET_CLEAR` wanted the M1.3 coupon's data, now printed (2026-09-05) — but the coupon's AXLE row is a free-SPIN fit and the coupler's socket wants a firm GRIP, closer to the coupon's PIN row (4.80mm) in spirit; not yet reconciled, flagged rather than silently reused. PETG not PLA |
@@ -376,7 +376,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.
-- **THE ORDER (`docs/BOM.md`, $402.45 + shipping = ≈$415-430 — after the Vilros kit, Amazon consolidation, right-sizing bulk items, swapping 8 discrete LEDs for a WS2812B strip, Evan choosing the 144 LED/m density over 60/m (+$4.00), and choosing the Adafruit #4252 steering coupling over the free-but-rejected printed option (+$0.75, Appendix DF)).** Nothing is bought. **Lighting**: WS2812B strip, 2 segments on **D4 and D7** (data is one-way, cut halves cannot share a feed), freeing **D5/D6 — the first spare PWM this design has had**. Encoder-interrupt risk quantified at ~0.027% tick loss for 3 px/segment (Appendix CZ); it scales with pixels per segment, so **cut to pixel count, not length**. **`docs/WIRING_PROTOSHIELD.md` and `firmware/SERIAL_PROTOCOL.md` are now current (Appendix DA)** — the vet found §2.2 naming the wrong motor (#1093) and no strip pins assigned at all. ~~⚠️ **`docs/LIGHTING_SPEC.md` still describes the superseded 8-LED scheme.**~~ **CLOSED same day (Appendix DC): rewritten for WS2812B, 3px/segment, DRL folded into the head pixel only (Evan's calls).** `firmware/uno_control/uno_control.ino`'s `applyLights()` is rewritten too — compiled clean (9680 B flash / 371 B SRAM via `arduino-cli`), **not hardware-verified**, no strip owned. PRD task 8e is now blocked on hardware only, not decisions.
+- **THE ORDER (`docs/BOM.md`, $411.45 + shipping = ≈$424-439 — after the Vilros kit, Amazon consolidation, right-sizing bulk items, swapping 8 discrete LEDs for a WS2812B strip, Evan choosing the 144 LED/m density over 60/m (+$4.00), choosing the Adafruit #4252 steering coupling over the free-but-rejected printed option (+$0.75, Appendix DF), and swapping the steering servo to the MG90D-270° once the rack outgrew the MG90S's 90°-each-way reach (+$9.00, Appendix DP)).** Nothing is bought. **Lighting**: WS2812B strip, 2 segments on **D4 and D7** (data is one-way, cut halves cannot share a feed), freeing **D5/D6 — the first spare PWM this design has had**. Encoder-interrupt risk quantified at ~0.027% tick loss for 3 px/segment (Appendix CZ); it scales with pixels per segment, so **cut to pixel count, not length**. **`docs/WIRING_PROTOSHIELD.md` and `firmware/SERIAL_PROTOCOL.md` are now current (Appendix DA)** — the vet found §2.2 naming the wrong motor (#1093) and no strip pins assigned at all. ~~⚠️ **`docs/LIGHTING_SPEC.md` still describes the superseded 8-LED scheme.**~~ **CLOSED same day (Appendix DC): rewritten for WS2812B, 3px/segment, DRL folded into the head pixel only (Evan's calls).** `firmware/uno_control/uno_control.ino`'s `applyLights()` is rewritten too — compiled clean (9680 B flash / 371 B SRAM via `arduino-cli`), **not hardware-verified**, no strip owned. PRD task 8e is now blocked on hardware only, not decisions.
   ⚠️ **TWO NEW SOURCING PROBLEMS, 2026-09-03:** the **EVE 25P cells are SOLD OUT** —
   but do NOT hunt for another 20 A cell, that rating was never load-driven (worst-case
   pack draw ~2.5 A against a 3 A fuse; **real spec is flat-top unprotected 18650,
@@ -421,7 +421,7 @@ original floor and the pre-2026-08-12 scale decision.)*
   right, not a round hole or a socket, so don't assume it's a quick
   `gen_*.py` job if it comes to that ·
   ~~which tires~~ ✅ done via Appendix CS (55.75mm) · re-check prices ✅ done
-  2026-08-08, total since moved to $402.45. **Bevel-gear bin check is the
+  2026-08-08, total since moved to $411.45. **Bevel-gear bin check is the
   only item still open, and it's a "probably," not a confirmation.**
 - **Open question for Evan:** does "no Lego motors" mean none at all, or
   none of the PF/Powered-Up families? EV3/NXT/9V-Technic motors, if owned,

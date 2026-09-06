@@ -154,6 +154,7 @@ the dated entry, not the digest.
 - [DM — Max steer capped at 45deg for planning margin; front track re-measured 155mm, governance flips, track layout floor-fit now fails its own check](#appendix-dm---max-steer-capped-at-45deg-for-planning-margin-front-track-re-measured-155mm-governance-flips-track-layout-floor-fit-now-fails-its-own-check-2026-09-05-2229-cdt) (09-05)
 - [DN — Correction to DM: 58deg/270deg both measured with no servo attached -- real wheel-angle ceiling is ~38.7deg estimate, 45deg target may be unachievable](#appendix-dn---correction-to-dm-58deg270deg-both-measured-with-no-servo-attached----real-wheel-angle-ceiling-is-387deg-estimate-45deg-target-may-be-unachievable-2026-09-05-2257-cdt) (09-05)
 - [DO — Servo candidate found for the full 135deg range: HOOYIJ MG90D 270deg, same 20T spline as MG90S, not yet ordered](#appendix-do---servo-candidate-found-for-the-full-135deg-range-hooyij-mg90d-270deg-same-20t-spline-as-mg90s-not-yet-ordered-2026-09-05-2311-cdt) (09-05)
+- [DP — Servo swapped in BOM: MG90S to HOOYIJ MG90D-270, row 7 +$9.00, total $411.45](#appendix-dp---servo-swapped-in-bom-mg90s-to-hooyij-mg90d-270-row-7-900-total-41145-2026-09-06-0024-cdt) (09-06)
 
 ---
 
@@ -12443,3 +12444,56 @@ individually verified to the same depth as the recommended candidate above.
 with the candidate and its fit against the coupler spline; `docs/BOM.md`
 row 7 left as the MG90S with a pointer to this finding, not silently
 swapped.
+
+# Appendix DP - Servo swapped in BOM: MG90S to HOOYIJ MG90D-270, row 7 +$9.00, total $411.45 (2026-09-06 00:24 CDT)
+Evan: "add it to the BOM." Confirms Appendix DO's candidate (HOOYIJ
+MG90D-270°) as the actual servo choice, replacing the MG90S in row 7.
+
+## DP.1 What changed
+
+`docs/BOM.md` row 7: MG90S metal-gear servo -> HOOYIJ MG90D-270°,
+$7.99/2-pack -> $16.99/4-pack, +$9.00. Reason unchanged from DO: the
+7-stud-to-13-stud rack swap (Appendix DL) gave the pinion 135 degrees of
+travel each way, and the MG90S is a fixed 90-degrees-each-way part that
+cannot reach it (Appendix DN found the mismatch; DO found this part as the
+fix). Same 20T/4.9mm spline and 2.2 kg-cm torque class as the MG90S it
+replaces, so the coupler design (Adafruit #4252 or the printed
+alternative) should not need rework -- still unconfirmed, not yet bench
+tested.
+
+## DP.2 Totals
+
+    row 7:           $7.99 -> $16.99          (+$9.00)
+    Amazon-folded:    $116.52 -> $125.52       (same 14 items, one price changed)
+    BOM total:        $402.45 -> $411.45
+    all-in estimate:  ~$415-430 -> ~$424-439
+
+## DP.3 What is still NOT true
+
+**Nothing is ordered.** Adding a row-level price to the BOM is a planning
+decision, not a purchase -- the project's no-purchase-without-Evan's-go
+rule is about the actual transaction, which has not happened for this
+part or anything else in the BOM. The open items from Appendix DO stand
+unchanged: mount-fit against the MG90S-sized footprint in
+`docs/WIRING_PROTOSHIELD.md` is unconfirmed (one body dimension differs),
+the listing's DOA-rate review is a real risk the 4-pack's spares only
+partly cover, and the actual wheel-angle bench measurement Appendix
+DL/DN/DO all called for still has not happened -- choosing this servo
+makes that measurement meaningful (the servo can now reach the rack's
+real range), it does not replace the need for it.
+
+## DP.4 Corrected in place
+
+`docs/BOM.md` (row 7, the Amazon-folded combined-order row, the SUM OF
+ROWS total). Propagated to every live doc quoting the old $402.45 figure:
+`HANDOFF.md` (5 places), `docs/LIGHTING_SPEC.md`, `README.md`.
+`steering.md` and PRD_ROADMAP.md needed no change here -- they already
+described the servo as a candidate (Appendix DO) and don't restate the
+BOM's dollar total.
+
+## DP.5 State
+
+**Nothing ordered.** BOM total now $411.45 before shipping, ~$424-439
+all-in. Servo choice is now settled on paper; physical verification
+(mount fit, bench-measured wheel angle) remains the real next step before
+this is trusted for CAD or firmware work.
