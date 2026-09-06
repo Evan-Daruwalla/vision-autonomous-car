@@ -161,6 +161,8 @@ the dated entry, not the digest.
 - [DT — 3DStreet pairing mid-session proven insufficient; marking table recomputed and the model scale turns out to be derived, not chosen (1:11.80)](#appendix-dt---3dstreet-pairing-mid-session-proven-insufficient-marking-table-recomputed-and-the-model-scale-turns-out-to-be-derived-not-chosen-11180-2026-09-06-1357-cdt) (09-06)
 - [DU — Dash ratio DECIDED: dash:gap = 1:2, closing an ambiguity that sat in three documents for a month](#appendix-du---dash-ratio-decided-dashgap--12-closing-an-ambiguity-that-sat-in-three-documents-for-a-month-2026-09-06-1402-cdt) (09-06)
 - [DV — 3DStreet startup rule confirmed by restart; the track has ONE lane, so DU's dash decision had nothing to mark; dashed edge lines chosen](#appendix-dv---3dstreet-startup-rule-confirmed-by-restart-the-track-has-one-lane-so-dus-dash-decision-had-nothing-to-mark-dashed-edge-lines-chosen-2026-09-06-1558-cdt) (09-06)
+- [DW — CORRECTION to DV: two-lane roads DO fit (span 2700, spare 100) — I held pitch fixed and ignored best_straight; stop sign placed and relocation proven](#appendix-dw---correction-to-dv-two-lane-roads-do-fit-span-2700-spare-100--i-held-pitch-fixed-and-ignored-best_straight-stop-sign-placed-and-relocation-proven-2026-09-06-1604-cdt) (09-06)
+- [DX — Track switched to TWO lanes at 250mm each (1.613x, deliberate); lane/road conflation refactored out; cornering clearance now 29.6mm, below the 50mm EST minimum](#appendix-dx---track-switched-to-two-lanes-at-250mm-each-1613x-deliberate-laneroad-conflation-refactored-out-cornering-clearance-now-296mm-below-the-50mm-est-minimum-2026-09-06-1622-cdt) (09-06)
 
 ---
 
@@ -13044,3 +13046,224 @@ rendered pitch is 3DStreet's, not the 68.6 / 137.2 mm this project decided
 (re-derived from `cad/marking_specs.py` this session). The real geometry stays
 in that script and in the printed strips. 3DStreet answers WHERE markings go
 and what the street reads like; it does not size them.
+
+# Appendix DW - CORRECTION to DV: two-lane roads DO fit (span 2700, spare 100) — I held pitch fixed and ignored best_straight; stop sign placed and relocation proven (2026-09-06, ~16:04 CDT)
+**CORRECTION to Appendix DV, written 6 minutes earlier.** Evan asked whether
+two-lane roads (one lane each direction) are possible. They are. DV says they
+are not, and that claim drove Evan's choice of option 2.
+
+## The wrong claim and the right number
+
+DV (and `cad/marking_specs.py`, now corrected) said:
+
+> Two lanes would be 620 mm. Span goes 2690 -> 3000 mm against 2800 mm usable:
+> **the 3x3 grid would not fit at all.**
+
+Real output of `cad/track_layout_v2.py --car-width 0.310` (lane = 2 x 310 =
+620 mm road):
+
+    lane width      620 mm
+    street pitch    1040 mm  (straight between corners 40 mm)
+    span            2700 mm of 2800 usable -> 100 mm SPARE
+    driven route    figure-8 through the centre intersection, 7.03 m
+    track_layout_v2 self_check: PASS
+
+**Two lanes fit, with the full 100 mm reserve intact.**
+
+## Root cause of the error
+
+I computed the two-lane span by adding the extra 310 mm of road to the existing
+2690 mm span **while holding pitch fixed**. Pitch is not fixed. `best_straight`
+shrinks the straight run (190 -> 40 mm) to protect `SPARE_MIN` — which is
+exactly the self-correcting behaviour I added to that file in **Appendix DS,
+one turn earlier the same day**, and then described in DS as "the layout now
+self-corrects: a future width increase shrinks the straight instead of failing
+the check." I wrote the mechanism and then reasoned as though it did not exist.
+
+**The generator was authoritative the whole time and I did not run it.** DS's
+own closing line — "the runnable, self-checking generator is the authority" —
+is the rule I broke.
+
+## What two lanes actually cost
+
+| | 1 lane (BUILT) | 2 lanes |
+|---|---|---|
+| road width | 310 mm | 620 mm |
+| straight between corners | 190 mm | **40 mm** — corners nearly tangent |
+| span / spare | 2690 / 110 mm | 2700 / **100 mm**, exactly on the reserve floor |
+| driven route per lap | 8.23 m | **7.03 m (-14%)** |
+| model scale | 1:11.80 | **1:11.80, unchanged** — each lane is still 12 ft |
+| MUTCD deviations | **two** (ratio + dashed edges) | **one** (ratio only) |
+
+Two lanes restore a real centreline, so DU's `dash:gap = 1:2` would sit where
+MUTCD actually puts a dash and the "dashed edge lines" deviation from DV
+disappears. The costs are 14% fewer metres of driving per lap — which is 14%
+fewer frames per lap for M3 — and a straight run of 40 mm, leaving essentially
+no room for any further width growth.
+
+**Single lane remains the BUILT configuration. It is now a choice rather than a
+forced outcome, and Evan should get to re-decide it on correct numbers.**
+Not changed unilaterally: the scene, `cad/marking_specs.py`'s dash placement,
+and DV's option-2 decision all still describe single-lane.
+
+## Stop sign placed and relocation PROVEN (the other half of this entry)
+
+`stop_sign` mixin, placed as a STANDALONE entity `nSsqp4h-KxRYD1sUwje8t` —
+standalone is what makes it relocatable, rather than baked into the street's
+generated content.
+
+- initial: `position "15 0 2.43"`, `rotation "0 -90 0"` (0.6 m off the lane
+  edge, facing back down the lane at traffic travelling +X — confirmed by a
+  focus snapshot from x=11.89 showing the sign face)
+- **relocation proven, not assumed**: one `entityUpdate` moved it to
+  `"-10 0 2.43"`, 25 m along the street, `getEntity` read back the new
+  position, and no street rebuild was needed.
+
+That satisfies PRD task Y.3's "NEW HARD REQUIREMENT — the sign must be
+RELOCATABLE / REMOVABLE" **in the model**. It says nothing about the physical
+mount, which is still unbuilt.
+
+⚠️ **The 3DStreet sign is scale-correct and the PHYSICAL sign is deliberately
+NOT.** Evan decided 2026-08-10 (Appendix Y) on "auxiliary detection head + an
+oversized (non-scale) printed sign", because pixel SHARE governs whether the
+training objective cares and 0 of 899 cone pixels survived reconstruction in
+`ml/compare_encoders.py`. So do not derive the printed sign's size from the
+1:11.80 scale — a scale-correct 30 in sign would be 64.6 mm, and the standing
+decision is deliberately larger than that. The scaled figure is a reference
+point for how far off-scale the real one is, nothing more.
+
+# Appendix DX - Track switched to TWO lanes at 250mm each (1.613x, deliberate); lane/road conflation refactored out; cornering clearance now 29.6mm, below the 50mm EST minimum (2026-09-06, ~16:22 CDT)
+**Evan: "switch to 2"**, then — once the cost surfaced — the narrow-lane
+variant. The track is now a two-lane road, one lane per direction.
+
+## The decision, in two steps
+
+Two lanes at the `SIM_TRANSFER_SPEC` 2.0x rule need a **620 mm** road, and at
+that width the 3x3 grid fits **only at R=500** — the optimistic end of the
+frozen 500-670 mm band. That would commit corner geometry before T2's turning
+test has run, which the project's own hard rule forbids. Measured, not
+reasoned:
+
+| R | 1 lane (310 mm road) | 2 lanes @ 620 mm | widest 2-lane that fits |
+|---|---|---|---|
+| 500 | fits, 110 mm spare | fits, 100 mm spare | 350 mm/lane |
+| 550 | fits | **REFUSES** (span 2820 > 2800) | 250 mm/lane |
+| 600 | fits | **REFUSES** (span 3020) | 150 mm — narrower than the car |
+| 670 | refuses | refuses | — |
+
+**Evan's call: two lanes at 250 mm each (1.613x car width), road 500 mm.** That
+buys back R=550 as well as R=500. 1.613x sits inside Duckietown's measured
+1.4-1.6x band, so it is a sourced deviation from the 2.0x rule, not an
+arbitrary one.
+
+## Real output at the new geometry
+
+    lane width      250 mm per direction (1.613 x car -- DELIBERATELY under the 2.0x rule)
+    road width      500 mm total, 2 lanes -- THIS is what the grid geometry consumes
+    street pitch    1100 mm  (straight between corners 100 mm)
+    span            2700 mm of 2800 usable -> 100 mm SPARE
+    driven route    figure-8 through the centre intersection, 7.51 m
+    track_layout_v2 self_check: PASS
+
+Lap length 8.23 -> **7.51 m** (-8.7%), not the -14% the 620 mm road would have
+cost, because the narrower road leaves pitch at 1100 mm instead of 1040.
+
+## ⚠️ A COST I UNDERSTATED WHEN EVAN CHOSE
+
+When offering the 1.613x option I quoted **"47.5 mm clearance per side"**. That
+is the STATIC figure, `(lane - car)/2`. **The cornering figure is 29.6 mm**,
+because off-tracking at the measured 185.95 mm wheelbase eats 35.9 mm at
+R=500:
+
+| lane | off-track @ R=500 | clearance/side | vs MIN_SIDE_CLEARANCE 50 mm |
+|---|---|---|---|
+| 310 mm | 35.9 mm | **59.6 mm** | OK |
+| **250 mm** | 35.9 mm | **29.6 mm** | **BELOW MINIMUM** |
+
+`cad/vehicle_envelope.py`'s `MIN_SIDE_CLEARANCE = 0.050` is itself an EST and
+nothing asserts against it, so no check failed — the report simply prints
+`TOO LONG` on every wheelbase row now. **This is a real consequence of the
+narrow lane and Evan should get to revisit it knowing the right number.** Not
+changed unilaterally.
+
+## ROOT-CAUSE REFACTOR: `lane` and `road` were one variable
+
+This is the fix that matters beyond today. `cad/track_layout_v2.py` used a
+single `lane` variable to mean BOTH the per-direction lane width AND the total
+paved width the grid geometry consumes. That conflation is exactly what
+produced the misreading in Appendix DV and the arithmetic error in DW.
+
+Now separated, and the separation is load-bearing rather than cosmetic:
+
+- `LANE = LANE_TO_CAR * CAR_WIDTH` — one lane, one direction (250 mm)
+- `LANES = 2`
+- `ROAD = LANES * LANE` — total paved width (500 mm), **what `span`,
+  `best_straight`, `check_fits`, the SVG stroke widths and the intersection
+  boxes all consume**
+
+Function parameters renamed `lane` -> `road` throughout, and `build()` now
+returns `road`, `lane` and `lanes` as three distinct keys. The JSON gains
+`lanes_per_street`, `lane_width_m_PER_DIRECTION` and `road_width_m_TOTAL` in
+place of the ambiguous `lane_width_m`.
+
+**Self-check change worth flagging:** the loop that asserted R=500/550/600 all
+build now asserts 500/550 build and **600/670 REFUSE**. R=600 fitted at one
+lane and does not at two. That is the second lane's real price, and it is now
+pinned by a check rather than left to be rediscovered.
+
+## Scale moved, and landed almost back where it started
+
+Narrowing the lane to 250 mm moves the DERIVED scale from **1:11.80 to
+1:14.63** — almost exactly the 1:14 the PRD carried all along.
+**That is a coincidence, not a vindication.** 1:14 was a round number chosen
+against a 130 mm ESTIMATE; 1:14.63 is derived from a measured 155 mm car under
+a different lane rule. They agree by accident and would diverge the moment
+either input moves. Recorded in `cad/marking_specs.py`'s docstring so nobody
+later reads it as "1:14 was right after all".
+
+New marking table at 1:14.63: normal line **6.94-10.42 mm**, stop line
+**20.83-41.67 mm**, dash **62.6 / 125.2 mm** at 40 cycles per lap.
+
+## The dashed-edge deviation is DELETED
+
+Appendix DV put the dash on the lane edges because a single-lane road has no
+centreline — a second MUTCD deviation stacked on DU's ratio compression. Two
+lanes restore a real centreline, so **the dash is now ordinary MUTCD placement
+and only the RATIO deviation remains.** `marking_specs.py`'s docstring block
+had accumulated three layers of correction and was rewritten to one current
+statement; the DV/DW/DX trail lives in the record, not in a docstring.
+
+## `cad/vehicle_envelope.py` kept in step
+
+- `max_car_width`'s divisor was a hardcoded `2.0` encoding "road = 2 x car"
+  (one lane at the 2.0x rule). Now `ROAD_TO_CAR = LANES * LANE_TO_CAR` =
+  **3.226**.
+- Its cross-file drift guard now also pins `LANES` and `LANE_TO_CAR`, so the
+  two files cannot disagree about the lane rule.
+- Its clearance report had a hardcoded **0.130** car width and a caption
+  reading "lane 260 mm". The caption went stale the instant the lane rule
+  changed, which is what exposed it. Both now use the MEASURED 155 mm car.
+  (Scope note: switching the table off the 130 mm estimate is slightly beyond
+  "switch to two lanes" — done because my change is what made the caption
+  wrong, and a report about whether the car fits should not use a superseded
+  estimate.)
+
+## 3DStreet scene rebuilt
+
+Old single-lane street removed; new `managed-street-c4dxk0ug5`, 40 m, two
+12 ft lanes, **dashed yellow centreline** (`short-dashed-stripe-yellow`) and
+**solid white edges** (`solid-stripe`). Verified by close-up snapshot, not by
+read-back alone — the lesson from Appendix DV, where a read-back echoed an
+invalid striping id that rendered solid.
+
+Note the 3DStreet scene is **unchanged by the 250-vs-310 mm choice**: it is
+full-scale, so each lane is a 12 ft lane either way. The model scale is ours,
+not its.
+
+## Process slip
+
+**I pre-cited "Appendix DX" in code comments before the script assigned the
+letter** — the same rule I caught myself breaking in Appendix DU and then broke
+again here, this time writing it to disk in three files rather than catching it
+first. The letter happened to match again. The check after this entry is
+whether the references are right, not whether I guessed well.

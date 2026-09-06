@@ -38,12 +38,19 @@ FLOOR = 3.000          # m   CONFIRMED by Evan 2026-09-01
 WALL_MARGIN = 0.100    # m                                              EST
 USABLE = FLOOR - 2 * WALL_MARGIN
 STREETS = 3            # per axis, track v2
+LANES = 2              #     lanes per street, one per direction (2026-09-06)
+LANE_TO_CAR = 250.0 / 155.0   # 1.613 -- MIRRORS track_layout_v2.py
+ROAD_TO_CAR = LANES * LANE_TO_CAR   # 3.226: total paved width per car width
 MAX_STRAIGHT = 0.190   # m   cap on the straight run between corners    EST
                        #     MIRRORS track_layout_v2.py, which is the
                        #     authority. 200 -> 190 on 2026-09-06. Do not
                        #     edit one file's copy alone -- self_check below
                        #     imports the other file and fails if they drift.
 MIN_SIDE_CLEARANCE = 0.050   # m  clearance per side IN A CORNER        EST
+CAR_WIDTH = 0.155      # m   MEASURED front track (Appendix DM). The report
+                       #     below used a hardcoded 0.130 ESTIMATE until
+                       #     2026-09-06; its caption went stale the moment the
+                       #     lane rule changed, which is what exposed it.
 
 
 def steer_floor_deg(wheelbase: float, radius: float) -> float:
@@ -67,9 +74,11 @@ def max_car_width(radius: float, straight: float = MAX_STRAIGHT,
                   streets: int = STREETS, usable: float = USABLE) -> float:
     """Widest car the track v2 grid can carry at this corner radius.
 
-    Track v2: lane = 2.0 x car width, street pitch = 2R + straight, and
-    span = (streets-1)*pitch + lane must fit the usable floor. Solving for the
-    car width:  W <= (usable - (streets-1)*(2R + straight)) / 2
+    Track v2: road = ROAD_TO_CAR x car width (2 lanes x 1.613), street pitch
+    = 2R + straight, and span = (streets-1)*pitch + road must fit the usable
+    floor. Solving for the car width:
+        W <= (usable - (streets-1)*(2R + straight)) / ROAD_TO_CAR
+    The divisor was 2 until 2026-09-06 (one lane at 2.0x); it is now 3.226.
 
     `straight` MATTERS, and holding it fixed is a bug: `track_layout_v2.py`
     shrinks it as the radius grows (`best_straight`), which is why v2 reports
@@ -77,12 +86,12 @@ def max_car_width(radius: float, straight: float = MAX_STRAIGHT,
     Two scripts describing one track have to agree, so this takes the straight
     as an argument and the report below shows BOTH ends of the trade.
     """
-    return (usable - (streets - 1) * (2 * radius + straight)) / 2.0
+    return (usable - (streets - 1) * (2 * radius + straight)) / ROAD_TO_CAR
 
 
 def corner_clearance(car_width: float, wheelbase: float, radius: float) -> float:
     """Lane clearance per side while cornering, after off-tracking."""
-    lane = 2.0 * car_width
+    lane = LANE_TO_CAR * car_width
     return (lane - car_width - offtrack(wheelbase, radius)) / 2.0
 
 
@@ -103,15 +112,21 @@ def self_check() -> None:
     # width budget shrinks as the corner radius grows -- the whole reason
     # track v2 dies at R=670
     assert max_car_width(0.500) > max_car_width(0.600) > max_car_width(0.670)
-    # at TANGENT corners R=600 still carries a 130 mm car -- this is the case a
-    # fixed 200 mm straight got wrong, and track_layout_v2.py agrees it fits
-    assert max_car_width(0.600, straight=0.0) >= 0.130
+    # ~~at TANGENT corners R=600 still carries a 130 mm car~~ NOT ANY MORE:
+    # two lanes tripled the road-per-car divisor (2 -> 3.226) on 2026-09-06,
+    # so R=600 now tops out at 124 mm. track_layout_v2.py agrees -- its
+    # self_check asserts R=600 REFUSES at the two-lane road width.
+    assert max_car_width(0.600, straight=0.0) < 0.130, (
+        "R=600 should no longer carry a 130 mm car at two lanes")
+    assert max_car_width(0.550, straight=0.0) >= 0.155, (
+        "R=550 must still carry the MEASURED 155 mm car -- that is the whole "
+        "reason the lane was narrowed to 1.613x instead of 2.0x")
     assert max_car_width(0.670, straight=0.0) < 0.130, "R=670 must not fit 130 mm"
-    # and the two scripts must agree on the same input
-    assert abs(max_car_width(0.500, straight=0.200) - 0.200) < 1e-9
 
-    # the v2 numbers reproduce: at R=500 with 200 mm straights the grid spans
-    # 2660 mm for a 130 mm car, leaving 140 mm spare
+    # HISTORICAL reproduction, kept as a regression on the SPAN formula only:
+    # at R=500, 200 mm straights and the OLD single-lane 2x rule, a 130 mm car
+    # spanned 2660 mm leaving 140 mm spare. The 2x is deliberately literal --
+    # this pins the arithmetic of that era, not today's road rule.
     span = 2 * (2 * 0.500 + 0.200) + 2 * 0.130
     assert abs(span - 2.660) < 1e-9, span
     assert abs((USABLE - span) - 0.140) < 1e-9
@@ -132,7 +147,8 @@ def self_check() -> None:
     _spec = importlib.util.spec_from_file_location('_track_layout_v2', _f)
     _t = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(_t)
-    for _name in ('FLOOR', 'WALL_MARGIN', 'STREETS', 'MAX_STRAIGHT'):
+    for _name in ('FLOOR', 'WALL_MARGIN', 'STREETS', 'MAX_STRAIGHT',
+                  'LANES', 'LANE_TO_CAR'):
         assert getattr(_t, _name) == globals()[_name], (
             f'{_name} has drifted: {_f.name} says {getattr(_t, _name)}, '
             f'this file says {globals()[_name]}. One track, two scripts - '
@@ -210,14 +226,16 @@ def main() -> int:
     print(f"{'wheelbase':>10} {'off-track':>10} {'clearance/side':>15}   verdict")
     for wb in (0.100, 0.120, 0.140, 0.160, 0.180, 0.200):
         ot = offtrack(wb, 0.500)
-        cl = corner_clearance(0.130, wb, 0.500)
+        cl = corner_clearance(CAR_WIDTH, wb, 0.500)
         ok = "OK" if cl >= MIN_SIDE_CLEARANCE else "TOO LONG"
         print(f"{wb*1000:9.0f}mm {ot*1000:9.1f}mm {cl*1000:14.1f}mm   {ok}")
-    print(f"\n  (at the 130 mm working car width, lane 260 mm, "
-          f"needing >={MIN_SIDE_CLEARANCE*1000:.0f} mm/side)")
+    print(f"\n  (at the MEASURED {CAR_WIDTH*1000:.0f} mm car, lane "
+          f"{LANE_TO_CAR*CAR_WIDTH*1000:.0f} mm, needing "
+          f">={MIN_SIDE_CLEARANCE*1000:.0f} mm/side)")
     print("  Overall LENGTH is wheelbase plus overhangs; overhangs do not")
     print("  off-track but do decide whether the car fits an intersection box")
-    print(f"  ({2*0.130*1000:.0f} mm square at a 130 mm car).")
+    print(f"  ({ROAD_TO_CAR*CAR_WIDTH*1000:.0f} mm square -- the ROAD width, "
+          f"at the measured {CAR_WIDTH*1000:.0f} mm car).")
 
     print()
     print("-" * 74)

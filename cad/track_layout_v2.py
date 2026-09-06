@@ -104,7 +104,28 @@ CAR_WIDTH = 0.155      # m   MEASURED 2026-09-05 (Appendix DM): FRONT track,
                        #     CAVEAT: tire track, not whole-vehicle width -- the
                        #     assembled car (chassis, electronics stack, camera
                        #     mount) has never been measured and may be wider.
-LANE = 2.0 * CAR_WIDTH  # m  lane width rule, SIM_TRANSFER_SPEC section 3
+LANES = 2              #     lanes per street, ONE PER DIRECTION. Was 1
+                       #     until 2026-09-06 (Appendix DX, Evan's call):
+                       #     a single-lane road has no centreline, so the
+                       #     dash had to go on the edges, a second MUTCD
+                       #     deviation. Two lanes buy the centreline back.
+LANE_TO_CAR = 250.0 / 155.0   # 1.613. ⚠️ DELIBERATELY BREAKS
+                       #     SIM_TRANSFER_SPEC section 3's `lane = 2.0 x car
+                       #     width` rule, Evan 2026-09-06. At 2.0x the road
+                       #     would be 620 mm and the 3x3 grid would fit ONLY
+                       #     at R=500, committing frozen corner geometry to
+                       #     the optimistic end of the 500-670 band before
+                       #     T2 has run. At 1.613x (250 mm/lane) R=550 fits
+                       #     too. 1.613x sits inside Duckietown's measured
+                       #     1.4-1.6x band, so it is a sourced deviation,
+                       #     not an arbitrary one. COST: clearance per side
+                       #     drops 77.5 -> 47.5 mm for the 155 mm car.
+LANE = LANE_TO_CAR * CAR_WIDTH   # m  ONE lane, one direction
+ROAD = LANES * LANE    # m  TOTAL paved width -- THIS is what the grid
+                       #     geometry consumes. Keeping these two separate
+                       #     is deliberate: one variable meaning both is
+                       #     what caused the 2026-09-06 misreading in
+                       #     Appendix DV, corrected in DW.
 R_NOM = 0.500          # m   FROZEN band 500-670; only 500 fits a 3x3 grid
 STREETS = 3            # per axis
 
@@ -118,23 +139,26 @@ MAX_STRAIGHT = 0.190   # m  cap on the straight run between corners     EST
                        #    asserts the two files agree.
 
 
-def grid_pitch(R: float, lane: float, straight: float) -> float:
+def grid_pitch(R: float, road: float, straight: float) -> float:
     """Street spacing: two arcs plus whatever straight street runs between.
 
     Driving east and turning north, the arc is tangent to both centrelines and
     consumes R BEFORE the corner and R AFTER it. Two consecutive corners a
     pitch apart therefore need `pitch - 2R >= 0`.
 
-    **The lane width is NOT part of this** -- parallel streets only need
-    `pitch >= lane` so their surfaces do not overlap, and 2R (>= 1000 mm) already
-    dwarfs lane (260 mm). v1 of this file used `2R + lane`, over-constraining
-    the pitch by a full 260 mm, which is what produced the false claim that a
-    3x3 grid fits ONLY at R = 500 mm. It fits at 500, 550 and 600 (Appendix AY).
+    **The road width is NOT part of this** -- parallel streets only need
+    `pitch >= road` so their surfaces do not overlap, and 2R (>= 1000 mm)
+    already dwarfs road. v1 of this file used `2R + road`, over-constraining
+    the pitch, which is what produced the false claim that a 3x3 grid fits
+    ONLY at R = 500 mm (Appendix AY).
+    ⚠️ At TWO lanes (500 mm road, 2026-09-06) the grid fits at R=500 and
+    R=550 but NOT R=600 -- the road width re-enters through `span`, not
+    through pitch. Run the generator; do not reason about it (Appendix DW).
     """
     return 2 * R + straight
 
 
-def best_straight(R: float, lane: float, streets: int) -> float:
+def best_straight(R: float, road: float, streets: int) -> float:
     """Largest straight run between corners that still fits the floor, capped.
 
     Evan 2026-09-01: "the loop can be smaller, smaller is probably better."
@@ -144,15 +168,15 @@ def best_straight(R: float, lane: float, streets: int) -> float:
     big.
     """
     usable = FLOOR - 2 * WALL_MARGIN - SPARE_MIN
-    s = (usable - lane) / (streets - 1) - 2 * R
+    s = (usable - road) / (streets - 1) - 2 * R
     return max(0.0, min(MAX_STRAIGHT, s))
 
 
-def check_fits(R: float, lane: float, streets: int, straight: float = None):
+def check_fits(R: float, road: float, streets: int, straight: float = None):
     if straight is None:
-        straight = best_straight(R, lane, streets)
-    pitch = grid_pitch(R, lane, straight)
-    span = (streets - 1) * pitch + lane
+        straight = best_straight(R, road, streets)
+    pitch = grid_pitch(R, road, straight)
+    span = (streets - 1) * pitch + road
     return pitch, span, span <= FLOOR - 2 * WALL_MARGIN + 1e-9
 
 
@@ -212,11 +236,11 @@ def round_polyline(verts, R: float, per: int = 40):
     return np.concatenate(pts)
 
 
-def build(R: float = R_NOM, lane: float = LANE, streets: int = STREETS,
+def build(R: float = R_NOM, road: float = ROAD, streets: int = STREETS,
           straight: float = None):
     if straight is None:
-        straight = best_straight(R, lane, streets)
-    pitch, span, ok = check_fits(R, lane, streets, straight)
+        straight = best_straight(R, road, streets)
+    pitch, span, ok = check_fits(R, road, streets, straight)
     if not ok:
         raise SystemExit(
             f"a {streets}x{streets} street grid does NOT fit: pitch "
@@ -245,7 +269,8 @@ def build(R: float = R_NOM, lane: float = LANE, streets: int = STREETS,
              (0, 0), (p, 0), (p, -p), (0, -p)]      # 3 rights
     route = round_polyline(verts, R)
     streets_xy = [(-pitch + i * pitch) for i in range(streets)]
-    return {"pitch": pitch, "span": span, "R": R, "lane": lane,
+    return {"pitch": pitch, "span": span, "R": R,
+            "road": road, "lane": road / LANES, "lanes": LANES,
             "straight": straight,
             "route": route, "verts": verts, "street_coords": streets_xy,
             "intersections": [(x, y) for x in streets_xy for y in streets_xy]}
@@ -278,11 +303,11 @@ INFILL_SOLID_FRAC = 1.0  # a 2 mm marking tile is all skin -- no sparse middle
 
 
 def print_plan(g):
-    R, lane, pitch = g["R"], g["lane"], g["pitch"]
+    R, road, pitch = g["R"], g["road"], g["pitch"]
     # corner arcs actually driven: 4 per lobe, 2 lobes
     arc_len = 2 * 4 * (math.pi / 2 * R)
-    # intersection boxes: outline of a lane x lane square, 9 of them
-    box_len = 9 * 4 * lane
+    # intersection boxes: outline of a road x road square, 9 of them
+    box_len = 9 * 4 * road
     # street edge + centre lines for the whole grid, both axes
     street_len = 2 * len(g["street_coords"]) * g["span"] * 2   # 2 edge lines
     # ONLY the arcs and the intersection boxes are printed. The straight street
@@ -312,21 +337,27 @@ def self_check() -> None:
     # NOT "span > 2.7": that encoded the over-constrained pitch and asserted the
     # loop was BIG. Smaller is the goal (Evan, 2026-09-01). The real floor is
     # geometric -- the grid must not collapse below tangent corners.
-    assert g["span"] >= 2 * (2 * g["R"]) + g["lane"] - 1e-9, \
+    assert g["span"] >= 2 * (2 * g["R"]) + g["road"] - 1e-9, \
         f"span {g['span']:.3f} is below tangent corners - grid is degenerate"
     assert g["straight"] >= 0.0, g["straight"]
 
     # 2. the CORRECTED pitch (2R, not 2R+lane) fits most of the frozen band.
     #    500/550/600 build; only 670 is out of reach even with tangent corners.
-    for ok_R in (0.500, 0.550, 0.600):
+    for ok_R in (0.500, 0.550):
         gg = build(R=ok_R)
         assert gg["span"] <= FLOOR - 2 * WALL_MARGIN + 1e-9, (ok_R, gg["span"])
-    try:
-        build(R=0.670)
-    except SystemExit:
-        pass
-    else:
-        raise AssertionError("R=670 should not fit a 3x3 grid")
+    # R=600 fitted at ONE lane and does NOT at two (500 mm road): span 2900
+    # > 2800 usable. Changed 2026-09-06 with LANES=2. This is the real cost
+    # of the second lane -- the frozen 500-670 band is now only covered to
+    # 550, so a T2 result above 550 kills the 3x3 grid entirely.
+    for no_R in (0.600, 0.670):
+        try:
+            build(R=no_R)
+        except SystemExit:
+            pass
+        else:
+            raise AssertionError(f"R={no_R} should not fit a 3x3 grid at "
+                                 f"{ROAD*1000:.0f} mm of road")
     # "Smaller is better" cannot mean "a bigger radius gives a smaller loop" --
     # a bigger turning circle FORCES a bigger loop, and at R=600 the straight is
     # already squeezed to ZERO (tangent corners) at lane 310 mm -- it was 70 mm
@@ -342,7 +373,7 @@ def self_check() -> None:
     #     this wrong by one lane width is what produced the false "fits only at
     #     R=500" claim (Appendix AY).
     assert abs(grid_pitch(0.5, 0.26, 0.1) - 1.1) < 1e-9, grid_pitch(0.5, 0.26, 0.1)
-    assert abs(grid_pitch(0.5, 0.99, 0.1) - 1.1) < 1e-9, "lane must not affect pitch"
+    assert abs(grid_pitch(0.5, 0.99, 0.1) - 1.1) < 1e-9, "road must not affect pitch"
 
     # 3. ONE closed route, min radius respected, NO cusps
     r = g["route"]
@@ -364,7 +395,7 @@ def self_check() -> None:
     assert abs(left - right) / max(left, right) < 0.05,         f"turn directions unbalanced: L={left:.1f} R={right:.1f}"
 
     # 5. the road, not the centreline, stays inside the usable floor
-    ext = np.abs(r).max() + g["lane"] / 2
+    ext = np.abs(r).max() + g["road"] / 2
     assert 2 * ext <= FLOOR - 2 * WALL_MARGIN + 1e-9, f"road bbox {2 * ext:.3f} m"
 
     # 6. the route really does CROSS at the centre intersection -- it must pass
@@ -418,20 +449,20 @@ def svg(g, out: Path) -> None:
     for c in g["street_coords"]:
         p.append(f'<line x1="{X(-g["span"]/2):.1f}" y1="{Y(c):.1f}" '
                  f'x2="{X(g["span"]/2):.1f}" y2="{Y(c):.1f}" stroke="#d8d5d0" '
-                 f'stroke-width="{g["lane"]*S:.1f}" stroke-linecap="butt"/>')
+                 f'stroke-width="{g["road"]*S:.1f}" stroke-linecap="butt"/>')
         p.append(f'<line x1="{X(c):.1f}" y1="{Y(-g["span"]/2):.1f}" '
                  f'x2="{X(c):.1f}" y2="{Y(g["span"]/2):.1f}" stroke="#d8d5d0" '
-                 f'stroke-width="{g["lane"]*S:.1f}" stroke-linecap="butt"/>')
+                 f'stroke-width="{g["road"]*S:.1f}" stroke-linecap="butt"/>')
     # the DRIVEN route on top
     d = " ".join(f"{'M' if i == 0 else 'L'}{X(q[0]):.1f},{Y(q[1]):.1f}"
                  for i, q in enumerate(g["route"])) + " Z"
     p.append(f'<path d="{d}" fill="none" stroke="#5a5a5a" '
-             f'stroke-width="{g["lane"]*S:.1f}" stroke-linecap="round"/>')
+             f'stroke-width="{g["road"]*S:.1f}" stroke-linecap="round"/>')
     p.append(f'<path d="{d}" fill="none" stroke="#f2c200" stroke-width="2.5" '
              f'stroke-dasharray="14 7"/>')
     for (ix, iy) in g["intersections"]:
-        p.append(f'<rect x="{X(ix-g["lane"]/2):.1f}" y="{Y(iy+g["lane"]/2):.1f}" '
-                 f'width="{g["lane"]*S:.1f}" height="{g["lane"]*S:.1f}" '
+        p.append(f'<rect x="{X(ix-g["road"]/2):.1f}" y="{Y(iy+g["road"]/2):.1f}" '
+                 f'width="{g["road"]*S:.1f}" height="{g["road"]*S:.1f}" '
                  f'fill="none" stroke="#1f6feb" stroke-width="1.5" '
                  f'stroke-dasharray="4 3"/>')
     p.append(f'<text x="{X(0):.1f}" y="{Y(FLOOR/2)-14:.1f}" text-anchor="middle" '
@@ -469,7 +500,8 @@ def main() -> int:
         return 0
     self_check()
 
-    g = build(R=args.radius, lane=2.0 * args.car_width, streets=args.streets)
+    g = build(R=args.radius, road=LANES * LANE_TO_CAR * args.car_width,
+              streets=args.streets)
     pp = print_plan(g)
     usable = FLOOR - 2 * WALL_MARGIN
     route = path_len(g["route"])
@@ -477,7 +509,10 @@ def main() -> int:
     print(f"car width       {args.car_width*1000:.2f} mm  FRONT track, MEASURED "
           f"2026-09-05 (Appendix DM) -- front governs since the 13-stud "
           f"rack rebuild; rear 148.25 and body 135.75 are both narrower")
-    print(f"lane width      {g['lane']*1000:.0f} mm")
+    print(f"lane width      {g['lane']*1000:.0f} mm per direction "
+          f"({LANE_TO_CAR:.3f} x car -- DELIBERATELY under the 2.0x rule)")
+    print(f"road width      {g['road']*1000:.0f} mm total, {g['lanes']} lanes "
+          f"-- THIS is what the grid geometry consumes")
     print(f"corner radius   {g['R']*1000:.0f} mm  NOT COMMITTED until B3")
     print(f"street pitch    {g['pitch']*1000:.0f} mm  "
           f"(straight between corners {(g['pitch']-2*g['R'])*1000:.0f} mm)")
@@ -503,7 +538,10 @@ def main() -> int:
     svg(g, out / "track_layout_v2.svg")
     (out / "track_layout_v2.json").write_text(json.dumps({
         "floor_m": FLOOR, "car_width_m_MEASURED": CAR_WIDTH,
-        "lane_width_m": g["lane"], "corner_radius_m_NOT_COMMITTED": g["R"],
+        "lanes_per_street": g["lanes"],
+        "lane_width_m_PER_DIRECTION": g["road"],
+        "road_width_m_TOTAL": g["road"],
+        "corner_radius_m_NOT_COMMITTED": g["R"],
         "street_pitch_m": g["pitch"], "span_m": g["span"],
         "streets_per_axis": args.streets,
         "blocks": (args.streets - 1) ** 2, "intersections": args.streets ** 2,

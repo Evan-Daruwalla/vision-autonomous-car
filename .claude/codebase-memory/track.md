@@ -36,6 +36,53 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   (ChatGPT desktop browser, Gemini in Chrome, Chrome 149+). Claude Code uses
   the MCP relay, which the page itself calls the fallback. Do not read '26
   tools' as 'the session has 26 tools'.
+- ✅ **DECIDED 2026-09-06 (Evan, Appendix DX): TWO LANES, 250 mm each,
+  road 500 mm, `LANE_TO_CAR = 1.613`.** Deliberately under
+  `SIM_TRANSFER_SPEC` s3's 2.0x rule: at 2.0x the road is 620 mm and the
+  3x3 grid fits ONLY at R=500, committing frozen corner geometry before
+  T2. At 250 mm/lane **R=550 fits too**. 1.613x is inside Duckietown's
+  measured 1.4-1.6x band. Real output: span 2700 mm, spare 100 mm,
+  straight 100 mm, lap **7.51 m** (was 8.23 single-lane), `self_check:
+  PASS`. **R=600 now REFUSES** — it fitted at one lane; that is the second
+  lane's price, and the self-check pins it.
+  ⚠️ **CORNERING CLEARANCE IS NOW 29.6 mm/side, BELOW the 50 mm
+  `MIN_SIDE_CLEARANCE` EST** (off-tracking eats 35.9 mm at the measured
+  185.95 mm wheelbase at R=500). It was 59.6 mm at a 310 mm lane. Nothing
+  asserts against that constant so no check fails — `vehicle_envelope.py`
+  just prints TOO LONG on every wheelbase row. **Open for Evan to
+  revisit.**
+  ⚠️ **`lane` and `road` are now SEPARATE everywhere** (`LANE` = one
+  direction, `ROAD = LANES * LANE` = what the grid geometry consumes).
+  One variable meaning both is what caused the DV misreading and the DW
+  arithmetic error. Do not re-merge them.
+  ⚠️ **Model scale moved 1:11.80 -> 1:14.63** — near the PRD's original
+  1:14 **by coincidence, not vindication**; 1:14 was chosen against a
+  130 mm estimate, 1:14.63 is derived from a measured 155 mm car.
+  ⚠️ **The dashed-EDGE deviation from DV is DELETED** — two lanes give a
+  real centreline, so only DU's ratio deviation remains.
+- ~~**ONE LANE OR TWO IS AN OPEN CHOICE, not a constraint (2026-09-06,
+  Appendix DW — CORRECTS DV).**~~ **CLOSED by DX above.** The track is BUILT single-lane (310 mm
+  road; `SIM_TRANSFER_SPEC` s3's lane:vehicle = 2.0x makes 310 mm ONE lane,
+  and `track_layout_v2.py` uses `lane` as the road's TOTAL width). DV
+  claimed two lanes "would not fit at all" — **wrong.** Real output of
+  `track_layout_v2.py --car-width 0.310`: **span 2700 mm, spare 100 mm,
+  self_check PASS.** The error was holding PITCH fixed; `best_straight`
+  shrinks the straight (190 -> 40 mm) to protect SPARE_MIN. Two lanes cost
+  a **14% shorter lap (8.23 -> 7.03 m)** and nearly all remaining straight,
+  but buy back a real centreline and delete the dashed-edge deviation.
+  Scale is 1:11.80 either way. **Run the generator before claiming a
+  layout does or does not fit — it is the authority (Appendix DS).**
+- **STOP SIGN placed in the 3DStreet scene 2026-09-06 (Appendix DW):**
+  `stop_sign` mixin as a STANDALONE entity (that is what makes it
+  relocatable, vs baked into street-generated content), 0.6 m off the lane
+  edge, `rotation "0 -90 0"` faces traffic travelling +X. **Relocation
+  PROVEN**: one `entityUpdate` moved it 25 m, read back clean, no street
+  rebuild. Satisfies Y.3's relocatable requirement IN THE MODEL only —
+  the physical mount is unbuilt. ⚠️ **Do NOT size the printed sign from
+  the 1:11.80 scale** — Evan decided 2026-08-10 (Appendix Y) on a
+  deliberately OVERSIZED, off-scale sign, because pixel share is what the
+  training objective responds to. Scale-correct would be 64.6 mm; the
+  standing decision is larger on purpose.
 - **MARKING SPECS ARE NOW A RUNNABLE SCRIPT: `cad/marking_specs.py`**
   (2026-09-06, Appendix DT), replacing the stale hand table in
   `PRD_ROADMAP.md`. **The model scale is DERIVED, not chosen: 1:11.80.**

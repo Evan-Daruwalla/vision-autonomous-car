@@ -19,11 +19,17 @@ whatever makes the model lane represent a real lane.
 
     scale = REAL_LANE_IN / model_lane        (model lane = 2.0 x car width)
 
-At today's 155 mm front track that is 310 mm of lane and a scale of ~1:11.8,
-NOT the 1:14 the PRD still carries. 1:14 was never re-derived after the lane
-rule replaced it; it is not a decision that was revisited and kept, it is one
-that was overtaken. Nothing downstream has used 1:14 for anything physical
-yet, so this costs nothing to correct now.
+At the 155 mm front track and the 1.613x lane rule that is 250 mm of lane and
+a scale of **~1:14.63**.
+
+HISTORY WORTH KEEPING, because the number went out and came back. The PRD
+carried 1:14, CHOSEN in Appendix L against a 130 mm ESTIMATE. When the lane
+rule replaced the fixed scale the derived scale became 1:11.80 (Appendix DT).
+Then narrowing the lane to 250 mm for the two-lane switch (Appendix DX) moved
+it to 1:14.63 -- almost exactly back on the original. **That is a coincidence,
+not a vindication.** 1:14 was a round number against a wrong car width;
+1:14.63 is derived from a measured one. They agree by accident and would
+diverge again the moment either input moves.
 
 WHAT IS MEASURED, WHAT IS A STANDARD, AND WHAT IS A JUDGEMENT CALL
   MEASURED   car width 155 mm (front track, Appendix DM)
@@ -41,20 +47,16 @@ DASH -- THE ONE ROW THAT IS NOT A SCALING
   gaps as appropriate", so the absolute size is compressed and the RATIO is
   the thing preserved.
 
-  WHERE THE DASH GOES, decided 2026-09-06 (Appendix DV): the LANE EDGES,
-  both sides. THE TRACK IS A SINGLE-LANE ROAD -- `SIM_TRANSFER_SPEC` s3's
-  rule is lane:vehicle = 2.0x (benchmarked against a 12 ft lane / 1850 mm
-  car body = 1.98x), so 310 mm is ONE lane, and `track_layout_v2.py` uses
-  `lane` as the road's TOTAL width in `span = (streets-1)*pitch + lane`.
-  There is no centreline to dash, and Appendix L's "yellow separates
-  opposing directions" applies to nothing here. Two lanes (620 mm) would
-  push span 2690 -> 3000 mm against 2800 usable and the 3x3 grid would not
-  fit at all. So the dash marks the EDGES -- a SECOND deliberate deviation
-  on top of the ratio one below: MUTCD edge lines are SOLID, and a dashed
-  edge line in the real standard means a lane ending or a passing-zone
-  boundary. Chosen over solid edges because solid throws away the
-  longitudinal signal the whole compression exists to provide.
-  Neither deviation is claimed as MUTCD compliance.
+  WHERE THE DASH GOES: the CENTRELINE, between the two directions of travel.
+  Ordinary MUTCD placement -- yellow separates opposing directions. The track
+  is TWO lanes as of 2026-09-06 (Appendix DX, Evan's call), 250 mm each.
+
+  This took three tries and the trail is in the record, not repeated here:
+  DV put the dash on the LANE EDGES because the track was then single-lane and
+  had no centreline; DW corrected DV's claim that two lanes could not fit
+  (they can -- span 2700 mm, spare 100 mm); DX switched to two lanes and so
+  DELETED the dashed-edge deviation entirely. **Only the RATIO deviation below
+  remains, and it is not claimed as MUTCD compliance.**
 
   RATIO RESOLVED 2026-09-06 BY EVAN (Appendix DU): dash:gap = 1:2. It had been ambiguous, and the
   ambiguity is worth keeping on the record because it survived a month in
@@ -91,9 +93,17 @@ MM_PER_IN = 25.4
 CAR_WIDTH = 0.155        # m  MEASURED 2026-09-05, FRONT track (Appendix DM).
                          #    MIRRORS cad/track_layout_v2.py -- self_check
                          #    imports that file and fails if they drift.
-LANE_RULE = 2.0          #    lane = 2.0 x car width, SIM_TRANSFER_SPEC s3
-ROUTE_LEN_M = 8.23       # m  real output of cad/track_layout_v2.py 2026-09-06
-                         #    (was 8.31 before the floor-fit fix, Appendix DS)
+LANE_TO_CAR = 250.0 / 155.0   # 1.613. ~~2.0x, SIM_TRANSFER_SPEC s3~~
+                         #    CHANGED 2026-09-06 (Appendix DX, Evan): two
+                         #    lanes at the 2.0x rule need a 620 mm road,
+                         #    which fits the 3x3 grid ONLY at R=500 and so
+                         #    commits frozen corner geometry before T2.
+                         #    250 mm/lane also fits R=550. Inside
+                         #    Duckietown's measured 1.4-1.6x band.
+                         #    MIRRORS cad/track_layout_v2.py.
+ROUTE_LEN_M = 7.51       # m  real output of cad/track_layout_v2.py 2026-09-06
+                         #    at TWO lanes (was 8.23 single-lane, 8.31
+                         #    before the floor-fit fix of Appendix DS)
 DASH_TO_GAP = 0.5        #    dash length / gap length = 1:2. DECIDED by Evan
                          #    2026-09-06 (Appendix DU), resolving the "~2:1"
                          #    ambiguity the record carried in three places --
@@ -106,7 +116,9 @@ TARGET_DASH_CYCLES = 40  #    dash cycles the car should see in one lap. The
 
 
 def lane_width_m(car_width: float = CAR_WIDTH) -> float:
-    return LANE_RULE * car_width
+    """ONE lane, one direction. The road is LANES x this -- see
+    track_layout_v2.py; the grid geometry consumes the ROAD, not this."""
+    return LANE_TO_CAR * car_width
 
 
 def scale(car_width: float = CAR_WIDTH) -> float:
@@ -155,8 +167,8 @@ def self_check() -> None:
     # 1. the scale is DERIVED and round-trips: model lane x scale == 12 ft
     t = table()
     assert abs(t["lane_mm"] * t["scale"] - MUTCD_LANE_IN * MM_PER_IN) < 1e-6, t
-    assert abs(t["lane_mm"] - 310.0) < 1e-9, t["lane_mm"]
-    assert 11.7 < t["scale"] < 11.9, f"scale {t['scale']:.3f} is not ~1:11.8"
+    assert abs(t["lane_mm"] - 250.0) < 1e-9, t["lane_mm"]
+    assert 14.5 < t["scale"] < 14.7, f"scale {t['scale']:.3f} is not ~1:14.6"
 
     # 2. REGRESSION against the six numbers Appendix L published at 1:14, which
     #    Appendix O.4's cold audit re-verified ("all six MUTCD 1:14 numbers
@@ -178,8 +190,10 @@ def self_check() -> None:
     assert abs(at_14(MUTCD_STOP_LINE_IN[1]) - 44.0) < 1.0
     assert abs(at_14(MUTCD_DASH_IN) - 218.0) < 1.5
     assert abs(at_14(MUTCD_GAP_IN) - 653.0) < 2.0
-    #    ... and the near-agreement at 130 mm, which explains the drift
-    assert abs(scale(0.130) - 14.0) < 0.1, scale(0.130)
+    #    The old 2.0x rule happened to agree with 1:14 at the 130 mm car of
+    #    the era (260.0 mm / 1:14.07 vs 261 mm / 1:14), which is why the
+    #    direction reversal went unnoticed. That coincidence is GONE under
+    #    the 1.613x rule -- no assert, because there is nothing left to pin.
 
     # 3. the dash compression does what it exists to do
     assert t["dash_cycles_true"] < 10, "true-scale dash was not actually sparse"
@@ -240,7 +254,8 @@ def main() -> int:
     print("ROAD MARKING SPECS  (full scale = FHWA MUTCD, verified 2026-08-05)")
     print("=" * 78)
     print(f"car width   {t['car_width_mm']:.2f} mm  FRONT track, MEASURED (Appendix DM)")
-    print(f"lane        {t['lane_mm']:.1f} mm  = {LANE_RULE} x car width (SIM_TRANSFER_SPEC s3)")
+    print(f"lane        {t['lane_mm']:.1f} mm per direction = {LANE_TO_CAR:.3f} x car "
+          f"(road = 2 x this = {2*t['lane_mm']:.0f} mm)")
     print(f"SCALE       1:{t['scale']:.2f}  DERIVED from the lane rule, not chosen")
     print("            (PRD still says 1:14 -- overtaken, never re-derived)")
     print()
