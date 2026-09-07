@@ -1,0 +1,250 @@
+<?xml version="1.0"?>
+<OpenDRIVE>
+  <header revMajor="1" revMinor="4" name="Autonomous Car Project 3x3 grid" vendor="cad/export_xodr.py" />
+  <road name="N-S street x=-1.100 m model" length="39.5020800000" id="0" junction="-1">
+    <planView>
+      <geometry s="0.0000000000" x="-16.0934400000" y="-19.7510400000" hdg="1.5707963268" length="39.5020800000">
+        <line />
+      </geometry>
+    </planView>
+    <elevationProfile>
+      <elevation s="0" a="0" b="0" c="0" d="0" />
+    </elevationProfile>
+    <lanes>
+      <laneOffset s="0" a="0" b="0" c="0" d="0" />
+      <laneSection s="0">
+        <right>
+          <lane id="-1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </right>
+        <center>
+          <lane id="0" type="none" level="false">
+            <roadMark sOffset="0" type="broken" color="yellow" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </center>
+        <left>
+          <lane id="1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </left>
+      </laneSection>
+    </lanes>
+    <roadRunnerProfile>
+      <left>
+        <section type_s="3950" laneCount="1" offsetX2="0" />
+        <section type_s="4294967295" laneCount="1" offsetX2="0" />
+      </left>
+      <right>
+        <section type_s="0" laneCount="1" offsetX2="0" />
+      </right>
+    </roadRunnerProfile>
+  </road>
+  <road name="N-S street x=+0.000 m model" length="39.5020800000" id="1" junction="-1">
+    <planView>
+      <geometry s="0.0000000000" x="0.0000000000" y="-19.7510400000" hdg="1.5707963268" length="39.5020800000">
+        <line />
+      </geometry>
+    </planView>
+    <elevationProfile>
+      <elevation s="0" a="0" b="0" c="0" d="0" />
+    </elevationProfile>
+    <lanes>
+      <laneOffset s="0" a="0" b="0" c="0" d="0" />
+      <laneSection s="0">
+        <right>
+          <lane id="-1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </right>
+        <center>
+          <lane id="0" type="none" level="false">
+            <roadMark sOffset="0" type="broken" color="yellow" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </center>
+        <left>
+          <lane id="1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </left>
+      </laneSection>
+    </lanes>
+    <roadRunnerProfile>
+      <left>
+        <section type_s="3950" laneCount="1" offsetX2="0" />
+        <section type_s="4294967295" laneCount="1" offsetX2="0" />
+      </left>
+      <right>
+        <section type_s="0" laneCount="1" offsetX2="0" />
+      </right>
+    </roadRunnerProfile>
+  </road>
+  <road name="N-S street x=+1.100 m model" length="39.5020800000" id="2" junction="-1">
+    <planView>
+      <geometry s="0.0000000000" x="16.0934400000" y="-19.7510400000" hdg="1.5707963268" length="39.5020800000">
+        <line />
+      </geometry>
+    </planView>
+    <elevationProfile>
+      <elevation s="0" a="0" b="0" c="0" d="0" />
+    </elevationProfile>
+    <lanes>
+      <laneOffset s="0" a="0" b="0" c="0" d="0" />
+      <laneSection s="0">
+        <right>
+          <lane id="-1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </right>
+        <center>
+          <lane id="0" type="none" level="false">
+            <roadMark sOffset="0" type="broken" color="yellow" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </center>
+        <left>
+          <lane id="1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </left>
+      </laneSection>
+    </lanes>
+    <roadRunnerProfile>
+      <left>
+        <section type_s="3950" laneCount="1" offsetX2="0" />
+        <section type_s="4294967295" laneCount="1" offsetX2="0" />
+      </left>
+      <right>
+        <section type_s="0" laneCount="1" offsetX2="0" />
+      </right>
+    </roadRunnerProfile>
+  </road>
+  <road name="E-W street y=-1.100 m model" length="39.5020800000" id="3" junction="-1">
+    <planView>
+      <geometry s="0.0000000000" x="-19.7510400000" y="-16.0934400000" hdg="0.0000000000" length="39.5020800000">
+        <line />
+      </geometry>
+    </planView>
+    <elevationProfile>
+      <elevation s="0" a="0" b="0" c="0" d="0" />
+    </elevationProfile>
+    <lanes>
+      <laneOffset s="0" a="0" b="0" c="0" d="0" />
+      <laneSection s="0">
+        <right>
+          <lane id="-1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </right>
+        <center>
+          <lane id="0" type="none" level="false">
+            <roadMark sOffset="0" type="broken" color="yellow" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </center>
+        <left>
+          <lane id="1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </left>
+      </laneSection>
+    </lanes>
+    <roadRunnerProfile>
+      <left>
+        <section type_s="3950" laneCount="1" offsetX2="0" />
+        <section type_s="4294967295" laneCount="1" offsetX2="0" />
+      </left>
+      <right>
+        <section type_s="0" laneCount="1" offsetX2="0" />
+      </right>
+    </roadRunnerProfile>
+  </road>
+  <road name="E-W street y=+0.000 m model" length="39.5020800000" id="4" junction="-1">
+    <planView>
+      <geometry s="0.0000000000" x="-19.7510400000" y="0.0000000000" hdg="0.0000000000" length="39.5020800000">
+        <line />
+      </geometry>
+    </planView>
+    <elevationProfile>
+      <elevation s="0" a="0" b="0" c="0" d="0" />
+    </elevationProfile>
+    <lanes>
+      <laneOffset s="0" a="0" b="0" c="0" d="0" />
+      <laneSection s="0">
+        <right>
+          <lane id="-1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </right>
+        <center>
+          <lane id="0" type="none" level="false">
+            <roadMark sOffset="0" type="broken" color="yellow" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </center>
+        <left>
+          <lane id="1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </left>
+      </laneSection>
+    </lanes>
+    <roadRunnerProfile>
+      <left>
+        <section type_s="3950" laneCount="1" offsetX2="0" />
+        <section type_s="4294967295" laneCount="1" offsetX2="0" />
+      </left>
+      <right>
+        <section type_s="0" laneCount="1" offsetX2="0" />
+      </right>
+    </roadRunnerProfile>
+  </road>
+  <road name="E-W street y=+1.100 m model" length="39.5020800000" id="5" junction="-1">
+    <planView>
+      <geometry s="0.0000000000" x="-19.7510400000" y="16.0934400000" hdg="0.0000000000" length="39.5020800000">
+        <line />
+      </geometry>
+    </planView>
+    <elevationProfile>
+      <elevation s="0" a="0" b="0" c="0" d="0" />
+    </elevationProfile>
+    <lanes>
+      <laneOffset s="0" a="0" b="0" c="0" d="0" />
+      <laneSection s="0">
+        <right>
+          <lane id="-1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </right>
+        <center>
+          <lane id="0" type="none" level="false">
+            <roadMark sOffset="0" type="broken" color="yellow" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </center>
+        <left>
+          <lane id="1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </left>
+      </laneSection>
+    </lanes>
+    <roadRunnerProfile>
+      <left>
+        <section type_s="3950" laneCount="1" offsetX2="0" />
+        <section type_s="4294967295" laneCount="1" offsetX2="0" />
+      </left>
+      <right>
+        <section type_s="0" laneCount="1" offsetX2="0" />
+      </right>
+    </roadRunnerProfile>
+  </road>
+</OpenDRIVE>

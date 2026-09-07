@@ -137,10 +137,17 @@ def geometries(scale=1.0):
     return out, g, R
 
 
-def build_xml(scale=1.0):
-    geoms, g, R = geometries(scale)
+def _add_road(root, rid, name, geoms, scale, self_link=False):
+    """Append one <road> built from `geoms` and return it.
+
+    ONE builder for all three callers -- the figure-8 export, the probe ladder
+    and the 3x3 grid. build_xml and _probe_xml were near-duplicates when the
+    probes were added (2026-09-06); a third copy for the grid would have made
+    the lane block and the roadRunnerProfile three places to keep in step.
+    """
+    tl = _load("track_layout_v2.py")
     ms = _load("marking_specs.py")
-    t = ms.table()
+    g, t = tl.build(), ms.table()
     # model dimension x scale. At scale=1 these are the 250 mm lane and the
     # 10.42 mm line; at full scale they return to the real 12 ft and 6 in
     # that marking_specs derived them from.
@@ -148,17 +155,14 @@ def build_xml(scale=1.0):
     mark_w = t["normal_line_mm"][1] / 1000.0 * scale
     total = sum(gm[3] for gm in geoms)
 
-    root = ET.Element("OpenDRIVE")
-    ET.SubElement(root, "header", revMajor="1", revMinor="4",
-                  name="Autonomous Car Project figure-8",
-                  vendor="cad/export_xodr.py")
-    road = ET.SubElement(root, "road", name="figure-8 route",
-                         length=f"{total:.10f}", id="0", junction="-1")
-    link = ET.SubElement(road, "link")
-    ET.SubElement(link, "predecessor", elementType="road", elementId="0",
-                  contactPoint="end")
-    ET.SubElement(link, "successor", elementType="road", elementId="0",
-                  contactPoint="start")
+    road = ET.SubElement(root, "road", name=name, length=f"{total:.10f}",
+                         id=str(rid), junction="-1")
+    if self_link:
+        link = ET.SubElement(road, "link")
+        ET.SubElement(link, "predecessor", elementType="road",
+                      elementId=str(rid), contactPoint="end")
+        ET.SubElement(link, "successor", elementType="road",
+                      elementId=str(rid), contactPoint="start")
 
     pv = ET.SubElement(road, "planView")
     s = 0.0
@@ -195,29 +199,73 @@ def build_xml(scale=1.0):
 
     # LaneMaker refuses any map without this vendor block:
     #   "xodr map needs to contain custom LaneProfile!"
-    # It is NOT standard OpenDRIVE -- it is a RoadRunner extension, and
-    # LaneMaker reads it by XPath (strings `roadRunnerProfile`,
-    # `LaneProfile::Apply` are in the binary). Decoded from its own SampleMaps:
-    #   type_s    = section start, s in CENTIMETRES (road 0: 127.14 m -> 12714)
+    # NOT standard OpenDRIVE -- a RoadRunner extension read by XPath (strings
+    # `roadRunnerProfile`, `LaneProfile::Apply` are in the binary). Decoded
+    # from its own SampleMaps (Appendix EB):
+    #   type_s     = section start, s in CENTIMETRES (road 0: 127.14 m -> 12714)
     #   4294967295 = UINT32_MAX, a terminator on the left list
-    #   laneCount = DRIVING lanes on that side (medians are not counted)
-    #   offsetX2  = laneOffset / laneWidth * 2 -- verified across all 272 roads
-    # ⚠️ NOT verified: why <left> lists a length-cm section plus a UINT32_MAX
-    # terminator while <right> lists a single type_s="0". No sample road has a
-    # 1+1 layout without a median, so this mirrors road 0's SHAPE with our lane
-    # counts. If LaneMaker still refuses, draw any road in it, save, and read
-    # the profile it writes -- that is ground truth and ends the guessing.
+    #   laneCount  = DRIVING lanes on that side (medians are not counted)
+    #   offsetX2   = laneOffset / laneWidth * 2 -- verified on all 272 roads
+    # ⚠️ Still unexplained: why <left> needs a length-cm section PLUS the
+    # terminator while <right> needs a single type_s="0". No sample road has a
+    # 1+1 layout without a median, so this mirrors road 0's SHAPE.
     prof = ET.SubElement(road, "roadRunnerProfile")
-    off_x2 = 0                                   # our laneOffset is 0
     left = ET.SubElement(prof, "left")
     ET.SubElement(left, "section", type_s=str(int(round(total * 100))),
-                  laneCount="1", offsetX2=str(off_x2))
+                  laneCount="1", offsetX2="0")
     ET.SubElement(left, "section", type_s="4294967295",
-                  laneCount="1", offsetX2=str(off_x2))
+                  laneCount="1", offsetX2="0")
     right = ET.SubElement(prof, "right")
-    ET.SubElement(right, "section", type_s="0",
-                  laneCount="1", offsetX2=str(off_x2))
-    return root, geoms, g, R, total, lane_w
+    ET.SubElement(right, "section", type_s="0", laneCount="1", offsetX2="0")
+    return road
+
+
+def _new_root(title):
+    root = ET.Element("OpenDRIVE")
+    ET.SubElement(root, "header", revMajor="1", revMinor="4", name=title,
+                  vendor="cad/export_xodr.py")
+    return root
+
+
+def build_xml(scale=1.0):
+    geoms, g, R = geometries(scale)
+    root = _new_root("Autonomous Car Project figure-8")
+    _add_road(root, 0, "figure-8 route", geoms, scale, self_link=True)
+    total = sum(gm[3] for gm in geoms)
+    return root, geoms, g, R, total, g["lane"] * scale
+
+
+def grid_roads(scale=1.0):
+    """The 3x3 grid as 6 straight roads: 3 along Z, 3 along X.
+
+    NO junctions and no links. Appendix EC established that LaneMaker loads a
+    self-intersecting road with no junction declared, so crossing roads need
+    none either -- this is the cheap version, and proper junction records are
+    the follow-up if the topology is wanted.
+    """
+    tl = _load("track_layout_v2.py")
+    g = tl.build()
+    coords = [c * scale for c in g["street_coords"]]
+    half = g["road"] / 2.0 * scale
+    end = max(coords) + half              # street runs -end .. +end
+    span = 2 * end
+    out = []
+    for c in coords:                      # along +Y (hdg = pi/2)
+        out.append((f"N-S street x={c/scale:+.3f} m model",
+                    [(c, -end, math.pi / 2, span, 0.0)]))
+    for c in coords:                      # along +X (hdg = 0)
+        out.append((f"E-W street y={c/scale:+.3f} m model",
+                    [(-end, c, 0.0, span, 0.0)]))
+    return out, g, span
+
+
+def build_grid_xml(scale=1.0):
+    roads, g, span = grid_roads(scale)
+    root = _new_root("Autonomous Car Project 3x3 grid")
+    for rid, (name, geoms) in enumerate(roads):
+        _add_road(root, rid, name, geoms, scale)
+    return root, roads, g, span
+
 
 
 def self_check() -> None:
@@ -270,7 +318,25 @@ def self_check() -> None:
     assert prof is not None, "no roadRunnerProfile -- LaneMaker will refuse the map"
     assert prof.find("left/section") is not None and prof.find("right/section") is not None
     total_m = float(reparsed.find("road").get("length"))
-    assert int(prof.find("left/section").get("type_s")) == int(round(total_m * 100)),         "left section type_s must be the road length in centimetres" 
+    assert int(prof.find("left/section").get("type_s")) == int(round(total_m * 100)),         "left section type_s must be the road length in centimetres"
+
+    # 7. THE 3x3 GRID: 6 roads, unique ids, every one straight and profiled.
+    groot, roads, gg, span = build_grid_xml(1.0)
+    assert len(roads) == 6, len(roads)
+    rs = groot.findall("road")
+    assert len(rs) == 6 and len({r.get("id") for r in rs}) == 6, "duplicate road id"
+    for r in rs:
+        assert r.find("planView/line") is None      # <line> is under <geometry>
+        assert len(r.findall("planView/geometry")) == 1
+        assert r.find("planView/geometry/line") is not None, "grid roads are straight"
+        assert r.find("roadRunnerProfile/right/section") is not None
+        assert abs(float(r.get("length")) - span) < 1e-9
+    # the 6 streets must sit on the grid coordinates, 3 per axis
+    xs = sorted({round(float(r.find("planView/geometry").get("x")), 6) for r in rs})
+    zs = sorted({round(float(r.find("planView/geometry").get("y")), 6) for r in rs})
+    assert len(xs) == 4 and len(zs) == 4, (xs, zs)   # 3 street coords + 1 end
+    # span must cover the whole grid: 2*pitch + road
+    assert abs(span - (2 * gg["pitch"] + gg["road"])) < 1e-9, (span, gg["pitch"])
     assert len(reparsed.findall("road/planView/geometry")) == len(geoms)
 
     print("export_xodr self_check: PASS")
@@ -311,70 +377,14 @@ def write_probe(out_dir: Path):
     for name, geoms, self_link in ladder:
         if geoms is None:
             geoms, _g, _R = geometries(scale)
-        root = _probe_xml(geoms, self_link, scale)
+        root = _new_root('probe')
+        _add_road(root, 0, 'probe', geoms, scale, self_link=self_link)
         f = out_dir / f"probe_{name}.xodr"
         ET.indent(root, space="  ")
         f.write_text(XML_DECL + ET.tostring(root, encoding="unicode"),
                      encoding="utf-8")
         written.append((f.name, len(geoms), self_link))
     return written
-
-
-def _probe_xml(geoms, self_link, scale):
-    tl = _load("track_layout_v2.py")
-    ms = _load("marking_specs.py")
-    g, t = tl.build(), ms.table()
-    lane_w = g["lane"] * scale
-    mark_w = t["normal_line_mm"][1] / 1000.0 * scale
-    total = sum(gm[3] for gm in geoms)
-    root = ET.Element("OpenDRIVE")
-    ET.SubElement(root, "header", revMajor="1", revMinor="4", name="probe",
-                  vendor="cad/export_xodr.py")
-    road = ET.SubElement(root, "road", name="probe", length=f"{total:.10f}",
-                         id="0", junction="-1")
-    if self_link:
-        link = ET.SubElement(road, "link")
-        ET.SubElement(link, "predecessor", elementType="road", elementId="0",
-                      contactPoint="end")
-        ET.SubElement(link, "successor", elementType="road", elementId="0",
-                      contactPoint="start")
-    pv = ET.SubElement(root.find("road"), "planView")
-    s = 0.0
-    for x, y, hdg, length, curv in geoms:
-        gel = ET.SubElement(pv, "geometry", s=f"{s:.10f}", x=f"{x:.10f}",
-                            y=f"{y:.10f}", hdg=f"{hdg:.10f}",
-                            length=f"{length:.10f}")
-        if abs(curv) < 1e-12:
-            ET.SubElement(gel, "line")
-        else:
-            ET.SubElement(gel, "arc", curvature=f"{curv:.10f}")
-        s += length
-    ep = ET.SubElement(road, "elevationProfile")
-    ET.SubElement(ep, "elevation", s="0", a="0", b="0", c="0", d="0")
-    lanes = ET.SubElement(road, "lanes")
-    ET.SubElement(lanes, "laneOffset", s="0", a="0", b="0", c="0", d="0")
-    sec = ET.SubElement(lanes, "laneSection", s="0")
-    for side, lane_id in (("right", "-1"), ("left", "1")):
-        grp = ET.SubElement(sec, side)
-        ln = ET.SubElement(grp, "lane", id=lane_id, type=LANE_TYPE, level="false")
-        ET.SubElement(ln, "width", sOffset="0", a=f"{lane_w:.10f}", b="0", c="0", d="0")
-        ET.SubElement(ln, "roadMark", sOffset="0", type=EDGE_MARK[0],
-                      color=EDGE_MARK[1], laneChange="none", weight="",
-                      width=f"{mark_w:.10f}")
-        if side == "right":
-            c = ET.SubElement(sec, "center")
-            cl = ET.SubElement(c, "lane", id="0", type="none", level="false")
-            ET.SubElement(cl, "roadMark", sOffset="0", type=CENTRE_MARK[0],
-                          color=CENTRE_MARK[1], laneChange="none", weight="",
-                          width=f"{mark_w:.10f}")
-    prof = ET.SubElement(road, "roadRunnerProfile")
-    left = ET.SubElement(prof, "left")
-    ET.SubElement(left, "section", type_s=str(int(round(total * 100))),
-                  laneCount="1", offsetX2="0")
-    ET.SubElement(left, "section", type_s="4294967295", laneCount="1", offsetX2="0")
-    right = ET.SubElement(prof, "right")
-    ET.SubElement(right, "section", type_s="0", laneCount="1", offsetX2="0")
-    return root
 
 
 def main() -> int:
@@ -384,12 +394,42 @@ def main() -> int:
     ap.add_argument("--out", default=None)
     ap.add_argument("--probe", action="store_true",
                     help="write the LaneMaker bisection ladder")
+    ap.add_argument("--grid", action="store_true",
+                    help="write the 3x3 street grid instead of the route")
     ap.add_argument("--self-check", action="store_true")
     args = ap.parse_args()
     if args.self_check:
         self_check()
         return 0
     self_check()
+
+    if args.grid:
+        ms = _load("marking_specs.py")
+        scale = 1.0 if args.model_scale else ms.scale()
+        root, roads, g, span = build_grid_xml(scale)
+        out = Path(args.out) if args.out else Path(__file__).with_name(
+            "track_grid3x3_model.xodr" if args.model_scale else "track_grid3x3.xodr")
+        ET.indent(root, space="  ")
+        out.write_text(XML_DECL + ET.tostring(root, encoding="unicode"),
+                       encoding="utf-8")
+        print("=" * 74)
+        print("OPENDRIVE EXPORT -- 3x3 STREET GRID")
+        print("=" * 74)
+        print("scale           " + (f"FULL, x{scale:.4f}" if scale != 1.0
+                                    else "MODEL, 1:1"))
+        print(f"roads           {len(roads)}  (3 along Z, 3 along X)")
+        print(f"street length   {span:.4f} m each")
+        print(f"street pitch    {g['pitch'] * scale:.4f} m")
+        print(f"road width      {g['road'] * scale:.4f} m, 2 lanes")
+        print(f"crossings       {len(g['intersections'])} (geometric only)")
+        print()
+        print("NO junction records and no links. Appendix EC established that")
+        print("LaneMaker loads a self-intersecting road with no junction, so")
+        print("crossing roads need none either. Proper junction topology is the")
+        print("follow-up, not this file.")
+        print()
+        print(f"-> {out}")
+        return 0
 
     if args.probe:
         for name, n, sl in write_probe(Path(__file__).parent):

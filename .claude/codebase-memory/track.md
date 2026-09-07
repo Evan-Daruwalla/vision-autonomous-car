@@ -131,6 +131,21 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
     `std::terminate`/abort — an unhandled C++ exception, NOT memory
     corruption), identical fault address both times. Parse the
     MINIDUMP_EXCEPTION_STREAM directly; no debugger needed.
+  - **THE 3x3 GRID IS EXPORTED TOO (2026-09-07, Appendix ED):**
+    `export_xodr.py --grid` -> `cad/track_grid3x3.xodr`. 6 roads, 39.5021 m
+    each, pitch 16.0934 m, road 7.3152 m, **9 crossings that are GEOMETRIC
+    ONLY** — no junction records, licensed by EC (probe 3 self-intersects
+    with no junction and loads). Same pitch/length as the 3DStreet scene,
+    so the two representations agree.
+  - ⚠️ **NEITHER xodr FILE SHOWS THE WHOLE TRACK.**
+    `track_grid3x3.xodr` = the street NETWORK, square crossings, no corner
+    arcs. `track_figure8.xodr` = the driven PATH, with the R=500 corners,
+    but no grid. The 3DStreet scene has the same split. Do not call either
+    one "the track".
+  - `_add_road()` is the ONE road builder for all three callers (figure-8,
+    probes, grid). Extracted 2026-09-07 from two near-duplicates; the
+    extraction is proven faithful because regenerating every previously
+    committed .xodr after it produced BYTE-IDENTICAL files.
   - ⚠️ **STILL NOT UNDERSTOOD:** why `<left>` needs a length-cm section
     PLUS a UINT32_MAX terminator while `<right>` needs one `type_s="0"`.
     No sample road has a 1+1 layout without a median, so ours mirrors road

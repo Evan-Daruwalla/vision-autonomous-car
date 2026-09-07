@@ -168,6 +168,7 @@ the dated entry, not the digest.
 - [EA — LaneMaker speaks OpenDRIVE, which HAS the arc primitive 3DStreet lacks; figure-8 exported as .xodr; the route has 6 corners not 8](#appendix-ea---lanemaker-speaks-opendrive-which-has-the-arc-primitive-3dstreet-lacks-figure-8-exported-as-xodr-the-route-has-6-corners-not-8-2026-09-06-2213-cdt) (09-06)
 - [EB — LaneMaker DOES import xodr and named its own blocker: a roadRunnerProfile vendor block, schema decoded from the binary and samples](#appendix-eb---lanemaker-does-import-xodr-and-named-its-own-blocker-a-roadrunnerprofile-vendor-block-schema-decoded-from-the-binary-and-samples-2026-09-06-2217-cdt) (09-06)
 - [EC — Bisection ladder: all 4 probes load, so self-link AND self-intersection are both harmless; the crashing file is byte-identical to a working one](#appendix-ec---bisection-ladder-all-4-probes-load-so-self-link-and-self-intersection-are-both-harmless-the-crashing-file-is-byte-identical-to-a-working-one-2026-09-06-2311-cdt) (09-06)
+- [ED — 3x3 grid exported as OpenDRIVE (6 roads, no junctions); _add_road extracted from two near-duplicates, proven byte-identical](#appendix-ed---3x3-grid-exported-as-opendrive-6-roads-no-junctions-_add_road-extracted-from-two-near-duplicates-proven-byte-identical-2026-09-07-0008-cdt) (09-07)
 
 ---
 
@@ -13797,3 +13798,73 @@ of the escape, twice producing `SyntaxError: unterminated string literal`.
 Fixed the last one by hoisting the XML declaration into a module constant
 built with `chr(10)` so no escape crosses the boundary. **Stop writing
 backslash escapes inside heredoc'd Python; use the Edit tool or `chr()`.**
+
+# Appendix ED - 3x3 grid exported as OpenDRIVE (6 roads, no junctions); _add_road extracted from two near-duplicates, proven byte-identical (2026-09-07, ~00:08 CDT)
+Evan: "make a track layout for the 3x3". Read as the standing gap Appendices EA
+and EC both closed with — "still not exported: the 3x3 grid, the 9
+intersections, junction records" — so: do for the grid what the figure-8 export
+did.
+
+## `export_xodr.py --grid`
+
+Six roads, scale-converted from `track_layout_v2.py`, written to
+`cad/track_grid3x3.xodr` (and `_model.xodr` with `--model-scale`):
+
+    roads           6  (3 along Z, 3 along X)
+    street length   39.5021 m each
+    street pitch    16.0934 m
+    road width      7.3152 m, 2 lanes
+    crossings       9 (geometric only)
+
+The same pitch and length as the 3DStreet scene built in Appendix DZ, so the
+two independent representations of the grid agree.
+
+## NO JUNCTION RECORDS, and that is a deliberate stop
+
+The 9 crossings are geometric only — the roads simply overlap. **Appendix EC is
+what licenses this**: probe 3 was a self-intersecting road with no junction
+declared and LaneMaker loaded it, so crossing roads need none either.
+
+Real junction topology — `<junction>` elements with connecting roads and lane
+links between every approach — is a much larger job and only worth doing if the
+tool needs to understand TURNS rather than just draw streets. Not attempted.
+
+## A REFACTOR, because a third copy would have been the wrong move
+
+`build_xml` and `_probe_xml` were near-duplicates I created earlier the same
+session (EA, then EC's probe ladder). The grid would have made **three** places
+holding the lane block, the `roadRunnerProfile` and the geometry loop.
+
+Extracted `_add_road(root, rid, name, geoms, scale, self_link=False)`; all
+three callers now use it, and `_probe_xml` is gone.
+
+**The regression check that makes this trustworthy:** after the refactor,
+regenerating `track_figure8.xodr`, `track_figure8_model.xodr` and all four
+probe files left them **byte-identical** — none appears in `git status`. A
+faithful extraction, proven rather than asserted.
+
+New self-check group 7 pins the grid: 6 roads, unique ids, exactly one straight
+geometry each, a `roadRunnerProfile` on each, all lengths equal, the street
+coordinates landing on 3 values per axis, and `span == 2 * pitch + road`.
+
+## What neither file shows
+
+`track_grid3x3.xodr` is the street NETWORK — 6 crossing straights, which is
+what `track_layout_v2.py` describes. `track_figure8.xodr` is the driven PATH,
+with the R=500 mm rounded corners. **Neither file contains both.** The corners
+exist only in the figure-8 export; the grid export has square crossings. Worth
+saying plainly because the 3DStreet scene has the same split and it would be
+easy to mistake either for "the track".
+
+## Process, third time
+
+Hit the bash-heredoc backslash bug AGAIN — `\\n` inside
+`print(f"\\n-> {out}")` emitted a literal newline and produced
+`SyntaxError: unterminated f-string literal`. This was one turn after writing
+the rule against it into Appendix EC. Fixed with the Edit tool.
+
+**The rule is not working as written.** Restating it as a mechanical one:
+inside a heredoc'd Python script, do not type a backslash at all. If a newline
+is needed in output, call `print()` with no argument, or build the string with
+`chr(10)`. If an escape is genuinely required, use the Edit tool instead of the
+heredoc.
