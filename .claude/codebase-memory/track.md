@@ -137,6 +137,31 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
     ONLY** — no junction records, licensed by EC (probe 3 self-intersects
     with no junction and loads). Same pitch/length as the 3DStreet scene,
     so the two representations agree.
+  - **PROPER JUNCTIONS EXIST (2026-09-07, Appendix EE):** `--junctions` ->
+    `cad/track_grid3x3_junctions.xodr`. 56 roads (12 street segments + 44
+    connecting roads), 9 junctions, 32 turn arcs, 44 laneLinks.
+  - ✅ **THE KERB RETURN RADIUS RECONCILES THE FIGURE-8 WITH THE GRID.**
+    A turn confined to the bare box has R = road/2 - lane/2 = **125 mm**,
+    needing **56.1 deg of lock** — past the 38.7 deg the servo reaches, so
+    **the car could not turn right**. With junction radius Rt the arcs are
+    Rt -/+ lane/2. At **Rt = 500 mm: right 375, left 625, street segments
+    100 mm** — which is exactly the "straight between corners"
+    `track_layout_v2` reports. **The figure-8's R=500 corners ARE the
+    junction turns.** A self-check asserts every radius >= 232.4 mm.
+  - ⚠️ **The grid is 91% junction, 9% street** (1000 mm of junction in
+    every 1100 mm pitch) — a direct consequence of Rt=500 vs pitch 1100.
+  - ⚠️ **EVERY OpenDRIVE ROAD NEEDS A `<link>`.** The first junction cut
+    had 0 of 56 and crashed LaneMaker with `0xC0000005 ACCESS_VIOLATION` at
+    an address in the EXE's OWN range (the EB/EC crashes were 0xC0000409 in
+    a system DLL — different bug). Junctions pointed at roads; no road
+    pointed back. **Connecting roads link to ROADS; street roads link to
+    JUNCTIONS.** Also `laneLink from` is -1 or +1 depending on WHICH END of
+    the street meets the junction — hardcoding -1 mislabels half of them
+    (post-fix split is 22/22). Self-check 8d now pins all of this and is
+    proven to fire.
+  - ✅ **The R=500 route stays ON the roadway** — measured max offset
+    139.4 mm vs the 250 mm half-width, 0 of 780 points off. Near a corner
+    the path is carried by the CROSSING street's pavement.
   - ⚠️ **NEITHER xodr FILE SHOWS THE WHOLE TRACK.**
     `track_grid3x3.xodr` = the street NETWORK, square crossings, no corner
     arcs. `track_figure8.xodr` = the driven PATH, with the R=500 corners,

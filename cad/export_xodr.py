@@ -339,6 +339,89 @@ def self_check() -> None:
     assert abs(span - (2 * gg["pitch"] + gg["road"])) < 1e-9, (span, gg["pitch"])
     assert len(reparsed.findall("road/planView/geometry")) == len(geoms)
 
+    # 8. THE JUNCTION GRID. The check that matters is CONTINUITY THROUGH THE
+    #    JUNCTION: every connecting road's arc must LAND on the outgoing lane,
+    #    in position and heading. An arc that ends anywhere else is a turn the
+    #    car drives off the road.
+    streets, junctions, connectors, m = junction_layout(1.0)
+    assert len(streets) == 12, len(streets)
+    assert len(junctions) == 9, len(junctions)
+    assert len(connectors) == 44, len(connectors)
+    from collections import Counter
+    assert Counter(len(j["arms"]) for j in junctions) == Counter({2: 4, 3: 4, 4: 1})
+
+    for j in junctions:
+        C = j["centre"]
+        for cid in j["connections"]:
+            c = connectors[cid]
+            x, y, hdg, length, curv = c["geoms"][0]
+            ex, ey, eh = arc_end(x, y, hdg, curv, length)
+            arm_out = c["name"].split("->")[1]
+            v = DIRS[arm_out]
+            rv = _right_of(v)
+            px = C[0] + v[0] * m["Rt"] + rv[0] * m["o"]
+            py = C[1] + v[1] * m["Rt"] + rv[1] * m["o"]
+            assert abs(ex - px) < 1e-9 and abs(ey - py) < 1e-9, (
+                c["name"], (ex, ey), (px, py))
+            d = (eh - math.atan2(v[1], v[0]) + math.pi) % (2 * math.pi) - math.pi
+            assert abs(d) < 1e-9, (c["name"], "heading off by", d)
+
+    # 8b. EVERY TURN MUST BE DRIVABLE. A turn tighter than the car's own
+    #     minimum radius is a road it cannot use. 232.4 mm is the
+    #     servo-achievable R_min estimate (steering.md, Appendix DN) -- an
+    #     estimate, so this asserts against it deliberately rather than against
+    #     the 116.2 mm bare-linkage figure, which no servo can deliver.
+    R_MIN_SERVO_EST = 0.2324
+    radii = {c["r_arc"] for c in connectors if c["r_arc"] is not None}
+    assert radii == {m["r_right"], m["r_left"]}, radii
+    for r in sorted(radii):
+        assert r >= R_MIN_SERVO_EST, (
+            "turn radius {:.3f} m is tighter than the car's estimated R_min "
+            "{:.3f} m -- raise the junction radius".format(r, R_MIN_SERVO_EST))
+
+    # 8c. junctions must not eat the streets between them
+    assert m["seg"] > 0, m["seg"]
+
+    # 8d. TOPOLOGY, not just geometry. The first cut of the junction export
+    #     passed every check above and still crashed LaneMaker with an
+    #     ACCESS_VIOLATION inside its own code, because NONE of its 56 roads
+    #     had a <link>: the junction blocks pointed at roads, and no road
+    #     pointed back. Geometry checks cannot see a missing graph edge.
+    jroot, jstreets, jjs, jconns, _m = build_junction_xml(1.0)
+    jroads = jroot.findall("road")
+    ids = {r.get("id") for r in jroads}
+    jids = {j.get("id") for j in jroot.findall("junction")}
+    assert len(jroads) == len(jstreets) + len(jconns) == 56, len(jroads)
+
+    for r in jroads:
+        lk = r.find("link")
+        assert lk is not None and len(lk), "road {} has no <link>".format(r.get("id"))
+        for e in lk:
+            et, eid = e.get("elementType"), e.get("elementId")
+            if et == "road":
+                assert eid in ids, "road {} links to missing road {}".format(r.get("id"), eid)
+            elif et == "junction":
+                assert eid in jids, "road {} links to missing junction {}".format(r.get("id"), eid)
+            else:
+                raise AssertionError("unknown elementType " + str(et))
+        # a connecting road links to ROADS; a street links to JUNCTIONS
+        want = "road" if r.get("junction") != "-1" else "junction"
+        for e in lk:
+            assert e.get("elementType") == want, (
+                "road {} (junction={}) has a {} link, expected {}".format(
+                    r.get("id"), r.get("junction"), e.get("elementType"), want))
+
+    for con in jroot.findall("junction/connection"):
+        assert con.get("incomingRoad") in ids, con.get("incomingRoad")
+        assert con.get("connectingRoad") in ids, con.get("connectingRoad")
+        ll = con.find("laneLink")
+        assert ll is not None and ll.get("to") == "-1", ET.tostring(con)
+        assert ll.get("from") in ("-1", "1"), ll.get("from")
+    # both approach directions must actually occur -- hardcoding from="-1"
+    # mislabels every street whose START touches the junction
+    froms = {ll.get("from") for ll in jroot.findall("junction/connection/laneLink")}
+    assert froms == {"-1", "1"}, froms
+
     print("export_xodr self_check: PASS")
 
 
@@ -387,6 +470,198 @@ def write_probe(out_dir: Path):
     return written
 
 
+DIRS = {"N": (0.0, 1.0), "S": (0.0, -1.0), "E": (1.0, 0.0), "W": (-1.0, 0.0)}
+
+
+def _right_of(u):
+    """Unit vector 90 degrees clockwise from u -- the right-hand side of travel."""
+    return (u[1], -u[0])
+
+
+def junction_layout(scale=1.0, turn_r=None):
+    """The 3x3 grid as street segments + junctions + connecting roads.
+
+    THE JUNCTION RADIUS IS THE KERB RETURN RADIUS, and it is the whole design
+    lever here. A turn confined to the bare intersection box (half-width
+    road/2 = 250 mm) would have radius road/2 - lane/2 = 125 mm, needing 56.1
+    degrees of steer at the measured 185.95 mm wheelbase -- far past the 38.7
+    degree servo-achievable estimate (steering.md / Appendix DN). The car could
+    not make a right turn.
+
+    With a kerb return radius Rt the arcs become Rt -/+ lane/2:
+
+        Rt      right    left    street segment   drivable (R_min 232.4 mm)
+        250mm   125mm    375mm      600mm         left only
+        375mm   250mm    500mm      350mm         both
+        500mm   375mm    625mm      100mm         both
+        625mm   500mm    750mm     -150mm         junctions would overlap
+
+    Default Rt = the figure-8's own R (500 mm), which is not a coincidence:
+    it yields 100 mm street segments, exactly the "straight between corners"
+    track_layout_v2 already reports. The route's sweeping corners ARE the
+    junction turns.
+
+    Returns (streets, junctions, connectors, meta) where each road is
+    (name, geoms) and connectors carry their junction id and lane links.
+    """
+    tl = _load("track_layout_v2.py")
+    g = tl.build()
+    Rt = (g["R"] if turn_r is None else turn_r) * scale
+    o = g["lane"] / 2.0 * scale
+    coords = [c * scale for c in g["street_coords"]]
+    pitch = g["pitch"] * scale
+
+    if pitch - 2 * Rt <= 0:
+        raise SystemExit(
+            "junction radius {:.3f} m leaves no street between junctions at "
+            "pitch {:.3f} m -- adjacent junctions would overlap".format(Rt, pitch))
+
+    # ---- which arms each junction actually has -----------------------------
+    # A junction has an arm in a direction only if a street continues there.
+    arms = {}
+    for cx in coords:
+        for cy in coords:
+            a = []
+            if cy < max(coords) - 1e-9: a.append("N")
+            if cy > min(coords) + 1e-9: a.append("S")
+            if cx < max(coords) - 1e-9: a.append("E")
+            if cx > min(coords) + 1e-9: a.append("W")
+            arms[(cx, cy)] = a
+
+    # ---- street segments between consecutive junctions ---------------------
+    # Each carries an id and remembers which (junction, arm) each end touches,
+    # so the connecting roads below can be linked without guessing.
+    streets = []
+    for c in coords:                                   # N-S streets at x = c
+        for a, b in zip(coords, coords[1:]):
+            streets.append(dict(
+                name="street x={:+.3f} y={:+.3f}..{:+.3f}".format(c, a, b),
+                geoms=[(c, a + Rt, math.pi / 2, pitch - 2 * Rt, 0.0)],
+                start=((c, a), "N"), end=((c, b), "S")))
+    for c in coords:                                   # E-W streets at y = c
+        for a, b in zip(coords, coords[1:]):
+            streets.append(dict(
+                name="street y={:+.3f} x={:+.3f}..{:+.3f}".format(c, a, b),
+                geoms=[(a + Rt, c, 0.0, pitch - 2 * Rt, 0.0)],
+                start=((a, c), "E"), end=((b, c), "W")))
+
+    end_road = {}                                      # (junction, arm) -> (idx, contact)
+    for i, s in enumerate(streets):
+        end_road[s["start"]] = (i, "start")
+        end_road[s["end"]] = (i, "end")
+
+    # ---- connecting roads: every legal movement at every junction ----------
+    connectors = []
+    junctions = []
+    for jid, (C, a_list) in enumerate(sorted(arms.items())):
+        conns = []
+        for arm_in in a_list:
+            for arm_out in a_list:
+                if arm_in == arm_out:
+                    continue                            # no U-turns
+                u = tuple(-v for v in DIRS[arm_in])     # travel direction in
+                v = DIRS[arm_out]                       # travel direction out
+                ru, rv = _right_of(u), _right_of(v)
+                p_in = (C[0] + DIRS[arm_in][0] * Rt + ru[0] * o,
+                        C[1] + DIRS[arm_in][1] * Rt + ru[1] * o)
+                cross = u[0] * v[1] - u[1] * v[0]
+                if abs(cross) < 1e-9:                   # straight through
+                    geoms = [(p_in[0], p_in[1], math.atan2(u[1], u[0]),
+                              2 * Rt, 0.0)]
+                    r_arc = None
+                else:
+                    left = cross > 0
+                    r_arc = Rt + o if left else Rt - o
+                    geoms = [(p_in[0], p_in[1], math.atan2(u[1], u[0]),
+                              r_arc * math.pi / 2,
+                              (1.0 if left else -1.0) / r_arc)]
+                cid = len(connectors)
+                connectors.append(dict(
+                    name="j{} {}->{}".format(jid, arm_in, arm_out),
+                    geoms=geoms, junction=jid, r_arc=r_arc,
+                    incoming=end_road.get((C, arm_in)),
+                    outgoing=end_road.get((C, arm_out))))
+                conns.append(cid)
+        junctions.append(dict(id=jid, centre=C, arms=a_list, connections=conns))
+
+    meta = dict(Rt=Rt, o=o, pitch=pitch, seg=pitch - 2 * Rt,
+                r_right=Rt - o, r_left=Rt + o, g=g)
+    return streets, junctions, connectors, meta
+
+
+def _set_link(road, pred=None, succ=None):
+    """Insert a <link> as the FIRST child of <road> (OpenDRIVE child order).
+
+    Each of pred/succ is (elementType, elementId, contactPoint) or None.
+    Roads without links are what crashed LaneMaker on 2026-09-07: it walks
+    road -> junction -> connecting road and dereferences links that are not
+    there (ACCESS_VIOLATION inside its own code, not the runtime's abort path).
+    Every road in its SampleMaps carries one.
+    """
+    link = ET.Element("link")
+    for tag, spec in (("predecessor", pred), ("successor", succ)):
+        if spec is None:
+            continue
+        et, eid, cp = spec
+        ET.SubElement(link, tag, elementType=et, elementId=str(eid),
+                      contactPoint=cp)
+    if len(link):
+        road.insert(0, link)
+
+
+def build_junction_xml(scale=1.0, turn_r=None):
+    streets, junctions, connectors, meta = junction_layout(scale, turn_r)
+    root = _new_root("Autonomous Car Project 3x3 grid with junctions")
+    jid_of = {tuple(j["centre"]): j["id"] for j in junctions}
+
+    street_els = []
+    for i, s in enumerate(streets):
+        r = _add_road(root, i, s["name"], s["geoms"], scale)
+        # a street runs between two junctions; each end declares which.
+        _set_link(r,
+                  pred=("junction", jid_of[s["start"][0]], ""),
+                  succ=("junction", jid_of[s["end"][0]], ""))
+        street_els.append(r)
+
+    base = len(streets)
+    for k, c in enumerate(connectors):
+        r = _add_road(root, base + k, c["name"], c["geoms"], scale)
+        r.set("junction", str(c["junction"]))
+        # a connecting road links to ROADS, not junctions, and names the end
+        # of each street it meets.
+        pred = succ = None
+        if c["incoming"] is not None:
+            idx, contact = c["incoming"]
+            pred = ("road", idx, contact)
+        if c["outgoing"] is not None:
+            idx, contact = c["outgoing"]
+            succ = ("road", idx, contact)
+        _set_link(r, pred=pred, succ=succ)
+
+    for j in junctions:
+        jel = ET.SubElement(root, "junction", id=str(j["id"]),
+                            name="junction {:+.3f},{:+.3f}".format(*j["centre"]))
+        n = 0
+        for cid in j["connections"]:
+            c = connectors[cid]
+            if c["incoming"] is None:
+                continue
+            inc, contact = c["incoming"]
+            con = ET.SubElement(jel, "connection", id=str(n),
+                                incomingRoad=str(inc),
+                                connectingRoad=str(base + cid),
+                                contactPoint="start")
+            # WHICH LANE ARRIVES depends on which END of the street touches
+            # this junction. Lane -1 runs in +s, so a car reaching the road's
+            # END is in -1; one reaching its START came the other way and is
+            # in +1. Hardcoding -1 (as the first cut did) mislabels half the
+            # approaches. The sample does the same thing -- its first
+            # connection is laneLink from="2".
+            frm = "-1" if contact == "end" else "1"
+            ET.SubElement(con, "laneLink", **{"from": frm, "to": "-1"})
+            n += 1
+    return root, streets, junctions, connectors, meta
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model-scale", action="store_true",
@@ -394,6 +669,8 @@ def main() -> int:
     ap.add_argument("--out", default=None)
     ap.add_argument("--probe", action="store_true",
                     help="write the LaneMaker bisection ladder")
+    ap.add_argument("--junctions", action="store_true",
+                    help="3x3 grid WITH junction records and turn arcs")
     ap.add_argument("--grid", action="store_true",
                     help="write the 3x3 street grid instead of the route")
     ap.add_argument("--self-check", action="store_true")
@@ -402,6 +679,48 @@ def main() -> int:
         self_check()
         return 0
     self_check()
+
+    if args.junctions:
+        ms = _load("marking_specs.py")
+        scale = 1.0 if args.model_scale else ms.scale()
+        root, streets, junctions, connectors, m = build_junction_xml(scale)
+        out = Path(args.out) if args.out else Path(__file__).with_name(
+            "track_grid3x3_junctions_model.xodr" if args.model_scale
+            else "track_grid3x3_junctions.xodr")
+        ET.indent(root, space="  ")
+        out.write_text(XML_DECL + ET.tostring(root, encoding="unicode"),
+                       encoding="utf-8")
+        from collections import Counter
+        arm_hist = Counter(len(j["arms"]) for j in junctions)
+        print("=" * 74)
+        print("OPENDRIVE EXPORT -- 3x3 GRID WITH PROPER JUNCTIONS")
+        print("=" * 74)
+        print("scale           " + ("FULL, x{:.4f}".format(scale) if scale != 1.0
+                                    else "MODEL, 1:1"))
+        print("street segments {:d}  ({:.3f} m each)".format(len(streets), m["seg"]))
+        print("junctions       {:d}  arms: {:d}x4-way, {:d}x3-way, {:d}x2-way".format(
+            len(junctions), arm_hist[4], arm_hist[3], arm_hist[2]))
+        print("connecting rds  {:d}  (every legal movement, no U-turns)".format(
+            len(connectors)))
+        print()
+        print("TURN GEOMETRY -- the junction radius IS the kerb return radius")
+        print("  junction Rt   {:8.3f} m   (= the figure-8's own corner radius)".format(m["Rt"]))
+        print("  right turns   {:8.3f} m   arc {:.3f} m".format(
+            m["r_right"], m["r_right"] * math.pi / 2))
+        print("  left turns    {:8.3f} m   arc {:.3f} m".format(
+            m["r_left"], m["r_left"] * math.pi / 2))
+        print("  car R_min est {:8.3f} m   servo-achievable (Appendix DN)".format(
+            0.2324 * scale))
+        print()
+        print("Confining turns to the bare {:.3f} m box instead would force".format(
+            m["g"]["road"] * scale))
+        print("R = {:.3f} m for a right turn -- 56.1 deg of lock, past the".format(
+            (m["g"]["road"] / 2 - m["g"]["lane"] / 2) * scale))
+        print("38.7 deg the servo can reach. The kerb radius is what makes the")
+        print("grid drivable at all.")
+        print()
+        print("-> {}".format(out))
+        return 0
 
     if args.grid:
         ms = _load("marking_specs.py")

@@ -169,6 +169,7 @@ the dated entry, not the digest.
 - [EB — LaneMaker DOES import xodr and named its own blocker: a roadRunnerProfile vendor block, schema decoded from the binary and samples](#appendix-eb---lanemaker-does-import-xodr-and-named-its-own-blocker-a-roadrunnerprofile-vendor-block-schema-decoded-from-the-binary-and-samples-2026-09-06-2217-cdt) (09-06)
 - [EC — Bisection ladder: all 4 probes load, so self-link AND self-intersection are both harmless; the crashing file is byte-identical to a working one](#appendix-ec---bisection-ladder-all-4-probes-load-so-self-link-and-self-intersection-are-both-harmless-the-crashing-file-is-byte-identical-to-a-working-one-2026-09-06-2311-cdt) (09-06)
 - [ED — 3x3 grid exported as OpenDRIVE (6 roads, no junctions); _add_road extracted from two near-duplicates, proven byte-identical](#appendix-ed---3x3-grid-exported-as-opendrive-6-roads-no-junctions-_add_road-extracted-from-two-near-duplicates-proven-byte-identical-2026-09-07-0008-cdt) (09-07)
+- [EE — Proper junctions: the kerb return radius reconciles the figure-8 with the grid; first cut crashed LaneMaker because 0 of 56 roads had a link](#appendix-ee---proper-junctions-the-kerb-return-radius-reconciles-the-figure-8-with-the-grid-first-cut-crashed-lanemaker-because-0-of-56-roads-had-a-link-2026-09-07-0025-cdt) (09-07)
 
 ---
 
@@ -13868,3 +13869,112 @@ inside a heredoc'd Python script, do not type a backslash at all. If a newline
 is needed in output, call `print()` with no argument, or build the string with
 `chr(10)`. If an escape is genuinely required, use the Edit tool instead of the
 heredoc.
+
+# Appendix EE - Proper junctions: the kerb return radius reconciles the figure-8 with the grid; first cut crashed LaneMaker because 0 of 56 roads had a link (2026-09-07, ~00:25 CDT)
+Evan: "do the curves too and proper intersections". Built, crashed LaneMaker,
+diagnosed, fixed — all in one sitting. The crash was my defect and the
+diagnosis is the useful part.
+
+## THE KERB RETURN RADIUS IS THE DESIGN LEVER, and it reconciles two models
+
+A turn confined to the bare intersection box (half-width `road/2` = 250 mm) has
+radius `road/2 - lane/2` = **125 mm**, needing **56.1 degrees of steering lock**
+at the measured 185.95 mm wheelbase. The servo-achievable estimate is 38.7
+degrees (R_min 232.4 mm, Appendix DN). **The car could not make a right turn.**
+
+Give the junction a kerb return radius Rt and the arcs become `Rt -/+ lane/2`:
+
+| Rt | right | left | street segment | drivable vs R_min 232.4 mm |
+|---|---|---|---|---|
+| 250 mm | 125 | 375 | 600 mm | left only |
+| 375 mm | 250 | 500 | 350 mm | both |
+| **500 mm** | **375** | **625** | **100 mm** | **both** |
+| 625 mm | 500 | 750 | -150 mm | junctions would overlap |
+
+At Rt = 500 mm the street segments come out at **100 mm — exactly the "straight
+between corners" `track_layout_v2` already reports.** That is not a
+coincidence: **the figure-8's R=500 sweeping corners ARE the junction turns.**
+The route model and the junction model were always describing the same
+geometry from two directions. A self-check now asserts every turn radius is at
+least the servo estimate, so a radius change that makes the grid undrivable
+fails loudly.
+
+## A hypothesis I had, and the measurement that killed it
+
+I suspected the R=500 route left the roadway on its corners, since an arc
+tangent 500 mm from the vertex starts well outside a 250 mm box. Measured over
+all 780 route points: **max offset 139.4 mm against a 250 mm half-width, 0
+points off the roadway, 110.6 mm to spare.** My hand-check only considered the
+approaching street; near a corner the path is covered by the CROSSING street's
+pavement, and the min-distance-to-any-centreline metric sees that.
+
+## `export_xodr.py --junctions`
+
+    street segments 12  (1.463 m each at full scale)
+    junctions       9   arms: 1x4-way, 4x3-way, 4x2-way
+    connecting rds  44  (every legal movement, no U-turns)
+    geometry        24 line, 32 arc
+
+Arm counts fall out of the grid: corner junctions have 2 arms, edge junctions
+3, the centre 4, giving 2 + 6 + 12 connections respectively = 44.
+
+⚠️ **The grid is 91% junction and 9% street** — 1000 mm of junction diameter in
+every 1100 mm of pitch. That follows directly from Rt=500 against pitch 1100.
+Honest, but it means these "streets" are 100 mm stubs between large turning
+areas, not a street grid in the ordinary sense.
+
+## THE CRASH: a junction graph with no edges
+
+Evan opened it; LaneMaker died. **A different crash from the earlier two** —
+the dump says `0xC0000005 ACCESS_VIOLATION at 0x7FF7E8D430FB`, and that address
+is in the EXE's own range, where the two crashes of Appendix EB/EC were
+`0xC0000409 FAST_FAIL` at `0x7FF888...`, a system DLL. Not a thrown exception
+this time: a bad pointer dereference inside LaneMaker's own code.
+
+Cause, confirmed against the samples: **0 of my 56 roads had a `<link>`
+element.** Every road in `traffic_test.xodr` has one. I generated the
+`<junction>` blocks and the connecting roads, and the junctions pointed at the
+roads — but **no road pointed back**. LaneMaker walks road -> junction ->
+connecting road and dereferenced links that were not there.
+
+The correct structure, read off the sample:
+
+- a CONNECTING road links to **roads**:
+  `<predecessor elementType="road" elementId="2" contactPoint="start"/>`
+- a STREET road links to **junctions**:
+  `<predecessor elementType="junction" elementId="0" contactPoint=""/>`
+
+Fixed: `_set_link()` inserts `<link>` as the first child of `<road>` (OpenDRIVE
+child order). Now 88 road-links (44 connectors x 2) + 24 junction-links
+(12 streets x 2) = every road wired.
+
+## A second defect the same fix exposed
+
+I had hardcoded `laneLink from="-1"`. The sample's first connection is
+`laneLink from="2"`. **Which lane arrives depends on which END of the street
+touches the junction:** lane -1 runs in +s, so a car reaching a road's END is
+in -1, while one reaching its START came the other way and is in +1.
+Hardcoding -1 mislabels half the approaches. After the fix the distribution is
+**22 `from="-1"` and 22 `from="1"`** — exactly half, as the geometry demands.
+
+## The check that was missing, and now exists
+
+Every geometry check passed on a file with no graph edges at all. **Geometry
+checks cannot see a missing link.** New self-check 8d verifies TOPOLOGY: every
+road has a non-empty `<link>`; every link target exists; connecting roads link
+to roads and streets link to junctions (not the reverse); every
+`incomingRoad`/`connectingRoad` in a `<connection>` resolves; and both approach
+directions actually occur in the laneLinks.
+
+Proven to fire, by stripping the links back out:
+
+    FIRES -> road 0 has no <link>
+
+Regression: every previously committed `.xodr` is unchanged.
+
+## Honest status
+
+**Whether the fixed file loads is untested** — I cannot drive the GUI. The
+crash is diagnosed and the structural defect is real and fixed, but "fixed"
+here means "matches the sample's structure and passes a topology check", not
+"observed to open".
