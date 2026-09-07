@@ -172,6 +172,7 @@ the dated entry, not the digest.
 - [EE — Proper junctions: the kerb return radius reconciles the figure-8 with the grid; first cut crashed LaneMaker because 0 of 56 roads had a link](#appendix-ee---proper-junctions-the-kerb-return-radius-reconciles-the-figure-8-with-the-grid-first-cut-crashed-lanemaker-because-0-of-56-roads-had-a-link-2026-09-07-0025-cdt) (09-07)
 - [EF — Evan's own LaneMaker export is ground truth: connecting roads must be ONE-WAY; that fix makes the file load; junction boundary and U-turns still missing](#appendix-ef---evans-own-lanemaker-export-is-ground-truth-connecting-roads-must-be-one-way-that-fix-makes-the-file-load-junction-boundary-and-u-turns-still-missing-2026-09-07-0033-cdt) (09-07)
 - [EG — Simulation works on LaneMaker's own file, so the fault is ours; U-turns added (68 connections); the junction boundary trim cannot be derived and is left unbuilt](#appendix-eg---simulation-works-on-lanemakers-own-file-so-the-fault-is-ours-u-turns-added-68-connections-the-junction-boundary-trim-cannot-be-derived-and-is-left-unbuilt-2026-09-07-0045-cdt) (09-07)
+- [EH — NEGATIVE: U-turns did not fix the simulation crash (identical fault address); four hypotheses, four wrong, and every correct finding came from evidence](#appendix-eh---negative-u-turns-did-not-fix-the-simulation-crash-identical-fault-address-four-hypotheses-four-wrong-and-every-correct-finding-came-from-evidence-2026-09-07-0050-cdt) (09-07)
 
 ---
 
@@ -14143,3 +14144,72 @@ deviating from MUTCD at all), the cornering clearance (29.6 mm/side against the
 
 The boundary remains buildable if Evan wants it later; the structure above is
 the head start.
+
+# Appendix EH - NEGATIVE: U-turns did not fix the simulation crash (identical fault address); four hypotheses, four wrong, and every correct finding came from evidence (2026-09-07, ~00:50 CDT)
+**NEGATIVE RESULT: adding U-turns did NOT fix the simulation crash.** Appendix
+EG shipped 80 roads and 68 connections matching LaneMaker's `k` arms -> `k*k`
+convention exactly. Evan tested it; the crash is unchanged.
+
+## The evidence that it is unchanged, not merely similar
+
+    LaneMaker.exe.3860.dmp   09-07 00:31:40  0xC0000409 FAST_FAIL p=7 @0x7FF888D4527E
+    LaneMaker.exe.48748.dmp  09-07 00:49:02  0xC0000409 FAST_FAIL p=7 @0x7FF888D4527E
+
+Byte-identical exception code, parameter and fault address across the
+pre-U-turn and post-U-turn runs. `FAST_FAIL` parameter 7 is
+`FATAL_APP_EXIT` — the MSVC `std::terminate`/abort path, i.e. an unhandled C++
+exception. Same throw, same code path. The U-turn change moved nothing.
+
+## FOUR HYPOTHESES, FOUR WRONG
+
+For the record, because the pattern matters more than any one of them:
+
+| # | hypothesis | how it died |
+|---|---|---|
+| 1 | the road self-link (`predecessor`/`successor` -> own id) crashes it | probe 4 loads (EC) |
+| 2 | the self-intersecting road with no junction crashes it | probe 3 loads (EC) |
+| 3 | a median lane is required | probes 1-4 load without one (EF) |
+| 4 | U-turn connections are required | this entry — crash unchanged |
+
+One hypothesis was RIGHT and it came from the reference file, not from
+reasoning: connecting roads must be one-way (EF), which fixed loading.
+
+**The lesson is about method, not about OpenDRIVE.** Every correct finding in
+this thread came from evidence — a crash dump, a structural diff against
+`1122.xodr`, a measurement. Every wrong one came from me reasoning about what a
+tool "probably" needs. Four for four.
+
+## What remains, and why it is not being attempted
+
+`<junction><boundary>` is now the ONLY structural difference left between our
+file and `1122.xodr`: ours has 0 of 9, the reference 5 of 5. Everything else
+matches attribute by attribute.
+
+⚠️ **That does not make it the cause.** It is the last thing I can SEE
+differing; the fault could equally be a value inside an element we both have,
+or something the structural diff does not surface at all. Calling it "the
+cause" would be the fifth hypothesis.
+
+And the trim still cannot be derived — junction 0's lane segments run
+s = 0.948..21.814 on a 22.763 m connector, symmetrically trimmed by 0.949 m,
+with nothing in the file explaining 0.949. Building it means inferring the
+trim, `side`, and the segment ordering, on a hypothesis that four precedents
+say is likely wrong.
+
+## STANDING RECOMMENDATION, unchanged and now better supported
+
+**Bank the exporter as "loads and renders correctly in LaneMaker; simulation
+unsupported."** That is a real, honest, useful result: the figure-8 geometry
+that 3DStreet structurally could not represent (Appendix DZ) round-trips into a
+real road-network tool and draws correctly.
+
+This is not on the critical path. `cad/track_layout_v2.py` and
+`cad/marking_layout.py` define the physical track and are complete and
+self-checked. Three actual decisions remain untouched: dash density (18.7
+cycles/lap against the 40 that justified the MUTCD deviation), cornering
+clearance (29.6 mm/side against the 50 mm EST), and THE ORDER ($411.45, all six
+BOM Verify items closed since 2026-09-05).
+
+If the boundary is attempted later, the structure in Appendix EG is the head
+start — and it should be attempted as ONE timeboxed experiment with the
+expectation that it may not be the cause, not as a fix.

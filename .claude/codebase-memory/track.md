@@ -190,6 +190,18 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   - **STATUS: everything LOADS and RENDERS; simulation unsupported.**
     NOT on the critical path — the physical track is
     `track_layout_v2.py` + `marking_layout.py`. Recommend banking it.
+  - ❌ **U-TURNS DID NOT FIX SIMULATION (2026-09-07, Appendix EH).** Crash
+    unchanged: `0xC0000409 FAST_FAIL p=7 @0x7FF888D4527E` — byte-identical
+    exception code, parameter AND fault address before and after. Same throw.
+  - ⚠️ **FOUR HYPOTHESES, FOUR WRONG:** self-link (killed by probe 4),
+    self-intersection (probe 3), median required (probes 1-4), U-turns
+    required (EH). The ONE correct finding — connecting roads must be
+    one-way — came from diffing the reference file, not from reasoning.
+    **Method rule: on this tool, only evidence has ever been right.**
+  - `<junction><boundary>` is the only structural difference LEFT, but that
+    does **not** make it the cause — it is the last thing VISIBLE in a
+    structural diff. Treat building it as one timeboxed EXPERIMENT that may
+    not be the fix, never as "the fix".
   - The reference's geometry is **21 line, 21 spiral, 18 arc, 6
     paramPoly3** — spirals are clothoid transitions, which
     `export_xodr.py` does not model at all.

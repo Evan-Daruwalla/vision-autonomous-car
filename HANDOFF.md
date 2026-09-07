@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-07 ~00:45 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-07 ~00:50 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 137 appendices A–EG; BM/BN/BP/BU/CT/CY/DB/DE/DN are corrections to earlier entries). When this file and the record disagree about
+(append-only, 138 appendices A–EH; BM/BN/BP/BU/CT/CY/DB/DE/DN are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -114,6 +114,20 @@ would also be inferred, and three of my inferences in that thread were wrong.
 **This is NOT on the critical path** — the physical track is defined by
 `cad/track_layout_v2.py` and `cad/marking_layout.py`, both complete and
 self-checked. Bank it as "loads and renders; simulation unsupported."
+
+**LaneMaker simulation — CLOSED AS A NEGATIVE (2026-09-07, Appendix EH):**
+
+Adding U-turns did NOT fix it. The crash is byte-identical before and after
+(`0xC0000409 FAST_FAIL p=7 @0x7FF888D4527E`). That is **four hypotheses, four
+wrong** — self-link, self-intersection, median, U-turns. The one correct
+finding in the whole thread (connecting roads must be one-way, Appendix EF)
+came from diffing Evan's own `~/Downloads/1122.xodr`, not from reasoning.
+`<junction><boundary>` is the only structural difference left, but that makes
+it the last VISIBLE difference, not the known cause — and its 0.949 m trim is
+still underivable. **Standing recommendation: bank the exporter as "loads and
+renders correctly; simulation unsupported" and spend the time on rows 1-5
+above instead.** If the boundary is tried later, treat it as ONE timeboxed
+experiment that may not be the fix.
 
 **Blocked on the order:**
 
