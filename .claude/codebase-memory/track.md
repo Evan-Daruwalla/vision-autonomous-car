@@ -150,6 +150,32 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
     junction turns.** A self-check asserts every radius >= 232.4 mm.
   - ⚠️ **The grid is 91% junction, 9% street** (1000 mm of junction in
     every 1100 mm pitch) — a direct consequence of Rt=500 vs pitch 1100.
+  - ✅ **GROUND TRUTH EXISTS: `~/Downloads/1122.xodr`**, a 3x3 grid Evan
+    exported FROM LaneMaker (2026-09-07, Appendix EF). Diff against it
+    instead of inferring from the SampleMaps.
+  - ⚠️ **CONNECTING ROADS MUST BE ONE-WAY.** All 47 of LaneMaker's have
+    `<right>` lane -1 + `<center>` lane 0, **NO `<left>` element**,
+    `laneOffset = +lane/2`, a **LANE-level `<link>`** inside the lane, and a
+    profile with only `<right>`. Mine were two-way — that was the
+    ACCESS_VIOLATION. Fixed via `_add_oneway_road()`; **the file now LOADS**
+    and connections appear. Pinned by self-check 8e.
+  - ❌ ~~a median lane may be required~~ **NO** — probes 1-4 load with a
+    1+1 no-median layout. LaneMaker writes a median; it does not demand one.
+  - ✅ **`offsetX2 = 0` IS correct for our roads** — it is
+    `laneOffset/laneWidth*2`, and ours have `laneOffset = 0`. The
+    reference's +/-1 come from ITS reference lines sitting half a lane off
+    centre. Do not "fix" this.
+  - ⚠️ **STILL BROKEN: connections render only on HOVER, and starting the
+    SIMULATION crashes** (`0xC0000409 FAST_FAIL p=7`, an unhandled C++
+    exception — a DIFFERENT fault from the load crash, which is fixed).
+    Prime suspect: **`<junction><boundary>`, which mine lacks entirely**
+    (0 of 9; reference has 5 of 5). Format: **2 segments per ARM**,
+    alternating `type="lane"` (a stretch along a CONNECTING road's outer
+    edge) with ZERO-LENGTH `type="joint"` on the incoming street.
+    Second gap: **LaneMaker INCLUDES U-turns** (its 4-arm junction has
+    16 = 4x4 connections); mine excludes them.
+  - **BEFORE building a boundary tracer, test whether simulation crashes on
+    1122.xodr ITSELF.** One click decides whether the fault is ours.
   - ⚠️ **EVERY OpenDRIVE ROAD NEEDS A `<link>`.** The first junction cut
     had 0 of 56 and crashed LaneMaker with `0xC0000005 ACCESS_VIOLATION` at
     an address in the EXE's OWN range (the EB/EC crashes were 0xC0000409 in

@@ -170,6 +170,7 @@ the dated entry, not the digest.
 - [EC — Bisection ladder: all 4 probes load, so self-link AND self-intersection are both harmless; the crashing file is byte-identical to a working one](#appendix-ec---bisection-ladder-all-4-probes-load-so-self-link-and-self-intersection-are-both-harmless-the-crashing-file-is-byte-identical-to-a-working-one-2026-09-06-2311-cdt) (09-06)
 - [ED — 3x3 grid exported as OpenDRIVE (6 roads, no junctions); _add_road extracted from two near-duplicates, proven byte-identical](#appendix-ed---3x3-grid-exported-as-opendrive-6-roads-no-junctions-_add_road-extracted-from-two-near-duplicates-proven-byte-identical-2026-09-07-0008-cdt) (09-07)
 - [EE — Proper junctions: the kerb return radius reconciles the figure-8 with the grid; first cut crashed LaneMaker because 0 of 56 roads had a link](#appendix-ee---proper-junctions-the-kerb-return-radius-reconciles-the-figure-8-with-the-grid-first-cut-crashed-lanemaker-because-0-of-56-roads-had-a-link-2026-09-07-0025-cdt) (09-07)
+- [EF — Evan's own LaneMaker export is ground truth: connecting roads must be ONE-WAY; that fix makes the file load; junction boundary and U-turns still missing](#appendix-ef---evans-own-lanemaker-export-is-ground-truth-connecting-roads-must-be-one-way-that-fix-makes-the-file-load-junction-boundary-and-u-turns-still-missing-2026-09-07-0033-cdt) (09-07)
 
 ---
 
@@ -13978,3 +13979,103 @@ Regression: every previously committed `.xodr` is unchanged.
 crash is diagnosed and the structural defect is real and fixed, but "fixed"
 here means "matches the sample's structure and passes a topology check", not
 "observed to open".
+
+# Appendix EF - Evan's own LaneMaker export is ground truth: connecting roads must be ONE-WAY; that fix makes the file load; junction boundary and U-turns still missing (2026-09-07, ~00:33 CDT)
+Evan exported a 3x3 grid from LaneMaker itself
+(`~/Downloads/1122.xodr`) — the ground-truth reference I had asked for two
+appendices earlier. It found a real defect, the fix made the file LOAD, and it
+left two differences still open.
+
+## THE FILE NOW LOADS. The defect was two-way connecting roads.
+
+Appendix EE's junction export crashed with `0xC0000005 ACCESS_VIOLATION` inside
+LaneMaker's own code. Against the reference, the cause is plain: **my
+connecting roads were TWO-WAY.** A turn movement runs one way. All 47 of
+LaneMaker's connecting roads have exactly one shape:
+
+- `<right>` with lane `-1` and `<center>` with lane `0` — **no `<left>`
+  element at all**
+- `laneOffset a = +lane/2` (its `+1.625`), so the reference line sits on the
+  lane's left edge
+- a **LANE-level `<link>`** inside the lane: `<predecessor id=..>`,
+  `<successor id=..>` — mine had none
+- `roadRunnerProfile` with only `<right>`, `offsetX2="1"`
+
+Fixed via a new `_add_oneway_road()`. Verified attribute by attribute against
+the reference:
+
+| | reference | mine after the fix |
+|---|---|---|
+| connecting roads with a `<left>` group | 0 of 47 | **0 of 44** |
+| with a lane-level `<link>` | 47 of 47 | **44 of 44** |
+| profile containing `<left>` | 0 of 47 | **0 of 44** |
+| `laneOffset a` | +1.625 | **+1.8288** (our lane/2) |
+
+**Evan confirms the file opens and the connections appear.** Self-check 8e now
+pins the one-way invariant.
+
+## TWO CORRECTIONS TO EARLIER APPENDICES
+
+**The median is NOT required (corrects EB's suspicion).** EB flagged that no
+sample road has a 1+1 layout without a median and treated it as a likely
+blocker. Probes 1-4 (Appendix EC) load fine with exactly that layout, so a
+median lane is not needed. LaneMaker writes one; it does not demand one.
+
+**`offsetX2 = 0` was correct all along.** Seeing the reference's `+1`/`-1` I
+started to "fix" mine and stopped when the arithmetic said otherwise:
+`offsetX2 = laneOffset / laneWidth * 2`, and my two-way roads have
+`laneOffset = 0`, so 0 is self-consistent. The reference's roads are +/-1
+because their reference lines sit half a lane off centre. Both are right for
+their own geometry — the EB decode holds.
+
+## WHAT IS STILL BROKEN, and the evidence
+
+Two symptoms remain, both reported by Evan:
+
+1. **Connections only render on hover.**
+2. **Starting the simulation crashes.**
+
+The new dump is `0xC0000409 FAST_FAIL param 7` at `0x7FF888D4527E` — back to
+`std::terminate` on an unhandled C++ exception, the SAME address as the two
+crashes of Appendix EB, and NOT the ACCESS_VIOLATION that the one-way fix
+cleared. So loading is genuinely fixed and the simulator throws on something
+else.
+
+Both symptoms point at the same missing element: **`<junction><boundary>`**,
+which mine lacks entirely (0 of 9; the reference has 5 of 5). Junction graphics
+are presumably generated from it — no boundary, nothing drawn except on
+selection highlight. And the binary carries
+`Overlap zone between roads {} & {} can't be determined. Neither boundary pair
+intersects.`, which reads like the simulator resolving road overlaps FROM
+boundaries.
+
+**The boundary format, decoded from the reference:** two segments per ARM,
+alternating
+
+- `type="lane"` — a stretch along a CONNECTING road's outer edge
+  (`roadID`, `sStart`, `sEnd`, `side`)
+- `type="joint"` — ZERO-LENGTH (`sStart == sEnd`) on an INCOMING street road,
+  where the junction meets it
+
+Counts confirm it: the 4-arm junction has 4 joints + 4 lanes = 8 segments; the
+3-arm junctions 3+3 = 6; the 2-arm junction 2+2 = 4.
+
+**A second difference found the same way: LaneMaker INCLUDES U-turns.** Its
+4-arm junction has 16 connections = 4x4, and its 3-arm ones have 9 = 3x3. Mine
+excludes arm-to-same-arm movements (44 total). Whether the simulator needs them
+is unknown.
+
+## THE NEXT STEP IS A TEST, NOT A GUESS
+
+I have guessed wrong three times in this thread (self-link, self-intersection,
+median). Before building a boundary tracer — real work, and `side` and segment
+ordering are both things I would be inferring — **the decisive question is
+whether simulation crashes on LaneMaker's OWN `1122.xodr`.**
+
+- If it crashes there too, the simulator needs something neither file has, or
+  is simply fragile, and my file is not the cause.
+- If it runs there, the boundary and/or the U-turn connections are mine to
+  build.
+
+One click, and it decides whether an hour of work is warranted. **Open at time
+of writing.**

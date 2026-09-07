@@ -422,6 +422,23 @@ def self_check() -> None:
     froms = {ll.get("from") for ll in jroot.findall("junction/connection/laneLink")}
     assert froms == {"-1", "1"}, froms
 
+    # 8e. CONNECTING ROADS MUST BE ONE-WAY. A turn movement runs one way;
+    #     the first cut made them two-way, which is the leading suspect for
+    #     the ACCESS_VIOLATION of Appendix EE. Shape taken from Evan's own
+    #     LaneMaker export (1122.xodr): no <left> lane group, no <left> in the
+    #     roadRunnerProfile, laneOffset = +lane/2, and a LANE-level <link>.
+    for r in jroot.findall("road"):
+        if r.get("junction") == "-1":
+            continue
+        assert r.find("lanes/laneSection/left") is None, (
+            "connecting road {} is two-way".format(r.get("id")))
+        assert r.find("roadRunnerProfile/left") is None, r.get("id")
+        ln = r.find("lanes/laneSection/right/lane")
+        assert ln is not None and ln.find("link") is not None, (
+            "connecting road {} has no lane-level link".format(r.get("id")))
+        off = float(r.find("lanes/laneOffset").get("a"))
+        assert off > 0, (r.get("id"), off)
+
     print("export_xodr self_check: PASS")
 
 
@@ -589,6 +606,82 @@ def junction_layout(scale=1.0, turn_r=None):
     return streets, junctions, connectors, meta
 
 
+def _add_oneway_road(root, rid, name, geoms, scale, lane_link=None):
+    """A ONE-WAY single-lane road -- the shape LaneMaker itself writes for a
+    connecting road inside a junction.
+
+    Copied from Evan's own LaneMaker export (Downloads/1122.xodr, 2026-09-07),
+    which is ground truth rather than inference. Every one of its 47 connecting
+    roads has exactly this shape:
+
+        <laneOffset a="+lane/2">        reference line on the lane's left edge
+        <right><lane id="-1" driving>   the only travel lane
+          <link><predecessor id=..><successor id=..>   LANE-level links
+        <center><lane id="0">           carries the centreline roadMark
+        (NO <left> element at all)
+        <roadRunnerProfile><right><section type_s="0" laneCount="1"
+                                           offsetX2="1"/></right>
+        (NO <left> element in the profile either)
+
+    My first cut made connecting roads TWO-WAY, which is semantically wrong --
+    a turn movement runs one way -- and is the leading suspect for the
+    ACCESS_VIOLATION of Appendix EE.
+
+    `lane_link` is (predecessor_lane_id, successor_lane_id) or None.
+    """
+    tl = _load("track_layout_v2.py")
+    ms = _load("marking_specs.py")
+    g, t = tl.build(), ms.table()
+    lane_w = g["lane"] * scale
+    mark_w = t["normal_line_mm"][1] / 1000.0 * scale
+    total = sum(gm[3] for gm in geoms)
+
+    road = ET.SubElement(root, "road", name=name, length="{:.10f}".format(total),
+                         id=str(rid), junction="-1")
+    pv = ET.SubElement(road, "planView")
+    s = 0.0
+    for x, y, hdg, length, curv in geoms:
+        gel = ET.SubElement(pv, "geometry", s="{:.10f}".format(s),
+                            x="{:.10f}".format(x), y="{:.10f}".format(y),
+                            hdg="{:.10f}".format(hdg),
+                            length="{:.10f}".format(length))
+        if abs(curv) < 1e-12:
+            ET.SubElement(gel, "line")
+        else:
+            ET.SubElement(gel, "arc", curvature="{:.10f}".format(curv))
+        s += length
+
+    ep = ET.SubElement(road, "elevationProfile")
+    ET.SubElement(ep, "elevation", s="0", a="0", b="0", c="0", d="0")
+
+    lanes = ET.SubElement(road, "lanes")
+    # reference line sits on the LEFT edge of the single lane, as LaneMaker does
+    ET.SubElement(lanes, "laneOffset", s="0", a="{:.10f}".format(lane_w / 2.0),
+                  b="0", c="0", d="0")
+    sec = ET.SubElement(lanes, "laneSection", s="0")
+    grp = ET.SubElement(sec, "right")
+    ln = ET.SubElement(grp, "lane", id="-1", type=LANE_TYPE, level="false")
+    if lane_link is not None:
+        lk = ET.SubElement(ln, "link")
+        ET.SubElement(lk, "predecessor", id=str(lane_link[0]))
+        ET.SubElement(lk, "successor", id=str(lane_link[1]))
+    ET.SubElement(ln, "width", sOffset="0", a="{:.10f}".format(lane_w),
+                  b="0", c="0", d="0")
+    ET.SubElement(ln, "roadMark", sOffset="0", type=EDGE_MARK[0],
+                  color=EDGE_MARK[1], laneChange="none", weight="",
+                  width="{:.10f}".format(mark_w))
+    c = ET.SubElement(sec, "center")
+    cl = ET.SubElement(c, "lane", id="0", type="", level="false")
+    ET.SubElement(cl, "roadMark", sOffset="0", type=CENTRE_MARK[0],
+                  color=CENTRE_MARK[1], laneChange="none", weight="",
+                  width="{:.10f}".format(mark_w))
+
+    prof = ET.SubElement(road, "roadRunnerProfile")
+    right = ET.SubElement(prof, "right")
+    ET.SubElement(right, "section", type_s="0", laneCount="1", offsetX2="1")
+    return road
+
+
 def _set_link(road, pred=None, succ=None):
     """Insert a <link> as the FIRST child of <road> (OpenDRIVE child order).
 
@@ -625,7 +718,12 @@ def build_junction_xml(scale=1.0, turn_r=None):
 
     base = len(streets)
     for k, c in enumerate(connectors):
-        r = _add_road(root, base + k, c["name"], c["geoms"], scale)
+        # LANE-LEVEL link ids: on a two-way street lane -1 runs in +s, so a car
+        # reaching the road's END is in -1 and one reaching its START is in +1.
+        pl = "-1" if (c["incoming"] and c["incoming"][1] == "end") else "1"
+        sl = "-1" if (c["outgoing"] and c["outgoing"][1] == "start") else "1"
+        r = _add_oneway_road(root, base + k, c["name"], c["geoms"], scale,
+                             lane_link=(pl, sl))
         r.set("junction", str(c["junction"]))
         # a connecting road links to ROADS, not junctions, and names the end
         # of each street it meets.
