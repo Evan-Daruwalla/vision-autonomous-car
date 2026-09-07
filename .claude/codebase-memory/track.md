@@ -174,8 +174,25 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
     edge) with ZERO-LENGTH `type="joint"` on the incoming street.
     Second gap: **LaneMaker INCLUDES U-turns** (its 4-arm junction has
     16 = 4x4 connections); mine excludes them.
-  - **BEFORE building a boundary tracer, test whether simulation crashes on
-    1122.xodr ITSELF.** One click decides whether the fault is ours.
+  - ✅ **TESTED 2026-09-07 (Appendix EG): simulation WORKS on 1122.xodr.**
+    So the fault is OURS, not the tool's.
+  - **U-turns added:** LaneMaker emits k arms -> k*k movements. Now **80
+    roads, 68 connections** (4x4 + 4x3^2 + 4x2^2). ⚠️ The 24 U-turns are
+    **UNDRIVABLE** (radius = lane/2 = 125 mm, under R_min 232.4) — emitted
+    for format conformance only; check 8b skips them BY DESIGN.
+  - ⚠️ **THE BOUNDARY TRIM CANNOT BE DERIVED, so it is NOT built.**
+    Structure is known (2 segments per arm; `type="lane"` on a connecting
+    road + zero-length `type="joint"` on the incoming street). But
+    junction 0's lane segments run s = 0.948..21.814 on a 22.763 m
+    connector — trimmed 0.949 m at each end, and **nothing in the file
+    explains 0.949** (not the 3.25 lane, not its half). `side` and
+    ordering would also be guessed.
+  - **STATUS: everything LOADS and RENDERS; simulation unsupported.**
+    NOT on the critical path — the physical track is
+    `track_layout_v2.py` + `marking_layout.py`. Recommend banking it.
+  - The reference's geometry is **21 line, 21 spiral, 18 arc, 6
+    paramPoly3** — spirals are clothoid transitions, which
+    `export_xodr.py` does not model at all.
   - ⚠️ **EVERY OpenDRIVE ROAD NEEDS A `<link>`.** The first junction cut
     had 0 of 56 and crashed LaneMaker with `0xC0000005 ACCESS_VIOLATION` at
     an address in the EXE's OWN range (the EB/EC crashes were 0xC0000409 in

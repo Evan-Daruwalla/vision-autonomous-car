@@ -171,6 +171,7 @@ the dated entry, not the digest.
 - [ED — 3x3 grid exported as OpenDRIVE (6 roads, no junctions); _add_road extracted from two near-duplicates, proven byte-identical](#appendix-ed---3x3-grid-exported-as-opendrive-6-roads-no-junctions-_add_road-extracted-from-two-near-duplicates-proven-byte-identical-2026-09-07-0008-cdt) (09-07)
 - [EE — Proper junctions: the kerb return radius reconciles the figure-8 with the grid; first cut crashed LaneMaker because 0 of 56 roads had a link](#appendix-ee---proper-junctions-the-kerb-return-radius-reconciles-the-figure-8-with-the-grid-first-cut-crashed-lanemaker-because-0-of-56-roads-had-a-link-2026-09-07-0025-cdt) (09-07)
 - [EF — Evan's own LaneMaker export is ground truth: connecting roads must be ONE-WAY; that fix makes the file load; junction boundary and U-turns still missing](#appendix-ef---evans-own-lanemaker-export-is-ground-truth-connecting-roads-must-be-one-way-that-fix-makes-the-file-load-junction-boundary-and-u-turns-still-missing-2026-09-07-0033-cdt) (09-07)
+- [EG — Simulation works on LaneMaker's own file, so the fault is ours; U-turns added (68 connections); the junction boundary trim cannot be derived and is left unbuilt](#appendix-eg---simulation-works-on-lanemakers-own-file-so-the-fault-is-ours-u-turns-added-68-connections-the-junction-boundary-trim-cannot-be-derived-and-is-left-unbuilt-2026-09-07-0045-cdt) (09-07)
 
 ---
 
@@ -14079,3 +14080,66 @@ whether simulation crashes on LaneMaker's OWN `1122.xodr`.**
 
 One click, and it decides whether an hour of work is warranted. **Open at time
 of writing.**
+
+# Appendix EG - Simulation works on LaneMaker's own file, so the fault is ours; U-turns added (68 connections); the junction boundary trim cannot be derived and is left unbuilt (2026-09-07, ~00:45 CDT)
+**Evan ran the decisive test: simulation WORKS on LaneMaker's own `1122.xodr`.**
+That rules out the tool and puts the remaining fault squarely on my export —
+which is exactly why the test was worth doing before building anything.
+
+## U-turns added: the cheap, exact half of the gap
+
+LaneMaker emits `k` arms -> `k*k` movements, U-turns included: its 4-arm
+junction has 16 connections, its 3-arm ones 9, its 2-arm one 4. Mine excluded
+arm-to-same-arm and had 44.
+
+Now **80 roads, 68 connections** — 4x4 + 4x(3x3) + 4x(2x2) = 68, matching the
+convention exactly. My own self-check caught the stale constant on the first
+run (`AssertionError: 68` against `== 44`), and a new assert pins the rule
+itself: `sum(len(arms)**2) == 68`.
+
+⚠️ **The 24 U-turns are NOT drivable by this car.** A U-turn swings between two
+lane centres `lane` apart, so its radius is `lane/2` = 125 mm model / 1.829 m
+full — under the 232.4 mm servo-achievable R_min. They are emitted for FORMAT
+CONFORMANCE only, and drivability check 8b now skips them **by design, with the
+reason in-code**, rather than silently passing. The continuity check does NOT
+skip them: all 68 arcs, including the 180-degree ones, land on their outgoing
+lane in position and heading.
+
+## The remaining gap, and the number I cannot derive
+
+`<junction><boundary>` — mine has 0 of 9, the reference 5 of 5.
+
+Structure decoded and confident: **2 segments per ARM**, alternating a
+`type="lane"` stretch along a connecting road's outer edge with a ZERO-LENGTH
+`type="joint"` on the incoming street. Counts confirm across all five of its
+junctions (4 arms -> 4+4=8 segments, 3 arms -> 6, 2 arms -> 4).
+
+**What I cannot derive is the trim.** Junction 0's lane segments run
+`s = 0.948 .. 21.814` on a 22.763 m connector — symmetrically trimmed by
+**0.949 m at each end** — and nothing in the file explains where 0.949 comes
+from. It is not the lane width (3.25), not half of it (1.625). `side` and the
+segment ordering would also be inferred. Three of my inferences in this thread
+have been wrong (self-link, self-intersection, median), so this is flagged as
+guesswork rather than attempted.
+
+Also worth recording from the reference: its geometry is **21 line, 21 spiral,
+18 arc, 6 paramPoly3**. The spirals are clothoid transitions between straight
+and arc — real road alignment, which `export_xodr.py` does not model at all.
+That is why Evan's grid is "not perfectly straight".
+
+## RECOMMENDATION, and the reason for it
+
+**Stop here and bank the exporter as "loads and renders correctly in LaneMaker;
+simulation unsupported."** That is a real, honest result.
+
+This is not on the critical path. The physical track is defined by
+`cad/track_layout_v2.py` and `cad/marking_layout.py`, both complete and
+self-checked. LaneMaker is a visualisation and validation nicety that has now
+consumed a large share of a session, while three actual decisions sit
+untouched: the dash density (18.7 cycles/lap against the 40 that justified
+deviating from MUTCD at all), the cornering clearance (29.6 mm/side against the
+50 mm EST), and THE ORDER ($411.45, all six BOM checks closed since
+2026-09-05).
+
+The boundary remains buildable if Evan wants it later; the structure above is
+the head start.

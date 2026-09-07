@@ -346,9 +346,13 @@ def self_check() -> None:
     streets, junctions, connectors, m = junction_layout(1.0)
     assert len(streets) == 12, len(streets)
     assert len(junctions) == 9, len(junctions)
-    assert len(connectors) == 44, len(connectors)
+    # 68 = 4x4 (centre) + 4 x 3x3 (edges) + 4 x 2x2 (corners), U-turns
+    # included per LaneMaker's convention (Appendix EF).
+    assert len(connectors) == 68, len(connectors)
     from collections import Counter
     assert Counter(len(j["arms"]) for j in junctions) == Counter({2: 4, 3: 4, 4: 1})
+    assert sum(len(j["connections"]) for j in junctions) == 68
+    assert sum(len(j["arms"]) ** 2 for j in junctions) == 68, "k arms -> k*k moves"
 
     for j in junctions:
         C = j["centre"]
@@ -372,7 +376,8 @@ def self_check() -> None:
     #     estimate, so this asserts against it deliberately rather than against
     #     the 116.2 mm bare-linkage figure, which no servo can deliver.
     R_MIN_SERVO_EST = 0.2324
-    radii = {c["r_arc"] for c in connectors if c["r_arc"] is not None}
+    radii = {c["r_arc"] for c in connectors
+             if c["r_arc"] is not None and not c["uturn"]}
     assert radii == {m["r_right"], m["r_left"]}, radii
     for r in sorted(radii):
         assert r >= R_MIN_SERVO_EST, (
@@ -391,7 +396,7 @@ def self_check() -> None:
     jroads = jroot.findall("road")
     ids = {r.get("id") for r in jroads}
     jids = {j.get("id") for j in jroot.findall("junction")}
-    assert len(jroads) == len(jstreets) + len(jconns) == 56, len(jroads)
+    assert len(jroads) == len(jstreets) + len(jconns) == 80, len(jroads)
 
     for r in jroads:
         lk = r.find("link")
@@ -574,15 +579,25 @@ def junction_layout(scale=1.0, turn_r=None):
         conns = []
         for arm_in in a_list:
             for arm_out in a_list:
-                if arm_in == arm_out:
-                    continue                            # no U-turns
+                # U-TURNS ARE INCLUDED, matching LaneMaker's own export
+                # (1122.xodr, Appendix EF): its 4-arm junction has 16 = 4x4
+                # connections and its 3-arm ones 9 = 3x3. Mine excluded
+                # arm-to-same-arm and had 44 where its convention gives 68.
+                # NOTE the U-turn is NOT drivable by this car: it swings
+                # between two lane centres `lane` apart, so its radius is
+                # lane/2 = 125 mm, under the 232.4 mm servo estimate. It is
+                # emitted for FORMAT CONFORMANCE, and check 8b skips it.
                 u = tuple(-v for v in DIRS[arm_in])     # travel direction in
                 v = DIRS[arm_out]                       # travel direction out
                 ru, rv = _right_of(u), _right_of(v)
                 p_in = (C[0] + DIRS[arm_in][0] * Rt + ru[0] * o,
                         C[1] + DIRS[arm_in][1] * Rt + ru[1] * o)
                 cross = u[0] * v[1] - u[1] * v[0]
-                if abs(cross) < 1e-9:                   # straight through
+                if arm_in == arm_out:                   # U-turn: 180 degrees
+                    r_arc = o
+                    geoms = [(p_in[0], p_in[1], math.atan2(u[1], u[0]),
+                              r_arc * math.pi, 1.0 / r_arc)]
+                elif abs(cross) < 1e-9:                 # straight through
                     geoms = [(p_in[0], p_in[1], math.atan2(u[1], u[0]),
                               2 * Rt, 0.0)]
                     r_arc = None
@@ -595,6 +610,7 @@ def junction_layout(scale=1.0, turn_r=None):
                 cid = len(connectors)
                 connectors.append(dict(
                     name="j{} {}->{}".format(jid, arm_in, arm_out),
+                    uturn=(arm_in == arm_out),
                     geoms=geoms, junction=jid, r_arc=r_arc,
                     incoming=end_road.get((C, arm_in)),
                     outgoing=end_road.get((C, arm_out))))
@@ -798,8 +814,12 @@ def main() -> int:
         print("street segments {:d}  ({:.3f} m each)".format(len(streets), m["seg"]))
         print("junctions       {:d}  arms: {:d}x4-way, {:d}x3-way, {:d}x2-way".format(
             len(junctions), arm_hist[4], arm_hist[3], arm_hist[2]))
-        print("connecting rds  {:d}  (every legal movement, no U-turns)".format(
-            len(connectors)))
+        nu = sum(1 for c in connectors if c["uturn"])
+        print("connecting rds  {:d}  (k arms -> k*k movements, U-turns "
+              "INCLUDED per LaneMaker's convention)".format(len(connectors)))
+        print("  of which U-turn {:d}  radius {:.3f} m -- UNDRIVABLE by this car "
+              "(under R_min),".format(nu, m["o"]))
+        print("                     emitted for format conformance only")
         print()
         print("TURN GEOMETRY -- the junction radius IS the kerb return radius")
         print("  junction Rt   {:8.3f} m   (= the figure-8's own corner radius)".format(m["Rt"]))

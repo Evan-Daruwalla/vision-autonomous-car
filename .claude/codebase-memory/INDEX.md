@@ -10,7 +10,7 @@ Core bins:
 - hardware.md — printing + Lego fit, power, motors/drivers, the Uno's pin budget and current limits, the pack, measured vehicle geometry (**SPLIT 2026-09-03**; 313 lines, over the ~150 cap. Includes the charger-vs-BMS category error and cell C-rating traps)
 - firmware-traps.md — Arduino toolchain + firmware logic traps: build, clock handling, status-LED semantics (new 2026-09-03; 80 lines)
 - steering.md — servo choice, measured rack-and-pinion geometry, the coupler that must survive it, calibration (new 2026-09-03; 141 lines)
-- track.md — track layout, markings, surface, what the camera sees of the environment (new 2026-09-02; 54 lines)
+- track.md — track layout, markings, surface, what the camera sees of the environment, **plus the whole 3DStreet / OpenDRIVE / LaneMaker trail** (updated 2026-09-07; **334 lines, WAY over the ~150 cap — split candidate: the xodr/LaneMaker material is ~120 lines and is really a separate bin**)
 - sim-harness.md — the simulator, the eval harness, training-time GPU limits (new 2026-09-02; 131 lines)
 - ml-training.md — GPU memory + world-model training facts MEASURED on this
   3060 Ti: the DreamerV3 fitting table, Sysmem Fallback confirmed ON,
