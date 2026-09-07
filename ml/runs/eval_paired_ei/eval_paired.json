@@ -1,0 +1,395 @@
+{
+  "args": {
+    "track": "donkey-generated-track-v0",
+    "ctrl_dirs": [
+      "cl_base_ei",
+      "cl_aug_ei"
+    ],
+    "arch": "mlp",
+    "launches": 3,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "episodes": 1,
+    "max_steps": 600,
+    "port": 9091,
+    "vae": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\vae\\vae_best.pt",
+    "rnn": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\mdnrnn\\mdnrnn_best.pt",
+    "out": "ml/runs/eval_paired_ei",
+    "device": "cuda"
+  },
+  "per_episode": [
+    {
+      "steps": 600,
+      "mean_abs_cte": 0.31213029399184355,
+      "reversals_per_100": 9.67,
+      "mean_abs_dsteer": 0.15931896986000593,
+      "control_hz": 20.0,
+      "survived": true,
+      "launch": 0,
+      "seed": 0,
+      "episode": 0,
+      "arm": "expert"
+    },
+    {
+      "steps": 129,
+      "mean_abs_cte": 0.6948000096333349,
+      "reversals_per_100": 10.08,
+      "mean_abs_dsteer": 0.07281303469244449,
+      "control_hz": 19.69,
+      "survived": false,
+      "launch": 0,
+      "seed": 0,
+      "episode": 0,
+      "arm": "cl_base_ei"
+    },
+    {
+      "steps": 100,
+      "mean_abs_cte": 0.5548444840312005,
+      "reversals_per_100": 9.0,
+      "mean_abs_dsteer": 0.060530646318438075,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 0,
+      "seed": 0,
+      "episode": 0,
+      "arm": "cl_aug_ei"
+    },
+    {
+      "steps": 600,
+      "mean_abs_cte": 0.35408523251341345,
+      "reversals_per_100": 10.67,
+      "mean_abs_dsteer": 0.1559307835560808,
+      "control_hz": 20.01,
+      "survived": true,
+      "launch": 0,
+      "seed": 1,
+      "episode": 0,
+      "arm": "expert"
+    },
+    {
+      "steps": 200,
+      "mean_abs_cte": 0.9366984571074137,
+      "reversals_per_100": 6.5,
+      "mean_abs_dsteer": 0.08690287535056594,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 0,
+      "seed": 1,
+      "episode": 0,
+      "arm": "cl_base_ei"
+    },
+    {
+      "steps": 104,
+      "mean_abs_cte": 0.37220024353323083,
+      "reversals_per_100": 10.58,
+      "mean_abs_dsteer": 0.06131021652678118,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 0,
+      "seed": 1,
+      "episode": 0,
+      "arm": "cl_aug_ei"
+    },
+    {
+      "steps": 600,
+      "mean_abs_cte": 0.32083171539309363,
+      "reversals_per_100": 10.5,
+      "mean_abs_dsteer": 0.14648269245926546,
+      "control_hz": 20.0,
+      "survived": true,
+      "launch": 0,
+      "seed": 2,
+      "episode": 0,
+      "arm": "expert"
+    },
+    {
+      "steps": 103,
+      "mean_abs_cte": 0.49388325055247373,
+      "reversals_per_100": 8.74,
+      "mean_abs_dsteer": 0.061690213670041044,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 0,
+      "seed": 2,
+      "episode": 0,
+      "arm": "cl_base_ei"
+    },
+    {
+      "steps": 103,
+      "mean_abs_cte": 0.8992984309358503,
+      "reversals_per_100": 5.83,
+      "mean_abs_dsteer": 0.04637400593206871,
+      "control_hz": 19.99,
+      "survived": false,
+      "launch": 0,
+      "seed": 2,
+      "episode": 0,
+      "arm": "cl_aug_ei"
+    },
+    {
+      "steps": 600,
+      "mean_abs_cte": 0.40901708509152135,
+      "reversals_per_100": 9.0,
+      "mean_abs_dsteer": 0.1505104049147015,
+      "control_hz": 20.0,
+      "survived": true,
+      "launch": 1,
+      "seed": 0,
+      "episode": 0,
+      "arm": "expert"
+    },
+    {
+      "steps": 154,
+      "mean_abs_cte": 0.959627717564052,
+      "reversals_per_100": 7.14,
+      "mean_abs_dsteer": 0.08382451115480435,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 1,
+      "seed": 0,
+      "episode": 0,
+      "arm": "cl_base_ei"
+    },
+    {
+      "steps": 377,
+      "mean_abs_cte": 1.1169696621719096,
+      "reversals_per_100": 6.63,
+      "mean_abs_dsteer": 0.09554061131611308,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 1,
+      "seed": 0,
+      "episode": 0,
+      "arm": "cl_aug_ei"
+    },
+    {
+      "steps": 600,
+      "mean_abs_cte": 0.3864369863651518,
+      "reversals_per_100": 9.83,
+      "mean_abs_dsteer": 0.15760250206110074,
+      "control_hz": 20.01,
+      "survived": true,
+      "launch": 1,
+      "seed": 1,
+      "episode": 0,
+      "arm": "expert"
+    },
+    {
+      "steps": 170,
+      "mean_abs_cte": 0.7634555998148725,
+      "reversals_per_100": 6.47,
+      "mean_abs_dsteer": 0.07999453858951845,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 1,
+      "seed": 1,
+      "episode": 0,
+      "arm": "cl_base_ei"
+    },
+    {
+      "steps": 367,
+      "mean_abs_cte": 0.9131131353897515,
+      "reversals_per_100": 6.81,
+      "mean_abs_dsteer": 0.10123364091978047,
+      "control_hz": 19.99,
+      "survived": false,
+      "launch": 1,
+      "seed": 1,
+      "episode": 0,
+      "arm": "cl_aug_ei"
+    },
+    {
+      "steps": 600,
+      "mean_abs_cte": 0.40796153986098943,
+      "reversals_per_100": 9.67,
+      "mean_abs_dsteer": 0.14013519892795556,
+      "control_hz": 20.0,
+      "survived": true,
+      "launch": 1,
+      "seed": 2,
+      "episode": 0,
+      "arm": "expert"
+    },
+    {
+      "steps": 169,
+      "mean_abs_cte": 1.0056101848983026,
+      "reversals_per_100": 8.88,
+      "mean_abs_dsteer": 0.07357336478716683,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 1,
+      "seed": 2,
+      "episode": 0,
+      "arm": "cl_base_ei"
+    },
+    {
+      "steps": 253,
+      "mean_abs_cte": 0.8019870543307643,
+      "reversals_per_100": 6.72,
+      "mean_abs_dsteer": 0.09636733724573066,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 1,
+      "seed": 2,
+      "episode": 0,
+      "arm": "cl_aug_ei"
+    },
+    {
+      "steps": 600,
+      "mean_abs_cte": 0.3259014144006263,
+      "reversals_per_100": 10.17,
+      "mean_abs_dsteer": 0.15949874002395512,
+      "control_hz": 20.0,
+      "survived": true,
+      "launch": 2,
+      "seed": 0,
+      "episode": 0,
+      "arm": "expert"
+    },
+    {
+      "steps": 165,
+      "mean_abs_cte": 0.5629658115449164,
+      "reversals_per_100": 9.09,
+      "mean_abs_dsteer": 0.0655854272800952,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 2,
+      "seed": 0,
+      "episode": 0,
+      "arm": "cl_base_ei"
+    },
+    {
+      "steps": 199,
+      "mean_abs_cte": 0.7751148844573026,
+      "reversals_per_100": 7.04,
+      "mean_abs_dsteer": 0.09006736706471954,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 2,
+      "seed": 0,
+      "episode": 0,
+      "arm": "cl_aug_ei"
+    },
+    {
+      "steps": 600,
+      "mean_abs_cte": 0.32363010590158714,
+      "reversals_per_100": 10.33,
+      "mean_abs_dsteer": 0.15612927598871745,
+      "control_hz": 20.0,
+      "survived": true,
+      "launch": 2,
+      "seed": 1,
+      "episode": 0,
+      "arm": "expert"
+    },
+    {
+      "steps": 150,
+      "mean_abs_cte": 0.45354717075824735,
+      "reversals_per_100": 7.33,
+      "mean_abs_dsteer": 0.08785146109809812,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 2,
+      "seed": 1,
+      "episode": 0,
+      "arm": "cl_base_ei"
+    },
+    {
+      "steps": 90,
+      "mean_abs_cte": 0.35739895235747104,
+      "reversals_per_100": 6.67,
+      "mean_abs_dsteer": 0.05378992332595536,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 2,
+      "seed": 1,
+      "episode": 0,
+      "arm": "cl_aug_ei"
+    },
+    {
+      "steps": 600,
+      "mean_abs_cte": 0.4260228278976669,
+      "reversals_per_100": 9.83,
+      "mean_abs_dsteer": 0.16165316268453414,
+      "control_hz": 20.0,
+      "survived": true,
+      "launch": 2,
+      "seed": 2,
+      "episode": 0,
+      "arm": "expert"
+    },
+    {
+      "steps": 158,
+      "mean_abs_cte": 0.49091342668534593,
+      "reversals_per_100": 9.49,
+      "mean_abs_dsteer": 0.0989006174977418,
+      "control_hz": 19.99,
+      "survived": false,
+      "launch": 2,
+      "seed": 2,
+      "episode": 0,
+      "arm": "cl_base_ei"
+    },
+    {
+      "steps": 198,
+      "mean_abs_cte": 0.8575514258012514,
+      "reversals_per_100": 8.08,
+      "mean_abs_dsteer": 0.08620554516044668,
+      "control_hz": 20.0,
+      "survived": false,
+      "launch": 2,
+      "seed": 2,
+      "episode": 0,
+      "arm": "cl_aug_ei"
+    }
+  ],
+  "per_launch": {
+    "0": {
+      "expert": 600.0,
+      "cl_base_ei": 144.0,
+      "cl_aug_ei": 102.33333333333333
+    },
+    "1": {
+      "expert": 600.0,
+      "cl_base_ei": 164.33333333333334,
+      "cl_aug_ei": 332.3333333333333
+    },
+    "2": {
+      "expert": 600.0,
+      "cl_base_ei": 157.66666666666666,
+      "cl_aug_ei": 162.33333333333334
+    }
+  },
+  "paired_vs_cl_base_ei": {
+    "cl_aug_ei": {
+      "mean_diff": 43.666666666666664,
+      "sd": 110.13981014046546,
+      "n": 3,
+      "per_launch": [
+        -41.7,
+        168.0,
+        4.7
+      ]
+    }
+  },
+  "provenance": {
+    "commit": "5773bb558c8ab8c5449f23ffe1e424a0fd19449e",
+    "dirty": true,
+    "dirty_files": [
+      "\"docs/Project Record \\342\\200\\224 Full Chronological History.md\"",
+      ".claude/pm-cadence.json",
+      "ml/diag_copycat.py",
+      "ml/runs/cl_aug_ei/",
+      "ml/runs/cl_base_ei/",
+      "ml/runs/eval_paired_smoke/",
+      "ml/train_controller.py"
+    ],
+    "ts_utc": "2026-09-07T15:31:17+00:00",
+    "python": "3.12.10",
+    "torch": "2.13.0+cu126",
+    "numpy": "2.5.1"
+  }
+}

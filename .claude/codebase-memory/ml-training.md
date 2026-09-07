@@ -358,6 +358,24 @@ teaches the car to swerve.
   (Record Appendix X said 18 episodes / 5,961 frames — wrong, corrected in
   Appendix Y.4. It came from one collection run's stdout; the directory
   already held 2 episodes from an earlier run.)
+- ⚠️ **"`train_controller.py` auto-prefers that file when present" USED TO
+  MEAN MORE THAN INTENDED — fixed 2026-09-07, Appendix EI/EJ.** Preferring the
+  expert file for the BC loss target is correct; the bug was that the SAME
+  overwritten `act` array was also fed to `rnn_states()`, which replays it
+  into the frozen MDN-RNN's LSTM. That RNN was trained only on EXECUTED
+  actions (`train_mdnrnn.py` via `splits.load_proc`), so `h_t` was built from
+  a counterfactual sequence that never produced the observed latents — worst
+  on the recovery frames where executed and expert actions differ.
+  `ml/diag_copycat.py` imports the same `rnn_states()` and inherited it.
+  **Fixed**: `act` (executed) now feeds `rnn_states()` unconditionally;
+  a separate `act_target` (expert relabel when present) feeds only the BC
+  loss target / the copycat comparison. Effect on the Appendix Z.3 null
+  result: held-out MSE for the augmented arm was **understated** by the leak
+  — pre-fix +2.2% vs baseline, post-fix **+17.6%**. Z.3's closed-loop
+  conclusion ("no clear improvement, 0/9 survived both arms") still holds on
+  a re-run with the fix and the P6 paired harness. **Any session reading
+  `act` in these two files must confirm which variable (`act` vs
+  `act_target`) it means before reusing older reasoning about them.**
 
 ## RETRACTION (2026-08-11): the "first completions" result did not replicate
 

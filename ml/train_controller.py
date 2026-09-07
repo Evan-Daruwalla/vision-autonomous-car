@@ -196,15 +196,28 @@ def main() -> int:
     proc = Path(args.proc)
     _, act, eps, tracks = load_proc("train", proc=proc)
 
-    # **Expert labels, not executed actions, when the corpus has recovery
-    # episodes.** collect_recovery.py records the action actually executed
-    # (including injected noise) to keep the data contract; cloning that
-    # teaches the car to swerve. build_expert_labels.py writes what the expert
-    # would have done at each visited state -- the DART target.
+    # **Expert labels, not executed actions, for the BC loss TARGET when the
+    # corpus has recovery episodes.** collect_recovery.py records the action
+    # actually executed (including injected noise) to keep the data contract;
+    # cloning that teaches the car to swerve. build_expert_labels.py writes
+    # what the expert would have done at each visited state -- the DART
+    # target. `act` itself stays the EXECUTED sequence everywhere else in
+    # this file: it is what actually produced the observed latents `mu`, so
+    # it is what rnn_states() below must replay into the frozen MDN-RNN's
+    # LSTM (see THE CAUSAL INDEXING in the module docstring). Only
+    # `act_target` -- used for fit_a/val_a further down -- gets the DART
+    # relabel. Cold audit finding, Appendix EI (2026-09-07): this used to
+    # overwrite `act` itself, so h_t was built from a counterfactual action
+    # sequence that never produced the observed z's -- worst exactly on the
+    # recovery frames where the two arrays differ.
+    act_target = act
     expert_path = proc / "train_actions_expert.npy"
     if expert_path.exists():
-        act = np.load(expert_path)
-        print(f"labels: {expert_path.name} (expert actions)")
+        act_target = np.load(expert_path)
+        assert len(act_target) == len(act), (
+            f"{len(act_target)} expert labels vs {len(act)} executed actions")
+        print(f"labels: {expert_path.name} (expert actions; "
+              f"LSTM input stays the executed sequence)")
 
     mu_path = proc / "train_mu.npy"
     # Cold audit finding 1: check the cache's encoder fingerprint before
@@ -242,8 +255,8 @@ def main() -> int:
     print(f"  fit {len(fit_i):,} frames, val {len(val_i):,} frames "
           f"({time.time()-t0:.0f}s)")
 
-    fit_z, fit_a = mu[fit_i], act[fit_i]
-    val_z, val_a = mu[val_i], act[val_i]
+    fit_z, fit_a = mu[fit_i], act_target[fit_i]
+    val_z, val_a = mu[val_i], act_target[val_i]
 
     if args.no_history:
         # Zeroed rather than removed so the Controller architecture, parameter

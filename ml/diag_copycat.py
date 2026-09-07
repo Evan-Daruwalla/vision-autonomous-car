@@ -83,9 +83,20 @@ def main() -> int:
     rnn.eval()
 
     _, act, eps, tracks = load_proc("train", proc=proc)
+    # Same split as train_controller.py (Appendix EI fix, 2026-09-07): `act`
+    # stays EXECUTED and is what rnn_states() below replays into the frozen
+    # MDN-RNN, because that is what actually produced the observed latents
+    # (and what the trained checkpoint's own h was built from). `act_target`
+    # is what the comparisons below (a_t, a_prev, var) are measured against
+    # -- the DART expert relabel when present, since that is the value the
+    # controller was actually trained to hit. Mixing the two here would
+    # compare the model's prediction against a target it was never asked to
+    # match, on exactly the recovery frames the diagnostic most needs to be
+    # right about.
+    act_target = act
     expert_path = proc / "train_actions_expert.npy"
     if expert_path.exists():
-        act = np.load(expert_path)
+        act_target = np.load(expert_path)
     mu_path = proc / "train_mu.npy"
     # Cold audit finding 1: check the cache's encoder fingerprint before
     # reusing it, same as train_mdnrnn.py does when it writes the cache.
@@ -117,8 +128,8 @@ def main() -> int:
     has_prev = prev_of[val_i] >= 0
     vi = val_i[has_prev]
     hh = val_h[has_prev]
-    a_t = act[vi]
-    a_prev = act[prev_of[vi]]
+    a_t = act_target[vi]
+    a_prev = act_target[prev_of[vi]]
     print(f"held-out frames with a valid previous action: {len(vi):,} "
           f"(dropped {int((~has_prev).sum())} episode-start frames)")
 
@@ -128,7 +139,7 @@ def main() -> int:
         pred = model(z, h).cpu().numpy()
         pred_h0 = model(z, torch.zeros_like(h)).cpu().numpy()
 
-    var = float(act[vi].var(axis=0).mean())
+    var = float(act_target[vi].var(axis=0).mean())
     rows = [
         ("controller -> a[t]      (the reported val MSE)", mse(pred, a_t)),
         ("a[t-1]     -> a[t]      (TRIVIAL COPY BASELINE)", mse(a_prev, a_t)),

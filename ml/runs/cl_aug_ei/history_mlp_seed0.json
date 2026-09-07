@@ -1,0 +1,243 @@
+{
+  "args": {
+    "epochs": 30,
+    "batch": 1024,
+    "lr": 0.001,
+    "seed": 0,
+    "vae": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\vae\\vae_best.pt",
+    "rnn": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\mdnrnn\\mdnrnn_best.pt",
+    "arch": "mlp",
+    "proc": "ml/data/proc_aug",
+    "no_history": false,
+    "recovery_weight": 1.0,
+    "out": "ml/runs/cl_aug_ei",
+    "device": "cuda"
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "fit_mse": 0.026690357847622147,
+      "val_mse": 0.009829611134241521,
+      "val_mse_unweighted": 0.009829611134241521,
+      "seconds": 0.3
+    },
+    {
+      "epoch": 2,
+      "fit_mse": 0.0076356199455022075,
+      "val_mse": 0.0069129904999147415,
+      "val_mse_unweighted": 0.0069129904999147415,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 3,
+      "fit_mse": 0.0057148253430186965,
+      "val_mse": 0.005557395357234171,
+      "val_mse_unweighted": 0.005557395357234171,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 4,
+      "fit_mse": 0.004472516755929884,
+      "val_mse": 0.004859178777061937,
+      "val_mse_unweighted": 0.004859178777061937,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 5,
+      "fit_mse": 0.003978498415147633,
+      "val_mse": 0.004349106028071972,
+      "val_mse_unweighted": 0.004349106028071972,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 6,
+      "fit_mse": 0.003403133798942522,
+      "val_mse": 0.00394612774287269,
+      "val_mse_unweighted": 0.00394612774287269,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 7,
+      "fit_mse": 0.0031675599302728604,
+      "val_mse": 0.0037579047688544604,
+      "val_mse_unweighted": 0.0037579047688544604,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 8,
+      "fit_mse": 0.002903232020383448,
+      "val_mse": 0.0034900544211636754,
+      "val_mse_unweighted": 0.0034900544211636754,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 9,
+      "fit_mse": 0.002694576133594469,
+      "val_mse": 0.0032360151583954635,
+      "val_mse_unweighted": 0.0032360151583954635,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 10,
+      "fit_mse": 0.0025435875307906557,
+      "val_mse": 0.0031684736312555424,
+      "val_mse_unweighted": 0.0031684736312555424,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 11,
+      "fit_mse": 0.0023795199612109564,
+      "val_mse": 0.002969497792306379,
+      "val_mse_unweighted": 0.002969497792306379,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 12,
+      "fit_mse": 0.002250549988533704,
+      "val_mse": 0.0029188805426065218,
+      "val_mse_unweighted": 0.0029188805426065218,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 13,
+      "fit_mse": 0.002149294363334775,
+      "val_mse": 0.002773014606950813,
+      "val_mse_unweighted": 0.002773014606950813,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 14,
+      "fit_mse": 0.002095655039424238,
+      "val_mse": 0.0027998506602470285,
+      "val_mse_unweighted": 0.0027998506602470285,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 15,
+      "fit_mse": 0.0019680871858181043,
+      "val_mse": 0.002702810573999054,
+      "val_mse_unweighted": 0.002702810573999054,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 16,
+      "fit_mse": 0.0018883956334680135,
+      "val_mse": 0.002624561002295189,
+      "val_mse_unweighted": 0.002624561002295189,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 17,
+      "fit_mse": 0.0018383157482646682,
+      "val_mse": 0.002515960655893823,
+      "val_mse_unweighted": 0.002515960655893823,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 18,
+      "fit_mse": 0.0017953912115276412,
+      "val_mse": 0.002527714121373922,
+      "val_mse_unweighted": 0.002527714121373922,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 19,
+      "fit_mse": 0.0016918683260748232,
+      "val_mse": 0.0025535778304392907,
+      "val_mse_unweighted": 0.0025535778304392907,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 20,
+      "fit_mse": 0.0016501810269453276,
+      "val_mse": 0.0024633713100464276,
+      "val_mse_unweighted": 0.0024633713100464276,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 21,
+      "fit_mse": 0.0016209490922061197,
+      "val_mse": 0.002431734982873304,
+      "val_mse_unweighted": 0.002431734982873304,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 22,
+      "fit_mse": 0.0015282408840218444,
+      "val_mse": 0.002319072578555396,
+      "val_mse_unweighted": 0.002319072578555396,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 23,
+      "fit_mse": 0.001576643095087306,
+      "val_mse": 0.002296563356507784,
+      "val_mse_unweighted": 0.002296563356507784,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 24,
+      "fit_mse": 0.001463795625489711,
+      "val_mse": 0.002213410512089266,
+      "val_mse_unweighted": 0.002213410512089266,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 25,
+      "fit_mse": 0.0014235983821161,
+      "val_mse": 0.002209629760122623,
+      "val_mse_unweighted": 0.002209629760122623,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 26,
+      "fit_mse": 0.001393406455014131,
+      "val_mse": 0.0022532810101550897,
+      "val_mse_unweighted": 0.0022532810101550897,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 27,
+      "fit_mse": 0.0014123610511169206,
+      "val_mse": 0.0021868512701339175,
+      "val_mse_unweighted": 0.0021868512701339175,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 28,
+      "fit_mse": 0.0013213088034571688,
+      "val_mse": 0.002140013012274089,
+      "val_mse_unweighted": 0.002140013012274089,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 29,
+      "fit_mse": 0.0013244065849892335,
+      "val_mse": 0.0021285761181378316,
+      "val_mse_unweighted": 0.0021285761181378316,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 30,
+      "fit_mse": 0.0012655666221600072,
+      "val_mse": 0.002032537481071498,
+      "val_mse_unweighted": 0.002032537481071498,
+      "seconds": 0.2
+    }
+  ],
+  "provenance": {
+    "commit": "5773bb558c8ab8c5449f23ffe1e424a0fd19449e",
+    "dirty": true,
+    "dirty_files": [
+      "\"docs/Project Record \\342\\200\\224 Full Chronological History.md\"",
+      ".claude/pm-cadence.json",
+      "ml/diag_copycat.py",
+      "ml/runs/cl_base_ei/",
+      "ml/train_controller.py"
+    ],
+    "ts_utc": "2026-09-07T15:20:11+00:00",
+    "python": "3.12.10",
+    "torch": "2.13.0+cu126",
+    "numpy": "2.5.1"
+  }
+}

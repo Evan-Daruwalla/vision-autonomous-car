@@ -173,6 +173,8 @@ the dated entry, not the digest.
 - [EF — Evan's own LaneMaker export is ground truth: connecting roads must be ONE-WAY; that fix makes the file load; junction boundary and U-turns still missing](#appendix-ef---evans-own-lanemaker-export-is-ground-truth-connecting-roads-must-be-one-way-that-fix-makes-the-file-load-junction-boundary-and-u-turns-still-missing-2026-09-07-0033-cdt) (09-07)
 - [EG — Simulation works on LaneMaker's own file, so the fault is ours; U-turns added (68 connections); the junction boundary trim cannot be derived and is left unbuilt](#appendix-eg---simulation-works-on-lanemakers-own-file-so-the-fault-is-ours-u-turns-added-68-connections-the-junction-boundary-trim-cannot-be-derived-and-is-left-unbuilt-2026-09-07-0045-cdt) (09-07)
 - [EH — NEGATIVE: U-turns did not fix the simulation crash (identical fault address); four hypotheses, four wrong, and every correct finding came from evidence](#appendix-eh---negative-u-turns-did-not-fix-the-simulation-crash-identical-fault-address-four-hypotheses-four-wrong-and-every-correct-finding-came-from-evidence-2026-09-07-0050-cdt) (09-07)
+- [EI — Scheduled daily-audit: the controller's history feature is built from actions that never happened, and two self-checks pass on a broken artifact](#appendix-ei---scheduled-daily-audit-the-controllers-history-feature-is-built-from-actions-that-never-happened-and-two-self-checks-pass-on-a-broken-artifact-2026-09-07-0723-cdt) (09-07)
+- [EJ — Fixed the DART action contamination in the controller: rnn_states() was fed the expert relabel instead of the executed sequence; the fix strengthens Z.3's negative, closed-loop unchanged at 0/9](#appendix-ej---fixed-the-dart-action-contamination-in-the-controller-rnn_states-was-fed-the-expert-relabel-instead-of-the-executed-sequence-the-fix-strengthens-z3s-negative-closed-loop-unchanged-at-09-2026-09-07-1032-cdt) (09-07)
 
 ---
 
@@ -14213,3 +14215,201 @@ BOM Verify items closed since 2026-09-05).
 If the boundary is attempted later, the structure in Appendix EG is the head
 start — and it should be attempted as ONE timeboxed experiment with the
 expectation that it may not be the cause, not as a fix.
+
+# Appendix EI - Scheduled daily-audit: the controller's history feature is built from actions that never happened, and two self-checks pass on a broken artifact (2026-09-07 07:23 CDT)
+Scheduled `daily-audit` cold sweep, 6 parallel workers over a 244-file manifest
+(43 py, 5 ino + 1 h, 37 md, 10 xodr, 3 stl, 1 git hook; 135 json/npy/png under
+`ml/runs/` excluded as generated run data). Findings only — nothing was changed.
+Classified ACTIVE by churn override: the last audit was Appendix DH (2026-09-04)
+but 23 non-audit commits landed after it.
+
+## The one that matters
+
+**`ml/train_controller.py:206` → `:240-241` — the controller's history feature is
+built from actions that never happened.** When `train_actions_expert.npy` exists,
+`act` is replaced with the DART expert relabels, and that same array is then
+passed to `rnn_states()`, which feeds it to the frozen MDN-RNN's LSTM
+(`:109-113`). `train_mdnrnn.py` only ever trains on executed actions from
+`load_proc`. So `h_t` is conditioned on a counterfactual action sequence that did
+not produce the observed latents — precisely on the recovery/noise frames where
+the two arrays differ. This is a live confound for the Appendix Z.3 null result
+("adding 6.67% recovery data left val MSE essentially unchanged"), and
+`ml/diag_copycat.py` imports the same `rnn_states`, so the diagnostic meant to
+validate the controller shares the contamination.
+Fix: keep two arrays — raw executed `act` for the LSTM input, expert relabels
+only for the BC loss target.
+
+## Two guards that pass on a broken artifact
+
+- `cad/vehicle_envelope.py:150-151` — the cross-file drift guard checks six names
+  against `track_layout_v2.py` and omits `CAR_WIDTH`, which is defined
+  independently in both files (`vehicle_envelope.py:50`, `track_layout_v2.py:92`,
+  both 0.155). The constant every clearance number derives from is the one the
+  guard cannot see, and `self_check: PASS` still prints.
+- `cad/marking_specs.py:274` prints "40 cycles per lap" by construction from
+  `TARGET_DASH_CYCLES = 40`. `cad/marking_layout.py` computes the real figure and
+  prints `cycles per lap 18.7`. Both scripts self-check PASS; nothing asserts on
+  the 2.1x gap. HANDOFF action item 1 already knows the real number is 18.7.
+
+## Docs asserting what disk denies
+
+- `HANDOFF.md:308` states "CURRENT, real output 2026-09-06 at lane 310 mm: route
+  8.23 m, pitch 1190 mm, span 2690 mm, spare 110 mm". Running
+  `python cad/track_layout_v2.py` now gives lane 250 mm, route 7.51 m, pitch
+  1100 mm, span 2700 mm, spare 100 mm. HANDOFF's own line 95 already uses 7.51 m.
+- `.claude/codebase-memory/track.md:288-298` asserts scale 1:11.80 and lane
+  310 mm. `python cad/marking_specs.py` prints `SCALE 1:14.63 DERIVED`, lane
+  250 mm. Lines 15 and 73 of the same file re-assert 1:11.80 against its own
+  line 58, which records the move to 1:14.63.
+  NOTE, and this corrected a worker: `README.md:3`'s "1/14-scale" is stale by
+  0.63, not by 2.8 — 1:11.80 was itself superseded. The proposed fix to rewrite
+  README to 1:11.80 would have made it worse and was rejected.
+- `cad/track_layout_v1.py:440` writes the JSON key `car_width_m_MEASURED` while
+  `:58` declares `CAR_WIDTH = 0.130 # UNMEASURED`. The committed
+  `cad/track_layout_v1.json` still carries the truthful `car_width_m_ESTIMATE`,
+  so regenerating flips a correct label to a false one — a direct violation of
+  this project's CLAUDE.md rule that physical-world claims stay honest.
+- `firmware/README.md:75` — "No control firmware exists. The serial protocol is
+  designed on paper only." `firmware/uno_control/uno_control.ino` is 657 lines
+  and flashed; `SERIAL_PROTOCOL.md:3` says IMPLEMENTED.
+- `firmware/SERIAL_PROTOCOL.md:1` titles itself "DRAFT v0.1" while `:11` says it
+  was bumped to v0.2 and `:3` says IMPLEMENTED. `:5` claims SELFTEST 39/39 for
+  the 2026-09-02 flash the record puts at 49/49; the current source has 58
+  checks.
+- `.claude/codebase-memory/INDEX.md:9-11` understates three bins by 100-200 lines
+  each (hardware.md 313 claimed / 466 actual; steering.md 141 / 339; track.md
+  334 / 363) — the file whose job is tracking cap overage.
+- `docs/research/2026-08-12_onboard-compute-selection.md` and
+  `2026-08-12_pi5-alternatives.md` both still end on "Raspberry Pi 5 2GB — Buy."
+  The project bought the 4GB Vilros kit; `dependencies.md:88` explains why.
+  Neither brief carries a superseded note.
+- `.mcp.json` runs `npx -y 3dstreet-mcp` with no version pin, so every session
+  auto-installs whatever is newest and gives it tool access.
+
+## Partial failsafe, deliberate and documented
+
+`firmware/uno_control/uno_control.ino:632-643` — on watchdog trip
+(`WATCHDOG_MS = 150`) throttle goes to 0 immediately and `PIN_STBY` goes LOW
+after `BRAKE_MS = 500`, a hardware Hi-Z disable of the TB6612. Steering is NOT
+centred; the servo holds its last angle indefinitely. `SERIAL_PROTOCOL.md` §3.2
+documents this as intentional (avoids a jerk). Recorded as a known shape of the
+failsafe, not as a defect.
+
+## Load-bearing negatives
+
+Episode-level train/val splitting confirmed by running `splits.py` self-check.
+Seeding covers torch + numpy + cuda in all four trainers. `models.py`,
+`episode_writer.py`, `provenance.py` self-checks all PASS. Figure-8 closes to
+<6e-10 m; all 80 roads in both junction `.xodr` files have resolvable links;
+`export_xodr.py` regenerates byte-identical across three runs; both STLs are
+manifold with volumes matching analytic values to 1e-14. The serial protocol's
+CRC-8/SMBus matches byte-for-byte across doc, firmware and `host_test.py`, and
+the fixed-frame design means no sender-controlled length can overrun `rxBuf`.
+`scripts/git-hooks/pre-commit` fails CLOSED when the delegated scanner is
+missing, requiring `CAR_ALLOW_UNGATED_COMMIT=1` to bypass. `docs/BOM.md` rows
+sum to exactly the claimed $411.45. Every Uno pin in BOM/WIRING matches the
+`PIN_*` constants.
+
+# Appendix EJ - Fixed the DART action contamination in the controller: rnn_states() was fed the expert relabel instead of the executed sequence; the fix strengthens Z.3's negative, closed-loop unchanged at 0/9 (2026-09-07 ~10:32 CDT)
+**WHAT:** Fixed the action-contamination bug the 2026-09-07 07:23 CDT scheduled
+audit found (Appendix EI, "the one that matters"): `ml/train_controller.py`
+overwrote `act` with the DART expert relabels (`train_actions_expert.npy`)
+whenever that file existed, and the SAME overwritten array was then fed to
+`rnn_states()`, which replays it into the frozen MDN-RNN's LSTM
+(`:99-118`). `train_mdnrnn.py` only ever trains that RNN on executed
+actions from `splits.load_proc`, so `h_t` was built from a counterfactual
+action sequence that never produced the observed latents `mu` -- worst on
+exactly the recovery frames where executed and expert actions differ. This
+directly touches the Appendix Z.3 null result ("adding 6.67% recovery data
+left val MSE essentially unchanged, 0.001754 -> 0.001788").
+
+**WHY:** `act` has two uses in this file that must NOT share one array. The
+LSTM input needs the EXECUTED sequence, because that is what actually
+produced `mu` (causality) and what serve time will always have (a deployed
+policy only ever knows its own executed history, never an oracle relabel).
+The BC loss target needs the EXPERT sequence when DART relabels exist,
+because that is what `collect_recovery.py`'s executed actions
+(injected noise, "log_expert_steer substituted on noise frames") are
+explicitly wrong to clone. Feeding the expert sequence into the LSTM input
+too was silently answering the loss target's question with itself on every
+recovery frame -- an information leak, not a data-quality problem.
+
+**HOW:**
+- [ml/train_controller.py:196-220](../ml/train_controller.py) -- `act` stays
+  the executed sequence; a new `act_target` (== `act` when no expert file
+  exists, else `np.load(train_actions_expert.npy)`) is introduced. An assert
+  pins the two arrays to equal length.
+- `:253-254` (the two `rnn_states()` calls) -- unchanged; correct now that
+  `act` itself is never overwritten.
+- `:258-259` (`fit_a`, `val_a`, the BC loss target) -- switched from `act` to
+  `act_target`.
+- [ml/diag_copycat.py:85-99](../ml/diag_copycat.py) -- inherited the identical
+  bug via the same imported `rnn_states()`. Same split applied, with the
+  choice made explicit in a comment: `rnn_states()` gets executed `act`
+  (matches what the loaded checkpoint's own `h` was actually trained on, and
+  what serve time will always have); `a_t`/`a_prev`/`var` (the copycat
+  comparison targets, `:131-132,142`) get `act_target`, since those measure
+  the model against what it was trained to hit, not against the noisy
+  executed signal it was never trained to match.
+- Both files syntax-checked (`ast.parse`) after editing; no other lines
+  touched.
+
+**RE-RUN, Appendix Z.3's comparison, with the fixed code:**
+
+Offline (held-out MSE, MLP arch, 3 seeds, `ml/data/proc` vs
+`ml/data/proc_aug`, V/M frozen -- same protocol as Z.3/AA):
+
+| arm | pre-fix (existing `cl_base`/`cl_aug` checkpoints) | post-fix (`cl_base_ei`/`cl_aug_ei`, retrained this session) |
+|---|---|---|
+| baseline (`proc`, no expert file -- code path untouched by the fix) | 0.001768 | 0.001768 (identical, confirms the fix is a no-op here) |
+| augmented (`proc_aug`, expert file present) | 0.001806 (+2.2% vs base) | **0.002078 (+17.6% vs base)** |
+
+Baseline reproduces exactly (0.0017536/0.0017644/0.0017850 seeds 0-2, matching
+the pre-existing `history_mlp_seed*.json` files bit for bit) because `proc`
+has no `train_actions_expert.npy`, so `act_target = act` unconditionally --
+the isolation the fix intended.
+
+Closed-loop, PAIRED (`ml/eval_paired.py`, the P6/Appendix AI-AJ trustworthy
+harness -- every arm inside one sim launch, so the track-regeneration
+confound cancels; Z.3 predates this harness and used the unpaired
+`eval_in_sim.py`, so these numbers are a new measurement, not a like-for-like
+replication of Z.3's own table). 3 launches x 3 seeds x 1 episode, max 600
+steps, real `donkey_sim.exe`:
+
+| arm | steps | mean\|cte\| | ctrl Hz | survived |
+|---|---|---|---|---|
+| expert (reference) | 600.0 +- 0.0 | 0.363 | 20.00 | 9/9 |
+| baseline (`cl_base_ei`) | 155.3 +- 25.7 | 0.707 | 19.96 | 0/9 |
+| augmented (`cl_aug_ei`) | 199.0 +- 106.8 | 0.739 | 20.00 | 0/9 |
+
+Paired diff (aug - base), within-launch: mean **+43.7 steps**, sd **110.1**,
+n=3 launches, per-launch **[-41.7, +168.0, +4.7]**. The sign flips between
+launches and the spread is 2.5x the mean -- not a reliable effect at this n,
+the same shape of unreliability Z.3 itself flagged about launch-to-launch
+noise.
+
+**DOES Z.3's CONCLUSION SURVIVE?** Yes, and the offline half is now a
+sharper negative than before. "No clear improvement from recovery data"
+still holds: 0/9 survived in both arms (unchanged), and the paired
+closed-loop difference nominally favors the augmented arm but is engulfed by
+its own noise at n=3 launches -- not distinguishable from zero. What changed
+is the offline metric that Appendix AA used to argue for an escape hatch (the
+recovery-weight sweep): pre-fix, held-out MSE made augmented look almost
+free (+2.2%); post-fix, with the leak closed, it costs +17.6% MSE for no
+measurable closed-loop gain. The pre-fix number was propping up recovery
+data's case more than the true signal did -- the counterfactual LSTM input
+was letting the model partially answer its own recovery-frame targets during
+training, which cannot happen at serve time.
+
+**WHAT THIS DOES NOT SETTLE:** the paired closed-loop n is small (3 launches)
+by construction (the mean-driving-time test is expensive; Z.3's own n=9 was
+already flagged as marginal). A `--recovery-weight` sweep (Appendix AA) has
+not been re-run against the fixed code and might read differently now that
+the escape hatch's own MSE justification is gone. Not run here --
+out of this task's scope.
+
+**Files touched this session, not yet committed:** `ml/train_controller.py`,
+`ml/diag_copycat.py` (the fix); `ml/runs/cl_base_ei/`, `ml/runs/cl_aug_ei/`,
+`ml/runs/eval_paired_ei/`, `ml/runs/eval_paired_smoke/` (new run artifacts,
+untracked). Appendix EI (the audit that found this) and this entry are both
+still uncommitted on top of `5773bb5`.

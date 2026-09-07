@@ -14,7 +14,8 @@ Core bins:
 - sim-harness.md — the simulator, the eval harness, training-time GPU limits (new 2026-09-02; 131 lines)
 - ml-training.md — GPU memory + world-model training facts MEASURED on this
   3060 Ti: the DreamerV3 fitting table, Sysmem Fallback confirmed ON,
-  dreamerv3-torch's missing offline loop (updated 2026-08-06)
+  dreamerv3-torch's missing offline loop, the DART action-contamination fix
+  in `train_controller.py`/`diag_copycat.py` (updated 2026-09-07)
 
 Standards bins (only those the codebase actually commits to):
 - dependencies.md — planned stack (DonkeyCar 5.x plumbing + PyTorch models) + the ON-CAR inference runtime decision: export to ONNX, and why RAM was never the binding constraint (updated 2026-09-03)
