@@ -83,6 +83,47 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   deliberately OVERSIZED, off-scale sign, because pixel share is what the
   training objective responds to. Scale-correct would be 64.6 mm; the
   standing decision is larger on purpose.
+- ✅ **OPENDRIVE IS THE WAY AROUND 3DSTREET'S MISSING CURVES (2026-09-06,
+  Appendix EA).** LaneMaker (`~/Downloads/LaneMaker_0.9_Win64`) is a Qt5
+  GUI whose SampleMaps are `.xodr` — **OpenDRIVE**, plain XML, the ASAM
+  standard CARLA/esmini/SUMO read. Its `<planView>` takes `<line>`,
+  **`<arc>`**, **`<spiral>`** (clothoid) and `<paramPoly3>`; the samples use
+  356 arcs and 286 spirals. So the R=500 corner geometry that 3DStreet
+  structurally cannot hold is a NATIVE primitive here.
+  - **`cad/export_xodr.py`** emits the driven route as one closed road:
+    14 geometries (8 line, 6 arc), full scale by default (x14.6304 → lane
+    3.6576 m, R 7.3152 m, route 109.9 m); `--model-scale` for the 2.7 m
+    track. Outputs `cad/track_figure8.xodr` + `_model.xodr`.
+  - **THE ROUTE HAS 6 CORNERS, NOT 8** — derived in EA, never before.
+    Two of its 8 vertices are both `(0,0)`, and the heading does NOT change
+    at either: the route runs STRAIGHT THROUGH the centre intersection on
+    both passes. Those merge into 2.2 m straights. 3 lefts + 3 rights.
+  - ⚠️ **NOT exported: the grid, the 9 intersections, junction records.**
+    The road crosses itself with no junction declared — valid OpenDRIVE,
+    minimum test of whether LaneMaker loads our geometry.
+  - ✅ **LANEMAKER DOES IMPORT .xodr — tested 2026-09-06 (Appendix EB).**
+    It parsed the file and named its own blocker:
+    `xodr map needs to contain custom LaneProfile!`
+  - ⚠️ **EVERY .xodr FOR LANEMAKER NEEDS A `<roadRunnerProfile>` BLOCK** —
+    a RoadRunner (MathWorks) vendor extension, NOT standard OpenDRIVE, as
+    the LAST child of `<road>`. Grepping the samples for "LaneProfile"
+    returns ZERO — the element is named `roadRunnerProfile` (544 hits in
+    traffic_test.xodr). Schema: `type_s` = section start with **s in
+    CENTIMETRES**; `4294967295` = UINT32_MAX terminator on the `<left>`
+    list; `laneCount` = DRIVING lanes only (medians not counted);
+    **`offsetX2` = laneOffset / laneWidth * 2**, verified across all 272
+    roads. `export_xodr.py` emits it and self-checks the cm unit.
+  - ⚠️ **STILL NOT UNDERSTOOD:** why `<left>` needs a length-cm section
+    PLUS a UINT32_MAX terminator while `<right>` needs one `type_s="0"`.
+    No sample road has a 1+1 layout without a median, so ours mirrors road
+    0's SHAPE, not a true analogue. **If LaneMaker still refuses: draw any
+    road in it, save, and read the profile it writes — ground truth.**
+  - LaneMaker internals, from its binary: CGAL (`vcpkg/.../CGAL/
+    Intersections_2/`), roads+junctions with overlap resolution, XPath
+    parsing (`.//lanes//laneOffset`, `.//lane`).
+  - `path_len` CLOSES the loop (`append=p[:1]`); an open `i..i+1` sum misses
+    a 5.042 mm closing chord. Compare against `path_len`, never a
+    reimplementation of it.
 - **3DStreet scene holds the 3x3 grid as of 2026-09-06 (Appendix DZ):**
   6 managed streets, pitch **16.0934 m**, length **39.5 m**, road
   **7.3152 m** — the 1:14.63 full-scale equivalent of `track_layout_v2`.

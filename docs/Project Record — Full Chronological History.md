@@ -165,6 +165,8 @@ the dated entry, not the digest.
 - [DX — Track switched to TWO lanes at 250mm each (1.613x, deliberate); lane/road conflation refactored out; cornering clearance now 29.6mm, below the 50mm EST minimum](#appendix-dx---track-switched-to-two-lanes-at-250mm-each-1613x-deliberate-laneroad-conflation-refactored-out-cornering-clearance-now-296mm-below-the-50mm-est-minimum-2026-09-06-1622-cdt) (09-06)
 - [DY — Marking + substrate layout built; the seam rule was enforced by nothing; MARK_W was 2.4-3.6x too wide (1506g -> 627g); the dash target assumed a centreline through intersections](#appendix-dy---marking--substrate-layout-built-the-seam-rule-was-enforced-by-nothing-mark_w-was-24-36x-too-wide-1506g---627g-the-dash-target-assumed-a-centreline-through-intersections-2026-09-06-1638-cdt) (09-06)
 - [DZ — 3x3 grid recreated in 3DStreet at 1:14.63 -- street NETWORK only: no curved corners, no figure-8, and it contradicts DY's marking layout at every intersection](#appendix-dz---3x3-grid-recreated-in-3dstreet-at-11463----street-network-only-no-curved-corners-no-figure-8-and-it-contradicts-dys-marking-layout-at-every-intersection-2026-09-06-1726-cdt) (09-06)
+- [EA — LaneMaker speaks OpenDRIVE, which HAS the arc primitive 3DStreet lacks; figure-8 exported as .xodr; the route has 6 corners not 8](#appendix-ea---lanemaker-speaks-opendrive-which-has-the-arc-primitive-3dstreet-lacks-figure-8-exported-as-xodr-the-route-has-6-corners-not-8-2026-09-06-2213-cdt) (09-06)
+- [EB — LaneMaker DOES import xodr and named its own blocker: a roadRunnerProfile vendor block, schema decoded from the binary and samples](#appendix-eb---lanemaker-does-import-xodr-and-named-its-own-blocker-a-roadrunnerprofile-vendor-block-schema-decoded-from-the-binary-and-samples-2026-09-06-2217-cdt) (09-06)
 
 ---
 
@@ -13480,3 +13482,230 @@ Nothing on disk changed this session — no CAD file, no generator output. This
 was scene work only. `cad/track_layout_v2.py` remains the authority on
 geometry and `cad/marking_layout.py` on markings; the scene is downstream of
 both and, as noted above, currently disagrees with the second.
+
+# Appendix EA - LaneMaker speaks OpenDRIVE, which HAS the arc primitive 3DStreet lacks; figure-8 exported as .xodr; the route has 6 corners not 8 (2026-09-06, ~22:13 CDT)
+Evan installed LaneMaker and asked whether I could reach it. Partly — and the
+part that matters turned out to be a route around the limitation Appendix DZ
+had just documented.
+
+## What LaneMaker actually is, and what is reachable
+
+`C:\Users\evan.EVANFREDY\Downloads\LaneMaker_0.9_Win64\Release\LaneMaker.exe`
+— a Qt5 desktop GUI (Qt5Core/Gui/Widgets DLLs alongside it).
+
+- **The executable: NOT reachable.** I can launch a process but have no screen
+  or desktop control, so I cannot see or drive its window. The Browser pane is
+  a browser, not a desktop.
+- **Its files: fully reachable.** And that is the whole story, because
+  `SampleMaps/` holds `bridge.xodr` and `traffic_test.xodr` — **OpenDRIVE**,
+  the ASAM road-network standard that CARLA, esmini and SUMO all read. Plain
+  XML.
+
+⚠️ Two things about LaneMaker I did NOT establish: whether it can IMPORT
+`.xodr` (it may be export-only, in which case the file below is for a different
+consumer), and whether the GUI needs a base map to start from. `gmp-10.dll` and
+`mpfr-6.dll` in the Release folder are the CGAL exact-arithmetic stack, which
+suggests exact geometric predicates — inferred from the DLL names, not verified.
+
+## WHY THIS MATTERS: OpenDRIVE HAS THE PRIMITIVE 3DSTREET LACKS
+
+Appendix DZ recorded that 3DStreet cannot represent the R=500 mm corner arcs,
+because a managed street there is a cross-section extruded along a STRAIGHT
+line. OpenDRIVE's `<planView>` takes `<line>`, `<arc>`, `<spiral>` and
+`<paramPoly3>`. Counted in LaneMaker's own samples:
+
+    line         bridge=280    traffic=64
+    arc          bridge=356    traffic=101
+    spiral       bridge=286    traffic=128
+    paramPoly3   bridge=98     traffic=22
+
+So the geometry that makes this a track rather than a street plan is a native
+primitive in a format now sitting on Evan's disk. `<spiral>` is a clothoid —
+a real transition curve between straight and arc, which `track_layout_v2.py`
+does not model at all.
+
+## New file: `cad/export_xodr.py`
+
+Emits the driven route as one closed OpenDRIVE road: **14 geometries, 8 line
+and 6 arc**, at full scale by default (x14.6304, so lane widths are a real
+3.6576 m rather than an absurd 0.25 m). `--model-scale` writes the physical
+2.7 m track instead. Both written: `cad/track_figure8.xodr` and
+`cad/track_figure8_model.xodr`.
+
+    scale           FULL, x14.6304 (the 1:14.63 model rendered at real-world size)
+    geometries      14  (8 line, 6 arc)
+    corner radius   7.3152 m  -> curvature 0.136702
+    lane width      3.6576 m each, 2 lanes
+    route length    109.9093 m
+    turns           3 left + 3 right, net turn 0 (balanced figure-8)
+
+## THE ROUTE HAS 6 CORNERS, NOT 8 — derived here for the first time
+
+`track_layout_v2.py`'s docstring has always claimed "3 lefts + 3 rights" and
+its self-check 4 tests that the turning is balanced, but nothing had ever
+derived WHERE those six corners are, and the route has eight vertices.
+
+The two extras are both `(0, 0)`. The route visits the centre intersection
+twice, and **on both passes the heading does not change** — it runs straight
+through. So those vertex pairs merge into straights of 2.2 m rather than
+producing arcs. Six corners remain.
+
+Arithmetic, every term checkable:
+
+    2 merged straights   2 * (2.2 - 2R) = 2 * 1.2  = 2.4 m
+    4 single straights   4 * (1.1 - 2R) = 4 * 0.1  = 0.4 m
+    6 arcs               6 * R*pi/2     = 6*0.7854 = 4.7124 m
+    total                                           7.5124 m
+
+The 4 x 0.1 m term is the 100 mm straight-between-corners that Appendix DX
+reported, arrived at independently.
+
+## A mistake worth recording, because it produced a real number
+
+The length check failed first time at `(7.512388980384689, 7.507028447306314)`
+— a 5.36 mm gap I had budgeted 0.5 mm for. Discretization can only account for
+about 0.1 mm (240 chords across 6 arcs, each fractionally shorter than its
+arc), so the gap was not what I assumed.
+
+Cause: I re-derived the polyline length with an open sum `i..i+1`, while
+`track_layout_v2.path_len` closes the loop (`np.diff(..., append=p[:1])`) and
+so counts a **5.042 mm closing chord** the open sum misses.
+7.507028 + 0.005042 = 7.512070 exactly.
+
+Fixed by comparing against `path_len` itself rather than a reimplementation of
+it — the same "the generator is the authority" rule from Appendix DS that I
+broke in DW. **The exact decomposition (7.512389 m) is the MORE accurate
+figure**; `path_len`'s 7.512070 carries 0.32 mm of polyline artifact.
+
+## Self-checks, and one defect of mine they did not catch
+
+    export_xodr self_check: PASS
+
+Five checks: 6 arcs with 3 left and 3 right; total length against
+`path_len` within 1 mm; **continuity — every geometry starts exactly where the
+previous ends in BOTH position and heading** (a gap there is a road that
+teleports); net turning exactly zero (an oval would total 2*pi); and the XML
+reparses with an `<arc>` and a centre-lane `<roadMark>` present.
+
+**Not caught by any check: I left an `if False else` dead branch in
+`build_xml`** computing lane width two ways, one of them nonsense. Found by
+re-reading the diff, not by a test. Removed; both widths are now plainly
+`model dimension x scale`. Also fixed a print line that rendered the scale as
+a meaningless `1:1.00`, and a docstring claiming a 0.03 mm discretization gap
+when the real figure is 0.32 mm.
+
+## What the file deliberately does NOT contain
+
+The 3x3 grid, the 9 intersections, junction records, and lane links between
+roads. A figure-8 self-intersects and OpenDRIVE models that with a junction
+plus connecting roads; this emits the route as a single road that simply
+crosses itself geometrically. Valid OpenDRIVE, and the smallest thing that
+answers "does LaneMaker load our geometry at all".
+
+⚠️ **Two reasons it may still be rejected, both untested:** the road links to
+itself (`predecessor` and `successor` both `elementId="0"`), which is correct
+for a closed loop but unusual; and no junction is declared at the crossing, so
+a tool validating topology may object. **Whether it loads is Evan's test — I
+cannot drive the GUI.** Either outcome is informative and neither has been
+observed yet.
+
+# Appendix EB - LaneMaker DOES import xodr and named its own blocker: a roadRunnerProfile vendor block, schema decoded from the binary and samples (2026-09-06, ~22:17 CDT)
+Follow-up to Appendix EA, written four minutes later. EA closed with "whether
+it loads is Evan's test". He tested it. **LaneMaker DOES import `.xodr`** — it
+parsed the file and rejected it for one specific reason:
+
+    xodr map needs to contain custom LaneProfile!
+
+That is a far better outcome than a generic failure: import works, and the
+error is actionable.
+
+## The requirement is a RoadRunner vendor extension, not standard OpenDRIVE
+
+My first grep for `LaneProfile` in the SampleMaps returned **zero hits in both
+files**, which looked like a dead end. It was a bad grep — the element is not
+named "LaneProfile".
+
+Found by reading strings out of `LaneMaker.exe` (read-only inspection, ~4 MB
+binary):
+
+    'xodr map needs to contain custom LaneProfile!'
+    'LaneProfile::Convertside'
+    'LaneProfile::Apply'
+    'LaneProfile::Apply empty'
+    'roadRunnerProfile'          <- the actual element name
+    'roadRunnerBoundaryHide'
+    './/elevationProfile//elevation'   <- it parses by XPath
+    './/lanes//laneOffset'
+    './/lane'
+
+`roadRunnerProfile` IS in the samples — 544 occurrences in `traffic_test.xodr`
+alone. It is a RoadRunner (MathWorks) extension, and it sits as the LAST child
+of `<road>`, after `<objects>`.
+
+The binary also confirms the CGAL guess from EA, which was inference there and
+is evidence here: `D:/Dev/vcpkg/installed/x64-windows/include\CGAL/
+Intersections_2/Line_2_Segment_2.h`. Other strings show the internal model is
+roads + junctions with overlap resolution ("Overlap zone between roads {} & {}
+can't be determined. Neither boundary pair intersects.").
+
+## Schema, decoded from the samples
+
+```xml
+<roadRunnerProfile>
+  <left>
+    <section type_s="12714" laneCount="2" offsetX2="1" />
+    <section type_s="4294967295" laneCount="2" offsetX2="1" />
+  </left>
+  <right>
+    <section type_s="0" laneCount="2" offsetX2="-1" />
+  </right>
+</roadRunnerProfile>
+```
+
+| attribute | meaning | evidence |
+|---|---|---|
+| `type_s` | section start, **s in CENTIMETRES** | road 0 length 127.14 m → 12714; road 1 226.72 m → 22671 |
+| `4294967295` | UINT32_MAX, terminator on the `<left>` list | appears only as a second left entry |
+| `laneCount` | **DRIVING** lanes on that side, medians NOT counted | road 0 left has ids 1,2,3 but lane 1 is `type="median"` → laneCount 2 |
+| `offsetX2` | `laneOffset / laneWidth * 2`, i.e. offset in half-lane units | **verified across all 272 roads**: −1.625/3.25×2 = −1, +1.625 → +1, +3.25 → +2, 0 → 0 |
+
+`offsetX2` is the one I am confident in — it holds on every road in the file
+without exception.
+
+## What is emitted, and what is still a guess
+
+`cad/export_xodr.py` now writes, for our 1-lane-each-way road with
+`laneOffset = 0`:
+
+    <roadRunnerProfile>
+      <left>
+        <section type_s="10991" laneCount="1" offsetX2="0" />
+        <section type_s="4294967295" laneCount="1" offsetX2="0" />
+      </left>
+      <right>
+        <section type_s="0" laneCount="1" offsetX2="0" />
+      </right>
+    </roadRunnerProfile>
+
+10991 = the 109.9093 m route in centimetres. A self-check now asserts the
+`<left>` `type_s` equals the road length in centimetres, so that unit cannot
+silently drift.
+
+⚠️ **NOT understood, and it may still be refused:** why `<left>` carries a
+length-in-cm section PLUS a UINT32_MAX terminator while `<right>` carries a
+single `type_s="0"`. The asymmetry is consistent across the samples but I have
+no reading of it I would defend. **And no sample road has a 1+1 layout without
+a median** — every two-way road there has one — so this mirrors road 0's SHAPE
+with our lane counts rather than copying a true analogue.
+
+**If it is still refused, the cheap end to the guessing is ground truth: draw
+any road in LaneMaker, save it, and read the profile it writes.** One minute of
+Evan's time beats any further inference from samples that do not contain our
+case.
+
+## Process note
+
+While decoding `offsetX2` I dumped a per-road table for all 272 roads into the
+transcript — hundreds of lines where a dozen would have proved the same
+relationship. Uncapped output on an exploratory query. The finding stands; the
+method wasted context.
