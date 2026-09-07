@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-07 ~00:50 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-07 ~15:00 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 138 appendices A–EH; BM/BN/BP/BU/CT/CY/DB/DE/DN are corrections to earlier entries). When this file and the record disagree about
+(append-only, 148 appendices A–ER; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -37,6 +37,19 @@ banked. ~~Nothing has been printed and nothing has been ordered since
 v2) printed on a Bambu P1S in Bambu ABS, giving M1.3's two headline numbers
 (pin holes 4.80 mm, rotating axle bores 5.00 mm, Appendices DI/DK). **Still
 nothing ORDERED** — the BOM stands at $411.45, unbought.
+
+**2026-09-07: a REAL DEFECT was found and fixed in the controller** (commit
+`bfa953e`, Appendix EJ). `ml/train_controller.py` overwrote `act` with the
+DART expert relabels and fed that same array to `rnn_states()`, so the frozen
+MDN-RNN's hidden state `h_t` was built from a counterfactual action sequence
+that never produced the observed latents — worst exactly on the recovery
+frames. `ml/diag_copycat.py` imported the same function and inherited it.
+Fixed by splitting `act` (executed, feeds the LSTM) from `act_target` (expert
+relabel, feeds only the BC loss). **Re-running Appendix Z.3's recovery-data
+comparison: the conclusion SURVIVES and sharpens** — held-out MSE for the
+augmented arm was understated by the leak (pre-fix +2.2% vs baseline, post-fix
+**+17.6%**), and the paired closed-loop result is unchanged at **0/9 survived
+in both arms**. Found by the scheduled daily-audit (Appendix EI).
 
 The sim work ended in a **well-instrumented negative**: no learned policy
 drives reliably, across five separate attempts to make one. That is a
@@ -98,36 +111,44 @@ This lists only what is actually open, cheapest first.)*
 | 4 | **Caliper the coupons.** Every fit verdict so far (pin 4.80 mm, axle 5.00 mm) is fit-by-feel, not a measured diameter. | Turns two working numbers into a measured offset that transfers to CAD |
 | 5 | **Confirm a 12-tooth bevel gear is in the parts bin.** Evan: "prob have one and if not i can print one" — not a confirmation. A bevel's meshing tooth profile is a harder print than a coupon. | Last unconfirmed pre-order check (PRD A1) |
 
-**LaneMaker / OpenDRIVE — RECOMMEND STOPPING HERE (Appendix EG):**
+**LaneMaker / OpenDRIVE — CLOSED AS A NEGATIVE, DO NOT RE-OPEN
+(2026-09-07, Appendices EK–ER):**
 
 `cad/export_xodr.py` emits the figure-8 (`--`), the grid (`--grid`), the grid
 with junctions (`--junctions`) and a crash-bisection ladder (`--probe`).
-**Everything LOADS and RENDERS in LaneMaker.** Simulation still crashes on our
-junction file; it works on Evan's own `~/Downloads/1122.xodr`, so the fault is
-ours. The one remaining structural gap is `<junction><boundary>` (0 of 9 vs the
-reference's 5 of 5). Its structure is decoded — 2 segments per arm, alternating
-a `type="lane"` stretch on a connecting road with a zero-length `type="joint"`
-on the incoming street — but **the trim cannot be derived**: junction 0's lane
-segments run s = 0.948..21.814 on a 22.763 m connector, symmetrically trimmed
-by 0.949 m, and nothing in the file explains 0.949. `side` and segment ordering
-would also be inferred, and three of my inferences in that thread were wrong.
-**This is NOT on the critical path** — the physical track is defined by
-`cad/track_layout_v2.py` and `cad/marking_layout.py`, both complete and
-self-checked. Bank it as "loads and renders; simulation unsupported."
+**Everything LOADS and RENDERS. Simulation crashes, and seven hypotheses have
+now failed to fix it:** self-link (EC), self-intersection (EC), median
+required (EC, re-killed against SIMULATION in EP), U-turns (EH),
+roads-too-short (EO/EP), missing `<junction><boundary>` — built, verified and
+still crashing (EQ) — and missing `<signalPhase>` — added to 68 of 68
+connections, still crashing (ER).
 
-**LaneMaker simulation — CLOSED AS A NEGATIVE (2026-09-07, Appendix EH):**
+**RESOLUTION: use `~/Downloads/figure 8.xodr` if a simulation visual is ever
+wanted.** It is a working figure-8 through a 4-way junction, authored by
+LaneMaker itself — our track's exact topology, already simulating. Nothing
+needs to be generated for that purpose.
 
-Adding U-turns did NOT fix it. The crash is byte-identical before and after
-(`0xC0000409 FAST_FAIL p=7 @0x7FF888D4527E`). That is **four hypotheses, four
-wrong** — self-link, self-intersection, median, U-turns. The one correct
-finding in the whole thread (connecting roads must be one-way, Appendix EF)
-came from diffing Evan's own `~/Downloads/1122.xodr`, not from reasoning.
-`<junction><boundary>` is the only structural difference left, but that makes
-it the last VISIBLE difference, not the known cause — and its 0.949 m trim is
-still underivable. **Standing recommendation: bank the exporter as "loads and
-renders correctly; simulation unsupported" and spend the time on rows 1-5
-above instead.** If the boundary is tried later, treat it as ONE timeboxed
-experiment that may not be the fix.
+**Continuing would mean** bisecting `figure 8.xodr` toward our generated file
+one element at a time, ~6–10 more manual LaneMaker sessions, against a
+closed-source Qt binary, for a tool that is off the critical path. **Not
+recommended.** The physical track is defined by `cad/track_layout_v2.py` and
+`cad/marking_layout.py`, both complete and self-checked, and neither depends
+on any of this.
+
+**What the thread DID produce — four pieces of an undocumented vendor format,
+derived and verified, reusable if this is ever revisited** (details in
+`.claude/codebase-memory/track.md`): the `side` rule (38/38 segments across
+both reference files); the counterclockwise joint→lane boundary walk where
+each lane segment is the right-turn kerb return between adjacent arms;
+`signalPhase` = one id per arm, 0-based; and straight-through trim =
+`connector_length / 24`, machine-precision on 5/5. ⚠️ Turn-connector trims
+(0.37–0.49 × lane, never symmetric) were never solved — the exporter uses
+0.45 × lane as a marked shortcut.
+
+⚠️ **Appendix EL's "side is underivable" and Appendix EN's "the boundary is
+the cause" are both RETRACTED** (EQ). EL hunted positional patterns when the
+rule is per-segment semantic; EN read a rescaled copy of Evan's own working
+file clearing the crash as isolating the boundary, which it does not.
 
 **Blocked on the order:**
 

@@ -137,7 +137,42 @@ def geometries(scale=1.0):
     return out, g, R
 
 
-def _add_road(root, rid, name, geoms, scale, self_link=False):
+# Counterclockwise order of compass arms, E first. The reference files' own
+# boundary walk is counterclockwise -- derived from `figure 8.xodr` by taking
+# each arm's outward heading (N/W/S/E) and reading the order its boundary
+# visits them.
+CCW_ARMS = ("E", "N", "W", "S")
+
+# Trim applied to a boundary lane segment at EACH end, as a fraction of lane
+# width, for a TURN connector. The reference's own turn trims are 0.37-0.49 x
+# lane (8 samples, `1122.xodr` + `figure 8.xodr`), never symmetric and with no
+# formula recovered -- they are where the connector's edge meets the incoming
+# street's edge, which varies with the approach angle.
+# shortcut: one representative value instead of the true intersection.
+# Ceiling: the paved polygon is a few cm off the real kerb line. Upgrade
+# trigger: LaneMaker renders a visibly wrong junction surface.
+TURN_TRIM_LANE_FRAC = 0.45
+
+
+def _boundary_side(contact):
+    """`side` for a type="joint" segment. DERIVED and verified on 38 of 38
+    boundary segments across all 6 junctions of `1122.xodr` and
+    `figure 8.xodr` (2026-09-07, Appendix EQ):
+
+        junction at the road's START (s=0)      -> "right"
+        junction at the road's END   (s=length) -> "left"
+        every type="lane" segment               -> "right", always
+
+    Appendix EL called this underivable because it hunted POSITIONAL patterns
+    (is the first joint left? one left per junction?). The rule is per-segment
+    semantic; the L/R sequences EL tabulated are just each junction's arms in
+    whatever order they happen to be written.
+    """
+    return "right" if contact == "start" else "left"
+
+
+def _add_road(root, rid, name, geoms, scale, self_link=False,
+              lanemaker_convention=False):
     """Append one <road> built from `geoms` and return it.
 
     ONE builder for all three callers -- the figure-8 export, the probe ladder
@@ -180,22 +215,61 @@ def _add_road(root, rid, name, geoms, scale, self_link=False):
     ET.SubElement(ep, "elevation", s="0", a="0", b="0", c="0", d="0")
 
     lanes = ET.SubElement(road, "lanes")
-    ET.SubElement(lanes, "laneOffset", s="0", a="0", b="0", c="0", d="0")
-    sec = ET.SubElement(lanes, "laneSection", s="0")
-    for side, lane_id in (("right", "-1"), ("left", "1")):
-        grp = ET.SubElement(sec, side)
-        ln = ET.SubElement(grp, "lane", id=lane_id, type=LANE_TYPE, level="false")
+    if lanemaker_convention:
+        # ⚠️ EXPERIMENT (2026-09-07): mirror the EXACT lane layout LaneMaker
+        # itself authors for a two-way street, because our 1+1 no-median
+        # layout is unlike ANY road in the reference file and the simulator
+        # reports "No roads to spawn on!" then crashes on our grid even at
+        # 5 m street segments -- i.e. length is not the gate (Appendix EO's
+        # threshold was measured only on rescaled copies of the reference and
+        # does NOT transfer to our file).
+        # `track.md` cleared the median on probes 1-4, but those tested
+        # LOADING; simulating is a different gate, and its own note already
+        # warned "no sample road has a 1+1 layout without a median".
+        # Reference road 0: laneOffset -lane/2; right -1 driving; centre 0
+        # with type=""; left 1 MEDIAN + 2 driving; profile offsetX2 +1/-1.
+        ET.SubElement(lanes, "laneOffset", s="0", a=f"{-lane_w / 2.0:.10f}",
+                      b="0", c="0", d="0")
+        sec = ET.SubElement(lanes, "laneSection", s="0")
+        grp = ET.SubElement(sec, "right")
+        ln = ET.SubElement(grp, "lane", id="-1", type=LANE_TYPE, level="false")
         ET.SubElement(ln, "width", sOffset="0", a=f"{lane_w:.10f}",
                       b="0", c="0", d="0")
         ET.SubElement(ln, "roadMark", sOffset="0", type=EDGE_MARK[0],
                       color=EDGE_MARK[1], laneChange="none", weight="",
                       width=f"{mark_w:.10f}")
-        if side == "right":                     # centre lane sits between them
-            c = ET.SubElement(sec, "center")
-            cl = ET.SubElement(c, "lane", id="0", type="none", level="false")
-            ET.SubElement(cl, "roadMark", sOffset="0", type=CENTRE_MARK[0],
-                          color=CENTRE_MARK[1], laneChange="none", weight="",
+        c = ET.SubElement(sec, "center")
+        cl = ET.SubElement(c, "lane", id="0", type="", level="false")
+        ET.SubElement(cl, "roadMark", sOffset="0", type=CENTRE_MARK[0],
+                      color=CENTRE_MARK[1], laneChange="none", weight="",
+                      width=f"{mark_w:.10f}")
+        grp = ET.SubElement(sec, "left")
+        med = ET.SubElement(grp, "lane", id="1", type="median", level="false")
+        ET.SubElement(med, "width", sOffset="0", a=f"{lane_w:.10f}",
+                      b="0", c="0", d="0")
+        ln = ET.SubElement(grp, "lane", id="2", type=LANE_TYPE, level="false")
+        ET.SubElement(ln, "width", sOffset="0", a=f"{lane_w:.10f}",
+                      b="0", c="0", d="0")
+        ET.SubElement(ln, "roadMark", sOffset="0", type=EDGE_MARK[0],
+                      color=EDGE_MARK[1], laneChange="none", weight="",
+                      width=f"{mark_w:.10f}")
+    else:
+        ET.SubElement(lanes, "laneOffset", s="0", a="0", b="0", c="0", d="0")
+        sec = ET.SubElement(lanes, "laneSection", s="0")
+        for side, lane_id in (("right", "-1"), ("left", "1")):
+            grp = ET.SubElement(sec, side)
+            ln = ET.SubElement(grp, "lane", id=lane_id, type=LANE_TYPE, level="false")
+            ET.SubElement(ln, "width", sOffset="0", a=f"{lane_w:.10f}",
+                          b="0", c="0", d="0")
+            ET.SubElement(ln, "roadMark", sOffset="0", type=EDGE_MARK[0],
+                          color=EDGE_MARK[1], laneChange="none", weight="",
                           width=f"{mark_w:.10f}")
+            if side == "right":                 # centre lane sits between them
+                c = ET.SubElement(sec, "center")
+                cl = ET.SubElement(c, "lane", id="0", type="none", level="false")
+                ET.SubElement(cl, "roadMark", sOffset="0", type=CENTRE_MARK[0],
+                              color=CENTRE_MARK[1], laneChange="none", weight="",
+                              width=f"{mark_w:.10f}")
 
     # LaneMaker refuses any map without this vendor block:
     #   "xodr map needs to contain custom LaneProfile!"
@@ -209,14 +283,18 @@ def _add_road(root, rid, name, geoms, scale, self_link=False):
     # ⚠️ Still unexplained: why <left> needs a length-cm section PLUS the
     # terminator while <right> needs a single type_s="0". No sample road has a
     # 1+1 layout without a median, so this mirrors road 0's SHAPE.
+    # offsetX2 = laneOffset / laneWidth * 2. With the LaneMaker convention
+    # the reference line sits half a lane off centre, so it is -/+1 exactly as
+    # every reference road writes it; our own centred layout gives 0.
+    ox_l, ox_r = ("1", "-1") if lanemaker_convention else ("0", "0")
     prof = ET.SubElement(road, "roadRunnerProfile")
     left = ET.SubElement(prof, "left")
     ET.SubElement(left, "section", type_s=str(int(round(total * 100))),
-                  laneCount="1", offsetX2="0")
+                  laneCount="1", offsetX2=ox_l)
     ET.SubElement(left, "section", type_s="4294967295",
-                  laneCount="1", offsetX2="0")
+                  laneCount="1", offsetX2=ox_l)
     right = ET.SubElement(prof, "right")
-    ET.SubElement(right, "section", type_s="0", laneCount="1", offsetX2="0")
+    ET.SubElement(right, "section", type_s="0", laneCount="1", offsetX2=ox_r)
     return road
 
 
@@ -611,6 +689,7 @@ def junction_layout(scale=1.0, turn_r=None):
                 connectors.append(dict(
                     name="j{} {}->{}".format(jid, arm_in, arm_out),
                     uturn=(arm_in == arm_out),
+                    arm_in=arm_in, arm_out=arm_out,
                     geoms=geoms, junction=jid, r_arc=r_arc,
                     incoming=end_road.get((C, arm_in)),
                     outgoing=end_road.get((C, arm_out))))
@@ -618,7 +697,7 @@ def junction_layout(scale=1.0, turn_r=None):
         junctions.append(dict(id=jid, centre=C, arms=a_list, connections=conns))
 
     meta = dict(Rt=Rt, o=o, pitch=pitch, seg=pitch - 2 * Rt,
-                r_right=Rt - o, r_left=Rt + o, g=g)
+                r_right=Rt - o, r_left=Rt + o, g=g, end_road=end_road)
     return streets, junctions, connectors, meta
 
 
@@ -718,14 +797,17 @@ def _set_link(road, pred=None, succ=None):
         road.insert(0, link)
 
 
-def build_junction_xml(scale=1.0, turn_r=None):
+def build_junction_xml(scale=1.0, turn_r=None, lanemaker_convention=False,
+                       boundary=False):
     streets, junctions, connectors, meta = junction_layout(scale, turn_r)
+    lane_w = meta["g"]["lane"] * scale
     root = _new_root("Autonomous Car Project 3x3 grid with junctions")
     jid_of = {tuple(j["centre"]): j["id"] for j in junctions}
 
     street_els = []
     for i, s in enumerate(streets):
-        r = _add_road(root, i, s["name"], s["geoms"], scale)
+        r = _add_road(root, i, s["name"], s["geoms"], scale,
+                      lanemaker_convention=lanemaker_convention)
         # a street runs between two junctions; each end declares which.
         _set_link(r,
                   pred=("junction", jid_of[s["start"][0]], ""),
@@ -765,15 +847,67 @@ def build_junction_xml(scale=1.0, turn_r=None):
                                 incomingRoad=str(inc),
                                 connectingRoad=str(base + cid),
                                 contactPoint="start")
+            # ONE SIGNAL PHASE PER ARM, 0-based. 63 of 63 connections in both
+            # reference files carry this; ours carried 0 of 68 (2026-09-07).
+            # The rule is visible in `figure 8.xodr`, whose two roads each meet
+            # the junction at BOTH ends: (road 0, lane -1)->2, (road 0, lane 2)
+            # ->3, (road 13, lane -1)->0, (road 13, lane 2)->1 -- i.e. keyed on
+            # the ARM, not the road.
+            ET.SubElement(con, "signalPhase",
+                          id=str(j["arms"].index(c["arm_in"])))
             # WHICH LANE ARRIVES depends on which END of the street touches
             # this junction. Lane -1 runs in +s, so a car reaching the road's
             # END is in -1; one reaching its START came the other way and is
             # in +1. Hardcoding -1 (as the first cut did) mislabels half the
             # approaches. The sample does the same thing -- its first
             # connection is laneLink from="2".
-            frm = "-1" if contact == "end" else "1"
+            # With LaneMaker's own layout the left side is lane 1 (MEDIAN)
+            # + lane 2 (driving), so the left-hand approach arrives in lane 2
+            # -- which is exactly what every reference connection writes
+            # (from="2"). Our centred layout has the driving lane at 1.
+            left_id = "2" if lanemaker_convention else "1"
+            frm = "-1" if contact == "end" else left_id
             ET.SubElement(con, "laneLink", **{"from": frm, "to": "-1"})
             n += 1
+
+        if not boundary:
+            continue
+        # THE BOUNDARY IS THE JUNCTION'S PAVED-AREA POLYGON, and its absence is
+        # why our junctions render as empty space (Appendix EP). It is a CYCLIC
+        # WALK: for each pair of arms adjacent in counterclockwise order, emit
+        #   <segment type="joint">  zero-length, on the INCOMING STREET at arm i
+        #   <segment type="lane">   a stretch of the connector arm i -> arm i+1
+        # That connector is the RIGHT TURN between them, i.e. literally the kerb
+        # return -- verified on both reference files, where every lane segment's
+        # predecessor/successor are exactly its neighbouring joints (Appendix EQ).
+        arm_of = {(c["arm_in"], c["arm_out"]): (base + cid, c)
+                  for cid in j["connections"] for c in [connectors[cid]]}
+        order = [a for a in CCW_ARMS if a in j["arms"]]
+        bel = ET.SubElement(jel, "boundary")
+        for i, arm in enumerate(order):
+            nxt = order[(i + 1) % len(order)]
+            street = meta["end_road"].get((tuple(j["centre"]), arm))
+            pair = arm_of.get((arm, nxt))
+            if street is None or pair is None:
+                raise SystemExit(
+                    f"junction {j['id']}: no street or connector for arm "
+                    f"{arm}->{nxt}; the boundary walk cannot close.")
+            sidx, contact = street
+            slen = sum(gm[3] for gm in streets[sidx]["geoms"])
+            at = 0.0 if contact == "start" else slen
+            ET.SubElement(bel, "segment", roadID=str(sidx),
+                          sStart=f"{at:.10f}", sEnd=f"{at:.10f}",
+                          side=_boundary_side(contact), type="joint")
+            crid, c = pair
+            clen = sum(gm[3] for gm in c["geoms"])
+            # straight-through connectors trim by length/24 -- machine-precision
+            # on 5/5 reference samples (Appendix EK); turns use the fraction of
+            # lane width above, which is an approximation, not a derivation.
+            trim = clen / 24.0 if c["r_arc"] is None else lane_w * TURN_TRIM_LANE_FRAC
+            trim = min(trim, clen * 0.45)         # never invert on a short arc
+            ET.SubElement(bel, "segment", roadID=str(crid),
+                          sStart=f"{trim:.10f}", sEnd=f"{clen - trim:.10f}",
+                          side="right", type="lane")
     return root, streets, junctions, connectors, meta
 
 def main() -> int:
@@ -787,6 +921,37 @@ def main() -> int:
                     help="3x3 grid WITH junction records and turn arcs")
     ap.add_argument("--grid", action="store_true",
                     help="write the 3x3 street grid instead of the route")
+    ap.add_argument("--sim-min-road", type=float, default=None,
+                    metavar="METRES",
+                    help="LANEMAKER ONLY. Scale the export so the SHORTEST "
+                         "road is at least this long, instead of using the "
+                         "true full scale. LaneMaker refuses to spawn a car "
+                         "on short roads: measured 2026-09-07 (Appendix EO), "
+                         "1.463 m FAILS and 2.553 m works, and our street "
+                         "segments are exactly 1.463 m at true full scale, so "
+                         "the honest export cannot be simulated. This is a "
+                         "VIEWING scale for a tool that is off the critical "
+                         "path -- it does NOT change the physical track, and "
+                         "the lane renders unrealistically wide as the price. "
+                         "5 matches the comfortably-spawning probe.")
+    ap.add_argument("--lanemaker-lanes", action="store_true",
+                    help="EXPERIMENT (2026-09-07). Give street roads the EXACT "
+                         "lane layout LaneMaker authors for a two-way street: "
+                         "a MEDIAN lane, reference line half a lane off centre, "
+                         "offsetX2 -/+1, left driving lane id 2. Our 1+1 "
+                         "centred layout matches no road in the reference file, "
+                         "and the simulator reports 'No roads to spawn on!' "
+                         "then crashes on our grid even at 5 m streets, so "
+                         "length is not the gate. track.md cleared the median "
+                         "on probes 1-4 -- but those tested LOADING, and "
+                         "simulating is a different gate.")
+    ap.add_argument("--boundary", action="store_true",
+                    help="emit <junction><boundary>, the junction's paved-area "
+                         "polygon. Its absence is why our junctions render as "
+                         "empty space and the simulator finds no drivable area "
+                         "(Appendix EP). `side` and the segment order are "
+                         "DERIVED and verified on 38/38 reference segments "
+                         "(EQ); the trim on turn connectors is approximate.")
     ap.add_argument("--self-check", action="store_true")
     args = ap.parse_args()
     if args.self_check:
@@ -797,9 +962,36 @@ def main() -> int:
     if args.junctions:
         ms = _load("marking_specs.py")
         scale = 1.0 if args.model_scale else ms.scale()
-        root, streets, junctions, connectors, m = build_junction_xml(scale)
+        if args.sim_min_road is not None:
+            if args.model_scale:
+                raise SystemExit("--sim-min-road and --model-scale both set "
+                                 "a scale; pick one.")
+            # The shortest road in this network is the street segment between
+            # two junctions, `pitch - 2*Rt` -- 100 mm at model scale, because
+            # Rt=500 against pitch=1100 leaves the grid 91% junction. Derive
+            # the scale from IT, not from the lane, since it is what the spawn
+            # threshold acts on.
+            g = _load("track_layout_v2.py").build()
+            seg_model = g["pitch"] - 2 * g["R"]
+            scale = args.sim_min_road / seg_model
+        root, streets, junctions, connectors, m = build_junction_xml(
+            scale, lanemaker_convention=args.lanemaker_lanes,
+            boundary=args.boundary)
+        if args.sim_min_road is not None:
+            # Appendix EO measured the spawn threshold in (1.463, 2.553] m.
+            # Refuse to write a file that lands under the known-good end --
+            # the failure mode in LaneMaker is a silent no-spawn, not an
+            # error, so it has to be caught here.
+            shortest = min(float(r.get("length")) for r in root.iter("road"))
+            assert shortest >= 2.553, (
+                f"shortest road {shortest:.4f} m is under 2.553 m, the "
+                f"shortest length measured to actually spawn (Appendix EO; "
+                f"1.463 m is measured to FAIL). Raise --sim-min-road.")
         out = Path(args.out) if args.out else Path(__file__).with_name(
             "track_grid3x3_junctions_model.xodr" if args.model_scale
+            else "track_grid3x3_junctions_bnd.xodr" if args.boundary
+            else "track_grid3x3_junctions_lmlanes.xodr" if args.lanemaker_lanes
+            else "track_grid3x3_junctions_sim.xodr" if args.sim_min_road is not None
             else "track_grid3x3_junctions.xodr")
         ET.indent(root, space="  ")
         out.write_text(XML_DECL + ET.tostring(root, encoding="unicode"),

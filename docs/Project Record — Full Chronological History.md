@@ -175,6 +175,14 @@ the dated entry, not the digest.
 - [EH — NEGATIVE: U-turns did not fix the simulation crash (identical fault address); four hypotheses, four wrong, and every correct finding came from evidence](#appendix-eh---negative-u-turns-did-not-fix-the-simulation-crash-identical-fault-address-four-hypotheses-four-wrong-and-every-correct-finding-came-from-evidence-2026-09-07-0050-cdt) (09-07)
 - [EI — Scheduled daily-audit: the controller's history feature is built from actions that never happened, and two self-checks pass on a broken artifact](#appendix-ei---scheduled-daily-audit-the-controllers-history-feature-is-built-from-actions-that-never-happened-and-two-self-checks-pass-on-a-broken-artifact-2026-09-07-0723-cdt) (09-07)
 - [EJ — Fixed the DART action contamination in the controller: rnn_states() was fed the expert relabel instead of the executed sequence; the fix strengthens Z.3's negative, closed-loop unchanged at 0/9](#appendix-ej---fixed-the-dart-action-contamination-in-the-controller-rnn_states-was-fed-the-expert-relabel-instead-of-the-executed-sequence-the-fix-strengthens-z3s-negative-closed-loop-unchanged-at-09-2026-09-07-1032-cdt) (09-07)
+- [EK — LaneMaker boundary, one more timeboxed try: the straight-through connector trim is exactly length/24 (5/5 samples, machine precision) but it covers only 1 of ~4 unresolved pieces -- not implemented](#appendix-ek---lanemaker-boundary-one-more-timeboxed-try-the-straight-through-connector-trim-is-exactly-length24-55-samples-machine-precision-but-it-covers-only-1-of-4-unresolved-pieces----not-implemented-2026-09-07-1117-cdt) (09-07)
+- [EL — LaneMaker boundary, tried again: side does not follow any simple positional pattern across 5 junctions -- still not enough to build even one junction without guessing](#appendix-el---lanemaker-boundary-tried-again-side-does-not-follow-any-simple-positional-pattern-across-5-junctions----still-not-enough-to-build-even-one-junction-without-guessing-2026-09-07-1143-cdt) (09-07)
+- [EM — Recreated 1122.xodr 1:1 at our scale: new rescale_reference_xodr.py scales every dimensioned attribute by one factor, leaves junction/boundary/side structure byte-identical -- untested in LaneMaker](#appendix-em---recreated-1122xodr-11-at-our-scale-new-rescale_reference_xodrpy-scales-every-dimensioned-attribute-by-one-factor-leaves-junctionboundaryside-structure-byte-identical----untested-in-lanemaker-2026-09-07-1155-cdt) (09-07)
+- [EN — THE CRASH DID NOT HAPPEN: a boundary-carrying file reached spawn logic, so the boundary really was the cause; LaneMaker refuses short roads, which threatens our 1.46 m street segments; and my rescaler was silently skipping every road object](#appendix-en---the-crash-did-not-happen-a-boundary-carrying-file-reached-spawn-logic-so-the-boundary-really-was-the-cause-lanemaker-refuses-short-roads-which-threatens-our-146-m-street-segments-and-my-rescaler-was-silently-skipping-every-road-object-2026-09-07-1206-cdt) (09-07)
+- [EO — CONFIRMED NEGATIVE: our 1.463 m street segments are below LaneMaker's spawn threshold (1.463, 2.553] -- a second blocker in front of the boundary, and it is a RATIO problem no uniform scale fixes](#appendix-eo---confirmed-negative-our-1463-m-street-segments-are-below-lanemakers-spawn-threshold-1463-2553----a-second-blocker-in-front-of-the-boundary-and-it-is-a-ratio-problem-no-uniform-scale-fixes-2026-09-07-1221-cdt) (09-07)
+- [EP — The LaneMaker lane convention did NOT fix it and EO's spawn threshold does not apply to our file -- but the screenshot shows 8 of 9 junctions rendering as EMPTY, which makes the missing boundary polygon one cause for all three symptoms](#appendix-ep---the-lanemaker-lane-convention-did-not-fix-it-and-eos-spawn-threshold-does-not-apply-to-our-file----but-the-screenshot-shows-8-of-9-junctions-rendering-as-empty-which-makes-the-missing-boundary-polygon-one-cause-for-all-three-symptoms-2026-09-07-1439-cdt) (09-07)
+- [EQ — Evan's figure-8 export cracked BOTH boundary rules -- side (38/38) and the counterclockwise kerb-return walk -- so the boundary is now built and verified, and it STILL crashes; EN's inference retracted; signalPhase found missing from all 68 connections](#appendix-eq---evans-figure-8-export-cracked-both-boundary-rules----side-3838-and-the-counterclockwise-kerb-return-walk----so-the-boundary-is-now-built-and-verified-and-it-still-crashes-ens-inference-retracted-signalphase-found-missing-from-all-68-connections-2026-09-07-1450-cdt) (09-07)
+- [ER — CLOSED AS A NEGATIVE: signalPhase did not fix it either -- seven hypotheses, seven wrong; the thread's real yield is four derived-and-verified pieces of the vendor format, and the resolution is to use Evan's own working figure-8 export](#appendix-er---closed-as-a-negative-signalphase-did-not-fix-it-either----seven-hypotheses-seven-wrong-the-threads-real-yield-is-four-derived-and-verified-pieces-of-the-vendor-format-and-the-resolution-is-to-use-evans-own-working-figure-8-export-2026-09-07-1459-cdt) (09-07)
 
 ---
 
@@ -14413,3 +14421,631 @@ out of this task's scope.
 `ml/runs/eval_paired_ei/`, `ml/runs/eval_paired_smoke/` (new run artifacts,
 untracked). Appendix EI (the audit that found this) and this entry are both
 still uncommitted on top of `5773bb5`.
+
+# Appendix EK - LaneMaker boundary, one more timeboxed try: the straight-through connector trim is exactly length/24 (5/5 samples, machine precision) but it covers only 1 of ~4 unresolved pieces -- not implemented (2026-09-07 ~11:17 CDT)
+**WHAT:** One more timeboxed attempt at the LaneMaker `<junction><boundary>` trim
+(Appendix EH's open item), per the "only evidence has ever been right" method
+rule. Found a genuine, precise sub-pattern in `~/Downloads/1122.xodr`
+(Evan's own LaneMaker export, ground truth) that was not in the record before
+-- but it does not add up to a working fix, and nothing was implemented in
+`cad/export_xodr.py`.
+
+**METHOD:** Parsed every `<road length=...>` and every `<boundary><segment
+.../>` in the reference file (5 junctions, 15 "lane"-type boundary segments
+across junctions 0-4), and computed `start_trim = sStart` and
+`end_trim = length - sEnd` for each.
+
+**THE FINDING:** Five of the fifteen segments (roads 4, 2, 20, 25, 49) --
+each independently confirmed to be a **straight-through connecting road**
+(`<line/>` geometry linking one street directly to another, not a turn arc)
+-- have `start_trim == end_trim == road_length / 24`, matching to 10-12
+significant figures:
+
+| road | length (m) | trim (m) | trim / length |
+|---|---|---|---|
+| 4  | 22.762907957366529 | 0.94845449822360617 | 0.041666... |
+| 2  | 22.762907957366529 | 0.94845449822360628 | 0.041666... |
+| 20 | 22.749895796034284 | 0.94791232483476551 | 0.041666... |
+| 25 | 22.819218983688788 | 0.9508007909870374  | 0.041666... |
+| 49 | 22.749953519664004 | 0.94791472998600013 | 0.041666... |
+
+`length/24` beats the competing hypothesis "trim is just a fixed ~0.949 m
+constant" -- the constant-hypothesis only matches these five to ~3
+significant figures (spread 0.9479-0.9508), `length/24` matches to
+10-12. This is the first trim relationship this project has found that
+holds to machine precision rather than "close enough to eyeball."
+
+**WHAT IT DOES NOT SETTLE, so nothing was built on it:**
+1. **It only covers ONE of at least two trim families.** The other 10
+   boundary segments (roads 21, 16, 9, 24, 43, 34, 36, 31, 53, 48 -- all
+   turn-arc connectors, not straight-through) cluster around 1.0-1.55 m of
+   absolute trim with no clean formula found in this timebox; they do NOT
+   fit `length/24` (that would predict 0.44-0.55 m, roughly half the actual
+   values).
+2. **The reference file's junctions 0/1/2/4 are 2-3-arm topologies**, not
+   the plain 4-way crossings our own grid needs at its 1 interior junction
+   (8 of our 9 junctions are corner/edge junctions with 2-3 arms and NO
+   opposite-arm partner, so no straight-through connector exists for most
+   of their arms at all -- `length/24` would apply to 0 of those arms).
+   Junction 3's structure (four arms, one incoming road with FOUR
+   connecting roads) was not decoded either.
+3. **Generalizability is unconfirmed.** All 5 samples come from one export,
+   at one lane width. Whether `1/24` is a LaneMaker constant or an artifact
+   of this specific file's lane-width/geometry has no second data point to
+   test -- would need a second reference export at a different lane width.
+4. Selection rule (WHICH connecting road represents an arm when several
+   exist) and the `side` attribute logic remain undecoded, same as EG/EH.
+
+**VERDICT:** Real, verified new evidence -- not the 5th guess. But it closes
+at most 1 of the ~4 unresolved pieces needed for a working boundary block,
+and covers a minority of our own junctions' arms even where it does apply.
+Implementing a boundary generator now would still mean guessing on the
+majority of arms, repeating the exact "hypothesis wrong" pattern Appendix EH
+already flagged. **Not implemented. Standing recommendation to bank the
+exporter as "loads and renders; simulation unsupported" still holds.**
+
+**If pursued further, the next real step is external to this session:**
+export a SECOND reference file from LaneMaker's GUI with a different lane
+width (or built by hand around a simple 4-arm crossing) to test whether
+`length/24` survives a scale change, and to get a clean 4-way sample for the
+turn-arc family. That is Evan's own LaneMaker session, not something
+derivable from the one file on disk.
+
+# Appendix EL - LaneMaker boundary, tried again: side does not follow any simple positional pattern across 5 junctions -- still not enough to build even one junction without guessing (2026-09-07 ~11:43 CDT)
+**WHAT:** Evan asked to try the LaneMaker boundary again, a second time in the
+same session (after Appendix EK). Checked whether EK's `length/24` trim
+finding was enough, on its own, to build a boundary for at least one
+COMPLETE junction in our own grid without guessing. It is not — `side` is
+also load-bearing and does not follow any of the simple patterns tested.
+**Nothing implemented in `cad/export_xodr.py`; no file regenerated.**
+
+**Which junction was the target.** Our `--junctions` grid has 1 four-way
+(interior) + 4 three-way (edge) + 4 two-way (corner) junctions
+(`cad/export_xodr.py::junction_layout`). Only the four-way junction has a
+straight-through connector (`r_arc is None`, `elif abs(cross) < 1e-9` branch)
+for EVERY arm — the 3-way and 2-way junctions have at least one arm with no
+opposite partner, so most of their boundary segments would need the turn-arc
+family EK already found has no discovered formula. The four-way junction was
+therefore the one candidate for a fully evidence-backed (not guessed) boundary
+block.
+
+**`side` tested against `1122.xodr`'s 5 junctions, position by position:**
+
+| junction | joint sequence (L=left, R=right) |
+|---|---|
+| 0 (2 arms) | **L**, R |
+| 1 (3 arms) | **L**, R, R |
+| 2 (3 arms) | R, **L**, R |
+| 3 (4 arms) | **L**, **L**, R, R |
+| 4 (3 arms) | **L**, R, **L** |
+
+No positional rule survives all five: not "first is always left" (junction 2
+breaks it), not "one left per junction" (junction 3 has two), not "left
+count scales with arm count" (junction 4 has 3 arms and 2 lefts, junction 1
+has 3 arms and 1 left). `side` almost certainly encodes which side of the
+connecting road's own reference line the joint point falls on — a real
+geometric fact from LaneMaker's internal boundary-polygon computation — but
+that requires reproducing the polygon computation itself, not a lookup table
+from 5 samples.
+
+**VERDICT: still not evidence, so still not built.** EK already flagged
+`side` as unresolved; this attempt turned that into a tested, ruled-out set
+of simple hypotheses rather than an open question, but the trim finding does
+not carry the whole boundary on its own. Implementing even the one
+"fully-evidenced" junction would mean guessing `side` on all four of its
+joints — the exact repeat of the "4 hypotheses, 4 wrong" pattern Appendix EH
+already named.
+
+**The one path that isn't guessing:** build ONE plain 4-way crossing by hand
+in LaneMaker's own GUI (not a SampleMap, not our exporter) and read the
+`side` values it writes. That is a ground-truth read, the same method that
+already resolved the one-way-connecting-road requirement (Appendix EF) and
+the `roadRunnerProfile` schema. It needs Evan's own LaneMaker session — nothing
+here can substitute for it.
+
+**Standing recommendation unchanged:** bank the exporter as "loads and
+renders; simulation unsupported." Next real move on this thread is the
+hand-built-junction export above, not another read of the existing file.
+
+# Appendix EM - Recreated 1122.xodr 1:1 at our scale: new rescale_reference_xodr.py scales every dimensioned attribute by one factor, leaves junction/boundary/side structure byte-identical -- untested in LaneMaker (2026-09-07 ~11:55 CDT)
+**WHAT:** Evan's instruction after EK/EL: stop deriving the boundary/`side`
+semantics, `1122.xodr` "works perfectly, try to recreate it 1:1." Clarified
+with Evan which "1:1" was meant (three options offered); chose: **rescale
+the reference file itself, keep its exact topology, change nothing
+structural.**
+
+**NEW SCRIPT: `cad/rescale_reference_xodr.py`.** Parses `1122.xodr` and
+multiplies every DIMENSIONED numeric attribute by one scale factor `k`,
+leaving every structural element (junctions, connections, laneLink,
+boundary segments, `side`, `type`, element order) byte-identical. This is a
+documented, mechanical transform (OpenDRIVE's own geometry schema), not a
+guess:
+
+- `<geometry s x y length>`: all four `*= k`; `hdg` (an angle) untouched.
+- `<arc curvature>`, `<spiral curvStart/curvEnd>`: `/= k` (radius `*= k`).
+- `<paramPoly3>` (`pRange="normalized"`, confirmed the ONLY range used in
+  this file, asserted in code): all 8 coefficients `*= k` uniformly, since
+  the parameter `p` is dimensionless in [0,1].
+- `<elevation>`, `<laneOffset>`, `<width>` (cubic-in-s polynomials whose
+  output has dimension length): `s *= k`; `a *= k`; `b` unchanged;
+  `c /= k`; `d /= k^2` (standard polynomial-rescaling algebra).
+- `<roadMark sOffset width>`: both `*= k`.
+- `<road length>`, `<segment sStart/sEnd>` (boundary): `*= k`.
+- `roadRunnerProfile <section type_s>`: `*= k`, **except** the literal
+  `4294967295` sentinel (UINT32_MAX terminator, Appendix EA), passed through
+  unchanged — it is never a distance.
+- `offsetX2` and every id/type/enum/contactPoint: untouched (a ratio and
+  non-length fields are invariant under uniform scale).
+
+**Bounding box, without curve evaluation.** Every geometry's start point
+`(x,y)` plus a pad of its own `length` in each direction gives a safe outer
+bbox (no arc/spiral/paramPoly3 can extend farther from its start than its
+own arc length). Reference footprint (max of width/height): **129.334 m**.
+
+**Run at `--target 2.7`** (our project's model-scale convention):
+`k = 0.020876`. Output `cad/track_1122_rescaled.xodr`:
+
+| | reference | rescaled |
+|---|---|---|
+| roads | 55 | 55 (unchanged) |
+| junctions | 5 | 5 (unchanged) |
+| boundary blocks | 5 | 5 (unchanged, side/type/order untouched) |
+| footprint (est.) | 129.334 m | 2.700 m |
+| total road length | 1055.139 m | 22.027 m |
+
+**Verified, not asserted:**
+- `self_check()`: scaling at k=0.1 moves the estimated footprint by exactly
+  k (129.334 -> 12.933 m), confirming the transform is linear as designed.
+- Element-tag counts identical between reference and output (`diff` on
+  sorted/uniqued tag lists: empty).
+- `hdg` values identical char-for-char (angles correctly left untouched).
+- `offsetX2` values identical char-for-char.
+- Lane width spot check: `a="3.25"` -> `a="0.06784754443936913"`,
+  matches `3.25 * 0.020876` to full float precision.
+- The `4294967295` sentinel count matches (8 in both files) and its value
+  is unchanged where present.
+- Output parses as well-formed XML (`ET.parse` succeeds).
+
+**WHAT THIS DOES NOT CLAIM:** this is Evan's own test map (5 junctions, an
+arbitrary layout), resized -- not our project's 3x3 figure-8 track. If it
+loads and simulates in LaneMaker, that confirms the rescale transform itself
+introduces no new fault and unblocks testing the REST of the pipeline
+(sim-transfer, etc.) on a real closed network; it does NOT answer EK/EL's
+boundary-derivation question, and does not produce a track matching our
+car's actual intended geometry. **Cannot be verified from this session** --
+LaneMaker is a Windows GUI app with no automation tool available here; every
+load/crash verdict in this project has come from Evan running it directly.
+
+**File to test:** `D:\ClaudeCode\Autonomous Car Project\cad\track_1122_rescaled.xodr`
+
+# Appendix EN - THE CRASH DID NOT HAPPEN: a boundary-carrying file reached spawn logic, so the boundary really was the cause; LaneMaker refuses short roads, which threatens our 1.46 m street segments; and my rescaler was silently skipping every road object (2026-09-07 ~12:06 CDT)
+**WHAT:** Evan tested the rescaled copies from Appendix EM in LaneMaker. Three
+results, one of them the most important thing this thread has produced.
+
+## 1. THE CRASH DID NOT HAPPEN. This is the headline.
+
+`cad/track_1122_rescaled.xodr` (k=0.020876) **loaded, and simulation did not
+crash.** No `0xC0000409 FAST_FAIL p=7`. It failed instead on a benign,
+readable warning:
+
+    [2026-09-07 11:57:35.328] [warning] No roads to spawn on!
+    Try creating longer roads.
+
+Four appendices (EE-EH) chased that crash on OUR generated grid, and EG/EH
+left `<junction><boundary>` as "the last VISIBLE structural difference, which
+does not make it the cause." **A file carrying a complete, valid boundary got
+all the way to spawn logic.** That is the strongest evidence so far that the
+boundary really was the cause -- but note precisely what it is worth: the
+boundary in this file was COPIED, not derived, so this confirms the diagnosis
+without supplying the fix. EK/EL's derivation problem is untouched.
+
+## 2. SPAWN THRESHOLD: LaneMaker refuses roads that are too short
+
+| k | shortest road | result |
+|---|---|---|
+| 0.020876 | 0.213 m | no spawn ("try creating longer roads") |
+| 0.5 | **5.105 m** | **spawns** |
+
+Threshold is somewhere in 0.213-5.105 m; not narrowed further because Evan
+moved on. Reference untouched (k=1) has a 10.210 m shortest road.
+
+⚠️ **DIRECT CONSEQUENCE FOR OUR OWN TRACK, and it is not a small one.** Our
+grid's street segments are `pitch - 2*Rt` = 1100 - 2x500 = **100 mm at model
+scale = 1.463 m at full scale** (x14.6304). That is FAR below the reference's
+10.210 m and plausibly below LaneMaker's spawn threshold. **A car may be
+unspawnable on our geometry no matter what the boundary block says** -- a
+blocker nobody had identified, because every prior attempt crashed before
+reaching spawn logic. If confirmed, the fix is geometric (raise pitch
+relative to the 500 mm kerb return radius to lengthen street segments), not
+structural.
+
+## 3. A REAL DEFECT IN `rescale_reference_xodr.py`, found by Evan's eyes
+
+Evan: the directional turn arrows rendered "off to the side instead of on the
+road." **The script scaled no `<object>` element at all** -- the reference
+carries 31 of them (`type="roadMark"`, `subtype="arrow"` and
+`subtype="stopping-line"`). An arrow is
+`<object s="10" t="3.25" width="2" .../>`, where `t` is lateral offset from
+the reference line and 3.25 is exactly one lane width. At k=0.5 the lane
+halved to 1.625 m while `t` stayed 3.25 m, putting every arrow **exactly 2x
+too far out** -- the reported symptom, mechanism confirmed rather than
+guessed. `s="10"` also landed past the end of a road now 5.105 m long, and a
+2 m glyph sat on a 1.625 m lane.
+
+A full element/attribute census of the reference found a SECOND miss:
+`<laneSection s>`. Both fixed: `<object>` now scales
+`s, t, zOffset, length, width, height, radius, validLength` and leaves
+`hdg/pitch/roll/orientation` (angles) alone; `<laneSection s>` scales.
+
+**The guard that would have caught it, added and PROVEN TO FIRE.**
+`ATTR_CLASS` classifies every (tag, attribute) pair in the format as
+length / inverse / poly / angle / opaque, and `check_coverage()` REFUSES to
+scale a file containing an unclassified pair -- because the failure mode here
+is silence, not an error. `self_check()` additionally verifies that **every
+one of the 1202 length-class values in the file moved by exactly k**, which
+is the assertion that fails if a future element is added to the format and
+left out of `rescale()`. Verified firing on a synthetic
+`<road superelevation="0.02">`.
+
+Post-fix invariant, checked at three scales: arrow `t / lane_width = 1.000`
+at k=1.0, 0.5 and 0.25 (it was 2.000 at k=0.5 before the fix).
+
+## Files
+
+- `cad/probe_spawn_k100.xodr` (k=1.0, shortest road 10.210 m, lane 3.250 m)
+  -- a round-trip control: if this behaves exactly like the untouched
+  reference, the transform is proven neutral.
+- `cad/probe_spawn_k050.xodr` (k=0.5, 5.105 m, lane 1.625 m) -- the scale
+  already known to spawn, now with arrows correct.
+- `cad/probe_spawn_k025.xodr` (k=0.25, 2.553 m, lane 0.812 m).
+
+⚠️ **Filenames must not contain a period.** The first cut wrote
+`probe_spawn_k0.5.xodr`; Qt file dialogs that split the extension at the
+FIRST dot read that as `.5.xodr`, fail the `*.xodr` filter, and report the
+path as invalid -- which is what Evan hit. Tags are `k100/k050/k025` now.
+
+## RECOMMENDATION: stop shrinking the simulation file
+
+The 2.7 m target was chosen to match the physical floor, and that was the
+wrong instinct for THIS artifact. The physical track is 2.7 m; the OpenDRIVE
+file is a representation of it, and `export_xodr.py` already defaults to FULL
+scale (x14.6304 -> lane 3.6576 m) for exactly this reason. **3.6576 m is
+within 13% of the reference's own 3.25 m lane**, i.e. our full-scale export
+already sits in the dimensional range LaneMaker is built for. Shrinking is
+what produced both the spawn failure and the arrow artifact. Simulate at full
+scale; convert to model scale only for fabrication.
+
+# Appendix EO - CONFIRMED NEGATIVE: our 1.463 m street segments are below LaneMaker's spawn threshold (1.463, 2.553] -- a second blocker in front of the boundary, and it is a RATIO problem no uniform scale fixes (2026-09-07 ~12:21 CDT)
+**WHAT:** Bisected LaneMaker's spawn threshold with rescaled copies of
+`1122.xodr` (the rescaler proven numerically neutral at k=1.0, Appendix EN).
+**CONFIRMED NEGATIVE: our own grid's street segments are too short for
+LaneMaker to spawn a car, independent of the `<junction><boundary>`
+question.**
+
+## The measurements (all Evan's, in LaneMaker)
+
+| probe | k | shortest road | longest road | spawns? |
+|---|---|---|---|---|
+| `track_1122_rescaled.xodr` | 0.020876 | 0.213 m | 1.103 m | **NO** |
+| `probe_spawn_k010.xodr` | 0.1 | 1.021 m | 5.284 m | **NO** |
+| `probe_spawn_kours.xodr` | 0.143292 | **1.4630 m** | 7.571 m | **NO** |
+| `probe_spawn_k025.xodr` | 0.25 | 2.553 m | 13.209 m | YES |
+| `probe_spawn_k050.xodr` | 0.5 | 5.105 m | 26.418 m | YES |
+| `probe_spawn_k100.xodr` | 1.0 | 10.210 m | 52.837 m | YES |
+
+**Threshold is in (1.463 m, 2.553 m].** `probe_spawn_kours` was built to have
+its shortest road equal EXACTLY our own full-scale street segment
+(k = 1.46304 / 10.210176 = 0.143292), so this is a direct measurement of our
+geometry, not an extrapolation.
+
+**"One long road is enough" is RULED OUT.** `kours` carries roads up to
+7.571 m — far above the 2.553 m known to work — and still did not spawn. The
+short roads gate it. Whether the true gate is shortest-road length or overall
+network scale cannot be separated with three points; both fit the data. Do
+not state one as fact.
+
+## Our own file, measured not assumed
+
+`cad/track_grid3x3_junctions.xodr`, 80 roads:
+- **all 12 street segments are exactly 1.4630 m** — the length just proven
+  not to spawn
+- the other 68 roads (turn arcs, straight-throughs, U-turns) are 5.75-14.63 m
+- longest road 14.6304 m
+
+## THE ROOT CAUSE IS A RATIO, AND IT WAS ALREADY ON THE RECORD
+
+`track.md` already carried it: **the grid is 91% junction, 9% street** — a
+direct consequence of Rt=500 mm against pitch=1100 mm, leaving
+`pitch - 2*Rt` = 100 mm of street per 1100 mm of pitch. In proportion terms:
+
+- ours: shortest road / lane width = 1.463 / 3.6576 = **0.40x**
+- reference: 10.210 / 3.25 = **3.14x**
+
+**No uniform scale factor fixes a ratio** — it multiplies both numbers
+together. This is why `kours` fails at the same proportions that k=1.0
+passes.
+
+## Two options, and the recommendation
+
+**A. Export the .xodr at a larger scale than the true x14.6304** (need
+≳x25.5 for 2.553 m streets; x50 would match the comfortably-spawning
+5.105 m). Cost: lanes render 6.5-12.5 m wide, dimensionally unreal. Buys:
+streets clear the threshold, **zero change to the physical track**, corner
+freeze untouched. Breaks if LaneMaker's physics/speeds are ever meant to
+transfer to the real car.
+
+**B. Raise pitch from 1100 mm to ≥1174.5 mm** (= 2*500 + 174.5, where
+174.5 mm model = 2.553 m at x14.6304). Span goes 2700 -> 2849 mm, leaving
+151 mm spare against the script's 100 mm self-check — **it does fit the
+3.0 m floor.** Cost: re-derive pitch in `track_layout_v2.py` (pitch is
+computed by `grid_pitch()`/`best_straight()`, not a constant, so this is not
+a one-line change), re-run the marking layout, and re-check the print plan.
+
+**RECOMMENDED: A.** `HANDOFF.md` puts LaneMaker off the critical path — the
+physical track is defined by `track_layout_v2.py` + `marking_layout.py`, and
+the policy trains in gym-donkeycar, not LaneMaker. Option B lets a
+visualisation tool redesign a track whose corner geometry is FROZEN until
+T2. Not adopted either way without Evan's call; nothing changed in
+`export_xodr.py` this entry.
+
+## Status of the boundary question
+
+Unchanged and still open. EN showed a boundary-carrying file clears the
+`0xC0000409` crash; EK/EL showed the trim rule for straight-through
+connectors is `length/24` but `side` is underivable from the one reference
+file. This entry adds a SECOND, independent blocker sitting in front of it:
+even a perfect boundary would not spawn a car on 1.463 m streets.
+
+# Appendix EP - The LaneMaker lane convention did NOT fix it and EO's spawn threshold does not apply to our file -- but the screenshot shows 8 of 9 junctions rendering as EMPTY, which makes the missing boundary polygon one cause for all three symptoms (2026-09-07 ~14:39 CDT)
+**WHAT:** Two negatives and one strong positive read, all from a single
+screenshot Evan sent of `cad/track_grid3x3_junctions_lmlanes.xodr` open in
+LaneMaker.
+
+## NEGATIVE 1: the LaneMaker lane convention did NOT fix it
+
+`--lanemaker-lanes` gives street roads the EXACT layout LaneMaker authors —
+median lane id 1, driving lane id 2 on the left, `laneOffset = -lane/2`,
+`offsetX2 = +1/-1`, centre lane `type=""`, junction `laneLink from="2"`
+matching the reference's own `from` histogram. **Same failure: "No roads to
+spawn on!" then the crash.**
+
+**The median hypothesis is now properly dead.** `track.md` had struck it out
+on probes 1-4, but those tested LOADING only; this tests SIMULATION and it
+still fails. The median is not the gate either way. Recorded so no future
+session re-opens it a third time.
+
+## NEGATIVE 2: Appendix EO's spawn threshold does NOT apply to our file
+
+EO measured (1.463 m, 2.553 m] from rescaled copies of `1122.xodr` and
+concluded our 1.463 m street segments were the blocker. **Wrong, and the
+error is mine.** `--sim-min-road 5` gave 5.000 m street segments — nearly 2x
+the length that spawns on the reference — and the failure is unchanged. The
+threshold was a property of the reference family, not a general rule; it was
+over-generalised onto a file with different structure. EO's measurements
+stand; EO's inference about OUR file does not.
+
+## THE POSITIVE READ: the junctions have no paved area, and that is visible
+
+In the screenshot, **8 of the 9 junctions render as empty dark-blue
+background.** Only the one under the cursor shows anything, and what it shows
+is hover-highlighted connecting-road curves plus turn arrows — not a paved
+surface. The 12 street segments render as isolated grey bars with nothing
+joining them.
+
+`<junction><boundary>` **IS the junction's paved-area polygon.** Our file has
+**0 of 9**; the reference has 5 of 5. That single fact now explains every
+symptom in one causal chain, rather than three unrelated ones:
+
+    no <boundary>  ->  no junction surface to draw   (junctions render empty,
+                                                      "connections render
+                                                      only on HOVER" — the
+                                                      symptom track.md has
+                                                      carried since EE)
+                   ->  no drivable area at a junction ("No roads to spawn on!")
+                   ->  empty result dereferenced      (0xC0000409 std::terminate)
+
+Appendix EN showed a boundary-CARRYING file clears the crash; EP shows a
+boundary-LACKING file fails in a way that is visually consistent with the
+boundary being the missing piece. Together these are the strongest evidence
+this thread has produced, and they agree.
+
+⚠️ **Still not proof.** Nobody has yet built a boundary on OUR geometry and
+watched it work. The chain above is a coherent explanation, not a tested one.
+
+## Where the derivation actually stands
+
+Appendix EK: the trim for a straight-through connector is
+`connector_length / 24`, machine-precision on 5/5 samples.
+Appendix EL: `side` follows no positional rule across the reference's 5
+junctions (L / L,R,R / R,L,R / L,L,R,R / L,R,L) — pattern-matching the
+reference's VALUES is a dead end.
+
+**What EK/EL did NOT try: deriving `side` GEOMETRICALLY.** The boundary is a
+closed polygon walked around the junction perimeter; `side` plausibly encodes
+which side of that road's own reference line the perimeter edge runs along,
+which is computable from the geometry we generate rather than guessable from
+5 samples. That is a real, untried approach — and also a multi-hour build
+with an uncertain payoff, on a tool `HANDOFF.md` puts off the critical path.
+
+## Code state
+
+`cad/export_xodr.py` gained two experiment flags, both off by default, and
+the default `--junctions` output is byte-identical to before (verified by
+diff):
+- `--sim-min-road METRES` — derives the export scale so the shortest road
+  clears a given length; asserts >= 2.553 m (the EO known-good), guard proven
+  to fire at 2.0 m.
+- `--lanemaker-lanes` — the median/laneOffset/offsetX2 layout above. **Now
+  known not to help**; kept because it is the artifact that proves the
+  negative, and reverting it would make the result unreproducible.
+
+# Appendix EQ - Evan's figure-8 export cracked BOTH boundary rules -- side (38/38) and the counterclockwise kerb-return walk -- so the boundary is now built and verified, and it STILL crashes; EN's inference retracted; signalPhase found missing from all 68 connections (2026-09-07 ~14:50 CDT)
+**WHAT:** Evan supplied `~/Downloads/figure 8.xodr` — a working LaneMaker
+export of **a figure-8 through ONE 4-way junction**, i.e. our exact topology.
+Two rules that Appendix EL called underivable fell out of it immediately. The
+boundary is now BUILT. **It still crashes.**
+
+## THE `side` RULE — DERIVED AND VERIFIED, 38 of 38 SEGMENTS
+
+    type="joint", junction at the road's START (s=0)      -> side="right"
+    type="joint", junction at the road's END   (s=length) -> side="left"
+    type="lane"  (always on a connecting road)            -> side="right", always
+
+Checked programmatically against EVERY boundary segment in both reference
+files: `1122.xodr` 30 of 30, `figure 8.xodr` 8 of 8, zero mismatches (38 total
+is the sum of those two tool-reported counts).
+
+**Appendix EL was wrong, and the error was mine, not the data's.** EL hunted
+POSITIONAL patterns — "is the first joint left?", "one left per junction?" —
+and tabulated `L`, `L,R,R`, `R,L,R`, `L,L,R,R`, `L,R,L` as "no rule survives."
+Those sequences are simply each junction's arms in whatever order they were
+written, some meeting a road at its start and some at its end. The rule is
+per-segment semantic. The pattern was never in the ordering.
+
+## THE SELECTION RULE — also derived, also verified
+
+The boundary is a **cyclic walk**: each `type="lane"` segment is the
+connecting road running FROM the joint immediately before it TO the joint
+immediately after it. Verified on both files — every lane segment's
+`<predecessor>`/`<successor>` match its neighbouring joints exactly, including
+the wrap-around.
+
+Computing each arm's outward heading from the geometry in `figure 8.xodr`
+(Road 0 start = south, Road 0 end = east, Road 13 start = west, Road 13 end =
+north) shows the walk visits N -> W -> S -> E: **counterclockwise**. The
+connector between two adjacent arms is therefore the RIGHT TURN between them
+— literally the kerb return that bounds the paved area. The geometry and the
+data agree.
+
+## BUILT: `--boundary` on `cad/export_xodr.py`
+
+9 of 9 junctions, 48 segments, exactly 2 per arm. A structural validator
+re-derives `side` from the joint's own s-position and asserts agreement:
+**48 of 48 match**, every s-range inside [0, road length], `sStart < sEnd` on
+every lane segment. `--self-check` PASS; the default `--junctions` output is
+byte-identical to before.
+
+Trims: `length/24` for straight-through connectors (Appendix EK,
+machine-precision on 5/5). For TURN connectors, `0.45 x lane width` — marked
+in code as a `# shortcut:`. The reference's real turn trims run 0.37-0.49 x
+lane, are never symmetric, and no formula was recovered; they are where the
+connector's edge meets the incoming street's edge, which varies with approach
+angle.
+
+## THE RESULT: STILL CRASHES
+
+Hypothesis count on this tool is now six wrong: self-link, self-intersection,
+median-required, U-turns, short roads, and now boundary-absent.
+
+## CORRECTION TO APPENDIX EN, and it matters
+
+EN read "a boundary-carrying file cleared the crash" as strong evidence the
+boundary WAS the cause. **That inference was weak and is hereby retracted.**
+The file that cleared the crash was a rescaled copy of Evan's OWN export,
+which differs from ours in dozens of ways beyond the boundary. It proves that
+file works; it does not isolate the boundary. EP then built a causal chain on
+top of that read — the chain remains a coherent story, but it is not
+supported, and building the boundary has now failed to confirm it.
+
+## FOUND WHILE INVESTIGATING: `<signalPhase>` was missing from every connection
+
+**63 of 63 connections across both reference files carry `<signalPhase>`.
+Ours carried 0 of 68.** It was visible in the very first tag census (EN) and
+dismissed as "optional traffic-signal metadata" — a dismissal made without
+evidence.
+
+The assignment rule is legible in `figure 8.xodr`, whose two roads each meet
+the junction at BOTH ends, so four arms come from two roads:
+
+    (road 0,  lane -1) -> phase 2      (road 13, lane -1) -> phase 0
+    (road 0,  lane  2) -> phase 3      (road 13, lane  2) -> phase 1
+
+**One phase id per ARM, 0-based** — keyed on the arm, not the road. Confirmed
+against `1122.xodr`: junction 0 (2 arms) uses phases 0-1, junction 1 (3 arms)
+uses 0-2.
+
+Now emitted: 68 of 68 connections carry one, and the 4-way junction shows
+4 phases x 4 connections each, the same shape as the reference. **Untested in
+LaneMaker at the time of writing.**
+
+## STANDING RECOMMENDATION, restated
+
+`HANDOFF.md` has said bank this since Appendix EG, and this entry does not
+change that. The derivation work here is genuinely reusable — `side`, the
+cyclic walk, the phase rule are all now known and verified rather than
+guessed — but six hypotheses have failed, every test costs Evan a manual
+LaneMaker session, and the physical track is fully specified without any of
+it. Rows 1-5 of HANDOFF (dash density, cornering clearance, the coupon
+caliper + pitch-row check, the 12-tooth bevel confirmation, the $411.45
+order) remain untouched.
+
+# Appendix ER - CLOSED AS A NEGATIVE: signalPhase did not fix it either -- seven hypotheses, seven wrong; the thread's real yield is four derived-and-verified pieces of the vendor format, and the resolution is to use Evan's own working figure-8 export (2026-09-07 ~14:59 CDT)
+**WHAT:** `<signalPhase>` on all 68 connections did NOT fix the crash either.
+**Seven hypotheses, seven wrong. This thread is CLOSED as a negative.**
+
+## The full hypothesis ledger, for whoever picks this up
+
+| # | hypothesis | killed by |
+|---|---|---|
+| 1 | road links to itself | probe 4 loads (EC) |
+| 2 | road self-intersects | probe 3 loads (EC) |
+| 3 | a median lane is required | probes 1-4 load (EC); re-killed against SIMULATION by `--lanemaker-lanes` (EP) |
+| 4 | U-turn movements required | crash byte-identical before/after (EH) |
+| 5 | roads too short to spawn | 5.000 m streets fail identically (EO/EP) |
+| 6 | `<junction><boundary>` missing | built and verified, still crashes (EQ) |
+| 7 | `<signalPhase>` missing | added to 68 of 68, still crashes (this entry) |
+
+The one correct finding in the entire thread — connecting roads must be
+one-way (EF) — came from DIFFING Evan's own export, never from reasoning.
+**The method rule stands and is now paid for seven times over: on this tool,
+only evidence has ever been right.**
+
+## WHAT THE THREAD ACTUALLY PRODUCED, and it is not nothing
+
+Four pieces of an undocumented vendor format, each DERIVED and VERIFIED
+rather than guessed:
+
+- **`side`** — joint at a road's start -> `"right"`, at its end -> `"left"`;
+  every lane segment `"right"`. 38 of 38 segments, both reference files (EQ).
+- **The boundary walk** — a counterclockwise cycle, joint then lane, where
+  each lane segment is the RIGHT-TURN connector between adjacent arms, i.e.
+  the kerb return. Verified by predecessor/successor matching on every
+  segment (EQ).
+- **`signalPhase`** — one id per ARM, 0-based, keyed on the arm rather than
+  the road (this entry).
+- **Straight-through trim = `connector_length / 24`** — machine-precision on
+  5 of 5 samples (EK).
+
+Plus `roadRunnerProfile`'s schema (EB), the one-way connecting-road rule
+(EF), and a rescaler proven numerically neutral at k=1.0 (EN). A future
+attempt starts from these instead of from scratch.
+
+## RESOLUTION
+
+**Use `~/Downloads/figure 8.xodr` if a simulation visual is ever wanted.** It
+is a working figure-8 through a 4-way junction, authored by LaneMaker itself
+— our track's actual topology, already simulating. Nothing needs to be
+generated for that purpose.
+
+`cad/export_xodr.py` is banked as **"loads and renders; simulation
+unsupported"**, the status `HANDOFF.md` has recommended since Appendix EG.
+Its real job — the physical track — is done by `track_layout_v2.py` and
+`marking_layout.py`, neither of which depends on any of this.
+
+**What would be required to continue, stated so the cost is explicit:**
+bisecting `figure 8.xodr` toward our generated file one element at a time,
+roughly 6-10 more manual LaneMaker sessions, against a closed-source Qt
+binary, for a tool that is off the critical path. Not recommended.
+
+## Code left behind (all behind flags, defaults untouched)
+
+`cad/export_xodr.py` gained `--sim-min-road METRES`, `--lanemaker-lanes`,
+`--boundary`, and now emits `<signalPhase>` unconditionally on junction
+connections. The default `--junctions` export is byte-identical to before
+every one of these changes (verified by diff after each). `--self-check`
+PASS. Kept rather than reverted because they are the artifacts that PROVE
+the negatives; deleting them would make hypotheses 3, 5, 6 and 7
+unreproducible.
+
+Also new: `cad/rescale_reference_xodr.py` (+ its `ATTR_CLASS` completeness
+guard, proven to fire) and six probe `.xodr` files.
