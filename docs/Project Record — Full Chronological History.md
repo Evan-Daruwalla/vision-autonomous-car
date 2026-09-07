@@ -167,6 +167,7 @@ the dated entry, not the digest.
 - [DZ — 3x3 grid recreated in 3DStreet at 1:14.63 -- street NETWORK only: no curved corners, no figure-8, and it contradicts DY's marking layout at every intersection](#appendix-dz---3x3-grid-recreated-in-3dstreet-at-11463----street-network-only-no-curved-corners-no-figure-8-and-it-contradicts-dys-marking-layout-at-every-intersection-2026-09-06-1726-cdt) (09-06)
 - [EA — LaneMaker speaks OpenDRIVE, which HAS the arc primitive 3DStreet lacks; figure-8 exported as .xodr; the route has 6 corners not 8](#appendix-ea---lanemaker-speaks-opendrive-which-has-the-arc-primitive-3dstreet-lacks-figure-8-exported-as-xodr-the-route-has-6-corners-not-8-2026-09-06-2213-cdt) (09-06)
 - [EB — LaneMaker DOES import xodr and named its own blocker: a roadRunnerProfile vendor block, schema decoded from the binary and samples](#appendix-eb---lanemaker-does-import-xodr-and-named-its-own-blocker-a-roadrunnerprofile-vendor-block-schema-decoded-from-the-binary-and-samples-2026-09-06-2217-cdt) (09-06)
+- [EC — Bisection ladder: all 4 probes load, so self-link AND self-intersection are both harmless; the crashing file is byte-identical to a working one](#appendix-ec---bisection-ladder-all-4-probes-load-so-self-link-and-self-intersection-are-both-harmless-the-crashing-file-is-byte-identical-to-a-working-one-2026-09-06-2311-cdt) (09-06)
 
 ---
 
@@ -13709,3 +13710,90 @@ While decoding `offsetX2` I dumped a per-road table for all 272 roads into the
 transcript — hundreds of lines where a dozen would have proved the same
 relationship. Uncapped output on an exploratory query. The finding stands; the
 method wasted context.
+
+# Appendix EC - Bisection ladder: all 4 probes load, so self-link AND self-intersection are both harmless; the crashing file is byte-identical to a working one (2026-09-06, ~23:11 CDT)
+Follow-up to Appendix EB. Evan reported LaneMaker **crashing** on the
+profile-bearing `.xodr` rather than rejecting it. A bisection ladder settled it,
+and both of my hypotheses were wrong.
+
+## The crash was diagnosed from Windows crash dumps, not guessed
+
+Two minidumps in `%LOCALAPPDATA%\CrashDumps\` (`LaneMaker.exe.2188.dmp` 22:22,
+`LaneMaker.exe.41188.dmp` 22:33). Parsed the MINIDUMP_EXCEPTION_STREAM
+directly — no debugger needed, the format is documented:
+
+    thread 42208  code 0xC0000409  fault address 0x00007FF888D4527E  params=1
+    exception info ['0x7']
+
+`0xC0000409` with parameter `7` is **FAST_FAIL_FATAL_APP_EXIT** — the MSVC
+runtime's `std::terminate`/`abort` path. **An unhandled C++ exception, not
+memory corruption.** Identical fault address in both dumps, so deterministic
+and the same code path. That reading fits the binary's CGAL paths and its
+`Rethrowing unknown exception in logger` string.
+
+## The bisection ladder — `export_xodr.py --probe`
+
+Four files, each adding one of the three ways our road differs from every road
+in LaneMaker's own samples:
+
+| probe | adds | result |
+|---|---|---|
+| 1 straight | one straight road, 1 lane each way, no links | **loads** |
+| 2 arc | + one arc (the curve path) | **loads** |
+| 3 open8 | + the full figure-8 geometry, still no self-link | **loads** |
+| 4 closed8 | + the self-link | **loads** |
+
+**All four load.** Both of my prime suspects are dead:
+
+- **The self-link is harmless.** No sample road links to itself
+  (`predecessor`/`successor` with `elementType="road"` and its own id) — all 272
+  link to junctions — so I expected it to be rejected. It is not.
+- **The self-intersection is harmless.** Probe 3 crosses itself with no junction
+  declared. LaneMaker loads it. My CGAL-overlap hypothesis, based on the binary's
+  `Overlap zone between roads {} & {} can't be determined` string, was wrong.
+
+Evan also observed that **probes 3 and 4 render identically**, which is correct
+and worth stating: the self-link is topology metadata, not geometry, so it
+changes nothing renderable.
+
+## THE FILE CONTENT WAS NEVER THE CAUSE
+
+`probe_4_closed8.xodr` and `cad/track_figure8.xodr` differ **only in two `name`
+attributes**. Everything else — all 14 geometries, the lane section, the
+roadRunnerProfile — hashes identically (`47c933c463da9685` over all non-`name`
+lines).
+
+Probe 4 loads. The byte-equivalent `track_figure8.xodr` crashed. So the crash
+did not come from the file's content.
+
+**Most likely: Evan opened the PRE-PROFILE attachment.** I sent one `.xodr`
+before adding `roadRunnerProfile` and another after; both sat in the chat. The
+earlier one produces the LaneProfile error, and dismissing that dialog is a
+plausible path into the abort. Both dumps postdate the fixed file being sent,
+but the older attachment was still there to click.
+
+⚠️ **NOT CONFIRMED.** The one variable left is the `name` string itself —
+`"figure-8 route"` and `"Autonomous Car Project figure-8"` contain spaces and a
+hyphen where the probes say `"probe"`. It would be absurd for that to abort a
+parser, and I do not believe it, but I have been wrong twice in this thread and
+the test is free: open `cad/track_figure8.xodr` from the repo rather than from
+a chat attachment. **Open at time of writing.**
+
+## What this leaves standing
+
+The exporter is validated as far as LaneMaker is concerned: **straights, arcs,
+self-intersection and self-linking all import cleanly.** The figure-8 geometry
+that 3DStreet structurally cannot represent (Appendix DZ) round-trips into a
+real road-network tool.
+
+Still not exported, unchanged from EA: the 3x3 grid, the 9 intersections,
+junction records, lane links between roads.
+
+## Process
+
+Three separate times this session a backslash escape (`\\n`, `\\`) passed
+through a quoted bash heredoc into Python and emitted a literal newline instead
+of the escape, twice producing `SyntaxError: unterminated string literal`.
+Fixed the last one by hoisting the XML declaration into a module constant
+built with `chr(10)` so no escape crosses the boundary. **Stop writing
+backslash escapes inside heredoc'd Python; use the Edit tool or `chr()`.**

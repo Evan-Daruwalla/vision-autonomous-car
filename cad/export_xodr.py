@@ -62,6 +62,7 @@ import math
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+XML_DECL = '<?xml version="1.0"?>' + chr(10)
 LANE_TYPE = "driving"
 EDGE_MARK = ("solid", "white")    # outer edge line, both sides
 CENTRE_MARK = ("broken", "yellow")  # separates opposing directions (Appendix DU/DX)
@@ -275,17 +276,127 @@ def self_check() -> None:
     print("export_xodr self_check: PASS")
 
 
+def write_probe(out_dir: Path):
+    """A bisection ladder for LaneMaker's crash (Appendix EB follow-up).
+
+    It aborts with 0xC0000409 param 7 (FAST_FAIL_FATAL_APP_EXIT = std::terminate
+    on an unhandled C++ exception), deterministically, at the same address both
+    times. That is a thrown invariant, not malformed XML -- so the question is
+    WHICH property of our road it objects to. Four files, increasing in the
+    three ways ours differs from every sample road:
+
+      1 straight   one straight road, no links, no self-crossing
+      2 arc        adds one arc -- tests the curve path
+      3 open8      the full figure-8 geometry, still NO self-link
+      4 closed8    adds the self-link (== cad/track_figure8.xodr)
+
+    First one that crashes names the cause. No sample road self-links or
+    self-intersects, so 3 and 4 are the anomalies; 1 and 2 should load if the
+    roadRunnerProfile shape is right.
+    """
+    ms = _load("marking_specs.py")
+    scale = ms.scale()
+    ladder = [
+        ("1_straight", [(0.0, 0.0, 0.0, 40.0, 0.0)], False),
+        ("2_arc", None, False),
+        ("3_open8", None, False),
+        ("4_closed8", None, True),
+    ]
+    R = 7.3152
+    quarter = abs(math.pi / 2) * R
+    ladder[1] = ("2_arc", [(0.0, 0.0, 0.0, 20.0, 0.0),
+                           (20.0, 0.0, 0.0, quarter, 1.0 / R),
+                           (20.0 + R, R, math.pi / 2, 20.0, 0.0)], False)
+    written = []
+    for name, geoms, self_link in ladder:
+        if geoms is None:
+            geoms, _g, _R = geometries(scale)
+        root = _probe_xml(geoms, self_link, scale)
+        f = out_dir / f"probe_{name}.xodr"
+        ET.indent(root, space="  ")
+        f.write_text(XML_DECL + ET.tostring(root, encoding="unicode"),
+                     encoding="utf-8")
+        written.append((f.name, len(geoms), self_link))
+    return written
+
+
+def _probe_xml(geoms, self_link, scale):
+    tl = _load("track_layout_v2.py")
+    ms = _load("marking_specs.py")
+    g, t = tl.build(), ms.table()
+    lane_w = g["lane"] * scale
+    mark_w = t["normal_line_mm"][1] / 1000.0 * scale
+    total = sum(gm[3] for gm in geoms)
+    root = ET.Element("OpenDRIVE")
+    ET.SubElement(root, "header", revMajor="1", revMinor="4", name="probe",
+                  vendor="cad/export_xodr.py")
+    road = ET.SubElement(root, "road", name="probe", length=f"{total:.10f}",
+                         id="0", junction="-1")
+    if self_link:
+        link = ET.SubElement(road, "link")
+        ET.SubElement(link, "predecessor", elementType="road", elementId="0",
+                      contactPoint="end")
+        ET.SubElement(link, "successor", elementType="road", elementId="0",
+                      contactPoint="start")
+    pv = ET.SubElement(root.find("road"), "planView")
+    s = 0.0
+    for x, y, hdg, length, curv in geoms:
+        gel = ET.SubElement(pv, "geometry", s=f"{s:.10f}", x=f"{x:.10f}",
+                            y=f"{y:.10f}", hdg=f"{hdg:.10f}",
+                            length=f"{length:.10f}")
+        if abs(curv) < 1e-12:
+            ET.SubElement(gel, "line")
+        else:
+            ET.SubElement(gel, "arc", curvature=f"{curv:.10f}")
+        s += length
+    ep = ET.SubElement(road, "elevationProfile")
+    ET.SubElement(ep, "elevation", s="0", a="0", b="0", c="0", d="0")
+    lanes = ET.SubElement(road, "lanes")
+    ET.SubElement(lanes, "laneOffset", s="0", a="0", b="0", c="0", d="0")
+    sec = ET.SubElement(lanes, "laneSection", s="0")
+    for side, lane_id in (("right", "-1"), ("left", "1")):
+        grp = ET.SubElement(sec, side)
+        ln = ET.SubElement(grp, "lane", id=lane_id, type=LANE_TYPE, level="false")
+        ET.SubElement(ln, "width", sOffset="0", a=f"{lane_w:.10f}", b="0", c="0", d="0")
+        ET.SubElement(ln, "roadMark", sOffset="0", type=EDGE_MARK[0],
+                      color=EDGE_MARK[1], laneChange="none", weight="",
+                      width=f"{mark_w:.10f}")
+        if side == "right":
+            c = ET.SubElement(sec, "center")
+            cl = ET.SubElement(c, "lane", id="0", type="none", level="false")
+            ET.SubElement(cl, "roadMark", sOffset="0", type=CENTRE_MARK[0],
+                          color=CENTRE_MARK[1], laneChange="none", weight="",
+                          width=f"{mark_w:.10f}")
+    prof = ET.SubElement(road, "roadRunnerProfile")
+    left = ET.SubElement(prof, "left")
+    ET.SubElement(left, "section", type_s=str(int(round(total * 100))),
+                  laneCount="1", offsetX2="0")
+    ET.SubElement(left, "section", type_s="4294967295", laneCount="1", offsetX2="0")
+    right = ET.SubElement(prof, "right")
+    ET.SubElement(right, "section", type_s="0", laneCount="1", offsetX2="0")
+    return root
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model-scale", action="store_true",
                     help="write the 2.7 m model instead of full scale")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--probe", action="store_true",
+                    help="write the LaneMaker bisection ladder")
     ap.add_argument("--self-check", action="store_true")
     args = ap.parse_args()
     if args.self_check:
         self_check()
         return 0
     self_check()
+
+    if args.probe:
+        for name, n, sl in write_probe(Path(__file__).parent):
+            print(f"  {name:26} {n:2} geometries  self-link={sl}")
+        print()
+        print("Open them in order. The FIRST that crashes names the cause.")
+        return 0
 
     ms = _load("marking_specs.py")
     scale = 1.0 if args.model_scale else ms.scale()

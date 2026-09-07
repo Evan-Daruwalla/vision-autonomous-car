@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<OpenDRIVE>
+  <header revMajor="1" revMinor="4" name="probe" vendor="cad/export_xodr.py" />
+  <road name="probe" length="109.9092557386" id="0" junction="-1">
+    <link>
+      <predecessor elementType="road" elementId="0" contactPoint="end" />
+      <successor elementType="road" elementId="0" contactPoint="start" />
+    </link>
+    <planView>
+      <geometry s="0.0000000000" x="0.0000000000" y="0.0000000000" hdg="1.5707963268" length="8.7782400000">
+        <line />
+      </geometry>
+      <geometry s="8.7782400000" x="0.0000000000" y="8.7782400000" hdg="1.5707963268" length="11.4906892898">
+        <arc curvature="0.1367016623" />
+      </geometry>
+      <geometry s="20.2689292898" x="-7.3152000000" y="16.0934400000" hdg="3.1415926536" length="1.4630400000">
+        <line />
+      </geometry>
+      <geometry s="21.7319692898" x="-8.7782400000" y="16.0934400000" hdg="3.1415926536" length="11.4906892898">
+        <arc curvature="0.1367016623" />
+      </geometry>
+      <geometry s="33.2226585795" x="-16.0934400000" y="8.7782400000" hdg="-1.5707963268" length="1.4630400000">
+        <line />
+      </geometry>
+      <geometry s="34.6856985795" x="-16.0934400000" y="7.3152000000" hdg="-1.5707963268" length="11.4906892898">
+        <arc curvature="0.1367016623" />
+      </geometry>
+      <geometry s="46.1763878693" x="-8.7782400000" y="0.0000000000" hdg="0.0000000000" length="8.7782400000">
+        <line />
+      </geometry>
+      <geometry s="54.9546278693" x="0.0000000000" y="0.0000000000" hdg="0.0000000000" length="8.7782400000">
+        <line />
+      </geometry>
+      <geometry s="63.7328678693" x="8.7782400000" y="0.0000000000" hdg="0.0000000000" length="11.4906892898">
+        <arc curvature="-0.1367016623" />
+      </geometry>
+      <geometry s="75.2235571591" x="16.0934400000" y="-7.3152000000" hdg="-1.5707963268" length="1.4630400000">
+        <line />
+      </geometry>
+      <geometry s="76.6865971591" x="16.0934400000" y="-8.7782400000" hdg="-1.5707963268" length="11.4906892898">
+        <arc curvature="-0.1367016623" />
+      </geometry>
+      <geometry s="88.1772864489" x="8.7782400000" y="-16.0934400000" hdg="3.1415926536" length="1.4630400000">
+        <line />
+      </geometry>
+      <geometry s="89.6403264489" x="7.3152000000" y="-16.0934400000" hdg="3.1415926536" length="11.4906892898">
+        <arc curvature="-0.1367016623" />
+      </geometry>
+      <geometry s="101.1310157386" x="0.0000000000" y="-8.7782400000" hdg="1.5707963268" length="8.7782400000">
+        <line />
+      </geometry>
+    </planView>
+    <elevationProfile>
+      <elevation s="0" a="0" b="0" c="0" d="0" />
+    </elevationProfile>
+    <lanes>
+      <laneOffset s="0" a="0" b="0" c="0" d="0" />
+      <laneSection s="0">
+        <right>
+          <lane id="-1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </right>
+        <center>
+          <lane id="0" type="none" level="false">
+            <roadMark sOffset="0" type="broken" color="yellow" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </center>
+        <left>
+          <lane id="1" type="driving" level="false">
+            <width sOffset="0" a="3.6576000000" b="0" c="0" d="0" />
+            <roadMark sOffset="0" type="solid" color="white" laneChange="none" weight="" width="0.1524000000" />
+          </lane>
+        </left>
+      </laneSection>
+    </lanes>
+    <roadRunnerProfile>
+      <left>
+        <section type_s="10991" laneCount="1" offsetX2="0" />
+        <section type_s="4294967295" laneCount="1" offsetX2="0" />
+      </left>
+      <right>
+        <section type_s="0" laneCount="1" offsetX2="0" />
+      </right>
+    </roadRunnerProfile>
+  </road>
+</OpenDRIVE>

@@ -113,6 +113,24 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
     list; `laneCount` = DRIVING lanes only (medians not counted);
     **`offsetX2` = laneOffset / laneWidth * 2**, verified across all 272
     roads. `export_xodr.py` emits it and self-checks the cm unit.
+  - ✅ **THE EXPORTER IS VALIDATED AGAINST LANEMAKER (2026-09-06, Appendix
+    EC).** `export_xodr.py --probe` writes a 4-rung bisection ladder
+    (straight / +arc / +figure-8 / +self-link). **ALL FOUR LOAD.** So
+    straights, arcs, a SELF-INTERSECTING road with no junction declared,
+    and a road that LINKS TO ITSELF are all accepted — both hypotheses for
+    the crash were wrong. Probes 3 and 4 render identically because the
+    self-link is topology metadata, not geometry.
+  - ⚠️ **The crash was NOT the file content.** `probe_4_closed8.xodr` and
+    `track_figure8.xodr` differ only in two `name` attributes; everything
+    else hashes identically. Probe 4 loads. Most likely a stale PRE-PROFILE
+    chat attachment was opened. **Unconfirmed** — the only untested
+    variable is the `name` string containing spaces and a hyphen.
+  - **Diagnosed from Windows minidumps**, not guessed:
+    `%LOCALAPPDATA%\CrashDumps\LaneMaker.exe.*.dmp`, exception
+    **0xC0000409 param 7 = FAST_FAIL_FATAL_APP_EXIT** (MSVC
+    `std::terminate`/abort — an unhandled C++ exception, NOT memory
+    corruption), identical fault address both times. Parse the
+    MINIDUMP_EXCEPTION_STREAM directly; no debugger needed.
   - ⚠️ **STILL NOT UNDERSTOOD:** why `<left>` needs a length-cm section
     PLUS a UINT32_MAX terminator while `<right>` needs one `type_s="0"`.
     No sample road has a 1+1 layout without a median, so ours mirrors road
