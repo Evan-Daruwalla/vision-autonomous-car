@@ -3195,223 +3195,291 @@
   </road>
   <junction id="0" name="junction -1.100,-1.100">
     <connection id="0" incomingRoad="0" connectingRoad="12" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="1" incomingRoad="0" connectingRoad="13" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="2" incomingRoad="6" connectingRoad="14" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="3" incomingRoad="6" connectingRoad="15" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="1" to="-1" />
     </connection>
   </junction>
   <junction id="1" name="junction -1.100,+0.000">
     <connection id="0" incomingRoad="1" connectingRoad="16" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="1" incomingRoad="1" connectingRoad="17" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="2" incomingRoad="1" connectingRoad="18" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="3" incomingRoad="0" connectingRoad="19" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="4" incomingRoad="0" connectingRoad="20" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="5" incomingRoad="0" connectingRoad="21" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="6" incomingRoad="8" connectingRoad="22" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="7" incomingRoad="8" connectingRoad="23" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="8" incomingRoad="8" connectingRoad="24" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="1" to="-1" />
     </connection>
   </junction>
   <junction id="2" name="junction -1.100,+1.100">
     <connection id="0" incomingRoad="1" connectingRoad="25" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="1" incomingRoad="1" connectingRoad="26" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="2" incomingRoad="10" connectingRoad="27" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="3" incomingRoad="10" connectingRoad="28" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="1" to="-1" />
     </connection>
   </junction>
   <junction id="3" name="junction +0.000,-1.100">
     <connection id="0" incomingRoad="2" connectingRoad="29" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="1" incomingRoad="2" connectingRoad="30" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="2" incomingRoad="2" connectingRoad="31" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="3" incomingRoad="7" connectingRoad="32" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="4" incomingRoad="7" connectingRoad="33" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="5" incomingRoad="7" connectingRoad="34" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="6" incomingRoad="6" connectingRoad="35" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="7" incomingRoad="6" connectingRoad="36" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="8" incomingRoad="6" connectingRoad="37" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="-1" to="-1" />
     </connection>
   </junction>
   <junction id="4" name="junction +0.000,+0.000">
     <connection id="0" incomingRoad="3" connectingRoad="38" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="1" incomingRoad="3" connectingRoad="39" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="2" incomingRoad="3" connectingRoad="40" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="3" incomingRoad="3" connectingRoad="41" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="4" incomingRoad="2" connectingRoad="42" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="5" incomingRoad="2" connectingRoad="43" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="6" incomingRoad="2" connectingRoad="44" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="7" incomingRoad="2" connectingRoad="45" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="8" incomingRoad="9" connectingRoad="46" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="9" incomingRoad="9" connectingRoad="47" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="10" incomingRoad="9" connectingRoad="48" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="11" incomingRoad="9" connectingRoad="49" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="12" incomingRoad="8" connectingRoad="50" contactPoint="start">
+      <signalPhase id="3" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="13" incomingRoad="8" connectingRoad="51" contactPoint="start">
+      <signalPhase id="3" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="14" incomingRoad="8" connectingRoad="52" contactPoint="start">
+      <signalPhase id="3" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="15" incomingRoad="8" connectingRoad="53" contactPoint="start">
+      <signalPhase id="3" />
       <laneLink from="-1" to="-1" />
     </connection>
   </junction>
   <junction id="5" name="junction +0.000,+1.100">
     <connection id="0" incomingRoad="3" connectingRoad="54" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="1" incomingRoad="3" connectingRoad="55" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="2" incomingRoad="3" connectingRoad="56" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="3" incomingRoad="11" connectingRoad="57" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="4" incomingRoad="11" connectingRoad="58" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="5" incomingRoad="11" connectingRoad="59" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="6" incomingRoad="10" connectingRoad="60" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="7" incomingRoad="10" connectingRoad="61" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="8" incomingRoad="10" connectingRoad="62" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="-1" to="-1" />
     </connection>
   </junction>
   <junction id="6" name="junction +1.100,-1.100">
     <connection id="0" incomingRoad="4" connectingRoad="63" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="1" incomingRoad="4" connectingRoad="64" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="2" incomingRoad="7" connectingRoad="65" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="3" incomingRoad="7" connectingRoad="66" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
   </junction>
   <junction id="7" name="junction +1.100,+0.000">
     <connection id="0" incomingRoad="5" connectingRoad="67" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="1" incomingRoad="5" connectingRoad="68" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="2" incomingRoad="5" connectingRoad="69" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="1" to="-1" />
     </connection>
     <connection id="3" incomingRoad="4" connectingRoad="70" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="4" incomingRoad="4" connectingRoad="71" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="5" incomingRoad="4" connectingRoad="72" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="6" incomingRoad="9" connectingRoad="73" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="7" incomingRoad="9" connectingRoad="74" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="8" incomingRoad="9" connectingRoad="75" contactPoint="start">
+      <signalPhase id="2" />
       <laneLink from="-1" to="-1" />
     </connection>
   </junction>
   <junction id="8" name="junction +1.100,+1.100">
     <connection id="0" incomingRoad="5" connectingRoad="76" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="1" incomingRoad="5" connectingRoad="77" contactPoint="start">
+      <signalPhase id="0" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="2" incomingRoad="11" connectingRoad="78" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
     <connection id="3" incomingRoad="11" connectingRoad="79" contactPoint="start">
+      <signalPhase id="1" />
       <laneLink from="-1" to="-1" />
     </connection>
   </junction>

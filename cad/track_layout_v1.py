@@ -437,7 +437,12 @@ def main() -> int:
     svg(pts, spans, tps, d, usable, out / "track_layout_v1.svg")
     (out / "track_layout_v1.json").write_text(json.dumps({
         "floor_m": FLOOR, "wall_margin_m": WALL_MARGIN,
-        "car_width_m_MEASURED": CAR_WIDTH, "lane_width_m": LANE,
+        # Key renamed 2026-09-09: it read "car_width_m_MEASURED", which this
+        # same file contradicts three times (:58, :388, :416 all say UNMEASURED).
+        # 0.130 is the pre-rebuild estimate; the MEASURED 0.155 belongs to
+        # track_layout_v2. A tracked artifact must not assert a measurement
+        # that never happened.
+        "car_width_m_UNMEASURED": CAR_WIDTH, "lane_width_m": LANE,
         "corner_radius_m_NOT_COMMITTED": R_NOM, "measured_min_radius_m": rmin,
         "lobe_separation_m": d, "crossing_straights_m": spans,
         "centreline_length_m": total,

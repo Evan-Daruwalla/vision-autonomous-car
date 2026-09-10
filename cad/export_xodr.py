@@ -1061,7 +1061,12 @@ def main() -> int:
         return 0
 
     if args.probe:
-        for name, n, sl in write_probe(Path(__file__).parent):
+        # --out is a DIRECTORY here, not a file: write_probe emits nine of them.
+        # Added 2026-09-09 so scripts/check_artifacts.py can regenerate the probe
+        # ladder into a temp dir and diff it; without this the only reachable
+        # destination was cad/ itself, which is what let these artifacts drift.
+        for name, n, sl in write_probe(
+                Path(args.out) if args.out else Path(__file__).parent):
             print(f"  {name:26} {n:2} geometries  self-link={sl}")
         print()
         print("Open them in order. The FIRST that crashes names the cause.")

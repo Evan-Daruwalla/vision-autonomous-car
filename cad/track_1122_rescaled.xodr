@@ -19,7 +19,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="-0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<width sOffset="0.0" a="0.06784754443936913" b="0.0" c="0.0" d="0.0" />
@@ -41,9 +41,9 @@
 			</laneSection>
 		</lanes>
 		<objects>
-			<object id="1" dynamic="false" s="0.20000000000000001" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="102" dynamic="false" s="10" t="3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="0.0091574796345001985" pitch="0" roll="0" type="roadMark" name="11" orientation="0.0091574796345001985" subtype="arrow" />
-			<object id="99" dynamic="false" s="23.46945584038513" t="-3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="0.029927934086106341" pitch="0" roll="0" type="roadMark" name="16" orientation="0.029927934086106341" subtype="arrow" />
+			<object id="1" dynamic="false" s="0.004175233503961178" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="102" dynamic="false" s="0.20876167519805888" t="0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="0.0091574796345001985" pitch="0" roll="0" type="roadMark" name="11" orientation="0.0091574796345001985" subtype="arrow" />
+			<object id="99" dynamic="false" s="0.48995229172256666" t="-0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="0.029927934086106341" pitch="0" roll="0" type="roadMark" name="16" orientation="0.029927934086106341" subtype="arrow" />
 		</objects>
 		<roadRunnerProfile>
 			<left>
@@ -70,7 +70,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -109,7 +109,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -148,7 +148,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -187,7 +187,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -230,7 +230,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="-0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<width sOffset="0.0" a="0.06784754443936913" b="0.0" c="0.0" d="0.0" />
@@ -252,10 +252,10 @@
 			</laneSection>
 		</lanes>
 		<objects>
-			<object id="1" dynamic="false" s="0.20000000000000001" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="102" dynamic="false" s="10" t="3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="6.278440910726883" pitch="0" roll="0" type="roadMark" name="14" orientation="6.278440910726883" subtype="arrow" />
-			<object id="2" dynamic="false" s="20.543206925361254" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="99" dynamic="false" s="10.743206925361253" t="-3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="3.1374975080613918" pitch="0" roll="0" type="roadMark" name="7" orientation="3.1374975080613918" subtype="arrow" />
+			<object id="1" dynamic="false" s="0.004175233503961178" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="102" dynamic="false" s="0.20876167519805888" t="0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="6.278440910726883" pitch="0" roll="0" type="roadMark" name="14" orientation="6.278440910726883" subtype="arrow" />
+			<object id="2" dynamic="false" s="0.42886342916787795" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="99" dynamic="false" s="0.22427698747378025" t="-0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="3.1374975080613918" pitch="0" roll="0" type="roadMark" name="7" orientation="3.1374975080613918" subtype="arrow" />
 		</objects>
 		<roadRunnerProfile>
 			<left>
@@ -289,7 +289,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="-0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<width sOffset="0.0" a="0.06784754443936913" b="0.0" c="0.0" d="0.0" />
@@ -311,10 +311,10 @@
 			</laneSection>
 		</lanes>
 		<objects>
-			<object id="1" dynamic="false" s="0.20000000000000001" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="102" dynamic="false" s="10" t="3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="1.5649811941291643" pitch="0" roll="0" type="roadMark" name="7" orientation="1.5649811941291643" subtype="arrow" />
-			<object id="2" dynamic="false" s="49.776531162713383" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="99" dynamic="false" s="39.976531162713385" t="-3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="-3.0717275191598601" pitch="0" roll="0" type="roadMark" name="11" orientation="-3.0717275191598601" subtype="arrow" />
+			<object id="1" dynamic="false" s="0.004175233503961178" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="102" dynamic="false" s="0.20876167519805888" t="0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="1.5649811941291643" pitch="0" roll="0" type="roadMark" name="7" orientation="1.5649811941291643" subtype="arrow" />
+			<object id="2" dynamic="false" s="1.0391432031076426" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="99" dynamic="false" s="0.8345567614135451" t="-0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="-3.0717275191598601" pitch="0" roll="0" type="roadMark" name="11" orientation="-3.0717275191598601" subtype="arrow" />
 		</objects>
 		<roadRunnerProfile>
 			<left>
@@ -341,7 +341,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -380,7 +380,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -419,7 +419,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -458,7 +458,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -497,7 +497,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -536,7 +536,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -575,7 +575,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -614,7 +614,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -653,7 +653,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -692,7 +692,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -731,7 +731,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -770,7 +770,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -809,7 +809,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -848,7 +848,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -887,7 +887,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -926,7 +926,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -975,7 +975,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="-0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<width sOffset="0.0" a="0.06784754443936913" b="0.0" c="0.0" d="0.0" />
@@ -997,10 +997,10 @@
 			</laneSection>
 		</lanes>
 		<objects>
-			<object id="1" dynamic="false" s="0.20000000000000001" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="102" dynamic="false" s="10" t="3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="4.7233007410663079" pitch="0" roll="0" type="roadMark" name="3" orientation="4.7233007410663079" subtype="arrow" />
-			<object id="2" dynamic="false" s="46.912385726392181" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="99" dynamic="false" s="37.112385726392183" t="-3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="-2.1680508758442458e-05" pitch="0" roll="0" type="roadMark" name="11" orientation="-2.1680508758442458e-05" subtype="arrow" />
+			<object id="1" dynamic="false" s="0.004175233503961178" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="102" dynamic="false" s="0.20876167519805888" t="0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="4.7233007410663079" pitch="0" roll="0" type="roadMark" name="3" orientation="4.7233007410663079" subtype="arrow" />
+			<object id="2" dynamic="false" s="0.9793508231779138" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="99" dynamic="false" s="0.7747643814838161" t="-0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="-2.1680508758442458e-05" pitch="0" roll="0" type="roadMark" name="11" orientation="-2.1680508758442458e-05" subtype="arrow" />
 		</objects>
 		<roadRunnerProfile>
 			<left>
@@ -1027,7 +1027,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1066,7 +1066,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1105,7 +1105,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1144,7 +1144,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1183,7 +1183,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1222,7 +1222,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1261,7 +1261,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1308,7 +1308,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="-0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<width sOffset="0.0" a="0.06784754443936913" b="0.0" c="0.0" d="0.0" />
@@ -1330,10 +1330,10 @@
 			</laneSection>
 		</lanes>
 		<objects>
-			<object id="1" dynamic="false" s="0.20000000000000001" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="102" dynamic="false" s="10" t="3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="3.1415783194912414" pitch="0" roll="0" type="roadMark" name="7" orientation="3.1415783194912414" subtype="arrow" />
-			<object id="2" dynamic="false" s="52.63680983755043" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="99" dynamic="false" s="42.836809837550433" t="-3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="-1.5766188058708357" pitch="0" roll="0" type="roadMark" name="11" orientation="-1.5766188058708357" subtype="arrow" />
+			<object id="1" dynamic="false" s="0.004175233503961178" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="102" dynamic="false" s="0.20876167519805888" t="0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="3.1415783194912414" pitch="0" roll="0" type="roadMark" name="7" orientation="3.1415783194912414" subtype="arrow" />
+			<object id="2" dynamic="false" s="1.0988548598768693" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="99" dynamic="false" s="0.8942684181827717" t="-0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="-1.5766188058708357" pitch="0" roll="0" type="roadMark" name="11" orientation="-1.5766188058708357" subtype="arrow" />
 		</objects>
 		<roadRunnerProfile>
 			<left>
@@ -1360,7 +1360,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="-0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<width sOffset="0.0" a="0.06784754443936913" b="0.0" c="0.0" d="0.0" />
@@ -1382,10 +1382,10 @@
 			</laneSection>
 		</lanes>
 		<objects>
-			<object id="1" dynamic="false" s="0.20000000000000001" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="102" dynamic="false" s="7.5931058952820187" t="3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="4.7154624344064446" pitch="0" roll="0" type="roadMark" name="15" orientation="4.7154624344064446" subtype="arrow" />
-			<object id="2" dynamic="false" s="14.986211790564038" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="99" dynamic="false" s="7.5931058952820187" t="-3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="1.5738624344064447" pitch="0" roll="0" type="roadMark" name="14" orientation="1.5738624344064447" subtype="arrow" />
+			<object id="1" dynamic="false" s="0.004175233503961178" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="102" dynamic="false" s="0.1585149506655331" t="0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="4.7154624344064446" pitch="0" roll="0" type="roadMark" name="15" orientation="4.7154624344064446" subtype="arrow" />
+			<object id="2" dynamic="false" s="0.31285466782710497" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="99" dynamic="false" s="0.1585149506655331" t="-0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="1.5738624344064447" pitch="0" roll="0" type="roadMark" name="14" orientation="1.5738624344064447" subtype="arrow" />
 		</objects>
 		<roadRunnerProfile>
 			<left>
@@ -1412,7 +1412,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1451,7 +1451,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1490,7 +1490,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1529,7 +1529,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1568,7 +1568,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1607,7 +1607,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1646,7 +1646,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1685,7 +1685,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1724,7 +1724,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1763,7 +1763,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1802,7 +1802,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1841,7 +1841,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1880,7 +1880,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1919,7 +1919,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1958,7 +1958,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -1997,7 +1997,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -2036,7 +2036,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -2075,7 +2075,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -2114,7 +2114,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="-0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<width sOffset="0.0" a="0.06784754443936913" b="0.0" c="0.0" d="0.0" />
@@ -2136,10 +2136,10 @@
 			</laneSection>
 		</lanes>
 		<objects>
-			<object id="1" dynamic="false" s="0.20000000000000001" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="102" dynamic="false" s="8.4203771806567591" t="3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="4.7438409952403173" pitch="0" roll="0" type="roadMark" name="14" orientation="4.7438409952403173" subtype="arrow" />
-			<object id="2" dynamic="false" s="16.640754361313519" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="99" dynamic="false" s="8.4203771806567591" t="-3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="1.6022409952403174" pitch="0" roll="0" type="roadMark" name="14" orientation="1.6022409952403174" subtype="arrow" />
+			<object id="1" dynamic="false" s="0.004175233503961178" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="102" dynamic="false" s="0.1757852046033413" t="0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="4.7438409952403173" pitch="0" roll="0" type="roadMark" name="14" orientation="4.7438409952403173" subtype="arrow" />
+			<object id="2" dynamic="false" s="0.34739517570272144" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="99" dynamic="false" s="0.1757852046033413" t="-0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="1.6022409952403174" pitch="0" roll="0" type="roadMark" name="14" orientation="1.6022409952403174" subtype="arrow" />
 		</objects>
 		<roadRunnerProfile>
 			<left>
@@ -2174,7 +2174,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="-0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<width sOffset="0.0" a="0.06784754443936913" b="0.0" c="0.0" d="0.0" />
@@ -2196,10 +2196,10 @@
 			</laneSection>
 		</lanes>
 		<objects>
-			<object id="1" dynamic="false" s="0.20000000000000001" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="102" dynamic="false" s="10" t="3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="0.069872480840139861" pitch="0" roll="0" type="roadMark" name="7" orientation="0.069872480840139861" subtype="arrow" />
-			<object id="2" dynamic="false" s="50.66591399210651" t="0" zOffset="0" length="0" validLength="0" width="0.40000000000000002" radius="0" height="0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
-			<object id="99" dynamic="false" s="40.865913992106513" t="-3.25" zOffset="0" length="0" validLength="0" width="2" radius="0" height="0" hdg="1.581700741066308" pitch="0" roll="0" type="roadMark" name="3" orientation="1.581700741066308" subtype="arrow" />
+			<object id="1" dynamic="false" s="0.004175233503961178" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="102" dynamic="false" s="0.20876167519805888" t="0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="0.069872480840139861" pitch="0" roll="0" type="roadMark" name="7" orientation="0.069872480840139861" subtype="arrow" />
+			<object id="2" dynamic="false" s="1.0577101080432925" t="0.0" zOffset="0.0" length="0.0" validLength="0.0" width="0.008350467007922356" radius="0.0" height="0.0" hdg="0" pitch="0" roll="0" type="roadMark" name="" orientation="0" subtype="stopping-line" />
+			<object id="99" dynamic="false" s="0.8531236663491949" t="-0.06784754443936913" zOffset="0.0" length="0.0" validLength="0.0" width="0.041752335039611774" radius="0.0" height="0.0" hdg="1.581700741066308" pitch="0" roll="0" type="roadMark" name="3" orientation="1.581700741066308" subtype="arrow" />
 		</objects>
 		<roadRunnerProfile>
 			<left>
@@ -2226,7 +2226,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>
@@ -2265,7 +2265,7 @@
 		</elevationProfile>
 		<lanes>
 			<laneOffset s="0.0" a="0.03392377221968457" b="0.0" c="0.0" d="0.0" />
-			<laneSection s="0">
+			<laneSection s="0.0">
 				<right>
 					<lane id="-1" type="driving" level="false">
 						<link>

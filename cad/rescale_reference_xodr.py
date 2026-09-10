@@ -68,7 +68,14 @@ import math
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-REF = Path.home() / "Downloads" / "1122.xodr"
+# Vendored 2026-09-09. This used to be `Path.home() / "Downloads" / "1122.xodr"`,
+# which made the whole script dead on any machine but Evan's: main() calls
+# self_check() unconditionally and self_check() asserts REF.exists(), so a bare
+# clone could not run it at all -- and Appendix EN's experiment could not be
+# reproduced from the repo. The file is Evan's own LaneMaker export; it is now
+# tracked at cad/reference/. See .claude/codebase-memory/track.md for the SHA256
+# and provenance of both reference files.
+REF = Path(__file__).with_name("reference") / "1122.xodr"
 OUT = Path(__file__).with_name("track_1122_rescaled.xodr")
 
 SENTINEL_TYPE_S = 4294967295  # UINT32_MAX terminator, never a distance

@@ -1,7 +1,7 @@
 {
   "floor_m": 3.0,
   "wall_margin_m": 0.1,
-  "car_width_m_ESTIMATE": 0.13,
+  "car_width_m_UNMEASURED": 0.13,
   "lane_width_m": 0.26,
   "corner_radius_m_NOT_COMMITTED": 0.55,
   "measured_min_radius_m": 0.5499999999903339,

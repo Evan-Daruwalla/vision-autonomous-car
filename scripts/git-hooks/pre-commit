@@ -57,4 +57,32 @@ else
   exit 1
 fi
 
+
+# ── Generated-artifact staleness ─────────────────────────────────────────────
+# Added 2026-09-09 (daily-audit Appendix ES, finding 1/2). Every generator in
+# this repo defaults its --out INTO a tracked path, so a committed artifact was
+# correct only if a human remembered to regenerate it. Two files had drifted for
+# days and the docs went on describing files that were not on disk.
+#
+# --staged, deliberately: checking the WHOLE registry on every commit would cost
+# ~20 subprocess regenerations for a one-line doc edit, and would block an
+# unrelated commit over an artifact somebody else left stale. A commit is
+# answerable for what IT stages.
+#
+# Unlike the two gates above, this one lives IN this repo, so "missing" means
+# someone deleted it -- treated the same fail-closed way.
+CHECK_ARTIFACTS="$(git rev-parse --show-toplevel)/scripts/check_artifacts.py"
+if [ -f "$CHECK_ARTIFACTS" ]; then
+  ART_PY="$(git rev-parse --show-toplevel)/.venv/Scripts/python.exe"
+  [ -x "$ART_PY" ] || ART_PY=python
+  "$ART_PY" "$CHECK_ARTIFACTS" --staged || exit 1
+elif allow_ungated; then
+  echo "check-artifacts: checker missing, allowed by CAR_ALLOW_UNGATED_COMMIT." >&2
+else
+  echo "check-artifacts REFUSED: not found at $CHECK_ARTIFACTS" >&2
+  echo "  A stale generated artifact could be committed unnoticed (Appendix ES)." >&2
+  echo "  Restore it, or set CAR_ALLOW_UNGATED_COMMIT=1 for this commit." >&2
+  exit 1
+fi
+
 exit 0
