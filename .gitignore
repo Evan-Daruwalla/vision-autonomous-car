@@ -48,3 +48,10 @@ ml/checkpoints/
 # (json/png) are versioned evidence and stay tracked; a 99MB uint8 image array
 # is raw data, belongs with ml/data/, and its entropy trips the secret scanner.
 ml/runs/**/images.npy
+
+# Local Claude Code settings — machine-specific permissions/state, not shared
+# config. Added 2026-09-09 (daily-audit finding 13): this was untracked ONLY
+# because of Evan's machine-global exclude (~/.config/git/ignore), which no
+# clone of this PUBLIC repo inherits. Without this rule a fresh clone is one
+# `git add -A` away from publishing it.
+.claude/settings.local.json
