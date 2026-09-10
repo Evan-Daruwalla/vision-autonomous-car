@@ -10,12 +10,12 @@ Core bins:
 - hardware.md — printing + Lego fit, power, motors/drivers, the Uno's pin budget and current limits, the pack, measured vehicle geometry (**SPLIT 2026-09-03**; 313 lines, over the ~150 cap. Includes the charger-vs-BMS category error and cell C-rating traps)
 - firmware-traps.md — Arduino toolchain + firmware logic traps: build, clock handling, status-LED semantics (new 2026-09-03; 80 lines)
 - steering.md — servo choice, measured rack-and-pinion geometry, the coupler that must survive it, calibration (new 2026-09-03; 141 lines)
-- track.md — track layout, markings, surface, what the camera sees of the environment, **plus the whole 3DStreet / OpenDRIVE / LaneMaker trail** (updated 2026-09-07; **334 lines, WAY over the ~150 cap — split candidate: the xodr/LaneMaker material is ~120 lines and is really a separate bin**)
+- track.md — track layout, markings, surface, what the camera sees of the environment, **plus the whole 3DStreet / OpenDRIVE / LaneMaker trail** (updated 2026-09-09 — the 1:11.80 scale struck in four places against the live 1:14.63, the 114.75 mm car width superseded by 155.00 mm, and the marking/dash table re-derived from live output; Appendix ET. **512 lines, 2.6× over the ~200 cap — SPLIT OVERDUE: the xodr/LaneMaker material is its own bin, and that thread is now closed as a negative so it is a clean cut**)
 - sim-harness.md — the simulator, the eval harness, training-time GPU limits (new 2026-09-02; 131 lines)
 - ml-training.md — GPU memory + world-model training facts MEASURED on this
   3060 Ti: the DreamerV3 fitting table, Sysmem Fallback confirmed ON,
   dreamerv3-torch's missing offline loop, the DART action-contamination fix
-  in `train_controller.py`/`diag_copycat.py` (updated 2026-09-07)
+  in `train_controller.py`/`diag_copycat.py` (updated 2026-09-09 -- two drifted dreamer.py line refs corrected, Appendix ET)
 
 Standards bins (only those the codebase actually commits to):
 - dependencies.md — planned stack (DonkeyCar 5.x plumbing + PyTorch models) + the ON-CAR inference runtime decision: export to ONNX, and why RAM was never the binding constraint (updated 2026-09-03)

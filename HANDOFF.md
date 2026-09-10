@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-07 ~15:00 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-09-09 ~23:00 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 148 appendices A–ER; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO are corrections to earlier entries). When this file and the record disagree about
+(append-only, 151 appendices A–EU; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -105,11 +105,44 @@ This lists only what is actually open, cheapest first.)*
 
 | # | Action | Why it matters |
 |---|---|---|
-| 1 | **Decide the dash density** (Appendix DY). `TARGET_DASH_CYCLES = 40` divided the FULL 7.51 m route by the cycle length, assuming the centreline runs through intersections. It does not — **53% of the route (4000 mm) is inside an intersection box**, so a lap delivers **18.7 cycles, not 40**. Options: accept 18.7, or shrink the cycle to ~87.5 mm (dash 29.2 / gap 58.3). | **One word.** Density was the entire justification for deviating from MUTCD's 1:3 (Appendix DU); at 18.7 that deviation is half-earned |
-| 2 | **Decide the cornering clearance** (Appendix DX). 29.6 mm/side against `cad/vehicle_envelope.py`'s `MIN_SIDE_CLEARANCE = 50 mm` EST, after off-tracking eats 35.9 mm at the measured 185.95 mm wheelbase. It was 59.6 mm at the old 310 mm lane. | **One word.** I quoted 47.5 mm (static) when Evan chose 250 mm lanes, which understated it. Nothing asserts on the constant, so no check fails — the report just prints TOO LONG |
+| ~~1~~ | ~~**Decide the dash density**~~ **DECIDED 2026-09-09 (Evan): ACCEPT 18.7.** `TARGET_DASH_CYCLES` is retired; `cad/marking_specs.py` now asserts a max-blind-gap criterion instead (1.8 control steps against a 2.0 limit at 1.401 m/s / 20 Hz). Dash geometry unchanged at 62.6 / 125.2 mm. Appendix EU | ~~One word.~~ Closed. The cycle count was never the quantity that mattered |
+| ~~2~~ | ~~**Decide the cornering clearance**~~ **DECIDED 2026-09-09 (Evan): ACCEPT 29.6 mm/side.** `MIN_SIDE_CLEARANCE` re-pointed at the ROAD edge (154.6 mm/side at the measured 185.95 mm wheelbase) and now genuinely ASSERTED in `vehicle_envelope.py`'s self_check. Appendix EU | ~~One word.~~ Closed. **Accepted cost: 29.6 mm is 24% of the half-lane, so the policy will clip the centreline in corners** |
 | 3 | **Pitch-row scale check on the printed coupons.** Lego beam across holes 1–2, then 1–5 (nominal 32.00 mm span). If it binds across 5 but not 2, caliper the real span — that ratio is the printer's dimensional scaling error and it applies to every chassis part. | Last unclosed piece of M1.3. Needs only the coupons already printed + real Lego |
 | 4 | **Caliper the coupons.** Every fit verdict so far (pin 4.80 mm, axle 5.00 mm) is fit-by-feel, not a measured diameter. | Turns two working numbers into a measured offset that transfers to CAD |
 | 5 | **Confirm a 12-tooth bevel gear is in the parts bin.** Evan: "prob have one and if not i can print one" — not a confirmation. A bevel's meshing tooth profile is a harder print than a coupon. | Last unconfirmed pre-order check (PRD A1) |
+
+**OPEN FROM THE 2026-09-09 DAILY-AUDIT (Appendix ES) — not worked, Evan
+cancelled the sweep; the doc half was repaired 2026-09-09 in Appendix ET:**
+
+✅ **RESOLVED 2026-09-09 (Appendix EU).** The dirty artifacts were the
+CORRECT freshly-generated output; the committed versions were the stale ones.
+Regenerated and committed. **The guard that stops this recurring now exists:**
+`scripts/check_artifacts.py` regenerates all 27 tracked artifacts into a temp
+dir and diffs them, and `scripts/git-hooks/pre-commit` runs it with `--staged`.
+Its FIRST run found **four more** stale files the audit had missed.
+
+**`scripts/run_checks.py` is now the test suite** `CLAUDE.md` requires:
+`14 passed, 0 failed, 0 skipped (of 14)`, exit 0.
+
+| sev | finding | one-line fix |
+|---|---|---|
+| ~~CRIT~~ **DONE** | regenerated. The guard then found the same drift in `_model`, `_lmlanes` and `_sim` too — four files, not one |
+| ~~CRIT~~ **DONE** | regenerated, and `1122.xodr` vendored into `cad/reference/` so it is reproducible on any clone |
+| ~~CRIT~~ **DONE** | status block rewritten to 2026-09-09, scale corrected to ~1:14.63, MG90S → MG90D-270. Voice-checked, in band on all 4 metrics |
+| ~~HIGH~~ **DONE** | `scripts/check_artifacts.py` + pre-commit `--staged`. Blocking PROVEN by staging a staled file: commit refused, HEAD unchanged |
+| ~~HIGH~~ **DONE** | `scripts/run_checks.py`, 14/14 pass, exit 0. (Audit's 28-of-43 was wrong: 37 argparse modules, 14 define one.) `train_controller.py` still has none — open |
+| ~~HIGH~~ **DONE** | now **100755** |
+| ~~HIGH~~ **DONE 2026-09-09** | SELFTEST was pinned at a stale **39/39** in ~~four~~ **three** unstruck places (the fourth, `PRD_ROADMAP.md:477`, had already been struck by Appendix ET -- the audit miscounted). All three now point at the board banner rather than carrying a number | struck; `uno_control.ino:10-16` remains the rule |
+| ~~MED~~ **DONE** | `TARGET_DASH_CYCLES` retired for a max-blind-gap criterion (1.8 steps vs a 2.0 limit), asserted. Dash geometry unchanged |
+| ~~MED~~ **DONE** | re-pointed at the ROAD edge (154.6 mm/side) and now ASSERTED; the accepted 29.6 mm lane shortfall is pinned by a second assert |
+| ~~MED~~ **DONE, source only** | cleared at the true top, BEFORE `:529` sets it — the audit's "mirroring :532" would have wiped the bit just set. Compiles 9694 B. **NOT FLASHED** |
+| ~~MED~~ **DONE** | now at `.gitignore:57` |
+
+~~Two load-bearing files live OUTSIDE the repo with nothing preserving them.~~
+**DONE 2026-09-09: both vendored into `cad/reference/`** as `1122.xodr` and
+`figure8.xodr` (space dropped — LaneMaker's Qt dialogs choke on it), with
+SHA256s in the record. `rescale_reference_xodr.py:72` repointed, so that
+script now runs on a bare clone instead of only on Evan's machine.
 
 **LaneMaker / OpenDRIVE — CLOSED AS A NEGATIVE, DO NOT RE-OPEN
 (2026-09-07, Appendices EK–ER):**
@@ -326,7 +359,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | SIM-POC P4 DreamerV3 | P4 | **DONE** | 2026-08-06, Appendices T+U: **both** halves. Trained 2000 steps (image loss 588.31→61.39, 9.6x) AND the 8GB fitting table measured. **Batch size, not model size, breaks 8GB**: 69.7M params fit at b16 (5.238 GB), 19.1M at b64 does not fit in 7.0 GB. Two task premises proved false — see T.2 |
 | SIM-POC P5 policy | P5 | **DONE — but its NUMBERS are uncertified** | 2026-08-07, Appendix V. Latent BC (linear + MLP) **and** CEM planning, 3 seeds × 3 episodes. Key finding (stands, open-loop): the paper's linear C is structurally wrong here — z encodes cross-track error nonlinearly (probe R² 0.27 linear vs 0.97 MLP). **CAVEAT 2026-08-11 (Appendix AD): every step count from this task came from a harness later measured at CV 55%, where n=1 launch resolves only ~3×. The qualitative result holds — the expert completes, learned policies mostly do not — but 69.3/89.7/187.2/110 are not measurements. "No learned policy finished" was also later shown FALSE in the strict sense: completions occur, just not reliably.** |
 | Harness trustworthiness | P6 | **DONE 2026-08-13** | Appendix AI/AJ. Cause found: `donkey-generated-track-v0` REGENERATES per launch, which is the 4.4x swing. Fix is the PAIRED design (`ml/eval_paired.py`), not a fixed track — every fixed track is far OOD and the controllers collapse to 13-67 steps there. Result: **no arm beats the baseline** |
-| Track layout | M1.4 | **v1 + v2 drawn, NOT committed** | 2026-09-01, Appendices AM/AT/AX/AY. `cad/track_layout_v1.py` = figure-8 with a flat causeway bridge + 5 landmarks; `cad/track_layout_v2.py` = 3x3 city grid, 9 intersections, figure-8 route through the centre. ~~8.31 m, 103.5 mm spare at R=500~~ ~~RE-RUN 2026-09-05 ... span 2710 mm, spare only 90 mm at R=500 — UNDER the script's own 100 mm self-check, which now FAILS~~ **CURRENT, real output 2026-09-06 at lane 310 mm: route 8.23 m, pitch 1190 mm, span 2690 mm, spare 110 mm at R=500, `self_check: PASS`.** The SVG and JSON had been silently frozen since 2026-09-05 — `main()` runs `self_check()` before it writes, so the failing assert meant no regeneration; the committed JSON still read the old 148.25 mm car. Both regenerated. Print plan grew with the lane: intersection boxes 10.67 → 11.16 m, tiles 85 → 88, filament ~1051 → ~1081 g. Corner geometry stays FROZEN until T2 regardless |
+| Track layout | M1.4 | **v1 + v2 drawn, NOT committed** | 2026-09-01, Appendices AM/AT/AX/AY. `cad/track_layout_v1.py` = figure-8 with a flat causeway bridge + 5 landmarks; `cad/track_layout_v2.py` = 3x3 city grid, 9 intersections, figure-8 route through the centre. ~~8.31 m, 103.5 mm spare at R=500~~ ~~RE-RUN 2026-09-05 ... span 2710 mm, spare only 90 mm at R=500 — UNDER the script's own 100 mm self-check, which now FAILS~~ ~~**CURRENT, real output 2026-09-06 at lane 310 mm: route 8.23 m, pitch 1190 mm, span 2690 mm, spare 110 mm at R=500**~~ (struck 2026-09-09, Appendix ET: wrong in every number — the lane had already moved 310 → 250 mm and nothing propagated it). **CURRENT, real `cad/track_layout_v2.py` stdout 2026-09-09: lane 250 mm (1.613 × the 155 mm car, DELIBERATELY under the 2.0× rule), route 7.51 m, pitch 1100 mm, span 2700 mm of 2800 usable, spare 100 mm at R=500, `self_check: PASS`.** The SVG and JSON had been silently frozen since 2026-09-05 — `main()` runs `self_check()` before it writes, so the failing assert meant no regeneration; the committed JSON still read the old 148.25 mm car. Both regenerated. Print plan, live 2026-09-09: corner arcs 6.28 m, intersection boxes 18.00 m, **122 tiles at 200 mm, ~627 g** of filament, street lines 32.40 m taped not printed (~~10.67 → 11.16 m / 85 → 88 tiles / ~1051 → ~1081 g~~ struck same date, same cause). Corner geometry stays FROZEN until T2 regardless |
 | Track: sim rehearsal | — | **IMPOSSIBLE, settled** | 2026-09-01, Appendix AX. gym-donkeycar's protocol has ten message types and none defines a road; `load_scene` picks from 11 prebuilt Unity scenes. A custom track needs a Unity build. Costs little: M3 trains on real laps, not the sim corpus |
 | Track surface | T3 | **Decided: hybrid** | 2026-09-01, Appendix AX. NOT 225 printed panels (~12.6 kg, 169-900 h, 225 bed clears, 28 camera-visible seams). Print the 6.28 m of corner arcs + 9.36 m of intersection boxes as ~79 tiles (~970 g); tape the 31.9 m of straight street lines |
 | Uno firmware | — | **CONTROL FIRMWARE RUNS ON THE BOARD (2026-09-02)** | Appendices BD/BJ/BO. `firmware/` — `uno_bringup` (board proven), `uno_memtest` (2048 B SRAM, 16.0042 MHz), `uno_echo` (link p99 1.069 ms), `uno_packguard` (SELFTEST 27/27), **`uno_control` (implements `SERIAL_PROTOCOL.md` v0.2: **SELFTEST 49/49, `host_test.py` 13/13 exit 0**, 7888 B flash / 313 B SRAM, loop 2-3 ms; the status LED is quiet on a bench board and loud once a real pack has ever been seen — Appendix CE)** — **CURRENTLY FLASHED, fixed build, as of 2026-09-02 ~19:55 CDT.** Evan had put `uno_packguard` back on it in between, so **read the boot banner, never this line, for what the board is running.** ⚠️ **Watchdog defect found by the daily-audit (BY), fixed (CA): two `millis()` samples per loop iteration made the watchdog trip in the same iteration as every good frame — after the reply was sent, so no status byte ever showed it; a wired car would drive ~2 ms then brake ~48 ms, repeating.** The probe that catches it reads `armed` inside the window; the status-bit check the audit suggested passes on the broken build. `SERIAL_PROTOCOL.md` is no longer design-only. **ACTUATORS UNWIRED** — link + state machine only. ⚠️ **The repo source no longer matches what's flashed, as of 2026-09-03 (Appendix DC): `uno_control.ino`'s lighting path was rewritten for WS2812B (task 8e) after this row's "CURRENTLY FLASHED" build. That rewrite is compiled, not flashed** — the board still runs the 2026-09-02 build described in the rest of this row; SELFTEST 49/49 and 7888 B flash refer to THAT build, not the current source (58 checks, 9680 B, per Appendix DC) |
@@ -508,3 +541,57 @@ original floor and the pre-2026-08-12 scale decision.)*
 - **Open question for Evan:** does "no Lego motors" mean none at all, or
   none of the PF/Powered-Up families? EV3/NXT/9V-Technic motors, if owned,
   would reopen the free-encoder odometry path. Confirm at M1.2 inventory.
+
+---
+
+## Paste-ready prompt for the next session
+
+```
+Read, in order:
+1. D:\ClaudeCode\Autonomous Car Project\HANDOFF.md  (ONLY live snapshot)
+2. PRD_ROADMAP.md
+3. .claude/codebase-memory/INDEX.md, then ONLY the bins your task touches
+   (track.md before ANY track/marking/xodr work; steering.md before ANY
+   servo/steering work)
+
+STATE (2026-09-09 ~14:40 CDT). Software is four milestones ahead of hardware.
+The control firmware RUNS on the Uno (SELFTEST 49/49, host_test 13/13) but
+the flashed build and the repo source DIVERGE -- read the board's boot banner,
+never a doc. Actuators are unwired. Two tolerance coupons are printed and
+tested (pin 4.80 mm, axle 5.00 mm); nothing is ordered, BOM stands at
+$411.45. The sim lane ended in a well-instrumented NEGATIVE: no learned
+policy drives reliably, cause understood. A real DART defect was found and
+fixed 2026-09-07 (Appendix EJ). The LaneMaker/OpenDRIVE simulation thread is
+CLOSED as a negative after seven failed hypotheses -- do not re-open it.
+A daily-audit on 2026-09-09 (Appendix ES) found ~60 issues; the DOC half was
+repaired the same day (Appendix ET), the CODE half is open and listed in
+HANDOFF's audit table.
+
+NEXT ACTIONS, cheapest first:
+1. Evan owes ONE WORD on dash density (accept 18.7 cycles/lap, or shrink the
+   cycle). Recommendation on the record: ACCEPT, and replace
+   TARGET_DASH_CYCLES with a max-gap criterion.
+2. Evan owes ONE WORD on cornering clearance (accept 29.6 mm/side).
+   Recommendation on the record: ACCEPT, and re-point MIN_SIDE_CLEARANCE at
+   the ROAD edge (154.57 mm/side), not the lane edge.
+3. Resolve the three dirty tracked .xodr/.png files -- regenerate+commit, or
+   delete as unreproducible. Do NOT `git checkout --` them: two were already
+   stale against their generators, so reverting restores the WRONG version.
+4. README.md:9 is PUBLIC and says nothing has been printed, contradicted by
+   its own :140. Rewrite the status block at :114-132.
+5. Pitch-row scale check + caliper the printed coupons (Evan's hands).
+6. Confirm a 12-tooth bevel gear is in the parts bin.
+7. THE ORDER, $411.45 + shipping -- BLOCKED-ON-EVAN.
+
+HARD CONSTRAINTS
+- Corner geometry FROZEN until T2's empirical turning test.
+- No hardware purchase without Evan's explicit go.
+- The record is append-only + hook-guarded: run `date`, append via
+  ~/.claude/skills/project-memory/append-record-entry.js, and NEVER pre-cite
+  an appendix letter -- the script assigns it live.
+- Physical claims stay honest: unprinted is "untested", sim-only is "sim-only".
+- Do NOT type a backslash inside a heredoc'd Python script.
+- Use ./.venv/Scripts/python.exe -- bare `python` has no numpy.
+- `git add -A` and `git add .` are HARD-DENIED in settings.json; conversational
+  approval cannot override them. List every file path explicitly.
+```

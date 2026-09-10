@@ -183,6 +183,9 @@ the dated entry, not the digest.
 - [EP — The LaneMaker lane convention did NOT fix it and EO's spawn threshold does not apply to our file -- but the screenshot shows 8 of 9 junctions rendering as EMPTY, which makes the missing boundary polygon one cause for all three symptoms](#appendix-ep---the-lanemaker-lane-convention-did-not-fix-it-and-eos-spawn-threshold-does-not-apply-to-our-file----but-the-screenshot-shows-8-of-9-junctions-rendering-as-empty-which-makes-the-missing-boundary-polygon-one-cause-for-all-three-symptoms-2026-09-07-1439-cdt) (09-07)
 - [EQ — Evan's figure-8 export cracked BOTH boundary rules -- side (38/38) and the counterclockwise kerb-return walk -- so the boundary is now built and verified, and it STILL crashes; EN's inference retracted; signalPhase found missing from all 68 connections](#appendix-eq---evans-figure-8-export-cracked-both-boundary-rules----side-3838-and-the-counterclockwise-kerb-return-walk----so-the-boundary-is-now-built-and-verified-and-it-still-crashes-ens-inference-retracted-signalphase-found-missing-from-all-68-connections-2026-09-07-1450-cdt) (09-07)
 - [ER — CLOSED AS A NEGATIVE: signalPhase did not fix it either -- seven hypotheses, seven wrong; the thread's real yield is four derived-and-verified pieces of the vendor format, and the resolution is to use Evan's own working figure-8 export](#appendix-er---closed-as-a-negative-signalphase-did-not-fix-it-either----seven-hypotheses-seven-wrong-the-threads-real-yield-is-four-derived-and-verified-pieces-of-the-vendor-format-and-the-resolution-is-to-use-evans-own-working-figure-8-export-2026-09-07-1459-cdt) (09-07)
+- [ES — Scheduled daily-audit: the committed .xodr artifacts have decoupled from their generators, so HANDOFF and ER describe files that are not on disk — and the public README still says nothing has been printed](#appendix-es---scheduled-daily-audit-the-committed-xodr-artifacts-have-decoupled-from-their-generators-so-handoff-and-er-describe-files-that-are-not-on-disk--and-the-public-readme-still-says-nothing-has-been-printed-2026-09-09-0737-cdt) (09-09)
+- [ET — Doc-sync pass: ER's 'byte-identical defaults' claim retracted (signalPhase is unconditional), HANDOFF's track row was wrong in all eight numbers, and track.md's 1:11.80 scale struck in four places against the live 1:14.63](#appendix-et---doc-sync-pass-ers-byte-identical-defaults-claim-retracted-signalphase-is-unconditional-handoffs-track-row-was-wrong-in-all-eight-numbers-and-trackmds-11180-scale-struck-in-four-places-against-the-live-11463-2026-09-09-1440-cdt) (09-09)
+- [EU — Audit remediation: the artifact guard found four MORE stale files than the audit did, two undocumented experiment provenances recovered by diffing, a MEASURED label on an unmeasured number, and the test suite CLAUDE.md always required](#appendix-eu---audit-remediation-the-artifact-guard-found-four-more-stale-files-than-the-audit-did-two-undocumented-experiment-provenances-recovered-by-diffing-a-measured-label-on-an-unmeasured-number-and-the-test-suite-claudemd-always-required-2026-09-09-2258-cdt) (09-09)
 
 ---
 
@@ -15049,3 +15052,433 @@ unreproducible.
 
 Also new: `cad/rescale_reference_xodr.py` (+ its `ATTR_CLASS` completeness
 guard, proven to fire) and six probe `.xodr` files.
+
+# Appendix ES - Scheduled daily-audit: the committed .xodr artifacts have decoupled from their generators, so HANDOFF and ER describe files that are not on disk — and the public README still says nothing has been printed (2026-09-09 07:37 CDT)
+Scheduled `daily-audit` fired 2026-09-09 07:05 CDT. `Autonomous Car Project` classified **ACTIVE** (record EP/EQ/ER all 2026-09-07, non-audit; 80 commits since the 2026-09-02 cutoff — the highest churn of any project in the sweep). Cold `/audit` across code and docs, plus a `/landing-check` on Appendix ER. **~60 findings: 1 critical, 19 high, 24 medium, 16 low.** No fixes applied, nothing committed.
+
+Coverage: 261 tracked files, reconciled three ways (`git ls-files`, `-z`, and `-c core.quotepath=false` — all 261). 95 source/doc/config files audited individually; 166 generated artifacts excluded as regenerable (141 `ml/runs/*`, 24 `cad/*.xodr|stl|svg`, 1 png), of which 5 junction `.xodr` variants and both external reference files were parsed programmatically and both coupon STLs hashed.
+
+## 0 — SWEEP SIDE EFFECT: three tracked files went dirty during a read-only sweep
+
+Running the project's own done-checks wrote into tracked repo paths. `git status --porcelain` now shows:
+
+```
+ M .claude/pm-cadence.json          (routine hook counter increment)
+ M cad/track_1122_rescaled.xodr
+ M cad/track_grid3x3_junctions.xodr
+ M ml/artifacts/p1_first_frame.png
+```
+
+**Nothing was reverted, deliberately.** Two of those three were *already stale against their own generators* (see §1), so `git checkout -- <paths>` would discard correct freshly-generated output and restore the wrong committed version. Which way to resolve is Evan's call. This is itself the finding in §2: a done-check that writes into a tracked path cannot be run without changing the repo.
+
+## 1 — CRIT/TOP: committed artifacts have silently decoupled from the generators that produce them
+
+Two tracked `.xodr` files no longer match what their generators emit, and the docs describe the files that no longer exist:
+
+- **`cad/track_grid3x3_junctions.xodr`** holds **0** `<signalPhase>` elements across 68 connections. `export_xodr.py:856` emits `<signalPhase>` **unconditionally** — no flag guard. Regenerating to a scratch path and diffing gives exactly **68 added lines and nothing else**. The committed artifact has not matched its generator since that change landed.
+- **`cad/track_1122_rescaled.xodr`** carries all 31 `<object>` elements at **unscaled full-scale values** (`s="10"`, `width="2"`) on a k=0.020876 file. It is the **pre-fix** rescaler output, committed in the same commit (`defbbf0`) as the fix that scales them. Re-running the current script gives `s="0.20876..."`. **Appendix EN's experiment cannot be reproduced from the repo.**
+
+Consequence: `HANDOFF.md:329`, Appendix ER's byte-identity claim, and the record's account of what LaneMaker was actually tested on all describe files that are not on disk. Fix: regenerate and commit both, or delete `track_1122_rescaled.xodr` as an unreproducible artifact.
+
+## 2 — HIGH: every generator defaults its output INTO a tracked repo path
+
+`export_xodr.py:990`, `:1039`, `:1074`, `rescale_reference_xodr.py:72`, and even `ml/verify_env.py:81` all default `--out` to a tracked path. A tracked artifact is therefore correct only if someone remembers to regenerate and commit, and **nothing checks**. Proven live by §0. Fix: make `--out` required, or add a `--check` mode that regenerates to a temp path and diffs, and call it from the pre-commit hook.
+
+## 3 — CRIT: the public README contradicts itself about whether anything has been printed
+
+`README.md:9` opens the public repo (`github.com/Evan-Daruwalla/vision-autonomous-car`) with "Nothing has been 3D-printed and no parts have been ordered". `README.md:140` of the same file says "tolerance coupons v1+v2 (printed and tested 2026-09-05)", and `:131` repeats the negative. This is the first thing a reader of a portfolio repo sees, and it is wrong. Fix: rewrite the status block at `:114-132`, or strike it with a dated note.
+
+## 4 — HIGH: the "test suite" the definition of done requires does not exist
+
+`CLAUDE.md:24` requires "the test suite ran with real output pasted". `git ls-files | grep -cE '(^|/)(test_|tests?/)'` returns **0** — no test files, no runner. Verification is 14 per-module `self_check()` functions that run only when that module is invoked, and **28 of 43 CLI modules have none** — including `ml/train_controller.py`, where the 2026-09-07 DART defect lived. Fix: add `scripts/run_checks.py` that imports and runs every `self_check()` and exits non-zero, and call that the test suite.
+
+## 5 — HIGH: two load-bearing artifacts live outside the repo with nothing preserving them
+
+`rescale_reference_xodr.py:72` points `REF` at `~/Downloads/1122.xodr` (96,786 B) — `--self-check` aborts without it. And `~/Downloads/figure 8.xodr` (31,208 B) is named by Appendix ER as **the entire resolution** of the seven-hypothesis LaneMaker thread. Both exist today; neither is tracked, backed up, or hashed. A Downloads-folder cleanup erases the resolution of a documented negative. Fix: copy both into `cad/reference/` and repoint `REF`, or record their SHA256 and provenance in `track.md` so their loss is at least detectable.
+
+## 6 — HIGH: the pre-commit hook is tracked without the execute bit
+
+`scripts/git-hooks/pre-commit` is tracked as mode **100644** — as are all 261 tracked files. It fires on this machine only because `core.fileMode=false`. On any POSIX clone or CI runner, git's hooksPath requires the x-bit and **silently skips** the hook, so the secret gate disappears with no warning. Fix: `git update-index --chmod=+x scripts/git-hooks/pre-commit` and commit.
+
+## 7 — HIGH: the SELFTEST count is pinned in four places at a number that has now drifted twice
+
+`firmware/SERIAL_PROTOCOL.md:5`, `.claude/codebase-memory/testing.md:101`, `.claude/codebase-memory/steering.md:89` and `PRD_ROADMAP.md:475` all say **39/39**, unstruck. The record puts the flashed build at 49/49 and current source has **58** `CHECK(` invocations. Record line 8641 shows this exact pin was already found stale once and fixed 37→39 — so it has drifted twice from the same cause.
+
+Worse, `PRD_ROADMAP.md:475` reads "Done-check MET: firmware SELFTEST 39/39 on the real board and host_test.py 11/11" — and that is the **pre-Appendix-CA build**, the one `HANDOFF.md:332` says carried a watchdog defect that would have braked a wired car ~96% of the time. The standing plan records a done-check met on a build known to be defective.
+
+The firmware file's own header (`uno_control.ino:10-16`) already says: "Never quote a SELFTEST count for this file without having just run it." Fix: replace all four numbers with a pointer to one place, and restate the PRD done-check against the 49/49 / 13/13 post-CA build.
+
+## 8 — HIGH: HANDOFF's "CURRENT, real output" row is wrong in all six numbers
+
+`HANDOFF.md:329` is labelled "CURRENT, real output 2026-09-06 at lane 310 mm". A live generator run (whose JSON is byte-identical to the committed one) gives lane **250 mm**, route 7.512 m, pitch 1100, span 2700, spare 100, boxes 18.00 m, tiles 122, filament 627 g — against the row's 310 / 8.23 / 1190 / 2690 / 110 / 11.16 / 88 / 1081. **The code is the current side; HANDOFF is the drifted side.** Fix: paste the current `python cad/track_layout_v2.py` stdout into that row and strike the old figures.
+
+## 9 — HIGH: the memory bin states two different values for the project's most load-bearing derived number
+
+`.claude/codebase-memory/track.md` asserts "The model scale is DERIVED, not chosen: 1:11.80" at `:15`, `:73`, `:82`, `:442`, `:450` — all unstruck — while `:58` says "Model scale moved 1:11.80 -> 1:14.63". `marking_specs.scale()` returns **14.6304**. The stale figure is the one the dash table at `:450` is computed from. Fix: strike the four 1:11.80 assertions and re-derive `:450` at 1:14.63.
+
+## 10 — Bin fact-check (four largest bins, re-derived against live runs)
+
+Five stale claims, everything else exact:
+
+- **`track.md:7-9`** anchors the whole bin on "the car's MEASURED width … (114.75 mm, 2026-09-02)". `hardware.md:278` shows that figure **struck through**, superseded to 148.25 mm (`:277`, Appendix CH) and then to **155 mm** (`:365`, front track, 2026-09-05, "governs"). `track_layout_v2.py:92` reads `CAR_WIDTH = 0.155`. The bin's own `:473-475` already says the width changed — so the file contradicts its own opening sentence.
+- **`track.md:447-448`** — "At 155 mm: normal line 8.61-12.92 mm, stop line 25.83-51.67 mm, lane 310 mm". Live `python cad/marking_specs.py` gives lane **250.0 mm**, normal line **6.94-10.42 mm**, stop line **20.83-41.67 mm**, scale 1:14.63. The quoted values reproduce exactly under the *old* lane=310 mm / 1:11.80 assumptions. Unlike other superseded passages in the same bin, this one carries **no** supersession note, and it sits directly beside the DX section that changed its inputs.
+- **`ml-training.md:57`** cites `dreamer.py:245` for `action_space`; `:245` is `eval_envs = [Damy(env) ...]` and the reference is at **:246**. (`288-290` is correct.)
+- **`ml-training.md:59`** cites `dreamer.py:319` for `tools.simulate(...)`; `:319` is `print("Start training.")` and the call is at **:320**.
+- **`testing.md:101`** cites SELFTEST 39/39 as current; `uno_control.ino` was rewritten 2026-09-03 22:28:50 in `5349efe`, *after* testing.md's last edit (2026-09-02 23:06), and now holds 58 `CHECK(` invocations. Same root cause as §7.
+
+Confirmed exact in the same pass (a partial list): `track_layout_v2` self-check PASS with span 2700 / spare 100 / lane 250 / `LANE_TO_CAR` 1.613 / lap 7.51 m, and `--radius 0.6` genuinely refuses; `vehicle_envelope` clearances 29.568 mm and 35.864 mm at wheelbase 185.95 mm, R=500; `export_xodr` 14 geometries, scale ×14.6304, route 109.9093 m, and `--grid` 6 roads at 39.5021 m, pitch 16.0934 m; `rescale_reference_xodr --self-check` "1202 length-class values all scaled, 55 roads" and k=0.020876; the `1122.xodr` geometry census (21 line / 21 spiral / 18 arc / 6 paramPoly3 / 5 junction / 5 boundary); LaneMaker `bridge.xodr` 356 arc / 286 spiral and `traffic_test.xodr` 544 `roadRunnerProfile` / 0 `LaneProfile`; `marking_layout` 12 runs / 7200 mm / 36 dashes / 28 stop lines / 18.7 cycles per lap; ConvVAE **4,348,547** params; `verify_corpus` 88/88 episodes, 102,888 frames, and the per-track split 51/60,051 + 27/31,627 + 10/11,210; recovery 20/20 episodes, 6,552 frames, 805 noise; all six `dreamer_p4` sweep param counts and peak-VRAM figures; `uno_packguard.ino` exactly 27 `CHECK(` (so *its* 27/27 is not stale); the CRC-8 vector `123456789 → 0xF4`.
+
+## 11 — HIGH (remaining)
+
+- `PRD_ROADMAP.md:388` and `:853` assert `cad/track_layout_v2.py`'s self-check "FAILS at R=500". It **PASSES** — real output `track_layout_v2 self_check: PASS`, 100 mm spare. Fix: strike both with a dated pointer to Appendix DS.
+- `docs/WIRING_PROTOSHIELD.md:177` says the coupling is "UNRESOLVED. No coupling is chosen", contradicting `PRD_ROADMAP.md:513` (Adafruit #4252, chosen 2026-09-03, Appendix DF) and BOM row 22 — six days unpropagated.
+- `docs/BOM.md:287` — the wiring diagram still labels `[MG90S servo]` after row 7 swapped to the HOOYIJ MG90D-270° on 2026-09-05; `docs/WIRING_PROTOSHIELD.md:123`'s heading carries the same stale part.
+- `docs/research/2026-07-23_drive-motor-selection.md:18` — headline verdict "Buy the Pololu #1093 … $23.95" stands unqualified; the project chose **#5159 at $29.95** on 2026-08-12 and this file has never been touched since. Fix: append a dated correction block, matching the pattern already at `:166-198`.
+- `docs/research/2026-07-23_power-system.md:207` — "Full build totals (motor now priced at $23.95)" still prices #1093, and this file **was** edited 2026-09-02, the same day the BOM motor fix landed.
+- `PRD_ROADMAP.md:806` treats `TARGET_DASH_CYCLES = 40` as settled; Appendix DY found the real figure is 18.7/lap and `HANDOFF.md:108` still lists it as an OPEN decision. `cad/marking_specs.py:113` also still hardcodes 40.
+- `docs/BOM.md:260` — the "by vendor" order sheet, which the doc says to buy from, has **no Adafruit row**, so row 22's Adafruit #4252 (marked "HARD CONSTRAINT") cannot be ordered from it.
+- `.claude/codebase-memory/INDEX.md:10` — router line counts stale by 40-140%: hardware.md "313" (actual 466), steering.md "141" (actual 339), track.md "334" (actual 515); ml-training.md (503) has no count at all.
+- `.claude/codebase-memory/hardware.md:334` still says "`BOM.md` row 5 buys the WRONG MOTOR … Unresolved - it moves the total, so it is Evan's call". Row 5 was corrected to #5159 the same day (2026-09-02), and hardware.md was edited again 2026-09-06 without fixing it.
+
+## 12 — MEDIUM (selected; ~24 total)
+
+- `cad/vehicle_envelope.py:230` — `MIN_SIDE_CLEARANCE = 50 mm` is a documented requirement with **no assertion anywhere**. The report prints "TOO LONG" and **exits 0** at every wheelbase in its own table (42.4 mm down to 26.6 mm). The 250 mm lane decision violates the stated rule at every point and nothing fails. Fix: assert at the measured 185.95 mm wheelbase, or restate the constant as advisory with a dated note that it is knowingly unmet.
+- `ml/train_controller.py:253` — the 2026-09-07 DART fix (LSTM gets executed `act`, BC loss gets `act_target`) is a **naming convention with zero mechanical guard**. Both call sites are correct today; nothing would catch the same defect recurring, and this module has no `self_check()`.
+- `cad/vehicle_envelope.py:150` — the cross-file drift guard checks FLOOR / WALL_MARGIN / STREETS / MAX_STRAIGHT / LANES / LANE_TO_CAR but omits `CAR_WIDTH`, which is duplicated verbatim at `:50` and `track_layout_v2.py:92`. `marking_specs.py:231` does check it, so coverage is inconsistent.
+- `.gitignore:50` — `.claude/settings.local.json` is untracked **only** because of Evan's machine-global exclude (`git check-ignore -v` names `~/.config/git/ignore`), not this repo's rules. On a fresh clone of this **public** repo it is one `git add -A` from being committed.
+- `cad/track_layout_v1.py:58` — a tracked, self-checking module still encoding three superseded facts (`CAR_WIDTH = 0.130 "UNMEASURED"`, `LANE = 2.0 * CAR_WIDTH` at `:59`, and a ~330 mm R_min in its docstring) with no superseded banner. Its self-check passes forever on stale constants, and `track_layout_v2.py:258` names it "the fallback".
+- `.claude/codebase-memory/gotchas.md:3` — the router states a "~150 cap" and documents splitting gotchas.md at 423 lines, but four bins are now past that cap unchecked: track.md 515, ml-training.md 503, hardware.md 466, steering.md 339.
+- `firmware/uno_control/uno_control.ino:529` — `ST_DROPPED` is OR'd in on a sequence gap and **never cleared**; `:550`'s `statusBits & 0x0E` preserves it forever, unlike `ST_CRC_BAD` (cleared `:532`) and `ST_WATCHDOG` (cleared `:642`). One dropped frame makes every later reply report "dropped" for the rest of the session.
+- `firmware/uno_control/uno_control.ino:329` — Appendix CZ's ~0.027% encoder tick-loss estimate assumed one NeoPixel `show()` per `BLINK_MS`=340 ms, but `applyLights()` runs every control tick (~50 ms, ~20 ms during a watchdog trip) — **6.8-17× more often**. The headline figure is carried unqualified in `LIGHTING_SPEC.md:218` and `WIRING_PROTOSHIELD.md:320,346`.
+- `firmware/uno_control/uno_control.ino:640` — hazard flashing on a watchdog trip is gated on `everArmed`, so before the first-ever ARM a trip lights the tail steady and never blinks; `SERIAL_PROTOCOL.md:154` states it flashes hazards unconditionally.
+- `firmware/README.md:74` — "No control firmware exists. The serial protocol is designed on paper only." `uno_control.ino` is 658 lines, flashed, and `SERIAL_PROTOCOL.md:3` says IMPLEMENTED.
+- `cad/track_layout_v2.py:120` (duplicated at `cad/marking_specs.py:102`) — comment claims "1.613x sits inside Duckietown's measured 1.4-1.6x band"; 250/155 = 1.6129, which is **just outside** it.
+- `cad/track_layout_v1.py:440` — `main()` writes the JSON key `"car_width_m_MEASURED"` for a constant its own `:58` calls UNMEASURED; the committed `track_layout_v1.json:4` still carries the honest `"car_width_m_ESTIMATE"`. The label was changed without the number becoming measured.
+- `cad/track_layout_v1.py:436` — writes into `--out` with no `mkdir(parents=True, exist_ok=True)`; sibling `track_layout_v2.py:569` has exactly that guard, so v1 crashes on a fresh directory where v2 succeeds.
+- `cad/export_xodr.py:1023` — `R_MIN_SERVO_EST = 0.2324` is local to `self_check()` (`:456`) and re-typed as a bare literal in `main()`'s printed report.
+- `cad/README.md:53` — "Print it twice — once in PLA, once in PETG" is superseded 26 lines below at `:79` ("ABS is now the standing chassis material, Evan 2026-09-05"). The same README documents only the two `scripts/gen_*.py` STL generators and never mentions `export_xodr.py` (1,102 lines) or the five other layout modules.
+- `docs/WIRING_PROTOSHIELD.md:356` uses "148.25 mm rear track" as governing; Appendix DM flipped governance to the 155 mm front track two days after this doc's last edit.
+- `docs/research/2026-07-23_sensor-compute-stack.md:74,153` asserts the Pi 5 "wants 5V/5A" and "Avoid USB-PD power banks"; the same-day `power-system.md:19-23` verified 5V/3A suffices and recommends a USB bank. Neither cross-references the other. `:207` still ranks Pi 5 8GB $95 as the #1 buy after `power-system.md:219` reversed to 4GB and `onboard-compute-selection.md` to 2GB $65.
+- `README.md:3` — "A 1/14-scale autonomous car" as current fact; the scale is derived and `marking_specs.scale()` returns 14.6304, so the round 1/14 is coincidental.
+- `docs/BOM.md:261` — "≈$415 – $430 all-in" is stale against the $411.45 row sum three lines above and against every other doc's ≈$424-439. `:258`'s Amazon-consolidation delta "+$84.97 to +$91.22" does not reconcile against its own step-deltas — re-deriving gives $86.04-$92.29, a **$1.07 gap at both ends**, the same magnitude as the separately-documented row-16 22 AWG revert error.
+- `docs/BOM.md:32,48` — bare filename references to `steering.md` and `gotchas.md` resolve from neither `docs/` nor the repo root; the real paths are under `.claude/codebase-memory/`.
+- `.claude/codebase-memory/features.md:3` — the bin's "34 Python files under ml/" total is right but its enumeration names only 31; `ml/provenance.py`, `ml/diag_camera_height.py` and `ml/diag_camera_pose.py` appear nowhere.
+- `.claude/codebase-memory/conventions.md:31` cites `track_layout_v2.py:472` for a bare `json.dumps` write; `:472` is SVG string-building and the real call is `:571`.
+- `ml/train_vae.py:94` — every training script seeds torch/numpy/random but none sets `cudnn.deterministic` or `torch.use_deterministic_algorithms` (checked across all 33 `ml` files), so cuDNN LSTM/conv backward passes are not bit-reproducible at a fixed seed.
+
+## 13 — LOW (16, one line each)
+
+`ml/collect_sim_data.py:275` `main()` returns no code, so 0 saved episodes still exits 0 (sibling `collect_recovery.py:229` does it right) · `ml/train_controller.py:314` and `:145` can divide by zero under `--recovery-weight 0.0` · `ml/preprocess.py:47` unguarded `rsplit("-", 1)[1]` kills a whole split on one stray file · `ml/models.py:17` docstring says the param-count assert is in `self_check()`; it was moved to `ConvVAE.__init__` (`:61-71`) precisely because self-check-only was proven a false guarantee · `firmware/SERIAL_PROTOCOL.md:1` titled "DRAFT v0.1" while `:11` says bumped to v0.2 · `:189` §5 omits the `T` and `B` commands the firmware implements at `uno_control.ino:610-615` · `:85` calls throttle-zero-while-braking accidental; `uno_control.ino:304-306` now makes it an explicit branch · `firmware/uno_control/packguard.h:1` claims 27/27 coverage for logic including `everPlausible`/`clearLatch()`, which were never in that hardware run · `packguard.h:84` `clearLatch()` is never called anywhere · `uno_control.ino:190,327` use 0 as a "never set" sentinel that is a reachable `millis()` value at the ~49.7-day rollover (both fail safe-direction) · `:287` `encISR()` calls `digitalRead()` twice per interrupt · `uno_packguard.ino:79` non-`F()` strings cost ~50-60 B SRAM against the stated F()-macro discipline · `firmware/host_test.py:81` no try/finally around the serial session · `cad/rescale_reference_xodr.py:94` `repr(float(v)*k)` switches to scientific notation below 1e-4, unvalidated against LaneMaker's parser · `:277` `--scale` and `--target` both accepted with no conflict check (`export_xodr.py:966` raises on the equivalent) · `:37` docstring coefficient rule incomplete for `<elevation>` and `<laneOffset>` · `cad/export_xodr.py:907` the `trim` clamp is unreachable from any CLI-exposed configuration · `:51` Usage block lists 3 invocations against 9 flags · `:148` sources the turn-trim range to "8 samples" where the two files hold 14 turn-connector segments · `scripts/gen_servo_lego_coupler.py:267` mkdir runs before the `if ok:` gate · `:257` and `gen_tolerance_coupon.py:237` hardcode a POSIX separator in the default `--out` · `.claude/codebase-memory/data.md:187` cites `exp_recovery.py:159-167`, actual 163-168 · `docs/WIRING_PROTOSHIELD.md:174` cites line 132, actual 133 · `HANDOFF.md:408` says gotchas.md is 24 lines, actual 25 · `.gitattributes:17` three tracked files over 500 KB with no LFS filter (both coupon STLs at 902,484 B, the record at 846,476 B; `.git` is 67 MB against 8.4 MB of working tree) · `graphify-out/manifest.json` was built 2026-09-07 11:21, before the last two commits (HEAD 15:08) which added 230 lines to `export_xodr.py` and a new module.
+
+`PRD_ROADMAP.md:1` has **zero** "CURRENT DIRECTION" sections despite several major pivots, using dated-strikethrough-append instead. The doc self-discloses this at `:8-16`. Flagged only so the next sweep does not re-raise it as a defect — it is a documented deliberate deviation.
+
+## 14 — Load-bearing negatives
+
+- **Secrets: clean.** `git grep` over the tracked tree **plus** a `git log --all -p -G` pickaxe over all **131** commits for `sk-`, `ghp_`, `AKIA`/`ASIA`, `AIza`, `xox[baprs]-`, `glpat-`, BEGIN-PRIVATE-KEY, JWT shape, and `api_key|secret|password|token\s*[:=]\s*"literal"`. No `.env`/`.pem`/`id_rsa`/`credentials*` ever added, and **zero files were added-then-deleted across all commits**, so nothing could hide a scrubbed secret. The only personal-identifier hit is "Evan-Daruwalla" as the public repo path. Limit: regex-based, not entropy-based.
+- **Pre-commit hook wiring is correct** (the *mode* is the bug, §6): `core.hooksPath = scripts/git-hooks`, `git rev-parse --git-path hooks/pre-commit` resolves to that tracked file, md5 identical, and `README.md:164` documents the fresh-clone step.
+- **Both big done-checks re-run today and PASS at exit 0.** P2 corpus: 88 episodes / 102,888 frames, splits disjoint, exact PID identity 88/88, image-axis gate 88/88, independently cross-derived from filenames. P1: CUDA plus a live sim frame. (Correction to a worker's claim: `ml/data/` is present at 7.6 GB, not empty.)
+- **All 7 `cad` self-checks PASS** on current source, and 4 cheap `ml` ones (`provenance`, `episode_writer`, `splits`, `models`).
+- **Two controls proven to FIRE on a planted positive**, not merely present: `vehicle_envelope.py:152`'s cross-file drift guard raised `AssertionError: LANE_TO_CAR has drifted…`, and `rescale_reference_xodr.py:227`'s ATTR_CLASS coverage guard raised `UNCLASSIFIED attributes -- refusing to scale`. A third (the `marking_specs`/`marking_layout` lane-rule guards) also fires on a planted drift.
+- **`cad/track_layout_v2.json` is byte-identical to a fresh generator run** — that artifact is current, and HANDOFF is the drifted side (§8).
+- **The 2026-09-07 DART fix landed at every call site.** `rnn_states()` gets the executed `act` at `train_controller.py:253/254` and `diag_copycat.py:120`; `act_target` reaches only `fit_a`/`val_a` (`:258-259`). No in-place mutation aliases them, and six other consumers never touch the cached action arrays.
+- **Record integrity clean:** 148 `# Appendix` headings, 148 matching TOC ids, zero orphans either direction, 149/149 in-document anchors resolve.
+- All 33 `ml/*.py` compile. `ml/requirements.txt` is fully pinned including a full commit SHA for `gym_donkeycar`, cross-checked both directions against imports in all 34 files with no gap.
+- `.gitignore` verified correct against `git status --ignored`, including the `ml/runs/**/images.npy` carve-out; nothing tracked that should be ignored.
+- The two coupon STLs are genuinely different files (identical 902,484 B, different SHA256, `cmp`-different at byte 588,921). BOM row sum re-added independently: **$411.45**, exact. All 8 PRD `- [x]` done-check artifacts exist and work.
+- **Firmware safety paths clean:** the 2026-09-02 two-`millis()` watchdog defect is genuinely fixed and no sibling timer repeats the pattern; every deadline uses rollover-safe unsigned subtraction; `encTicks` is read atomically under `noInterrupts()`; `steerToUs()`/`throttleToDuty()`/`readMv()` all widen before multiplying, including the INT8_MIN negation case; no `String`, no unbounded buffer, no array indexed by an unvalidated serial byte; CRC-8 agrees between `.ino` and `host_test.py`; `host_test.py`'s 13 checks are a real exit-code gate.
+- **`export_xodr.py`'s derived vendor rules are TRUE**, each re-derived rather than taken from the code: `side` — 38 boundary segments across `1122.xodr` (30) + `figure 8.xodr` (8), every `type="lane"` one `"right"`; `signalPhase` — 63/63 reference connections carry one, distinct ids per junction equal that junction's arm count, reproduced on 9/9 of ours; straight-through trim — exactly 5 samples at `trim/L = 0.04166667` = 1/24 to machine precision. The 0.45 turn-trim approximation **is** marked `# shortcut:` at `:151`.
+- Cross-file constants agree today across v2 ↔ vehicle_envelope, v2 ↔ marking_specs, and v2 ↔ marking_specs ↔ marking_layout. `INDEX.md` routes to all 18 bins with no missing bin and no orphan. `.mcp.json` and `pm-cadence.json` are valid JSON.
+- **Not swept, reported as missing:** firmware flash-size and SELFTEST-on-board claims (no `arduino-cli` on PATH, no board attached) — **UNTESTED, not clean**. `ml/runs/*` result JSON was not opened file-by-file. Mutation score and fuzzing were not run.
+
+## 15 — Landing-check on Appendix ER
+
+Verdict: **FIX FIRST.** Two of ER's own claims are false against disk, and both concern the artifacts the entry says prove its negatives.
+
+- **`docs/Project Record — Full Chronological History.md:15045`** — "The default `--junctions` export is byte-identical to before every one of these changes (verified by diff after each)" is falsified by the sentence three lines above it: `signalPhase` is emitted unconditionally at `export_xodr.py:856`. Regenerating to a scratch path and diffing gives exactly **68 added `<signalPhase>` lines and nothing else**. Fix: append a dated correction stating the default export DID change by 68 lines, and regenerate the committed artifact.
+- **`:15040`** — the section heading "Code left behind (all behind flags, defaults untouched)" is false for the same reason. Fix: "three behind flags; signalPhase unconditional".
+- **`:15051`** — "six probe `.xodr` files"; commit `defbbf0` added **five** `probe_*` files (k010/k025/k050/k100/kours) and nine `.xodr` in total. No reading gives six.
+- **UNVERIFIED:** "a rescaler proven numerically neutral at k=1.0" — not re-run at k=1.0. Reported as unverified, not assumed either way.
+
+**ER claims that reproduced TRUE:** the `side` 38-of-38 rule; the `signalPhase` one-id-per-arm rule (63/63); the straight-through trim at 5-of-5 machine precision; the three new flags present in argparse (`:924`, `:937`, `:948`); signalPhase emitted unconditionally at `:856`; `export_xodr self_check: PASS` re-run live; the ATTR_CLASS guard proven to fire on a planted positive; "seven hypotheses, seven wrong" (each cited appendix says what its row says); and `~/Downloads/figure 8.xodr` exists at 31,208 B, mtime 2026-09-07 14:41 — **true but fragile**, per §5.
+
+**Correction propagation is otherwise clean.** EL's retraction is stated inside EQ (record `:14943`) and reaches `HANDOFF.md:148`, `track.md:244` and `export_xodr.py:166`. All four derived vendor-format pieces are written into `track.md` (`:242`, `:248`, `:250`, `:252`) including the 0.45 shortcut caveat at `:254`. **No file anywhere still asserts a retracted claim unqualified.**
+
+Repo state: local is **2 commits ahead** of `origin/main` (`bfa953e`, `defbbf0` unpushed). Working tree was clean but for the `pm-cadence.json` counter before this sweep — see §0 for what the sweep itself changed.
+
+# Appendix ET - Doc-sync pass: ER's 'byte-identical defaults' claim retracted (signalPhase is unconditional), HANDOFF's track row was wrong in all eight numbers, and track.md's 1:11.80 scale struck in four places against the live 1:14.63 (2026-09-09 14:40 CDT)
+**WHAT:** Doc-sync pass over the whole `/project-memory` set, driven by the
+2026-09-09 daily-audit (Appendix ES). **No code was changed.** Every number
+written below was re-derived by running the generator, not copied from ES.
+The audit's ~60 findings were NOT worked — Evan cancelled that — but the
+subset that is purely doc drift is repaired here, because repairing it IS
+this system's job.
+
+## 1. CORRECTION TO APPENDIX ER — its "byte-identical" claim is false
+
+ER's "Code left behind" section says the default `--junctions` export is
+**"byte-identical to before every one of these changes (verified by diff
+after each)"**, and its heading calls the changes "all behind flags, defaults
+untouched". **Both are wrong.** `cad/export_xodr.py:856` emits `<signalPhase>`
+**unconditionally** — there is no flag guard on it.
+
+Measured 2026-09-09:
+
+```
+grep -c signalPhase cad/track_grid3x3_junctions.xodr        -> 68
+git show HEAD:cad/track_grid3x3_junctions.xodr | grep -c    -> 0
+```
+
+The committed artifact carries 0; a fresh regeneration carries 68. The diff is
+exactly 68 added lines and nothing else. So the default output DID change, and
+the committed artifact has not matched its generator since that change landed.
+
+ER also says **"six probe `.xodr` files"**. There are **five**:
+`probe_spawn_k010`, `k025`, `k050`, `k100`, `kours`.
+
+Per the append-only rule this is a new entry, not an edit to ER.
+
+## 2. DRIFT-CHECK: HANDOFF.md's track row was wrong in every number
+
+`HANDOFF.md`'s Track-layout row carried a block labelled **"CURRENT, real
+output 2026-09-06 at lane 310 mm"**. Running `cad/track_layout_v2.py` today,
+against a committed JSON that is byte-identical to what the script writes:
+
+| quantity | HANDOFF row | live run 2026-09-09 |
+|---|---|---|
+| lane width | 310 mm | **250 mm** |
+| driven route | 8.23 m | **7.51 m** |
+| street pitch | 1190 mm | **1100 mm** |
+| span | 2690 mm | **2700 mm** |
+| spare at R=500 | 110 mm | **100 mm** |
+| intersection boxes | 11.16 m | **18.00 m** |
+| printed tiles | 88 | **122** |
+| filament | ~1081 g | **~627 g** |
+
+`self_check: PASS`. The row is superseded in place with the real stdout.
+
+**`PRD_ROADMAP.md` inherited the same staleness twice** (:388 and :853),
+both asserting the self-check "FAILS at R=500 ... only 90 mm spare". It
+PASSES, with 100 mm spare. Both struck and dated, never deleted.
+
+## 3. BIN REPAIR: `track.md` stated the project's most load-bearing derived
+number two different ways
+
+`marking_specs.scale()` returns **14.6304**. `track.md` said **1:11.80** in
+four unstruck places (:15, :73, :82, :442) while a fifth (:58) recorded the
+move to 1:14.63 — so the file contradicted itself, and the dash table at :450
+was computed from the stale figure. The four are struck; the dash table is
+re-derived from live output:
+
+```
+lane        250.0 mm per direction (road 500 mm)
+SCALE       1:14.63  DERIVED from the lane rule, not chosen
+normal line       6.94-10.42 mm      stop line   20.83-41.67 mm
+dash (USED)       62.6 + 125.2 mm    (ratio 1:2, Evan 2026-09-06)
+```
+
+`track.md:7-9` also anchored on the superseded **114.75 mm** car width; the
+live generator uses **155.00 mm** FRONT track (Appendix DM). Corrected.
+
+## 4. OPEN, and still Evan's call: the two one-word decisions
+
+Both were elaborated this session with re-run numbers; neither is decided, so
+neither is written into any doc as settled.
+
+- **Dash density.** `marking_layout.py` gives **18.7 cycles per lap**, not the
+  `TARGET_DASH_CYCLES = 40` that `marking_specs.py:274` still PRINTS as fact —
+  the target was computed on the full 7507 mm route, but 4000 mm of it (53%)
+  is inside intersection boxes that carry no centreline. The quantity that
+  actually matters is the blind gap: at 1.401 m/s and 20 Hz the current
+  125.2 mm gap costs **1.8 control steps**, against the 8.9 that got true
+  scale rejected and the 0.8 that shrinking would buy. The real blind stretch
+  is the 500 mm intersection box — **7.1 steps, 8 times a lap** — which cycle
+  length cannot touch. Recommendation on the record: ACCEPT 18.7 and replace
+  the cycle-count target with a max-gap criterion.
+- **Cornering clearance.** `vehicle_envelope.py` at the measured 185.95 mm
+  wheelbase, R=500 mm: off-tracking **35.86 mm**, leaving **29.57 mm/side**
+  inside the LANE but **154.57 mm/side** to the ROAD edge.
+  `MIN_SIDE_CLEARANCE = 50 mm` is checked against the lane edge and **nothing
+  asserts on it**, so the report prints TOO LONG at all six wheelbases and
+  still exits 0. Recommendation on the record: ACCEPT 29.6 and re-point the
+  constant at the road edge. Honest cost: 29.57 mm is 24% of the half-lane,
+  so the BC policy will put a wheel over the centreline in corners — a paint
+  violation, not a failure, but visible in portfolio video.
+
+## 5. NOT DONE, deliberately — the audit's code findings
+
+ES's CRIT items are code and repo-hygiene work, out of scope for a doc pass
+and explicitly cancelled by Evan. They remain open, and the three tracked
+files the audit's own done-checks dirtied are **still dirty and unreverted**:
+`cad/track_1122_rescaled.xodr`, `cad/track_grid3x3_junctions.xodr`,
+`ml/artifacts/p1_first_frame.png`. Reverting would restore the WRONG committed
+version over correct fresh output; committing them resolves finding 1. Either
+way it is Evan's call and nothing here decided it.
+
+Also left open and named rather than fixed: the false "40 cycles per lap"
+string at `marking_specs.py:274`; `README.md`'s public claim that nothing has
+been printed, contradicted by its own line 140; the four stale SELFTEST
+"39/39" pins; `track.md` at 515 lines against a ~200-line cap.
+
+# Appendix EU - Audit remediation: the artifact guard found four MORE stale files than the audit did, two undocumented experiment provenances recovered by diffing, a MEASURED label on an unmeasured number, and the test suite CLAUDE.md always required (2026-09-09 22:58 CDT)
+**WHAT:** Worked the CODE half of the 2026-09-09 daily-audit (Appendix ES).
+Fourteen findings closed, two new defects found that the audit missed, and
+three of the audit's own numbers corrected. **Two new guards exist so this
+class of bug cannot recur.** The doc half was already done in Appendix ET.
+
+## THE HEADLINE: the guard found more drift than the audit did
+
+`scripts/check_artifacts.py` regenerates every tracked generated artifact into
+a temp dir and diffs it. The audit named **two** stale files. The first run of
+the guard found **four more**:
+
+    cad/track_grid3x3_junctions_model.xodr     stale by exactly 68 signalPhase lines
+    cad/track_grid3x3_junctions_lmlanes.xodr   stale by exactly 68 signalPhase lines
+    cad/track_grid3x3_junctions_sim.xodr       stale by exactly 68 signalPhase lines
+    cad/track_layout_v1.json                   one renamed key
+
+All four had the same cause as the two the audit found: `export_xodr.py:856`
+emits `<signalPhase>` unconditionally, and nobody regenerated the variants.
+**A registry that regenerates beats a human who remembers.** That is the whole
+finding.
+
+## TWO PIECES OF PROVENANCE THAT EXISTED NOWHERE
+
+Building the registry meant knowing the exact command behind each artifact.
+Two could not be reproduced from any doc and were recovered by diffing:
+
+- **`_bnd.xodr` is not a `--boundary` run.** The filename cascade at
+  `export_xodr.py:990` puts `_bnd` ahead of `_lmlanes` and `_sim`, so the file
+  is the COMBINED Appendix EQ/ER experiment:
+  `--junctions --boundary --lanemaker-lanes --sim-min-road 5`. Identified from
+  its own geometry (roads 5.0 m, laneOffset -6.25, lane width 12.5).
+- **`_lmlanes.xodr` is likewise `--lanemaker-lanes --sim-min-road 5`.**
+
+Both are now recorded in the registry, in code, where they cannot rot.
+The five `probe_spawn_*` files were also mapped: k = 0.10 / 0.25 / 0.50 / 1.00
+and **0.143292** for `kours` (chosen so the reference's shortest road matches
+our 1.463 m street). All five reproduce byte-for-byte.
+
+## AN HONESTY DEFECT THE AUDIT DID NOT SEE
+
+`cad/track_layout_v1.py` wrote the JSON key **`car_width_m_MEASURED`** while
+the SAME FILE says UNMEASURED three times (`:58`, `:388`, `:416`). The value is
+0.130 m, the pre-rebuild estimate; the measured 0.155 m belongs to v2. A
+tracked artifact was asserting a measurement that never happened, which
+`CLAUDE.md`'s physical-honesty rule forbids outright. Key renamed to
+`car_width_m_UNMEASURED`; the artifact regenerated.
+
+## THE AUDIT'S OWN NUMBERS, CORRECTED
+
+| audit claimed | actually |
+|---|---|
+| 28 of 43 CLI modules lack `self_check()` | **37** argparse modules, **14** define one, **27** lack it |
+| SELFTEST 39/39 pinned in **four** unstruck places | **three** -- the fourth was struck by Appendix ET the same day |
+| `PRD_ROADMAP.md:513` is the #4252 choice | it is at **:520**; the by-vendor sheet is at **:236-244**, not :260 |
+
+And one finding was **over-called**: `WIRING_PROTOSHIELD.md:292` already
+carries its own correction ("CORRECTED the same day, Appendix BO") in the same
+paragraph. Left alone.
+
+## WHAT WAS BUILT
+
+**`scripts/check_artifacts.py`** -- one registry, 27 tracked artifacts, 25
+regenerable. Three states: OK / DRIFT / UNCHECKABLE-with-reason. The two
+uncheckable ones (`p1_first_frame.png` needs the Unity sim and a GPU;
+`tolerance_coupon_v1.stl` is a superseded design) are PRINTED every run rather
+than omitted -- a silently skipped artifact is indistinguishable from a passing
+one. Wired into `scripts/git-hooks/pre-commit` with `--staged`, so a commit is
+answerable for what IT stages and an unrelated commit is not blocked by
+somebody else's stale file.
+
+**PROVEN, not asserted:** a deliberately staled `track_grid3x3.xodr` was staged
+and committed. The commit was **BLOCKED**, HEAD unchanged at `defbbf0`, and the
+message named the file and printed the exact regeneration command.
+
+**`scripts/run_checks.py`** -- the test suite `CLAUDE.md` has required all
+along and that did not exist. Discovery is a WALK for `def self_check`, not a
+list, because a hardcoded registry goes stale exactly the way everything else
+in this entry did.
+
+    14 passed, 0 failed, 0 skipped  (of 14)
+
+**I was wrong in the plan about this.** I predicted several ml/ checks would
+SKIP for want of a GPU or the gitignored corpus. None do; all 14 run clean.
+Exit 1 on failure was proven with a deliberately failing temp module, then the
+module was deleted.
+
+## CODE FIXES
+
+- **`cad/vehicle_envelope.py`** -- `MIN_SIDE_CLEARANCE` re-pointed at the ROAD
+  edge (Evan's call). It had been checked against the LANE edge, where the real
+  margin is 29.6 mm/side, so the report printed TOO LONG at all six wheelbases
+  and **exited 0 anyway, because nothing asserted on it**. Now `self_check()`
+  asserts it at the measured 185.95 mm wheelbase, where road clearance is
+  154.6 mm/side against the 50 mm rule. A second assert PINS the accepted
+  lane-edge shortfall, so it cannot drift back unnoticed. `CAR_WIDTH` added to
+  the cross-file drift-guard tuple. **Accepted cost, stated in the report
+  itself: 29.6 mm is 24% of the half-lane, so the policy will clip the
+  centreline in corners.**
+- **`cad/marking_specs.py`** -- `TARGET_DASH_CYCLES = 40` retired (Evan's call).
+  It divided the FULL route by the cycle length, assuming a centreline that
+  runs through intersections; it does not, and 53% of the route is inside a
+  box. The criterion is now the **blind gap** in control steps, asserted at
+  both ends: true scale must BREACH it (8.9 steps -- that is why it was
+  rejected) and the chosen dash must MEET it (1.8 against a limit of 2.0).
+  Dash geometry is UNCHANGED at 62.6 / 125.2 mm. Nothing prints "40 cycles per
+  lap" any more.
+- **`firmware/uno_control/uno_control.ino:527`** -- `ST_DROPPED` was OR'd in on
+  a sequence gap and cleared NOWHERE, while `:550`'s `statusBits & 0x0E`
+  preserves it, so **one dropped frame made every later reply for the rest of
+  the session report "dropped"**. ST_CRC_BAD and ST_WATCHDOG were both already
+  cleared; this bit was the odd one out.
+  WARNING: **the audit's own instruction was a bug.** It said "clear it at the
+  top of handleFrame(), mirroring :532" -- but ST_DROPPED is SET at :529, so
+  clearing at :532 would wipe the bit that line had just set. Both bits are now
+  cleared at the true top, BEFORE the sequence test.
+  Compiles clean: **9694 B flash (30%), 371 B SRAM (18%)**, 58 -> 63 `CHECK()`
+  invocations. **NOT FLASHED. Not verified on hardware. The board still runs
+  the 2026-09-02 build** and the new SELFTEST checks test the bit arithmetic,
+  not the frame path -- calling `handleFrame()` from SELFTEST would actuate a
+  servo to prove a mask.
+
+## REPO HYGIENE
+
+- `scripts/git-hooks/pre-commit` was tracked **100644** (as are all 261 files);
+  it fired here only because `core.fileMode=false`, and would have silently
+  vanished on any POSIX clone or CI runner. Now **100755**.
+- `.claude/settings.local.json` was untracked ONLY via Evan's machine-global
+  exclude, which no clone inherits -- on this PUBLIC repo it was one
+  `git add -A` from being published. Now in the repo's own `.gitignore:57`.
+- **Both external reference files vendored** into `cad/reference/`:
+  `1122.xodr` (96,786 B, sha256 7252e7d7...b750f443) and `figure8.xodr`
+  (31,208 B, sha256 8c308417...b11a9416), space dropped from the filename
+  because LaneMaker's Qt dialogs choke on it. `rescale_reference_xodr.py:72`
+  repointed. **That script was previously DEAD on any machine but Evan's** --
+  `main()` calls `self_check()` unconditionally and it asserts the Downloads
+  file exists.
+
+## DOCS
+
+The public `README.md` contradicted itself: `:9` said "Nothing has been
+3D-printed and no parts have been ordered" against `:140`'s "printed and tested
+2026-09-05". Status block rewritten to 2026-09-09 (printing STARTED, nothing
+ORDERED), `:3` corrected from "1/14-scale" to **~1:14.63**, and the MG90S
+updated to the MG90D-270. Reviewed against the voice profile: in band on all
+four scored metrics (mean 26.2, stdev 13.8, polysyllabic 9.5%, FK 12.5), no
+uniform-sentence alarm, em dashes cut.
+
+Six superseded hardware claims struck and dated, plus a **new** finding: the
+BOM's by-vendor order sheet had **no Adafruit row**, so row 22's #4252 -- which
+that row calls a HARD CONSTRAINT and whose $0.75 is inside the $411.45 sum --
+could not be ordered from the sheet at all. Row added.
+
+The three live SELFTEST pins now point at the board's own banner instead of
+carrying a number, per `uno_control.ino:16`: "Never quote a SELFTEST count for
+this file without having just run it."
+
+## STILL OPEN
+
+`ml/train_controller.py` -- where the 2026-09-07 DART defect lived -- still has
+no `self_check()`. The suite runs what exists; it does not create coverage that
+was never written. `ml/verify_env.py` still has no argparse, so its output path
+remains a constant that only an edit can redirect.

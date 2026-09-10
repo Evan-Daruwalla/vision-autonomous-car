@@ -15,7 +15,7 @@ real parts;** every dimension below still needs calipers on arrival.
 
 ## TL;DR (verdict first)
 
-1. **Buy the Pololu #1093 — N20 30:1 HP 6V, $23.95.** It is the *only*
+1. ~~**Buy the Pololu #1093 — N20 30:1 HP 6V, $23.95.**~~ **SUPERSEDED 2026-08-12: Evan chose the ENCODER variant, Pololu #5159 at $29.95** (Appendix O, BOM row 5; D2/D3 are spent on encoder interrupts). The reasoning below still holds — #5159 is the same 30:1 HP gearbox with an encoder on the back. (propagated 2026-09-09, daily-audit finding 10.) It is the *only*
    candidate whose available gear ratio lands in the required motor-speed
    band, and it has a full published spec sheet and CAD envelope.
 2. **The Lego motor path is rejected on physics, not on price.** Every

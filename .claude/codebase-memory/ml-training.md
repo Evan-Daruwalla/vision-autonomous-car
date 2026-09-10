@@ -54,9 +54,9 @@ end-to-end with zero environment instantiation? **Answered 2026-08-06: no.**
   (dreamer.py:238-241). `offline_traindir` only selects which directory seeds
   the replay buffer.
 - The envs are consulted for exactly two things: `action_space` /
-  `observation_space` (dreamer.py:245, 288-290).
+  `observation_space` (`ml/vendor/dreamerv3-torch/dreamer.py`:**246** and 288-289; the bare `dreamer.py:245` this line used to carry was off by one and named no path — corrected 2026-09-09, Appendix ET).
 - The training loop is `tools.simulate(agent, train_envs, ...)`
-  (dreamer.py:319) — **train steps are driven by ENV steps**, because the
+  (`ml/vendor/dreamerv3-torch/dreamer.py`:**320**; was `:319`, off by one — corrected 2026-09-09, Appendix ET. Two other `tools.simulate` calls sit at :272 and :307) — **train steps are driven by ENV steps**, because the
   agent trains inside `Dreamer.__call__`, invoked once per env transition.
 
 So the flag means "warm-start the buffer from disk", not "train offline".

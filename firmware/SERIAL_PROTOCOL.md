@@ -2,7 +2,7 @@
 
 **Status: IMPLEMENTED 2026-09-02 (Appendix BO) — `firmware/uno_control/`, with
 `firmware/host_test.py` as the Pi-side exerciser. Verified ON THE REAL BOARD:
-firmware SELFTEST 39/39, host_test 13/13, exit 0 (2026-09-02 ~19:55 CDT, after
+firmware ~~SELFTEST 39/39~~ **SELFTEST 49/49** (count struck 2026-09-09: it was pinned at the pre-watchdog-fix build), host_test 13/13, exit 0 (2026-09-02 ~19:55 CDT, after
 the watchdog fix: the daily-audit, Appendix BY, found `loop()` taking two
 `millis()` samples per iteration so the watchdog tripped in the same iteration
 as every good frame — invisible in any reply byte; fixed and re-verified in

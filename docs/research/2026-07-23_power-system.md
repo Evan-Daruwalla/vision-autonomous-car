@@ -204,7 +204,7 @@ Cheapest complete, SAFE power system found (path b):
   POWER SYSTEM MINIMUM                     $25.89   ...leaving $0 for a motor
 ```
 
-Full build totals (motor now priced at $23.95):
+Full build totals (~~motor now priced at $23.95~~ **$29.95 — the #5159 encoder motor Evan chose 2026-08-12; every total in this table is understated by $6.00** (propagated 2026-09-09, daily-audit finding 10.)):
 
 | Scenario | Total | Verdict |
 |---|---|---|

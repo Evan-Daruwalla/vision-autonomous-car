@@ -1,13 +1,14 @@
 # vision-autonomous-car
 
-A 1/14-scale autonomous car: Lego Technic drivetrain in a 3D-printed frame,
+A ~1:14.63-scale autonomous car: Lego Technic drivetrain in a 3D-printed frame,
 one camera, no LiDAR. The goal is a car that learns to drive from
 demonstrations I record, then improves using a world model trained offline on
 its own driving logs.
 
-**Status as of 2026-08-06: the software is real and measured. The car is not
-built.** Nothing has been 3D-printed and no parts have been ordered. Every
-result below is in simulation, and this README says so everywhere it matters.
+**Status as of 2026-09-09: the software is real and measured. The car is not
+built.** Printing has started: two tolerance coupons are printed and tested.
+No parts have been ordered, and nothing has driven. Every result below is in
+simulation, and this README says so everywhere it matters.
 
 ---
 
@@ -111,25 +112,31 @@ record is append-only; earlier entries are never edited to look smarter.
 
 ---
 
-## The hardware, which does not exist yet
+## The hardware, which is two printed parts and a shopping list
 
-Design decisions are settled and costed; nothing is bought.
+Design decisions are settled and costed. Nothing is bought. Two printed parts
+now exist; everything else is a drawing and a price.
 
 - **Compute:** Raspberry Pi 5 (4 GB), Camera Module 3 Wide. Inference only.
 - **Drive:** Pololu N20 30:1 HP through a Lego differential. Every Lego motor
   was rejected on physics, not price — the fastest option tops out at
   0.88 m/s against a 1.0 m/s floor.
-- **Steering:** MG90S servo. Never a plain DC motor: no position feedback
-  means no commandable angle, and every model in this project emits a
-  steering angle.
+- **Steering:** HOOYIJ MG90D-270 servo, swapped in 2026-09-05 when a rebuilt
+  13-stud rack turned out to need 135 degrees each way, past what the MG90S
+  it replaced could reach. Never a plain DC motor: no position feedback means
+  no commandable angle, and every model in this project emits a steering angle.
 - **Power:** split source. USB power bank to the Pi, separate 2S pack to the
   motor and servo, one shared ground. Combining them puts 4.62 A on a 3 A
   rail during a stall and resets the Pi mid-run.
 - **Budget:** ~~≈$178–181, under a $200 ceiling~~ → ~~≈$226–234 before shipping~~ → **$411.45 before shipping, ≈$424–439 with** (re-priced 2026-08-08, 2026-09-02, repeatedly on 2026-09-03 as the BOM was consolidated onto fewer vendors, and again 2026-09-05 when the steering servo swapped to match a rebuilt rack). The **$200 ceiling is long breached**; the largest single item is the Raspberry Pi 5 starter kit at $179.99. `docs/BOM.md` is the order list and the only current figure.
 
 A parametric Lego-fit tolerance coupon is generated and geometrically
-self-validated (manifold and signed-volume checks pass), but **it has not been
-printed**, so every tolerance in it is a prediction, not a measurement.
+self-validated (manifold and signed-volume checks pass). **Two versions have
+now been printed and fitted** (Bambu P1S, Bambu ABS, 2026-09-05): pin holes
+want 4.80 mm, rotating axle bores want 5.00 mm. Both verdicts are fit-by-feel:
+no caliper measurement exists yet, so the numbers are working values, not
+measured offsets. The third check, whether the printer's row-to-row pitch
+drifts across a five-hole span, has not been run.
 
 ---
 

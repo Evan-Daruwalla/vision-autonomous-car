@@ -385,9 +385,11 @@ transfer gap) must not block the capstone.
    Appendix DN). Both comfortably inside the frozen 500-670 mm corner band,
    still not T2's empirical test. ⚠️ **The wider front track also
    makes the floor-fit itself marginal, separately from turn radius**:
-   `cad/track_layout_v2.py`'s own self-check FAILS at R=500 with the new
+   ~~`cad/track_layout_v2.py`'s own self-check FAILS at R=500 with the new
    155 mm width (lane 310mm, span 2710mm, only 90mm spare against the
-   required 100mm) — real output, not projected, and unresolved (Appendix
+   required 100mm)~~ **STRUCK 2026-09-09 (Appendix ET): it PASSES. Live stdout
+   gives lane 250 mm, span 2700 mm, spare 100 mm at R=500, `self_check: PASS` —
+   the lane moved 310 → 250 mm and this line never propagated** (Appendix
    DM). **Still NOT measured:** kingpin spacing, steering-arm
    lengths, hub interfaces, and whether any part of the assembled car exceeds
    the (now 155 mm, front-governed) tire track. No dimensioned sketch exists yet.
@@ -472,9 +474,14 @@ transfer gap) must not block the capstone.
     `firmware/uno_control/` implements `firmware/SERIAL_PROTOCOL.md` v0.2 —
     7-byte command, 9-byte reply, CRC8, ARMED-per-frame, 150 ms watchdog,
     4x quadrature encoder, the pack-guard throttle inhibit, and D10 -> TB6612
-    `STBY`. Done-check MET: **firmware SELFTEST 39/39 on the real board** and
+    `STBY`. ~~Done-check MET: **firmware SELFTEST 39/39 on the real board** and
     **`firmware/host_test.py` 11/11, exit 0**; 7232 B flash (22%), 312 B SRAM
-    (15%), loop 2-3 ms of the 50 ms budget.
+    (15%), loop 2-3 ms of the 50 ms budget.~~ **STRUCK 2026-09-09 (Appendix ET):
+    that cites the PRE-Appendix-CA build, which carried the watchdog defect that
+    would have braked a wired car ~96% of the time. Restated against the post-CA
+    build: SELFTEST 49/49, `host_test.py` 13/13 exit 0, 7888 B flash, 313 B SRAM.
+    NEVER quote a SELFTEST count without having just run it — `uno_control.ino:10-16`
+    says so, and this pin has now drifted twice (37 → 39 → stale).**
     ⚠️ **ACTUATORS UNWIRED.** The link and the state machine are verified; no
     motor, servo, encoder, LED or pack exists, so every actuator path is
     verified only as a DECISION the firmware made, never as something that
@@ -794,7 +801,7 @@ directions; white separates same-direction.~~
 the specs are now a runnable script, `cad/marking_specs.py`.** The
 full-scale MUTCD figures are unchanged (they are the standard); everything
 downstream of them moved, because **the model scale is DERIVED now, not
-chosen: 1:11.80, not 1:14.** Appendix L picked the scale and derived the
+chosen: ~~1:11.80~~ **1:14.63 (struck 2026-09-09, Appendix ET: `marking_specs.scale()` returns 14.6304)**, not 1:14.** Appendix L picked the scale and derived the
 lane from it (12 ft / 14 = 261 mm); the lane rule that replaced it
 (`lane = 2.0 × car width`, `SIM_TRANSFER_SPEC` §3) derives the lane from the
 MEASURED car, so the scale falls out as 12 ft / 310 mm. **1:14 was never
@@ -803,7 +810,7 @@ revisited and kept — it was overtaken.** The two rules agreed at the old
 went unnoticed for a month. At the measured 155 mm front track: **lane
 310 mm · normal line 8.61-12.92 mm · stop line 25.83-51.67 mm · dash
 68.6/137.2 mm** (true scale 258/775 mm gives only 8.0 cycles on the 8.23 m
-lap, so the compression stands; `TARGET_DASH_CYCLES = 40` is the EST that
+lap, so the compression stands; ~~`TARGET_DASH_CYCLES = 40`~~ **RETIRED 2026-09-09, Appendix EU -- replaced by a max-blind-gap criterion** is the EST that
 sets the absolute size). Yellow separates opposing directions; white
 separates same-direction. ~~⚠️ BLOCKED-ON-EVAN before anything prints: the
 "~2:1 Duckietown" dash deviation never records WHICH SIDE IS WHICH~~
@@ -850,8 +857,9 @@ T2. **Measure minimum turning radius empirically** on the rolling chassis
     ~330 mm estimate, so the 500-670 mm band has margin to spare — **but the
     front track also grew to 155 mm the same day (Appendix DM), which makes
     the FLOOR-FIT marginal even though the turn radius has slack: lane
-    widens to 310 mm and `cad/track_layout_v2.py`'s own self-check now fails
-    at R=500 (only 90 mm spare, needs 100).** This is still not T2 — T2 is
+    ~~widens to 310 mm and `cad/track_layout_v2.py`'s own self-check now fails
+    at R=500 (only 90 mm spare, needs 100).~~ **STRUCK 2026-09-09 (Appendix ET):
+    lane is 250 mm and the self-check PASSES with 100 mm spare.** This is still not T2 — T2 is
     the empirical test — and it matters more now, not less: the steering
     geometry and car width have both changed while the car is still being
     built.

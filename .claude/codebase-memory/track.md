@@ -5,14 +5,13 @@ the physical track: layout, markings, surface, and what the camera sees of the
 environment.
 
 The track's dimensions are driven by the car's MEASURED width — that fact lives
-in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
-`cad/track_layout_v2.py`.
+in `hardware.md`. ~~114.75 mm, 2026-09-02~~ — **superseded 2026-09-05 (Appendix DM): the generator uses the 155.00 mm FRONT track**, which governs since the 13-stud rack rebuild (rear 148.25 and body 135.75 are both narrower). The generator that consumes it is `cad/track_layout_v2.py`. (Corrected 2026-09-09, Appendix ET.)
 
 - **3DStreet is a street CROSS-SECTION tool, not a track-geometry tool**
   (assessed 2026-09-01, Appendix AM). It does linear segments plus 90-deg /
   T / dead-end intersections; **no curved streets found**, and it works in
   real-world units (a real lane is 3-3.6 m, this track's is ~0.3 m, roughly
-  1/11 — **confirmed exactly 2026-09-06: the derived scale is 1:11.80**,
+  1/15 — ~~confirmed exactly 2026-09-06: the derived scale is 1:11.80~~ **struck 2026-09-09 (Appendix ET): `marking_specs.scale()` returns 14.6304, i.e. 1:14.63**,
   see the marking section below). **Good for** marking design, dash
   patterns, sign placement and a
   portfolio render. **Bad for** the figure-8 plan-view geometry, which is
@@ -70,7 +69,7 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   shrinks the straight (190 -> 40 mm) to protect SPARE_MIN. Two lanes cost
   a **14% shorter lap (8.23 -> 7.03 m)** and nearly all remaining straight,
   but buy back a real centreline and delete the dashed-edge deviation.
-  Scale is 1:11.80 either way. **Run the generator before claiming a
+  ~~Scale is 1:11.80 either way.~~ **Scale is 1:14.63 either way (struck 2026-09-09, ET).** **Run the generator before claiming a
   layout does or does not fit — it is the authority (Appendix DS).**
 - **STOP SIGN placed in the 3DStreet scene 2026-09-06 (Appendix DW):**
   `stop_sign` mixin as a STANDALONE entity (that is what makes it
@@ -79,7 +78,7 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   PROVEN**: one `entityUpdate` moved it 25 m, read back clean, no street
   rebuild. Satisfies Y.3's relocatable requirement IN THE MODEL only —
   the physical mount is unbuilt. ⚠️ **Do NOT size the printed sign from
-  the 1:11.80 scale** — Evan decided 2026-08-10 (Appendix Y) on a
+  the ~~1:11.80~~ **1:14.63** scale** — Evan decided 2026-08-10 (Appendix Y) on a
   deliberately OVERSIZED, off-scale sign, because pixel share is what the
   training objective responds to. Scale-correct would be 64.6 mm; the
   standing decision is larger on purpose.
@@ -439,16 +438,14 @@ in `hardware.md` (114.75 mm, 2026-09-02), and the generator that consumes it is
   the hybrid-vs-225-panels conclusion is unaffected (627 g vs ~12,600 g).
 - **MARKING SPECS ARE NOW A RUNNABLE SCRIPT: `cad/marking_specs.py`**
   (2026-09-06, Appendix DT), replacing the stale hand table in
-  `PRD_ROADMAP.md`. **The model scale is DERIVED, not chosen: 1:11.80.**
+  `PRD_ROADMAP.md`. **The model scale is DERIVED, not chosen: ~~1:11.80~~ 1:14.63** (struck 2026-09-09, Appendix ET — `marking_specs.scale()` returns 14.6304 and the dash table below was computed from the stale figure).
   Appendix L picked the scale (1:14) and derived the lane from it; the lane
   rule that replaced it (`lane = 2.0 x car width`) derives the lane from the
   car, so the scale falls out as `12 ft / 310 mm`. The two agreed at the old
   130 mm car (260.0 mm / 1:14.07 vs the published 261 mm / 1:14), which is
-  why the reversal went unnoticed. At 155 mm: normal line 8.61-12.92 mm,
-  stop line 25.83-51.67 mm, lane 310 mm.
+  why the reversal went unnoticed. ~~At 155 mm: normal line 8.61-12.92 mm, stop line 25.83-51.67 mm, lane 310 mm.~~ **STRUCK 2026-09-09 (Appendix ET) — those are the old single-lane 1:11.80 values. Live `cad/marking_specs.py` gives: lane 250.0 mm per direction (road 500 mm, 1.613 × the 155 mm car, deliberately under the 2.0× rule), normal line 6.94-10.42 mm, stop line 20.83-41.67 mm, scale 1:14.63.**
 - **DASH RATIO DECIDED 2026-09-06 (Evan, Appendix DU): `dash:gap = 1:2`** —
-  gap twice the dash. At 1:11.80 on the 8.23 m lap that is **68.6 mm dash /
-  137.2 mm gap, 40 cycles per lap.** ~~UNRESOLVED — this file, `HANDOFF.md`
+  gap twice the dash. ~~At 1:11.80 on the 8.23 m lap that is 68.6 mm dash / 137.2 mm gap, 40 cycles per lap.~~ **RE-DERIVED 2026-09-09 (Appendix ET) from live output: at 1:14.63 the dash is 62.6 mm / gap 125.2 mm (cycle 187.8 mm), 36 dashes over 12 runs / 7200 mm. And the cycle count is NOT 40 — `marking_layout.py` computes 18.7 per lap, because 4000 mm of the 7507 mm route (53%) is inside intersection boxes that carry no centreline. ~~`marking_specs.py:274` still PRINTS '40 cycles per lap' as fact; that string is false and the decision is OPEN.~~ **CLOSED 2026-09-09 (Appendix EU): Evan ACCEPTED 18.7. `TARGET_DASH_CYCLES` is retired for a max-blind-gap criterion -- 1.8 control steps against a 2.0 limit -- which `marking_specs.py` now ASSERTS at both ends. No script prints '40 cycles per lap' any more; dash geometry is unchanged.** ~~UNRESOLVED — this file, `HANDOFF.md`
   and Appendix L all said "Duckietown uses ~2:1" and none said which side
   was which~~ closed. Keep the reason on the record: MUTCD's is dash:gap =
   1:3, and **Appendix L's own worked example (60/180 mm) is 1:3** — it never

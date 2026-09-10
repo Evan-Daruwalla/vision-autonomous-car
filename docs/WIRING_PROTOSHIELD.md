@@ -120,7 +120,13 @@ Verified against pololu.com/product/5159 on 2026-09-02.
 revolution.** JST SH is 1.0 mm pitch and not hand-solderable to 0.1"
 protoboard — buy Pololu's mating cable and solder its far end to the shield.
 
-### 2.4 Steering servo (MG90S)
+### 2.4 Steering servo (~~MG90S~~ **HOOYIJ MG90D-270**)
+
+warning: **The whole of 2.4 was written for the MG90S and still names it below.**
+BOM row 7 swapped to the HOOYIJ MG90D-270 on 2026-09-05 (Appendix DP) because
+the 13-stud rack needs 135 degrees each way, past the MG90S's reach (Appendix
+DN). The WIRING is unchanged -- same 3-wire signal/5V/GND, same pin -- so the
+table below stands; the PART NAME does not. (propagated 2026-09-09, daily-audit finding 10.)
 
 | Wire | To |
 |---|---|
@@ -174,8 +180,15 @@ Confirm the spline against a real MG90S, and treat it as working-torque-only.
 (`docs/research/2026-07-23_sensor-compute-stack.md` lines 132, 255). Same
 caveat: socket gripping a real axle, never a printed cross stub.
 
-**UNRESOLVED.** No coupling is chosen. This section states the constraint the
-choice must satisfy, not the choice.
+~~**UNRESOLVED.** No coupling is chosen. This section states the constraint the
+choice must satisfy, not the choice.~~
+
+**RESOLVED 2026-09-03 (Appendices DD/DF): Adafruit #4252**, BOM row 22, $0.75.
+Evan has built it and reports it strong, which confirms the spline fit on his
+real servo. warning: no numeric stall-torque margin exists or can be computed --
+it is injection-moulded, not PLA, so Appendix BV's interlayer-shear math does
+not transfer and Adafruit publishes no rating. The constraint above still
+governs: grip a real Lego axle, never print the cross profile. (propagated 2026-09-09, daily-audit finding 10.)
 
 ### 2.5 Lights — WS2812B strips
 

@@ -86,7 +86,7 @@ FAILS as the servo-to-pinion coupler.
   indicating why. **Now 450** (81 of 90 degrees, ~28.8 degrees road wheel,
   R = 1.819 x wheelbase), holding 10% margin per side because servo centre and
   rack centre are aligned by hand and that alignment is unmeasured.
-- **Two SELFTEST checks now pin this** (`uno_control`, 39/39 on the board): the
+- **Two SELFTEST checks now pin this** (`uno_control`; ~~39/39 on the board~~ -- stale count struck 2026-09-09, SELFTEST count: **read the board's boot banner** -- `uno_control.ino` prints `SELFTEST PASS <pass>/<total>` at runtime and the file's own header forbids quoting a count without having just run it. Last OBSERVED on the board: **49/49, 2026-09-02** (Appendix CA). Current source carries 63 `CHECK()` invocations and **has never been flashed** (Appendix DC, plus the 2026-09-09 ST_DROPPED fix).): the
   span may not exceed the mechanical lock, and it must reach **>=85% of it**.
   A future narrowing that silently costs turning circle now fails the gate.
 

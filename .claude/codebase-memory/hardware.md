@@ -331,10 +331,14 @@ traps in `sim-harness.md`.
   pack.** The encoder accepts 2.7-18 V, so the pack "works" - and then swings
   its outputs to 7.4 V into the Uno's 5 V-max inputs. Outputs already carry
   internal 10k pull-ups to `Vcc`; no external pull-ups.
-- **`BOM.md` row 5 buys the WRONG MOTOR** as of 2026-09-02: it lists #1093
+- ~~**`BOM.md` row 5 buys the WRONG MOTOR** as of 2026-09-02: it lists #1093
   ($23.95, no encoder) while the record has Evan choosing **#5159** ($29.95,
   12 CPR) on 2026-08-12, and D2/D3 are already spent on encoder interrupts.
-  Unresolved - it moves the total, so it is Evan's call.
+  Unresolved - it moves the total, so it is Evan's call.~~
+  **RESOLVED THE SAME DAY (2026-09-02, Appendix BO)** - row 5 now reads #5159
+  and a new row 5b adds the #4763 JST SH cable Pololu does not include. Struck
+  2026-09-09 (daily-audit finding 10): it had sat here reading like a live
+  defect for a week after being fixed.
 
 - **STEERING PINION IS 12 TEETH** (Evan, 2026-09-02). **LEGO gear pitch rule,
   verified not recalled: 16 teeth per stud of pitch radius, stud = 8 mm, so
