@@ -110,9 +110,29 @@ DASH_TO_GAP = 0.5        #    dash length / gap length = 1:2. DECIDED by Evan
                          #    see the docstring. A deliberate deviation from
                          #    MUTCD's 1:3, not a scaling of it.
 MIN_PRINTED_FEATURE_MM = 0.8   # PRD T3: printed marking strips are 0.8 mm min
-TARGET_DASH_CYCLES = 40  #    dash cycles the car should see in one lap. The
-                         #    whole reason the true-scale dash is rejected.
-                         #                                              EST
+DASH_CYCLE_MM = 187.8    #    mm, the DECIDED dash cycle. Was derived as
+                         #    ROUTE_LEN_M*1000/40 until 2026-09-09, and that
+                         #    derivation rested on a premise the layout script
+                         #    disproves: it divided the FULL route by the cycle
+                         #    length, assuming the centreline runs through
+                         #    intersections. It does not -- MUTCD breaks it at
+                         #    every box, and marking_layout.py implements that.
+                         #    4000 mm of the 7507 mm route (53%) carries no
+                         #    centreline, so a lap shows 18.7 cycles, not 40.
+                         #    Evan accepted 18.7 on 2026-09-09 and the geometry
+                         #    is unchanged; only the JUSTIFICATION moved, from
+                         #    a cycle count to the max-gap criterion below.
+MAX_BLIND_GAP_STEPS = 2.0  #  control steps the car may spend with no centreline
+                         #    under it. THIS is the quantity that matters, and
+                         #    it is what actually killed the true-scale dash:
+                         #    at SIM_TRANSFER_SPEC's measured 1.401 m/s and
+                         #    20 Hz, true scale's 625 mm gap is 8.9 steps,
+                         #    the current 125.2 mm gap is 1.8, and shrinking
+                         #    the cycle to hit 40 would buy 0.8 -- one step,
+                         #    at the cost of a 29.2 mm dash against a
+                         #    6.94-10.42 mm line width.
+SPEED_M_S = 1.401        #    measured, SIM_TRANSFER_SPEC
+CONTROL_HZ = 20.0        #    the policy's decision rate
 
 
 def lane_width_m(car_width: float = CAR_WIDTH) -> float:
@@ -130,15 +150,23 @@ def to_model_mm(inches: float, car_width: float = CAR_WIDTH) -> float:
     return inches * MM_PER_IN / scale(car_width)
 
 
-def dash_cycle(route_len_m: float = ROUTE_LEN_M,
-               cycles: int = TARGET_DASH_CYCLES,
-               dash_to_gap: float = DASH_TO_GAP):
-    """Compressed dash, sized so one lap shows `cycles` of them.
+def blind_gap_steps(gap_mm: float) -> float:
+    """Control steps the car spends with no centreline under it.
 
-    Returns (dash_mm, gap_mm, cycle_mm). The RATIO is the input; the absolute
-    size falls out of how much training signal the lap has to carry.
+    The criterion that replaced TARGET_DASH_CYCLES on 2026-09-09. A cycle count
+    is a proxy; this is the thing the policy actually experiences.
     """
-    cycle_mm = route_len_m * 1000.0 / cycles
+    return (gap_mm / 1000.0) / SPEED_M_S * CONTROL_HZ
+
+
+def dash_cycle(cycle_mm: float = DASH_CYCLE_MM,
+               dash_to_gap: float = DASH_TO_GAP):
+    """Split a decided cycle length into (dash_mm, gap_mm, cycle_mm).
+
+    The RATIO and the CYCLE are both inputs now. Until 2026-09-09 the cycle was
+    derived from a target lap-count, which assumed a centreline that runs
+    through intersections -- it does not. See DASH_CYCLE_MM.
+    """
     dash_mm = cycle_mm * dash_to_gap / (1.0 + dash_to_gap)
     return dash_mm, cycle_mm - dash_mm, cycle_mm
 
@@ -158,8 +186,17 @@ def table(car_width: float = CAR_WIDTH, dash_to_gap: float = DASH_TO_GAP):
                               for i in MUTCD_STOP_LINE_IN),
         "dash_true_mm": (true_dash, true_gap, true_dash + true_gap),
         "dash_used_mm": (d, g, cyc),
-        "dash_cycles_true": ROUTE_LEN_M * 1000.0 / (true_dash + true_gap),
-        "dash_cycles_used": ROUTE_LEN_M * 1000.0 / cyc,
+        # RENAMED 2026-09-09. These divide the FULL route, which over-counts:
+        # the centreline breaks at every intersection and 53% of the route is
+        # inside one. cad/marking_layout.py walks the real dashed length and is
+        # the authority on cycles per lap (18.7, not 40). Kept under an honest
+        # name because the TRUE-vs-USED comparison is still the argument for
+        # compressing the dash at all.
+        "dash_cycles_true_if_continuous": ROUTE_LEN_M * 1000.0 / (true_dash + true_gap),
+        "dash_cycles_used_if_continuous": ROUTE_LEN_M * 1000.0 / cyc,
+        # The criterion that actually governs.
+        "blind_gap_steps_true": blind_gap_steps(true_gap),
+        "blind_gap_steps_used": blind_gap_steps(g),
     }
 
 
@@ -196,8 +233,19 @@ def self_check() -> None:
     #    the 1.613x rule -- no assert, because there is nothing left to pin.
 
     # 3. the dash compression does what it exists to do
-    assert t["dash_cycles_true"] < 10, "true-scale dash was not actually sparse"
-    assert t["dash_cycles_used"] >= 30, t["dash_cycles_used"]
+    assert t["dash_cycles_true_if_continuous"] < 10, "true-scale dash was not actually sparse"
+    # The cycle-count floor (was >= 30) is GONE -- it pinned a number computed
+    # on a route premise the layout script disproves. The criterion is now the
+    # blind gap, asserted at both ends: true scale must BREACH it (that is why
+    # it was rejected) and the chosen dash must MEET it.
+    assert t["blind_gap_steps_true"] > MAX_BLIND_GAP_STEPS, (
+        f"true-scale gap is only {t['blind_gap_steps_true']:.1f} control steps "
+        f"-- if it no longer breaches the limit, the whole reason for deviating "
+        f"from MUTCD has evaporated and this file needs rewriting, not patching.")
+    assert t["blind_gap_steps_used"] <= MAX_BLIND_GAP_STEPS, (
+        f"chosen gap is {t['blind_gap_steps_used']:.2f} control steps at "
+        f"{SPEED_M_S} m/s and {CONTROL_HZ:.0f} Hz, over the "
+        f"{MAX_BLIND_GAP_STEPS} allowed. Shorten DASH_CYCLE_MM.")
     d, g, cyc = t["dash_used_mm"]
     assert abs(d + g - cyc) < 1e-9
     assert abs(d / g - DASH_TO_GAP) < 1e-9, "the compression lost its ratio"
@@ -268,10 +316,18 @@ def main() -> int:
     print(f"{'stop line':<22} {'12-24 in':>16} {s0:>10.2f}-{s1:.2f} mm")
     td, tg, tc = t["dash_true_mm"]
     print(f"{'dash (TRUE scale)':<22} {'10 + 30 ft':>16} {td:>7.0f} + {tg:.0f} mm   "
-          f"only {t['dash_cycles_true']:.1f} cycles per lap -- REJECTED")
+          f"{t['blind_gap_steps_true']:.1f} blind control steps -- REJECTED")
     ud, ug, uc = t["dash_used_mm"]
-    print(f"{'dash (USED)':<22} {'ratio only':>16} {ud:>7.1f} + {ug:.1f} mm   "
-          f"{t['dash_cycles_used']:.0f} cycles per lap")
+    print(f"{'dash (USED)':<22} {'cycle 187.8':>16} {ud:>7.1f} + {ug:.1f} mm   "
+          f"{t['blind_gap_steps_used']:.1f} blind steps (limit "
+          f"{MAX_BLIND_GAP_STEPS:.1f})")
+    print()
+    print(f"  Dash sizing is judged on the BLIND GAP -- control steps at "
+          f"{SPEED_M_S} m/s, {CONTROL_HZ:.0f} Hz --")
+    print("  not on cycles per lap. That target (40) was retired 2026-09-09: it")
+    print("  divided the FULL route, but the centreline breaks at every")
+    print("  intersection and 53% of the route is inside one. The real figure is")
+    print("  18.7 cycles per lap; run cad/marking_layout.py, which walks it.")
     print()
     print("  Yellow separates OPPOSING directions; white separates same-direction.")
     print(f"  Dash ratio: dash:gap = 1:{1/args.dash_to_gap:.0f}  (MUTCD is 1:3)")

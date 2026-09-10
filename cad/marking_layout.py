@@ -280,10 +280,15 @@ def main() -> int:
           f"-- 8 box traversals, no centreline in any of them")
     print(f"  carries a dash   {carries*1000:.0f} mm")
     print(f"  cycles per lap   {carries/L['cycle_m']:.1f}   "
-          f"vs marking_specs' TARGET_DASH_CYCLES = 40")
+          f"vs the retired TARGET_DASH_CYCLES = 40")
     print("  The target was computed on the FULL route length, which assumed the")
-    print("  centreline runs through intersections. It does not. Either accept the")
-    print("  lower density or shrink the cycle -- Evan's call, not decided here.")
+    print("  centreline runs through intersections. It does not.")
+    print("  DECIDED 2026-09-09 (Evan): ACCEPT 18.7. The cycle count was never the")
+    print("  quantity that mattered -- the blind gap is, and 125.2 mm is 1.8 control")
+    print("  steps against the 8.9 that got true scale rejected. marking_specs.py now")
+    print("  asserts on that gap instead of on a lap count. The real blind stretch is")
+    print("  the 500 mm intersection box: 7.1 steps, 8 times a lap, which no cycle")
+    print("  length can touch.")
     return 0
 
 

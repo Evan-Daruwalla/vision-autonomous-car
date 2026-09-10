@@ -518,6 +518,24 @@ void selftest() {
       if (QTAB[(a << 2) | b] != -QTAB[(b << 2) | a]) antisym = false;
   CHECK(antisym, "QTAB is antisymmetric: reversing any transition negates it");
 
+  /* Per-frame status bits (daily-audit finding 12, fixed 2026-09-09).
+   * These test the BIT ARITHMETIC, not the whole frame path: handleFrame()
+   * drives the servo, motor and arm state, so calling it from SELFTEST on a
+   * bench board would actuate hardware to prove a mask. Stated plainly rather
+   * than dressed up as end-to-end coverage. */
+  {
+    uint8_t sb = ST_WATCHDOG | ST_CRC_BAD | ST_DROPPED | (2 << ST_PACK_SHIFT);
+    uint8_t cleared = sb & (uint8_t)~(ST_DROPPED | ST_CRC_BAD);
+    CHECK((cleared & ST_DROPPED) == 0, "handleFrame's clear drops ST_DROPPED");
+    CHECK((cleared & ST_CRC_BAD) == 0, "handleFrame's clear drops ST_CRC_BAD");
+    CHECK((cleared & ST_WATCHDOG) != 0, "...and leaves ST_WATCHDOG alone");
+    CHECK((cleared >> ST_PACK_SHIFT) == 2, "...and leaves the pack bits alone");
+    /* This is WHY the clear must exist: the reply mask preserves ST_DROPPED,
+     * so without a per-frame clear one gap would stick for the whole session. */
+    CHECK(((ST_DROPPED | ST_WATCHDOG) & 0x0E) == (ST_DROPPED | ST_WATCHDOG),
+          "reply mask 0x0E preserves ST_DROPPED, so it must be cleared per frame");
+  }
+
   Serial.print(F("SELFTEST ")); Serial.print(fail ? F("FAIL ") : F("PASS "));
   Serial.print(pass); Serial.print('/'); Serial.println(pass + fail);
   #undef CHECK
@@ -525,11 +543,22 @@ void selftest() {
 
 // ---- frame handling --------------------------------------------------------
 void handleFrame(const uint8_t *f, uint32_t now) {
+  // PER-FRAME status bits are RECOMPUTED here, never accumulated. Both are
+  // cleared BEFORE the sequence test below, which is the whole point: clearing
+  // ST_DROPPED after that test would wipe the bit the test had just set.
+  //
+  // Fixed 2026-09-09 (daily-audit finding 12). ST_DROPPED was OR'd in on a
+  // sequence gap and cleared NOWHERE, while :550's `statusBits & 0x0E` preserves
+  // it across every reply -- so ONE dropped frame made every later reply for the
+  // rest of the session report "dropped", and the host could not tell a live
+  // link problem from a stale bit. ST_CRC_BAD and ST_WATCHDOG were both already
+  // cleared; ST_DROPPED was the odd one out.
+  statusBits &= (uint8_t)~(ST_DROPPED | ST_CRC_BAD);
+
   uint8_t seq = f[1];
   if ((uint8_t)(seq - lastSeq) != 1 && lastFrameMs != 0) statusBits |= ST_DROPPED;
   lastSeq = seq;
   lastFrameMs = now;
-  statusBits &= (uint8_t)~ST_CRC_BAD;
 
   int8_t  steer    = (int8_t)f[2];
   int8_t  throttle = (int8_t)f[3];

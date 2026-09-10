@@ -47,6 +47,24 @@ MAX_STRAIGHT = 0.190   # m   cap on the straight run between corners    EST
                        #     edit one file's copy alone -- self_check below
                        #     imports the other file and fails if they drift.
 MIN_SIDE_CLEARANCE = 0.050   # m  clearance per side IN A CORNER        EST
+                       #     RE-POINTED 2026-09-09 (Evan's call, daily-audit
+                       #     finding 11). It used to be checked against the
+                       #     LANE edge, where the real margin is 29.6 mm/side
+                       #     -- so the report printed TOO LONG at all six
+                       #     wheelbases and exited 0 anyway, because NOTHING
+                       #     asserted on it. A stated requirement that nothing
+                       #     enforces is not a requirement.
+                       #     It now measures to the ROAD edge, which is what
+                       #     actually ends a run: crossing the centreline on a
+                       #     two-lane track with no oncoming traffic is a paint
+                       #     violation, leaving the road is a failure. Margin
+                       #     there is 154.6 mm/side at the measured wheelbase,
+                       #     3x this constant, and self_check now ASSERTS it.
+                       #     Accepted cost: 29.6 mm is 24% of the half-lane, so
+                       #     the policy will clip the centreline in corners.
+WHEELBASE_MEASURED = 0.18595   # m  Appendix DD/DE. The wheelbase the assertion
+                       #     below is stated at -- not a swept range, the real
+                       #     car. steering.md:166 is the authority.
 CAR_WIDTH = 0.155      # m   MEASURED front track (Appendix DM). The report
                        #     below used a hardcoded 0.130 ESTIMATE until
                        #     2026-09-06; its caption went stale the moment the
@@ -90,9 +108,24 @@ def max_car_width(radius: float, straight: float = MAX_STRAIGHT,
 
 
 def corner_clearance(car_width: float, wheelbase: float, radius: float) -> float:
-    """Lane clearance per side while cornering, after off-tracking."""
+    """LANE clearance per side while cornering, after off-tracking.
+
+    Crossing this is a paint violation, not a failure -- the track is two-lane
+    with no oncoming traffic. Kept because it is what the policy's cross-track
+    error is judged against; it is NOT what MIN_SIDE_CLEARANCE now measures.
+    """
     lane = LANE_TO_CAR * car_width
     return (lane - car_width - offtrack(wheelbase, radius)) / 2.0
+
+
+def road_clearance(car_width: float, wheelbase: float, radius: float) -> float:
+    """ROAD clearance per side while cornering -- margin to leaving the track.
+
+    This is the one that ends a run, and as of 2026-09-09 it is what
+    MIN_SIDE_CLEARANCE is checked against (see the constant's note).
+    """
+    road = ROAD_TO_CAR * car_width
+    return (road - car_width - offtrack(wheelbase, radius)) / 2.0
 
 
 def self_check() -> None:
@@ -134,6 +167,21 @@ def self_check() -> None:
     # corner clearance falls as the car lengthens
     assert corner_clearance(0.130, 0.100, 0.5) > corner_clearance(0.130, 0.180, 0.5)
 
+    # MIN_SIDE_CLEARANCE IS NOW ENFORCED. Added 2026-09-09 (daily-audit finding
+    # 11): the constant was documented as a requirement and checked nowhere, so
+    # the report printed TOO LONG at every wheelbase in its own table and still
+    # exited 0. Stated at the real car, not a swept range.
+    _road_cl = road_clearance(CAR_WIDTH, WHEELBASE_MEASURED, 0.500)
+    assert _road_cl >= MIN_SIDE_CLEARANCE, (
+        f"road clearance {_road_cl*1000:.1f} mm/side at the measured "
+        f"{WHEELBASE_MEASURED*1000:.2f} mm wheelbase is under the required "
+        f"{MIN_SIDE_CLEARANCE*1000:.0f} mm. Either the car grew, the road "
+        f"narrowed, or the corner tightened -- none of which may pass silently.")
+    # ...and the lane figure is the one we KNOWINGLY accept, so pin it too: if
+    # it ever climbs back over MIN_SIDE_CLEARANCE the road-edge rule stops being
+    # the binding one and this file's framing needs revisiting.
+    assert corner_clearance(CAR_WIDTH, WHEELBASE_MEASURED, 0.500) < MIN_SIDE_CLEARANCE
+
     # THE TWO SCRIPTS DESCRIBE ONE TRACK (see max_car_width's docstring), so a
     # constant drifting in one file must FAIL here rather than diverge in
     # silence. Added 2026-09-06 after MAX_STRAIGHT went 200 -> 190 in
@@ -147,8 +195,11 @@ def self_check() -> None:
     _spec = importlib.util.spec_from_file_location('_track_layout_v2', _f)
     _t = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(_t)
+    # CAR_WIDTH added to the tuple 2026-09-09 (daily-audit finding 11): it is
+    # duplicated at :50 here and track_layout_v2.py:92, and marking_specs.py
+    # already guards its own copy -- this file was the one hole in that fence.
     for _name in ('FLOOR', 'WALL_MARGIN', 'STREETS', 'MAX_STRAIGHT',
-                  'LANES', 'LANE_TO_CAR'):
+                  'LANES', 'LANE_TO_CAR', 'CAR_WIDTH'):
         assert getattr(_t, _name) == globals()[_name], (
             f'{_name} has drifted: {_f.name} says {getattr(_t, _name)}, '
             f'this file says {globals()[_name]}. One track, two scripts - '
@@ -223,15 +274,25 @@ def main() -> int:
     print("-" * 74)
     print("  A turning car sweeps WIDER than its own width: the rear axle cuts")
     print("  inside the front. Clearance per side, cornering at R=500 mm:\n")
-    print(f"{'wheelbase':>10} {'off-track':>10} {'clearance/side':>15}   verdict")
+    print(f"{'wheelbase':>10} {'off-track':>10} {'to lane edge':>13} "
+          f"{'to ROAD edge':>13}   verdict")
     for wb in (0.100, 0.120, 0.140, 0.160, 0.180, 0.200):
         ot = offtrack(wb, 0.500)
         cl = corner_clearance(CAR_WIDTH, wb, 0.500)
-        ok = "OK" if cl >= MIN_SIDE_CLEARANCE else "TOO LONG"
-        print(f"{wb*1000:9.0f}mm {ot*1000:9.1f}mm {cl*1000:14.1f}mm   {ok}")
+        rc = road_clearance(CAR_WIDTH, wb, 0.500)
+        ok = "OK" if rc >= MIN_SIDE_CLEARANCE else "TOO LONG"
+        print(f"{wb*1000:9.0f}mm {ot*1000:9.1f}mm {cl*1000:12.1f}mm "
+              f"{rc*1000:12.1f}mm   {ok}")
     print(f"\n  (at the MEASURED {CAR_WIDTH*1000:.0f} mm car, lane "
-          f"{LANE_TO_CAR*CAR_WIDTH*1000:.0f} mm, needing "
-          f">={MIN_SIDE_CLEARANCE*1000:.0f} mm/side)")
+          f"{LANE_TO_CAR*CAR_WIDTH*1000:.0f} mm, road "
+          f"{ROAD_TO_CAR*CAR_WIDTH*1000:.0f} mm, needing "
+          f">={MIN_SIDE_CLEARANCE*1000:.0f} mm/side TO THE ROAD EDGE)")
+    print("  The verdict is judged on the ROAD column (Evan, 2026-09-09): the")
+    print("  lane column is the paint, the road column is what ends a run.")
+    print(f"  At the measured {WHEELBASE_MEASURED*1000:.2f} mm wheelbase the lane")
+    print(f"  margin is {corner_clearance(CAR_WIDTH, WHEELBASE_MEASURED, 0.5)*1000:.1f}"
+          f" mm/side -- KNOWINGLY under the {MIN_SIDE_CLEARANCE*1000:.0f} mm figure,")
+    print("  so expect the policy to clip the centreline in corners.")
     print("  Overall LENGTH is wheelbase plus overhangs; overhangs do not")
     print("  off-track but do decide whether the car fits an intersection box")
     print(f"  ({ROAD_TO_CAR*CAR_WIDTH*1000:.0f} mm square -- the ROAD width, "
