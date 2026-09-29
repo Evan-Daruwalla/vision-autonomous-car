@@ -25,3 +25,7 @@ FIRST, then `PRD_ROADMAP.md`.
   portfolio material).
 - Definition of done for code tasks: task's own done-check passes + real
   output pasted + record entry exists (global standard applies).
+
+Never include "Co-Authored-By: Claude Opus 5.5 (or any other model) <noreply@anthropic.com>" in any commits or pushes
+
+Long tasks on Opus 5.5 follow the plan-split rule in the workspace-root CLAUDE.md (Opus plans and reasons; up to 3 Sonnet 5.5 agents run the code part; not for scheduled runs).
