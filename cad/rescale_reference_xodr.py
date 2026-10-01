@@ -73,7 +73,7 @@ from pathlib import Path
 # self_check() unconditionally and self_check() asserts REF.exists(), so a bare
 # clone could not run it at all -- and Appendix EN's experiment could not be
 # reproduced from the repo. The file is Evan's own LaneMaker export; it is now
-# tracked at cad/reference/. See .claude/codebase-memory/track.md for the SHA256
+# tracked at cad/reference/. See .claude/project-memory/track.md for the SHA256
 # and provenance of both reference files.
 REF = Path(__file__).with_name("reference") / "1122.xodr"
 OUT = Path(__file__).with_name("track_1122_rescaled.xodr")

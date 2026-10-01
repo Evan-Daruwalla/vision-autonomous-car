@@ -154,7 +154,7 @@ pass criteria, not a measured offset.
 
 1. Put the filled table + print settings into a record entry (they are
    portfolio evidence — this is a real measured experiment, not a guess).
-2. Write the two chosen offsets into `.claude/codebase-memory/gotchas.md`,
+2. Write the two chosen offsets into `.claude/project-memory/gotchas.md`,
    replacing the unverified community figures currently there.
 3. M1.5 onward can then model against real numbers.
 

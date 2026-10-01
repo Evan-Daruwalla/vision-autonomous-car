@@ -1,6 +1,6 @@
 # firmware/ — Arduino Uno
 
-The Uno owns everything real-time (Appendix BC, `.claude/codebase-memory/architecture.md`):
+The Uno owns everything real-time (Appendix BC, `.claude/project-memory/architecture.md`):
 motor PWM, steering servo, the four light channels, encoder counting on D2/D3,
 and a throttle watchdog. The Pi does vision and policy at 20 Hz and sends
 commands over **USB serial**.

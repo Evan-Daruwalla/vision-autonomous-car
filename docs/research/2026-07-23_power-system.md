@@ -26,7 +26,7 @@ someone else's measurement or a stated assumption.
    ~50 mA, still far inside the 600 mA cap, so the conclusion survives. But it
    matters because the Uno must NOT source LED current from its pins (up to
    160 mA): its 5 V pin is fed from the LM2596 rail instead. See
-   `.claude/codebase-memory/gotchas.md`.)*
+   `.claude/project-memory/gotchas.md`.)*
    This reopens cheap 5 V/3 A sources, including USB power banks.
 2. **Recommended: split source.** A USB power bank feeds the Pi alone; a
    separate 2S pack feeds the motor and servo. The single shared connection

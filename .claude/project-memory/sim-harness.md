@@ -48,7 +48,7 @@ Related bins: `ml-training.md` (world-model training facts measured on this
   supplies hand-built obs/action spaces plus a real offline loop and leaves
   the vendored tree unpatched. **Any future session planning "just run their
   offline mode" is planning something that does not exist.** Full detail:
-  `.claude/codebase-memory/ml-training.md`.
+  `.claude/project-memory/ml-training.md`.
 - **Disable NVIDIA "CUDA - Sysmem Fallback Policy" before any training run**
   (NVIDIA Control Panel → Manage 3D Settings → python.exe → "Prefer No
   Sysmem Fallback"). Since driver 536.40 the default spills VRAM overflow

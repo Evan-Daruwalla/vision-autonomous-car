@@ -11,7 +11,7 @@ FIRST, then `PRD_ROADMAP.md`.
   TOC line. No HTML twin (none exists — don't create one).
 - **Handoff** (`HANDOFF.md`): session end.
 - **PRD next-task**: on request ("next task", "go").
-- **Codebase-memory bins** (`.claude/codebase-memory/`): same session as any
+- **Project-memory bins** (`.claude/project-memory/`): same session as any
   change that alters a stored fact.
 
 ## Hard rules

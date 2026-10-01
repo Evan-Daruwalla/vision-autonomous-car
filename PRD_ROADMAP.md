@@ -50,7 +50,7 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
 - Docs only, no code, no git repo, no hardware bought: `HANDOFF.md`,
   `docs/Project Record — Full Chronological History.md`,
   `docs/research/2026-07-23_sensor-compute-stack.md` (the evidence base for
-  every stack choice below), `.claude/codebase-memory/` bins, this PRD.
+  every stack choice below), `.claude/project-memory/` bins, this PRD.
 - ~~Evan owns: Lego Technic sets incl. a working differential and a steering
   donor set (specific set/motor inventory NOT yet catalogued — M1.1), a 3D
   printer (model/filament stock not catalogued — M1.2), a desktop PC
