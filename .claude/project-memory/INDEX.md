@@ -13,7 +13,7 @@ Core bins:
 - gotchas.md — **SPLIT 2026-09-02, now a 24-line ROUTER only.** Kept because CLAUDE.md/HANDOFF reference it by name; follow its pointers
 - hardware.md — printing + Lego fit, power, motors/drivers, the Uno's pin budget and current limits, the pack, measured vehicle geometry (**SPLIT 2026-09-03**; 313 lines, over the ~150 cap. Includes the charger-vs-BMS category error and cell C-rating traps)
 - firmware-traps.md — Arduino toolchain + firmware logic traps: build, clock handling, status-LED semantics (new 2026-09-03; 80 lines)
-- steering.md — servo choice, measured rack-and-pinion geometry, the coupler that must survive it, calibration (new 2026-09-03; 141 lines)
+- steering.md — servo choice, measured rack-and-pinion geometry, the coupler that must survive it, calibration (new 2026-09-03; updated 2026-10-04 - printed-coupler decision, MG90D fit caveat)
 - track.md — track layout, markings, surface, what the camera sees of the environment, **plus the whole 3DStreet / OpenDRIVE / LaneMaker trail** (updated 2026-09-09 — the 1:11.80 scale struck in four places against the live 1:14.63, the 114.75 mm car width superseded by 155.00 mm, and the marking/dash table re-derived from live output; Appendix ET. **512 lines, 2.6× over the ~200 cap — SPLIT OVERDUE: the xodr/LaneMaker material is its own bin, and that thread is now closed as a negative so it is a clean cut**)
 - sim-harness.md — the simulator, the eval harness, training-time GPU limits (new 2026-09-02; 131 lines)
 - ml-training.md — GPU memory + world-model training facts MEASURED on this

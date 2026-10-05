@@ -7,7 +7,7 @@
 > Created 2026-09-30 from CLAUDE.md, HANDOFF.md, PRD_ROADMAP.md and the bins (Skills record EA follow-up).
 
 ## 1. No hardware purchase without Evan's explicit go (2026-09-30)
-**What:** the BOM (`docs/BOM.md`) stands at $411.45 + shipping (~$424-439), UNBOUGHT, BLOCKED-ON-EVAN. Purchase tasks are worked against specs and stubs until he acts.
+**What:** the BOM (`docs/BOM.md`) stands at $422.25 before shipping (2026-10-04 cart review, was $411.45; shipping not re-estimated), UNBOUGHT, BLOCKED-ON-EVAN. The BMS order is unconfirmed - see #4. Purchase tasks are worked against specs and stubs until he acts.
 **Constrains:** never place, start or "prepare to submit" an order; re-verify prices before he buys.
 **Why:** money, and the BOM has been re-priced four times.
 **Source:** CLAUDE.md:18-19; HANDOFF.md:39, :191, :495; detail in budget.md / hardware.md.
@@ -30,9 +30,9 @@
 **Why:** an over-discharged lithium pack is a fire and safety risk.
 **Source:** HANDOFF.md:474-483; hardware.md (power section).
 
-## 5. Steering coupler: the printed one FAILS (2026-09-30)
-**What:** the highest-torque joint; MG90S stall ~216 mN-m gives SF 0.57-0.96 for the printed coupler. Grip a real Lego axle; no coupling is chosen yet.
-**Constrains:** never ship or claim a printed steering coupler.
+## 5. Steering coupler: a printed CROSS-AXLE STUB fails; nothing is load-tested (2026-09-30, sharpened 2026-10-04)
+**What:** the highest-torque joint. A printed cross-axle STUB gives SF 0.57-0.96 at MG90S stall (~216 mN-m, Appendix BV) - never print one. The old wording here ("the printed one FAILS", "no coupling is chosen yet") conflated that stub with the socket-style `cad/servo_lego_coupler_v1.stl` (Appendix DG, prints no cross) and ignored BOM row 22's 2026-09-03 choice of Adafruit #4252. 2026-10-04, Evan: PRINT v1 instead of buying #4252 - unless #4252 is already in the parts bin. No SF is claimed or computable for either; PETG not PLA, and Evan's prints so far are ABS, which nothing here analyses. Fit on the MG90D-270 is not bench-verified.
+**Constrains:** never print a cross-axle stub; never CLAIM any coupler works until it survives a load test; BOM row 22 is not retired until one does.
 **Why:** the joint breaks under stall torque.
 **Source:** HANDOFF.md:485-489; detail in steering.md.
 

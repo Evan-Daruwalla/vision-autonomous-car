@@ -190,6 +190,7 @@ the dated entry, not the digest.
 - [EW — Scheduled daily-audit: 9 findings - 90 files on the public remote carry the local workspace path while HANDOFF discloses 2, and eval_paired writes paired diffs with no expert-survival gate](#appendix-ew---scheduled-daily-audit-9-findings---90-files-on-the-public-remote-carry-the-local-workspace-path-while-handoff-discloses-2-and-eval_paired-writes-paired-diffs-with-no-expert-survival-gate-2026-09-17-0759-cdt) (09-17)
 - [EX - Scheduled daily-audit: 60 findings - HANDOFF says 6 commits UNPUSHED while everything is on the public remote, and the private-path scope is 98 files not 2](#appendix-ex---scheduled-daily-audit-60-findings---handoff-says-6-commits-unpushed-while-everything-is-on-the-public-remote-and-the-private-path-scope-is-98-files-not-2-2026-09-30-0728-cdt) (09-30)
 - [EY - Project-memory bins: renamed, important.md added, new standard bins as stubs](#appendix-ey---project-memory-bins-renamed-importantmd-added-new-standard-bins-as-stubs-2026-09-30-2253-cdt) (09-30)
+- [EZ - Cart review propagated: total re-derived to $422.25 (the review's own ~$423 omitted the printed coupler's -$0.75), the BMS in Evan's cart BLOCKED for an undocumented cutoff, 26 AWG dropped, coupler printed instead of bought](#appendix-ez---cart-review-propagated-total-re-derived-to-42225-the-reviews-own-423-omitted-the-printed-couplers--075-the-bms-in-evans-cart-blocked-for-an-undocumented-cutoff-26-awg-dropped-coupler-printed-instead-of-bought-2026-10-04-2002-cdt) (10-04)
 
 ---
 
@@ -15643,3 +15644,129 @@ The bins were shaped around code. A survey of every project found scheduled jobs
 ## Next
 
 Phase 4, a later sitting: move the facts each stub points to into its bin, with a lossless check. Nothing here was committed by this session.
+
+# Appendix EZ - Cart review propagated: total re-derived to $422.25 (the review's own ~$423 omitted the printed coupler's -$0.75), the BMS in Evan's cart BLOCKED for an undocumented cutoff, 26 AWG dropped, coupler printed instead of bought (2026-10-04 20:02 CDT)
+**WHAT:** Propagated a 2026-10-04 side-chat cart review into the BOM, the bins,
+HANDOFF and this record. **Nothing was bought.** Every price below is from
+Evan's cart on 2026-10-04 and was NOT re-verified live by the session that
+wrote this entry. No part here has been test-fitted, flashed or loaded.
+
+## THE BLOCKER - the BMS nearly shipped wrong
+
+Evan's cart held ACEIRMC **B08CV2VS8G** (5-pack, $8.99), not row 11b's vetted
+**B08HLQQCQJ** (8-pack, $9.59). B08CV2VS8G appears nowhere in the project.
+Its spec documents overcurrent (~10 A), short-circuit and a discharge-side
+MOSFET - but **no over-discharge or overcharge voltage set point**. That fails
+`important.md` #4 (no pack bought without a DOCUMENTED over-discharge cutoff)
+and repeats the snippet-vs-live-page failure row 11 already warns about.
+
+The nuance worth keeping: unlike the Adeept charger's category error
+(Appendix CK), this IS the right kind of part - it has the series FET. It just
+publishes no set point.
+
+**Row 11b was NOT changed.** It stays on B08HLQQCQJ ($0.60 more, 8 boards vs 5,
+$1.20/board vs $1.80, documents "Overdischarge detection voltage:
+2.9V+/-0.05V") with a dated BLOCKED note, until Evan confirms which he ordered.
+
+## DECISIONS (Evan, 2026-10-04)
+
+1. **Drop 26 AWG entirely; 22 AWG for every net.** `WIRING_PROTOSHIELD.md:49`
+   split "signal ~26 AWG; motor and pack ~22 AWG". 22 AWG is never worse
+   electrically (signal nets carry mA) and grips a screw terminal better. The
+   two awkward signal runs never come off the spool: the encoder uses the
+   pre-made Pololu #4763 (row 5b) and the servo ships its own lead. 22 AWG
+   upgraded 6x5ft $9.69 -> 6x10ft $12.79 (B089CQHRDT), which removes the
+   5-ft-per-colour risk on red/black that dropping the second spool created.
+   Build note banked: ~1.7 mm OD stranded silicone will NOT thread a 0.1"
+   protoboard hole - strip and solder to the pad.
+2. **Print the coupler instead of buying Adafruit #4252** (row 22, $0.75 ->
+   $0.00, NOT retired). Print the socket-style `cad/servo_lego_coupler_v1.stl`
+   (Appendix DG), never a cross-axle stub (SF 0.57-0.96, Appendix BV). PETG,
+   not PLA - and Evan's only prints are Bambu ABS, which no analysis here
+   covers. No SF claimed or computable. #4252 comes back if the print fails a
+   load test.
+
+## CART SUBSTITUTIONS, with the reasoning
+
+| row | was | now | why |
+|---|---|---|---|
+| 2-3 | DigiKey $35.00 + $1.00 | PiShop $38.50 + $2.95 | the rows' OWN source cells already pointed at PiShop; only the price cells never followed |
+| 7 | $16.99 | $16.14 | same ASIN B0D5YBL2JX, price drift |
+| 10 | Addicore $1.25, backordered | DIANN B0BJV9ZL3J 10-pack $6.99 | series/parallel UNVERIFIED |
+| 12 | Addicore $2.48, backordered | EPLZON B09R49R76K 2-pack $9.99 | 4-40 V in, 1.25-37 V out, 2 A; built-in voltmeter helps the trim-to-5.20 V-unloaded rule |
+| 13 | Amass $11.99 | Frienda B0875MBLNH $9.99 | Amass shipped Oct 21 - Nov 9 vs Oct 9 for the rest: 3-6 weeks on the critical path; a knockoff is low risk at ~2.5 A through a ~30 A connector |
+| 16 | $48.02 | $41.11 | -26 AWG $9.99, 22 AWG +$3.10, 470 uF -$0.02 |
+| 19 | $7.38 | $9.99 | contents UNVERIFIED |
+| 22 | $0.75 | $0.00 | printed instead |
+
+Row 13 had specified "genuine Amass" deliberately, so the trade-off is recorded,
+not just the swap.
+
+## THE TOTAL - re-derived, and the review's own figure was wrong
+
+**$422.25 before shipping**, not the review's "approx $423". The review's net
+(+$11.55) never subtracted its own decision 2: row 22 leaving the cart is
+-$0.75 whether the coupler is printed or #4252 turns out to be in the bin.
+
+Derived two independent ways, both by script, never by adding deltas
+(`BOM.md:260` records the total drifting $9.82 from the rows once before):
+
+    row table:    rows: 24   unpriced: []   SUM: 422.25   CHECK PASS
+    order sheet:  vendor subtotals sum: 422.25
+                  Amazon row: 15 items sum 135.35, stated 135.35
+                  CHECK PASS: order sheet = 422.25, Amazon row self-consistent
+
+The row-table parser was itself verified first, against the unedited file:
+`SUM: 411.45, CHECK PASS`. Its first version silently skipped rows 1 and 10
+(their price sits in a different column) and read 230.21 - a check that cannot
+see two rows would have "passed" any total.
+
+The old `approx $415 - $430 all-in` range is struck as impossible (the subtotal
+alone is $422.25). Shipping was not re-estimated.
+
+## THREE CORRECTIONS TO THE REVIEW BRIEF
+
+- **Its row list omitted rows 2-3**, though its own price deltas included the
+  camera move. Included.
+- **`gotchas.md` is a 24-line router** (split 2026-09-02), not a place for
+  facts. Its existing "power" row already routes to `hardware.md`, where the
+  BMS findings now live - so no router line was added.
+- **"The LM2596 still has headroom"** at a 6.65 V sagged pack is only ~1.45 V
+  above the 5.20 V rail - recorded as UNVERIFIED against the module's dropout,
+  not as headroom. At the BMS cutoff (2 x 2.9 V = 5.8 V) only 0.6 V remains.
+
+## FOUND WHILE PROPAGATING
+
+- **The LM2596 substitute halves the margin.** `hardware.md` recorded a 3 A
+  module with 1.8-2.1 A spare at the 0.92-1.20 A peak. EPLZON is rated 2 A:
+  0.80-1.08 A. Still positive.
+- **`important.md` #5 conflated two designs.** It said "the printed one FAILS"
+  and "no coupling is chosen yet". The SF 0.57-0.96 failure is the printed
+  CROSS-AXLE STUB, not the socket-style v1; and row 22 had chosen #4252 on
+  2026-09-03. Read literally, #5 forbade decision 2. Sharpened, not removed.
+- **`steering.md:300` said row 7 "still names the MG90S"** - stale since
+  2026-09-05. Struck.
+
+## BANKED IN `hardware.md`
+
+- **Cheap 2S BMS boards ship LOCKED** ("need to be charged and activated before
+  output... otherwise the circuit is locked"). A freshly soldered board can read
+  zero and look dead - connect the charger once before meter-probing it.
+- **"Less than 300 mOhm" series resistance** is an upper bound; at ~2.5 A it
+  would be 0.75 V and ~1.9 W. Measure on arrival.
+
+## OPEN - Evan's hands, not decided here
+
+1. Which BMS was ordered.
+2. DIANN holder SERIES or PARALLEL (a parallel holder breaks 2S / 7.4 V).
+3. Does the KSOPUERT kit hold 100k + 12k (divider ratio 0.10714) and
+   330-470 ohm (WS2812B DIN)?
+4. Is #4252 already in the parts bin? (Row 22 records it "already built" and
+   "strong" on 2026-09-03 - if so, nothing needs printing.)
+5. Vilros kit's 120 mm camera cable pin count (row 3 stays a separate buy).
+6. Coupler fit on the MG90D-270 - same 20T spline, different body, never
+   bench-tested.
+
+Still in NO cart: 2x Samsung 25R $9.98 at imrbatteries (sales FINAL; USPS 8
+cells/package) and the Adeept p0374 charger $7.99. Low stock at review time:
+resistor kit 3, 0.1 uF caps 6, LM2596 6, 470 uF 13, Pi kit 19.

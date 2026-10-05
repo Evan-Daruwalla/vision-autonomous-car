@@ -5,11 +5,11 @@
   "bins": 3,
   "_created": "2026-07-23",
   "_note": "Defaults per project-memory skill (record every 3 prompts; handoff/prd/bins event-driven). Hand-created at bootstrap - autoinit hook did not fire (slash-command invocation). Evan: say the word to change numbers.",
-  "_count": 348,
-  "_last_reminder_iso": "2026-10-05T00:17:03Z",
+  "_count": 352,
+  "_last_reminder_iso": "2026-10-05T01:05:55Z",
   "_last_fired": {
-    "record_entry": 339,
-    "bins": 348,
+    "record_entry": 352,
+    "bins": 351,
     "handoff": 342,
     "drift_check": 348
   },

@@ -298,8 +298,11 @@ exists to prevent.
   3-of-4 units dead on arrival (26 ratings, 4.2/5 avg) — the 4-pack's
   built-in spares partly cover that risk. The bench measurement of real
   wheel angle is still needed regardless of which servo is used.
-- **This is a candidate, not a BOM change** — `docs/BOM.md` row 7 still
-  names the MG90S per this project's no-purchase-without-Evan's-go rule.
+- ~~**This is a candidate, not a BOM change** — `docs/BOM.md` row 7 still
+  names the MG90S per this project's no-purchase-without-Evan's-go rule.~~
+  **STALE since 2026-09-05, struck 2026-10-04:** BOM row 7 was swapped to the
+  MG90D-270 that day (Appendix DP); Evan's 2026-10-04 cart holds it at $16.14
+  (same ASIN `B0D5YBL2JX`).
 - **Servo-to-pinion coupling CHOSEN: Adafruit #4252** (Evan, 2026-09-03) —
   the manufactured candidate this file and `docs/BOM.md` row 22 already
   named, $0.75, micro-servo spline → 16 mm Lego cross axle. Evan reports it
@@ -334,6 +337,19 @@ exists to prevent.
   ⚠️ **No safety factor is claimed and none can be computed** — friction plus
   spline bite, never loaded. Print PETG, not PLA. **Neither option has a real
   margin**, so this does not retire the #4252 purchase until one survives a test.
+- **2026-10-04 (Evan): PRINT v1 INSTEAD of buying #4252** (BOM row 22 -> $0.00,
+  NOT retired). Conditions that travel with it: print the socket-style
+  `cad/servo_lego_coupler_v1.stl`, never a cross-axle stub (SF 0.57-0.96,
+  Appendix BV). PETG, not PLA - and Evan's only prints so far are Bambu ABS,
+  which neither the PLA SF math nor anything else here covers, so **ABS is
+  UNANALYSED for this part**. No SF is claimed or computable. Never claim it
+  works until it survives a load test (`important.md` #5).
+  **FIRST check the parts bin:** the entry above records #4252 as "already
+  built" and "strong" on 2026-09-03 - if it is on hand, nothing needs printing.
+  **Coupler fit on the MG90D-270 is NOT bench-verified:** the #4252 fit was
+  confirmed on the MG90S. The candidate entry above records the same 20T spline,
+  but the body differs (22.8 mm vs ~31 mm), and v1's 4.65 mm bore was sized
+  against the MG90S's ~4.8-4.9 mm spline. Test-fit ONE before printing several.
 - **MG90S output shaft: 20-tooth spline, ~4.8-4.9 mm OD** (SkyStar/TinyTronics
   datasheet, servodatabase; 2026-09-03). Splined, not round — an adapter must
   grip the spline pattern, not a plain bore diameter.

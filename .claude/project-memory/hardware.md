@@ -217,6 +217,9 @@ traps in `sim-harness.md`.
   - **Current draw: ~80mA realistic, 360mA absolute worst case** (6
     pixels, full white, 100% brightness, never actually commanded).
     Either way the LM2596's 3A rating keeps **1.8–2.1A of margin**.
+    **2026-10-04: that 3 A was the Addicore part, which was backordered. Its
+    substitute (EPLZON `B09R49R76K`, BOM row 12) is rated 2 A, so the margin
+    at the same 0.92-1.20 A peak is 0.80-1.08 A - still positive, smaller.**
   - **Encoder tick loss: ~0.027% of ticks, ~1 in 3800, ~1.1 ticks/sec**
     — worst case, continuous indicator blink at the no-load top speed
     (Appendix CS), for ONE segment write. `applyLights()` writes both
@@ -443,6 +446,34 @@ FLIPPED 2026-09-05 (Appendix DM), see below:**
   design CDR is **15 A**; 30 A is the 80 °C temperature-limited number). Prefer a
   cell whose headline is an **unqualified datasheet continuous rating** — the
   Samsung 25R's 20 A is one.
+- **2026-10-04: a SECOND BMS listing nearly shipped, the same snippet-vs-page
+  failure one level up.** Evan's cart held ACEIRMC `B08CV2VS8G` (5-pack, $8.99),
+  not row 11b's vetted `B08HLQQCQJ`. Its spec documents overcurrent (~10 A),
+  short-circuit and a discharge-side MOSFET - so unlike the Adeept charger above
+  it IS the right KIND of part, with the series FET - but it publishes **NO
+  over-discharge or overcharge voltage set point**. A BMS with an undocumented
+  cutoff cannot satisfy `important.md` #4. Row 11b stays on `B08HLQQCQJ` until
+  Evan confirms which one he ordered.
+- **Cheap 2S BMS boards ship LOCKED.** That listing: boards "need to be charged
+  and activated before output... otherwise the circuit is locked." A freshly
+  soldered board can read ZERO output and look dead. **Before meter-probing a
+  "dead" BMS, connect the charger once to activate it.** Recorded from the
+  `B08CV2VS8G` listing; whether `B08HLQQCQJ` behaves the same is unverified -
+  assume it might.
+- **Series resistance "less than 300 mOhm"** (same listing) is an upper bound
+  and real boards usually measure far lower. At row 11b's ~2.5 A worst case it
+  would be 0.75 V of drop and ~1.9 W on a small PCB, sagging the pack
+  7.4 -> 6.65 V. That leaves ~1.45 V above the 5.20 V rail; whether that clears
+  the LM2596's dropout at load is UNVERIFIED (the 2026-10-04 review called it
+  headroom - check the module's datasheet, and see the rail-sag note above on
+  the 5 V supply sagging as the pack drains; at the BMS cutoff, 2 x 2.9 V =
+  5.8 V, only 0.6 V remains). Measure the board on arrival; not a reason to
+  reject it.
+- **Holder substitute (row 10), 2026-10-04:** the Addicore holder was
+  backordered; the DIANN `B0BJV9ZL3J` replacement's title says "2 Slots 3.7V".
+  **SERIES vs PARALLEL is unverified** - the design needs 2S / 7.4 V at PACK+,
+  and a parallel holder breaks the whole power architecture. Check it before
+  wiring the pack.
 - **TP5100-based chargers cannot be used here**: they are buck chargers needing
   9–12 V in, so 5 V USB-C cannot drive them.
 - **Practical constraints on buying cells:** USPS caps lithium at **8 cells per

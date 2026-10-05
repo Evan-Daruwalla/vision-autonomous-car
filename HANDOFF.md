@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-04 ~19:17 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-04 ~20:02 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 155 appendices A–EY; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 156 appendices A–EZ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -36,7 +36,7 @@ banked. ~~Nothing has been printed and nothing has been ordered since
 2026-07-23.~~ **PRINTING STARTED 2026-09-05** — two tolerance coupons (v1 and
 v2) printed on a Bambu P1S in Bambu ABS, giving M1.3's two headline numbers
 (pin holes 4.80 mm, rotating axle bores 5.00 mm, Appendices DI/DK). **Still
-nothing ORDERED** — the BOM stands at $411.45, unbought.
+nothing ORDERED** — the BOM stands at ~~$411.45~~ **$422.25 before shipping (2026-10-04 cart review)**, unbought.
 
 **2026-09-07: a REAL DEFECT was found and fixed in the controller** (commit
 `bfa953e`, Appendix EJ). `ml/train_controller.py` overwrote `act` with the
@@ -110,6 +110,26 @@ This lists only what is actually open, cheapest first.)*
 | 3 | **Pitch-row scale check on the printed coupons.** Lego beam across holes 1–2, then 1–5 (nominal 32.00 mm span). If it binds across 5 but not 2, caliper the real span — that ratio is the printer's dimensional scaling error and it applies to every chassis part. | Last unclosed piece of M1.3. Needs only the coupons already printed + real Lego |
 | 4 | **Caliper the coupons.** Every fit verdict so far (pin 4.80 mm, axle 5.00 mm) is fit-by-feel, not a measured diameter. | Turns two working numbers into a measured offset that transfers to CAD |
 | 5 | **Confirm a 12-tooth bevel gear is in the parts bin.** Evan: "prob have one and if not i can print one" — not a confirmation. A bevel's meshing tooth profile is a harder print than a coupon. | Last unconfirmed pre-order check (PRD A1) |
+
+**2026-10-04 CART REVIEW (side chat; Appendix EZ) - nothing bought:**
+
+- **BLOCKER - the BMS.** Evan's cart held ACEIRMC `B08CV2VS8G`, whose listing
+  documents NO over-discharge set point (fails `important.md` #4). BOM row 11b
+  stays on the vetted `B08HLQQCQJ` (documents 2.9 V +/-0.05 V) until Evan
+  confirms which one he ordered.
+- **UNVERIFIED, Evan's hands:** the DIANN holder is SERIES not parallel (a
+  parallel holder breaks 2S / 7.4 V); the KSOPUERT kit really holds 100k + 12k
+  + 330-470 ohm; Adafruit #4252 is or is not already in the parts bin; the
+  Vilros kit's 120 mm camera cable pin count; coupler fit on the MG90D-270.
+- **Decided by Evan:** 22 AWG for every net (26 AWG dropped); PRINT
+  `cad/servo_lego_coupler_v1.stl` instead of buying #4252 (row 22 not retired
+  until a coupler survives a load test).
+- **In NO cart yet:** 2x Samsung 25R $9.98 at imrbatteries (row 9 - sales
+  FINAL, USPS caps 8 cells/package); Adeept p0374 charger $7.99 (row 11).
+- **Low stock when reviewed:** resistor kit 3 left, 0.1 uF caps 6, LM2596 6,
+  470 uF caps 13, Pi kit 19.
+- **Total $422.25 before shipping**, re-derived two ways (row table and order
+  sheet agree). The review's own "approx $423" omitted row 22's -$0.75.
 
 **OPEN FROM THE 2026-09-09 DAILY-AUDIT (Appendix ES) — not worked, Evan
 cancelled the sweep; the doc half was repaired 2026-09-09 in Appendix ET:**
@@ -188,7 +208,7 @@ file clearing the crash as isolating the boundary, which it does not.
 
 | # | Action | Blocked on |
 |---|---|---|
-| 6 | **Place the order** (`docs/BOM.md`, **$411.45 + shipping ≈ $424-439**). All six BOM Verify items closed; only #3 above is unconfirmed. | **Evan** |
+| 6 | **Place the order** (`docs/BOM.md`, ~~**$411.45 + shipping ≈ $424-439**~~ **$422.25 before shipping (2026-10-04 cart review); shipping not re-estimated. BLOCKED on confirming the BMS ASIN - BOM row 11b**). All six BOM Verify items closed; only #3 above is unconfirmed. | **Evan** |
 | 7 | **Bench-measure the real wheel angle with a servo attached** — the sharpened task from Appendices DL/DN/DO. Measure the WHEEL directly at the servo's own limit; do not compute it from the bare-linkage 58°/270° figures. Then re-derive `SERVO_US_SPAN`, whose 10% margin was sized against the OLD rack's hard stops. | parts (servo) |
 | 8 | **Confirm the MG90D-270° physically fits the MG90S-sized mount** — one body dimension differs (22.4×12.1×22.8 vs ~22.8×12.2×31 mm). | parts (servo) |
 | 9 | **Task 8e: flash and verify the WS2812B firmware.** `uno_control.ino` compiles clean (9680 B, 58 SELFTEST checks) but has never run. Done-check needs both strip segments addressing independently, the LAST pixel of each lit, and `ticks` counting cleanly with indicators blinking. | parts (strip) |
@@ -345,7 +365,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Decision gate | M1.1 | **Done** | 2026-07-23: 8GB · no Lego motors · 3060 Ti 8GB · ~$200 · ratified |
 | Drive motor selection | M1.1b | **Done (purchase pending)** | 2026-07-23: ~~Pololu #1093, $23.95~~ **#5159, $29.95** (encoder variant — corrected 2026-09-02 Appendix BO, propagated here 2026-09-03); docs/research/2026-07-23_drive-motor-selection.md |
 | Power system selection | M1.1c | **Done (purchase pending)** | 2026-07-23: split source, power bank owned; docs/research/2026-07-23_power-system.md |
-| BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced four times** | `docs/BOM.md`, ~~≈$238-248 + $15-25 shipping (≈$253-273 all-in)~~ **$411.45 + shipping ≈ $424-439** (row 7's servo swapped to the MG90D-270° 2026-09-05, Appendix DP, +$9.00 over the interim $402.45 — the rack now needs 135° each way, past the MG90S's reach, Appendix DN). Row 17 is an **Arduino Uno Evan already owns, $0**. **Row 5 corrected 2026-09-02 to the #5159 ENCODER motor** Evan chose on 2026-08-12 (+$6) and **new row 5b, the #4763 JST SH cable Pololu does not include** (+$3) — Appendix BO. **$200 ceiling breached on every path** |
+| BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced four times** | `docs/BOM.md`, ~~≈$238-248 + $15-25 shipping (≈$253-273 all-in)~~ ~~**$411.45 + shipping ≈ $424-439**~~ **$422.25 before shipping (2026-10-04 cart review): rows 2-3 moved to PiShop, LM2596 + holder substitutes for the Addicore backorders, 26 AWG dropped, XT30 swapped, coupler printed instead of bought** (row 7's servo swapped to the MG90D-270° 2026-09-05, Appendix DP, +$9.00 over the interim $402.45 — the rack now needs 135° each way, past the MG90S's reach, Appendix DN). Row 17 is an **Arduino Uno Evan already owns, $0**. **Row 5 corrected 2026-09-02 to the #5159 ENCODER motor** Evan chose on 2026-08-12 (+$6) and **new row 5b, the #4763 JST SH cable Pololu does not include** (+$3) — Appendix BO. **$200 ceiling breached on every path** |
 | Chassis CAD + print | M1 | **Started** | M1.3's two headline numbers closed 2026-09-05 (Appendices DI/DK): pin 4.80mm, axle 5.00mm — pitch-row scale check still open |
 | Tolerance coupon | M1.3 | **Pin + axle offsets both closed; pitch check open** | `cad/tolerance_coupon_v1.stl` (pin row PASS @ 4.80mm; axle row FAIL, all 6 too loose) + `cad/tolerance_coupon_v2.stl` (axle sweep 4.80-5.30mm, PASS @ 5.00mm — "3rd smallest is best") + `cad/README.md`. No caliper data on either coupon (fit-by-feel only), pitch-row scale check (beam across holes 1-2, then 1-5) never run |
 | Steering coupler (printed) | 8c(ii) | **STL generated, never printed** | 2026-09-03, Appendix DG. `cad/servo_lego_coupler_v1.stl` + `scripts/gen_servo_lego_coupler.py` (manifold PASS, volume PASS 1.05e-14, 1152 tris, Ø10 × 16 mm). MG90S Ø4.65 bore → female 5.00 × 2.00 Lego cross socket. Prints NO cross profile (obeys Appendix BV); 20T spline deliberately not modelled (sub-nozzle pitch). ⚠️ **No torque margin claimed** — friction + spline bite, never loaded. Four constants unmeasured; `SOCKET_CLEAR` wanted the M1.3 coupon's data, now printed (2026-09-05) — but the coupon's AXLE row is a free-SPIN fit and the coupler's socket wants a firm GRIP, closer to the coupon's PIN row (4.80mm) in spirit; not yet reconciled, flagged rather than silently reused. PETG not PLA |
@@ -492,7 +512,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 - ~~M1.1 decision gate~~ — **answered 2026-07-23** (see Current state).
 - ~~M1.1b drive-motor purchase — research in flight~~ — **resolved
   2026-07-23**; the motor is in the BOM below.
-- **THE ORDER (`docs/BOM.md`, $411.45 + shipping = ≈$424-439 — after the Vilros kit, Amazon consolidation, right-sizing bulk items, swapping 8 discrete LEDs for a WS2812B strip, Evan choosing the 144 LED/m density over 60/m (+$4.00), choosing the Adafruit #4252 steering coupling over the free-but-rejected printed option (+$0.75, Appendix DF), and swapping the steering servo to the MG90D-270° once the rack outgrew the MG90S's 90°-each-way reach (+$9.00, Appendix DP)).** Nothing is bought. **Lighting**: WS2812B strip, 2 segments on **D4 and D7** (data is one-way, cut halves cannot share a feed), freeing **D5/D6 — the first spare PWM this design has had**. Encoder-interrupt risk quantified at ~0.027% tick loss for 3 px/segment (Appendix CZ); it scales with pixels per segment, so **cut to pixel count, not length**. **`docs/WIRING_PROTOSHIELD.md` and `firmware/SERIAL_PROTOCOL.md` are now current (Appendix DA)** — the vet found §2.2 naming the wrong motor (#1093) and no strip pins assigned at all. ~~⚠️ **`docs/LIGHTING_SPEC.md` still describes the superseded 8-LED scheme.**~~ **CLOSED same day (Appendix DC): rewritten for WS2812B, 3px/segment, DRL folded into the head pixel only (Evan's calls).** `firmware/uno_control/uno_control.ino`'s `applyLights()` is rewritten too — compiled clean (9680 B flash / 371 B SRAM via `arduino-cli`), **not hardware-verified**, no strip owned. PRD task 8e is now blocked on hardware only, not decisions.
+- **THE ORDER (`docs/BOM.md`, ~~$411.45 + shipping = ≈$424-439~~ $422.25 before shipping as of 2026-10-04 — after the Vilros kit, Amazon consolidation, right-sizing bulk items, swapping 8 discrete LEDs for a WS2812B strip, Evan choosing the 144 LED/m density over 60/m (+$4.00), choosing the Adafruit #4252 steering coupling over the free-but-rejected printed option (+$0.75, Appendix DF), and swapping the steering servo to the MG90D-270° once the rack outgrew the MG90S's 90°-each-way reach (+$9.00, Appendix DP)).** Nothing is bought. **Lighting**: WS2812B strip, 2 segments on **D4 and D7** (data is one-way, cut halves cannot share a feed), freeing **D5/D6 — the first spare PWM this design has had**. Encoder-interrupt risk quantified at ~0.027% tick loss for 3 px/segment (Appendix CZ); it scales with pixels per segment, so **cut to pixel count, not length**. **`docs/WIRING_PROTOSHIELD.md` and `firmware/SERIAL_PROTOCOL.md` are now current (Appendix DA)** — the vet found §2.2 naming the wrong motor (#1093) and no strip pins assigned at all. ~~⚠️ **`docs/LIGHTING_SPEC.md` still describes the superseded 8-LED scheme.**~~ **CLOSED same day (Appendix DC): rewritten for WS2812B, 3px/segment, DRL folded into the head pixel only (Evan's calls).** `firmware/uno_control/uno_control.ino`'s `applyLights()` is rewritten too — compiled clean (9680 B flash / 371 B SRAM via `arduino-cli`), **not hardware-verified**, no strip owned. PRD task 8e is now blocked on hardware only, not decisions.
   ⚠️ **TWO NEW SOURCING PROBLEMS, 2026-09-03:** the **EVE 25P cells are SOLD OUT** —
   but do NOT hunt for another 20 A cell, that rating was never load-driven (worst-case
   pack draw ~2.5 A against a 3 A fuse; **real spec is flat-top unprotected 18650,
@@ -537,7 +557,7 @@ original floor and the pre-2026-08-12 scale decision.)*
   right, not a round hole or a socket, so don't assume it's a quick
   `gen_*.py` job if it comes to that ·
   ~~which tires~~ ✅ done via Appendix CS (55.75mm) · re-check prices ✅ done
-  2026-08-08, total since moved to $411.45. **Bevel-gear bin check is the
+  2026-08-08, total since moved to ~~$411.45~~ $422.25 (2026-10-04). **Bevel-gear bin check is the
   only item still open, and it's a "probably," not a confirmation.**
 - **Open question for Evan:** does "no Lego motors" mean none at all, or
   none of the PF/Powered-Up families? EV3/NXT/9V-Technic motors, if owned,
@@ -560,7 +580,7 @@ The control firmware RUNS on the Uno (SELFTEST 49/49, host_test 13/13) but
 the flashed build and the repo source DIVERGE -- read the board's boot banner,
 never a doc. Actuators are unwired. Two tolerance coupons are printed and
 tested (pin 4.80 mm, axle 5.00 mm); nothing is ordered, BOM stands at
-$411.45. The sim lane ended in a well-instrumented NEGATIVE: no learned
+$422.25 (2026-10-04). The sim lane ended in a well-instrumented NEGATIVE: no learned
 policy drives reliably, cause understood. The LaneMaker/OpenDRIVE simulation
 thread is CLOSED as a negative after seven failed hypotheses -- do not
 re-open it. The 2026-09-09 daily-audit (Appendix ES) is FULLY WORKED: docs in
@@ -578,8 +598,10 @@ UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
 (2026-09-30, 60 findings) have not been worked.
 
 NEXT ACTIONS, cheapest first:
-1. Commit the Appendix EV work if Evan authorizes (ml/train_controller.py +
-   docs). Never push without being told.
+1. Answer the 2026-10-04 cart-review blockers: which BMS was ordered, is the
+   DIANN holder SERIES, does the resistor kit hold 100k/12k/330-470 ohm, is
+   Adafruit #4252 already in the parts bin. (The Appendix EV commit this
+   item used to ask for landed as caaf191 on 2026-10-04.)
 2. Flash uno_control and read the banner. The ST_DROPPED fix (Appendix EU)
    is compiled, never flashed -- the board still runs the 2026-09-02 build.
 3. diag_copycat.py:96-99 makes the same DART choice train_controller.py now
@@ -587,7 +609,7 @@ NEXT ACTIONS, cheapest first:
    the same function so the self_check covers both.
 4. Pitch-row scale check + caliper the printed coupons (Evan's hands).
 5. Confirm a 12-tooth bevel gear is in the parts bin.
-6. THE ORDER, $411.45 + shipping -- BLOCKED-ON-EVAN.
+6. THE ORDER, $422.25 + shipping -- BLOCKED-ON-EVAN. First confirm the BMS is B08HLQQCQJ, NOT B08CV2VS8G (no documented over-discharge cutoff).
 7. Evan's call, and LARGER than this file used to disclose. **98 tracked files
    carry the local workspace path `D:\ClaudeCode\...`** on the PUBLIC remote
    (measured 2026-10-04; 95 are provenance JSONs under `ml/runs/`, written by

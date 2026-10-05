@@ -46,7 +46,15 @@ lands in a screw terminal or a latching connector.
 
 ## 2. Net list
 
-Signal wire ~26 AWG; motor and pack wire ~22 AWG (`BOM.md` row 16).
+**22 AWG for every net, signal and power (Evan, 2026-10-04; `BOM.md` row 16;
+was: "Signal wire ~26 AWG; motor and pack wire ~22 AWG").** 26 AWG was dropped:
+22 AWG is never worse electrically (signal nets carry mA) and it grips a screw
+terminal better than 26 AWG strands. The two signal runs that would have been
+awkward never come off the spool - the encoder uses the pre-made Pololu #4763
+JST SH cable (row 5b) and the servo ships its own 3-wire lead.
+
+**Build note:** 22 AWG stranded silicone (~1.7 mm OD with insulation) will NOT
+thread THROUGH a 0.1" protoboard hole. Strip it and solder onto the pad.
 
 ### 2.1 Pack and power distribution
 
