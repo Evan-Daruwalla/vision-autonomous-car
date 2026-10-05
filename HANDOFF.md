@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-09-09 ~23:00 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-04 ~19:17 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 151 appendices A–EU; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 155 appendices A–EY; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -122,7 +122,8 @@ dir and diffs them, and `scripts/git-hooks/pre-commit` runs it with `--staged`.
 Its FIRST run found **four more** stale files the audit had missed.
 
 **`scripts/run_checks.py` is now the test suite** `CLAUDE.md` requires:
-`14 passed, 0 failed, 0 skipped (of 14)`, exit 0.
+`15 passed, 0 failed, 0 skipped (of 15)`, exit 0 — the 15th added 2026-09-10,
+`ml/train_controller.py`, which now pins the DART invariant (Appendix EV).
 
 | sev | finding | one-line fix |
 |---|---|---|
@@ -130,7 +131,7 @@ Its FIRST run found **four more** stale files the audit had missed.
 | ~~CRIT~~ **DONE** | regenerated, and `1122.xodr` vendored into `cad/reference/` so it is reproducible on any clone |
 | ~~CRIT~~ **DONE** | status block rewritten to 2026-09-09, scale corrected to ~1:14.63, MG90S → MG90D-270. Voice-checked, in band on all 4 metrics |
 | ~~HIGH~~ **DONE** | `scripts/check_artifacts.py` + pre-commit `--staged`. Blocking PROVEN by staging a staled file: commit refused, HEAD unchanged |
-| ~~HIGH~~ **DONE** | `scripts/run_checks.py`, 14/14 pass, exit 0. (Audit's 28-of-43 was wrong: 37 argparse modules, 14 define one.) `train_controller.py` still has none — open |
+| ~~HIGH~~ **DONE** | `scripts/run_checks.py`, 14/14 pass, exit 0. (Audit's 28-of-43 was wrong: 37 argparse modules, 14 define one.) ~~`train_controller.py` still has none — open~~ **closed 2026-09-10 (Appendix EV)**: its self_check pins the DART invariant and kills a replay of the 2026-09-07 bug. `diag_copycat.py` still makes the same choice inline, unguarded |
 | ~~HIGH~~ **DONE** | now **100755** |
 | ~~HIGH~~ **DONE 2026-09-09** | SELFTEST was pinned at a stale **39/39** in ~~four~~ **three** unstruck places (the fourth, `PRD_ROADMAP.md:477`, had already been struck by Appendix ET -- the audit miscounted). All three now point at the board banner rather than carrying a number | struck; `uno_control.ino:10-16` remains the rule |
 | ~~MED~~ **DONE** | `TARGET_DASH_CYCLES` retired for a max-blind-gap criterion (1.8 steps vs a 2.0 limit), asserted. Dash geometry unchanged |
@@ -170,7 +171,7 @@ on any of this.
 
 **What the thread DID produce — four pieces of an undocumented vendor format,
 derived and verified, reusable if this is ever revisited** (details in
-`.claude/codebase-memory/track.md`): the `side` rule (38/38 segments across
+`.claude/project-memory/track.md`): the `side` rule (38/38 segments across
 both reference files); the counterclockwise joint→lane boundary walk where
 each lane segment is the right-turn kerb return between adjacent arms;
 `signalPhase` = one id per arm, 0-based; and straight-through trim =
@@ -436,7 +437,7 @@ original floor and the pre-2026-08-12 scale decision.)*
   M1.1c or any wiring.
 - `docs/BOM.md` — the order list, with wiring architecture and the
   pre-order verification checklist.
-- `.claude/codebase-memory/` — bins. **`gotchas.md` was SPLIT 2026-09-02** (it
+- `.claude/project-memory/` — bins. **`gotchas.md` was SPLIT 2026-09-02** (it
   hit 423 lines) and is now a 24-line ROUTER. Read `hardware.md` before any
   build work, `track.md` before track work, `sim-harness.md` before touching the
   simulator or eval harness.
@@ -550,38 +551,51 @@ original floor and the pre-2026-08-12 scale decision.)*
 Read, in order:
 1. D:\ClaudeCode\Autonomous Car Project\HANDOFF.md  (ONLY live snapshot)
 2. PRD_ROADMAP.md
-3. .claude/codebase-memory/INDEX.md, then ONLY the bins your task touches
+3. .claude/project-memory/INDEX.md, then ONLY the bins your task touches
    (track.md before ANY track/marking/xodr work; steering.md before ANY
    servo/steering work)
 
-STATE (2026-09-09 ~14:40 CDT). Software is four milestones ahead of hardware.
+STATE (2026-09-10 ~17:21 CDT). Software is four milestones ahead of hardware.
 The control firmware RUNS on the Uno (SELFTEST 49/49, host_test 13/13) but
 the flashed build and the repo source DIVERGE -- read the board's boot banner,
 never a doc. Actuators are unwired. Two tolerance coupons are printed and
 tested (pin 4.80 mm, axle 5.00 mm); nothing is ordered, BOM stands at
 $411.45. The sim lane ended in a well-instrumented NEGATIVE: no learned
-policy drives reliably, cause understood. A real DART defect was found and
-fixed 2026-09-07 (Appendix EJ). The LaneMaker/OpenDRIVE simulation thread is
-CLOSED as a negative after seven failed hypotheses -- do not re-open it.
-A daily-audit on 2026-09-09 (Appendix ES) found ~60 issues; the DOC half was
-repaired the same day (Appendix ET), the CODE half is open and listed in
-HANDOFF's audit table.
+policy drives reliably, cause understood. The LaneMaker/OpenDRIVE simulation
+thread is CLOSED as a negative after seven failed hypotheses -- do not
+re-open it. The 2026-09-09 daily-audit (Appendix ES) is FULLY WORKED: docs in
+ET, code in EU. Dash density (accept 18.7) and cornering clearance (accept
+29.6 mm/side, rule re-pointed at the road edge) were DECIDED 2026-09-09.
+THE TEST SUITE is `python scripts/run_checks.py` (15/15 on 2026-09-10 --
+re-run it, never quote it). A pre-commit guard blocks any staged generated
+artifact that no longer matches its generator. Repo is IN SYNC with
+origin/main (0 ahead, 0 behind, fetched 2026-10-04) -- those 6 commits were
+pushed. This file claimed "6 commits UNPUSHED" for three weeks and TWO
+daily-audits flagged it (EW, EX) before it was corrected; re-derive push state
+from the remote, never from this line.
+
+UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
+(2026-09-30, 60 findings) have not been worked.
 
 NEXT ACTIONS, cheapest first:
-1. Evan owes ONE WORD on dash density (accept 18.7 cycles/lap, or shrink the
-   cycle). Recommendation on the record: ACCEPT, and replace
-   TARGET_DASH_CYCLES with a max-gap criterion.
-2. Evan owes ONE WORD on cornering clearance (accept 29.6 mm/side).
-   Recommendation on the record: ACCEPT, and re-point MIN_SIDE_CLEARANCE at
-   the ROAD edge (154.57 mm/side), not the lane edge.
-3. Resolve the three dirty tracked .xodr/.png files -- regenerate+commit, or
-   delete as unreproducible. Do NOT `git checkout --` them: two were already
-   stale against their generators, so reverting restores the WRONG version.
-4. README.md:9 is PUBLIC and says nothing has been printed, contradicted by
-   its own :140. Rewrite the status block at :114-132.
-5. Pitch-row scale check + caliper the printed coupons (Evan's hands).
-6. Confirm a 12-tooth bevel gear is in the parts bin.
-7. THE ORDER, $411.45 + shipping -- BLOCKED-ON-EVAN.
+1. Commit the Appendix EV work if Evan authorizes (ml/train_controller.py +
+   docs). Never push without being told.
+2. Flash uno_control and read the banner. The ST_DROPPED fix (Appendix EU)
+   is compiled, never flashed -- the board still runs the 2026-09-02 build.
+3. diag_copycat.py:96-99 makes the same DART choice train_controller.py now
+   routes through select_actions(), inline and unguarded. Route it through
+   the same function so the self_check covers both.
+4. Pitch-row scale check + caliper the printed coupons (Evan's hands).
+5. Confirm a 12-tooth bevel gear is in the parts bin.
+6. THE ORDER, $411.45 + shipping -- BLOCKED-ON-EVAN.
+7. Evan's call, and LARGER than this file used to disclose. **98 tracked files
+   carry the local workspace path `D:\ClaudeCode\...`** on the PUBLIC remote
+   (measured 2026-10-04; 95 are provenance JSONs under `ml/runs/`, written by
+   `ml/provenance.write_result`, which stores `cwd`). The Windows HOME path is
+   a separate, smaller surface: 2 occurrences, both in the record. Appendices
+   EW/EX measured the 98-file scope while this file disclosed only the 2.
+   Two independent decisions: stop the source (store a repo-relative path
+   instead of `cwd`) and/or scrub the committed files (a history rewrite).
 
 HARD CONSTRAINTS
 - Corner geometry FROZEN until T2's empirical turning test.

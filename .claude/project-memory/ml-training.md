@@ -376,6 +376,12 @@ teaches the car to swerve.
   a re-run with the fix and the P6 paired harness. **Any session reading
   `act` in these two files must confirm which variable (`act` vs
   `act_target`) it means before reusing older reasoning about them.**
+  **Pinned since 2026-09-10 (Appendix EV):** in `train_controller.py` the
+  choice now lives in `select_actions()`, and `--self-check` fails if the
+  expert array ever reaches the LSTM again — mutation-tested, a replay of the
+  2026-09-07 bug is killed. Ceiling, marked `# shortcut:` in code: it pins the
+  function, not that `main()` routes through it. **`diag_copycat.py` still makes
+  the same choice inline and nothing guards it.**
 
 ## RETRACTION (2026-08-11): the "first completions" result did not replicate
 

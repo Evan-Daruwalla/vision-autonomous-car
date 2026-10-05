@@ -186,6 +186,10 @@ the dated entry, not the digest.
 - [ES — Scheduled daily-audit: the committed .xodr artifacts have decoupled from their generators, so HANDOFF and ER describe files that are not on disk — and the public README still says nothing has been printed](#appendix-es---scheduled-daily-audit-the-committed-xodr-artifacts-have-decoupled-from-their-generators-so-handoff-and-er-describe-files-that-are-not-on-disk--and-the-public-readme-still-says-nothing-has-been-printed-2026-09-09-0737-cdt) (09-09)
 - [ET — Doc-sync pass: ER's 'byte-identical defaults' claim retracted (signalPhase is unconditional), HANDOFF's track row was wrong in all eight numbers, and track.md's 1:11.80 scale struck in four places against the live 1:14.63](#appendix-et---doc-sync-pass-ers-byte-identical-defaults-claim-retracted-signalphase-is-unconditional-handoffs-track-row-was-wrong-in-all-eight-numbers-and-trackmds-11180-scale-struck-in-four-places-against-the-live-11463-2026-09-09-1440-cdt) (09-09)
 - [EU — Audit remediation: the artifact guard found four MORE stale files than the audit did, two undocumented experiment provenances recovered by diffing, a MEASURED label on an unmeasured number, and the test suite CLAUDE.md always required](#appendix-eu---audit-remediation-the-artifact-guard-found-four-more-stale-files-than-the-audit-did-two-undocumented-experiment-provenances-recovered-by-diffing-a-measured-label-on-an-unmeasured-number-and-the-test-suite-claudemd-always-required-2026-09-09-2258-cdt) (09-09)
+- [EV — train_controller.py gets a self_check that would have caught the DART bug: the choice of LSTM input extracted into select_actions(), and all three planted mutants killed](#appendix-ev---train_controllerpy-gets-a-self_check-that-would-have-caught-the-dart-bug-the-choice-of-lstm-input-extracted-into-select_actions-and-all-three-planted-mutants-killed-2026-09-10-1721-cdt) (09-10)
+- [EW — Scheduled daily-audit: 9 findings - 90 files on the public remote carry the local workspace path while HANDOFF discloses 2, and eval_paired writes paired diffs with no expert-survival gate](#appendix-ew---scheduled-daily-audit-9-findings---90-files-on-the-public-remote-carry-the-local-workspace-path-while-handoff-discloses-2-and-eval_paired-writes-paired-diffs-with-no-expert-survival-gate-2026-09-17-0759-cdt) (09-17)
+- [EX - Scheduled daily-audit: 60 findings - HANDOFF says 6 commits UNPUSHED while everything is on the public remote, and the private-path scope is 98 files not 2](#appendix-ex---scheduled-daily-audit-60-findings---handoff-says-6-commits-unpushed-while-everything-is-on-the-public-remote-and-the-private-path-scope-is-98-files-not-2-2026-09-30-0728-cdt) (09-30)
+- [EY - Project-memory bins: renamed, important.md added, new standard bins as stubs](#appendix-ey---project-memory-bins-renamed-importantmd-added-new-standard-bins-as-stubs-2026-09-30-2253-cdt) (09-30)
 
 ---
 
@@ -15482,3 +15486,160 @@ this file without having just run it."
 no `self_check()`. The suite runs what exists; it does not create coverage that
 was never written. `ml/verify_env.py` still has no argparse, so its output path
 remains a constant that only an edit can redirect.
+
+# Appendix EV - train_controller.py gets a self_check that would have caught the DART bug: the choice of LSTM input extracted into select_actions(), and all three planted mutants killed (2026-09-10 17:21 CDT)
+**WHAT:** `ml/train_controller.py` now has a `self_check()` — the module where
+the 2026-09-07 DART defect lived (Appendix EJ), and the open item Appendix EU
+left behind. `scripts/run_checks.py` discovers it automatically: the suite is
+now **15 passed, 0 failed, 0 skipped (of 15)**, exit 0.
+
+## WHY THE OBVIOUS CHECK WOULD HAVE BEEN THEATER
+
+The defect was never inside `rnn_states()`. It lived in `main()`'s choice of
+WHICH array to hand it — the expert relabel instead of the executed actions.
+`main()` cannot run in a self-check (it needs the corpus, the VAE and the
+MDN-RNN checkpoints), so a self-check that only exercised `rnn_states()` would
+have **passed on the buggy code**. A check that cannot catch the bug it is named
+for is worse than none, because it reads as coverage.
+
+So the choice was pulled out of `main()` into one small pure function,
+`select_actions(executed, expert) -> (lstm_input, bc_target)`, and `main()` now
+calls it. Behaviour is unchanged: `act` stays the executed sequence into
+`rnn_states()`, `act_target` stays the BC label for `fit_a` / `val_a`.
+
+## WHAT THE CHECK PINS (CPU, random tiny MDN-RNN, no corpus — runs on a bare clone)
+
+1. **The DART invariant** — the LSTM input IS the executed array; the BC
+   target IS the expert array; no expert file means both are executed; a
+   length mismatch is refused.
+2. **The invariant is not vacuous** — feeding expert vs executed actions
+   actually changes `h` on the frames after they diverge. Without this, check
+   1 could be guarding a choice that makes no difference.
+3. **Causality** — the module docstring's "THE CAUSAL INDEXING", a bug this
+   project has caught before. Frame 3's own action differs between the two
+   runs and `h_3` is still identical, which proves `h_t` does not see `a_t`
+   (the label leak that makes a policy look excellent offline and unable to
+   drive). `h` starts at zero in every episode, and no state crosses an episode
+   boundary.
+4. **The controller's output stays inside tanh's [-1, 1]** for both archs,
+   and an unknown arch is refused.
+
+It runs inside `torch.random.fork_rng`, because `run_checks.py` runs every
+self-check in one process and a check that reseeded the global RNG could change
+the checks after it.
+
+## PROVEN, NOT ASSERTED — mutation test against the bug class
+
+Each mutant is a scratch copy of the file with one line changed; the repo was
+never touched.
+
+    0 control (unmutated copy)                        PASS
+    A the 2026-09-07 DART bug: expert into the LSTM   KILLED: rnn_states() must replay the EXECUTED actions...
+    B DART target lost: executed as the BC label      KILLED: the BC target must be the expert relabel
+    C causal shift removed: h_t = out[t], label leak  KILLED: h_t depends on a_t: the one-step causal shift is broken...
+
+Honest scope on mutant A: it is the faithful equivalent of the pre-`bfa953e`
+code, not that file itself — the old file has no `select_actions()`, so its
+own check cannot be run.
+
+## THE CEILING, marked in code
+
+`# shortcut:` at the call site in `main()`: the check pins `select_actions()`,
+not that `main()` routes through it. A future refactor of that block could
+bypass it silently. Proving the routing needs a fixture corpus. Upgrade
+trigger: any edit to that block, or a second caller of `rnn_states()`.
+
+`--self-check` added to the CLI; the flag returns before any seeding or
+loading. Diff: 1 file, +101 / -5. Not committed.
+
+# Appendix EW - Scheduled daily-audit: 9 findings - 90 files on the public remote carry the local workspace path while HANDOFF discloses 2, and eval_paired writes paired diffs with no expert-survival gate (2026-09-17 07:59 CDT)
+**Scheduled `daily-audit` run, 2026-09-17, started 07:49 CDT (per `date`). Read-only: nothing fixed, nothing committed.** Classified ACTIVE: ES (2026-09-09 07:37) is outside the 7-day window, and EV (2026-09-10 17:21) is inside it. **Audit run — 9 findings, top: 90 tracked files / 201 lines on PUBLIC `origin/main` carry the local `ClaudeCode` workspace path (89 files under `ml/runs/`), and HANDOFF discloses only "2 occurrences".**
+
+## Findings (severity-ranked; tier in brackets)
+
+1. **HIGH [CONFIRMED]** `git grep -l -F "ClaudeCode" origin/main | wc -l` → 90 files. `git grep -F ... | wc -l` → 201 lines, 89 of the files under `ml/runs/`. These are absolute `args` paths echoed into run JSONs and logs. `gh` reports the repo `PUBLIC`. The record's own guard list (md:11379) names `D:\ClaudeCode` as a private identifier. HANDOFF next-action 7 (~:586-587) scopes the problem to "2 occurrences of his Windows home path" in the record, so the scope is understated. Separately, 3 record lines on origin/main contain `EVANFREDY` (md:5794, 11378, 13512). Fix: serialize run args relative to the repo root in the writers (`vars(args)` dumps), regenerate or redact the tracked run files, and restate the true scope in HANDOFF. A history rewrite is Evan's call.
+2. **HIGH [CONFIRMED]** `ml/eval_paired.py` has 0 `batch_valid` references, against 4 in `ml/eval_in_sim.py`. It never checks that the PID expert survived before writing paired diffs. The 2026-08-10 degraded-sim incident is exactly the case that gate exists for. Both stored `eval_paired*.json` lack the key, although the expert survived 24/24 and 9/9 in those runs, so no published number is corrupted yet. Fix: move `batch_valid` into a shared helper and gate `eval_paired.py`'s write on it.
+3. MED [CONFIRMED] `scripts/check_artifacts.py:201-204` `staged_paths()` ignores `proc.returncode`. When git fails, `--staged` prints "nothing to do" and exits 0 (worker-reproduced in a non-git copy). It is masked in the pre-commit hook, which always runs inside the checkout. Fix: fail closed on a non-zero returncode.
+4. MED [CONFIRMED] `PRD_ROADMAP.md:1184-1185` still says, unstruck, "self-check FAILS at R=500 (90 mm spare, needs 100)". ET struck this claim at :388-391 and :861, but this third copy survived. `cad/track_layout_v2.json` supports PASS with 100 mm spare.
+5. MED [CONFIRMED] `HANDOFF.md:308` says "spare 110 mm, check PASSES". HANDOFF's own track-layout row and ET say 100 mm.
+6. LOW [CONFIRMED] `docs/BOM.md:262` says "≈$415 – $430 all-in", while README, HANDOFF and PRD say $411.45 + shipping ≈ $424–439. ES flagged this gap and EU did not close it.
+7. LOW [REPORTED] `firmware/uno_control/packguard.h` hand-duplicates `firmware/uno_packguard/uno_packguard.ino`, with no mechanical sync check. All 8 constants and `step()` match today.
+8. LOW [REPORTED] `ml/runs/dreamer_p4/sweep_Sb64h5/p4_result.json` stores `peak_gb: 0.0` for an OOM arm (`oom_at_step: 1`). `sweep_summary.json` correctly shows `null`.
+9. LOW [REPORTED] `ml/diag_copycat.py:96-99` still makes the executed/expert choice inline, not via `select_actions()`. HANDOFF next-action 3 already tracks this.
+
+REFUTED: W-A's "torch not installed, self_check unrunnable". It used the wrong interpreter. With `.venv`, `train_controller.py` PASSES inside the 15/15 suite run.
+
+## Landing-check on EV: every checkable claim HOLDS
+
+- `select_actions()` is at `ml/train_controller.py:122-135` and is called at `:313`.
+- The `--self-check` flag returns before seeding (`:268-274`).
+- `git diff --stat` → +101/-5, uncommitted, as EV states.
+- The 3 planted mutants were re-killed on a scratch copy, with verbatim assertion text; the control PASSES.
+- HANDOFF and the 3 bins agree on 15/15.
+
+## Verified true
+
+- `scripts/run_checks.py` via `.venv`: 15 passed, 0 failed, 0 skipped (07:49:26–07:49:36 CDT). The tree was unchanged afterward.
+- The `check_artifacts.py` drift detector fires on a hand-edited `.xodr` in a copy (exit 1), and the real tree is clean (27 checked, 0 drifted).
+- `provenance` and `splits` self_checks PASS.
+- Preprocessing is identical across `eval_in_sim.py`, `plan_cem.py` and `trace_failure.py`. The `split_seed_of` contract is honored by all 5 consumers.
+- README numbers reproduce from artifacts: VAE 4,348,547 params; dreamer_p4 VRAM table; rollout 30/30 and 0/30.
+- Invalid batches (`seedA`/`seedB` `batch_valid: false`) are cited nowhere.
+- Record: 152 appendices, ordered, TOC balanced, 0 CR bytes.
+- No doc claims real-car driving or calipered fits.
+
+## Coverage and cost
+
+- Code: 21 of 82 read, 3 run. `ml/runs`: sampled by group (all 35 `p5_eval.json`, all `dreamer_p4`).
+- Docs: 13 of 42 read in full, 6 grep-only, 23 not opened.
+- Not swept: D3, D4, X4, M4, M5, M9–M14. The firmware was not executed (serial port).
+- Cost: 3 Sonnet agents, 155 tool calls, ~557K subagent tokens.
+
+# Appendix EX - Scheduled daily-audit: 60 findings - HANDOFF says 6 commits UNPUSHED while everything is on the public remote, and the private-path scope is 98 files not 2 (2026-09-30, ~07:28 CDT)
+Scheduled daily-audit run, 2026-09-30 (CDT). Read-only: nothing fixed, nothing committed. Only ACTIVE project this sweep (one non-audit commit f10f8aa on 2026-09-29; last audit was Appendix EW, 2026-09-17).
+
+Method: /audit with 3 Sonnet workers (A: ml + scripts code, M1/M2/M3/M10/M13; B: firmware, cad, .claude, ml/runs, M7/M8/M9/M12/M15 + G1-G4; C: docs D1-D8), then /landing-check (1 fresh agent) on Appendices EV and EW. The session model re-ran every high and med it relied on.
+
+Count: 60 findings after dedup (A 19, B 18, C 20, session 2, landing-check 2, minus 4 duplicates, plus 3 edge cases not already covered). 0 crit, 2 high, the rest med/low.
+
+Top findings:
+1. HIGH (CONFIRMED): HANDOFF.md:571-573 says "6 commits ahead of origin/main, UNPUSHED". Live: 0 ahead, origin/main == HEAD == f10f8aa. Everything is already on the PUBLIC remote.
+2. HIGH (CONFIRMED): HANDOFF.md:586-587 next-action 7 says "2 occurrences" of the private path. `git grep -l -F ClaudeCode origin/main` = 98 files (96 under ml/runs). EW's own "90 files" was a miscount: the same command at 70e4352 (the tip on 2026-09-17) also gives 98. HANDOFF never picked up any of EW's 9 findings.
+3. MED: the WORKING-TREE EW entry adds the literal private tokens to the record; they go public on the next commit.
+4. MED: ml/trace_failure.py:118-122 builds LatentPolicy without no_history (train/serve skew for --no-history controllers); diag_copycat.py:136-140 has the same gap.
+5. MED: ml/splits.py:170-176 split stability for proc_aug depends on track-name sort order; a new recovery track name leaks val frames into fit (constructed).
+6. MED: the encoder-fingerprint guard never fires: ml/data/proc and ml/data/proc_aug have no .key files.
+7. MED (read, no hardware): uno_control.ino:634-661, an unbounded RX loop runs before the watchdog, so a '?' byte flood can starve the 150 ms watchdog. The actuators are unwired today, so this is latent.
+8. MED: SERIAL_PROTOCOL.md:151 claims stray bytes cannot start the car; CRC8 alone passes ~0.41% of random frames starting 0xA5 (Monte Carlo 813/200000).
+9. MED: firmware/README.md:75 "No control firmware exists" is false; uno_control is 686 lines.
+10. MED: cad/track_layout_v2.py:582 hard-codes a superseded RISK string into the committed track_layout_v2.json:26.
+
+Also: bare `python scripts/run_checks.py` exits 0 with 3 SKIPs (no torch), including the train_controller self_check; HANDOFF.md:569 names bare `python` while :597 says use .venv. The EV code has sat uncommitted for 20 days.
+
+Verified true: .venv suite 15 passed / 0 failed / 0 skipped; check_artifacts 27 checked, 0 drifted, 2 uncheckable; record 153 headings A..EW, TOC balanced, 0 CR bytes; train_controller self_check killed 3/3 planted mutants on a scratch copy; secret scan of the history clean (two tools); all 136 commits use the noreply author; README numbers match ml/runs.
+
+Disclosure: worker B deleted an ignored firmware/__pycache__/host_test*.pyc that it had created itself.
+
+# Appendix EY - Project-memory bins: renamed, important.md added, new standard bins as stubs (2026-09-30, ~22:53 CDT)
+**Evan, 2026-09-30 (asked in the Skills session):** "change the name to project-memory bins and create new bins covering all types of things a project would contain ... You must include an important.md bin that has the most project critical things in it." The cross-project design is in the Skills record entry of the same date.
+
+## What changed here
+
+- Bins folder `.claude/project-memory`: renamed from `.claude/codebase-memory/` with `git mv`.
+- New `important.md`: 9 numbered critical entries (What / Constrains / Why / Source), each citing CLAUDE.md, HANDOFF.md or a bin; written by Opus and spot-checked on disk. The new `important-inject` hook injects it the first time a session touches this project, and again after compaction.
+- New stub bins (first line `STATUS: N/A` or `STATUS: empty`, naming where the facts live today): decisions, people, timeline, glossary, compliance, budget, operations, services, experiments, writing (hardware.md already existed and matches the new standard name). The pm-cadence age rule skips stubs.
+- INDEX.md: "Read first: important.md" and "New standard bins" lines added (heading renamed where it said codebase-memory).
+- Reference lines updated: CLAUDE.md:14; HANDOFF.md:174, :440, :554; PRD_ROADMAP.md:53; sim-harness.md:51; cad/README.md:157; `cad/rescale_reference_xodr.py`:76 (comment only); docs/research/2026-07-23_power-system.md:29; firmware/README.md:3.
+
+## Why
+
+The bins were shaped around code. A survey of every project found scheduled jobs, external services, experiments, decisions, people, deadlines, compliance, budget, writing and hardware facts with no bin; each now has one home, and the most critical facts are injected instead of hoped-for.
+
+## Proof (2026-09-30)
+
+- `pm-cadence.js --canary` 79/79; `important-inject.js --canary` 41/41 (installed and public copies identical).
+- `important-inject.js` with cwd = this project printed `[IMPORTANT - Autonomous Car Project]` and the path of its important.md.
+
+## Next
+
+Phase 4, a later sitting: move the facts each stub points to into its bin, with a lossless check. Nothing here was committed by this session.

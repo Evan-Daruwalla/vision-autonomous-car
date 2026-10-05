@@ -5,6 +5,17 @@ CI config). Verification is done by **runnable self-checks and done-checks
 that exit non-zero on failure** — the project's actual gates. Adding `ruff`
 and a `tests/` directory before M3 is an open audit item (F20).
 
+**`python scripts/run_checks.py` IS the test suite** (added 2026-09-09,
+Appendix EU). It walks `cad/`, `ml/` and `scripts/` for every `def self_check`,
+imports each and runs it: PASS / FAIL / SKIP-with-printed-reason, exit 1 on any
+FAIL, `--strict` makes a SKIP fatal. **15/15 PASS on 2026-09-10** — re-run it,
+never quote this number. A new self_check is discovered automatically; never
+hand-maintain a list. Its sibling for generated files is
+`scripts/check_artifacts.py`, which the pre-commit hook runs with `--staged`.
+**A self_check must be able to fail on the bug it is named for** — prove it by
+planting the bug in a scratch copy (Appendix EV did this for the DART defect:
+3 of 3 mutants killed).
+
 ## The gates that exist, and what each one actually proves
 
 | Command | Proves | Notes |

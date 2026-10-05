@@ -36,6 +36,7 @@ cannot drive. h is therefore shifted by one: h_0 = 0, h_t = out[t-1].
 Usage:
   python ml/train_controller.py                 # 30 epochs
   python ml/train_controller.py --seed 1        # a different init
+  python ml/train_controller.py --self-check    # invariants only, CPU, no data
 """
 
 from __future__ import annotations
@@ -118,6 +119,94 @@ def rnn_states(rnn: MDNRNN, mu: np.ndarray, act: np.ndarray,
     return np.concatenate(idx_all), np.concatenate(h_all)
 
 
+def select_actions(executed: np.ndarray, expert: np.ndarray | None):
+    """Return (lstm_input, bc_target). THE DART INVARIANT, as one function.
+
+    The LSTM input is ALWAYS the executed sequence -- it is what produced the
+    observed latents, and the frozen MDN-RNN was only ever trained on executed
+    actions. Only the BC target takes the expert relabel. Extracted from main()
+    2026-09-10 so self_check() can pin it: the 2026-09-07 defect (Appendix EJ)
+    lived in main()'s choice of array, and main() cannot run without the corpus.
+    """
+    if expert is None:
+        return executed, executed
+    assert len(expert) == len(executed), (
+        f"{len(expert)} expert labels vs {len(executed)} executed actions")
+    return executed, expert
+
+
+def self_check() -> None:
+    """Pins the DART invariant, proves it is not vacuous, and pins causality.
+
+    CPU only, a randomly initialised MDN-RNN, no corpus or checkpoint -- so it
+    runs on a bare clone. fork_rng keeps it from reseeding the global RNG,
+    because scripts/run_checks.py runs every self-check in one process.
+    """
+    with torch.random.fork_rng(devices=[]):
+        torch.manual_seed(0)
+        rng = np.random.default_rng(0)
+        executed = rng.standard_normal((11, ACTION_DIM)).astype(np.float32)
+        expert = executed.copy()
+        expert[3:6] += 0.8          # "recovery frames": where the arrays differ
+
+        # 1. The invariant. On the pre-bfa953e code this is exactly what
+        #    failed: the expert array went into the LSTM.
+        lstm_in, target = select_actions(executed, expert)
+        assert lstm_in is executed, (
+            "rnn_states() must replay the EXECUTED actions, never the expert "
+            "relabel -- the 2026-09-07 DART contamination (Appendix EJ)")
+        assert target is expert, "the BC target must be the expert relabel"
+        lstm_in, target = select_actions(executed, None)
+        assert lstm_in is executed and target is executed
+        refused = False
+        try:
+            select_actions(executed, expert[:-1])
+        except AssertionError:
+            refused = True
+        assert refused, "a label/action length mismatch must be refused"
+
+        # 2. The invariant is not vacuous: which array goes in changes h.
+        #    Two episodes: frames 0-5 (actions 3-5 differ) and 6-10 (identical).
+        rnn = MDNRNN().eval()
+        mu = rng.standard_normal((11, Z_DIM)).astype(np.float32)
+        eps = np.array([[0, 6], [6, 5]])
+        ep_idx = np.array([0, 1])
+        idx, h_exec = rnn_states(rnn, mu, executed, eps, ep_idx, "cpu")
+        _, h_exp = rnn_states(rnn, mu, expert, eps, ep_idx, "cpu")
+        assert idx.tolist() == list(range(11)), idx
+        assert h_exec.shape == (11, HIDDEN), h_exec.shape
+        assert not np.allclose(h_exec[4], h_exp[4]), (
+            "feeding expert vs executed actions left h unchanged -- then the "
+            "DART invariant above would be guarding nothing")
+
+        # 3. Causality (THE CAUSAL INDEXING in the module docstring): h_t is
+        #    the state BEFORE consuming (z_t, a_t). Frame 3's own action
+        #    differs between the two runs, so h_3 matching proves h_t does not
+        #    see a_t -- the label leak that makes a policy look perfect offline
+        #    and unable to drive.
+        assert np.allclose(h_exec[:4], h_exp[:4]), (
+            "h_t depends on a_t: the one-step causal shift is broken and the "
+            "label leaks into the controller's input")
+        assert np.all(h_exec[0] == 0) and np.all(h_exec[6] == 0), (
+            "h must start at zero in every episode")
+        assert np.allclose(h_exec[6:], h_exp[6:]), (
+            "state leaked across an episode boundary")
+
+        # 4. The controller's output is bounded to the simulator's range.
+        for arch in ("linear", "mlp"):
+            out = Controller(arch=arch)(torch.randn(5, Z_DIM) * 50,
+                                        torch.randn(5, HIDDEN) * 50)
+            assert out.shape == (5, ACTION_DIM), out.shape
+            assert out.abs().max() <= 1.0, f"{arch} escaped tanh's [-1, 1]"
+        refused = False
+        try:
+            Controller(arch="transformer")
+        except ValueError:
+            refused = True
+        assert refused, "an unknown arch must be refused"
+    print("train_controller self_check: PASS")
+
+
 def evaluate(model, z, h, a, device, batch=4096, w=None):
     """Mean per-frame MSE. `w` gives a weighted mean over the same frames.
 
@@ -176,7 +265,13 @@ def main() -> int:
                          "--proc containing recovery episodes")
     ap.add_argument("--out", default=str(RUNS / "controller"))
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--self-check", action="store_true",
+                    help="run the DART/causality invariants on CPU and exit; "
+                         "needs no corpus or checkpoint")
     args = ap.parse_args()
+    if args.self_check:
+        self_check()
+        return 0
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
@@ -210,12 +305,13 @@ def main() -> int:
     # overwrite `act` itself, so h_t was built from a counterfactual action
     # sequence that never produced the observed z's -- worst exactly on the
     # recovery frames where the two arrays differ.
-    act_target = act
     expert_path = proc / "train_actions_expert.npy"
-    if expert_path.exists():
-        act_target = np.load(expert_path)
-        assert len(act_target) == len(act), (
-            f"{len(act_target)} expert labels vs {len(act)} executed actions")
+    expert = np.load(expert_path) if expert_path.exists() else None
+    # shortcut: self_check() pins select_actions(), not that main() routes
+    # through it -- proving that needs a fixture corpus. Upgrade trigger: any
+    # refactor of this block, or a second caller of rnn_states().
+    act, act_target = select_actions(act, expert)
+    if expert is not None:
         print(f"labels: {expert_path.name} (expert actions; "
               f"LSTM input stays the executed sequence)")
 

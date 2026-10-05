@@ -1,4 +1,8 @@
-# codebase-memory index — Autonomous Car Project
+# project-memory index — Autonomous Car Project
+
+Read first: important.md - critical facts, injected by the important-inject hook (added 2026-09-30)
+
+New standard bins (2026-09-30; first line STATUS: = stub, see that line): decisions, people, timeline, glossary, compliance, budget, operations, services, experiments, writing, important
 
 Core bins:
 - security.md — empty, no attack surface yet; live at M2 teleop (updated 2026-07-23)
@@ -15,12 +19,12 @@ Core bins:
 - ml-training.md — GPU memory + world-model training facts MEASURED on this
   3060 Ti: the DreamerV3 fitting table, Sysmem Fallback confirmed ON,
   dreamerv3-torch's missing offline loop, the DART action-contamination fix
-  in `train_controller.py`/`diag_copycat.py` (updated 2026-09-09 -- two drifted dreamer.py line refs corrected, Appendix ET)
+  in `train_controller.py`/`diag_copycat.py` (updated 2026-09-10 -- DART invariant pinned by train_controller's self_check, Appendix EV)
 
 Standards bins (only those the codebase actually commits to):
 - dependencies.md — planned stack (DonkeyCar 5.x plumbing + PyTorch models) + the ON-CAR inference runtime decision: export to ONNX, and why RAM was never the binding constraint (updated 2026-09-03)
 - ui.md — N/A, no frontend planned; teleop UI TBD at M2 (re-checked 2026-09-02, still N/A)
-- testing.md — the runnable done-checks + verification rules, ml AND firmware (updated 2026-09-02)
+- testing.md — the runnable done-checks + verification rules, ml AND firmware (updated 2026-09-10 -- `scripts/run_checks.py` is the suite; a self_check must fail on its own bug)
 - data.md — THE episode data contract: npz schema, t=0 rule, both alignment gates, 3-way split rule, the SPLIT-SEED rule, the torn-preprocess guard in load_proc, + the Pi/Uno serial frame contract (updated 2026-09-03; 190 lines, over the ~150 cap)
 - tooling.md — Python 3.12.10 venv, machine facts, git -F quirk, shell/encoding traps from the gotchas split (updated 2026-09-02)
 
