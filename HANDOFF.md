@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-04 ~20:02 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-04 ~20:38 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 156 appendices A–EZ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 159 appendices A–FC; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -111,18 +111,32 @@ This lists only what is actually open, cheapest first.)*
 | 4 | **Caliper the coupons.** Every fit verdict so far (pin 4.80 mm, axle 5.00 mm) is fit-by-feel, not a measured diameter. | Turns two working numbers into a measured offset that transfers to CAD |
 | 5 | **Confirm a 12-tooth bevel gear is in the parts bin.** Evan: "prob have one and if not i can print one" — not a confirmation. A bevel's meshing tooth profile is a harder print than a coupon. | Last unconfirmed pre-order check (PRD A1) |
 
-**2026-10-04 CART REVIEW (side chat; Appendix EZ) - nothing bought:**
+**2026-10-04 CART REVIEW (side chat; Appendices EZ, FA, FB, FC) - nothing bought:**
 
-- **BLOCKER - the BMS.** Evan's cart held ACEIRMC `B08CV2VS8G`, whose listing
-  documents NO over-discharge set point (fails `important.md` #4). BOM row 11b
-  stays on the vetted `B08HLQQCQJ` (documents 2.9 V +/-0.05 V) until Evan
-  confirms which one he ordered.
-- **UNVERIFIED, Evan's hands:** the DIANN holder is SERIES not parallel (a
-  parallel holder breaks 2S / 7.4 V); the KSOPUERT kit really holds 100k + 12k
-  + 330-470 ohm; Adafruit #4252 is or is not already in the parts bin; the
-  Vilros kit's 120 mm camera cable pin count; coupler fit on the MG90D-270.
+- ~~**BLOCKER - the BMS.**~~ **RESOLVED 2026-10-04: Evan is ordering the vetted
+  `B08HLQQCQJ`** (8PCS, $9.59), re-verified live - the description still states
+  "Overdischarge detection voltage: 2.9V+/-0.05V." The `B08CV2VS8G` in his cart
+  documented no set point. Read the DESCRIPTION, not the bullets: both parts'
+  bullets say only "Over-discharge protection".
+- **NEW SAFETY GAP: `docs/WIRING_PROTOSHIELD.md` never included the BMS.** Its
+  net list still runs `PACK+` holder -> fuse, so wiring from it bypasses the
+  over-discharge cutoff. Pack -> B+/B-/MB, everything else (charger too) ->
+  P+/P-. MB needs the cell midpoint, which the 2-lead holder does not expose.
+  A dated warning sits in that doc; the net redraw is OPEN.
+- **DIANN holder: SERIES per its listing** ("Output Voltage: 7.4V", Evan pasted
+  it 2026-10-04). Meter it on arrival - ~7.4-8.4 V across red/black is series;
+  ~3.7-4.2 V means parallel, reject it.
+- **Resistor kit (KSOPUERT), checked 2026-10-04:** 100k present; NO 12k - build
+  it as 10k + 2k in series (12.0k, same 0.10714 ratio; never 10k alone, which
+  under-reads the pack 15%); nothing in 330-470 ohm - 2 x 200 ohm in series
+  (400 ohm) per strip segment.
+- **Coupler (2026-10-04):** no #4252 was ever on hand - the 2026-09-03 build
+  was a PRINT of v1, whose axle socket was too loose. Print v2
+  (`cad/servo_lego_coupler_v2.stl`, socket clearance 0.00 mm). Untested.
+- **UNVERIFIED, Evan's hands:** the Vilros kit's 120 mm camera cable pin count; coupler fit on
+  the MG90D-270.
 - **Decided by Evan:** 22 AWG for every net (26 AWG dropped); PRINT
-  `cad/servo_lego_coupler_v1.stl` instead of buying #4252 (row 22 not retired
+  `cad/servo_lego_coupler_v2.stl` (v1 printed too loose) instead of buying #4252 (row 22 not retired
   until a coupler survives a load test).
 - **In NO cart yet:** 2x Samsung 25R $9.98 at imrbatteries (row 9 - sales
   FINAL, USPS caps 8 cells/package); Adeept p0374 charger $7.99 (row 11).
@@ -208,7 +222,7 @@ file clearing the crash as isolating the boundary, which it does not.
 
 | # | Action | Blocked on |
 |---|---|---|
-| 6 | **Place the order** (`docs/BOM.md`, ~~**$411.45 + shipping ≈ $424-439**~~ **$422.25 before shipping (2026-10-04 cart review); shipping not re-estimated. BLOCKED on confirming the BMS ASIN - BOM row 11b**). All six BOM Verify items closed; only #3 above is unconfirmed. | **Evan** |
+| 6 | **Place the order** (`docs/BOM.md`, ~~**$411.45 + shipping ≈ $424-439**~~ **$422.25 before shipping (2026-10-04 cart review); shipping not re-estimated. BMS confirmed 2026-10-04 (B08HLQQCQJ, re-verified live)**). All six BOM Verify items closed; only #3 above is unconfirmed. | **Evan** |
 | 7 | **Bench-measure the real wheel angle with a servo attached** — the sharpened task from Appendices DL/DN/DO. Measure the WHEEL directly at the servo's own limit; do not compute it from the bare-linkage 58°/270° figures. Then re-derive `SERVO_US_SPAN`, whose 10% margin was sized against the OLD rack's hard stops. | parts (servo) |
 | 8 | **Confirm the MG90D-270° physically fits the MG90S-sized mount** — one body dimension differs (22.4×12.1×22.8 vs ~22.8×12.2×31 mm). | parts (servo) |
 | 9 | **Task 8e: flash and verify the WS2812B firmware.** `uno_control.ino` compiles clean (9680 B, 58 SELFTEST checks) but has never run. Done-check needs both strip segments addressing independently, the LAST pixel of each lit, and `ticks` counting cleanly with indicators blinking. | parts (strip) |
@@ -368,7 +382,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | BOM | M2.8 | **BLOCKED-ON-EVAN; re-priced four times** | `docs/BOM.md`, ~~≈$238-248 + $15-25 shipping (≈$253-273 all-in)~~ ~~**$411.45 + shipping ≈ $424-439**~~ **$422.25 before shipping (2026-10-04 cart review): rows 2-3 moved to PiShop, LM2596 + holder substitutes for the Addicore backorders, 26 AWG dropped, XT30 swapped, coupler printed instead of bought** (row 7's servo swapped to the MG90D-270° 2026-09-05, Appendix DP, +$9.00 over the interim $402.45 — the rack now needs 135° each way, past the MG90S's reach, Appendix DN). Row 17 is an **Arduino Uno Evan already owns, $0**. **Row 5 corrected 2026-09-02 to the #5159 ENCODER motor** Evan chose on 2026-08-12 (+$6) and **new row 5b, the #4763 JST SH cable Pololu does not include** (+$3) — Appendix BO. **$200 ceiling breached on every path** |
 | Chassis CAD + print | M1 | **Started** | M1.3's two headline numbers closed 2026-09-05 (Appendices DI/DK): pin 4.80mm, axle 5.00mm — pitch-row scale check still open |
 | Tolerance coupon | M1.3 | **Pin + axle offsets both closed; pitch check open** | `cad/tolerance_coupon_v1.stl` (pin row PASS @ 4.80mm; axle row FAIL, all 6 too loose) + `cad/tolerance_coupon_v2.stl` (axle sweep 4.80-5.30mm, PASS @ 5.00mm — "3rd smallest is best") + `cad/README.md`. No caliper data on either coupon (fit-by-feel only), pitch-row scale check (beam across holes 1-2, then 1-5) never run |
-| Steering coupler (printed) | 8c(ii) | **STL generated, never printed** | 2026-09-03, Appendix DG. `cad/servo_lego_coupler_v1.stl` + `scripts/gen_servo_lego_coupler.py` (manifold PASS, volume PASS 1.05e-14, 1152 tris, Ø10 × 16 mm). MG90S Ø4.65 bore → female 5.00 × 2.00 Lego cross socket. Prints NO cross profile (obeys Appendix BV); 20T spline deliberately not modelled (sub-nozzle pitch). ⚠️ **No torque margin claimed** — friction + spline bite, never loaded. Four constants unmeasured; `SOCKET_CLEAR` wanted the M1.3 coupon's data, now printed (2026-09-05) — but the coupon's AXLE row is a free-SPIN fit and the coupler's socket wants a firm GRIP, closer to the coupon's PIN row (4.80mm) in spirit; not yet reconciled, flagged rather than silently reused. PETG not PLA |
+| Steering coupler (printed) | 8c(ii) | ~~**STL generated, never printed**~~ **v1 PRINTED (by 2026-09-03), axle socket TOO LOOSE (Evan, 2026-10-04); v2 generated, untested** | 2026-09-03, Appendix DG. `cad/servo_lego_coupler_v1.stl` + `scripts/gen_servo_lego_coupler.py` (manifold PASS, volume PASS 1.05e-14, 1152 tris, Ø10 × 16 mm). MG90S Ø4.65 bore → female 5.00 × 2.00 Lego cross socket. Prints NO cross profile (obeys Appendix BV); 20T spline deliberately not modelled (sub-nozzle pitch). ⚠️ **No torque margin claimed** — friction + spline bite, never loaded. Four constants unmeasured; `SOCKET_CLEAR` wanted the M1.3 coupon's data, now printed (2026-09-05) — but the coupon's AXLE row is a free-SPIN fit and the coupler's socket wants a firm GRIP, closer to the coupon's PIN row (4.80mm) in spirit; not yet reconciled, flagged rather than silently reused. PETG not PLA |
 | Electronics + teleop | M2 | **Not started** | purchase list is task 8 |
 | Behavioral cloning | M3 | **Not started** | |
 | M4 architecture gate | M4.16a | **Done** | 2026-07-23: feasible w/ constraints; docs/research/2026-07-23_world-model-8gb-vram.md |
@@ -598,9 +612,9 @@ UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
 (2026-09-30, 60 findings) have not been worked.
 
 NEXT ACTIONS, cheapest first:
-1. Answer the 2026-10-04 cart-review blockers: which BMS was ordered, is the
-   DIANN holder SERIES, does the resistor kit hold 100k/12k/330-470 ohm, is
-   Adafruit #4252 already in the parts bin. (The Appendix EV commit this
+1. REDRAW `docs/WIRING_PROTOSHIELD.md`'s pack nets to include the BMS - it is
+   absent, so wiring from the current table bypasses over-discharge
+   protection. Then print `cad/servo_lego_coupler_v2.stl` and test-fit it. (The Appendix EV commit this
    item used to ask for landed as caaf191 on 2026-10-04.)
 2. Flash uno_control and read the banner. The ST_DROPPED fix (Appendix EU)
    is compiled, never flashed -- the board still runs the 2026-09-02 build.
@@ -609,7 +623,7 @@ NEXT ACTIONS, cheapest first:
    the same function so the self_check covers both.
 4. Pitch-row scale check + caliper the printed coupons (Evan's hands).
 5. Confirm a 12-tooth bevel gear is in the parts bin.
-6. THE ORDER, $422.25 + shipping -- BLOCKED-ON-EVAN. First confirm the BMS is B08HLQQCQJ, NOT B08CV2VS8G (no documented over-discharge cutoff).
+6. THE ORDER, $422.25 + shipping -- BLOCKED-ON-EVAN. BMS confirmed 2026-10-04: B08HLQQCQJ (8PCS), re-verified live.
 7. Evan's call, and LARGER than this file used to disclose. **98 tracked files
    carry the local workspace path `D:\ClaudeCode\...`** on the PUBLIC remote
    (measured 2026-10-04; 95 are provenance JSONs under `ml/runs/`, written by

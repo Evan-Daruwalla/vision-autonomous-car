@@ -306,11 +306,11 @@ exists to prevent.
 - **Servo-to-pinion coupling CHOSEN: Adafruit #4252** (Evan, 2026-09-03) —
   the manufactured candidate this file and `docs/BOM.md` row 22 already
   named, $0.75, micro-servo spline → 16 mm Lego cross axle. Evan reports it
-  already built and "strong," which is real information: it **empirically
+  **CORRECTED 2026-10-04 (Evan): no Adafruit #4252 was ever on hand.** The part he built on 2026-09-03 was a PRINT of `cad/servo_lego_coupler_v1.stl`. "It's the adafruit 4252 adapter" was read as the bought injection-moulded part, so the spline-fit 'confirmation' and the 'injection-moulded, PLA math doesn't transfer' reasoning rested on the wrong part. v1's Lego-axle socket turned out TOO LOOSE. ~~already built and "strong," which is real information: it **empirically
   confirms the spline fit** on his actual MG90S — the open question in the
   first section of this file ("Adafruit's own wording... not guaranteed to
   fit with any other kind of servo splines... verify the spline before
-  buying") is answered by his own build, not by the vendor's guarantee.
+  buying") is answered by his own build, not by the vendor's guarantee.~~
   **PRD task 8c(ii)'s done-check ("a coupling selected with its stall-torque
   margin stated") is only PARTIALLY met.** A part is selected. A numeric
   margin is not, and cannot be computed the way the printed-PLA case was
@@ -344,8 +344,8 @@ exists to prevent.
   which neither the PLA SF math nor anything else here covers, so **ABS is
   UNANALYSED for this part**. No SF is claimed or computable. Never claim it
   works until it survives a load test (`important.md` #5).
-  **FIRST check the parts bin:** the entry above records #4252 as "already
-  built" and "strong" on 2026-09-03 - if it is on hand, nothing needs printing.
+  **Parts bin checked 2026-10-04: no #4252; v1 had been printed and its axle socket was too loose -> print `cad/servo_lego_coupler_v2.stl`** (socket clearance 0.20 -> 0.00 mm, the coupon's pin-row grip offset). ~~**FIRST check the parts bin:** the entry above records #4252 as "already
+  built" and "strong" on 2026-09-03 - if it is on hand, nothing needs printing.~~
   **Coupler fit on the MG90D-270 is NOT bench-verified:** the #4252 fit was
   confirmed on the MG90S. The candidate entry above records the same 20T spline,
   but the body differs (22.8 mm vs ~31 mm), and v1's 4.65 mm bore was sized

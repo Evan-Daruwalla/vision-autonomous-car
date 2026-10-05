@@ -517,9 +517,9 @@ transfer gap) must not block the capstone.
         real Lego axle; never print the cross profile. Constraint written to
         `docs/WIRING_PROTOSHIELD.md` §2.4a. Done: a coupling selected with its
         stall-torque margin stated.
-        **PARTIAL 2026-09-03 (Appendices DD/DF): CHOSEN — Adafruit #4252**,
+        **CORRECTED 2026-10-04: that was a misreading - Evan had PRINTED `cad/servo_lego_coupler_v1.stl`; no #4252 was ever on hand, so nothing confirmed the #4252 fit. v1's axle socket was too loose; v2 generated.** ~~**PARTIAL 2026-09-03 (Appendices DD/DF): CHOSEN — Adafruit #4252**,
         already built by Evan, reports it "strong." That empirically confirms
-        the spline fit on his real MG90S (Adafruit's own listing does not
+        the spline fit on his real MG90S~~ (Adafruit's own listing does not
         guarantee it beyond their own micro servo). **Still not fully closed
         by this task's own bar**: no numeric stall-torque margin exists or can
         be computed for this part — it is injection-moulded, not PLA, so

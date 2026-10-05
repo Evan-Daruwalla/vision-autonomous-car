@@ -34,8 +34,8 @@ the current one where they disagree** · power architecture
 | 2 | LM2596 buck module @ 5.2 V | module, wired in — has its own trim pot, set it BEFORE connecting anything |
 | 3 | SPST rocker switch (or its leads to a panel mount) | switches the pack, not the Pi |
 | 4 | 470–1000 µF electrolytic + 0.1 µF ceramic | across VM/GND, physically at the TB6612. **Plus a second 470 µF across `+5V2`/GND at the strip feed point (added 2026-09-03)** — WS2812B pixels switch their drivers in step, and the strips sit at the end of a lead; without local bulk that step lands on the 5.2 V rail, which also feeds the Uno |
-| 5 | 2 × WS2812B data-line resistors, ~330–470 Ω | one in series with each segment's `DIN`. **Superseded the 8 per-LED resistors 2026-09-03 (Appendix CX)** — every WS2812B pixel has its own constant-current driver, so per-LED ballast no longer exists as a concept |
-| 6 | Pack-sense divider: 100 kΩ + 12 kΩ | ratio 0.10714, per `firmware/uno_packguard/` |
+| 5 | 2 × WS2812B data-line resistors, ~330–470 Ω | **2026-10-04: the kit has nothing in 330-470 ohm - use 2 x 200 ohm in series (400 ohm) for each.** one in series with each segment's `DIN`. **Superseded the 8 per-LED resistors 2026-09-03 (Appendix CX)** — every WS2812B pixel has its own constant-current driver, so per-LED ballast no longer exists as a concept |
+| 6 | Pack-sense divider: 100 kΩ + 12 kΩ | ratio 0.10714, per `firmware/uno_packguard/`. **2026-10-04: the kit (BOM row 19) has no 12 kohm - build it as 10 kohm + 2 kohm in series, exactly 12.0 kohm. Do NOT use 10 kohm alone: the ratio drops to 0.0909 and the firmware under-reads the pack by 15%.** |
 | 7 | Screw terminals or JST for every off-board lead | motor+encoder, servo, **2 × strip segment (3 conductors each: `+5V2`, `DIN`, GND)**, pack |
 
 **Zero flying Dupont jumpers is the point of the exercise.** Dupont crimps back
@@ -55,6 +55,18 @@ JST SH cable (row 5b) and the servo ships its own 3-wire lead.
 
 **Build note:** 22 AWG stranded silicone (~1.7 mm OD with insulation) will NOT
 thread THROUGH a 0.1" protoboard hole. Strip it and solder onto the pad.
+
+**WARNING (2026-10-04): the net list below does NOT include the BMS** (BOM row
+11b, ACEIRMC `B08HLQQCQJ`, added 2026-09-03 in Appendix CK). As written,
+`PACK+` runs from the holder straight to the fuse, so **wiring from this table
+leaves the pack with NO over-discharge cutoff** - the exact hole CK closed.
+Until the nets are redrawn, the rule is fixed by the board itself: the pack
+connects to the BMS's **B+ / B- / MB** pads, and **everything else - switch,
+loads AND the charger - connects to P+ / P-**, never to B+ / B- (anything on
+B- or B+ bypasses the protection). **MB is the midpoint between the two
+cells**, and the DIANN holder (row 10) exposes only two leads, so a third wire
+must be soldered to its internal series strap. Where the 3 A fuse sits relative
+to the BMS is part of the redraw. Redrawing these nets is an OPEN task.
 
 ### 2.1 Pack and power distribution
 
@@ -253,7 +265,7 @@ actually needed, not to a convenient length.
 |---|---|---|
 | divider top | `VBAT` (**after** the switch) | 100 kΩ |
 | `A0` | 100 kΩ / 12 kΩ junction | Uno **A0** |
-| divider bottom | 12 kΩ | star ground |
+| divider bottom | 12 kΩ (= 10 kohm + 2 kohm in series, 2026-10-04) | star ground |
 
 Tapping **after** the rocker means the divider stops drawing (≈75 µA at 8.4 V)
 when the car is off, and a blown fuse reads 0 V → `FAULT`, which

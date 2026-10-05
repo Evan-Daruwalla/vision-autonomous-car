@@ -452,8 +452,21 @@ FLIPPED 2026-09-05 (Appendix DM), see below:**
   short-circuit and a discharge-side MOSFET - so unlike the Adeept charger above
   it IS the right KIND of part, with the series FET - but it publishes **NO
   over-discharge or overcharge voltage set point**. A BMS with an undocumented
-  cutoff cannot satisfy `important.md` #4. Row 11b stays on `B08HLQQCQJ` until
-  Evan confirms which one he ordered.
+  cutoff cannot satisfy `important.md` #4. Row 11b stays on `B08HLQQCQJ` ~~until
+  Evan confirms which one he ordered~~ - **resolved the same day: Evan is
+  ordering `B08HLQQCQJ`**, re-verified live in a browser (8PCS, $9.59, In
+  Stock, "Overdischarge detection voltage: 2.9V+/-0.05V.").
+- **The set point lives in the listing's DESCRIPTION, not its bullets.** The
+  vetted part's bullets say only "Over-discharge protection" - exactly what
+  `B08CV2VS8G` said. A bullets-only check cannot tell the good board from the
+  bad one; scroll to the description.
+- **The BMS is not in the wiring doc (found 2026-10-04).** It was added to the
+  BOM on 2026-09-03 (Appendix CK), but `docs/WIRING_PROTOSHIELD.md`'s net list
+  was never redrawn - `PACK+` still runs holder -> fuse. Wiring from it would
+  bypass the over-discharge cutoff entirely. Rule from the board's own pinout:
+  pack to **B+ / B- / MB**, everything else (charger included) to **P+ / P-**.
+  **MB needs the cell midpoint**, which the 2-lead DIANN holder does not
+  expose - solder a third wire to its internal series strap. Net redraw is open.
 - **Cheap 2S BMS boards ship LOCKED.** That listing: boards "need to be charged
   and activated before output... otherwise the circuit is locked." A freshly
   soldered board can read ZERO output and look dead. **Before meter-probing a
@@ -471,9 +484,16 @@ FLIPPED 2026-09-05 (Appendix DM), see below:**
   reject it.
 - **Holder substitute (row 10), 2026-10-04:** the Addicore holder was
   backordered; the DIANN `B0BJV9ZL3J` replacement's title says "2 Slots 3.7V".
-  **SERIES vs PARALLEL is unverified** - the design needs 2S / 7.4 V at PACK+,
-  and a parallel holder breaks the whole power architecture. Check it before
-  wiring the pack.
+  ~~**SERIES vs PARALLEL is unverified**~~ **SERIES per the listing** (Evan
+  pasted it 2026-10-04: "Output Voltage: 7.4V", 2 cells, one red + one black
+  lead, 7.6 x 4.0 x 1.9 cm, 13 cm leads). The copy is unreliable - it also says
+  "AAA", and "Parallel or Series ... depending on how you set it up", which
+  reads as combining several holders. **Meter it before wiring:** two charged
+  cells read ~7.4-8.4 V across red/black in series, ~3.7-4.2 V in parallel; a
+  parallel holder breaks 2S / 7.4 V, so reject it. Visual tell: in a 2-cell
+  series holder the cells typically sit head-to-tail with a strap at one end.
+  Lead gauge is not stated, and those leads carry full pack current upstream
+  of the 3 A fuse.
 - **TP5100-based chargers cannot be used here**: they are buck chargers needing
   9–12 V in, so 5 V USB-C cannot drive them.
 - **Practical constraints on buying cells:** USPS caps lithium at **8 cells per

@@ -123,6 +123,10 @@ ARTIFACTS = [
     # --- printed parts ------------------------------------------------------
     dict(kind="file", artifact="cad/servo_lego_coupler_v1.stl",
          cmd=["scripts/gen_servo_lego_coupler.py", "-o", "{out}"]),
+    # v2 (2026-10-04): v1's +0.20 socket printed too loose on a Lego axle.
+    dict(kind="file", artifact="cad/servo_lego_coupler_v2.stl",
+         cmd=["scripts/gen_servo_lego_coupler.py", "--socket-clear", "0.00",
+              "-o", "{out}"]),
     dict(kind="file", artifact="cad/tolerance_coupon_v2.stl",
          cmd=["scripts/gen_tolerance_coupon.py", "-o", "{out}"]),
 

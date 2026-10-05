@@ -253,9 +253,26 @@ def write_stl(tris, path):
 
 
 def main():
+    global SOCKET_CLEAR, SOCKET_SPAN, SOCKET_ARM, ANGLES, N, COMP
     ap = argparse.ArgumentParser()
     ap.add_argument("-o", "--out", default="cad/servo_lego_coupler_v1.stl")
+    # Added 2026-10-04 after Evan printed v1: its socket (+0.20 = the coupon's
+    # FREE-SPIN axle-bore offset) held the Lego axle too loosely. A grip wants
+    # the coupon's PIN-row offset, which passed at 0.00 (4.80 modelled for a
+    # 4.8 pin) -> v2. Default stays 0.20 so v1 regenerates byte-identically.
+    # shortcut: one clearance for span and arm alike; if 0.00 is too tight in
+    # ABS, re-run at 0.05 / 0.10 rather than modelling the arms separately.
+    ap.add_argument("--socket-clear", type=float, default=SOCKET_CLEAR,
+                    help="mm added to the Lego cross on span and arm "
+                         "(v1 0.20 = too loose when printed; v2 0.00)")
     args = ap.parse_args()
+
+    SOCKET_CLEAR = args.socket_clear
+    SOCKET_SPAN = AXLE_SPAN + SOCKET_CLEAR
+    SOCKET_ARM = AXLE_ARM + SOCKET_CLEAR
+    ANGLES = build_angles()     # the exact cross corners move with the socket
+    N = len(ANGLES)
+    COMP = gap_comp()
 
     tris = build()
     dup, unmatched = check_manifold(tris)

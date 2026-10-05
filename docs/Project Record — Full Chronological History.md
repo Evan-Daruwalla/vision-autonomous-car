@@ -191,6 +191,9 @@ the dated entry, not the digest.
 - [EX - Scheduled daily-audit: 60 findings - HANDOFF says 6 commits UNPUSHED while everything is on the public remote, and the private-path scope is 98 files not 2](#appendix-ex---scheduled-daily-audit-60-findings---handoff-says-6-commits-unpushed-while-everything-is-on-the-public-remote-and-the-private-path-scope-is-98-files-not-2-2026-09-30-0728-cdt) (09-30)
 - [EY - Project-memory bins: renamed, important.md added, new standard bins as stubs](#appendix-ey---project-memory-bins-renamed-importantmd-added-new-standard-bins-as-stubs-2026-09-30-2253-cdt) (09-30)
 - [EZ - Cart review propagated: total re-derived to $422.25 (the review's own ~$423 omitted the printed coupler's -$0.75), the BMS in Evan's cart BLOCKED for an undocumented cutoff, 26 AWG dropped, coupler printed instead of bought](#appendix-ez---cart-review-propagated-total-re-derived-to-42225-the-reviews-own-423-omitted-the-printed-couplers--075-the-bms-in-evans-cart-blocked-for-an-undocumented-cutoff-26-awg-dropped-coupler-printed-instead-of-bought-2026-10-04-2002-cdt) (10-04)
+- [FA - BMS confirmed live (B08HLQQCQJ, 2.9 V set point in the description not the bullets) and the holder is series - but the wiring doc never included the BMS, so the over-discharge hole CK closed was closed only on paper](#appendix-fa---bms-confirmed-live-b08hlqqcqj-29-v-set-point-in-the-description-not-the-bullets-and-the-holder-is-series---but-the-wiring-doc-never-included-the-bms-so-the-over-discharge-hole-ck-closed-was-closed-only-on-paper-2026-10-04-2016-cdt) (10-04)
+- [FB - Resistor kit checked: no 12k and nothing in 330-470 ohm, but 10k+2k and 2x200 ohm in series cover both exactly - and 10k alone would make the pack-guard firmware read 15% low](#appendix-fb---resistor-kit-checked-no-12k-and-nothing-in-330-470-ohm-but-10k2k-and-2x200-ohm-in-series-cover-both-exactly---and-10k-alone-would-make-the-pack-guard-firmware-read-15-low-2026-10-04-2027-cdt) (10-04)
+- [FC - CORRECTION to DD/DF: no Adafruit #4252 was ever on hand - the strong 2026-09-03 coupler was a print of v1, whose axle socket was too loose; v2 tightens it to the coupon's grip offset; plus a closure bug in this session's edit script](#appendix-fc---correction-to-dddf-no-adafruit-4252-was-ever-on-hand---the-strong-2026-09-03-coupler-was-a-print-of-v1-whose-axle-socket-was-too-loose-v2-tightens-it-to-the-coupons-grip-offset-plus-a-closure-bug-in-this-sessions-edit-script-2026-10-04-2045-cdt) (10-04)
 
 ---
 
@@ -15770,3 +15773,210 @@ alone is $422.25). Shipping was not re-estimated.
 Still in NO cart: 2x Samsung 25R $9.98 at imrbatteries (sales FINAL; USPS 8
 cells/package) and the Adeept p0374 charger $7.99. Low stock at review time:
 resistor kit 3, 0.1 uF caps 6, LM2596 6, 470 uF 13, Pi kit 19.
+
+# Appendix FA - BMS confirmed live (B08HLQQCQJ, 2.9 V set point in the description not the bullets) and the holder is series - but the wiring doc never included the BMS, so the over-discharge hole CK closed was closed only on paper (2026-10-04 20:16 CDT)
+**WHAT:** Two of Appendix EZ's open items closed the same evening, and closing
+the BMS one exposed a wiring-doc gap that is a real safety hole. Nothing is
+bought yet; Evan stated he is ordering the BMS below.
+
+## THE BMS - resolved: Evan is ordering the vetted B08HLQQCQJ
+
+Evan named the listing by title: "ACEIRMC 2S 7.4V 8.4V 8A 18650 Charger PCB
+BMS Protection Board for Li-ion Lithium Battery Cell (8pcs)" - the exact title
+Appendix CO verified live on 2026-09-03 for row 11b.
+
+A title is not an ASIN, and Appendix CO records that this same listing has a
+5-pack VARIANT ($8.59). So the page was re-read live in a browser, not via a
+summarized fetch, on 2026-10-04:
+
+| check | result |
+|---|---|
+| URL | `/dp/B08HLQQCQJ?th=1` - matches row 11b |
+| variant selected | 8PCS |
+| buy-box price | $9.59 - unchanged |
+| availability | In Stock |
+| over-discharge | "Overdischarge detection voltage: 2.9V+/-0.05V." |
+| overcharge | "Overcharge release voltage: 4.28V+/-0.05V." |
+
+**A price trap was caught on the way.** A page-wide text search returned
+$12.99 next to the title; the buy-box selector returned $9.59. The $12.99 was
+the "frequently bought together" block. Had the first read been trusted, the
+BOM total would have moved by $3.40 for nothing. The total stays **$422.25**.
+
+**The finding worth keeping: the set point is in the DESCRIPTION, not the
+bullets.** The bullet list Evan pasted says only "Over-discharge protection,
+overcurrent protection, overcharge protection, short circuit protection" -
+which is word-for-word the kind of claim B08CV2VS8G made with no set point
+behind it. A bullets-only check cannot tell the good board from the bad one.
+The spec table he pasted is worse than useless: it maps the "50000 hours"
+lifespan bullet into a field called "Battery Charge Time".
+
+## THE HOLDER - series, per its listing
+
+Evan pasted the DIANN B0BJV9ZL3J listing: "Output Voltage: 7.4V", two cells,
+one red and one black lead, 7.6 x 4.0 x 1.9 cm, 13 cm leads. That is 2S, as
+the design needs. The copy is unreliable - it also says "AAA", and that the
+holder "can be used as a Parallel or Series Battery Sled", which reads as
+combining several holders. Meter it on arrival: ~7.4-8.4 V across red/black
+is series, ~3.7-4.2 V is parallel and means reject. Lead gauge is not stated.
+
+## THE SAFETY GAP: the BMS was never wired in
+
+The BMS's own pinout (from Evan's paste) is B+, B-, P+, P-, and **MB - "the
+connection point between the batteries"**. Checking that against the project:
+
+    grep -c "BMS|midpoint|MB|balance" docs/WIRING_PROTOSHIELD.md  ->  0
+
+**`docs/WIRING_PROTOSHIELD.md` has never mentioned the BMS.** It was added to
+the BOM on 2026-09-03 (Appendix CK) to close the over-discharge hole, but the
+net list was not redrawn: `PACK+` still runs from the holder straight to the
+3 A fuse. **Anyone wiring from that table would build a pack with no
+over-discharge cutoff** - the hole CK reported closed, closed only on paper
+for a month.
+
+Two consequences, both recorded where a builder will hit them:
+
+1. **Connection rule, fixed by the board itself:** the pack goes to B+ / B- /
+   MB; everything else - switch, loads AND the charger - goes to P+ / P-.
+   Anything on B+ or B- bypasses the protection.
+2. **The holder and the BMS do not fit together as bought.** MB needs the
+   midpoint between the two cells, and the DIANN holder exposes only its two
+   end leads. A third wire must be soldered to its internal series strap.
+
+Where the 3 A fuse sits relative to the BMS is a design call left to the
+redraw, not made here. A dated WARNING now heads the net list in
+`WIRING_PROTOSHIELD.md`; `important.md` #4, `hardware.md` and HANDOFF carry it.
+**The net redraw itself is OPEN** and is HANDOFF's next action #1.
+
+## STILL OPEN from Appendix EZ
+
+- Does the KSOPUERT kit hold 100k + 12k + 330-470 ohm?
+- Is Adafruit #4252 already in the parts bin?
+- The Vilros kit's 120 mm camera cable pin count; coupler fit on the MG90D-270.
+
+# Appendix FB - Resistor kit checked: no 12k and nothing in 330-470 ohm, but 10k+2k and 2x200 ohm in series cover both exactly - and 10k alone would make the pack-guard firmware read 15% low (2026-10-04 20:27 CDT)
+**WHAT:** Closes the resistor-kit item Appendices EZ and FA left open. Evan
+listed the KSOPUERT kit's (BOM row 19) values on 2026-10-04:
+
+    10, 22, 47, 100, 150, 200, 1k, 2k, 2.2k, 3.3k, 4.7k, 5.1k, 6.8k, 10k,
+    20k, 47k, 51k, 68k, 100k, 220k, 300k, 470k, 680k, 1M  (ohms)
+
+"68l" in his message is read as 68k and "2,200" as 2.2k - both are typing, and
+neither value is used below.
+
+## Neither exact value the build needs is in the kit; both are buildable
+
+| need | in kit | build it from |
+|---|---|---|
+| 100k, pack-sense divider top | yes | as is |
+| 12k, divider bottom | **no** | **10k + 2k in series = 12.0k exactly** |
+| 330-470 ohm, WS2812B DIN, x2 | **no** - nothing between 200 and 1k | **2 x 200 ohm in series = 400 ohm** per segment |
+
+**Why the 12k has to be exact, checked in code rather than recalled:**
+`firmware/uno_packguard/uno_packguard.ino:11` fixes "R1=100k (pack+ to A0),
+R2=12k (A0 to GND), ratio 0.10714" against the INTERNAL 1.1 V band gap (:12,
+:202). A full 2S pack is 8.4 V x 0.10714 = 0.90 V, inside the 1.1 V range.
+10k + 2k reproduces the ratio, so **no firmware change**. The tempting
+shortcut, 10k alone, gives 0.0909: the firmware would read the pack ~15% low
+and cut out early. Recorded as a DO NOT in the BOM and in the wiring doc's
+parts table, divider row and net list.
+
+**The missing six:** Evan listed 24 values against the advertised 30. The
+missing values may include 330 or 470 ohm, which would allow a single resistor
+for the DIN lines - but the series pairs work either way, so it is not a
+blocker. The kit is 600 pieces (about 20 per value), far more than these four
+resistors need.
+
+## Still open from the 2026-10-04 cart review
+
+- Is Adafruit #4252 already in the parts bin?
+- The Vilros kit's 120 mm camera cable pin count; coupler fit on the MG90D-270.
+- Redraw `docs/WIRING_PROTOSHIELD.md`'s pack nets to include the BMS (Appendix
+  FA) - the priority.
+
+# Appendix FC - CORRECTION to DD/DF: no Adafruit #4252 was ever on hand - the strong 2026-09-03 coupler was a print of v1, whose axle socket was too loose; v2 tightens it to the coupon's grip offset; plus a closure bug in this session's edit script (2026-10-04 20:45 CDT)
+**WHAT:** A correction to Appendices DD and DF, a test print that was never
+recorded, and a new coupler revision. Plus a bug in this session's own edit
+script, caught and repaired before anything was committed.
+
+## CORRECTION: there was never an Adafruit #4252 on hand
+
+On 2026-10-04 Evan answered "is #4252 already in the parts bin?" with "no not
+yet", then "i need to reprint it", then - asked what the 2026-09-03 part was -
+**`cad/servo_lego_coupler_v1.stl`, with the Lego axle going INTO a socket**,
+and: **"i did print v1 the axel connector part was too loose".**
+
+What the record had built on two sentences:
+
+- DD quoted Evan accurately: "I have the rack and pinion set up already and
+  it's strong." DD itself was careful - it noted the report named "not which
+  part or method bridges the MG90S spline to the Lego pinion" and asked.
+- DF recorded the answer, "it's the adafruit 4252 adapter.", as the BOUGHT
+  injection-moulded part, and concluded (a) the build "empirically confirms
+  the spline fit" of #4252 on the MG90S and (b) the PLA interlayer-shear math
+  "does not transfer" because the part is injection-moulded.
+
+Both conclusions rested on the wrong part. The 2026-09-03 coupler was a PRINT
+of v1, generated that same day (Appendix DG). So: **nothing has ever confirmed
+a #4252 fit, and the "injection-moulded" reasoning never applied.** DF is not
+edited; this entry supersedes it. Corrected in BOM row 22, `steering.md`,
+`important.md` #5, `PRD_ROADMAP.md` task 8c(ii) and HANDOFF (whose workstream
+row still said v1 was "STL generated, never printed").
+
+## THE UNRECORDED TEST PRINT - v1
+
+`CLAUDE.md` requires printer settings, filament and measured fit for every test
+print. For v1 only the fit result is known:
+
+- **Lego-axle socket: TOO LOOSE** (Evan, 2026-10-04).
+- Servo end: by Evan's 2026-09-03 report the assembly felt "strong"; the
+  spline grip itself was never isolated or loaded.
+- **Printer, filament, settings, print date: NOT RECORDED - missing data.**
+  Evan's only recorded prints are Bambu P1S / Bambu ABS (the coupons), but
+  that is not evidence of what v1 was printed in.
+
+## WHY v1 WAS LOOSE, and v2
+
+v1's socket was the Lego cross (4.80 mm span, 1.80 mm arm) **plus 0.20 mm** -
+`SOCKET_CLEAR`, which the generator itself marked "provisional until the M1.3
+coupon prints". The coupons later measured two different offsets: rotating
+axle bores (free SPIN) pass at **+0.20**, pin holes (snug GRIP of a 4.8 mm pin)
+pass at **0.00**. v1 used the spin offset for a joint that must grip, so a
+loose socket is the predicted result, not a surprise.
+
+**v2 = socket clearance 0.00 mm** (4.80 x 1.80 cross), the coupon's grip
+offset. `scripts/gen_servo_lego_coupler.py` gained `--socket-clear` with the
+old 0.20 default, so v1 still regenerates byte-for-byte (the artifact guard
+confirms: `OK cad/servo_lego_coupler_v1.stl`). v2 is registered in
+`scripts/check_artifacts.py`:
+
+    axle socket: 4.80 across x 1.80 arm x 6.00 deep (clear 0.00; wall 2.60)
+    manifold   : duplicate-directed-edges=0 unmatched-edges=0  -> PASS
+    volume     : 1026.9671 mm^3 (expected 1026.9671, rel.err 1.59e-14)  -> PASS
+    28 artifacts checked, 0 drifted, 0 errored, 2 uncheckable
+    15 passed, 0 failed, 0 skipped  (of 15)
+
+**v2 is untested.** Caveats that travel with it: the 1.80 mm arm is still a
+community value, not measured; the coupon calibrated a ROUND pin, and thin
+cross arms may print differently, so 0.00 could be too tight - re-run at 0.05
+or 0.10 rather than forcing it. PETG over PLA (`steering.md`); ABS is
+unanalysed. Fit on the MG90D-270 is unverified. No safety factor is claimed.
+
+## A BUG IN THIS SESSION'S EDIT SCRIPT - caught, repaired
+
+The script that applied these corrections built each replacement in a Python
+`lambda` reading a shared variable `a`. Python resolves that variable when the
+lambda RUNS, not when it is defined, so **five of the edits inserted the last
+value of `a` - a HANDOFF bullet block - in place of their own text**, in BOM
+row 22, `steering.md`, `important.md` #5, PRD 8c(ii) and HANDOFF's workstream
+row. In the BOM it split row 22 across several lines.
+
+The dry run did not catch it: it checked that every anchor MATCHED, not what
+would be WRITTEN. It was caught by reading the bytes on disk afterwards. A
+repair script asserted the stray block appeared exactly where expected and
+replaced each copy with its intended text; the BOM re-sums to $422.25 both
+ways with all 24 rows intact. Nothing was committed in between.
+
+**Lesson, stated so the next script avoids it:** a dry run must print what it
+WOULD WRITE, not just that anchors match; and never close over a loop-reused
+variable - bind it (`lambda m, a=a: ...`) or build the string first.
