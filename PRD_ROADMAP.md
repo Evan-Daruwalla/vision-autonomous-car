@@ -203,7 +203,7 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   guard on A0, TB6612 `STBY` on D10 — **zero PWM spare, A1-A5 the only free
   pins**; Pi↔Uno over USB with the 5 V conductor cut, binary serial protocol
   v0.2 (7-byte command, 9-byte reply, CRC8, ARMED per frame, 150 ms
-  watchdog) · power: USB bank → Pi ONLY; 2× EVE 25P 18650 + 2S BMS board →
+  watchdog) · power: USB bank → Pi ONLY; 2× ~~EVE 25P~~ Samsung 25R 18650 + 2S BMS board →
   TB6612 VM and → LM2596 @ 5.2 V → servo, Uno 5V pin, LEDs, encoder; 3 A
   fuse at the pack, XT30, rocker; ~~⚠️ **the 2S BMS documents NO over-discharge
   cutoff — open safety item, guarded by firmware only while the firmware is

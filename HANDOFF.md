@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-10 ~14:28 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-10 ~14:53 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 162 appendices A–FF; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 163 appendices A–FG; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -607,9 +607,11 @@ THE TEST SUITE is `python scripts/run_checks.py` (15/15 on 2026-09-10 --
 re-run it, never quote it). A pre-commit guard blocks any staged generated
 artifact that no longer matches its generator. ~~Repo is IN SYNC with
 origin/main (0 ahead, 0 behind, fetched 2026-10-04) -- those 6 commits were
-pushed.~~ **2026-10-10, fetched: 3 commits AHEAD of origin/main, 0 behind,
+pushed.~~ ~~**2026-10-10, fetched: 3 commits AHEAD of origin/main, 0 behind,
 unpublished** (caaf191, 6a12c26, de8f12e, plus 6caccea on 2026-10-10; the Appendix FF work is uncommitted) - Appendix FD
-caught this line saying "in sync" after those commits landed. This file claimed "6 commits UNPUSHED" for three weeks and TWO
+caught this line saying "in sync" after those commits landed.~~ **2026-10-10: this file no longer
+records publish state at all.** Every pinned count here went stale on the next commit (FD row 1,
+three times). Run `git fetch` then `git status -sb`. This file claimed "6 commits UNPUSHED" for three weeks and TWO
 daily-audits flagged it (EW, EX) before it was corrected; re-derive push state
 from the remote, never from this line.
 
@@ -617,7 +619,11 @@ UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
 (2026-09-30, 60 findings) have not been worked.
 
 NEXT ACTIONS, cheapest first:
-1. Print `cad/servo_lego_coupler_v2.stl` and test-fit it. (The BMS wiring
+1. Print `cad/servo_lego_coupler_v2.stl` and test-fit it; record printer,
+   filament, settings and the fit.
+1b. Work the daily audit's OPEN rows - Appendix FG holds the full 35-row
+   table; open are 11, 13, 15-35, plus row 14 half done (checkpoint
+   fingerprints written, never checked). (The BMS wiring
    redraw this item used to lead with landed 2026-10-10.) (The Appendix EV commit this
    item used to ask for landed as caaf191 on 2026-10-04.)
 2. Flash uno_control and read the banner. The ST_DROPPED fix (Appendix EU)

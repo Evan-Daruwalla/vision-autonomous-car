@@ -197,6 +197,7 @@ the dated entry, not the digest.
 - [FD - Scheduled daily-audit: 35 findings - HANDOFF says in sync with origin while 3 commits are unpushed, and the DART self_check passes with the real bug put back in main()](#appendix-fd---scheduled-daily-audit-35-findings---handoff-says-in-sync-with-origin-while-3-commits-are-unpushed-and-the-dart-self_check-passes-with-the-real-bug-put-back-in-main-2026-10-08-0728-cdt) (10-08)
 - [FE - Wiring redrawn with the BMS in the circuit (fuse on the cell side) and three Mermaid diagrams added - the first one-piece diagram rendered but was unreadable, so it was split](#appendix-fe---wiring-redrawn-with-the-bms-in-the-circuit-fuse-on-the-cell-side-and-three-mermaid-diagrams-added---the-first-one-piece-diagram-rendered-but-was-unreadable-so-it-was-split-2026-10-10-1406-cdt) (10-10)
 - [FF - Daily audit FD worked: DART self_check now covers main()'s whole data path, noisy labels refused, coupler walls guarded, latch doc corrected - and 28 of FD's 35 findings were never saved](#appendix-ff---daily-audit-fd-worked-dart-self_check-now-covers-mains-whole-data-path-noisy-labels-refused-coupler-walls-guarded-latch-doc-corrected---and-28-of-fds-35-findings-were-never-saved-2026-10-10-1428-cdt) (10-10)
+- [FG - CORRECTION to FF: the daily audit's full 35 findings were saved after all - FF searched filenames, not contents; the full table is now in the record, and two more FF items were only half done](#appendix-fg---correction-to-ff-the-daily-audits-full-35-findings-were-saved-after-all---ff-searched-filenames-not-contents-the-full-table-is-now-in-the-record-and-two-more-ff-items-were-only-half-done-2026-10-10-1452-cdt) (10-10)
 
 ---
 
@@ -16141,3 +16142,94 @@ the 3.00 V/cell latch re-trips after 500 ms under 6.0 V.
 
 Checkpoint fingerprints checked by their 3 consumers; `diag_copycat.py` still
 makes the DART choice inline, unguarded; FD's 28 unrecorded findings.
+
+# Appendix FG - CORRECTION to FF: the daily audit's full 35 findings were saved after all - FF searched filenames, not contents; the full table is now in the record, and two more FF items were only half done (2026-10-10 14:52 CDT)
+**WHAT:** A correction to Appendix FF, found by a /landing-check sweep run
+before publishing 6caccea and c5e1026 to the public repo. Nothing was
+published before the correction.
+
+## FF's central claim was false
+
+FF (and the c5e1026 commit message) said the daily audit's other 28 findings
+"were never saved" and could not be worked, because "a search of the workspace
+and `~/.claude` found no report file". **That was wrong.** The full report -
+a 35-row table, file:line and fix for every finding - is in the transcript of
+the 2026-10-08 scheduled audit session (a local session file, not part of the
+repo). The search that "found nothing" matched file NAMES only (`*audit*`),
+never file contents.
+
+- **Commit:** c5e1026 had not been published, so its message was amended in
+  place (now `cb78025`) to say where the table lives and that the earlier
+  draft was wrong. Amending was safe because nothing had left the machine.
+- **Record:** FF is append-only and stays as written; this entry supersedes
+  its claim, and copies the full table below so it is in the repo from now on.
+  The table was checked for private identifiers (none) and transliterated to
+  ASCII per the record's rule.
+
+**Two more FF statements were too strong.** FF's table marked FD's coupler-
+propagation item done and the noisy-label item "fixed". The sweep found BOM
+row 22 still saying "Print v1" in one cell plus an unstruck "field report"
+sentence, `BOM.md:32` and `steering.md` still saying the #4252 fit was
+"confirmed on the MG90S", `cad/README.md` still calling #4252 the chosen part,
+and `PRD_ROADMAP.md:208` still saying EVE 25P. All are now struck and dated.
+The noisy-label item is HALF done: checkpoints carry fingerprints but nothing
+checks them (table row 14).
+
+Also from the sweep: `testing.md` cited EV's mutants as the DART proof without
+saying they only covered the helper; now it says mutants must hit the caller.
+
+## Verified by the sweep (a fresh agent, artifacts only)
+
+Self-check passes and a planted DART mutant on main()'s new path is killed;
+`--socket-clear 6` exits 1 and writes nothing; 28 artifacts, 0 drifted; 15/15
+checks; every diagram pin matches `uno_control.ino`; BOM sums to $422.25; no
+NEW private identifier in the 5 unpublished commits (caaf191 adds a few more
+MENTIONS of already-public ones - the workspace-path disclosure in HANDOFF and
+two record lines describing it).
+
+## FD's full table (2026-10-08), with status as of 2026-10-10
+
+Done in 6caccea / cb78025 / this commit: rows 1-10, 12. Half done: 14
+(written, not checked). Row 1 recurs: HANDOFF's ahead count goes stale every
+commit; it now says to re-derive from the remote. Row 5's suggested floor was
+2.0 mm; 1.2 mm was used (three 0.4 mm perimeters). Open: 11, 13, 15-35.
+Row 20 (FC's heading stamped 20:45 against a commit at 20:39:56) is answered
+here: the real time was ~20:37-20:40 CDT, as noted at the time.
+
+| # | Sev | Where | Issue | Fix |
+|---|---|---|---|---|
+| 1 | **high**  (verified) | HANDOFF.md:606 | Says "0 ahead, 0 behind"; `git status -sb` shows `[ahead 3]` | Rewrite as "3 ahead (caaf191, 6a12c26, de8f12e), unpushed as of 2026-10-08" |
+| 2 | med  (verified) | ml/train_controller.py:313, :152-153 | Self-check still passes with the DART bug put back in `main()`. The caaf191 commit title overclaims; the `# shortcut:` note at :310-312 admits the gap | Move the array choice into a function that `self_check` calls on a small fixture; or reword :152-153 |
+| 3 | med  (verified) | firmware/uno_control/packguard.h:84; SERIAL_PROTOCOL.md:163-165 | The low-battery cutoff latch is RAM-only, so opening the serial port resets the board and clears it. The doc says it needs a power cycle | Save the latch to EEPROM, or keep throttle blocked for N ms after boot; or correct the doc |
+| 4 | med  (verified) | PRD_ROADMAP.md:208-210, :609-612 | BMS gate still shown as open; HANDOFF:508 says closed 2026-09-03 | Strike it with a dated note: "closed CK; confirmed FA; open: redraw wiring nets through the BMS" |
+| 5 | med  (verified) | scripts/gen_servo_lego_coupler.py:59, :289, :301-304 | `--socket-clear 6` gives `wall -0.40` and still prints PASS | Compute the real minimum wall from `ring_cross()` and add `wall >= 2.0` to `ok` |
+| 6 | med | HANDOFF.md:508 vs WIRING_PROTOSHIELD.md:59-75 | Says the cutoff is "CLOSED... wired between charger and pack"; the net list bypasses the BMS | Append "closed on paper only; wiring net redraw OPEN (FA)" |
+| 7 | med | PRD_ROADMAP.md:520-541 | Unstruck "never printed" and field-report text contradicts the FC correction | Strike :524-528; replace :541 with "v1 printed, socket too loose; v2 untested" |
+| 8 | med | docs/WIRING_PROTOSHIELD.md:206-210 | Keeps the retracted #4252 "built, strong" claim | Replace with the FC correction |
+| 9 | med | docs/BOM.md:54 | Row 22 still says "PRINT v1"; field-report sentence unstruck; leftover " - -" | Change v1 to v2, strike the sentence, delete the leftover |
+| 10 | med | cad/README.md:167-175 | Only a v1 section, no v2, no `--socket-clear` | Add a v2 section with the generator command |
+| 11 | med | PRD_ROADMAP.md:457-463 | Price still "$238-248"; disk says $422.25 | Add a dated revision line |
+| 12 | med | ml/train_controller.py:308-316 | Missing `train_actions_expert.npy` silently trains on the noise-injected actions | Exit with an error if any `-rec` track is present and expert is None |
+| 13 | med | ml/splits.py:54-60; train_cte_probe.py:55 | Derived caches are checked by length only; a same-length corpus swap goes unnoticed | Put a sha1 of the episodes and actions arrays in `.key` and check it |
+| 14 | med | ml/eval_in_sim.py:265-285, eval_paired.py:88-100, plan_cem.py:209 | Controller checkpoints have no VAE/RNN fingerprint | Save `encoder_fingerprint` in the `.pt` and assert it on load |
+| 15 | med | firmware/uno_control/uno_control.ino:636-657 | A CRC failure throws away the next frame's sync byte; leftover payload bytes can run as `?`, `T`, `B` commands | On CRC failure, find the next 0xA5 in rxBuf and shift it to the front |
+| 16 | low-med | train_controller.py:343; diag_copycat.py:118 | No `split_seed` check against the RNN (only rollout_eval has one) | Copy the check from rollout_eval.py:231-241 |
+| 17 | low-med | firmware/uno_control/packguard.h:26-48 | 8800 mV fault threshold may be inside the +/-10% error of the 1.1 V reference (unverified) | Calibrate against a meter on the bench |
+| 18 | low-med | uno_control.ino:343-362 | NeoPixel `show()` every frame may jitter the steering pulse (unmeasured) | Measure on the bench |
+| 19 | low | HANDOFF.md:385, :529 | Stale SOCKET_CLEAR text; "+$0.75 #4252" | Name v2 and the 0.00 offset; strike +$0.75 |
+| 20 | low | record FC heading (line 15897) | Stamped 20:45; the commit containing it is 20:39:56 | Add a forward correction in the next entry |
+| 21 | low | HANDOFF.md:154 | "27 artifacts"; check_artifacts reports 28 | Change 27 to 28 |
+| 22 | low | HANDOFF.md:592 | Block labelled 2026-09-10, body holds 2026-10-04 facts | Relabel to 2026-10-04 ~20:38 |
+| 23 | low | .claude/project-memory/INDEX.md:14 | hardware.md "313 lines"; actual 521 | Change 313 to 521 |
+| 24 | low | hardware.md:200 | Cites `docs/PRD_ROADMAP.md`; the file is at the repo root | Drop `docs/` |
+| 25 | low | HANDOFF.md:5 | Corrections list omits FC | Append /FC |
+| 26 | low | HANDOFF.md:225 | "only #3 unconfirmed" conflicts with rows 3-5 | Say "rows 3-5" |
+| 27 | low | LIGHTING_SPEC.md:116 | No pointer to the 2x200  ohm build | Add the pointer |
+| 28 | low | ml/eval_in_sim.py:335-349; plan_cem.py:275; eval_paired.py:183; trace_failure.py:187 | An invalid batch blocks the re-run; three scripts overwrite evidence with no guard | Write to `.invalid.json`; add the overwrite guard |
+| 29 | low | eval_in_sim.py:271-274 | Missing checkpoint found only after earlier seeds have run | Preload checkpoints, as eval_paired does |
+| 30 | low | cad/rescale_reference_xodr.py:~299 | `--scale -1` writes negative lengths; `--scale 0` crashes with ZeroDivisionError | `ap.error` unless k > 0 |
+| 31 | low | ml/run_dreamer_p4.py:295 | Out-of-memory before the first epoch records `peak_gb 0.0` | Update the peak in the except branch |
+| 32 | low | README.md:155; scripts/run_checks.py:31-36 | "bare clone" checks need torch; a missing torch shows as SKIP and exits 0 | Reword README; exit non-zero when train_controller is skipped |
+| 33 | low | ml/requirements.txt | pyserial is imported but not pinned | Add `pyserial==3.5` |
+| 34 | low | scripts/check_artifacts.py:230-234 | `--staged` ignores commits that stage only a generator script | Map each generator to its artifacts |
+| 35 | low | ml/provenance.py:139; 96 files in ml/runs | Absolute private paths in tracked result JSONs (already disclosed in HANDOFF) | Make paths relative in `write_result` |

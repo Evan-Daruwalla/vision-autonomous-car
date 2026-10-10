@@ -346,8 +346,10 @@ exists to prevent.
   works until it survives a load test (`important.md` #5).
   **Parts bin checked 2026-10-04: no #4252; v1 had been printed and its axle socket was too loose -> print `cad/servo_lego_coupler_v2.stl`** (socket clearance 0.20 -> 0.00 mm, the coupon's pin-row grip offset). ~~**FIRST check the parts bin:** the entry above records #4252 as "already
   built" and "strong" on 2026-09-03 - if it is on hand, nothing needs printing.~~
-  **Coupler fit on the MG90D-270 is NOT bench-verified:** the #4252 fit was
-  confirmed on the MG90S. The candidate entry above records the same 20T spline,
+  **Coupler fit on the MG90D-270 is NOT bench-verified:** ~~the #4252 fit was
+  confirmed on the MG90S~~ no coupler fit has ever been confirmed on any servo -
+  the 2026-09-03 "strong" build was a print of v1 (struck 2026-10-10, Appendix
+  FC). The candidate entry above records the same 20T spline,
   but the body differs (22.8 mm vs ~31 mm), and v1's 4.65 mm bore was sized
   against the MG90S's ~4.8-4.9 mm spline. Test-fit ONE before printing several.
 - **MG90S output shaft: 20-tooth spline, ~4.8-4.9 mm OD** (SkyStar/TinyTronics

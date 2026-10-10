@@ -14,7 +14,11 @@ hand-maintain a list. Its sibling for generated files is
 `scripts/check_artifacts.py`, which the pre-commit hook runs with `--staged`.
 **A self_check must be able to fail on the bug it is named for** — prove it by
 planting the bug in a scratch copy (Appendix EV did this for the DART defect:
-3 of 3 mutants killed).
+3 of 3 mutants killed). **And plant it WHERE THE CALLER IS, not only in the
+helper:** EV's mutants all hit `select_actions()`, so putting the bug back in
+`main()` still passed (Appendix FD #2). Fixed 2026-10-10 by moving main()'s
+whole path into `build_training_arrays()`; Appendix FF's mutants hit that path
+and are killed.
 
 ## The gates that exist, and what each one actually proves
 

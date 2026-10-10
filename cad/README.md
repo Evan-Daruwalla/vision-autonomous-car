@@ -167,7 +167,9 @@ than guessing beyond the ends of the sweep.
 ## servo_lego_coupler_v1.stl — PRD task 8c(ii)
 
 **Why this exists:** the servo-to-pinion coupling is the highest-torque joint
-on the car (Appendix BV). The chosen part is the Adafruit #4252 ($0.75), but
+on the car (Appendix BV). ~~The chosen part is the Adafruit #4252 ($0.75), but~~
+**Since 2026-10-04 the plan is to PRINT this part (v2, below); #4252 is the
+fallback, never bought.** Originally: the chosen part was the Adafruit #4252 ($0.75), but
 Adafruit is a sole-source vendor for it and charges ~$10 shipping for that one
 item (Evan, 2026-09-03). This is a printed stopgap to try first — **not a
 proven replacement.**
