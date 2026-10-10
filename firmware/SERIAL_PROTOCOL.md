@@ -159,6 +159,14 @@ visible in driving, which it should not be.*
 3. **A bad CRC is a dropped frame, not a guessed one.** The Uno replies with
    `status` bit2 set and takes no actuator action. Two consecutive bad frames
    should be treated by the Pi as a link fault.
+   **Resync (2026-10-10, daily-audit FD row 15):** the 7 bytes of a bad frame
+   are rescanned from byte 1 for the next `0xA5`, and that tail is kept. Before
+   this, a frame that LOST a byte took the next frame's sync as its 7th byte,
+   so the next frame was lost too and its payload was parsed as idle bytes.
+   A false `0xA5` inside a payload yields one EXTRA bad-CRC reply before the
+   real sync is reached - so "two consecutive bad frames" can come from ONE
+   corruption. No Pi-side client implements that rule yet; when one does,
+   count bad replies per time window, not strictly per frame.
 4. **`STBY` is dropped on every safe state, after the brake.** Disarm,
    watchdog trip, latched pack cutoff and boot all end with D10 LOW. Re-arming
    requires a valid ARMED frame; a latched cutoff ~~cannot be re-armed at all
@@ -195,8 +203,16 @@ RAM cost is negligible: two 16-byte frame buffers plus an int32 counter, against
 
 One ASCII escape hatch: a lone `?` (0x3F) outside a frame makes the Uno print a
 human-readable status line. Costs one branch, and means the board can be
-inspected from any serial terminal without a decoder. `?` is not a valid sync
-byte, so it cannot collide with a frame.
+inspected from any serial terminal without a decoder. ~~`?` is not a valid sync
+byte, so it cannot collide with a frame.~~ **Corrected 2026-10-10 (daily-audit
+FD row 15):** `?` is not a sync byte, but it IS a valid payload byte (steer 63),
+and so are `T` (SELFTEST) and `B` (bench-quiet toggle). A payload that arrives
+with the parser idle - after a lost sync byte, or before the resync fix in
+section 3 - could run them. Now `T` and `B` are refused while ARMED; `?` is
+always honoured (it only prints, and `host_test.py` probes `armed` with it).
+A stray `?` mid-drive costs one status line of serial output. `host_test.py`'s
+reply parser skips it because it resyncs on `0x5A`; any future Pi client must
+do the same (no Pi client exists yet).
 
 ---
 

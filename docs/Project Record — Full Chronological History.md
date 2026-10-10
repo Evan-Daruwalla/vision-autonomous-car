@@ -198,6 +198,10 @@ the dated entry, not the digest.
 - [FE - Wiring redrawn with the BMS in the circuit (fuse on the cell side) and three Mermaid diagrams added - the first one-piece diagram rendered but was unreadable, so it was split](#appendix-fe---wiring-redrawn-with-the-bms-in-the-circuit-fuse-on-the-cell-side-and-three-mermaid-diagrams-added---the-first-one-piece-diagram-rendered-but-was-unreadable-so-it-was-split-2026-10-10-1406-cdt) (10-10)
 - [FF - Daily audit FD worked: DART self_check now covers main()'s whole data path, noisy labels refused, coupler walls guarded, latch doc corrected - and 28 of FD's 35 findings were never saved](#appendix-ff---daily-audit-fd-worked-dart-self_check-now-covers-mains-whole-data-path-noisy-labels-refused-coupler-walls-guarded-latch-doc-corrected---and-28-of-fds-35-findings-were-never-saved-2026-10-10-1428-cdt) (10-10)
 - [FG - CORRECTION to FF: the daily audit's full 35 findings were saved after all - FF searched filenames, not contents; the full table is now in the record, and two more FF items were only half done](#appendix-fg---correction-to-ff-the-daily-audits-full-35-findings-were-saved-after-all---ff-searched-filenames-not-contents-the-full-table-is-now-in-the-record-and-two-more-ff-items-were-only-half-done-2026-10-10-1452-cdt) (10-10)
+- [FH - Daily audit FD row 15 fixed: the Uno's command parser resyncs on a bad CRC and refuses T/B while ARMED - compiled, not flashed](#appendix-fh---daily-audit-fd-row-15-fixed-the-unos-command-parser-resyncs-on-a-bad-crc-and-refuses-tb-while-armed---compiled-not-flashed-2026-10-10-1514-cdt) (10-10)
+- [FI - Parts arrived: 20 of 22 order lines in, the camera and the drive motor not reported - and the MG90D-270 exposes an unfixed 180-degree servo span in the firmware](#appendix-fi---parts-arrived-20-of-22-order-lines-in-the-camera-and-the-drive-motor-not-reported---and-the-mg90d-270-exposes-an-unfixed-180-degree-servo-span-in-the-firmware-2026-10-10-1517-cdt) (10-10)
+- [FJ - CORRECTION to FI: 22 of 24 ordered items arrived, not 20 of 22 order lines](#appendix-fj---correction-to-fi-22-of-24-ordered-items-arrived-not-20-of-22-order-lines-2026-10-10-1518-cdt) (10-10)
+- [FK - Drive motor arrived (23 of 24 items in; camera still unreported) - #5159 vs #1093 not yet confirmed](#appendix-fk---drive-motor-arrived-23-of-24-items-in-camera-still-unreported---5159-vs-1093-not-yet-confirmed-2026-10-10-1520-cdt) (10-10)
 
 ---
 
@@ -16233,3 +16237,178 @@ here: the real time was ~20:37-20:40 CDT, as noted at the time.
 | 33 | low | ml/requirements.txt | pyserial is imported but not pinned | Add `pyserial==3.5` |
 | 34 | low | scripts/check_artifacts.py:230-234 | `--staged` ignores commits that stage only a generator script | Map each generator to its artifacts |
 | 35 | low | ml/provenance.py:139; 96 files in ml/runs | Absolute private paths in tracked result JSONs (already disclosed in HANDOFF) | Make paths relative in `write_result` |
+
+# Appendix FH - Daily audit FD row 15 fixed: the Uno's command parser resyncs on a bad CRC and refuses T/B while ARMED - compiled, not flashed (2026-10-10 15:14 CDT)
+**WHAT:** Daily audit FD (2026-10-08) row 15 fixed in `firmware/uno_control/uno_control.ino`:
+the command parser now RESYNCS on a bad CRC instead of discarding all 7 bytes,
+and the `T` / `B` debug commands are refused while ARMED. **Compiled only. Not
+flashed, not run on the board** - the board still runs the 2026-09-02 build
+(important.md #3), and this session has no flash access.
+
+## The defect, worse than the audit table said
+
+The audit said a CRC failure "throws away the next frame's sync byte". That
+happens when a frame LOSES a byte: its 7th byte is then the next frame's
+`0xA5`, the CRC fails, all 7 bytes are dropped, and the next frame's payload
+arrives with the parser idle. Two costs, not one:
+
+1. **The next (good) frame is lost too.** One lost byte costs two frames.
+2. **Payload bytes run as commands.** Idle bytes equal to `?` (0x3F),
+   `T` (0x54) or `B` (0x42) ran `printStatus()`, `selftest()` and the
+   bench-quiet toggle. These are ordinary values: steer 63 is `?`, steer 84 is
+   `T`. A spurious `B` silences the PACK_FAULT LED - the indicator for a sense
+   wire that fell off a moving car.
+
+`SERIAL_PROTOCOL.md` section 5 also claimed "`?` is not a valid sync byte, so
+it cannot collide with a frame". False: it collides with payload. Struck and
+corrected.
+
+A Python model of the old and new parser (scratchpad, a reasoning aid, not a
+firmware test) on the exact SELFTEST vectors, frame A missing byte 3, then
+frame B = seq 2 with payload `T ? B`:
+
+    dropped byte
+       old: [('BAD', 1), ('CMD', 'T'), ('CMD', '?'), ('CMD', 'B')]
+       new: [('BAD', 1), ('FRAME', 2)]
+    false sync in payload (A's seq = 0xA5)
+       old: [('BAD', 165), ('CMD', 'T'), ('CMD', '?'), ('CMD', 'B')]
+       new: [('BAD', 165), ('BAD', 0), ('FRAME', 2)]
+
+So the vectors DO discriminate: the pre-fix logic fails them.
+
+## The fix
+
+- `rxFeed(buf, len, c, out)` - the whole byte parser as one function. `loop()`
+  calls it on the live buffer; SELFTEST calls the same function on a local
+  buffer, so a planted bug in the parser hits the caller's path too (the
+  Appendix FD row 2 lesson). On a bad CRC it rescans bytes 1-6 for the next
+  `0xA5` and keeps that tail; a false `0xA5` just fails its own CRC and is
+  rescanned again.
+- `cmdAllowed(c, armed)` - `?` always; `T` and `B` only when not ARMED.
+  `?` stays allowed because `host_test.py` probes `armed` with it INSIDE the
+  armed window (the Appendix CA watchdog test).
+- 9 new SELFTEST assertions (lost byte recovers the next frame, its payload
+  never runs as commands, same with a false sync, idle `?` / junk, the
+  command gate).
+- `host_test.py` test 4b: sends a frame with a byte deleted, then a DISARMED
+  frame 11 whose payload is `T ? B`; asserts a CRC_BAD reply, then a clean
+  reply for seq 11, then no stray SELFTEST / bench-quiet / status text.
+- `SERIAL_PROTOCOL.md` section 3 rule 3 (resync) and section 5 (correction).
+
+## Accepted costs and what is NOT closed
+
+- **Lost SYNC byte:** if a frame's `0xA5` itself is lost, its payload still
+  arrives idle. No byte-level rule can tell that from a person typing. While
+  ARMED only `?` can still run, which prints one status line.
+- **Extra bad-CRC reply:** a false `0xA5` inside a payload gives one more
+  CRC_BAD reply before the real sync is found, so the protocol's "two
+  consecutive bad frames = link fault" rule can fire on ONE corruption. No Pi
+  client implements that rule yet; the doc now says to count per time window.
+- **CRC8 false accept** is about 1/256 per misaligned candidate. The old parser
+  had the same exposure (it also started frames on payload `0xA5` bytes).
+
+## Verification (real output)
+
+`arduino-cli compile --fqbn arduino:avr:uno --warnings all firmware/uno_control`
+- zero warnings:
+
+    Sketch uses 10668 bytes (33%) of program storage space. Maximum is 32256 bytes.
+    Global variables use 379 bytes (18%) of dynamic memory, leaving 1669 bytes for local variables. Maximum is 2048 bytes.
+
+HEAD, compiled the same way for the baseline: 9694 B / 371 B. Cost of the fix:
++974 B flash, +8 B SRAM.
+
+`scripts/run_checks.py`: 15 passed, 0 failed, 0 skipped (of 15). It has no
+firmware step, so it does not cover this change.
+
+**Not run:** the new SELFTEST assertions and host_test 4b. The SELFTEST pass
+count for this build is UNKNOWN until Evan flashes it and reads the banner -
+never quote one. Flashing also delivers the still-unflashed ST_DROPPED fix
+(Appendix EU) and the WS2812B lighting path.
+
+## Audit FD status
+
+Done: 1-10, 12, 15. Half done: 14. Open: 11, 13, 16-35.
+
+# Appendix FI - Parts arrived: 20 of 22 order lines in, the camera and the drive motor not reported - and the MG90D-270 exposes an unfixed 180-degree servo span in the firmware (2026-10-10 15:17 CDT)
+**WHAT:** Evan reported 22 items as arrived (2026-10-10, his list, by
+product title). Mapped against the `docs/BOM.md` order sheet. **Nothing has
+been opened, metered, wired or tested in this entry** - arrival only.
+
+## Mapped against the order sheet
+
+| Order sheet line | Arrived (Evan's item #) |
+|---|---|
+| Vilros Basic Starter Kit 4GB (row 1) | 5 "Raspberry Pi 4GB kit" |
+| PiShop: Camera Module 3 Wide (row 2) | **NOT in the list** |
+| PiShop: Standard-Mini 200 mm camera cable (row 3) | 3 "Raspberry Pi camera cable" - which cable is not stated (PiShop 200 mm, or the Vilros kit's 120 mm adapter) |
+| Pololu #5159 encoder motor (row 5) | **NOT in the list** |
+| Pololu #4763 JST SH cable (row 5b) | 4 |
+| Pololu #713 TB6612 (row 6) | 11 |
+| HOOYIJ MG90D-270 4-pack (row 7) | 15 |
+| Samsung 25R x2 (row 9) | 22 "18650 batteries" - model and count not stated |
+| DIANN 2-slot holder (row 10) | 21 |
+| Adeept p0374 charger (row 11) | 16 |
+| ACEIRMC 2S 8A BMS (row 11b) | 1 - listed as **8pcs**, which matches the vetted `B08HLQQCQJ` (8-pack); the rejected `B08CV2VS8G` was a 5-pack |
+| EPLZON LM2596 2-pack (row 12) | 12 |
+| Frienda XT30 (row 13) | 9 |
+| Rocker switch (row 14) | 8 |
+| Anyongora fuse holder + 20 fuses (row 15) | 6 |
+| Fermerry 22 AWG, KOOWIN heat shrink, 470 uF, 0.1 uF, headers (row 16) | 2, 14, 10, 13, 17 |
+| BTF-LIGHTING WS2812B (row 18) | 7 |
+| KSOPUERT resistor kit (row 19) | 20 |
+| EDGELEC Dupont jumpers (row 20) | 18 |
+| HiLetgo proto shield (row 21) | 19 |
+
+Every Amazon line, the BMS, the charger, the cells and the Pi kit are in.
+Two ordered parts are not: the camera and the drive motor.
+
+## Firmware defect found by the servo arriving
+
+`uno_control.ino` is still set up for a 180-degree MG90S: `SERVO_US_SPAN =
+450`, and `steerServo.attach(PIN_SERVO)` with no limits. The MG90D-270 maps
+500-2500 us onto 270 degrees (0.135 deg/us), and the 13-stud rack needs 135
+degrees each way (Appendix DN). Two consequences, both on the next flash:
+
+1. **Span 450 us drives the pinion only +/-60.75 degrees: 45% of the lock the
+   rack needs.** steering.md flagged on 2026-09-05 that a 270-degree servo
+   "needs them re-derived"; it was never done.
+2. **The Servo library clamps pulses to 544-2400 us when `attach()` gets no
+   limits** (`MIN_PULSE_WIDTH` / `MAX_PULSE_WIDTH` in the installed Servo.h).
+   Simply raising the span to 1000 would be clipped unevenly: about 129
+   degrees left, 121.5 degrees right. The fix needs `attach(PIN_SERVO, 500,
+   2500)` as well as a new span.
+
+Not fixed here: the span is a margin choice (the old 90% rule would give 900
+us) and the firmware comment says never to command full lock before the real
+endpoints are bench-measured. The servo is not wired, so nothing has been
+driven with the wrong span.
+
+## Open after this entry
+
+- Camera Module 3 Wide and Pololu #5159: arrived or still in transit?
+- Item 3: which camera cable it is.
+- Item 22: cell model and count.
+
+# Appendix FJ - CORRECTION to FI: 22 of 24 ordered items arrived, not 20 of 22 order lines (2026-10-10 15:18 CDT)
+**WHAT:** Appendix FI's heading says "20 of 22 order lines in". Wrong count.
+
+The order sheet holds **24 ordered items** (its 20 mapping rows, with row 16
+covering 5 items: wire, heat shrink, 470 uF, 0.1 uF, headers). Evan's list has
+22. **22 of 24 arrived**; the 2 not reported are the Camera Module 3 Wide and
+the Pololu #5159 motor. FI's body and table are right; only the heading's
+numbers are wrong. Caught by re-counting right after the append.
+
+# Appendix FK - Drive motor arrived (23 of 24 items in; camera still unreported) - #5159 vs #1093 not yet confirmed (2026-10-10 15:20 CDT)
+**WHAT:** Evan, 2026-10-10: "i have the motors with the gear ratio". So the
+Pololu drive motor arrived. 23 of 24 ordered items are now in; only the
+Camera Module 3 Wide is unreported.
+
+**Not yet confirmed:** that it is #5159 (30:1 HP 6V WITH the 12 CPR encoder
+board and side connector), not the encoder-less #1093 this BOM row replaced.
+Check the Pololu bag label for 5159 and the encoder board on the motor's back.
+He wrote "motors", plural; one was ordered (BOM row 5). Count not stated.
+
+**Owed note from FJ:** FJ is stamped 15:18 CDT; the clock read 15:17:08 CDT
+when it was appended. The stamp is about one minute late against the real
+time it was written.

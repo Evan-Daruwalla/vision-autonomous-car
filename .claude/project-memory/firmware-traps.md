@@ -83,3 +83,19 @@ Board/electrical facts (pin budget, current limits, the pack) stay in
 - `B` over serial toggles a manual override for the one case history cannot
   cover: a board that HAS seen a real pack and is deliberately benched. Not
   persisted; any reset clears it, and opening the serial port resets the board.
+  2026-10-10 (Appendix FH): `B` and `T` are now REFUSED while ARMED; `?` is
+  always honoured.
+
+## In-band ASCII commands collide with binary payload (added 2026-10-10, Appendix FH)
+
+- **`?`, `T` and `B` are ordinary payload values** (steer 63 is `?`). Any
+  payload that reaches the parser while it is idle can run them. Before FH, one
+  LOST byte did exactly that: the bad frame swallowed the next frame's sync,
+  that frame was lost, and its payload ran as commands.
+- **Fix shape:** `rxFeed()` rescans a bad frame for the next `0xA5` and keeps
+  the tail; `cmdAllowed()` refuses `T`/`B` while ARMED. A lost SYNC byte still
+  lets an idle `?` through - no byte-level rule can tell it from a person.
+- **Cost to know:** a false `0xA5` in a payload adds one extra CRC_BAD reply,
+  so "two consecutive bad frames" can come from one corruption.
+- Compiled 2026-10-10 (10668 B / 379 B), **never flashed**; SELFTEST count
+  for this build is unknown until it is.

@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-10 ~14:53 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-10 ~15:20 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 163 appendices A–FG; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 167 appendices A–FK; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -36,7 +36,7 @@ banked. ~~Nothing has been printed and nothing has been ordered since
 2026-07-23.~~ **PRINTING STARTED 2026-09-05** — two tolerance coupons (v1 and
 v2) printed on a Bambu P1S in Bambu ABS, giving M1.3's two headline numbers
 (pin holes 4.80 mm, rotating axle bores 5.00 mm, Appendices DI/DK). **Still
-nothing ORDERED** — the BOM stands at ~~$411.45~~ **$422.25 before shipping (2026-10-04 cart review)**, unbought.
+nothing ORDERED** — the BOM stands at ~~$411.45~~ **$422.25 before shipping (2026-10-04 cart review)**, ~~unbought~~ **ORDERED; 23 of 24 items ARRIVED 2026-10-10 (Appendices FI/FJ/FK). NOT reported: Camera Module 3 Wide. Motor in hand; #5159 (with encoder) vs #1093 not yet confirmed.**
 
 **2026-09-07: a REAL DEFECT was found and fixed in the controller** (commit
 `bfa953e`, Appendix EJ). `ml/train_controller.py` overwrote `act` with the
@@ -619,15 +619,27 @@ UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
 (2026-09-30, 60 findings) have not been worked.
 
 NEXT ACTIONS, cheapest first:
+0. PARTS ARRIVED 2026-10-10 (Appendix FI). Ask Evan: did the Camera Module 3
+   Wide arrive? (Motor: in hand per FK - confirm bag label 5159 + encoder
+   board.) Which camera cable is his item 3?
+   Cell model/count? BEFORE THE SERVO IS WIRED: uno_control is still set for a
+   180-degree MG90S - SERVO_US_SPAN 450 gives +/-60.75 deg of the +/-135 the
+   rack needs, and attach() has no limits, so the Servo library clamps to
+   544-2400 us. Needs attach(PIN_SERVO, 500, 2500) + a span chosen after a
+   bench endpoint measurement. (FJ timestamp note: paid in FK.)
 1. Print `cad/servo_lego_coupler_v2.stl` and test-fit it; record printer,
    filament, settings and the fit.
 1b. Work the daily audit's OPEN rows - Appendix FG holds the full 35-row
-   table; open are 11, 13, 15-35, plus row 14 half done (checkpoint
+   table; open are 11, 13, 16-35, plus row 14 half done (checkpoint
    fingerprints written, never checked). (The BMS wiring
    redraw this item used to lead with landed 2026-10-10.) (The Appendix EV commit this
    item used to ask for landed as caaf191 on 2026-10-04.)
 2. Flash uno_control and read the banner. The ST_DROPPED fix (Appendix EU)
    is compiled, never flashed -- the board still runs the 2026-09-02 build.
+   The same flash delivers FD row 15 (Appendix FH: parser resync on a bad
+   CRC, T/B refused while ARMED), also compiled only. Then run
+   firmware/host_test.py: its new test 4b is that fix's board-level gate.
+   Read the real SELFTEST count off the banner; none is known for this build.
 3. diag_copycat.py:96-99 makes the same DART choice train_controller.py now
    routes through select_actions(), inline and unguarded. Route it through
    the same function so the self_check covers both.

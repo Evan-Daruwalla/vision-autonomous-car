@@ -168,6 +168,24 @@ def main() -> int:
     check(r is not None and bool(r["status"] & ST_WATCHDOG),
           "silence past 150 ms sets the WATCHDOG status bit")
 
+    # 4b. a LOST byte costs one frame, not two (daily-audit FD row 15, fixed
+    # 2026-10-10). Frame 10 loses a byte, so its 7th byte is frame 11's sync.
+    # The pre-fix parser discarded that sync, lost frame 11, and ran frame 11's
+    # payload bytes 'T', '?', 'B' as commands. Frame 11 is DISARMED on purpose.
+    ser.reset_input_buffer()
+    a = bytearray(command(10, 0, 0, 0, armed=True))
+    del a[3]
+    ser.write(bytes(a) + command(11, ord("T"), ord("?"), ord("B"), armed=False))
+    r1, r2 = read_reply(ser), read_reply(ser)
+    check(r1 is not None and bool(r1["status"] & ST_CRC_BAD),
+          "a frame with a lost byte is rejected with CRC_BAD")
+    check(r2 is not None and r2["seq"] == 11 and not r2["status"] & ST_CRC_BAD,
+          "the frame after a lost byte is recovered, not discarded")
+    time.sleep(0.3)
+    junk = ser.read(400).decode("ascii", "replace")
+    check("SELFTEST" not in junk and "bench-quiet" not in junk and "armed=" not in junk,
+          f"no payload byte ran as a command (stray output: {junk.strip()[:60]!r})")
+
     # 5. the ASCII escape hatch still works and is not mistaken for a frame
     ser.reset_input_buffer()
     ser.write(b"?")

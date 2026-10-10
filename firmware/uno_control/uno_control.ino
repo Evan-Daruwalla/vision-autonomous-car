@@ -70,7 +70,8 @@
  *
  * Serial 115200, binary frames. A lone '?' outside a frame prints a
  * human-readable status line; 'T' runs SELFTEST; 'B' toggles bench-quiet (LED
- * only -- see benchQuiet). None is a valid sync byte.
+ * only -- see benchQuiet). None is a valid sync byte, but any of them CAN be a
+ * payload byte, so 'T' and 'B' are refused while ARMED -- see rxFeed().
  */
 #include <Arduino.h>
 #include <Servo.h>
@@ -105,6 +106,8 @@ const uint8_t RPL_LEN  = 9;
 // returning a mid-file enum fails to compile with "'OutMode' does not name a
 // type". Hit while compiling this file on 2026-09-02.
 enum OutMode { OUT_DRIVE = 0, OUT_BRAKE = 1, OUT_OFF = 2 };
+// What one received byte completed -- rxFeed(). Up here for the same reason.
+enum RxEvent { RX_NONE = 0, RX_FRAME = 1, RX_BAD = 2, RX_CMD = 3 };
 
 const uint16_t WATCHDOG_MS = 150;   // three missed frames at 20 Hz
 const uint16_t BRAKE_MS    = 500;   // brake before coasting; see header
@@ -230,6 +233,44 @@ uint8_t crc8(const uint8_t *d, uint8_t n) {
     for (uint8_t i = 0; i < 8; i++) c = (c & 0x80) ? (uint8_t)((c << 1) ^ 0x07) : (uint8_t)(c << 1);
   }
   return c;
+}
+
+/* Feed ONE received byte to a command-frame parser (buf, len). On RX_FRAME
+ * and RX_BAD the 7 completed bytes are copied to `out` first.
+ *
+ * RESYNC ON A BAD CRC (daily-audit FD row 15, fixed 2026-10-10). The parser
+ * used to throw all 7 bytes away. When frame A has LOST a byte, its 7th byte
+ * is frame B's sync, so B's payload then arrived with the parser idle: B was
+ * lost, and any payload byte equal to '?', 'T' or 'B' ran as a command
+ * (steer 63 is '?'). Now a bad frame is rescanned from byte 1 for the next
+ * 0xA5 and that tail is kept. A false 0xA5 inside a payload just fails its own
+ * CRC and is rescanned again, so the real sync is still reached -- at the cost
+ * of one extra CRC_BAD reply per false sync.
+ *
+ * NOT CLOSED BY THIS: if a frame's SYNC byte itself is lost, its payload still
+ * arrives with the parser idle, and no byte-level rule can tell it from a
+ * human typing. cmdAllowed() is what keeps that harmless while driving. */
+RxEvent rxFeed(uint8_t *buf, uint8_t &len, uint8_t c, uint8_t *out) {
+  if (len == 0) {
+    if (c == SYNC_CMD) { buf[len++] = c; return RX_NONE; }
+    return (c == '?' || c == 'T' || c == 'B') ? RX_CMD : RX_NONE;
+  }
+  buf[len++] = c;
+  if (len < CMD_LEN) return RX_NONE;
+  memcpy(out, buf, CMD_LEN);
+  if (crc8(buf, CMD_LEN) == 0) { len = 0; return RX_FRAME; }
+  uint8_t k = 1;
+  while (k < CMD_LEN && buf[k] != SYNC_CMD) k++;
+  len = (uint8_t)(CMD_LEN - k);
+  memmove(buf, buf + k, len);
+  return RX_BAD;
+}
+
+// While ARMED a Pi is driving, so a lone 'T' or 'B' is far more likely to be an
+// orphaned payload byte than a person at a terminal: refuse them. '?' only
+// prints, and host_test.py probes `armed` with it INSIDE the armed window.
+bool cmdAllowed(uint8_t c, bool isArmed) {
+  return c == '?' || !isArmed;
 }
 
 uint16_t steerToUs(int8_t steer) {
@@ -536,6 +577,43 @@ void selftest() {
           "reply mask 0x0E preserves ST_DROPPED, so it must be cleared per frame");
   }
 
+  /* RX resync (daily-audit FD row 15, 2026-10-10). Runs rxFeed() -- the SAME
+   * function loop() calls -- on a LOCAL buffer, so the live parser is never
+   * touched. Frame A loses byte 3; frame B's payload is 'T', '?', 'B'. On the
+   * pre-fix parser all three ran as commands and B was lost. Pass 1 also puts
+   * a false sync (0xA5) in A's seq byte. */
+  for (uint8_t pass1 = 0; pass1 < 2; pass1++) {
+    uint8_t a[CMD_LEN] = { SYNC_CMD, (uint8_t)(pass1 ? SYNC_CMD : 1), 0, 0, 0, 1, 0 };
+    a[6] = crc8(a, CMD_LEN - 1);
+    uint8_t b[CMD_LEN] = { SYNC_CMD, 2, 'T', '?', 'B', 1, 0 };
+    b[6] = crc8(b, CMD_LEN - 1);
+    uint8_t s[2 * CMD_LEN - 1], n = 0;
+    for (uint8_t i = 0; i < CMD_LEN; i++) if (i != 3) s[n++] = a[i];
+    for (uint8_t i = 0; i < CMD_LEN; i++) s[n++] = b[i];
+    uint8_t buf[CMD_LEN], len = 0, out[CMD_LEN];
+    uint8_t frames = 0, cmds = 0, seq = 0;
+    for (uint8_t i = 0; i < n; i++) {
+      RxEvent e = rxFeed(buf, len, s[i], out);
+      if (e == RX_FRAME) { frames++; seq = out[1]; }
+      if (e == RX_CMD) cmds++;
+    }
+    if (pass1) {
+      CHECK(frames == 1 && seq == 2, "false 0xA5 in a bad frame: next frame still recovered");
+      CHECK(cmds == 0, "...and no payload byte runs as a command");
+    } else {
+      CHECK(frames == 1 && seq == 2, "a lost byte costs ONE frame: the next one is recovered");
+      CHECK(cmds == 0, "...and its 'T' '?' 'B' payload never runs as commands");
+    }
+  }
+  {
+    uint8_t buf[CMD_LEN], len = 0, out[CMD_LEN];
+    CHECK(rxFeed(buf, len, '?', out) == RX_CMD && len == 0, "idle '?' is a command, not a frame");
+    CHECK(rxFeed(buf, len, 'x', out) == RX_NONE && len == 0, "idle junk is ignored");
+    CHECK(cmdAllowed('?', true), "'?' allowed while armed (host_test probes with it)");
+    CHECK(!cmdAllowed('T', true) && !cmdAllowed('B', true), "'T' and 'B' refused while armed");
+    CHECK(cmdAllowed('T', false) && cmdAllowed('B', false), "'T' and 'B' allowed when disarmed");
+  }
+
   Serial.print(F("SELFTEST ")); Serial.print(fail ? F("FAIL ") : F("PASS "));
   Serial.print(pass); Serial.print('/'); Serial.println(pass + fail);
   #undef CHECK
@@ -633,28 +711,23 @@ void loop() {
 
   while (Serial.available()) {
     uint8_t c = (uint8_t)Serial.read();
-    if (rxLen == 0) {
-      if (c == SYNC_CMD) rxBuf[rxLen++] = c;
-      else if (c == '?') printStatus();
+    uint8_t f[CMD_LEN];
+    RxEvent ev = rxFeed(rxBuf, rxLen, c, f);
+    if (ev == RX_FRAME) handleFrame(f, now);   // ONE clock sample per iteration -- see header
+    else if (ev == RX_BAD) {
+      // A bad CRC is a DROPPED frame, never a guessed one: no actuator action,
+      // and the watchdog keeps running so a stream of corrupt frames still
+      // trips it rather than looking like a healthy link.
+      statusBits |= ST_CRC_BAD;
+      sendReply(f[1], readTicks(), statusBits, loopDt);
+    } else if (ev == RX_CMD && cmdAllowed(c, armed)) {
+      if (c == '?') printStatus();
       else if (c == 'T') selftest();
-      else if (c == 'B') {
+      else {
         benchQuiet = !benchQuiet;
         Serial.print(F("bench-quiet ")); Serial.print(benchQuiet ? F("ON") : F("OFF"));
         Serial.println(F(" - LED only; throttle stays inhibited, cleared on reset"));
       }
-      continue;                              // resync: ignore anything else
-    }
-    rxBuf[rxLen++] = c;
-    if (rxLen == CMD_LEN) {
-      if (crc8(rxBuf, CMD_LEN) == 0) handleFrame(rxBuf, now);   // ONE clock sample per iteration -- see header
-      else {
-        // A bad CRC is a DROPPED frame, never a guessed one: no actuator action,
-        // and the watchdog keeps running so a stream of corrupt frames still
-        // trips it rather than looking like a healthy link.
-        statusBits |= ST_CRC_BAD;
-        sendReply(rxBuf[1], readTicks(), statusBits, loopDt);
-      }
-      rxLen = 0;
     }
   }
 
