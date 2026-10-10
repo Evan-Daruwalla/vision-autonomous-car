@@ -466,7 +466,9 @@ FLIPPED 2026-09-05 (Appendix DM), see below:**
   bypass the over-discharge cutoff entirely. Rule from the board's own pinout:
   pack to **B+ / B- / MB**, everything else (charger included) to **P+ / P-**.
   **MB needs the cell midpoint**, which the 2-lead DIANN holder does not
-  expose - solder a third wire to its internal series strap. Net redraw is open.
+  expose - solder a third wire to its internal series strap. ~~Net redraw is open.~~
+  **Redrawn 2026-10-10** (WIRING_PROTOSHIELD.md section 2.1): cells -> 3 A fuse
+  -> B+ (fuse on the cell side, Evan's call), charger on P+ / P-, PACK- = P-.
 - **Cheap 2S BMS boards ship LOCKED.** That listing: boards "need to be charged
   and activated before output... otherwise the circuit is locked." A freshly
   soldered board can read ZERO output and look dead. **Before meter-probing a

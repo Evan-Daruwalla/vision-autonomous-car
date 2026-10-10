@@ -10,6 +10,8 @@ no-encoder part) three weeks after §4.3 recorded that exact correction, and
 list for an **Arduino proto shield** carrying every connection between the Uno,
 the TB6612, the motor/encoder, the servo, the lights and the pack.
 
+**2026-10-10: the pack path is redrawn with the BMS in the circuit (section 2.1), and three diagrams now sit at the top of section 2.** Until this date the net list wired the holder straight to the fuse, bypassing the over-discharge cutoff (Appendix FA).
+
 **It is deliberately not a PCB.** Not one component in this document has ever
 been in Evan's hands — no TB6612, no LM2596, no MG90S, no N20, no encoder. A
 board laid out now is a board laid out against datasheet drawings. Writing the
@@ -37,6 +39,7 @@ the current one where they disagree** · power architecture
 | 5 | 2 × WS2812B data-line resistors, ~330–470 Ω | **2026-10-04: the kit has nothing in 330-470 ohm - use 2 x 200 ohm in series (400 ohm) for each.** one in series with each segment's `DIN`. **Superseded the 8 per-LED resistors 2026-09-03 (Appendix CX)** — every WS2812B pixel has its own constant-current driver, so per-LED ballast no longer exists as a concept |
 | 6 | Pack-sense divider: 100 kΩ + 12 kΩ | ratio 0.10714, per `firmware/uno_packguard/`. **2026-10-04: the kit (BOM row 19) has no 12 kohm - build it as 10 kohm + 2 kohm in series, exactly 12.0 kohm. Do NOT use 10 kohm alone: the ratio drops to 0.0909 and the firmware under-reads the pack by 15%.** |
 | 7 | Screw terminals or JST for every off-board lead | motor+encoder, servo, **2 × strip segment (3 conductors each: `+5V2`, `DIN`, GND)**, pack |
+| 8 | *(off the shield)* Pack assembly: 2S holder, 3 A fuse, 2S BMS, USB-C charger | added 2026-10-10. Lives with the pack and unplugs at the XT30 - section 2.1. Nothing on the shield connects to the BMS's B+ / MB / B- |
 
 **Zero flying Dupont jumpers is the point of the exercise.** Dupont crimps back
 out under vibration, and this vehicle vibrates. Every off-board connection
@@ -56,7 +59,7 @@ JST SH cable (row 5b) and the servo ships its own 3-wire lead.
 **Build note:** 22 AWG stranded silicone (~1.7 mm OD with insulation) will NOT
 thread THROUGH a 0.1" protoboard hole. Strip it and solder onto the pad.
 
-**WARNING (2026-10-04): the net list below does NOT include the BMS** (BOM row
+~~**WARNING (2026-10-04): the net list below does NOT include the BMS** (BOM row
 11b, ACEIRMC `B08HLQQCQJ`, added 2026-09-03 in Appendix CK). As written,
 `PACK+` runs from the holder straight to the fuse, so **wiring from this table
 leaves the pack with NO over-discharge cutoff** - the exact hole CK closed.
@@ -66,14 +69,88 @@ loads AND the charger - connects to P+ / P-**, never to B+ / B- (anything on
 B- or B+ bypasses the protection). **MB is the midpoint between the two
 cells**, and the DIANN holder (row 10) exposes only two leads, so a third wire
 must be soldered to its internal series strap. Where the 3 A fuse sits relative
-to the BMS is part of the redraw. Redrawing these nets is an OPEN task.
+to the BMS is part of the redraw. Redrawing these nets is an OPEN task.~~ **RESOLVED 2026-10-10: section 2.1 now routes the pack through the BMS, with the fuse on the cell side (Evan's call).**
+
+### 2.0 Diagrams (added 2026-10-10)
+
+Three small diagrams, one question each - one combined drawing was tried first and was unreadable (20 nodes, ~35 crossing lines). **The tables below stay the authority on pins and wire;** these are the map. Every Uno pin matches `firmware/uno_control/uno_control.ino:81-94`.
+
+#### Power - where every volt comes from
+
+```mermaid
+flowchart TB
+  subgraph PACK["PACK ASSEMBLY - off the shield, unplugs at the XT30"]
+    C1["Cell 1 - Samsung 25R"]
+    C2["Cell 2 - Samsung 25R"]
+    FUSE["3 A ATO fuse - at the source"]
+    BMS["2S BMS - ACEIRMC B08HLQQCQJ"]
+    CHG["USB-C 2S charger - Adeept"]
+    C1 -- "holder RED (+)" --> FUSE -- "B+" --> BMS
+    C1 -- "series strap: 3rd wire = MB" --> BMS
+    C2 -- "holder BLACK (-) = B-" --> BMS
+    CHG -- "to P+ / P- only" --> BMS
+  end
+  BMS -- "P+ = PACK+" --> XT30["XT30 disconnect"]
+  XT30 --> SW["Rocker switch"]
+  SW -- "VBAT 7.4 V" --> TB["TB6612 VMOT"]
+  TB -- "AO1+BO1 / AO2+BO2" --> MOT["N20 motor - Pololu 5159"]
+  SW -- "VBAT" --> BUCK["LM2596 - trim to 5.20 V UNLOADED first"]
+  SW -- "VBAT" --> DIV["Pack-sense divider"]
+  BUCK -- "+5V2" --> UNO["Uno 5V pin - NOT VIN"]
+  BUCK -- "+5V2" --> SERVO["Servo V+"]
+  BUCK -- "+5V2 - never VBAT" --> ENC["Encoder Vcc"]
+  BUCK -- "+5V2" --> STRIPS["Both WS2812B segments + 470 uF at feed"]
+  classDef safety fill:#fde2e1,stroke:#b42318,color:#000
+  class FUSE,BMS,XT30 safety
+```
+
+#### Signals - every Uno pin (matches `uno_control.ino:81-94`)
+
+```mermaid
+flowchart LR
+  UNO["Arduino Uno"]
+  UNO -- "D11 PWM" --> TBP["TB6612 PWMA + PWMB"]
+  UNO -- "D8" --> TBA["TB6612 AIN1 + BIN1"]
+  UNO -- "D12" --> TBB["TB6612 AIN2 + BIN2"]
+  UNO -- "D10" --> TBS["TB6612 STBY"]
+  UNO -- "5V" --> TBV["TB6612 VCC - logic supply"]
+  UNO -- "D9" --> SERVO["Servo signal"]
+  UNO -- "D4" --> RL["400 ohm = 2 x 200"] --> SL["LEFT strip DIN"]
+  UNO -- "D7" --> RR["400 ohm = 2 x 200"] --> SR["RIGHT strip DIN"]
+  ENC["Encoder"] -- "A to D2" --> UNO
+  ENC -- "B to D3" --> UNO
+  DIV["Divider: 100k top, 10k + 2k bottom"] -- "A0" --> UNO
+  PI["Raspberry Pi 5"] <-- "USB data - 5 V wire CUT" --> UNO
+```
+
+#### Ground - one star, every return on its own leg
+
+```mermaid
+flowchart LR
+  STAR(("STAR - TB6612 GND pad"))
+  P["PACK- = BMS P-, via XT30 - never B-"] --> STAR
+  BUCK["LM2596 VOUT-"] --> STAR
+  UNO["Uno GND"] --> STAR
+  SERVO["Servo GND"] --> STAR
+  ENC["Encoder GND - its OWN leg"] --> STAR
+  SL["LEFT strip GND"] --> STAR
+  SR["RIGHT strip GND"] --> STAR
+  DIV["Divider bottom"] --> STAR
+```
 
 ### 2.1 Pack and power distribution
 
 | Net | From | To | Wire | Notes |
 |---|---|---|---|---|
-| `PACK+` | 2S holder + | 3 A ATO fuse holder | 22 | **Fuse at the pack terminal, before anything else** — it protects the harness, so it goes at the source |
-| `PACK+F` | fuse out | XT30 male | 22 | disconnect point |
+| `CELL+` | holder RED (cell 1 +) | 3 A ATO fuse | 22 | **2026-10-10: fuse at the source, BEFORE the BMS** (Evan) - covers the BMS board, its leads and the charge path |
+| `B+` | fuse out | BMS `B+` | 22 | |
+| `MB` | holder's internal series strap (cell 1 - / cell 2 +) | BMS `MB` | 22 | **new 3rd wire** - the DIANN holder has only 2 leads, so solder to its strap. Meter 3.6-4.2 V from MB to B- |
+| `B-` | holder BLACK (cell 2 -) | BMS `B-` | 22 | **nothing else ever touches B+ / MB / B-** |
+| `CHG+` / `CHG-` | charger `BAT+` / `BAT-` | BMS `P+` / `P-` | 22 | charger on the protected side; keep its USB-C port reachable with the pack installed. Its drain on the pack with no USB plugged in is UNMEASURED |
+| `PACK+` | BMS `P+` | XT30 male + | 22 | **2026-10-10: the BMS output** (was holder + -> fuse) |
+| `PACK-` | BMS `P-` | XT30 male -, then star ground on the car side | 22 | **never B-** - anything on B- bypasses the protection |
+| ~~`PACK+`~~ | ~~2S holder +~~ | ~~3 A ATO fuse holder~~ | ~~22~~ | ~~**Fuse at the pack terminal, before anything else** — it protects the harness, so it goes at the source~~ **SUPERSEDED 2026-10-10 by the BMS rows above** |
+| ~~`PACK+F`~~ | ~~fuse out~~ | ~~XT30 male~~ | ~~22~~ | ~~disconnect point~~ **SUPERSEDED 2026-10-10: the fuse moved to the cell side, and the XT30 now takes BMS P+** |
 | `PACK+SW` | XT30 female | rocker switch | 22 | on the shield |
 | `VBAT` | rocker out | TB6612 `VMOT`, LM2596 `VIN+`, divider top | 22 | the switched 7.4 V rail |
 | `+5V2` | LM2596 `VOUT+` | Uno `5V` pin, servo V+, **both strip segments' +5V**, encoder `Vcc` | 22 | **set the trim pot to 5.20 V with the module unloaded before connecting anything** |
@@ -203,12 +280,20 @@ caveat: socket gripping a real axle, never a printed cross stub.
 ~~**UNRESOLVED.** No coupling is chosen. This section states the constraint the
 choice must satisfy, not the choice.~~
 
-**RESOLVED 2026-09-03 (Appendices DD/DF): Adafruit #4252**, BOM row 22, $0.75.
+~~**RESOLVED 2026-09-03 (Appendices DD/DF): Adafruit #4252**, BOM row 22, $0.75.
 Evan has built it and reports it strong, which confirms the spline fit on his
 real servo. warning: no numeric stall-torque margin exists or can be computed --
 it is injection-moulded, not PLA, so Appendix BV's interlayer-shear math does
 not transfer and Adafruit publishes no rating. The constraint above still
-governs: grip a real Lego axle, never print the cross profile. (propagated 2026-09-09, daily-audit finding 10.)
+governs: grip a real Lego axle, never print the cross profile. (propagated 2026-09-09, daily-audit finding 10.)~~
+
+**CORRECTED 2026-10-04 (Appendix FC), propagated here 2026-10-10:** no #4252
+was ever on hand - the "strong" 2026-09-03 build was a PRINT of
+`cad/servo_lego_coupler_v1.stl`, so nothing confirmed a #4252 fit and the
+injection-moulding reasoning never applied. v1's Lego-axle socket was too
+loose; **print `cad/servo_lego_coupler_v2.stl`** (socket clearance 0.00 mm),
+untested. #4252 stays the fallback. The constraint above still governs: grip
+a real Lego axle, never print the cross profile.
 
 ### 2.5 Lights — WS2812B strips
 
@@ -276,7 +361,7 @@ when the car is off, and a blown fuse reads 0 V → `FAULT`, which
 ## 3. Ground
 
 **One star point, at the TB6612's `GND` pad.** Everything returns there
-individually: pack negative, LM2596 `VOUT−`, Uno `GND`, servo GND, encoder GND,
+individually: pack negative (**BMS `P-` via the XT30, never `B-`** - 2026-10-10), LM2596 `VOUT−`, Uno `GND`, servo GND, encoder GND,
 **and each strip segment's GND on its own leg.**
 
 The rule that matters: **the encoder return must not share a conductor with the
@@ -344,7 +429,9 @@ Nothing proceeds to the next row until the check passes.
 | # | Do | Check before continuing |
 |---|---|---|
 | 1 | Set LM2596 to 5.2 V, **unloaded, nothing else connected** | meter reads 5.15–5.25 V |
-| 2 | Solder pack path: fuse, XT30, rocker, star ground | continuity; **switch off = 0 V downstream** |
+| ~~2~~ | ~~Solder pack path: fuse, XT30, rocker, star ground~~ | ~~continuity; **switch off = 0 V downstream**~~ **SPLIT 2026-10-10 into 2a / 2b** |
+| 2a | Pack assembly: MB 3rd wire onto the holder's strap, fuse in the RED lead, BMS B+ / MB / B-, charger to P+ / P-, XT30 male on P+ / P- | MB to B- reads 3.6-4.2 V and B+ to B- reads their sum. **P+ may read 0 V until the BMS is ACTIVATED by connecting the charger once** (cheap boards ship locked - hardware.md); only then does P+ to P- show pack voltage |
+| 2b | Shield power path: XT30 female, rocker, star ground | continuity; **switch off = 0 V downstream** |
 | 3 | Fit divider, wire A0, flash `uno_packguard` | `SELFTEST` 27/27, then `REAL` reports pack voltage within 0.1 V of the meter |
 | 4 | Solder TB6612 + caps, including `STBY` to D10 | with D10 low, motor terminals high-Z; with D10 high and PWM 0, they short-brake |
 | 5 | Motor + encoder | drive at 20 % duty both directions; `ticks` counts up one way, down the other, ≈358 per output rev by hand |
@@ -365,6 +452,7 @@ measurements — this table is portfolio material, not ceremony.
 - ~~**Row 5 motor**, §4.3 — gates whether §2.3 is wired at all.~~ **CLOSED:**
   `BOM.md` row 5 is #5159, and §2.2's prose was corrected to match on
   2026-09-03 — it had been contradicting §4.3 in the same file until then.
+- **Charger drain on the pack** with no USB plugged in - the charger is permanently wired to P+ / P- (2026-10-10), and its idle current is unmeasured. Meter it on arrival.
 - **TB6612 parallel pin pairing** unverified against Toshiba, §2.2.
 - ~~**LM2596 module current rating** unverified for the specific Addicore
   part~~ **RESOLVED 2026-09-03: rated 3 A**, per Addicore's own listing. §2

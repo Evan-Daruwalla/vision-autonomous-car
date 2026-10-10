@@ -194,6 +194,8 @@ the dated entry, not the digest.
 - [FA - BMS confirmed live (B08HLQQCQJ, 2.9 V set point in the description not the bullets) and the holder is series - but the wiring doc never included the BMS, so the over-discharge hole CK closed was closed only on paper](#appendix-fa---bms-confirmed-live-b08hlqqcqj-29-v-set-point-in-the-description-not-the-bullets-and-the-holder-is-series---but-the-wiring-doc-never-included-the-bms-so-the-over-discharge-hole-ck-closed-was-closed-only-on-paper-2026-10-04-2016-cdt) (10-04)
 - [FB - Resistor kit checked: no 12k and nothing in 330-470 ohm, but 10k+2k and 2x200 ohm in series cover both exactly - and 10k alone would make the pack-guard firmware read 15% low](#appendix-fb---resistor-kit-checked-no-12k-and-nothing-in-330-470-ohm-but-10k2k-and-2x200-ohm-in-series-cover-both-exactly---and-10k-alone-would-make-the-pack-guard-firmware-read-15-low-2026-10-04-2027-cdt) (10-04)
 - [FC - CORRECTION to DD/DF: no Adafruit #4252 was ever on hand - the strong 2026-09-03 coupler was a print of v1, whose axle socket was too loose; v2 tightens it to the coupon's grip offset; plus a closure bug in this session's edit script](#appendix-fc---correction-to-dddf-no-adafruit-4252-was-ever-on-hand---the-strong-2026-09-03-coupler-was-a-print-of-v1-whose-axle-socket-was-too-loose-v2-tightens-it-to-the-coupons-grip-offset-plus-a-closure-bug-in-this-sessions-edit-script-2026-10-04-2045-cdt) (10-04)
+- [FD - Scheduled daily-audit: 35 findings - HANDOFF says in sync with origin while 3 commits are unpushed, and the DART self_check passes with the real bug put back in main()](#appendix-fd---scheduled-daily-audit-35-findings---handoff-says-in-sync-with-origin-while-3-commits-are-unpushed-and-the-dart-self_check-passes-with-the-real-bug-put-back-in-main-2026-10-08-0728-cdt) (10-08)
+- [FE - Wiring redrawn with the BMS in the circuit (fuse on the cell side) and three Mermaid diagrams added - the first one-piece diagram rendered but was unreadable, so it was split](#appendix-fe---wiring-redrawn-with-the-bms-in-the-circuit-fuse-on-the-cell-side-and-three-mermaid-diagrams-added---the-first-one-piece-diagram-rendered-but-was-unreadable-so-it-was-split-2026-10-10-1406-cdt) (10-10)
 
 ---
 
@@ -15980,3 +15982,86 @@ ways with all 24 rows intact. Nothing was committed in between.
 **Lesson, stated so the next script avoids it:** a dry run must print what it
 WOULD WRITE, not just that anchors match; and never close over a loop-reused
 variable - bind it (`lambda m, a=a: ...`) or build the string first.
+
+# Appendix FD - Scheduled daily-audit: 35 findings - HANDOFF says in sync with origin while 3 commits are unpushed, and the DART self_check passes with the real bug put back in main() (2026-10-08, ~07:28 CDT)
+Scheduled daily-audit run of 2026-10-08 (read-only; nothing in the repo was changed). Classified ACTIVE: last audit EX (2026-09-30) is outside the 7-day window, and caaf191, 6a12c26, de8f12e landed 2026-10-04.
+
+Method: /audit with 3 cold Sonnet workers (code M1/M2/M3/M7/M9 + G1-G4; docs D1-D8; cross-domain X + landing-check on FC). Manifest 277 tracked files, reconciled two ways (277/277); code shard 228. Highs and safety items re-run by the session model.
+
+Result: 35 findings after de-duplication - 1 high, 13 med, 21 low.
+
+Top findings:
+1. HIGH, CONFIRMED - HANDOFF.md:606 says "IN SYNC with origin/main (0 ahead, 0 behind)"; `git status -sb` prints `[ahead 3]` (caaf191, 6a12c26, de8f12e unpushed). Same class as EW/EX.
+2. MED, CONFIRMED - ml/train_controller.py self_check does NOT fail when the 2026-09-07 DART bug is put back in main() at :313 (mutant re-run by the session: `train_controller self_check: PASS`, exit 0). The `# shortcut:` marker at :310-312 discloses it; the caaf191 subject and the :152-153 comment overclaim.
+3. MED, CONFIRMED - firmware pack-cutoff latch is RAM-only (no EEPROM, clearLatch has no caller), so a serial-open reset clears it; SERIAL_PROTOCOL.md:163-165 says it cannot re-arm without a power cycle.
+4. MED, CONFIRMED - PRD_ROADMAP.md:208-210 and :609-612 still carry the BMS over-discharge gate as open; HANDOFF:508 says CLOSED 2026-09-03 (CK) with no note that the wiring doc bypasses the BMS (FA).
+5. MED - coupler correction (FC) not propagated: BOM.md:54 still says print v1, WIRING_PROTOSHIELD.md:206-210 keeps the retracted #4252 claim, cad/README.md:167-175 has no v2, PRD:541 says "Never printed".
+6. MED, CONFIRMED - scripts/gen_servo_lego_coupler.py: `--socket-clear 6` gives `wall -0.40` and `OVERALL : PASS`, exit 0.
+7. MED - missing train_actions_expert.npy silently trains on noise-injected actions (train_controller.py:308-316); controller checkpoints carry no VAE/RNN fingerprint (eval_in_sim/eval_paired/plan_cem).
+
+Verified true: BOM sums to $422.25 two ways; record has 159 appendices A-FC, TOC balanced, 0 CRLF; 15/15 checks pass under .venv; check_artifacts 28 checked, 0 drifted; v1/v2 STLs regenerate byte-identical; private-path count 98 files matches HANDOFF; secret history scan clean.
+
+Not swept: firmware compile/run (no board), sim/training runs, CVE (pip-audit not installed).
+
+# Appendix FE - Wiring redrawn with the BMS in the circuit (fuse on the cell side) and three Mermaid diagrams added - the first one-piece diagram rendered but was unreadable, so it was split (2026-10-10 14:06 CDT)
+**WHAT:** `docs/WIRING_PROTOSHIELD.md`'s pack path is redrawn with the BMS in
+the circuit, and the doc has its first diagrams. This closes the safety gap
+Appendix FA found: since the BMS was added on 2026-09-03 (Appendix CK), the net
+list had wired the holder straight to the fuse, so anyone building from it
+would have had no over-discharge cutoff. Nothing is built; no part has arrived.
+
+## The pack path, as redrawn (section 2.1)
+
+    cell 1 + -- holder RED -- 3 A fuse -- BMS B+
+    series strap (cell 1 - / cell 2 +) -- NEW 3rd wire -- BMS MB
+    cell 2 - -- holder BLACK -- BMS B-
+    charger BAT+ / BAT- -- BMS P+ / P-
+    BMS P+ / P- = PACK+ / PACK- -- XT30 -- rocker / star ground
+
+Two decisions by Evan, 2026-10-10:
+- **Fuse on the cell side, before the BMS** - it keeps the doc's existing
+  "fuse at the source" rule and covers the BMS board, its leads and the charge
+  path. The alternative (fuse after P+) left the cell-to-BMS leads and the
+  board itself unfused.
+- **Diagrams as Mermaid inside the doc**, so they render on GitHub, diff as
+  text, and sit next to the tables they summarize.
+
+Carried into the doc: nothing but the cells (and the fuse) touches B+ / MB /
+B-; star-ground "pack negative" is now BMS P- via the XT30, never B-; build
+step 2 is split into 2a (pack: meter MB 3.6-4.2 V; P+ may read 0 V until the
+BMS is ACTIVATED by connecting the charger once) and 2b (shield power path).
+New open item: the charger's drain on the pack with no USB plugged in,
+because it is now permanently wired to P+ / P-.
+
+## The diagrams - and the first attempt failed
+
+**One whole-car diagram was drawn first and rejected.** It rendered with 20
+nodes and no parse error, but the screenshot was ~35 crossing lines that no
+builder could follow. "It renders" was not the bar. It was split into three
+diagrams, one question each: **power** (where every volt comes from),
+**signals** (every Uno pin) and **ground** (one star, every return on its own
+leg). Each was rendered with Mermaid 11.4.1 in a browser and looked at before
+going into the doc.
+
+## Verified, not asserted
+
+- **Pin check:** a script compared every `D<n>` on the signals diagram to the
+  `PIN_*` constants in `uno_control.ino:81-94`:
+
+        firmware pins: 2 ENC_A, 3 ENC_B, 4 STRIP_L, 7 STRIP_R, 8 DIR_A,
+                       9 SERVO, 10 STBY, 11 MOTOR, 12 DIR_B (13 STATUS = LED)
+        diagram pins : [2, 3, 4, 7, 8, 9, 10, 11, 12]
+        CHECK PASS: diagram pins == firmware pins; only cells/fuse touch B+/MB/B-
+
+  It also asserts that only the cells and the fuse feed B+ / MB / B-. **Proven
+  able to fail:** with D9 swapped to D6 in a copy, it raised
+  `diagram [2, 3, 4, 6, 7, ...] != firmware [2, 3, 4, 7, 8, 9, ...]`.
+- **The edit script's dry run printed the actual diff** before writing - the
+  fix for Appendix FC's bug, where a dry run only confirmed anchors matched.
+  Its ASCII guard also fired once on a false positive (a struck old row keeps
+  its original em dash) and was narrowed to refuse only ADDED non-ASCII.
+
+## Still open
+
+The TB6612 parallel pin pairing (unverified against Toshiba); the charger idle
+drain; v1 coupler print settings (Appendix FC); v2 coupler not yet printed.

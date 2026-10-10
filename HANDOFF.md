@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-04 ~20:38 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-10 ~14:06 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 159 appendices A–FC; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 161 appendices A–FE; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -122,7 +122,10 @@ This lists only what is actually open, cheapest first.)*
   net list still runs `PACK+` holder -> fuse, so wiring from it bypasses the
   over-discharge cutoff. Pack -> B+/B-/MB, everything else (charger too) ->
   P+/P-. MB needs the cell midpoint, which the 2-lead holder does not expose.
-  A dated warning sits in that doc; the net redraw is OPEN.
+  A dated warning sits in that doc; ~~the net redraw is OPEN~~ **REDRAWN
+  2026-10-10:** cells -> 3 A fuse -> BMS B+ / MB / B-, charger and everything
+  else on P+ / P-, plus three Mermaid diagrams (power, signals, ground) in
+  section 2.0, every Uno pin checked against `uno_control.ino`.
 - **DIANN holder: SERIES per its listing** ("Output Voltage: 7.4V", Evan pasted
   it 2026-10-04). Meter it on arrival - ~7.4-8.4 V across red/black is series;
   ~3.7-4.2 V means parallel, reject it.
@@ -602,9 +605,11 @@ ET, code in EU. Dash density (accept 18.7) and cornering clearance (accept
 29.6 mm/side, rule re-pointed at the road edge) were DECIDED 2026-09-09.
 THE TEST SUITE is `python scripts/run_checks.py` (15/15 on 2026-09-10 --
 re-run it, never quote it). A pre-commit guard blocks any staged generated
-artifact that no longer matches its generator. Repo is IN SYNC with
+artifact that no longer matches its generator. ~~Repo is IN SYNC with
 origin/main (0 ahead, 0 behind, fetched 2026-10-04) -- those 6 commits were
-pushed. This file claimed "6 commits UNPUSHED" for three weeks and TWO
+pushed.~~ **2026-10-10, fetched: 3 commits AHEAD of origin/main, 0 behind,
+unpublished** (caaf191, 6a12c26, de8f12e) - Appendix FD
+caught this line saying "in sync" after those commits landed. This file claimed "6 commits UNPUSHED" for three weeks and TWO
 daily-audits flagged it (EW, EX) before it was corrected; re-derive push state
 from the remote, never from this line.
 
@@ -612,9 +617,8 @@ UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
 (2026-09-30, 60 findings) have not been worked.
 
 NEXT ACTIONS, cheapest first:
-1. REDRAW `docs/WIRING_PROTOSHIELD.md`'s pack nets to include the BMS - it is
-   absent, so wiring from the current table bypasses over-discharge
-   protection. Then print `cad/servo_lego_coupler_v2.stl` and test-fit it. (The Appendix EV commit this
+1. Print `cad/servo_lego_coupler_v2.stl` and test-fit it. (The BMS wiring
+   redraw this item used to lead with landed 2026-10-10.) (The Appendix EV commit this
    item used to ask for landed as caaf191 on 2026-10-04.)
 2. Flash uno_control and read the banner. The ST_DROPPED fix (Appendix EU)
    is compiled, never flashed -- the board still runs the 2026-09-02 build.
