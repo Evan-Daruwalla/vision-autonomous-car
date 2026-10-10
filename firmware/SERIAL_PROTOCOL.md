@@ -161,8 +161,13 @@ visible in driving, which it should not be.*
    should be treated by the Pi as a link fault.
 4. **`STBY` is dropped on every safe state, after the brake.** Disarm,
    watchdog trip, latched pack cutoff and boot all end with D10 LOW. Re-arming
-   requires a valid ARMED frame; a latched cutoff cannot be re-armed at all
-   without a power cycle. See §1a for why brake-then-coast and not coast alone.
+   requires a valid ARMED frame; a latched cutoff ~~cannot be re-armed at all
+   without a power cycle~~ **is held in RAM only, so ANY reset clears it -
+   including the Pi opening the serial port, which auto-resets the Uno**
+   (corrected 2026-10-10, Appendix FD #3; Evan chose to correct this doc, not
+   the firmware). The BMS's 2.9 V/cell hardware cutoff is the real floor; this
+   3.00 V/cell latch (`PG_CUTOFF_MV` 6000) is a soft layer above it, and it
+   re-trips if the pack sits under 6.0 V for `PG_HOLD_MS` (500 ms) again. See §1a for why brake-then-coast and not coast alone.
 5. **The watchdog is SAFETY, not security.** It protects against a hung Pi or a
    diverging policy. It does nothing against something else writing valid frames
    to the port (`security.md`).

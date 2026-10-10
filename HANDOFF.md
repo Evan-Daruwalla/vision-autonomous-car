@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-10 ~14:06 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-10 ~14:28 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 161 appendices A–FE; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 162 appendices A–FF; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -508,7 +508,7 @@ original floor and the pre-2026-08-12 scale decision.)*
   the car land where it lands; set lane width for ≥85 mm/side from the
   MEASURED width. Note a smaller car also lowers the camera, and the
   sim's camera height/pitch are still unidentified (AI.3).
-- ✅ ~~**THE 2S PACK HAS NO HARDWARE LOW-VOLTAGE CUTOFF — open safety item**~~ **CLOSED 2026-09-03 (Appendix CK): it was a CATEGORY ERROR, not a sourcing gap.** A charger IC terminates CHARGE and has no discharge-path FET; over-discharge cutoff needs a series FET on the pack OUTPUT, which is a BMS job. Fix is TWO boards: Adeept p0374 stays the USB-C charger, plus **ACEIRMC 2S 8A BMS $9.59, documented cutoff 2.9 V ±0.05 V**, wired between charger and pack. +$9.59. Original note follows: ⚠️ **THE 2S PACK HAS NO HARDWARE LOW-VOLTAGE CUTOFF**
+- ✅ ~~**THE 2S PACK HAS NO HARDWARE LOW-VOLTAGE CUTOFF — open safety item**~~ **CLOSED 2026-09-03 (Appendix CK): it was a CATEGORY ERROR, not a sourcing gap.** A charger IC terminates CHARGE and has no discharge-path FET; over-discharge cutoff needs a series FET on the pack OUTPUT, which is a BMS job. Fix is TWO boards: Adeept p0374 stays the USB-C charger, plus **ACEIRMC 2S 8A BMS $9.59, documented cutoff 2.9 V ±0.05 V**, wired between charger and pack. +$9.59. **Caveat (Appendices FA, FE): the wiring doc never actually included the BMS until it was redrawn 2026-10-10, so this "closed" held only on paper for a month.** Original note follows: ⚠️ **THE 2S PACK HAS NO HARDWARE LOW-VOLTAGE CUTOFF**
   (2026-09-02, Appendix BI). BOM row 11's board is titled "BMS" but Adeept
   documents **over-voltage and short-circuit protection only**; over-discharge
   is not listed, and the EVE 25P cells are bare. Below ~2.5 V/cell lithium takes
@@ -608,7 +608,7 @@ re-run it, never quote it). A pre-commit guard blocks any staged generated
 artifact that no longer matches its generator. ~~Repo is IN SYNC with
 origin/main (0 ahead, 0 behind, fetched 2026-10-04) -- those 6 commits were
 pushed.~~ **2026-10-10, fetched: 3 commits AHEAD of origin/main, 0 behind,
-unpublished** (caaf191, 6a12c26, de8f12e) - Appendix FD
+unpublished** (caaf191, 6a12c26, de8f12e, plus 6caccea on 2026-10-10; the Appendix FF work is uncommitted) - Appendix FD
 caught this line saying "in sync" after those commits landed. This file claimed "6 commits UNPUSHED" for three weeks and TWO
 daily-audits flagged it (EW, EX) before it was corrected; re-derive push state
 from the remote, never from this line.

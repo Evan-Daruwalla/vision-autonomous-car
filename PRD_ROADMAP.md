@@ -205,9 +205,12 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   v0.2 (7-byte command, 9-byte reply, CRC8, ARMED per frame, 150 ms
   watchdog) · power: USB bank → Pi ONLY; 2× EVE 25P 18650 + 2S BMS board →
   TB6612 VM and → LM2596 @ 5.2 V → servo, Uno 5V pin, LEDs, encoder; 3 A
-  fuse at the pack, XT30, rocker; ⚠️ **the 2S BMS documents NO over-discharge
+  fuse at the pack, XT30, rocker; ~~⚠️ **the 2S BMS documents NO over-discharge
   cutoff — open safety item, guarded by firmware only while the firmware is
-  on** · DonkeyCar 5.x for Pi-side plumbing **minus its actuator backend,
+  on**~~ **CLOSED: BMS ACEIRMC B08HLQQCQJ documents a 2.9 V/cell cutoff
+  (Appendix CK, re-verified live 2026-10-04), and the wiring doc routes the
+  pack through it since 2026-10-10 (Appendix FE). Cells are Samsung 25R, not
+  EVE 25P (sold out 2026-09-03).** · DonkeyCar 5.x for Pi-side plumbing **minus its actuator backend,
   which cannot drive the Uno** (task 11 amendment); `rpi-lgpio` not
   `RPi.GPIO` on the Pi 5 · custom PyTorch models · training on RTX 3060 Ti
   8 GB with Sysmem Fallback still ON (capped in code, not in the driver).
@@ -538,7 +541,10 @@ transfer gap) must not block the capstone.
         model the 20T spline (~0.76 mm pitch is under 0.4 mm-nozzle
         resolution). ⚠️ **It carries no torque margin either**, so it does not
         close this task — it gives a $0 thing to test first. Print PETG.
-        Never printed, never loaded.
+        ~~Never printed, never loaded.~~ **v1 WAS printed (by 2026-09-03;
+        settings not recorded) and its axle socket was too loose (Evan,
+        2026-10-04, Appendix FC). v2 (socket clearance 0.00 mm) is generated,
+        not yet printed. Neither has been loaded.**
 
 8d. **Export the inference stack to ONNX — BEFORE the first drive, not after**
     (appended 2026-09-03, Appendix CI). Recommended by
@@ -606,10 +612,14 @@ transfer gap) must not block the capstone.
     test; measurements recorded. *(Terms corrected 2026-09-02; the split-source
     architecture itself dates from 2026-07-23 ~17:59 and is unchanged. Net
     list and an 8-step build order: `docs/WIRING_PROTOSHIELD.md`.)*
-    ⚠️ **GATE: BOM Verify item 6.** The 2S BMS board documents NO over-discharge
+    ~~⚠️ **GATE: BOM Verify item 6.** The 2S BMS board documents NO over-discharge
     cutoff, and firmware cannot guard a pack while the firmware is off. Close
     it (protection board that states over-discharge cutoff, or protected
-    cells) before any pack is charged. **Evan's call.**
+    cells) before any pack is charged. **Evan's call.**~~ **GATE CLOSED
+    2026-10-10:** BMS `B08HLQQCQJ` states a 2.9 V/cell cutoff (Appendix CK,
+    re-verified live 2026-10-04), and `docs/WIRING_PROTOSHIELD.md` section 2.1
+    now wires the pack through it (Appendix FE). Until that redraw the wiring
+    bypassed the BMS (Appendix FA). Still to do on the bench: build step 2a.
 11. **Teleop + logging.** DonkeyCar install, web/gamepad teleop, tub
     recorder verified (images + steering/throttle synced). Done: M2 success
     criterion (full-session drive + ≥10 readable laps).

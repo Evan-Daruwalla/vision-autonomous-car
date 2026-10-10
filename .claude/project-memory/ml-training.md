@@ -379,8 +379,15 @@ teaches the car to swerve.
   **Pinned since 2026-09-10 (Appendix EV):** in `train_controller.py` the
   choice now lives in `select_actions()`, and `--self-check` fails if the
   expert array ever reaches the LSTM again — mutation-tested, a replay of the
-  2026-09-07 bug is killed. Ceiling, marked `# shortcut:` in code: it pins the
-  function, not that `main()` routes through it. **`diag_copycat.py` still makes
+  2026-09-07 bug is killed. ~~Ceiling, marked `# shortcut:` in code: it pins the
+  function, not that `main()` routes through it.~~ **Ceiling CLOSED 2026-10-10
+  (Appendix FD #2, which confirmed the bug could hide in `main()`):** main()'s
+  whole data-prep path is now `build_training_arrays()`, which self_check runs
+  end to end; a mutant putting the bug back on that path is killed. Also
+  2026-10-10 (FD #7): recovery tracks (`-rec`) with no expert labels now
+  refuse to train unless `--allow-noisy-labels`, and controller checkpoints
+  carry `vae_fingerprint` / `rnn_fingerprint` - **nothing checks them yet**
+  (eval_in_sim / eval_paired / plan_cem). **`diag_copycat.py` still makes
   the same choice inline and nothing guards it.**
 
 ## RETRACTION (2026-08-11): the "first completions" result did not replicate

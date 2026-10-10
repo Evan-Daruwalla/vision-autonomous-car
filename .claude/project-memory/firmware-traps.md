@@ -71,6 +71,11 @@ Board/electrical facts (pin budget, current limits, the pack) stay in
   Missing this is what made the first attempt still blink after flashing.
 - **A light that always cries wolf is not read when it means something** — that
   is the reason, not tidiness.
+- **The `PACK_CUTOFF` latch is RAM-only - any reset clears it, including the
+  Pi opening the serial port (DTR auto-resets the Uno).** Found 2026-10-08
+  (Appendix FD #3); Evan chose to correct `SERIAL_PROTOCOL.md` rather than
+  persist it in EEPROM. The BMS's 2.9 V/cell cutoff is the hardware floor; the
+  latch re-trips after 500 ms under 6.0 V.
 - **What is never silenced**: a latched `PACK_CUTOFF` (a genuinely flat pack).
   And silencing is LED-only — throttle inhibit, `STBY` and `outputModeFor()`
   are untouched, with SELFTEST assertions saying so, including that a watchdog

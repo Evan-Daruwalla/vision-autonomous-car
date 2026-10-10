@@ -57,6 +57,7 @@ from pathlib import Path
 
 # ---- geometry, all mm -------------------------------------------------------
 OD = 10.0            # body outer diameter; wall stays >=2.5 mm everywhere
+MIN_WALL = 1.2       # refuse below this: three 0.4 mm-nozzle perimeters
 TOTAL_LEN = 16.0     # matches Adafruit #4252's 16 mm so it drops into the same space
 
 SPLINE_DIA = 4.85    # MG90S 20T spline OD (datasheet 4.8-4.9)
@@ -278,15 +279,19 @@ def main():
     dup, unmatched = check_manifold(tris)
     vol, exp = signed_volume(tris), expected_volume()
     err = abs(vol - exp) / exp
-    ok = dup == 0 and unmatched == 0 and vol > 0 and err < 1e-6
+    wall_bore = (OD - BORE_DIA) / 2
+    wall_socket = (OD - SOCKET_SPAN) / 2
+    # Appendix FD #6: `--socket-clear 6` produced wall -0.40 and still printed
+    # OVERALL PASS -- the mesh checks prove a closed solid, not a printable
+    # one. 1.2 mm = three 0.4 mm-nozzle perimeters; below that it is not a wall.
+    walls_ok = min(wall_bore, wall_socket) >= MIN_WALL
+    ok = dup == 0 and unmatched == 0 and vol > 0 and err < 1e-6 and walls_ok
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     if ok:                      # never leave a bad mesh on disk looking printable
         write_stl(tris, out)
 
-    wall_bore = (OD - BORE_DIA) / 2
-    wall_socket = (OD - SOCKET_SPAN) / 2
     print(f"body       : OD {OD:.2f} x {TOTAL_LEN:.2f} mm")
     print(f"servo bore : {BORE_DIA:.2f} mm dia x {BORE_DEPTH:.2f} deep "
           f"({BORE_INTERF:.2f} under the {SPLINE_DIA:.2f} spline; wall {wall_bore:.2f})")
@@ -299,6 +304,8 @@ def main():
           f"  -> {'PASS' if dup == 0 and unmatched == 0 else 'FAIL'}")
     print(f"volume     : {vol:.4f} mm^3 (expected {exp:.4f}, rel.err {err:.2e})"
           f"  -> {'PASS' if vol > 0 and err < 1e-6 else 'FAIL'}")
+    print(f"walls      : min {min(wall_bore, wall_socket):.2f} mm (need >= {MIN_WALL:.2f})"
+          f"  -> {'PASS' if walls_ok else 'FAIL'}")
     print(f"OVERALL    : {'PASS' if ok else 'FAIL'}")
     if not ok:
         print(f"NOT WRITTEN: {out} (geometry failed validation)")

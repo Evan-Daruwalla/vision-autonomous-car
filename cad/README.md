@@ -184,6 +184,25 @@ signed volume against an analytic expectation) and refuses to write on failure.
 Current output: `manifold PASS`, `volume PASS` at 1.05e-14 relative error,
 1,152 triangles, Ø10 × 16 mm, 1015.12 mm³.
 
+### Printed and fitted: v1 was too loose -> v2 (2026-10-04, Appendix FC)
+
+**v1 was printed** (by 2026-09-03; the record had misread this as a bought
+Adafruit #4252). **Its Lego-axle socket was TOO LOOSE** (Evan). Printer,
+filament and settings were not recorded. Cause: the socket used the coupon's
++0.20 mm free-SPIN offset, where a grip needs the pin row's 0.00.
+
+**`servo_lego_coupler_v2.stl` - print this one.** Same part, socket clearance
+0.00 mm (4.80 x 1.80 mm cross, 2.60 mm wall):
+
+```bash
+python scripts/gen_servo_lego_coupler.py --socket-clear 0.00 -o cad/servo_lego_coupler_v2.stl
+```
+
+**Untested.** The 0.00 came from a round pin; thin cross arms may print
+tighter - if a Lego axle will not go in, regenerate at 0.05 or 0.10 rather than
+forcing it. Record printer, filament, settings and the fit result this time.
+The generator refuses any wall under 1.2 mm (Appendix FD #6).
+
 ### The design, and the one thing it deliberately does not do
 
 | end | feature | why |

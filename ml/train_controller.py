@@ -52,8 +52,8 @@ import torch.nn as nn
 
 from models import ACTION_DIM, HIDDEN, MDNRNN, Z_DIM, ConvVAE, count_params
 from provenance import write_result
-from splits import (fit_val_episodes, load_cached_mu, load_proc,
-                    split_seed_of)
+from splits import (encoder_fingerprint, fit_val_episodes, load_cached_mu,
+                    load_proc, split_seed_of)
 
 REPO = Path(__file__).resolve().parent.parent
 PROC = REPO / "ml" / "data" / "proc"
@@ -135,6 +135,41 @@ def select_actions(executed: np.ndarray, expert: np.ndarray | None):
     return executed, expert
 
 
+def build_training_arrays(rnn, mu, act, expert, eps, fit_eps, val_eps, device):
+    """main()'s whole DART data-prep path: (i, z, h, a) for fit and for val.
+
+    Moved out of main() 2026-10-10 (daily audit, Appendix FD #2). With only
+    select_actions() under test, putting the 2026-09-07 bug back INSIDE main()
+    -- handing the expert array to rnn_states() -- still passed self_check.
+    main() now does nothing on this path but call this function, and
+    self_check() runs it end to end.
+    """
+    lstm_in, target = select_actions(act, expert)
+    out = []
+    for ep_idx in (fit_eps, val_eps):
+        idx, h = rnn_states(rnn, mu, lstm_in, eps, ep_idx, device)
+        out.append((idx, mu[idx], h, target[idx]))
+    return out[0], out[1]
+
+
+def check_labels(tracks, expert, allow_noisy: bool) -> None:
+    """Refuse to clone noise-injected actions by accident (Appendix FD #7).
+
+    Recovery episodes (track names ending '-rec', the same rule main() uses
+    for --recovery-weight) record the action actually EXECUTED, injected
+    noise included. Without train_actions_expert.npy the BC target falls back
+    to those actions, and the car learns to swerve. That used to happen
+    silently; now it needs an explicit flag.
+    """
+    n_rec = sum(str(t).endswith("-rec") for t in tracks)
+    if n_rec and expert is None and not allow_noisy:
+        raise SystemExit(
+            f"{n_rec} recovery episode(s) but no train_actions_expert.npy: the "
+            f"BC target would be the noise-injected executed actions. Run "
+            f"ml/build_expert_labels.py, or pass --allow-noisy-labels to train "
+            f"on them deliberately.")
+
+
 def self_check() -> None:
     """Pins the DART invariant, proves it is not vacuous, and pins causality.
 
@@ -149,8 +184,10 @@ def self_check() -> None:
         expert = executed.copy()
         expert[3:6] += 0.8          # "recovery frames": where the arrays differ
 
-        # 1. The invariant. On the pre-bfa953e code this is exactly what
-        #    failed: the expert array went into the LSTM.
+        # 1. The invariant, at the function that decides it. Check 5 below
+        #    runs main()'s whole data-prep path, so the pre-bfa953e bug (the
+        #    expert array into the LSTM) cannot hide in main() either --
+        #    before 2026-10-10 it could (Appendix FD #2).
         lstm_in, target = select_actions(executed, expert)
         assert lstm_in is executed, (
             "rnn_states() must replay the EXECUTED actions, never the expert "
@@ -204,6 +241,30 @@ def self_check() -> None:
         except ValueError:
             refused = True
         assert refused, "an unknown arch must be refused"
+
+        # 5. main()'s data-prep path end to end. fit = episode 0 (frames 0-5,
+        #    where the arrays differ at 3-5); val = episode 1 (identical).
+        (fit_i, fit_z, fit_h, fit_a), (val_i, _, val_h, val_a) = build_training_arrays(
+            rnn, mu, executed, expert, eps, np.array([0]), np.array([1]), "cpu")
+        assert fit_i.tolist() == list(range(6)) and val_i.tolist() == list(range(6, 11))
+        assert np.array_equal(fit_a, expert[fit_i]), "BC target must be the expert relabel"
+        assert np.array_equal(fit_z, mu[fit_i])
+        assert np.allclose(fit_h, h_exec[fit_i]) and np.allclose(val_h, h_exec[val_i]), (
+            "the LSTM was fed something other than the EXECUTED actions -- the "
+            "2026-09-07 DART contamination, now inside main()'s path")
+        assert not np.allclose(fit_h[4], h_exp[4])
+
+        # 6. Noisy-label guard (Appendix FD #7).
+        recov = ["generated-track", "generated-track-rec"]
+        refused = False
+        try:
+            check_labels(recov, None, allow_noisy=False)
+        except SystemExit:
+            refused = True
+        assert refused, "recovery episodes with no expert labels must be refused"
+        check_labels(recov, None, allow_noisy=True)      # deliberate: allowed
+        check_labels(recov, expert, allow_noisy=False)   # labelled: fine
+        check_labels(["generated-track"], None, allow_noisy=False)  # no recovery: fine
     print("train_controller self_check: PASS")
 
 
@@ -265,6 +326,9 @@ def main() -> int:
                          "--proc containing recovery episodes")
     ap.add_argument("--out", default=str(RUNS / "controller"))
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--allow-noisy-labels", action="store_true",
+                    help="train on recovery episodes WITHOUT expert labels, i.e. "
+                         "clone the noise-injected executed actions on purpose")
     ap.add_argument("--self-check", action="store_true",
                     help="run the DART/causality invariants on CPU and exit; "
                          "needs no corpus or checkpoint")
@@ -299,18 +363,15 @@ def main() -> int:
     # target. `act` itself stays the EXECUTED sequence everywhere else in
     # this file: it is what actually produced the observed latents `mu`, so
     # it is what rnn_states() below must replay into the frozen MDN-RNN's
-    # LSTM (see THE CAUSAL INDEXING in the module docstring). Only
-    # `act_target` -- used for fit_a/val_a further down -- gets the DART
-    # relabel. Cold audit finding, Appendix EI (2026-09-07): this used to
-    # overwrite `act` itself, so h_t was built from a counterfactual action
-    # sequence that never produced the observed z's -- worst exactly on the
-    # recovery frames where the two arrays differ.
+    # LSTM (see THE CAUSAL INDEXING in the module docstring). Only the BC
+    # target gets the DART relabel - build_training_arrays() below decides
+    # that, and self_check() runs it. Cold audit finding, Appendix EI
+    # (2026-09-07): this used to overwrite `act` itself, so h_t was built from
+    # a counterfactual action sequence that never produced the observed z's
+    # -- worst exactly on the recovery frames where the two arrays differ.
     expert_path = proc / "train_actions_expert.npy"
     expert = np.load(expert_path) if expert_path.exists() else None
-    # shortcut: self_check() pins select_actions(), not that main() routes
-    # through it -- proving that needs a fixture corpus. Upgrade trigger: any
-    # refactor of this block, or a second caller of rnn_states().
-    act, act_target = select_actions(act, expert)
+    check_labels(tracks, expert, args.allow_noisy_labels)
     if expert is not None:
         print(f"labels: {expert_path.name} (expert actions; "
               f"LSTM input stays the executed sequence)")
@@ -346,13 +407,10 @@ def main() -> int:
 
     print(f"building RNN states for {len(fit_eps)} fit + {len(val_eps)} val episodes...")
     t0 = time.time()
-    fit_i, fit_h = rnn_states(rnn, mu, act, eps, fit_eps, args.device)
-    val_i, val_h = rnn_states(rnn, mu, act, eps, val_eps, args.device)
+    (fit_i, fit_z, fit_h, fit_a), (val_i, val_z, val_h, val_a) = build_training_arrays(
+        rnn, mu, act, expert, eps, fit_eps, val_eps, args.device)
     print(f"  fit {len(fit_i):,} frames, val {len(val_i):,} frames "
           f"({time.time()-t0:.0f}s)")
-
-    fit_z, fit_a = mu[fit_i], act_target[fit_i]
-    val_z, val_a = mu[val_i], act_target[val_i]
 
     if args.no_history:
         # Zeroed rather than removed so the Controller architecture, parameter
@@ -427,7 +485,14 @@ def main() -> int:
             best = va
             torch.save({"model": model.state_dict(), "epoch": epoch,
                         "val_mse": va, "val_mse_unweighted": va_plain,
-                        "args": vars(args)},
+                        "args": vars(args),
+                        # Appendix FD #7: which frozen V and M this C was
+                        # trained against. encoder_fingerprint() is a plain
+                        # file-stat hash, so it serves the RNN too. Nothing
+                        # CHECKS these yet - eval_in_sim / eval_paired /
+                        # plan_cem verifying them is the open follow-up.
+                        "vae_fingerprint": encoder_fingerprint(args.vae),
+                        "rnn_fingerprint": encoder_fingerprint(args.rnn)},
                        out / f"controller_{args.arch}_seed{args.seed}.pt")
 
     write_result(out / f"history_{args.arch}_seed{args.seed}.json", {"args": vars(args), "history": history})

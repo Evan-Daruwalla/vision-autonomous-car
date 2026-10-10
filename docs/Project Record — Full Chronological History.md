@@ -196,6 +196,7 @@ the dated entry, not the digest.
 - [FC - CORRECTION to DD/DF: no Adafruit #4252 was ever on hand - the strong 2026-09-03 coupler was a print of v1, whose axle socket was too loose; v2 tightens it to the coupon's grip offset; plus a closure bug in this session's edit script](#appendix-fc---correction-to-dddf-no-adafruit-4252-was-ever-on-hand---the-strong-2026-09-03-coupler-was-a-print-of-v1-whose-axle-socket-was-too-loose-v2-tightens-it-to-the-coupons-grip-offset-plus-a-closure-bug-in-this-sessions-edit-script-2026-10-04-2045-cdt) (10-04)
 - [FD - Scheduled daily-audit: 35 findings - HANDOFF says in sync with origin while 3 commits are unpushed, and the DART self_check passes with the real bug put back in main()](#appendix-fd---scheduled-daily-audit-35-findings---handoff-says-in-sync-with-origin-while-3-commits-are-unpushed-and-the-dart-self_check-passes-with-the-real-bug-put-back-in-main-2026-10-08-0728-cdt) (10-08)
 - [FE - Wiring redrawn with the BMS in the circuit (fuse on the cell side) and three Mermaid diagrams added - the first one-piece diagram rendered but was unreadable, so it was split](#appendix-fe---wiring-redrawn-with-the-bms-in-the-circuit-fuse-on-the-cell-side-and-three-mermaid-diagrams-added---the-first-one-piece-diagram-rendered-but-was-unreadable-so-it-was-split-2026-10-10-1406-cdt) (10-10)
+- [FF - Daily audit FD worked: DART self_check now covers main()'s whole data path, noisy labels refused, coupler walls guarded, latch doc corrected - and 28 of FD's 35 findings were never saved](#appendix-ff---daily-audit-fd-worked-dart-self_check-now-covers-mains-whole-data-path-noisy-labels-refused-coupler-walls-guarded-latch-doc-corrected---and-28-of-fds-35-findings-were-never-saved-2026-10-10-1428-cdt) (10-10)
 
 ---
 
@@ -16065,3 +16066,78 @@ going into the doc.
 
 The TB6612 parallel pin pairing (unverified against Toshiba); the charger idle
 drain; v1 coupler print settings (Appendix FC); v2 coupler not yet printed.
+
+# Appendix FF - Daily audit FD worked: DART self_check now covers main()'s whole data path, noisy labels refused, coupler walls guarded, latch doc corrected - and 28 of FD's 35 findings were never saved (2026-10-10 14:28 CDT)
+**WHAT:** Worked the 2026-10-08 daily audit (Appendix FD). All 7 of its
+recorded top findings are now closed or corrected. **The other 28 of its 35
+findings cannot be worked: they were never saved.** The record holds only
+the top 7 and a search of the workspace and `~/.claude` found no report file.
+That is a gap in how the audit records its output, not something this entry
+can recover.
+
+## The 7
+
+| # | finding | done |
+|---|---|---|
+| 1 HIGH | HANDOFF said "in sync" with origin; 3 commits ahead | fixed in commit 6caccea |
+| 2 MED | DART self_check passed with the bug put back in `main()` | **fixed - below** |
+| 3 MED | pack latch is RAM-only; doc said power cycle only | doc corrected (Evan's call) |
+| 4 MED | PRD showed the BMS gate open; HANDOFF closed it with no caveat | both corrected |
+| 5 MED | coupler correction (FC) not propagated | wiring doc + BOM in 6caccea; cad/README + PRD now |
+| 6 MED | coupler generator passed a -0.40 mm wall | **fixed - below** |
+| 7 MED | missing expert labels trained silently on noisy actions | **fixed - below** |
+
+## #2 - the self_check now covers `main()`'s path
+
+`ml/train_controller.py`: main()'s whole data-prep path (select actions,
+replay the executed ones through the frozen LSTM, slice fit/val) is now one
+function, `build_training_arrays()`, and `main()` only calls it. self_check
+runs it end to end on synthetic data. The `# shortcut:` that disclosed the old
+gap is removed, and the comment that overclaimed is corrected.
+
+Mutation test, scratch copies, repo untouched:
+
+    control (unmutated)                          PASS
+    FD#2: DART bug inside main()'s data path     KILLED: the LSTM was fed something other than the EXECUTED actions
+    BC target lost inside main()'s data path     KILLED: BC target must be the expert relabel
+    FD#7: noisy-label guard disabled             KILLED: recovery episodes with no expert labels must be refused
+
+Honest limit: an author could still re-write `main()` to bypass the function
+entirely. What changed is that the logic no longer lives in `main()` at all.
+
+## #7 - noisy labels refused; checkpoints fingerprinted
+
+If any track ends in `-rec` (the rule main() already used for
+`--recovery-weight`) and `train_actions_expert.npy` is missing, training now
+stops with an explicit message unless `--allow-noisy-labels` is passed.
+Controller checkpoints now carry `vae_fingerprint` and `rnn_fingerprint`
+(`splits.encoder_fingerprint`). **Nothing checks those yet** - verifying them
+in eval_in_sim / eval_paired / plan_cem is the named follow-up.
+
+## #6 - walls
+
+`scripts/gen_servo_lego_coupler.py` refuses any wall under `MIN_WALL` = 1.2 mm
+(three 0.4 mm-nozzle perimeters):
+
+    walls      : min -0.40 mm (need >= 1.20)  -> FAIL
+    OVERALL    : FAIL     NOT WRITTEN ...      exit 1
+
+v1 and v2 still regenerate byte-for-byte (`28 artifacts checked, 0 drifted`).
+
+## #3 - the latch (Evan chose the doc fix)
+
+The Uno resets whenever the Pi opens the serial port, and the cutoff latch is
+RAM-only, so a Pi reconnect clears it. `SERIAL_PROTOCOL.md` said only a power
+cycle could. Corrected rather than adding EEPROM firmware that could not be
+verified on the board: the BMS's 2.9 V/cell cutoff is the hardware floor, and
+the 3.00 V/cell latch re-trips after 500 ms under 6.0 V.
+
+## Verified
+
+    15 passed, 0 failed, 0 skipped  (of 15)
+    28 artifacts checked, 0 drifted, 0 errored, 2 uncheckable
+
+## Follow-ups, named not done
+
+Checkpoint fingerprints checked by their 3 consumers; `diag_copycat.py` still
+makes the DART choice inline, unguarded; FD's 28 unrecorded findings.
