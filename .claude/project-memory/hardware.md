@@ -531,3 +531,5 @@ FLIPPED 2026-09-05 (Appendix DM), see below:**
   does; 1.5 mm used).
 - 2026-10-11 (Appendix FP): motor coupler v2 = D-bore +0.075 mm (3.075 /
   2.575 across flat), 8 mm deep. v1 CONFIRMED too tight (Evan, Appendix FQ).
+- 2026-10-11 (Appendix FS): motor coupler v3 = D-bore +0.150 over v1 (3.150 /
+  2.650 across flat). v2 inferred still too tight. Shaft still unmeasured.

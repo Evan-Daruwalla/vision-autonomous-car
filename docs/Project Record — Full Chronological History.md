@@ -209,6 +209,7 @@ the dated entry, not the digest.
 - [FP - Motor coupler v2: D-bore +0.075 mm clearance, still 8 mm deep (a 12 mm version was dropped - the shaft is 9 mm)](#appendix-fp---motor-coupler-v2-d-bore-0075-mm-clearance-still-8-mm-deep-a-12-mm-version-was-dropped---the-shaft-is-9-mm-2026-10-11-0011-cdt) (10-11)
 - [FQ - Motor coupler v1 confirmed TOO TIGHT on the shaft (Evan) - FP's inference is now his stated result](#appendix-fq---motor-coupler-v1-confirmed-too-tight-on-the-shaft-evan---fps-inference-is-now-his-stated-result-2026-10-11-0013-cdt) (10-11)
 - [FR - Coupler print settings recorded: Bambu P1S, PLA, 0.1 mm layers, 2 walls, solid - the couplers are PLA, not ABS like the coupons](#appendix-fr---coupler-print-settings-recorded-bambu-p1s-pla-01-mm-layers-2-walls-solid---the-couplers-are-pla-not-abs-like-the-coupons-2026-10-11-0013-cdt) (10-11)
+- [FS - Motor coupler v3: D-bore another +0.075 mm (3.150 / 2.650) - v2 inferred still too tight](#appendix-fs---motor-coupler-v3-d-bore-another-0075-mm-3150--2650---v2-inferred-still-too-tight-2026-10-11-1424-cdt) (10-11)
 
 ---
 
@@ -16601,3 +16602,25 @@ clearances are empirical per part, not transferable.
 
 **Owed note from FQ:** FQ is stamped 00:13 CDT; it was appended at
 00:12:04 CDT.
+
+# Appendix FS - Motor coupler v3: D-bore another +0.075 mm (3.150 / 2.650) - v2 inferred still too tight (2026-10-11 14:24 CDT)
+**WHAT:** Evan: "make it another 0.075 tolerance". Motor coupler v3 opens
+the D-bore another 0.075 mm: 3.150 mm dia, 2.650 mm across the flat, 8 mm
+deep (+0.150 over v1 in total). Socket and body unchanged.
+
+    D bore     : 3.15 mm dia, 2.65 across the flat x 8.00 deep (wall 2.12)
+    manifold   : duplicate-directed-edges=0 unmatched-edges=0  -> PASS
+    volume     : 514.4437 mm^3 (expected 514.4437, rel.err 6.63e-16)  -> PASS
+    hole nested: inside bore and socket at every angle  -> PASS
+    walls      : min 1.30 mm (need >= 1.20)  -> PASS
+
+`check_artifacts.py`: 32 checked, 0 drifted.
+
+**Inferred, not stated:** motor v2 (+0.075) was printed and was still too
+tight. Settings assumed unchanged from Appendix FR (P1S, PLA, 0.1 mm, 2 walls,
+solid).
+
+**The fit trail so far** (all on the unmeasured 2.50 mm-flat model):
+v1 nominal - too tight; v2 +0.075 - (inferred) too tight; v3 +0.150 -
+untested. Two prints in, the shaft's real across-flat size would end the
+guessing; it is still not caliper-measured.

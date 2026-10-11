@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-11 ~00:14 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-11 ~14:25 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 174 appendices A–FR; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 175 appendices A–FS; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -632,8 +632,8 @@ NEXT ACTIONS, cheapest first:
    Appendix FM); settings recorded in FR (P1S, PLA, 0.1 mm, 2 walls, solid).
    Print `cad/servo_lego_coupler_v3.stl` (half the wall, 14 mm long; the 2 mm
    shortening was a guess) and test-fit it; record the same four things.
-1a. Drive-motor coupler: print `cad/motor_lego_coupler_v2.stl` (Appendix FP,
-   D-bore +0.075 mm over v1, which was TOO TIGHT - Evan, FQ) and fit it.
+1a. Drive-motor coupler: print `cad/motor_lego_coupler_v3.stl` (Appendix FS,
+   D-bore +0.150 over v1; v1 TOO TIGHT (FQ), v2 +0.075 inferred too tight) and fit it.
    Print settings are recorded (FR: P1S, PLA, 0.1 mm, 2 walls, solid) -
    only a CHANGE needs recording now. The D-flat is still unmeasured.
 1b. Work the daily audit's OPEN rows - Appendix FG holds the full 35-row

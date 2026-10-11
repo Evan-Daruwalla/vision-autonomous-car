@@ -251,6 +251,13 @@ Evan's call: the shaft is only 9 mm.)
 python scripts/gen_servo_lego_coupler.py --socket-clear 0.00 --od 7.4 --bore-dia 3.075 --bore-flat 2.575 --screw-dia 1.5 --bore-depth 8 --socket-depth 5 -o cad/motor_lego_coupler_v2.stl
 ```
 
+**Motor v3 (2026-10-11, Evan): another +0.075 mm** - 3.150 mm dia, 2.650 mm
+across the flat (+0.150 over v1 in total). Same everything else.
+
+```bash
+python scripts/gen_servo_lego_coupler.py --socket-clear 0.00 --od 7.4 --bore-dia 3.15 --bore-flat 2.65 --screw-dia 1.5 --bore-depth 8 --socket-depth 5 -o cad/motor_lego_coupler_v3.stl
+```
+
 ### The design, and the one thing it deliberately does not do
 
 | end | feature | why |

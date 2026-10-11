@@ -144,6 +144,12 @@ ARTIFACTS = [
               "--od", "7.4", "--bore-dia", "3.075", "--bore-flat", "2.575",
               "--screw-dia", "1.5", "--bore-depth", "8", "--socket-depth", "5",
               "-o", "{out}"]),
+    # Motor v3 (2026-10-11, Evan): another +0.075 mm on the D-bore.
+    dict(kind="file", artifact="cad/motor_lego_coupler_v3.stl",
+         cmd=["scripts/gen_servo_lego_coupler.py", "--socket-clear", "0.00",
+              "--od", "7.4", "--bore-dia", "3.15", "--bore-flat", "2.65",
+              "--screw-dia", "1.5", "--bore-depth", "8", "--socket-depth", "5",
+              "-o", "{out}"]),
     dict(kind="file", artifact="cad/tolerance_coupon_v2.stl",
          cmd=["scripts/gen_tolerance_coupon.py", "-o", "{out}"]),
 
