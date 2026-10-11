@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-11 ~14:25 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-11 ~15:03 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 175 appendices A–FS; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 180 appendices A–FX; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -25,7 +25,7 @@ BOARD** (`firmware/uno_control/`, host_test 13/13, Appendices BO/CA/CE).
 time was found by the 2026-09-02 daily-audit (BY) and fixed the same evening
 (CA); "verified on the board" before CA covered the link, not this path.**
 ⚠️ **The flashed build and the repo source now DIVERGE** (2026-09-03, Appendix
-DC): the board still runs the 2026-09-02 build (SELFTEST 49/49, 7888 B), while
+DC): ~~the board still runs the 2026-09-02 build (SELFTEST 49/49, 7888 B)~~ **2026-10-10: Evan uploaded `firmware/servo_bench` over it (Appendix FT) - the board runs servo_bench until uno_control is re-flashed**, while
 `uno_control.ino`'s lighting path was rewritten for WS2812B afterwards —
 compiled clean (58 checks, 9680 B) but **never flashed**. Read the boot banner,
 never a doc, for what the board is actually running.
@@ -400,7 +400,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Track layout | M1.4 | **v1 + v2 drawn, NOT committed** | 2026-09-01, Appendices AM/AT/AX/AY. `cad/track_layout_v1.py` = figure-8 with a flat causeway bridge + 5 landmarks; `cad/track_layout_v2.py` = 3x3 city grid, 9 intersections, figure-8 route through the centre. ~~8.31 m, 103.5 mm spare at R=500~~ ~~RE-RUN 2026-09-05 ... span 2710 mm, spare only 90 mm at R=500 — UNDER the script's own 100 mm self-check, which now FAILS~~ ~~**CURRENT, real output 2026-09-06 at lane 310 mm: route 8.23 m, pitch 1190 mm, span 2690 mm, spare 110 mm at R=500**~~ (struck 2026-09-09, Appendix ET: wrong in every number — the lane had already moved 310 → 250 mm and nothing propagated it). **CURRENT, real `cad/track_layout_v2.py` stdout 2026-09-09: lane 250 mm (1.613 × the 155 mm car, DELIBERATELY under the 2.0× rule), route 7.51 m, pitch 1100 mm, span 2700 mm of 2800 usable, spare 100 mm at R=500, `self_check: PASS`.** The SVG and JSON had been silently frozen since 2026-09-05 — `main()` runs `self_check()` before it writes, so the failing assert meant no regeneration; the committed JSON still read the old 148.25 mm car. Both regenerated. Print plan, live 2026-09-09: corner arcs 6.28 m, intersection boxes 18.00 m, **122 tiles at 200 mm, ~627 g** of filament, street lines 32.40 m taped not printed (~~10.67 → 11.16 m / 85 → 88 tiles / ~1051 → ~1081 g~~ struck same date, same cause). Corner geometry stays FROZEN until T2 regardless |
 | Track: sim rehearsal | — | **IMPOSSIBLE, settled** | 2026-09-01, Appendix AX. gym-donkeycar's protocol has ten message types and none defines a road; `load_scene` picks from 11 prebuilt Unity scenes. A custom track needs a Unity build. Costs little: M3 trains on real laps, not the sim corpus |
 | Track surface | T3 | **Decided: hybrid** | 2026-09-01, Appendix AX. NOT 225 printed panels (~12.6 kg, 169-900 h, 225 bed clears, 28 camera-visible seams). Print the 6.28 m of corner arcs + 9.36 m of intersection boxes as ~79 tiles (~970 g); tape the 31.9 m of straight street lines |
-| Uno firmware | — | **CONTROL FIRMWARE RUNS ON THE BOARD (2026-09-02)** | Appendices BD/BJ/BO. `firmware/` — `uno_bringup` (board proven), `uno_memtest` (2048 B SRAM, 16.0042 MHz), `uno_echo` (link p99 1.069 ms), `uno_packguard` (SELFTEST 27/27), **`uno_control` (implements `SERIAL_PROTOCOL.md` v0.2: **SELFTEST 49/49, `host_test.py` 13/13 exit 0**, 7888 B flash / 313 B SRAM, loop 2-3 ms; the status LED is quiet on a bench board and loud once a real pack has ever been seen — Appendix CE)** — **CURRENTLY FLASHED, fixed build, as of 2026-09-02 ~19:55 CDT.** Evan had put `uno_packguard` back on it in between, so **read the boot banner, never this line, for what the board is running.** ⚠️ **Watchdog defect found by the daily-audit (BY), fixed (CA): two `millis()` samples per loop iteration made the watchdog trip in the same iteration as every good frame — after the reply was sent, so no status byte ever showed it; a wired car would drive ~2 ms then brake ~48 ms, repeating.** The probe that catches it reads `armed` inside the window; the status-bit check the audit suggested passes on the broken build. `SERIAL_PROTOCOL.md` is no longer design-only. **ACTUATORS UNWIRED** — link + state machine only. ⚠️ **The repo source no longer matches what's flashed, as of 2026-09-03 (Appendix DC): `uno_control.ino`'s lighting path was rewritten for WS2812B (task 8e) after this row's "CURRENTLY FLASHED" build. That rewrite is compiled, not flashed** — the board still runs the 2026-09-02 build described in the rest of this row; SELFTEST 49/49 and 7888 B flash refer to THAT build, not the current source (58 checks, 9680 B, per Appendix DC) |
+| Uno firmware | — | ~~**CONTROL FIRMWARE RUNS ON THE BOARD (2026-09-02)**~~ **2026-10-10: board runs `servo_bench` (FT); uno_control to be re-flashed** | Appendices BD/BJ/BO. `firmware/` — `uno_bringup` (board proven), `uno_memtest` (2048 B SRAM, 16.0042 MHz), `uno_echo` (link p99 1.069 ms), `uno_packguard` (SELFTEST 27/27), **`uno_control` (implements `SERIAL_PROTOCOL.md` v0.2: **SELFTEST 49/49, `host_test.py` 13/13 exit 0**, 7888 B flash / 313 B SRAM, loop 2-3 ms; the status LED is quiet on a bench board and loud once a real pack has ever been seen — Appendix CE)** — **CURRENTLY FLASHED, fixed build, as of 2026-09-02 ~19:55 CDT.** Evan had put `uno_packguard` back on it in between, so **read the boot banner, never this line, for what the board is running.** ⚠️ **Watchdog defect found by the daily-audit (BY), fixed (CA): two `millis()` samples per loop iteration made the watchdog trip in the same iteration as every good frame — after the reply was sent, so no status byte ever showed it; a wired car would drive ~2 ms then brake ~48 ms, repeating.** The probe that catches it reads `armed` inside the window; the status-bit check the audit suggested passes on the broken build. `SERIAL_PROTOCOL.md` is no longer design-only. **ACTUATORS UNWIRED** — link + state machine only. ⚠️ **The repo source no longer matches what's flashed, as of 2026-09-03 (Appendix DC): `uno_control.ino`'s lighting path was rewritten for WS2812B (task 8e) after this row's "CURRENTLY FLASHED" build. That rewrite is compiled, not flashed** — the board still runs the 2026-09-02 build described in the rest of this row; SELFTEST 49/49 and 7888 B flash refer to THAT build, not the current source (58 checks, 9680 B, per Appendix DC) |
 | Vehicle lighting | — | **Spec written, nothing wired** | 2026-09-01, Appendix AY. `docs/LIGHTING_SPEC.md`. Headlights/tail/DRL/indicators. Only the headlight beam is in the camera's view. ~~Settles the PCA9685.~~ Superseded 2026-09-02 (BC): an **Arduino Uno** takes actuation instead. Turn signals are a THIRD policy head and gate the M3 collection run via PRD task 11b |
 | ~~Harness trustworthiness~~ | ~~P6~~ | ~~**OPEN — BLOCKING all closed-loop claims**~~ **STALE ROW, STRUCK 2026-09-02** | ⚠️ **This row contradicted the P6 row above it and was two days out of date.** It is dated 2026-08-11 (Appendix AD, cause unknown); the row above is dated **2026-08-13 (Appendix AI/AJ) and found the cause** — `donkey-generated-track-v0` regenerates the track per launch. **P6 is DONE.** The live rule that survives is narrower: never compare closed-loop numbers ACROSS launches; use `ml/eval_paired.py` |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8; print markings not surface. ~~1.6×2.8 m, 1:14~~ **SUPERSEDED — floor is 3.0 × 3.0 m (Evan, 2026-09-01) and the layout is `cad/track_layout_v2.py` at lane 230 mm / 171 mm spare on the MEASURED 114.75 mm car (2026-09-02, Appendix BO).** T1 scale is CLOSED except its marking table; **T2 still blocks every corner tile** — it needs an empirical turning test on the rolling chassis. `R_min = 0.625 × wheelbase ≈ 116.2 mm` as of 2026-09-05 (58° max steer, 13-stud rack; was `1.600 × wheelbase ≈ 297.5 mm` on the old rack) |
@@ -592,12 +592,14 @@ Read, in order:
    (track.md before ANY track/marking/xodr work; steering.md before ANY
    servo/steering work)
 
-STATE (2026-09-10 ~17:21 CDT). Software is four milestones ahead of hardware.
-The control firmware RUNS on the Uno (SELFTEST 49/49, host_test 13/13) but
-the flashed build and the repo source DIVERGE -- read the board's boot banner,
-never a doc. Actuators are unwired. Two tolerance coupons are printed and
-tested (pin 4.80 mm, axle 5.00 mm); nothing is ordered, BOM stands at
-$422.25 (2026-10-04). The sim lane ended in a well-instrumented NEGATIVE: no learned
+STATE (2026-10-11 ~14:36 CDT). Parts ORDERED and 23 of 24 ARRIVED 2026-10-10
+(Appendices FI-FL; the Camera Module 3 Wide is on a separate order, not in).
+Nothing is wired. The Uno now runs firmware/servo_bench (FT), NOT uno_control:
+re-flash uno_control and read its boot banner - no SELFTEST count is known
+for the current source. The MG90D-270 is positional (turns and stops).
+Couplers print in PLA on a Bambu P1S (0.1 mm, 2 walls, solid; FR): servo v2
+fitted, v3 next; motor coupler v1 too tight, v3 (+0.150) next. Tolerance
+coupons (ABS) gave pin 4.80 mm, axle 5.00 mm. BOM $422.25 before shipping. The sim lane ended in a well-instrumented NEGATIVE: no learned
 policy drives reliably, cause understood. The LaneMaker/OpenDRIVE simulation
 thread is CLOSED as a negative after seven failed hypotheses -- do not
 re-open it. The 2026-09-09 daily-audit (Appendix ES) is FULLY WORKED: docs in
@@ -619,10 +621,18 @@ UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
 (2026-09-30, 60 findings) have not been worked.
 
 NEXT ACTIONS, cheapest first:
+00. WIRING AUDIT DONE 2026-10-11 (Appendix FX): doc and firmware agree pin
+   for pin. Before wiring ANYTHING, follow WIRING_PROTOSHIELD section 5 as
+   rewritten: rail trimmed to 5.0 V (not 5.2) and the pot locked; step 1b
+   proves the cut-5V USB cable on this FT232RL clone FIRST (fail = stop and
+   redesign); step 2a cells OUT, B- then MB then B+, fuse last. Strips are cut
+   2 + 1 per side (tail on a rear jumper; firmware PX order changed). Run
+   host_test.py with --wired once anything is wired. Compiled, never flashed.
 0. PARTS ARRIVED 2026-10-10 (Appendices FI-FL). Camera still in transit;
-   motor is #5159; item 3 is the PiShop cable. Still ask: cell model/count.
-   SERVO BENCH: flash firmware/servo_bench (FL), measure the MG90D-270
-   map + end-of-travel pulses unloaded, then re-flash uno_control.
+   motor is #5159; item 3 is the PiShop cable. Cells: 4x Samsung 25R by wrap (FV/FW; 2 for the pack, 2 spares) - meter each.
+   SERVO BENCH: servo_bench is ON the board and works (FT); servo is
+   positional. Still to measure: per-unit DOA, angle table, end-of-travel
+   pulses, centre slop; then re-flash uno_control.
    BEFORE THE SERVO IS WIRED: uno_control is still set for a
    180-degree MG90S - SERVO_US_SPAN 450 gives +/-60.75 deg of the +/-135 the
    rack needs, and attach() has no limits, so the Servo library clamps to
@@ -642,7 +652,7 @@ NEXT ACTIONS, cheapest first:
    redraw this item used to lead with landed 2026-10-10.) (The Appendix EV commit this
    item used to ask for landed as caaf191 on 2026-10-04.)
 2. Flash uno_control and read the banner. The ST_DROPPED fix (Appendix EU)
-   is compiled, never flashed -- the board still runs the 2026-09-02 build.
+   is compiled, never flashed -- the board runs servo_bench now (FT).
    The same flash delivers FD row 15 (Appendix FH: parser resync on a bad
    CRC, T/B refused while ARMED), also compiled only. Then run
    firmware/host_test.py: its new test 4b is that fix's board-level gate.
@@ -652,7 +662,9 @@ NEXT ACTIONS, cheapest first:
    the same function so the self_check covers both.
 4. Pitch-row scale check + caliper the printed coupons (Evan's hands).
 5. Confirm a 12-tooth bevel gear is in the parts bin.
-6. THE ORDER, $422.25 + shipping -- BLOCKED-ON-EVAN. BMS confirmed 2026-10-04: B08HLQQCQJ (8PCS), re-verified live.
+6. ~~THE ORDER -- BLOCKED-ON-EVAN~~ ORDERED; 23/24 arrived (FI-FL). Still
+   paid: ~$430 (Evan's recollection, FU - shipping included or not unknown).
+   PRD task 8 closes when the camera (separate order) arrives.
 7. Evan's call, and LARGER than this file used to disclose. **98 tracked files
    carry the local workspace path `D:\ClaudeCode\...`** on the PUBLIC remote
    (measured 2026-10-04; 95 are provenance JSONs under `ml/runs/`, written by

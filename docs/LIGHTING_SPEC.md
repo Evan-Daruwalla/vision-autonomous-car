@@ -52,11 +52,11 @@ CX). Kept for the reasoning trail; nothing in it is current.
 
 | segment | pin | pixels | zones |
 |---|---|---|---|
-| left strip | D4 (`DIN`) | 3 | white front (head+DRL) · red rear (tail) · amber (left indicator) |
-| right strip | D7 (`DIN`) | 3 | white front (head+DRL) · red rear (tail) · amber (right indicator) |
+| left strip | D4 (`DIN`) | 3 | pixel 0 white head+DRL (front) · pixel 1 amber left indicator (front) · pixel 2 red tail (REAR, on a jumper) - reordered 2026-10-11 |
+| right strip | D7 (`DIN`) | 3 | pixel 0 white head+DRL (front) · pixel 1 amber right indicator (front) · pixel 2 red tail (REAR, on a jumper) - reordered 2026-10-11 |
 
 Cut **to pixel count, not to length** (Appendix DA) — 3 pixels at the chosen
-144 LED/m density spans 21 mm, a plausible headlight cluster on this car.
+144 LED/m density spans 21 mm. **2026-10-11 (audit, Evan's decision C):** each side is cut 2 + 1 - a 2-pixel front piece (~14 mm, head + indicator) and a 1-pixel rear tail on a 3-wire jumper, so the tail sits at the back and out of camera view (`WIRING_PROTOSHIELD.md` section 2.5).
 WS2812B bit-bangs its own timing on a plain digital pin; **no PWM hardware
 and no per-LED series resistor are needed** (each pixel has a built-in
 constant-current driver). This is why the swap frees 2 of the car's 3
@@ -101,8 +101,8 @@ owned, nothing bench-verified:**
 | realistic (6 pixels lit, both sides, brightness per §2's provisional levels) | **~80 mA** |
 | absolute worst case (6 pixels, full white, 100% brightness — never commanded) | **~360 mA** |
 | existing peak (motor stalled + servo) | 840 mA |
-| + realistic strip | 920 mA — **2.08 A margin** to the LM2596's 3 A rating |
-| + worst-case strip | 1200 mA — **1.8 A margin** |
+| + realistic strip | 920 mA — ~~**2.08 A margin** to the LM2596's 3 A rating~~ **1.08 A margin to the EPLZON module's 2 A rating** (corrected 2026-10-11) |
+| + worst-case strip | 1200 mA — ~~**1.8 A margin**~~ **0.80 A margin** (2 A rating, corrected 2026-10-11) |
 
 Either figure leaves comfortable headroom. Feed from the **LM2596 5 V rail**
 that already supplies the servo, not from the Pi — unchanged reasoning: the
@@ -220,7 +220,7 @@ defensible. Passing a rule off as a learned behaviour is not.
   the "update only between control-loop ticks" half by rate-limiting
   `NeoPixel::show()` to 20 ms in `applyLights()` — see that function's
   comment. First real test is wiring a strip and watching `ticks` count
-  cleanly while the indicators blink (`SERIAL_PROTOCOL.md` build order step
+  cleanly while the indicators blink (~~`SERIAL_PROTOCOL.md`~~ `WIRING_PROTOSHIELD.md` section 5 build order step
   8, per Appendix DA.7).
 - Whether indicators become a learned head depends on the M2 logger change
   (§5.2) landing before M3 data collection — unaffected by the strip swap.

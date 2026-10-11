@@ -210,6 +210,11 @@ the dated entry, not the digest.
 - [FQ - Motor coupler v1 confirmed TOO TIGHT on the shaft (Evan) - FP's inference is now his stated result](#appendix-fq---motor-coupler-v1-confirmed-too-tight-on-the-shaft-evan---fps-inference-is-now-his-stated-result-2026-10-11-0013-cdt) (10-11)
 - [FR - Coupler print settings recorded: Bambu P1S, PLA, 0.1 mm layers, 2 walls, solid - the couplers are PLA, not ABS like the coupons](#appendix-fr---coupler-print-settings-recorded-bambu-p1s-pla-01-mm-layers-2-walls-solid---the-couplers-are-pla-not-abs-like-the-coupons-2026-10-11-0013-cdt) (10-11)
 - [FS - Motor coupler v3: D-bore another +0.075 mm (3.150 / 2.650) - v2 inferred still too tight](#appendix-fs---motor-coupler-v3-d-bore-another-0075-mm-3150--2650---v2-inferred-still-too-tight-2026-10-11-1424-cdt) (10-11)
+- [FT - Docs sync: the board runs servo_bench now, not the 2026-09-02 build - and the MG90D-270 is positional; stale order/state claims fixed](#appendix-ft---docs-sync-the-board-runs-servo_bench-now-not-the-2026-09-02-build---and-the-mg90d-270-is-positional-stale-orderstate-claims-fixed-2026-10-11-1435-cdt) (10-11)
+- [FU - Order total: about $430 (Evan's recollection, not a receipt) vs the BOM's $422.25 before shipping](#appendix-fu---order-total-about-430-evans-recollection-not-a-receipt-vs-the-boms-42225-before-shipping-2026-10-11-1437-cdt) (10-11)
+- [FV - Cells confirmed Samsung 25R by their wrap (INR18650-25R, 2500 mAh) - count and authenticity not yet established](#appendix-fv---cells-confirmed-samsung-25r-by-their-wrap-inr18650-25r-2500-mah---count-and-authenticity-not-yet-established-2026-10-11-1439-cdt) (10-11)
+- [FW - Four Samsung 25R cells on hand, not two - the 2S pack uses two, two are spares](#appendix-fw---four-samsung-25r-cells-on-hand-not-two---the-2s-pack-uses-two-two-are-spares-2026-10-11-1440-cdt) (10-11)
+- [FX - Wiring-diagram audit + fix all: doc and firmware agree pin for pin; rail to 5.0 V, cut-cable test gate, BMS solder order, pixels reordered, host_test --wired guard](#appendix-fx---wiring-diagram-audit--fix-all-doc-and-firmware-agree-pin-for-pin-rail-to-50-v-cut-cable-test-gate-bms-solder-order-pixels-reordered-host_test---wired-guard-2026-10-11-1501-cdt) (10-11)
 
 ---
 
@@ -16624,3 +16629,198 @@ solid).
 v1 nominal - too tight; v2 +0.075 - (inferred) too tight; v3 +0.150 -
 untested. Two prints in, the shaft's real across-flat size would end the
 guessing; it is still not caliper-measured.
+
+# Appendix FT - Docs sync: the board runs servo_bench now, not the 2026-09-02 build - and the MG90D-270 is positional; stale order/state claims fixed (2026-10-11 14:35 CDT)
+**WHAT:** A /docs-sync pass found that the board's firmware state in the docs
+was wrong, plus older staleness in HANDOFF's paste-ready prompt and the PRD.
+
+## The board no longer runs the 2026-09-02 uno_control build
+
+On 2026-10-10 Evan uploaded `firmware/servo_bench` (Appendix FL) and reported
+"ok it worked". Uploading a sketch REPLACES what is on the Uno. So the
+2026-09-02 build (SELFTEST 49/49, 7888 B) that important.md #3, HANDOFF and
+its paste-ready prompt all still named is GONE from the board. Last known on
+the board: servo_bench. Whether uno_control has been re-flashed since is NOT
+known - no SELFTEST banner has been reported. The 2026-09-02 build cannot be
+recovered except from its commit; nothing needs it.
+
+What the bench session established, from Evan's words only:
+- Before the upload the servo hummed, held stiffly and did not move - the
+  car firmware holding it at 1500 us (the sketch had not been uploaded yet,
+  or the Serial Monitor line ending was wrong; which one fixed it was asked
+  and NOT answered).
+- Typing `1000` made the horn "turn and stop": the MG90D-270 is POSITIONAL,
+  not continuous rotation. Usable for steering.
+- No angles, end-of-travel pulses or per-unit dead-on-arrival results yet.
+
+## Other staleness fixed in this pass
+
+- HANDOFF paste-ready prompt STATE paragraph was dated 2026-09-10 and said
+  "nothing is ordered"; next action 6 still listed THE ORDER as
+  BLOCKED-ON-EVAN. Both rewritten: ordered, 23 of 24 items in (FI-FL), camera
+  on a separate order.
+- PRD M2 task 8 (purchase): its done-check is "order placed by Evan; arrival +
+  any price deltas noted in the record". Order placed and arrivals noted
+  (FI-FL); **the price deltas are NOT recorded** - what Evan actually paid
+  per vendor, and shipping, are unknown. Marked partly done with that gap
+  named, not checked off.
+- testing.md: the parser-resync checks (FH) and host_test 4b added.
+- INDEX.md: line counts for the bins changed this session.
+
+## Process slip this session, stated once
+
+Three record stamps were typed before the clock was read (FJ +1 min, FN -5
+min, FQ +1 min); each is corrected in a later entry. Cause: `date` and the
+append ran in ONE command, so the stamp was composed before the output
+existed. Rule now in the doc-tooling memory: run `date` as its own call, read
+it, then append.
+
+# Appendix FU - Order total: about $430 (Evan's recollection, not a receipt) vs the BOM's $422.25 before shipping (2026-10-11 14:37 CDT)
+**WHAT:** Evan on what the order cost: "idk the exact price but it was around
+$430" (2026-10-11).
+
+- Recorded as **~$430, Evan's approximate recollection** - not a receipt
+  total. Not stated: whether it includes shipping and tax, or the
+  per-vendor split.
+- Against the BOM's $422.25 before shipping, that is about +$8. If ~$430
+  includes shipping across six vendors, the order came in near the BOM; if
+  it excludes shipping, the real total is higher. Which one is unknown.
+- PRD M2 task 8's done-check ("arrival + any price deltas noted") now has an
+  approximate figure. The task stays OPEN for one reason only: the Camera
+  Module 3 Wide (separate order) has not arrived. Exact per-vendor totals
+  can be read from the order confirmations later if they are ever needed.
+
+# Appendix FV - Cells confirmed Samsung 25R by their wrap (INR18650-25R, 2500 mAh) - count and authenticity not yet established (2026-10-11 14:39 CDT)
+**WHAT:** Evan read the cell wrap (2026-10-11): "INR18650-25R +2500mAH CCC-8
+151 SDIQCHT".
+
+- **INR18650-25R** is the Samsung 25R model designation: the cell BOM row 9
+  specifies (2x Samsung 25R, replacing the sold-out EVE 25P). Model MATCHES.
+- **2500 mAh** matches the 25R's rated capacity.
+- **"CCC-8 151 SDIQCHT"** is recorded verbatim. It looks like a lot/date code;
+  it is NOT decoded here - no source for the format was checked, and a guess
+  at a manufacture date would be invented data.
+- **Not established:** the cell COUNT (2 ordered), and that the cells are
+  genuine - a printed model string is what a counterfeit copies too. The
+  arrival checks still stand: meter each cell (~3.x V as shipped), reject a
+  dented cell or torn wrap.
+- The 25R is an UNPROTECTED cell (no protection circuit in the can), which is
+  why the BMS (`B08HLQQCQJ`, 2.9 V cutoff) must be in the circuit -
+  important.md #4.
+
+# Appendix FW - Four Samsung 25R cells on hand, not two - the 2S pack uses two, two are spares (2026-10-11 14:40 CDT)
+**WHAT:** Evan: "and I have 4" - four Samsung 25R cells on hand, not the 2 the
+BOM (row 9, $9.98) and the order sheet list. FV left the count open; this
+closes it. Why 4 arrived (a 4-cell order, or a vendor minimum) is not stated,
+and the BOM's cell price was not re-derived.
+
+- The design is a 2S pack: ONE 2-slot DIANN holder, ONE BMS, 2 cells. The
+  other 2 are spares. Nothing here plans a 2S2P pack; that would be a design
+  change (holder, BMS current, wiring section 2.1), not a drop-in.
+- Pair the two pack cells by measured voltage (within ~0.05 V of each other
+  before the first charge) - a balance rule of thumb, not a measured
+  requirement of this BMS. Store the spares apart from loose metal.
+- Authenticity is still not established; metering each cell is still owed.
+
+# Appendix FX - Wiring-diagram audit + fix all: doc and firmware agree pin for pin; rail to 5.0 V, cut-cable test gate, BMS solder order, pixels reordered, host_test --wired guard (2026-10-11 15:01 CDT)
+**WHAT:** A cold /audit of the wiring diagram (`docs/WIRING_PROTOSHIELD.md`
+plus everything it must agree with), then Evan's "fix all". Nothing is wired;
+none of this is bench-verified.
+
+## The audit
+
+Two Sonnet auditors, cold, no delegates, a pre-registered rubric:
+- A: docs methods + electrical sanity over the wiring doc, BOM.md,
+  LIGHTING_SPEC.md and hardware.md.
+- B: doc-vs-firmware pin cross-check (X-series + M7) over the wiring doc,
+  uno_control.ino, packguard.h, uno_packguard.ino, SERIAL_PROTOCOL.md,
+  host_test.py and LIGHTING_SPEC.md.
+- Scope: 9 of 282 tracked files; the rest excluded as outside "the wiring
+  diagram".
+- Cost: 44 auditor tool calls, ~392K auditor tokens, ~6 min wall clock.
+
+**Verdict: pin for pin, the doc and the firmware AGREE.**
+- Every wired Uno pin, every TB6612 net and the encoder match.
+- The divider gives 0.900 V at A0 at 8.4 V, and the doc and the code have
+  the same values.
+- No load and not the charger bypasses the BMS.
+- The two pack-guard copies have not drifted.
+
+The defects were one level up: 22 findings (3 high) and 3 architecture
+items.
+
+**Coverage caveat, stated:** auditor B's search counts did not reconcile
+with the session's own re-run (doc pin grep 39 vs 34 lines; firmware grep 41
+vs 46). By the audit's own rule the doc-vs-firmware method is "not swept".
+Its outcome is independently backed by auditor A's pin check and by the
+session reproducing the servo finding. The audit was a reading exercise:
+nothing was compiled for it, nothing ran on a board.
+
+## Evan's decisions (2026-10-11)
+
+| Item | Decision |
+|---|---|
+| A: the 5.2 V rail (0.3 V margin to the ATmega's 5.5 V, no clamp) | trim to **5.0 V** and glue the pot |
+| B: the cut-5V USB cable, untested on the FT232RL clone | **gated bench test** before wiring (new step 1b); FAIL = stop and redesign |
+| C: 3 adjacent pixels put the tail ~7 mm from the headlight | reorder to **HEAD=0, IND=1 front, TAIL=2 rear** on a 3-wire jumper |
+| Fuse (worst case ~2.6-2.8 A vs 3 A) | **keep 3 A**, state the budget; a blow is a safe failure |
+
+## What was fixed
+
+Code, via the plan-split rule (two Sonnet agents, disjoint files, each diff
+re-checked on disk by Opus):
+- `uno_control.ino:177`: `PX_HEAD = 0, PX_IND = 1, PX_TAIL = 2`. Re-compiled
+  with zero warnings at 10668 B / 379 B, unchanged, because only constant
+  values moved. No SELFTEST check depends on pixel order.
+- `host_test.py`: a `--wired` flag (streams steer/throttle 0, skips the two
+  bench-only checks). Without it, the script REFUSES with exit 2 once a real
+  pack is sensed. Checked against a fake serial port, a planted case that
+  hits the real `main()`:
+
+      pack=0 flags=[] rc=2 frames_sent=1 throttle30_frames=0
+      pack=3 flags=[] rc=1 frames_sent=13 throttle30_frames=6
+
+  The sensed-pack case refuses before any throttle frame; the bench case is
+  unchanged. Never run against a board.
+
+Docs (58 anchored edits, all-or-nothing):
+- WIRING_PROTOSHIELD: status lines; 5.2 -> 5.0 V throughout; the pot lock;
+  the 0.5 V margin and "nothing clamps it".
+- Build order:
+  - new step 0 (flash uno_control with the Uno off the shield);
+  - new step 1b (prove the cut cable);
+  - step 2a (cells OUT, B- then MB then B+, fuse last);
+  - step 2b polarity check;
+  - step 3 (flash over the cut cable, rocker ON; 0.2 V gate);
+  - step 4 wording (brake only after an armed frame);
+  - step 5 (`--wired` from here on);
+  - step 8 (fuse temperature, servo twitch);
+  - new step 8b (repeat at ~6.4 V).
+- Pack current budget; the unfused MB/B- leads; USB ground as the one
+  Pi-to-car link; the cut-cable risk; LM2596 VIN-/VOUT- and the
+  motor-terminal cap listed.
+- The strip jumper net table; AREF unconnected; optional DIN pull-down.
+- "Blown fuse -> FAULT" corrected (the Uno loses power too).
+- Stale LIGHTING_SPEC warning, MG90S / MG996R / #4252 rows and the
+  LM2596 "3 A" (now 2 A EPLZON, 0.80-1.08 A margin) struck.
+- Ratings not recorded in the repo are named as such, never filled in.
+- LIGHTING_SPEC: pixel table, the 2+1 cut, 2 A margins, the dangling
+  build-order pointer.
+- BOM rows 6 and 12 and the ASCII power diagram.
+- SERIAL_PROTOCOL: BIN1/BIN2/PWMB bridged.
+- hardware.md: MG90S, the "no hardware over-discharge protection" bullet,
+  the 10 mA LED rule, the rail headroom (1.65 V; 0.8 V at the BMS cutoff).
+
+Checks after the fixes:
+- `run_checks.py`: 15 passed, 0 failed, 0 skipped.
+- `check_artifacts.py`: 32 checked, 0 drifted.
+- Every remaining "5.2 V" is struck or historical.
+- The Mermaid blocks were edited as text; **not re-rendered**.
+
+## NOT fixed - BLOCKED-ON-EVAN
+
+**Row 1, the servo span.** `SERVO_US_SPAN 450` gives +/-60.75 deg of the
++/-135 the rack needs, and `attach()` has no limits (the Servo library clamps
+to 544-2400 us). The fix needs the servo_bench endpoint numbers. Changing
+`attach()` alone would leave the two SELFTEST asserts on the 180-degree
+model, a half-fix.

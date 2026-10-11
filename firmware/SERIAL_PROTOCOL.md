@@ -30,11 +30,11 @@ The map below is the corrected one. **`docs/BOM.md`'s diagram used to double-boo
 | D5 | **FREE** | ~~headlights (PWM), Timer0~~ — released 2026-09-03 when the 8 discrete LEDs became two WS2812B strips (Appendix CX). **First spare PWM this design has ever had** |
 | D6 | **FREE** | ~~tail lights (PWM), Timer0~~ — released 2026-09-03, same change. Timer0 PWM, frequency-locked to `millis()` |
 | D7 | **LED strip, RIGHT segment `DIN`** | plain digital. Two pins, not one: WS2812B data is `DIN`→`DOUT` only, so a cut strip's two halves cannot share a feed (Appendix CY) |
-| D8 | motor DIR A | → TB6612 AIN1 |
+| D8 | motor DIR A | → TB6612 AIN1 **and BIN1, bridged** (both channels paralleled; added 2026-10-11) |
 | D9 | steering servo | Servo library, **claims Timer1** |
 | D10 | **TB6612 `STBY`** — master driver enable | added 2026-09-02, Appendix BL. Its PWM is already dead (Servo owns Timer1), so it is the cheapest free pin; spending it here keeps A1–A5 for future analog (motor current sense) |
-| D11 | motor PWM | **Timer2** — see below |
-| D12 | motor DIR B | → TB6612 AIN2 |
+| D11 | motor PWM | **Timer2** — see below. Drives PWMA **and PWMB, bridged** |
+| D12 | motor DIR B | → TB6612 AIN2 **and BIN2, bridged** |
 | D13 | status LED | onboard; heartbeat + fault code |
 
 **Motor PWM must be on Timer2 (D11), not Timer0 (D5/D6).** Timer0 also drives

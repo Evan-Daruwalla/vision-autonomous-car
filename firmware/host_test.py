@@ -10,6 +10,10 @@ encoder, LED or pack exists. This verifies the LINK and the STATE MACHINE only.
 Every actuator assertion here is about what the firmware DECIDED, never about
 anything physically moving.
 
+--wired: for a wired car. Streams steer 0 / throttle 0 and skips the two
+bench-only checks. Without it, the script REFUSES to stream once a real pack
+is sensed (audit 2026-10-11 row 7).
+
 Opening the port RESETS the board (gotchas), which is how the boot banner and
 the firmware's own SELFTEST are captured.
 """
@@ -75,6 +79,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", default="COM3")
     ap.add_argument("--baud", type=int, default=115200)
+    ap.add_argument("--wired", action="store_true",
+                    help="the car is wired: stream no steer/throttle and skip the bench-only checks")
     args = ap.parse_args()
 
     print(f"opening {args.port} at {args.baud} (this RESETS the board)")
@@ -109,13 +115,22 @@ def main() -> int:
         print(f"       pack={PACK_NAMES[pack]} ticks={r['ticks']} dt={r['dt']} "
               f"status=0x{r['status']:02X}")
         # A0 is floating: the guard MUST call that a fault, not a healthy pack.
-        check(pack == 3, "floating pack sense reads FAULT, not a healthy pack")
+        if args.wired:
+            print("  skip floating pack sense reads FAULT, not a healthy pack (--wired)")
+        else:
+            check(pack == 3, "floating pack sense reads FAULT, not a healthy pack")
+            if pack != 3:
+                print("REFUSING: pack sensed (a real divider is reading) - "
+                      "the car looks wired; re-run with --wired")
+                ser.close()
+                return 2
 
     # 2. seq increments cleanly across a short stream
     ok = True
     wd_mid = []                          # ST_WATCHDOG on each mid-stream reply
+    steer, thr = (0, 0) if args.wired else (20, 30)
     for s in range(2, 8):
-        ser.write(command(s, 20, 30, 0x01, armed=True))
+        ser.write(command(s, steer, thr, 0x01, armed=True))
         rr = read_reply(ser)
         if rr is None or rr["seq"] != s:
             ok = False
@@ -192,8 +207,11 @@ def main() -> int:
     time.sleep(0.3)
     line = ser.read(300).decode("ascii", "replace")
     check("everArmed=" in line, "'?' prints a human-readable status line")
-    check("stby=0" in line,
-          "STBY still LOW: no pack sensor means the driver is never enabled")
+    if args.wired:
+        print("  skip STBY still LOW: no pack sensor means the driver is never enabled (--wired)")
+    else:
+        check("stby=0" in line,
+              "STBY still LOW: no pack sensor means the driver is never enabled")
     print("       " + line.strip().replace("\r\n", " | ")[:160])
 
     ser.close()

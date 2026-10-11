@@ -174,7 +174,9 @@ const uint8_t STRIP_AMBER_G    = 51;    // ~40% of R, a warm amber mix — not m
 const uint16_t BLINK_MS  = 340;         // ~1.5 Hz, each half
 
 const uint8_t PIXELS_PER_STRIP = 3;     // cut to PIXEL count, not length (Appendix DA)
-const uint8_t PX_HEAD = 0, PX_TAIL = 1, PX_IND = 2;
+// Head + indicator are the 2 front-corner pixels; the tail is pixel 2 at the REAR
+// on a 3-wire jumper (WIRING_PROTOSHIELD.md section 2.5, 2026-10-11).
+const uint8_t PX_HEAD = 0, PX_IND = 1, PX_TAIL = 2;
 
 // ---- state -----------------------------------------------------------------
 Servo    steerServo;

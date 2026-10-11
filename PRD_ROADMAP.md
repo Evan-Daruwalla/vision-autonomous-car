@@ -275,7 +275,7 @@ transfer gap) must not block the capstone.
    REJECTED ON PHYSICS (all PF motors top out at ≤0.88 m/s, below the
    1.0 m/s floor, through any diff configuration); Powered Up + Build HAT
    rejected on five grounds incl. its 8V ±10% supply requirement that a 2S
-   pack cannot meet. **Still BLOCKED-ON-EVAN for the purchase go.**
+   pack cannot meet. ~~**Still BLOCKED-ON-EVAN for the purchase go.**~~ **#5159 ARRIVED 2026-10-10 (label confirmed, Appendix FL).**
    Drivetrain **CORRECTED 2026-09-03 (Appendix CS)**: Evan's actual
    differential is 20t→28t (N=1.400) — config A, not the "lower-risk"
    config B (12t→28t, N=2.333) this line used to call the build. His
@@ -439,6 +439,11 @@ transfer gap) must not block the capstone.
    "Verify before ordering" section (power-bank output rating, which
    differential he owns, which tires, and current prices). Done: order
    placed by Evan; arrival + any price deltas noted in the record.
+   **2026-10-11 status (Appendix FT): ORDER PLACED; 23 of 24 items ARRIVED
+   2026-10-10 (FI-FL; camera on a separate order). ~~NOT DONE: the price deltas
+   (actual paid per vendor + shipping) are not recorded.~~ Paid ~$430 (Evan's
+   recollection, Appendix FU; vs $422.25 BOM before shipping). OPEN only until
+   the camera arrives.**
    - *(Price corrected 2026-09-01: ≈$176-179 is stale by ~$60. The BOM
      re-priced 2026-08-08 to **$221.82–$224.82** before shipping, and rows
      17–20 — lighting and I/O added 2026-09-01 (Appendix AY) — took it to

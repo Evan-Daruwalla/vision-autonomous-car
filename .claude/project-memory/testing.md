@@ -129,6 +129,18 @@ no measurement has established.** Test the property that survives the
 convention instead — here, that the two directions are exact opposites and that
 `QTAB` is antisymmetric across all 16 entries, which is true either way.
 
+## Parser resync gates (added 2026-10-10, Appendix FH) - compiled, NOT run
+
+- SELFTEST: two passes of a lost-byte stream (frame A minus byte 3, then
+  frame B with payload `T ? B`; pass 2 also puts 0xA5 in A's seq) through
+  `rxFeed()` - the SAME function loop() calls - plus the idle `?`/junk and
+  `cmdAllowed()` cases. 9 assertions. A Python model of the old parser fails
+  the same vectors (scratch, not a firmware test).
+- `host_test.py` test 4b: lost-byte frame 10 then DISARMED frame 11 with
+  payload `T ? B`; expects CRC_BAD, then a clean seq-11 reply, then no stray
+  SELFTEST / bench-quiet / status text. The board-level gate for FH.
+- Neither has run: uno_control with FH has never been flashed (FT).
+
 ## The watchdog defect, and the test that looked right but could not see it (2026-09-02, Appendices BY/CA)
 
 **The scheduled daily-audit found a CRIT in firmware this bin had just called

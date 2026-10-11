@@ -19,7 +19,7 @@
 **Source:** CLAUDE.md:20-25.
 
 ## 3. The flashed Uno build and the repo source DIVERGE (2026-09-30)
-**What:** the board runs the 2026-09-02 build (SELFTEST 49/49, 7888 B); newer source (incl. the WS2812B path) was never flashed. Actuators are unwired.
+**What:** ~~the board runs the 2026-09-02 build (SELFTEST 49/49, 7888 B)~~ **2026-10-10: the board runs `firmware/servo_bench` (Appendix FT); the 2026-09-02 build is gone from it.** The current uno_control source (WS2812B path, EU, FH) has never been flashed; no SELFTEST count exists for it. Actuators are unwired.
 **Constrains:** read the boot banner before trusting any firmware claim; never assume the repo is what runs.
 **Why:** a test against the wrong build verifies nothing.
 **Source:** HANDOFF.md:27-34; detail in firmware-traps.md.

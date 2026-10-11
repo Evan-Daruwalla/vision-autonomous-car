@@ -165,7 +165,7 @@ traps in `sim-harness.md`.
   commanded ANGLE; a bare DC motor only takes a direction, so steering
   position would be unknown. The M3 behavioral-cloning model and every M4
   policy emit a steering angle — a plain motor gives that output nothing to
-  command. The car has two actuators: drive motor + MG90S servo.
+  command. The car has two actuators: drive motor + ~~MG90S~~ MG90D-270 servo (swapped 2026-09-05, Appendix DP).
 - **The Pi 5's GPIO is 3.3V and NOT 5V tolerant; this Uno clone is a 5V board.**
   Wiring its TX straight to a Pi RX pin can damage the Pi. **Connect over USB**,
   which sidesteps level shifting entirely. This is the single hardware-
@@ -268,7 +268,7 @@ traps in `sim-harness.md`.
   therefore treats an **unwired sensor as a healthy one**. `uno_packguard`'s
   first build did exactly that and would have allowed throttle with no divider
   attached. **Any analog guard needs an upper implausibility band too.**
-- **The 2S pack has no HARDWARE over-discharge protection** (Appendix BI). BOM
+- ~~**The 2S pack has no HARDWARE over-discharge protection** (Appendix BI).~~ **SUPERSEDED: the ACEIRMC BMS (2.9 V cutoff) is in the circuit since the 2026-10-10 redraw (Appendices CK/FE); the firmware latch below is a soft layer above it. Kept as history:** BOM
   row 11's "BMS" documents over-voltage and short-circuit only, and the EVE
   cells are bare. `firmware/uno_packguard/` implements a latched firmware cutoff
   (warn 6.4 V, cut 6.0 V held 500 ms, fault outside 4.0-8.8 V, CLEAR needs
@@ -328,7 +328,7 @@ traps in `sim-harness.md`.
   chip total (8 x 20 mA = 160 mA, "80% of the limit") and missed that its 4
   channels each drive **2** LEDs, i.e. **40 mA per pin** - the absolute maximum.
   The per-channel reasoning was inherited from the PCA9685, which sank 25 mA
-  per channel independently. **Run the LEDs at 10 mA**: 20 mA/pin in spec,
+  per channel independently. ~~**Run the LEDs at 10 mA**~~ (SUPERSEDED 2026-09-03: no LED current passes through a pin since the WS2812B swap, Appendix CX - the reasoning lesson stands): 20 mA/pin in spec,
   80 mA chip total. No MOSFETs needed.
 - **Encoder `Vcc` (Pololu #5159) must come off the 5 V rail, NEVER the 7.4 V
   pack.** The encoder accepts 2.7-18 V, so the pack "works" - and then swings
@@ -478,11 +478,11 @@ FLIPPED 2026-09-05 (Appendix DM), see below:**
 - **Series resistance "less than 300 mOhm"** (same listing) is an upper bound
   and real boards usually measure far lower. At row 11b's ~2.5 A worst case it
   would be 0.75 V of drop and ~1.9 W on a small PCB, sagging the pack
-  7.4 -> 6.65 V. That leaves ~1.45 V above the 5.20 V rail; whether that clears
+  7.4 -> 6.65 V. That leaves ~1.65 V above the ~~5.20 V~~ 5.00 V rail (set point lowered 2026-10-11); whether that clears
   the LM2596's dropout at load is UNVERIFIED (the 2026-10-04 review called it
   headroom - check the module's datasheet, and see the rail-sag note above on
   the 5 V supply sagging as the pack drains; at the BMS cutoff, 2 x 2.9 V =
-  5.8 V, only 0.6 V remains). Measure the board on arrival; not a reason to
+  5.8 V, only 0.8 V remains at 5.0 V - 0.6 V at the old 5.2 V). Measure the board on arrival; not a reason to
   reject it.
 - **Holder substitute (row 10), 2026-10-04:** the Addicore holder was
   backordered; the DIANN `B0BJV9ZL3J` replacement's title says "2 Slots 3.7V".
