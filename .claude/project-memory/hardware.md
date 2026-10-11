@@ -521,3 +521,13 @@ FLIPPED 2026-09-05 (Appendix DM), see below:**
   parcel and a second shipping charge — check who actually SHIPS the item.
 - **DigiKey stocks no high-drain 18650** — their cells top out at a **520 mA**
   continuous rating. Distributor breadth does not extend to power cells.
+
+## Drive-motor coupler v1 generated (2026-10-10, Appendix FN)
+
+- `cad/motor_lego_coupler_v1.stl`: #5159 3 mm D-shaft bore (2.50 across the
+  flat, 8 deep) to a 0.00-clearance real-Lego-axle socket, OD 7.4 x 15 mm.
+  The 2.50 flat is UNMEASURED (single retailer) - caliper the shaft first.
+- Generator now refuses a web hole that crosses the D flat (a 2.2 mm hole
+  does; 1.5 mm used).
+- 2026-10-11 (Appendix FP): motor coupler v2 = D-bore +0.075 mm (3.075 /
+  2.575 across flat), 8 mm deep. v1 CONFIRMED too tight (Evan, Appendix FQ).

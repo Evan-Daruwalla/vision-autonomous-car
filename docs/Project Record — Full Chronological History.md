@@ -202,6 +202,13 @@ the dated entry, not the digest.
 - [FI - Parts arrived: 20 of 22 order lines in, the camera and the drive motor not reported - and the MG90D-270 exposes an unfixed 180-degree servo span in the firmware](#appendix-fi---parts-arrived-20-of-22-order-lines-in-the-camera-and-the-drive-motor-not-reported---and-the-mg90d-270-exposes-an-unfixed-180-degree-servo-span-in-the-firmware-2026-10-10-1517-cdt) (10-10)
 - [FJ - CORRECTION to FI: 22 of 24 ordered items arrived, not 20 of 22 order lines](#appendix-fj---correction-to-fi-22-of-24-ordered-items-arrived-not-20-of-22-order-lines-2026-10-10-1518-cdt) (10-10)
 - [FK - Drive motor arrived (23 of 24 items in; camera still unreported) - #5159 vs #1093 not yet confirmed](#appendix-fk---drive-motor-arrived-23-of-24-items-in-camera-still-unreported---5159-vs-1093-not-yet-confirmed-2026-10-10-1520-cdt) (10-10)
+- [FL - Motor confirmed #5159, item 3 is the PiShop cable, camera on a separate order; servo_bench sketch written for the MG90D-270 endpoint measurement](#appendix-fl---motor-confirmed-5159-item-3-is-the-pishop-cable-camera-on-a-separate-order-servo_bench-sketch-written-for-the-mg90d-270-endpoint-measurement-2026-10-10-1526-cdt) (10-10)
+- [FM - Coupler v2 fitted ('dimensions are good'); v3 generated - half the wall, 2 mm shorter - untested, and its print settings still unrecorded](#appendix-fm---coupler-v2-fitted-dimensions-are-good-v3-generated---half-the-wall-2-mm-shorter---untested-and-its-print-settings-still-unrecorded-2026-10-10-2039-cdt) (10-10)
+- [FN - Drive-motor coupler v1 generated: #5159 D-shaft to a real Lego axle - the D-flat is still unmeasured, caliper before printing](#appendix-fn---drive-motor-coupler-v1-generated-5159-d-shaft-to-a-real-lego-axle---the-d-flat-is-still-unmeasured-caliper-before-printing-2026-10-10-2052-cdt) (10-10)
+- [FO - CORRECTION to FN: its timestamp is 5 minutes early - appended 20:57 CDT, stamped 20:52](#appendix-fo---correction-to-fn-its-timestamp-is-5-minutes-early---appended-2057-cdt-stamped-2052-2026-10-10-2057-cdt) (10-10)
+- [FP - Motor coupler v2: D-bore +0.075 mm clearance, still 8 mm deep (a 12 mm version was dropped - the shaft is 9 mm)](#appendix-fp---motor-coupler-v2-d-bore-0075-mm-clearance-still-8-mm-deep-a-12-mm-version-was-dropped---the-shaft-is-9-mm-2026-10-11-0011-cdt) (10-11)
+- [FQ - Motor coupler v1 confirmed TOO TIGHT on the shaft (Evan) - FP's inference is now his stated result](#appendix-fq---motor-coupler-v1-confirmed-too-tight-on-the-shaft-evan---fps-inference-is-now-his-stated-result-2026-10-11-0013-cdt) (10-11)
+- [FR - Coupler print settings recorded: Bambu P1S, PLA, 0.1 mm layers, 2 walls, solid - the couplers are PLA, not ABS like the coupons](#appendix-fr---coupler-print-settings-recorded-bambu-p1s-pla-01-mm-layers-2-walls-solid---the-couplers-are-pla-not-abs-like-the-coupons-2026-10-11-0013-cdt) (10-11)
 
 ---
 
@@ -16412,3 +16419,185 @@ He wrote "motors", plural; one was ordered (BOM row 5). Count not stated.
 **Owed note from FJ:** FJ is stamped 15:18 CDT; the clock read 15:17:08 CDT
 when it was appended. The stamp is about one minute late against the real
 time it was written.
+
+# Appendix FL - Motor confirmed #5159, item 3 is the PiShop cable, camera on a separate order; servo_bench sketch written for the MG90D-270 endpoint measurement (2026-10-10 15:26 CDT)
+**WHAT:** Three arrival facts confirmed by Evan, and a servo bench sketch
+written for the MG90D-270 endpoint measurement that the firmware fix in FI
+waits on. **Nothing measured yet.**
+
+## Confirmed (Evan, 2026-10-10)
+
+- **Motor: the bag label says 5159.** So it is the 30:1 HP 6V with the 12 CPR
+  encoder (BOM row 5), not the encoder-less #1093. FK's open question closed.
+- **Item 3 is the PiShop Standard-Mini camera cable** (BOM row 3).
+- **The camera was ordered separately from the cable** - it is a different
+  order from the PiShop cable, and it has not arrived. 23 of 24 items in.
+
+## servo_bench sketch
+
+`firmware/servo_bench/servo_bench.ino`: type a pulse width (400-2600 us) in
+the Serial Monitor and the servo on D9 goes there; `c` re-centres to 1500.
+`attach()` gets explicit 400-2600 limits, because with no limits the Servo
+library clamps to 544-2400 us and would hide both ends of a 500-2500 us servo.
+Bench-only, unloaded servo on the Uno's 5 V pin; NOT the car firmware.
+
+    arduino-cli compile --fqbn arduino:avr:uno --warnings all firmware/servo_bench
+    Sketch uses 3140 bytes (9%) of program storage space. Maximum is 32256 bytes.
+    Global variables use 238 bytes (11%) of dynamic memory, leaving 1810 bytes for local variables. Maximum is 2048 bytes.
+
+Zero warnings. Not flashed or run. Flashing it REPLACES the 2026-09-02
+uno_control build on the board; uno_control must be re-flashed afterwards
+(that flash is already a next action: it delivers the EU and FH fixes).
+
+Expected from the listing (500-2500 us = 270 degrees, 0.135 deg/us), to be
+checked, not assumed: +/-67.5 degrees at 1000/2000 us, +/-135 at 500/2500 us.
+
+# Appendix FM - Coupler v2 fitted ('dimensions are good'); v3 generated - half the wall, 2 mm shorter - untested, and its print settings still unrecorded (2026-10-10 20:39 CDT)
+**WHAT:** Coupler v2 was printed and fitted, and v3 was generated from Evan's
+verdict. His words: "make the walls of the v2 1/2 a thick and a bit shorter
+overall other than that the dimensions are good".
+
+## v2 fit result (as reported)
+
+"The dimensions are good": read as the 4.65 mm servo bore and the
+0.00-clearance Lego cross socket both fit. **NOT recorded yet, and CLAUDE.md
+requires them for every test print:** printer, filament, slicer settings, and
+whether the fit was on the MG90D-270 spline and a real Lego axle. Asked for.
+No load test: no torque claim.
+
+## v3
+
+`scripts/gen_servo_lego_coupler.py` gained `--od`, `--bore-depth` and
+`--socket-depth` (defaults = v1/v2; both regenerate byte-identically, checked
+with `cmp`). v3 = `--socket-clear 0.00 --od 7.4 --bore-depth 7 --socket-depth 5`:
+
+    body       : OD 7.40 x 14.00 mm
+    servo bore : 4.65 mm dia x 7.00 deep (0.20 under the 4.85 spline; wall 1.38)
+    axle socket: 4.80 across x 1.80 arm x 5.00 deep (clear 0.00; wall 1.30)
+    manifold   : duplicate-directed-edges=0 unmatched-edges=0  -> PASS
+    volume     : 404.4463 mm^3 (expected 404.4463, rel.err 2.81e-16)  -> PASS
+    walls      : min 1.30 mm (need >= 1.20)  -> PASS
+
+- "Half as thick": socket wall 2.60 -> 1.30, bore wall 2.675 -> 1.375.
+- "A bit shorter": **my guess**, 16 -> 14 mm, 1 mm off each end (web stays 2).
+- The wall guard still refuses: `--od 6.5` gave `walls min 0.85 -> FAIL`,
+  `NOT WRITTEN`, no file on disk.
+- Registered in `scripts/check_artifacts.py`: 29 artifacts, 0 drifted.
+  `run_checks.py`: 15 passed, 0 failed, 0 skipped.
+
+**Cost, stated plainly:** in twist the bore section keeps about 36% of v2's
+polar section modulus ((OD^4 - ID^4)/OD, my arithmetic: 342.1 vs 953.2
+mm^3), and a 1.375 mm wall around a 0.20 mm press fit is likelier to split
+in ABS. This is the highest-torque joint (important.md #5). Untested.
+
+# Appendix FN - Drive-motor coupler v1 generated: #5159 D-shaft to a real Lego axle - the D-flat is still unmeasured, caliper before printing (2026-10-10 20:52 CDT)
+**WHAT:** Evan: "make one for the keyed shaft of the motor too". A
+drive-motor coupler, `cad/motor_lego_coupler_v1.stl`: Pololu #5159's 3 mm
+D-shaft at one end, a socket for a REAL Lego axle at the other (the
+socket-style rule from 2026-07-23 - never a printed cross).
+
+## Generator change
+
+`scripts/gen_servo_lego_coupler.py` gained `--bore-dia`, `--bore-flat`
+(D-bore, mm across the flat; 0 = round) and `--screw-dia`. The D's two
+flat-to-arc corner angles are added to the shared angle list, so the flat is
+exact. New guard: the web's through-hole must sit inside the bore AND the
+socket at every angle - a 2.2 mm hole crosses a D-shaft flat that is 1.0 mm
+off centre, and the manifold/volume checks do not see that.
+
+    D bore     : 3.00 mm dia, 2.50 across the flat x 8.00 deep (wall 2.20)
+    screw hole : 1.50 mm dia, z 8.0-10.0
+    axle socket: 4.80 across x 1.80 arm x 5.00 deep (clear 0.00; wall 1.30)
+    manifold   : duplicate-directed-edges=0 unmatched-edges=0  -> PASS
+    volume     : 520.0754 mm^3 (expected 520.0754, rel.err 1.97e-15)  -> PASS
+    hole nested: inside bore and socket at every angle  -> PASS
+    walls      : min 1.30 mm (need >= 1.20)  -> PASS
+
+- Guard, planted on the caller: the same command with the default 2.2 mm hole
+  gave `hole nested ... FAIL`, `NOT WRITTEN`. `--bore-flat 3.5` on a 3.0 bore
+  is refused by argparse.
+- D profile checked separately: flat at x = 1.000 mm (21 vertices on it), arc
+  radius 1.50 (1.5018 with the hole compensation).
+- v1, v2, v3 still regenerate byte-identically: `check_artifacts.py` 30
+  checked, 0 drifted. `run_checks.py` 15 passed, 0 failed, 0 skipped.
+
+## Not known
+
+**The 2.50 mm across-the-flat is UNMEASURED** - Pololu does not publish it,
+one retailer says 2.5 (2026-07-23 drive-motor research). The motor is now in
+hand: caliper diameter, across-flat and shaft length before printing, and
+regenerate with the real numbers. Untested; no torque claim (the 2026-07-23
+SF 2.26-3.77 was computed for a PLA socket, not this ABS part).
+
+# Appendix FO - CORRECTION to FN: its timestamp is 5 minutes early - appended 20:57 CDT, stamped 20:52 (2026-10-10 20:57 CDT)
+**WHAT:** Appendix FN is stamped 20:52 CDT. It was appended at 20:57:39 CDT
+(the `date` printed in the same command). The stamp was typed before the
+clock was read - the exact failure the append tool's `--date` rule exists to
+stop. FN's content is unaffected. Also owed and folded in here: FJ is stamped
+15:18 CDT but was appended at 15:17:08 CDT (noted in FK).
+
+# Appendix FP - Motor coupler v2: D-bore +0.075 mm clearance, still 8 mm deep (a 12 mm version was dropped - the shaft is 9 mm) (2026-10-11 00:11 CDT)
+**WHAT:** Evan asked for motor coupler v2: "0.075mm more clearance" on the
+motor-shaft part only, and that side "1.5x longer". Then, after being told
+the shaft is only 9 mm: "make it 8mm bore". So v2 = v1 with the D-bore
+opened by 0.075 mm; nothing else changes.
+
+    D bore     : 3.08 mm dia, 2.58 across the flat x 8.00 deep (wall 2.16)
+    axle socket: 4.80 across x 1.80 arm x 5.00 deep (clear 0.00; wall 1.30)
+    manifold   : duplicate-directed-edges=0 unmatched-edges=0  -> PASS
+    volume     : 517.2966 mm^3 (expected 517.2966, rel.err 5.49e-15)  -> PASS
+    hole nested: inside bore and socket at every angle  -> PASS
+    walls      : min 1.30 mm (need >= 1.20)  -> PASS
+
+(Printed values are rounded; the model is 3.075 / 2.575.) A 12 mm-bore version
+was generated first and overwritten - the #5159 shaft is 9 mm, so 3 mm of it
+would be empty and the coupler face would rub the gearbox if pushed home.
+`check_artifacts.py`: 31 checked, 0 drifted.
+
+**Not stated, inferred:** the clearance request implies motor coupler v1 was
+printed and was too tight on the shaft. Neither the print nor its result was
+reported in words, and printer / filament / settings are NOT recorded - for
+this print or for servo v2. The D-flat is still not caliper-measured; the
++0.075 is a fit correction on top of the single-retailer 2.50 mm figure.
+
+# Appendix FQ - Motor coupler v1 confirmed TOO TIGHT on the shaft (Evan) - FP's inference is now his stated result (2026-10-11 00:13 CDT)
+**WHAT:** Evan confirmed it ("1 yes"): motor coupler v1 WAS printed and its
+D-bore was TOO TIGHT on the #5159 shaft. Appendix FP had recorded that as
+inferred; it is now his stated result. v1 was modelled at nominal (3.00 mm,
+2.50 mm across the flat) - so on this printer a nominal 3 mm D-hole prints
+undersize for this shaft, the opposite of the coupon pin row (4.80 hole for
+a 4.8 pin fit). Small holes shrinking more is the usual FDM pattern; not
+measured here. v2 adds 0.075 mm; untested.
+
+**Still NOT recorded for any print this session:** printer, filament,
+layer height, walls, infill (servo v2, motor v1, motor v2).
+
+# Appendix FR - Coupler print settings recorded: Bambu P1S, PLA, 0.1 mm layers, 2 walls, solid - the couplers are PLA, not ABS like the coupons (2026-10-11 00:13 CDT)
+**WHAT:** Print settings, as Evan gave them (2026-10-11): "P1S PLA 0.1mm 2
+too small for sparse infill so defaults to 100%".
+
+| field | value |
+|---|---|
+| printer | Bambu P1S |
+| filament | PLA (brand not stated) |
+| layer height | 0.1 mm |
+| walls | 2 (read as 2 wall loops) |
+| infill | effectively 100%: the parts are too small for sparse infill |
+
+**Assumed, not stated:** these apply to all three coupler prints reported this
+session - servo v2 (fitted, Appendix FM), motor v1 (too tight, FQ) - and will
+apply to motor v2 and servo v3. Evan was asked for "one line if they were all
+the same" and gave one line.
+
+**Correction this changes:** important.md #5 said "Evan's prints so far are
+ABS, which nothing here analyses". The tolerance coupons were ABS (Appendices
+DI/DK); the COUPLERS are PLA. PLA is the material the 2026-07-23 /
+Appendix BV shear numbers used (15-25 MPa interlayer), so the drive-coupler
+SF 2.26-3.77 figure now at least matches the material - but it was computed
+for that era's geometry, not these thinner 7.4 mm parts, and no part has been
+load-tested. The coupon offsets (pin 4.80, axle 5.00) were measured in ABS,
+which shrinks differently from PLA - one more reason the 0.00 / +0.075
+clearances are empirical per part, not transferable.
+
+**Owed note from FQ:** FQ is stamped 00:13 CDT; it was appended at
+00:12:04 CDT.

@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-10 ~15:20 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-11 ~00:14 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 167 appendices A–FK; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 174 appendices A–FR; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -36,7 +36,7 @@ banked. ~~Nothing has been printed and nothing has been ordered since
 2026-07-23.~~ **PRINTING STARTED 2026-09-05** — two tolerance coupons (v1 and
 v2) printed on a Bambu P1S in Bambu ABS, giving M1.3's two headline numbers
 (pin holes 4.80 mm, rotating axle bores 5.00 mm, Appendices DI/DK). **Still
-nothing ORDERED** — the BOM stands at ~~$411.45~~ **$422.25 before shipping (2026-10-04 cart review)**, ~~unbought~~ **ORDERED; 23 of 24 items ARRIVED 2026-10-10 (Appendices FI/FJ/FK). NOT reported: Camera Module 3 Wide. Motor in hand; #5159 (with encoder) vs #1093 not yet confirmed.**
+nothing ORDERED** — the BOM stands at ~~$411.45~~ **$422.25 before shipping (2026-10-04 cart review)**, ~~unbought~~ **ORDERED; 23 of 24 items ARRIVED 2026-10-10 (Appendices FI/FJ/FK). NOT arrived: Camera Module 3 Wide (a separate order from the cable). Motor confirmed #5159 by its label (FL).**
 
 **2026-09-07: a REAL DEFECT was found and fixed in the controller** (commit
 `bfa953e`, Appendix EJ). `ml/train_controller.py` overwrote `act` with the
@@ -134,8 +134,8 @@ This lists only what is actually open, cheapest first.)*
   under-reads the pack 15%); nothing in 330-470 ohm - 2 x 200 ohm in series
   (400 ohm) per strip segment.
 - **Coupler (2026-10-04):** no #4252 was ever on hand - the 2026-09-03 build
-  was a PRINT of v1, whose axle socket was too loose. Print v2
-  (`cad/servo_lego_coupler_v2.stl`, socket clearance 0.00 mm). Untested.
+  was a PRINT of v1, whose axle socket was too loose. ~~Print v2~~ v2 fitted
+  2026-10-10; print v3 (`cad/servo_lego_coupler_v3.stl`, Appendix FM). Untested.
 - **UNVERIFIED, Evan's hands:** the Vilros kit's 120 mm camera cable pin count; coupler fit on
   the MG90D-270.
 - **Decided by Evan:** 22 AWG for every net (26 AWG dropped); PRINT
@@ -619,16 +619,23 @@ UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
 (2026-09-30, 60 findings) have not been worked.
 
 NEXT ACTIONS, cheapest first:
-0. PARTS ARRIVED 2026-10-10 (Appendix FI). Ask Evan: did the Camera Module 3
-   Wide arrive? (Motor: in hand per FK - confirm bag label 5159 + encoder
-   board.) Which camera cable is his item 3?
-   Cell model/count? BEFORE THE SERVO IS WIRED: uno_control is still set for a
+0. PARTS ARRIVED 2026-10-10 (Appendices FI-FL). Camera still in transit;
+   motor is #5159; item 3 is the PiShop cable. Still ask: cell model/count.
+   SERVO BENCH: flash firmware/servo_bench (FL), measure the MG90D-270
+   map + end-of-travel pulses unloaded, then re-flash uno_control.
+   BEFORE THE SERVO IS WIRED: uno_control is still set for a
    180-degree MG90S - SERVO_US_SPAN 450 gives +/-60.75 deg of the +/-135 the
    rack needs, and attach() has no limits, so the Servo library clamps to
    544-2400 us. Needs attach(PIN_SERVO, 500, 2500) + a span chosen after a
    bench endpoint measurement. (FJ timestamp note: paid in FK.)
-1. Print `cad/servo_lego_coupler_v2.stl` and test-fit it; record printer,
-   filament, settings and the fit.
+1. ~~Print v2 and test-fit it~~ v2 FITTED 2026-10-10 ("dimensions are good",
+   Appendix FM); settings recorded in FR (P1S, PLA, 0.1 mm, 2 walls, solid).
+   Print `cad/servo_lego_coupler_v3.stl` (half the wall, 14 mm long; the 2 mm
+   shortening was a guess) and test-fit it; record the same four things.
+1a. Drive-motor coupler: print `cad/motor_lego_coupler_v2.stl` (Appendix FP,
+   D-bore +0.075 mm over v1, which was TOO TIGHT - Evan, FQ) and fit it.
+   Print settings are recorded (FR: P1S, PLA, 0.1 mm, 2 walls, solid) -
+   only a CHANGE needs recording now. The D-flat is still unmeasured.
 1b. Work the daily audit's OPEN rows - Appendix FG holds the full 35-row
    table; open are 11, 13, 16-35, plus row 14 half done (checkpoint
    fingerprints written, never checked). (The BMS wiring

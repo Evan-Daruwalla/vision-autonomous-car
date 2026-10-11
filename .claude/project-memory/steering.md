@@ -355,3 +355,20 @@ exists to prevent.
 - **MG90S output shaft: 20-tooth spline, ~4.8-4.9 mm OD** (SkyStar/TinyTronics
   datasheet, servodatabase; 2026-09-03). Splined, not round — an adapter must
   grip the spline pattern, not a plain bore diameter.
+
+## MG90D-270 ARRIVED; firmware still set for 180 degrees (2026-10-10, Appendices FI/FL)
+
+- `uno_control.ino` still has `SERVO_US_SPAN = 450` and an unlimited
+  `attach()`: +/-60.75 deg of the +/-135 the rack needs, and the Servo library
+  clamps unlimited pulses to 544-2400 us. Fix = `attach(PIN_SERVO, 500, 2500)`
+  + a span chosen from MEASURED endpoints, never from the listing.
+- Measure with `firmware/servo_bench/` (type a pulse in us, servo moves),
+  unloaded, on the Uno 5 V pin. Listing says 0.135 deg/us; unverified.
+
+## Coupler v2 fitted, v3 generated (2026-10-10, Appendix FM)
+
+- v2 fitted: "dimensions are good" (Evan). Printer, filament and settings
+  = Bambu P1S, PLA, 0.1 mm, 2 walls, solid (Appendix FR). v3 = OD 7.4 (walls 1.30 / 1.375 mm, half of v2), 14 mm
+  long (bore 7, socket 5; the 2 mm cut was a guess). Same bore and socket.
+- Weaker by design: about 36% of v2's twist section modulus at the bore,
+  and a thinner wall around a 0.20 mm press fit. Untested; no SF claimed.

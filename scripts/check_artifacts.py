@@ -127,6 +127,23 @@ ARTIFACTS = [
     dict(kind="file", artifact="cad/servo_lego_coupler_v2.stl",
          cmd=["scripts/gen_servo_lego_coupler.py", "--socket-clear", "0.00",
               "-o", "{out}"]),
+    # v3 (2026-10-10): Evan fitted v2 - half the wall, a bit shorter, same fits.
+    dict(kind="file", artifact="cad/servo_lego_coupler_v3.stl",
+         cmd=["scripts/gen_servo_lego_coupler.py", "--socket-clear", "0.00",
+              "--od", "7.4", "--bore-depth", "7", "--socket-depth", "5",
+              "-o", "{out}"]),
+    # Drive motor (Pololu #5159, 3 mm D-shaft) to a real Lego axle, 2026-10-10.
+    dict(kind="file", artifact="cad/motor_lego_coupler_v1.stl",
+         cmd=["scripts/gen_servo_lego_coupler.py", "--socket-clear", "0.00",
+              "--od", "7.4", "--bore-dia", "3.0", "--bore-flat", "2.5",
+              "--screw-dia", "1.5", "--bore-depth", "8", "--socket-depth", "5",
+              "-o", "{out}"]),
+    # Motor v2 (2026-10-11, Evan): +0.075 mm on the D-bore only.
+    dict(kind="file", artifact="cad/motor_lego_coupler_v2.stl",
+         cmd=["scripts/gen_servo_lego_coupler.py", "--socket-clear", "0.00",
+              "--od", "7.4", "--bore-dia", "3.075", "--bore-flat", "2.575",
+              "--screw-dia", "1.5", "--bore-depth", "8", "--socket-depth", "5",
+              "-o", "{out}"]),
     dict(kind="file", artifact="cad/tolerance_coupon_v2.stl",
          cmd=["scripts/gen_tolerance_coupon.py", "-o", "{out}"]),
 

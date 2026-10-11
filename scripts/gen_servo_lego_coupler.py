@@ -56,7 +56,7 @@ from collections import Counter
 from pathlib import Path
 
 # ---- geometry, all mm -------------------------------------------------------
-OD = 10.0            # body outer diameter; wall stays >=2.5 mm everywhere
+OD = 10.0            # body outer diameter (v1/v2; v3 is 7.4 via --od)
 MIN_WALL = 1.2       # refuse below this: three 0.4 mm-nozzle perimeters
 TOTAL_LEN = 16.0     # matches Adafruit #4252's 16 mm so it drops into the same space
 
@@ -64,6 +64,8 @@ SPLINE_DIA = 4.85    # MG90S 20T spline OD (datasheet 4.8-4.9)
 BORE_INTERF = 0.20   # bore is undersize by this; the spline cuts its own seat
 BORE_DIA = SPLINE_DIA - BORE_INTERF
 BORE_DEPTH = 8.0     # servo end, from z=0
+BORE_FLAT = 0.0      # 0 = round bore. >0 = D-bore, this many mm across the
+                     # flat (the drive motor's 3 mm D-shaft, 2026-10-10)
 
 SCREW_DIA = 2.2      # axial access for the servo's OWN retaining screw (M2),
                      # so the coupler cannot walk off the shaft. Zero new parts.
@@ -109,6 +111,9 @@ def build_angles():
         for sy in (1, -1):
             corners += [(sx * hs, sy * ha), (sx * ha, sy * ha), (sx * ha, sy * hs)]
     angs = {math.atan2(y, x) % (2 * math.pi) for x, y in corners}
+    if BORE_FLAT > 0:   # the D's two flat-to-arc corners, exact (same reason)
+        t = math.acos((BORE_FLAT - BORE_DIA / 2) / (BORE_DIA / 2))
+        angs |= {t, 2 * math.pi - t}
     angs |= {2 * math.pi * k / FILL_ANGLES for k in range(FILL_ANGLES)}
     return sorted(angs)
 
@@ -143,6 +148,22 @@ def ring_circle(dia, compensate):
     return [(r * (COMP[i] if compensate else 1.0) * math.cos(a),
              r * (COMP[i] if compensate else 1.0) * math.sin(a))
             for i, a in enumerate(ANGLES)]
+
+
+def ring_bore():
+    """Round bore, or a D: the compensated circle cut by a flat at +x."""
+    pts = ring_circle(BORE_DIA, compensate=True)
+    if BORE_FLAT <= 0:
+        return pts
+    d = BORE_FLAT - BORE_DIA / 2          # flat's distance from the centre
+    out = []
+    for (x, y), a in zip(pts, ANGLES):
+        c = math.cos(a)
+        r = math.hypot(x, y)
+        if c > 1e-12 and d / c < r:
+            r = d / c
+        out.append((r * math.cos(a), r * math.sin(a)))
+    return out
 
 
 def ring_cross():
@@ -197,7 +218,7 @@ def annulus(tris, outer, inner, z, up):
 
 def build():
     body = ring_circle(OD, compensate=False)      # outer surface: inscribed is fine
-    bore = ring_circle(BORE_DIA, compensate=True)
+    bore = ring_bore()
     screw = ring_circle(SCREW_DIA, compensate=True)
     socket = ring_cross()
     tris = []
@@ -236,7 +257,7 @@ def signed_volume(tris):
 def expected_volume():
     """Independent of the mesh: analytic areas of the actual generated polygons."""
     return (area(ring_circle(OD, False)) * TOTAL_LEN
-            - area(ring_circle(BORE_DIA, True)) * BORE_DEPTH
+            - area(ring_bore()) * BORE_DEPTH
             - area(ring_circle(SCREW_DIA, True)) * (WEB_TOP - BORE_DEPTH)
             - area(ring_cross()) * SOCKET_DEPTH)
 
@@ -255,6 +276,8 @@ def write_stl(tris, path):
 
 def main():
     global SOCKET_CLEAR, SOCKET_SPAN, SOCKET_ARM, ANGLES, N, COMP
+    global OD, BORE_DEPTH, WEB_TOP, SOCKET_DEPTH, TOTAL_LEN
+    global BORE_DIA, BORE_FLAT, SCREW_DIA
     ap = argparse.ArgumentParser()
     ap.add_argument("-o", "--out", default="cad/servo_lego_coupler_v1.stl")
     # Added 2026-10-04 after Evan printed v1: its socket (+0.20 = the coupon's
@@ -266,7 +289,35 @@ def main():
     ap.add_argument("--socket-clear", type=float, default=SOCKET_CLEAR,
                     help="mm added to the Lego cross on span and arm "
                          "(v1 0.20 = too loose when printed; v2 0.00)")
+    # Added 2026-10-10 for v3 (Evan, after fitting v2: "walls 1/2 as thick and a
+    # bit shorter overall, other than that the dimensions are good"). Defaults
+    # are v1/v2's, so both still regenerate byte-identically. The web between
+    # bore and socket stays 2 mm; TOTAL_LEN follows from the two depths.
+    ap.add_argument("--od", type=float, default=OD, help="body outer diameter, mm")
+    ap.add_argument("--bore-depth", type=float, default=BORE_DEPTH,
+                    help="servo-spline bore depth, mm")
+    ap.add_argument("--socket-depth", type=float, default=SOCKET_DEPTH,
+                    help="Lego-axle socket depth, mm")
+    # Added 2026-10-10 for the DRIVE-motor coupler (Pololu #5159, 3 mm D-shaft).
+    # Defaults are the servo coupler's, so v1-v3 regenerate byte-identically.
+    ap.add_argument("--bore-dia", type=float, default=BORE_DIA,
+                    help="motor/servo-end bore diameter, mm")
+    ap.add_argument("--bore-flat", type=float, default=BORE_FLAT,
+                    help="D-bore: mm across the flat (0 = round)")
+    ap.add_argument("--screw-dia", type=float, default=SCREW_DIA,
+                    help="through-hole in the web, mm")
     args = ap.parse_args()
+
+    OD = args.od
+    BORE_DEPTH = args.bore_depth
+    WEB_TOP = BORE_DEPTH + 2.0
+    SOCKET_DEPTH = args.socket_depth
+    TOTAL_LEN = WEB_TOP + SOCKET_DEPTH
+    BORE_DIA = args.bore_dia
+    BORE_FLAT = args.bore_flat
+    SCREW_DIA = args.screw_dia
+    if BORE_FLAT and not BORE_DIA / 2 < BORE_FLAT < BORE_DIA:
+        ap.error("--bore-flat must lie between the bore radius and diameter")
 
     SOCKET_CLEAR = args.socket_clear
     SOCKET_SPAN = AXLE_SPAN + SOCKET_CLEAR
@@ -285,7 +336,13 @@ def main():
     # OVERALL PASS -- the mesh checks prove a closed solid, not a printable
     # one. 1.2 mm = three 0.4 mm-nozzle perimeters; below that it is not a wall.
     walls_ok = min(wall_bore, wall_socket) >= MIN_WALL
-    ok = dup == 0 and unmatched == 0 and vol > 0 and err < 1e-6 and walls_ok
+    # The web's through-hole must sit strictly inside BOTH bores, at every
+    # angle -- a 2.2 mm hole crosses a 3 mm D-shaft's flat (1.0 mm off centre)
+    # and the annulus faces would fold through each other. Mesh checks miss it.
+    screw_r = [math.hypot(x, y) for x, y in ring_circle(SCREW_DIA, True)]
+    nested = all(s < math.hypot(*b) and s < math.hypot(*c)
+                 for s, b, c in zip(screw_r, ring_bore(), ring_cross()))
+    ok = dup == 0 and unmatched == 0 and vol > 0 and err < 1e-6 and walls_ok and nested
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -293,8 +350,12 @@ def main():
         write_stl(tris, out)
 
     print(f"body       : OD {OD:.2f} x {TOTAL_LEN:.2f} mm")
-    print(f"servo bore : {BORE_DIA:.2f} mm dia x {BORE_DEPTH:.2f} deep "
-          f"({BORE_INTERF:.2f} under the {SPLINE_DIA:.2f} spline; wall {wall_bore:.2f})")
+    if BORE_FLAT > 0:
+        print(f"D bore     : {BORE_DIA:.2f} mm dia, {BORE_FLAT:.2f} across the flat "
+              f"x {BORE_DEPTH:.2f} deep (wall {wall_bore:.2f})")
+    else:
+        print(f"servo bore : {BORE_DIA:.2f} mm dia x {BORE_DEPTH:.2f} deep "
+              f"({SPLINE_DIA - BORE_DIA:.2f} under the {SPLINE_DIA:.2f} spline; wall {wall_bore:.2f})")
     print(f"screw hole : {SCREW_DIA:.2f} mm dia, z {BORE_DEPTH:.1f}-{WEB_TOP:.1f}")
     print(f"axle socket: {SOCKET_SPAN:.2f} across x {SOCKET_ARM:.2f} arm "
           f"x {SOCKET_DEPTH:.2f} deep (clear {SOCKET_CLEAR:.2f}; wall {wall_socket:.2f})")
@@ -304,6 +365,7 @@ def main():
           f"  -> {'PASS' if dup == 0 and unmatched == 0 else 'FAIL'}")
     print(f"volume     : {vol:.4f} mm^3 (expected {exp:.4f}, rel.err {err:.2e})"
           f"  -> {'PASS' if vol > 0 and err < 1e-6 else 'FAIL'}")
+    print(f"hole nested: inside bore and socket at every angle  -> {'PASS' if nested else 'FAIL'}")
     print(f"walls      : min {min(wall_bore, wall_socket):.2f} mm (need >= {MIN_WALL:.2f})"
           f"  -> {'PASS' if walls_ok else 'FAIL'}")
     print(f"OVERALL    : {'PASS' if ok else 'FAIL'}")

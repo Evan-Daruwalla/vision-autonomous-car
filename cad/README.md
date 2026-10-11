@@ -205,6 +205,52 @@ tighter - if a Lego axle will not go in, regenerate at 0.05 or 0.10 rather than
 forcing it. Record printer, filament, settings and the fit result this time.
 The generator refuses any wall under 1.2 mm (Appendix FD #6).
 
+### v3: half the wall, 2 mm shorter (2026-10-10)
+
+Evan fitted v2: "make the walls of the v2 1/2 as thick and a bit shorter
+overall; other than that the dimensions are good". So the bore (4.65 mm) and
+the 0.00-clearance cross socket are unchanged. OD 10.0 -> 7.4 mm (socket wall
+2.60 -> 1.30, bore wall 2.675 -> 1.375); length 16 -> 14 mm (bore 8 -> 7,
+socket 6 -> 5, web still 2). "A bit shorter" = 2 mm was a guess, not a
+measured requirement - change `--bore-depth` / `--socket-depth` if not.
+
+```bash
+python scripts/gen_servo_lego_coupler.py --socket-clear 0.00 --od 7.4 --bore-depth 7 --socket-depth 5 -o cad/servo_lego_coupler_v3.stl
+```
+
+**Untested, and weaker by design:** in twist, the bore section's polar section
+modulus drops to about 36% of v2's (computed, (OD^4 - ID^4)/OD), and a
+1.375 mm wall around a 0.20 mm press-fit spline is more likely to split in
+ABS. 1.30 mm is just above the generator's 1.2 mm floor.
+
+### Drive-motor coupler v1: Pololu #5159 D-shaft to a Lego axle (2026-10-10)
+
+Same generator, same socket and wall as servo v3, with a D-bore at the motor
+end: 3.00 mm, 2.50 mm across the flat, 8 mm deep (the shaft is 9 mm, so the
+part stops ~1 mm short of the gearbox face). 1.5 mm through-hole in the web
+(a 2.2 mm one would cut the flat, which sits 1.0 mm off centre; the generator
+now refuses that). OD 7.4 x 15 mm.
+
+```bash
+python scripts/gen_servo_lego_coupler.py --socket-clear 0.00 --od 7.4 --bore-dia 3.0 --bore-flat 2.5 --screw-dia 1.5 --bore-depth 8 --socket-depth 5 -o cad/motor_lego_coupler_v1.stl
+```
+
+**The 2.50 mm flat is UNMEASURED** - Pololu does not publish it; one retailer
+says 2.5 mm (`docs/research/2026-07-23_drive-motor-selection.md`). Caliper
+the real shaft (diameter, across-flat, length) before printing and re-run
+with the measured numbers. The bore is modelled at nominal (0.00 offset, the
+grip that worked on the coupon pins and on v2); if it will not go on, add
+0.05-0.10 to `--bore-dia` and `--bore-flat` rather than forcing it. Untested.
+
+**Motor v2 (2026-10-11, Evan): +0.075 mm clearance on the D-bore only** -
+3.075 mm dia, 2.575 mm across the flat, still 8 mm deep; socket and body
+unchanged. (A 1.5x-longer, 12 mm bore was generated first and dropped at
+Evan's call: the shaft is only 9 mm.)
+
+```bash
+python scripts/gen_servo_lego_coupler.py --socket-clear 0.00 --od 7.4 --bore-dia 3.075 --bore-flat 2.575 --screw-dia 1.5 --bore-depth 8 --socket-depth 5 -o cad/motor_lego_coupler_v2.stl
+```
+
 ### The design, and the one thing it deliberately does not do
 
 | end | feature | why |
