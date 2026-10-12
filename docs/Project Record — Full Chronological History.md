@@ -235,6 +235,7 @@ the dated entry, not the digest.
 - [GP - Servo mount v1: open under the body, ears on plastic, pinned at the L's corner](#appendix-gp---servo-mount-v1-open-under-the-body-ears-on-plastic-pinned-at-the-ls-corner-2026-10-12-1113-cdt) (10-12)
 - [GQ - Servo L liftarm: corner stud freed, servo mount v1 stands](#appendix-gq---servo-l-liftarm-corner-stud-freed-servo-mount-v1-stands-2026-10-12-1130-cdt) (10-12)
 - [GR - Correction: GQ's timestamp](#appendix-gr---correction-gqs-timestamp-2026-10-12-1122-cdt) (10-12)
+- [GS - Servo mount v2: a frame across both L liftarms](#appendix-gs---servo-mount-v2-a-frame-across-both-l-liftarms-2026-10-12-1128-cdt) (10-12)
 
 ---
 
@@ -17653,3 +17654,31 @@ assumes it is fixed.
 
 # Appendix GR - Correction: GQ's timestamp (2026-10-12 ~11:22 CDT)
 **Correction to Appendix GQ:** its heading says "~11:30 CDT", but the `date` call made just before writing it returned 11:21:18 CDT. The heading time was typed, not copied from that output. GQ was written at about 11:21 CDT on 2026-10-12. Nothing else in GQ changes.
+
+# Appendix GS - Servo mount v2: a frame across both L liftarms (2026-10-12 ~11:28 CDT)
+**WHAT:** Servo mount v2. Evan: "I want to connect on both sides ... look at
+the photos I sent again, the connection points are on the long side."
+
+**What the photos show (IMG_0212, re-read):** there are TWO 2x4 L liftarms,
+one each side of the servo, mirror images. Their long legs run along the
+servo's long sides with the axle (cross) holes at the same end, and their
+short legs point inward at the corner. The legs are about 4 studs apart,
+centre to centre (photo scale from the 8 mm hole pitch; NOT measured). The Ls
+attach to the grey frame, so they are fixed - this answers GQ's open question.
+v1 (GP) assumed ONE L under the servo's long axis; that was a misreading of
+Evan's description, and v1 put plastic and pins where there is no L.
+
+**v2 (`cad/servo_mount.scad` -> `cad/servo_mount.stl`, printable, UNTESTED):**
+one plate 42.5 x 40 x 7.3 mm sitting on both Ls' top faces (x -14.5..28,
+y -20..20), the case footprint open, ears on plastic with pilots at x -10.88
+and 17.0 (unchanged), and Lego-beam-shaped pin holes at studs 1, 2 and 3 of
+BOTH Ls: (8, 16, 24) x (+16, -16). Pinning studs 1 and 3 on each side is
+enough; stud 2 is spare. Placeholders: L thickness (8.0) and L spacing (32,
+from the photo).
+
+**Checks:** manifold PASS; bbox (-14.5,-20,0)..(28,20,7.3) PASS; probes
+86/86 PASS; second render byte-identical (sha256 f25224846aa2d702...);
+check_artifacts 35 checked, 0 drifted. Not printed.
+
+**Process note:** the .scad header cites this entry as "GS" before it was
+appended - a pre-cite; checked against the script's assignment.

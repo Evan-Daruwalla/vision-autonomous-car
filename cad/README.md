@@ -353,12 +353,12 @@ on the bed, no supports. Report: do the pins snap and hold; does the motor
 sit level with the coupler; is the back wall gap right (encoder end position
 was a photo estimate).
 
-### servo_mount.stl - v1, printable, UNTESTED (Appendix GP)
+### servo_mount.stl - v2, printable, UNTESTED (Appendix GS)
 
-Plate on the Lego 4x2 L liftarm carrying the MG90D-270 by its ears only (the
-whole case footprint is open). Two ear screws into 1.7 mm pilots (swap for the
-coupon's best pilot); one black pin at the L's corner plus a spare hole for the
-short leg on either side. Print flat side down, no supports.
+One plate across the two Lego 2x4 L liftarms either side of the MG90D-270,
+carrying it by its ears only (the case footprint is open). Two ear screws into
+1.7 mm pilots (swap for the coupon's best pilot). Pin holes at studs 1, 2 and 3
+of each L; pin studs 1 and 3. Print flat side down, no supports.
 
 ### electronics_tray_draft.scad, electronics_deck_draft.scad - LAYOUT DRAFTS
 

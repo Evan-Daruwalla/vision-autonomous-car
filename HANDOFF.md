@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-12 ~11:22 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-12 ~11:28 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 200 appendices A–GR; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 201 appendices A–GS; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -627,10 +627,10 @@ NEXT ACTIONS, cheapest first:
      at a PHOTO-ESTIMATED gap. PRINT AND FIT v2, report: do the pins snap,
      does the motor sit level with the coupler, is the back-wall gap ~0.5 mm.
      Axle centre 26.20 mm above the floor (GE); motor connector UP (GF).
-   - SERVO MOUNT cad/servo_mount.stl v1 (GP): printable, UNTESTED - open under
-     the body, ears on plastic, pinned at the L's corner (stud 3). Print and
-     fit: ears sit flat, pilot size, near-ear pad clear of neighbours.
-     Pins at the L's corner (stud 3), which Evan freed (GQ).
+   - SERVO MOUNT cad/servo_mount.stl v2 (GS): printable, UNTESTED - a plate on
+     BOTH 2x4 L liftarms (one each side of the servo), case footprint open,
+     ears on plastic, pin holes at studs 1-3 of each L. Print and fit: L spacing
+     (photo: 32 mm), ears sit flat, pilot size.
    - ELECTRONICS TRAY/DECK: LAYOUT DRAFTS (cad/scad/*_draft.scad, GJ), NOT
      printable, placeholders named *_UNMEASURED; E11 (top-down photo + heights) for the electronics.
      Known defect: the deck's rocker hole sits over the holder/BMS.
