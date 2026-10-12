@@ -229,6 +229,8 @@ the dated entry, not the digest.
 - [GJ - Mounts Phase B/C: printable motor mount; servo and electronics layout drafts](#appendix-gj---mounts-phase-bc-printable-motor-mount-servo-and-electronics-layout-drafts-2026-10-11-2226-cdt) (10-11)
 - [GK - Motor mount gets a back wall behind the encoder end](#appendix-gk---motor-mount-gets-a-back-wall-behind-the-encoder-end-2026-10-11-2253-cdt) (10-11)
 - [GL - Motor mount v1 printed (encoder hits the walls); v2 with real-pin snap sockets](#appendix-gl---motor-mount-v1-printed-encoder-hits-the-walls-v2-with-real-pin-snap-sockets-2026-10-12-1042-cdt) (10-12)
+- [GM - Decision: real black friction pins for every printed part](#appendix-gm---decision-real-black-friction-pins-for-every-printed-part-2026-10-12-1053-cdt) (10-12)
+- [GN - docs-sync pass and HANDOFF drift check](#appendix-gn---docs-sync-pass-and-handoff-drift-check-2026-10-12-1055-cdt) (10-12)
 
 ---
 
@@ -17500,3 +17502,50 @@ render manifold PASS; bbox (-10.35,-19.9,18.5)..(15,19.9,33.13) PASS; probes
 them solid, the removed wall section open); second render byte-identical
 (sha256 35502fb170d8a80e...); check_artifacts 34 checked, 0 drifted.
 v2 is UNTESTED; not printed.
+
+# Appendix GM - Decision: real black friction pins for every printed part (2026-10-12 ~10:53 CDT)
+**WHAT:** Decision (Evan, 2026-10-12): "I will be using these pins from now
+on" - the black LEGO 2780 friction pins (ring in the middle, a lip at each
+end, his description) are the standard way every printed part attaches to
+the Lego body. Printed pin stubs are retired.
+
+**Applied to:** motor mount v2 already uses them (record GL). The servo mount
+and electronics tray/deck drafts already use through holes with 6.2 x 0.8
+recesses at both faces, which take these pins; any blind socket must copy the
+snap pocket of `pin_socket()` in `cad/scad/motor_mount.scad`.
+
+**Stored:** `.claude/project-memory/decisions.md` (first entry in that bin;
+it had been empty since 2026-09-30). Recess and pocket sizes remain untested
+in PLA.
+
+# Appendix GN - docs-sync pass and HANDOFF drift check (2026-10-12 ~10:55 CDT)
+**WHAT:** /docs-sync full pass plus a HANDOFF drift check, 2026-10-12.
+
+## Drift check (HANDOFF's claims vs disk, cheap checks run for real)
+
+| Claim | Observed | Verdict |
+|---|---|---|
+| Test suite `run_checks.py` "15/15 on 2026-09-10" | 16 passed, 0 failed, 0 skipped (of 16) | DRIFT - fixed to 16/16 on 2026-10-12 |
+| `check_artifacts.py` clean | 34 checked, 0 drifted, 2 uncheckable | MATCH |
+| Prompt STATE stamp 2026-10-11 ~14:36 | file last updated 2026-10-12 | DRIFT - restamped |
+| Item 000 "Phase A ... then Sonnet writes the 4 .scad files"; open list: beam underside, v3 fit, axle ~26.3 | all done or measured (GD, GE, GF, GJ, GL) | DRIFT - item rewritten (status + what Evan does next) |
+| Item 1a "print motor coupler v3 and fit it" | v3 FITS (GF) | DRIFT - fixed |
+| "motor coupler v1 too tight, v3 next" in STATE | v3 fits | DRIFT - fixed |
+| Record holds 195 appendices A-GM (before this entry) | 195, last GM | MATCH |
+| Files named exist (motor_mount.stl, coupon, couplers v3, render_scad.py, OpenSCAD, the brief, the 4 drafts' .scad) | all present | MATCH |
+| Push state | not recorded by HANDOFF by design; `git status -sb` after fetch: in sync with origin/main | n/a |
+| The Uno runs servo_bench | needs the board | UNVERIFIED-TODAY (read the boot banner) |
+
+6 drifted rows, all in the paste-ready prompt, all fixed in HANDOFF.
+
+## Other steps
+
+- PRD task 6: a dated GJ/GL note (v1 printed, v2 untested, done-check NOT
+  passed). No milestone moved.
+- Bins: `decisions.md` started (GM). The cadence hook's stalest bins (data,
+  performance, security, ui) hold facts this session did not change - left
+  as they are. HTML twin and record index: the project has neither.
+- Memory files: no durable working-preference change this session.
+- Process slip: the HANDOFF line counting appendices was written as "A-GN"
+  before this entry existed, i.e. pre-cited. Checked against the script's
+  assignment after appending.

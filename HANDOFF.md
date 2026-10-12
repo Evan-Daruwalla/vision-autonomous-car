@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-12 ~10:42 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-12 ~10:55 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 194 appendices A–GL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 196 appendices A–GN; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -592,20 +592,20 @@ Read, in order:
    (track.md before ANY track/marking/xodr work; steering.md before ANY
    servo/steering work)
 
-STATE (2026-10-11 ~14:36 CDT). Parts ORDERED and 23 of 24 ARRIVED 2026-10-10
+STATE (2026-10-12 ~10:55 CDT). Parts ORDERED and 23 of 24 ARRIVED 2026-10-10
 (Appendices FI-FL; the Camera Module 3 Wide is on a separate order, not in).
 Nothing is wired. The Uno now runs firmware/servo_bench (FT), NOT uno_control:
 re-flash uno_control and read its boot banner - no SELFTEST count is known
 for the current source. The MG90D-270 is positional (turns and stops).
 Couplers print in PLA on a Bambu P1S (0.1 mm, 2 walls, solid; FR): servo v2
-fitted, v3 next; motor coupler v1 too tight, v3 (+0.150) next. Tolerance
+fitted, v3 next; motor coupler v3 FITS the shaft (GF; not load-tested). Tolerance
 coupons (ABS) gave pin 4.80 mm, axle 5.00 mm. BOM $422.25 before shipping. The sim lane ended in a well-instrumented NEGATIVE: no learned
 policy drives reliably, cause understood. The LaneMaker/OpenDRIVE simulation
 thread is CLOSED as a negative after seven failed hypotheses -- do not
 re-open it. The 2026-09-09 daily-audit (Appendix ES) is FULLY WORKED: docs in
 ET, code in EU. Dash density (accept 18.7) and cornering clearance (accept
 29.6 mm/side, rule re-pointed at the road edge) were DECIDED 2026-09-09.
-THE TEST SUITE is `python scripts/run_checks.py` (15/15 on 2026-09-10 --
+THE TEST SUITE is `python scripts/run_checks.py` (16/16 on 2026-10-12 --
 re-run it, never quote it). A pre-commit guard blocks any staged generated
 artifact that no longer matches its generator. ~~Repo is IN SYNC with
 origin/main (0 ahead, 0 behind, fetched 2026-10-04) -- those 6 commits were
@@ -621,29 +621,22 @@ UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
 (2026-09-30, 60 findings) have not been worked.
 
 NEXT ACTIONS, cheapest first:
-000. PRINTED MOUNTS (servo, motor, electronics tray + deck) - Appendix FY. Phase A
-   done: OpenSCAD 2021.01 at ~/tools/openscad-2021.01, scripts/render_scad.py
-   (canonical STL + probes), cad/pla_fit_coupon.stl. BLOCKED-ON-EVAN: print the
-   coupon and report fits; fill in the measurement sheet (FY / the task plan at
-   ~/.claude/task-plans/autonomous-car-printed-mounts.md). Then: specs + preview
-   PNGs for approval, then Sonnet writes the 4 .scad files. Untested; not printed.
-   Online dimensions (Appendix FZ): Lego 6.2 x 0.8 counterbore + 7.4 beam (cailliau),
-   Pi 5 / Uno / BMS / LM2596 / XT30 / rocker (ROUND, 20 mm hole) found; servo, motor,
-   case-in-kit, bank ports, holder, charger, fuse body and zip ties still need calipers.
-   Appendix GA corrects FZ: Pololu's drawing covers motor M1, M2, M4; M3 is now a
-   2-number spot check (shaft dia + across-flat); M5-M6 and servo S1-S9 stand.
-   First on-car numbers in (Appendix GB; GD corrects the free length to 70 mm and puts
-   the near frame beam underside at 35.22 mm; GE: axle centre 26.20 measured; GF: motor
-   coupler v3 FITS the shaft (not load-tested), motor goes CONNECTOR UP per Evan, bottom 21.2;
-   GG: motor test-fitted in place, no mount; GH: encoder end -> front beam 36.65, cradle to
-   pin into holes A/B of the short beams inside the centre frame; GI: A-B 32 mm c-c,
-   underside 33.13; GJ: cad/motor_mount.stl BUILT (printable, untested, printed pin stubs);
-   servo + electronics tray/deck are LAYOUT DRAFTS in cad/scad/*_draft.scad, NOT printable;
-   GK: motor mount has a back wall; GL: v1 PRINTED - dims OK, encoder hit the back third of
-   the walls; v2 = walls trimmed + real black pins in snap sockets (brief docs/research/
-   2026-10-12_technic-pin-snap-geometry.md), untested): open:
-   beam underside height over the axle line (motor top ~33.3 mm; axle centre ~26.3 mm,
-   Appendix GC), v3 fit on the motor shaft, L piece, S1/S2/S4-S7.
+000. PRINTED MOUNTS - Appendices FY (plan) and GA-GM (measurements, builds).
+   - MOTOR MOUNT cad/motor_mount.stl v2 (GL): real black 2780 pins in snap
+     sockets; side walls trimmed after v1's print hit the encoder; back wall
+     at a PHOTO-ESTIMATED gap. PRINT AND FIT v2, report: do the pins snap,
+     does the motor sit level with the coupler, is the back-wall gap ~0.5 mm.
+     Axle centre 26.20 mm above the floor (GE); motor connector UP (GF).
+   - SERVO MOUNT + ELECTRONICS TRAY/DECK: LAYOUT DRAFTS (cad/scad/*_draft.scad,
+     GJ), NOT printable, placeholders named *_UNMEASURED. Need servo S1, S2,
+     S4-S7 + the L piece; E11 (top-down photo + heights) for the electronics.
+     Known defect: the deck's rocker hole sits over the holder/BMS.
+   - DECISION (GM): every printed part uses real black 2780 pins, no printed
+     stubs (.claude/project-memory/decisions.md).
+   - cad/pla_fit_coupon.stl is still UNPRINTED: 4.80 bore / 6.2 recess are
+     untested in PLA.
+   - Tooling: OpenSCAD 2021.01 at ~/tools/openscad-2021.01; scripts/render_scad.py
+     (canonical STL + probes). Task plan: ~/.claude/task-plans/autonomous-car-printed-mounts.md.
 00. WIRING AUDIT DONE 2026-10-11 (Appendix FX): doc and firmware agree pin
    for pin. Before wiring ANYTHING, follow WIRING_PROTOSHIELD section 5 as
    rewritten: rail trimmed to 5.0 V (not 5.2) and the pot locked; step 1b
@@ -665,10 +658,8 @@ NEXT ACTIONS, cheapest first:
    Appendix FM); settings recorded in FR (P1S, PLA, 0.1 mm, 2 walls, solid).
    Print `cad/servo_lego_coupler_v3.stl` (half the wall, 14 mm long; the 2 mm
    shortening was a guess) and test-fit it; record the same four things.
-1a. Drive-motor coupler: print `cad/motor_lego_coupler_v3.stl` (Appendix FS,
-   D-bore +0.150 over v1; v1 TOO TIGHT (FQ), v2 +0.075 inferred too tight) and fit it.
-   Print settings are recorded (FR: P1S, PLA, 0.1 mm, 2 walls, solid) -
-   only a CHANGE needs recording now. The D-flat is still unmeasured.
+1a. Drive-motor coupler v3 FITS the #5159 shaft and is installed on the diff
+   input (Appendix GF; v1 too tight, FQ). Fit only - NOT load-tested.
 1b. Work the daily audit's OPEN rows - Appendix FG holds the full 35-row
    table; open are 11, 13, 16-35, plus row 14 half done (checkpoint
    fingerprints written, never checked). (The BMS wiring

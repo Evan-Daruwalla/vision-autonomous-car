@@ -418,6 +418,7 @@ transfer gap) must not block the capstone.
    hand with motor engaged. *(Term corrected 2026-09-02 — "PF motor" has been
    wrong since 2026-07-23 ~17:21, when Evan confirmed he owns no Lego motors.)*
    **2026-10-11 (Appendix FY): the motor mount is being built in OpenSCAD, gated on M1-M6 (2026-10-11, Appendix GA: M1/M2/M4 now come from Pololu's drawing; M3 is a spot check) and the PLA fit coupon. The material in practice is PLA; the PETG named above is unresolved.**
+   **2026-10-12 (Appendices GJ, GL): v1 printed - dimensions fine, encoder hit the back third of the side walls; v2 (real black pins in snap sockets, trimmed walls, back wall) built, UNTESTED. Done-check NOT passed.**
 7. **CAD: chassis plate.** Bays for Pi, ~~LiPo (low, central), TB6612+UBEC~~
    **2× 18650 holder (low, central) · the Arduino Uno + proto shield (68.6 ×
    53.4 mm — 60% of the 114.75 mm car width, so it mounts lengthwise; stack
