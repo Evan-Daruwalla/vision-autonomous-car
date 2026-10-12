@@ -218,6 +218,17 @@ the dated entry, not the digest.
 - [FY - Printed mounts, Phase A: OpenSCAD installed, render_scad.py validator, PLA fit coupon - the servo, motor and electronics STLs wait on measurements](#appendix-fy---printed-mounts-phase-a-openscad-installed-render_scadpy-validator-pla-fit-coupon---the-servo-motor-and-electronics-stls-wait-on-measurements-2026-10-11-1639-cdt) (10-11)
 - [FZ - Mount dimensions looked up online: Lego counterbore 6.2 x 0.8 sourced, Pi 5 / Uno / BMS / LM2596 / XT30 / rocker found - and the BOM's LM2596 link now shows a different part](#appendix-fz---mount-dimensions-looked-up-online-lego-counterbore-62-x-08-sourced-pi-5--uno--bms--lm2596--xt30--rocker-found---and-the-boms-lm2596-link-now-shows-a-different-part-2026-10-11-1743-cdt) (10-11)
 - [GA - Correction to FZ: Pololu publishes the #5159 motor's dimensions (M1-M4)](#appendix-ga---correction-to-fz-pololu-publishes-the-5159-motors-dimensions-m1-m4-2026-10-11-2047-cdt) (10-11)
+- [GB - First on-car measurements for the mounts: motor line has length, height open; servo ear height](#appendix-gb---first-on-car-measurements-for-the-mounts-motor-line-has-length-height-open-servo-ear-height-2026-10-11-2102-cdt) (10-11)
+- [GC - Correction to GB: axle coupler top is ~30 mm above the floor, axle centre ~26.3 mm](#appendix-gc---correction-to-gb-axle-coupler-top-is-30-mm-above-the-floor-axle-centre-263-mm-2026-10-11-2104-cdt) (10-11)
+- [GD - Motor line: beam underside 35.22 mm, free length 70 mm (corrects GB's 78.76)](#appendix-gd---motor-line-beam-underside-3522-mm-free-length-70-mm-corrects-gbs-7876-2026-10-11-2111-cdt) (10-11)
+- [GE - Axle centre measured at 26.20 mm; motor orientation options; corrects GD's connector-up figure](#appendix-ge---axle-centre-measured-at-2620-mm-motor-orientation-options-corrects-gds-connector-up-figure-2026-10-11-2114-cdt) (10-11)
+- [GF - Motor coupler v3 fits the shaft; motor goes connector-up (Evan); corrects GE](#appendix-gf---motor-coupler-v3-fits-the-shaft-motor-goes-connector-up-evan-corrects-ge-2026-10-11-2118-cdt) (10-11)
+- [GG - Motor test-fitted in place (connector up, no mount); near-beam pins would hit the motor](#appendix-gg---motor-test-fitted-in-place-connector-up-no-mount-near-beam-pins-would-hit-the-motor-2026-10-11-2122-cdt) (10-11)
+- [GH - Encoder end to front beam 36.65 mm; corrects GG's hole spacing; cradle pin candidates](#appendix-gh---encoder-end-to-front-beam-3665-mm-corrects-ggs-hole-spacing-cradle-pin-candidates-2026-10-11-2129-cdt) (10-11)
+- [GI - Cradle pin holes A/B measured: 32 mm apart, underside 33.13 mm](#appendix-gi---cradle-pin-holes-ab-measured-32-mm-apart-underside-3313-mm-2026-10-11-2140-cdt) (10-11)
+- [GJ - Mounts Phase B/C: printable motor mount; servo and electronics layout drafts](#appendix-gj---mounts-phase-bc-printable-motor-mount-servo-and-electronics-layout-drafts-2026-10-11-2226-cdt) (10-11)
+- [GK - Motor mount gets a back wall behind the encoder end](#appendix-gk---motor-mount-gets-a-back-wall-behind-the-encoder-end-2026-10-11-2253-cdt) (10-11)
+- [GL - Motor mount v1 printed (encoder hits the walls); v2 with real-pin snap sockets](#appendix-gl---motor-mount-v1-printed-encoder-hits-the-walls-v2-with-real-pin-snap-sockets-2026-10-12-1042-cdt) (10-12)
 
 ---
 
@@ -17063,3 +17074,429 @@ that. S1-S9 stand.
 - Servo: S1-S9 unchanged.
 
 Untested; nothing printed or measured in this entry.
+
+# Appendix GB - First on-car measurements for the mounts: motor line has length, height open; servo ear height (2026-10-11 ~21:02 CDT)
+**WHAT:** Evan's first on-car measurements for the printed mounts (Appendix FY
+measurement sheet), taken with a Mitutoyo digital caliper, plus 5 photos
+(underside with the caliper, side view of the servo with the caliper, front
+top view, two underside views with a steel ruler). Photos are not committed.
+
+## Measured (Evan, 2026-10-11)
+
+| Item | Value | Note |
+|---|---|---|
+| Motor coupler v3 | installed on the diff input axle (socket end) | Fit on the MOTOR shaft not reported yet |
+| Edge of the light-grey ball to the end of coupler v3 | 9 mm | |
+| To the top of coupler v3 | 33 mm | the centre was not reachable; the reference surface is not stated (see below) |
+| End of coupler v3 to the far edge of the 7-long black beam (front) | 78.76 mm | Evan: "about 10 Lego lengths"; 78.76 / 8.0 = 9.85 pitches, edge to edge |
+| Bottom of the grey L piece to the bottom of the servo housing | 13.80 mm | servo mounted output-down |
+| Servo housing bottom to the ears (flanges) | +1.5 mm | so the ears are 15.3 mm above the L piece's bottom face |
+
+## What it implies (inference, not measured)
+
+- **Axle height.** IF the 33 mm is from the floor with the car upright, the
+  axle centre is 33 - 7.4 / 2 = **29.3 mm** above the floor (coupler v3 OD
+  7.4, from `check_artifacts.py`). Unconfirmed reference.
+- **Motor length fits.** Per Appendix GA the #5159 is 32.5 mm overall (max)
+  plus a 9-10 mm shaft; the shaft sits 8 mm deep in v3's bore, so the motor
+  ends about 34-35 mm past the coupler's end, plus room for the side
+  connector's cable. 78.76 mm is available along the axle line. The
+  earlier worry (Appendix FY: "~20 mm free", which assumed nothing was on
+  the axle yet) does not stand; a longer input axle is probably NOT needed.
+- **But height is open.** The grey frame's cross beams run over the axle
+  line in the underside photos, the nearest one roughly 6-10 mm past the
+  coupler's end (photo estimate, +/-3 mm). Whether the motor passes UNDER
+  them depends on their underside height. With the axle centre at 29.3 mm,
+  the gearbox (10 tall) spans about 24.3-34.3 mm and the encoder cap (14
+  tall) about 22-36 mm above the floor, if centred on the shaft. Not
+  measured: the height of those beams' underside.
+- **Servo ears.** If the L piece is a standard liftarm (7.4-7.8 mm thick,
+  cailliau), the ears' underside is 7.5-7.9 mm above its TOP face, about
+  one beam thickness. The L piece's real thickness is not measured.
+
+## Still needed
+
+1. Motor coupler v3 on the motor shaft: fit result (the record needs it per
+   the CAD rule; printer settings as Appendix FR).
+2. The 33 mm: from what surface, car upright or upside down?
+3. Height above the floor of the underside of the lowest grey beam crossing
+   the axle line between the coupler and the black beam.
+4. The L piece: its thickness, and which beam it is in the front photo.
+5. Servo items S1, S2, S4-S7 (the 1.5 mm above is read as S3).
+
+Untested; nothing printed against these numbers.
+
+# Appendix GC - Correction to GB: axle coupler top is ~30 mm above the floor, axle centre ~26.3 mm (2026-10-11 ~21:04 CDT)
+**WHAT:** Correction to Appendix GB's "33 mm to the top of coupler v3". Evan,
+2026-10-11: it was measured **from the floor to the top of the motor
+coupler**, and the value is **"more like 30 mm"** (his estimate; the
+coupler's centre was not reachable). The car was on the floor, i.e. upright.
+
+Recomputed (inference): axle centre = 30 - 7.4 / 2 = **26.3 mm** above the
+floor (was 29.3). With the motor centred on the shaft, the gearbox (10 tall)
+spans about 21.3-31.3 mm and the encoder cap (14 tall) about 19.3-33.3 mm
+above the floor. Ground clearance under the motor is about 19 mm.
+
+Still open from GB: the underside height of the grey beams crossing the axle
+line (the motor passes under them only if it is above about 33.3 mm), the
+coupler v3 fit on the motor shaft, the L piece, servo S1, S2, S4-S7.
+
+# Appendix GD - Motor line: beam underside 35.22 mm, free length 70 mm (corrects GB's 78.76) (2026-10-11 ~21:11 CDT)
+**WHAT:** More on-car numbers from Evan for the motor line, and a correction
+to Appendix GB.
+
+| Item | Value | Source |
+|---|---|---|
+| Floor to the TOP of the grey frame's near-side beam (the beam just past coupler v3's tip, marked in red on annotated copies of IMG_0204 / IMG_0210) | 43.22 mm | Evan, caliper, car upright |
+| That beam's thickness | 8 mm | Evan |
+| -> its underside above the floor | **35.22 mm** | computed |
+| Coupler v3 end to the front 7-long black beam | **70 mm** | Evan; **corrects GB's 78.76 mm** ("I misspoke") |
+
+## Inference (not measured)
+
+- **The motor fits under the beam, with a margin that depends on how it is
+  turned.** Axle centre ~26.3 mm (Appendix GC; from Evan's "more like 30 mm"
+  estimate). Pololu's page: the encoder board stays within the gearbox
+  section (+0.25 mm) except on the connector side, where it sticks out 3-4
+  mm. So:
+  - connector DOWN or sideways with the 10 mm gearbox side vertical: top of
+    the motor ~26.3 + 5.25 = 31.55 mm, about **3.7 mm** under the beam;
+  - connector UP: top ~33.3 mm, about **1.9 mm** under it, which is inside
+    the error of the 30 mm estimate.
+  Proposal: connector down. Bottom of the motor then ~17 mm above the floor.
+- **Length:** the motor ends ~34-35 mm past the coupler's end; 70 mm is
+  available, so ~35 mm spare.
+- **Open:** whether the whole grey frame is one flat layer (underside 35.22
+  mm all the way to the black beam). The photos show inner grey beams about
+  34 mm past the coupler's end (photo estimate, +/-3 mm), right where the
+  encoder end would be. If any of them sits lower, it blocks the motor.
+- **The axle-centre height is now the number the mount hangs on**, and it is
+  an estimate. A caliper reading from the floor to the BOTTOM of the
+  coupler gives it exactly (centre = bottom + 3.7).
+
+Untested; nothing printed against these numbers.
+
+# Appendix GE - Axle centre measured at 26.20 mm; motor orientation options; corrects GD's connector-up figure (2026-10-11 ~21:14 CDT)
+**WHAT:** Evan measured the axle height (replacing GC's estimate) and gave
+the car's lowest point.
+
+| Item | Value | Source |
+|---|---|---|
+| Floor to the top of coupler v3 (car upright) | **29.90 mm** | Evan, caliper; the bottom is not reachable |
+| -> axle centre (OD 7.4) | **26.20 mm** | computed; GC's estimate was 26.3 |
+| -> bottom of the coupler | 22.50 mm | computed |
+| The 4 white beams (lowest parts of the car, seen in the underside photos) | bottoms at the same height as the coupler's bottom, i.e. ~22.5 mm | Evan |
+
+## Correction to my own GD inference
+
+GD said the "connector up" orientation gives a motor top of ~33.3 mm. That
+treated the 14 mm encoder height as centred on the shaft. Pololu's page says
+the encoder extends 3-4 mm past the gearbox ONLY on the connector side, so
+connector up puts the top at 26.2 + 5 + 4 = **35.2 mm, touching the 35.22 mm
+beam**: not usable. GD's connector-down figure stands.
+
+## Orientation options (inference; gearbox 12 x 10, encoder +4 on the connector side)
+
+| Orientation | Top (beam at 35.22) | Bottom (white beams at 22.5) |
+|---|---|---|
+| 10 mm side vertical, connector DOWN | 31.2 (4.0 margin) | 17.2 (5.3 below the white beams; connector and cable face the floor) |
+| 10 mm side vertical, connector UP | 35.2 (no margin) | 21.2 |
+| **12 mm side vertical, connector SIDEWAYS** | **32.2 (3.0 margin)** | **20.2 (2.3 below the white beams)** |
+
+Proposal: connector sideways. It costs the least ground clearance, keeps the
+JST cable off the floor, and the 3.0 mm left above the motor is room for a
+cradle roof. The cradle's floor and zip ties add ~1.5-2 mm below the motor,
+so the mount, not the motor, becomes the car's lowest point at roughly
+18-19 mm. Not decided; for Evan.
+
+## Mount concept from this (to confirm)
+
+The near frame beam's holes face down (visible in the underside photos), so
+the mount can pin UP into that beam: top face against its underside at
+35.22, pins vertical. Still needed for that:
+1. Coupler tip to the near face of that beam, along the axle (photo
+   estimate ~6 mm).
+2. Is the axle centred between that beam's two visible holes?
+3. Is the whole grey frame one layer (nothing lower than 35.22 between that
+   beam and the black beam)?
+4. Coupler v3's fit on the motor shaft.
+
+Untested; nothing printed against these numbers.
+
+# Appendix GF - Motor coupler v3 fits the shaft; motor goes connector-up (Evan); corrects GE (2026-10-11 ~21:18 CDT)
+**WHAT:** Evan's answers for the motor mount, his orientation call, and a
+correction to my Appendix GE.
+
+| Item | Value | Source |
+|---|---|---|
+| Motor coupler v3 on the #5159 shaft | **fits** ("yes") | Evan. Printed per Appendix FR (Bambu P1S, PLA, 0.1 mm, 2 walls, solid). Fit only; NOT load-tested. v1 was too tight (FQ); v3 = D-bore 3.15 / 2.65 across flat |
+| Axle centred between the 2 holes of the near grey frame beam | yes | Evan |
+| "Motor shaft to the white beam" | 18.75 mm | Evan. Read as the SIDEWAYS distance from the axle line to the nearest white (lowest, lengthwise) beam; to confirm |
+| Lower than the frame (35.22 mm underside) | only the short black steering connecting parts, at 27.0 mm | Evan; their position relative to the motor not confirmed (photos suggest at the front, near the 70 mm stop) |
+| Motor orientation | **connector UP, 10 mm gearbox side vertical** | Evan's decision: "the motor is shorter than it is wide; connector up gives more ground clearance" |
+
+## Correction to GE
+
+GE rated "connector up" unusable because its top (26.2 + 5 + 4 = 35.2 mm)
+meets the 35.22 mm beam. That was a logical error: the near grey beam sits
+over the GEARBOX end of the motor (photo estimate 8.5-16 mm past the
+coupler's tip, scaled from the caliper in IMG_0204), while the connector is
+on the encoder at the far end (~25-34 mm past the tip). There the motor sits
+under the frame's open square (photo estimate open from ~16 to ~42 mm past
+the tip), so the connector rises into the opening, not into a beam. Under
+the beam itself the motor top is 26.2 + 5 = 31.2 mm, 4.0 mm clear.
+
+Evan is right on ground clearance: with the 10 mm side vertical the bottom
+is 26.2 - 5 = 21.2 mm, 1.3 mm below the white beams (22.5), versus 20.2 mm
+for GE's proposal. Connector up is the better choice and supersedes GE's
+proposal.
+
+## Mount concept now
+
+A plate against the near grey beam's underside (35.22 mm), with 2 pins up
+into its 2 holes either side of the axle; a cradle hanging from it around
+the gearbox and can, zip ties holding the motor; the encoder and connector
+left open to rise into the frame's opening, so the JST cable can run
+straight up through the frame. Photo-estimated positions (tip-to-beam,
+open-square extent, hole spacing) need one caliper check each before the
+spec is final.
+
+Untested; nothing printed against these numbers.
+
+# Appendix GG - Motor test-fitted in place (connector up, no mount); near-beam pins would hit the motor (2026-10-11 ~21:22 CDT)
+**WHAT:** Evan sent 3 photos (IMG_0212-0214: top view, angled top view,
+underside) with the #5159 motor plugged into coupler v3 on the diff input,
+connector UP. A physical test fit of the motor's position, with no mount:
+the motor is held only by the coupler.
+
+## What the photos show (photo reading, not measured)
+
+- The motor fits the space: the gearbox passes under the two grey beams
+  between the ball joint and the centre frame, and the can and encoder sit
+  inside the centre frame's open square, the connector visible from above.
+- The encoder's end is about 2 mm short of the inner beams at the far side
+  of that opening (underside photo, scaled from the 8 mm hole pitch). Tight.
+- The holes either side of the axle in the beam over the gearbox look
+  ADJACENT (one 8 mm pitch apart), i.e. about 4 mm either side of the axle
+  centre, not the 16 mm GF assumed.
+
+## Consequence for the mount concept (inference)
+
+GF's "plate against the near beam, 2 pins up into its holes" does not work
+if those holes are 4 mm from the axle: a black friction pin is 2 modules
+long, so the half below the beam (~8 mm, 35.22 down to ~27 mm) would sit
+inside the motor (12 mm wide, i.e. +/-6 mm; top 31.2 mm). Revised concept:
+a cradle under the motor, with arms up both sides OUTSIDE the motor, pinned
+up into the centre frame's two lengthwise sides.
+
+Needed for that (calipers):
+1. Inner width of the centre frame opening (between its two lengthwise
+   sides), and whether the motor sits centred in it.
+2. Along the axle: from the gearbox's gold front plate to the centre of the
+   nearest hole in those lengthwise sides.
+3. The gap from the encoder's end to the beam at the far side of the opening
+   (photo estimate ~2 mm).
+
+Untested; nothing printed. The mount is still unspecified.
+
+# Appendix GH - Encoder end to front beam 36.65 mm; corrects GG's hole spacing; cradle pin candidates (2026-10-11 ~21:29 CDT)
+**WHAT:** A new measurement from Evan and a correction to my Appendix GG.
+
+| Item | Value | Source |
+|---|---|---|
+| Encoder's back end to the front 7-long black beam (motor in place, connector up) | **36.65 mm** | Evan, caliper |
+
+Consistent with the earlier numbers: 70 mm free from the coupler's end minus
+36.65 puts the motor's back end ~33.35 mm past the coupler's end (Pololu: up
+to ~34.5). Per Evan, nothing between the motor and that beam is lower than
+the frame (except the steering parts, 27.0 mm), so there is clear space
+behind the motor.
+
+## Correction to GG
+
+GG read the holes either side of the axle as ADJACENT (8 mm apart, 4 mm
+from the axle). That was a misreading. A close crop of IMG_0212 shows the
+frame sides alternate vertical holes with SIDEWAYS holes (which look like
+plain cylinders from above), so the vertical holes are 16 mm apart: the two
+either side of the axle are about 8 mm from it, as GF first assumed.
+
+GG's conclusion still holds, for a smaller reason: a pin there hangs ~8 mm
+below the beam, and its edge would be ~8 - 2.4 = 5.6 mm from the axle,
+against the gearbox's 6.0 mm half-width - about 0.4 mm of overlap, so no
+room for a printed part. Photo-scale numbers; not measured.
+
+## Candidate pin holes for the cradle (photo reading)
+
+Inside the centre frame, two short beams run across the opening on either
+side of the motor, each with one vertical hole (marked A and B on
+IMG_0212_holes.jpg, an annotated crop sent to Evan; not committed). Photo
+scale (16 mm hole pitch): A and B are ~15-16 mm either side of the axle and
+~8 mm ahead of the encoder's back end. A pin there clears the motor by
+~7 mm sideways. Needed by caliper:
+1. A to B centre-to-centre (measure top edge to top edge);
+2. encoder back end to A's centre, along the motor;
+3. floor to the underside of those two short beams (they look recessed in
+   the photo; Evan's "one layer" says 35.22).
+
+Untested; nothing printed.
+
+# Appendix GI - Cradle pin holes A/B measured: 32 mm apart, underside 33.13 mm (2026-10-11 ~21:40 CDT)
+**WHAT:** Evan measured the two cradle pin holes (A and B, Appendix GH).
+
+| Item | Value | Source |
+|---|---|---|
+| A to B, inside edge to inside edge | 27.25 mm | Evan, caliper |
+| -> centre to centre (+ one hole dia, 4.8-4.9) | **~32.1 mm**, i.e. 4 Lego pitches; A and B at +/-16 mm from the axle (centred per GF) | computed |
+| Floor to the TOP of the short beams holding A and B | 41.13 mm | Evan |
+| -> their underside (beam 8 thick, Evan) | **33.13 mm** | computed |
+
+The short beams sit ~2.1 mm LOWER than the frame around them (35.22), as the
+photo suggested. They run parallel to the axle, beside the motor (inner
+edges ~12 mm from the axle vs the motor's 6 mm), so they do not crowd it.
+
+## Not measured, and judged not needed
+
+Encoder back end to A, along the motor (GH's item 2): photo estimate ~8 mm.
+A trough held to the motor by zip ties can sit anywhere along the can, so
+the pins set the cradle's position along the motor and a +/-3 mm error only
+shifts the trough. Assumption, stated; the preview will show it.
+
+## Motor mount geometry so far (inference, for the Phase B spec)
+
+- Axle centre 26.20 above the floor; motor connector up, 12 wide x 10 tall
+  at the gearbox and can: top 31.2, bottom 21.2.
+- Trough under the can, floor ~2 mm thick: bottom ~19.2 (zip ties add
+  ~1.2 if they wrap under). The white beams are at 22.5.
+- Two arms at +/-16 mm, tops flat against the short beams' underside at
+  33.13, one black friction pin each (half in the beam, half in the arm).
+  Arm inner faces ~11.5 mm from the axle: ~5.5 mm clear of the motor.
+- Pin hole 4.80 mm (ABS-tested only) until the PLA coupon is printed.
+
+Untested; nothing printed.
+
+# Appendix GJ - Mounts Phase B/C: printable motor mount; servo and electronics layout drafts (2026-10-11 ~22:26 CDT)
+**WHAT:** Phase B/C of the printed mounts (plan in Appendix FY). Evan chose
+"spec + preview render now" for all three mounts, with: layout DRAFTS for
+the servo mount and the electronics tray + deck (placeholders marked, not
+printable), PRINTED PIN STUBS for the motor mount, and the 18.75 mm read as
+measured sideways "from the outside of" the axle (so the white beams' inner
+face is 18.75-22.45 mm from the axle centre).
+
+## Split (workspace plan-split rule)
+
+Opus wrote every number into a spec (task plan, "PHASE B SPECS"); three
+Sonnet agents coded disjoint files in parallel; Opus re-rendered each part
+itself and compared bytes with the agent's output. No agent deviated from
+the spec or changed a probe.
+
+## Parts
+
+| Part | Files | Status | Verification (Opus re-run) |
+|---|---|---|---|
+| Motor mount | `cad/scad/motor_mount.scad` + `.probe.json` -> `cad/motor_mount.stl` (registered in `check_artifacts.py`) | PRINTABLE, UNTESTED | 908 triangles, manifold PASS, bbox (-4,-18.4,18.5)..(15,18.4,39.93) PASS, probes 24/24 PASS; re-render byte-identical (sha256 cf663a1e75ad316e...) |
+| Servo mount | `cad/scad/servo_mount_draft.scad` + `.probe.json` | LAYOUT DRAFT, NOT PRINTABLE, no STL in the repo | manifold PASS, bbox PASS, probes 192/192 PASS; byte-identical re-render |
+| Electronics tray | `cad/scad/electronics_tray_draft.scad` + `.probe.json` | LAYOUT DRAFT, no STL | probes 77/77 PASS; byte-identical |
+| Electronics deck | `cad/scad/electronics_deck_draft.scad` + `.probe.json` | LAYOUT DRAFT, no STL | probes 48/48 PASS; byte-identical |
+
+Suite: `run_checks.py` 16 passed, 0 failed; `check_artifacts.py` 34 checked,
+0 drifted, 2 uncheckable.
+
+## Motor mount design (z = height above the floor, car upright)
+
+- Trough under the motor body: floor 18.5-20.9 (0.3 below the motor's 21.2
+  bottom), walls +/-6.4..8.4 up to 26.2.
+- Two arms at y +/-11.6..18.2 up to 32.93 (0.2 under the 33.13 beam
+  underside), each with a PRINTED pin stub, d 4.80, 7 mm long, 0.4 chamfer,
+  at +/-16 (holes A/B).
+- Two zip ties at x 3 and 11, through floor slots, flush in an underside
+  groove. Lowest point 18.5 mm (white beams 22.5).
+- Why stubs: a black friction pin's lower half (~8 mm) needs an arm wall
+  that would reach y ~19.6, into the white beams at worst case 18.75. The
+  load is small (stall reaction ~56 mN-m over 32 mm, ~1.75 N per stub).
+- Assumptions to check on the first print: the stubs' fit in the Lego
+  holes (4.80 untested in PLA); the trough's position along the motor is
+  set by the pins (photo estimate, +/-3 mm tolerated).
+
+## Drafts: what is placeholder
+
+- Servo: case 22.8 x 12.2 x 22.6, ear span 32, ear hole spacing 27.5, shaft
+  offset 5.5, L piece 8.0 thick, boss clearance 12. Online sources disagree
+  (22.2 x 12.6 x 31; 22.8 x 12.2 x 28.5; ears 32), none for the HOOYIJ part.
+- Electronics: frame pin positions; holder 76 x 40 x 19 (unreliable listing);
+  charger size unattributed; Pi case 90.2 x 62.2 x 26.7 unconfirmed as the
+  kit's case. Tray 156 x 125 mm (bank and holder side by side) against the
+  recorded 135.75 mm body width.
+- Known draft defect: the deck's 20 mm rocker hole at (40, 40) puts the
+  switch body over the holder/BMS area below; it needs to move to an edge
+  tab once the top layout (E11) is known.
+
+Not printed, not fitted. No commit.
+
+# Appendix GK - Motor mount gets a back wall behind the encoder end (2026-10-11 ~22:53 CDT)
+**WHAT:** Evan: "there needs to be a back on the motor mount". Read as a
+wall behind the motor's back (encoder) end, so the motor cannot back out of
+coupler v3 (it was held along its axis only by the coupler's grip).
+
+**HOW (Opus, direct edit; small change):** `cad/scad/motor_mount.scad`
+- back wall 2.0 thick, from the floor up to z 28.0 (below the connector,
+  which starts at 31.45), across the trough (y +/-8.4);
+- its inner face 0.5 mm behind the encoder's back end, so the motor still
+  seats fully in the coupler; a 7.0 mm relief on the axle line makes the
+  wall bear on the rim of the encoder cap, not its centre;
+- the side walls and a floor tongue run back to meet it.
+
+The encoder's back end position (x -7.85 from the A/B pin line) is a PHOTO
+estimate (IMG_0212), now named `ENCODER_END_X_UNMEASURED`. Before the wall
+mattered, a +/-3 mm error only slid the trough along the motor; now it sets
+the wall's gap. Needs one caliper number: encoder back end to the centre of
+hole A, along the motor.
+
+**Checks (re-run):** render manifold PASS, bbox (-10.35,-18.4,18.5)..(15,
+18.4,39.93) PASS, probes 32/32 PASS (8 new points on the wall, its relief and
+the trough); a second render is byte-identical (sha256 aff760b718bc38c1...);
+`check_artifacts.py` 34 checked, 0 drifted. Untested; not printed.
+
+# Appendix GL - Motor mount v1 printed (encoder hits the walls); v2 with real-pin snap sockets (2026-10-12 ~10:42 CDT)
+**WHAT:** First physical result for the motor mount, and v2.
+
+## v1 print result (Evan, 2026-10-12)
+
+Evan printed motor mount v1 (`cad/motor_mount.stl` as of record GJ: printed
+pin stubs, full-length side walls, no back wall). His words: "the motor
+mount v1 seems to be alright dimension wise", but "for the last 1/3 of the
+side walls ... there is interference with the encoder housing". Printer
+settings for this print were not stated (the couplers use Bambu P1S, PLA,
+0.1 mm, 2 walls - Appendix FR; not confirmed for this part). Whether the
+printed stubs gripped holes A/B was not reported. He also judged measuring
+to a hole's centre too inaccurate, so the encoder-end position stays a
+photo estimate.
+
+## v2 changes (Evan's requests, Opus direct edit)
+
+1. **Side walls:** the back third removed; the walls now run from x 3 to
+   15 (v1: -3 to 15). The back wall from record GK stays.
+2. **Real black friction pins instead of printed stubs.** Evan noticed the
+   Lego hole/pin has a wider part at the end "so the connectors can snap into
+   place" and asked for /research-brief. The brief is
+   `docs/research/2026-10-12_technic-pin-snap-geometry.md`:
+   - hole recess 6.2 x 0.8 at BOTH faces (cailliau, measured);
+   - pin tip lip 5.2 mm over its last 0.8 mm, collar 6.4 x 0.8 per side,
+     half-length 8.0 (LDraw community CAD);
+   - a cold assessor flagged that everything but the recess rests on one
+     CAD library, and that Evan's "last 0.1 mm" may be the friction ridges
+     (~0.1 mm proud near the tip). One revision round applied.
+   Each arm's top 7.8 mm is now shaped like a Lego beam: 6.2 x 0.8 recess at
+   the top for the collar, 4.8 bore for 6.2 mm, then a 6.2 mm cavity 2.0 mm
+   tall where the tip lands and the lip can spring out. The arm top is flush
+   with the beam underside (33.13, was 0.2 below). Arms widened to y 19.9 to
+   wall the recess and cavity (0.8 mm outer wall); the white beams' inner
+   face is at least 18.75 + the axle's radius from the axle centre.
+   Mounting order: pins into beams A/B from below, then push the mount up.
+
+## Checks (Opus re-run)
+
+render manifold PASS; bbox (-10.35,-19.9,18.5)..(15,19.9,33.13) PASS; probes
+60/60 PASS (bores with solid rings, recess and cavity open, walls around
+them solid, the removed wall section open); second render byte-identical
+(sha256 35502fb170d8a80e...); check_artifacts 34 checked, 0 drifted.
+v2 is UNTESTED; not printed.

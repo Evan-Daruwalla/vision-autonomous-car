@@ -531,6 +531,8 @@ FLIPPED 2026-09-05 (Appendix DM), see below:**
   does; 1.5 mm used).
 - 2026-10-11 (Appendix FP): motor coupler v2 = D-bore +0.075 mm (3.075 /
   2.575 across flat), 8 mm deep. v1 CONFIRMED too tight (Evan, Appendix FQ).
+- 2026-10-11 (Appendix GF): motor coupler v3 (3.15 / 2.65 across flat) FITS the #5159
+  shaft and is installed on the diff input axle. Fit only, NOT load-tested.
 - 2026-10-11 (Appendix FY): the PLA pin-hole fit is UNKNOWN - the 4.80 mm figure is
   from the ABS coupons. `cad/pla_fit_coupon.stl` (untested) tests 4.75-5.00 pin
   holes, a counterbore, pitch, horizontal holes, servo-screw pilots and zip slots.

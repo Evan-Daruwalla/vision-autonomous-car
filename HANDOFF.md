@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-11 ~20:47 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-12 ~10:42 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 183 appendices A–GA; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 194 appendices A–GL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -632,6 +632,18 @@ NEXT ACTIONS, cheapest first:
    case-in-kit, bank ports, holder, charger, fuse body and zip ties still need calipers.
    Appendix GA corrects FZ: Pololu's drawing covers motor M1, M2, M4; M3 is now a
    2-number spot check (shaft dia + across-flat); M5-M6 and servo S1-S9 stand.
+   First on-car numbers in (Appendix GB; GD corrects the free length to 70 mm and puts
+   the near frame beam underside at 35.22 mm; GE: axle centre 26.20 measured; GF: motor
+   coupler v3 FITS the shaft (not load-tested), motor goes CONNECTOR UP per Evan, bottom 21.2;
+   GG: motor test-fitted in place, no mount; GH: encoder end -> front beam 36.65, cradle to
+   pin into holes A/B of the short beams inside the centre frame; GI: A-B 32 mm c-c,
+   underside 33.13; GJ: cad/motor_mount.stl BUILT (printable, untested, printed pin stubs);
+   servo + electronics tray/deck are LAYOUT DRAFTS in cad/scad/*_draft.scad, NOT printable;
+   GK: motor mount has a back wall; GL: v1 PRINTED - dims OK, encoder hit the back third of
+   the walls; v2 = walls trimmed + real black pins in snap sockets (brief docs/research/
+   2026-10-12_technic-pin-snap-geometry.md), untested): open:
+   beam underside height over the axle line (motor top ~33.3 mm; axle centre ~26.3 mm,
+   Appendix GC), v3 fit on the motor shaft, L piece, S1/S2/S4-S7.
 00. WIRING AUDIT DONE 2026-10-11 (Appendix FX): doc and firmware agree pin
    for pin. Before wiring ANYTHING, follow WIRING_PROTOSHIELD section 5 as
    rewritten: rail trimmed to 5.0 V (not 5.2) and the pot locked; step 1b

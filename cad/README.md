@@ -338,3 +338,24 @@ with the same settings as the parts (P1S, PLA, 0.1 mm, 2 walls), then report:
   into firmly without splitting.
 - **Zip slots** (3.0 / 3.5 / 4.0 / 5.0 wide x 1.8): the smallest your zip tie
   passes through.
+
+### motor_mount.stl - v2, printable, UNTESTED (Appendices GJ, GK, GL)
+
+Cradle for the Pololu #5159 under the centre frame, motor connector UP,
+held by 2 zip ties, with a back wall behind the encoder. v1 printed
+2026-10-12: dimensions fine, but the encoder hit the back third of the side
+walls, which v2 removes. v2 takes two REAL black friction pins: push them
+into holes A/B of the short beams inside the centre frame from below, then
+push the mount up so the pins snap into its arm sockets (6.2 x 0.8 collar
+recess, 4.8 bore, 6.2 snap cavity - see
+docs/research/2026-10-12_technic-pin-snap-geometry.md). Print upright, floor
+on the bed, no supports. Report: do the pins snap and hold; does the motor
+sit level with the coupler; is the back wall gap right (encoder end position
+was a photo estimate).
+
+### servo_mount_draft.scad, electronics_tray_draft.scad, electronics_deck_draft.scad - LAYOUT DRAFTS
+
+Not printable. Every value named `*_UNMEASURED` is a placeholder (servo
+ears and case, frame pin positions, holder, charger, Pi case). They exist
+so the layout can be approved; no STL is committed until the measurements
+replace the placeholders.
