@@ -236,6 +236,8 @@ the dated entry, not the digest.
 - [GQ - Servo L liftarm: corner stud freed, servo mount v1 stands](#appendix-gq---servo-l-liftarm-corner-stud-freed-servo-mount-v1-stands-2026-10-12-1130-cdt) (10-12)
 - [GR - Correction: GQ's timestamp](#appendix-gr---correction-gqs-timestamp-2026-10-12-1122-cdt) (10-12)
 - [GS - Servo mount v2: a frame across both L liftarms](#appendix-gs---servo-mount-v2-a-frame-across-both-l-liftarms-2026-10-12-1128-cdt) (10-12)
+- [GT - Motor mount v3: floor up 2.5 mm, back wall 2 mm closer](#appendix-gt---motor-mount-v3-floor-up-25-mm-back-wall-2-mm-closer-2026-10-12-1731-cdt) (10-12)
+- [GU - Pin holes +0.075 mm (4.875) in every mount](#appendix-gu---pin-holes-0075-mm-4875-in-every-mount-2026-10-12-1737-cdt) (10-12)
 
 ---
 
@@ -17682,3 +17684,55 @@ check_artifacts 35 checked, 0 drifted. Not printed.
 
 **Process note:** the .scad header cites this entry as "GS" before it was
 appended - a pre-cite; checked against the script's assignment.
+
+# Appendix GT - Motor mount v3: floor up 2.5 mm, back wall 2 mm closer (2026-10-12 ~17:31 CDT)
+**WHAT:** Motor mount v3, from Evan (2026-10-12): "move the floor of the
+motor mount 2.5mm up and the wall in the back 2mm closer to the front".
+Whether this comes from fitting a printed v2 was not stated.
+
+**Changes (`cad/scad/motor_mount.scad`):**
+- floor z 18.5..20.9 -> **21.0..23.4** (+2.5). The arms and the back wall now
+  start from the higher floor; the zip slots and underside grooves move up
+  with it. The car's lowest point under the mount rises to 21.0 mm (white
+  beams 22.5).
+- back wall inner face x -8.35 -> **-6.35** (+2.0 toward the coupler; read
+  "front" as the motor's/mount's front end, i.e. tighter on the encoder).
+  `BACK_SHIFT = 2.0` on top of the photo estimate.
+
+**What it implies (inference, flagged):** the floor top at 23.4 is 2.2 mm
+above the motor bottom computed from the 26.20 mm axle centre (21.2). If
+Evan's change is right, the motor's real bottom face sits higher than that
+computation (or the motor is less than 10 mm tall at the trough), so the
+cradle numbers in GE/GF are off by about that much.
+
+**Checks:** manifold PASS; bbox (-8.35,-19.9,21.0)..(15,19.9,33.13) PASS;
+probes 63/63 PASS (floor, groove, slot and back-wall probes moved; an open
+probe below the new floor and one behind the moved wall added); second
+render byte-identical (sha256 45071a11bd86464f...); check_artifacts 35
+checked, 0 drifted. Untested; not printed.
+
+**Process note:** the .scad header cites "record GT" before this entry was
+appended (a pre-cite), checked against the script's assignment.
+
+# Appendix GU - Pin holes +0.075 mm (4.875) in every mount (2026-10-12 ~17:37 CDT)
+**WHAT:** Evan (2026-10-12): "give another 0.075mm tolerance on the holes for
+the pegs for all models". Read, as with the couplers, as +0.075 mm on the
+hole DIAMETER: the pin bore goes 4.80 -> **4.875 mm**. The 6.2 x 0.8 collar
+recess and the 6.2 snap pocket are unchanged. Whether a print showed the
+pins too tight was not stated.
+
+**Applied to:** `motor_mount.scad` (PIN_D), `servo_mount.scad`,
+`electronics_tray_draft.scad`, `electronics_deck_draft.scad` (each now has
+`PIN_D = 4.875` in place of a literal 4.8), and their probe files (20 hole
+probes to d 4.875). NOT applied to `pla_fit_coupon.scad` (it is a test series
+of fixed sizes) or the couplers (shaft and axle bores, not pin holes). The
+library default in `lib/lego.scad` stays 4.80, so a new part must set PIN_D
+itself; decisions.md now says so.
+
+**Checks:** motor mount 63/63, servo mount 86/86, tray 77/77, deck 48/48
+probes PASS; motor and servo STLs re-rendered byte-identically (sha256
+dd2c703a173836c1... and d9ef74ecfbe72457...); check_artifacts 35 checked, 0
+drifted. Untested; not printed.
+
+**Process note:** the .scad comments cite "record GU" before this entry was
+appended (pre-cite), checked against the script's assignment.

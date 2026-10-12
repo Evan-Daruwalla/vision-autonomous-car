@@ -12,7 +12,7 @@
 //   plate x -78..78, y -62.5..62.5, z 0..2
 //   bank interior x -76..76 (open at +x), y -52.5..17.7, walls z 2..12
 //   holder interior x -38.25..38.25, y 19.7..60.2, walls z 2..12
-//   posts 8x8 at (+/-72, +/-58.5), z 0..23, top pin hole 4.8 dia (0.8 counterbore)
+//   posts 8x8 at (+/-72, +/-58.5), z 0..23, top pin hole 4.875 dia (0.8 counterbore)
 //   frame-pin bosses 8x8 at FRAME_PIN_NODES_UNMEASURED, z 0..7.8
 //
 // Render with scripts/render_scad.py: it checks the mesh against
@@ -21,6 +21,7 @@
 use <lib/lego.scad>
 EPS = 0.01;
 $fn = 64;
+PIN_D = 4.875;            // pin-hole bore: 4.80 + 0.075 (Evan, 2026-10-12, record GU)
 
 PLATE_T = 2.0;
 WALL_T = 2.0;
@@ -58,9 +59,9 @@ difference() {
     for (n = FRAME_PIN_NODES_UNMEASURED) box([n[0] - 4, n[1] - 4, 0], [n[0] + 4, n[1] + 4, 7.8]);
   }
   // 6 post top pin holes
-  for (p = POSTS) translate([p[0], p[1], DECK_Z - 7.8]) technic_hole(d = 4.8, h = 7.8, cb_d = 6.2, cb_top = 0.8);
+  for (p = POSTS) translate([p[0], p[1], DECK_Z - 7.8]) technic_hole(d = PIN_D, h = 7.8, cb_d = 6.2, cb_top = 0.8);
   // 7 frame-pin holes
-  for (n = FRAME_PIN_NODES_UNMEASURED) translate([n[0], n[1], 0]) technic_hole(d = 4.8, h = 7.8, cb_d = 6.2, cb_bot = 0.8);
+  for (n = FRAME_PIN_NODES_UNMEASURED) translate([n[0], n[1], 0]) technic_hole(d = PIN_D, h = 7.8, cb_d = 6.2, cb_bot = 0.8);
   // 8 zip slots
   for (z = ZIPS) translate([z[0], z[1], 0]) zip_slot(4.0, 1.8, PLATE_T);
 }

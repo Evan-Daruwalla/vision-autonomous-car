@@ -1,12 +1,12 @@
 {
   "bbox": [[-14.5, -20, 0], [28, 20, 7.3]],
   "holes": [
-    {"name": "pin 8,16", "center": [8, 16, 3.65], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "pin 16,16", "center": [16, 16, 3.65], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "pin 24,16", "center": [24, 16, 3.65], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "pin 8,-16", "center": [8, -16, 3.65], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "pin 16,-16", "center": [16, -16, 3.65], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "pin 24,-16", "center": [24, -16, 3.65], "axis": "z", "d": 4.8, "ring": true},
+    {"name": "pin 8,16", "center": [8, 16, 3.65], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "pin 16,16", "center": [16, 16, 3.65], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "pin 24,16", "center": [24, 16, 3.65], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "pin 8,-16", "center": [8, -16, 3.65], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "pin 16,-16", "center": [16, -16, 3.65], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "pin 24,-16", "center": [24, -16, 3.65], "axis": "z", "d": 4.875, "ring": true},
     {"name": "pilot near", "center": [-10.88, 0, 4.3], "axis": "z", "d": 1.7, "ring": true},
     {"name": "pilot far", "center": [17.0, 0, 4.3], "axis": "z", "d": 1.7, "ring": true}
   ],

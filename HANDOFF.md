@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-12 ~11:28 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-12 ~17:37 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 201 appendices A–GS; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 203 appendices A–GU; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -622,7 +622,7 @@ UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
 
 NEXT ACTIONS, cheapest first:
 000. PRINTED MOUNTS - Appendices FY (plan) and GA-GM (measurements, builds).
-   - MOTOR MOUNT cad/motor_mount.stl v2 (GL): real black 2780 pins in snap
+   - MOTOR MOUNT cad/motor_mount.stl v3 (GT: floor +2.5 mm, back wall 2 mm in; v2 GL): real black 2780 pins in snap
      sockets; side walls trimmed after v1's print hit the encoder; back wall
      at a PHOTO-ESTIMATED gap. PRINT AND FIT v2, report: do the pins snap,
      does the motor sit level with the coupler, is the back-wall gap ~0.5 mm.
@@ -635,7 +635,7 @@ NEXT ACTIONS, cheapest first:
      printable, placeholders named *_UNMEASURED; E11 (top-down photo + heights) for the electronics.
      Known defect: the deck's rocker hole sits over the holder/BMS.
    - DECISION (GM): every printed part uses real black 2780 pins, no printed
-     stubs (.claude/project-memory/decisions.md).
+     stubs (.claude/project-memory/decisions.md). Pin bore 4.875 in all mounts (GU).
    - cad/pla_fit_coupon.stl is still UNPRINTED: 4.80 bore / 6.2 recess are
      untested in PLA.
    - Tooling: OpenSCAD 2021.01 at ~/tools/openscad-2021.01; scripts/render_scad.py

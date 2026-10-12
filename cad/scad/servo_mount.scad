@@ -23,6 +23,7 @@
 use <lib/lego.scad>
 EPS = 0.01;
 $fn = 64;
+PIN_D = 4.875;            // pin-hole bore: 4.80 + 0.075 (Evan, 2026-10-12, record GU)
 
 PITCH = 8.0;
 L_T_UNMEASURED = 8.0;
@@ -63,7 +64,7 @@ difference() {
     translate([x, 0, EAR_Z - PILOT_DEPTH]) pilot_hole(PILOT_D, PILOT_DEPTH + EPS);
   // pin holes over both Ls, Lego-beam shaped
   for (x = PIN_X, s = [1, -1])
-    translate([x, s * L_Y, 0]) technic_hole(d = 4.8, h = EAR_Z, cb_d = 6.2, cb_top = 0.8, cb_bot = 0.8);
+    translate([x, s * L_Y, 0]) technic_hole(d = PIN_D, h = EAR_Z, cb_d = 6.2, cb_top = 0.8, cb_bot = 0.8);
 }
 
 // preview-only ghosts

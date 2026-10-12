@@ -1,10 +1,10 @@
 {
   "bbox": [[-78, -62.5, 0], [78, 62.5, 9.5]],
   "holes": [
-    {"name": "post -72,-58.5", "center": [-72, -58.5, 3.9], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "post 72,-58.5", "center": [72, -58.5, 3.9], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "post -72,58.5", "center": [-72, 58.5, 3.9], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "post 72,58.5", "center": [72, 58.5, 3.9], "axis": "z", "d": 4.8, "ring": true},
+    {"name": "post -72,-58.5", "center": [-72, -58.5, 3.9], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "post 72,-58.5", "center": [72, -58.5, 3.9], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "post -72,58.5", "center": [-72, 58.5, 3.9], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "post 72,58.5", "center": [72, 58.5, 3.9], "axis": "z", "d": 4.875, "ring": true},
     {"name": "rocker", "center": [40, 40, 1.25], "axis": "z", "d": 20, "ring": true}
   ],
   "open_points": [[0, 0, 4.0]],

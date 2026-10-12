@@ -10,7 +10,7 @@
 //
 // MAP (mm)
 //   plate x -78..78, y -62.5..62.5, z 0..2.5
-//   post bosses 8x8 at (+/-72, +/-58.5), z 0..7.8, pin holes 4.8 dia (0.8 counterbore at z 0)
+//   post bosses 8x8 at (+/-72, +/-58.5), z 0..7.8, pin holes 4.875 dia (0.8 counterbore at z 0)
 //   Pi fence z 2.5..5.5, interior x -76.2..14.5, y -52.5..10.2
 //   Uno standoffs z 2.5..6.5 + pegs to 9.5; LM2596 standoffs z 2.5..5.5 + pegs to 8.5
 //   rocker hole 20 dia at (40, 40)
@@ -21,6 +21,7 @@
 use <lib/lego.scad>
 EPS = 0.01;
 $fn = 64;
+PIN_D = 4.875;            // pin-hole bore: 4.80 + 0.075 (Evan, 2026-10-12, record GU)
 
 PLATE_T = 2.5;
 PI_CASE_L_UNMEASURED = 90.2;
@@ -70,7 +71,7 @@ difference() {
     }
   }
   // 6 post pin holes
-  for (p = POSTS) translate([p[0], p[1], 0]) technic_hole(d = 4.8, h = 7.8, cb_d = 6.2, cb_bot = 0.8);
+  for (p = POSTS) translate([p[0], p[1], 0]) technic_hole(d = PIN_D, h = 7.8, cb_d = 6.2, cb_bot = 0.8);
   // 7 rocker
   translate([40, 40, -EPS]) hole_cyl(ROCKER_HOLE_D, PLATE_T + 2 * EPS);
   // 8 zip slots

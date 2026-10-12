@@ -1,7 +1,8 @@
-// Motor mount, 2026-10-11 (v2 2026-10-12): printable PLA mount for the drive
+// Motor mount, 2026-10-11 (v2, v3 2026-10-12): printable PLA mount for the drive
 // motor on the Lego Technic frame.
 //
-// STATUS: UNTESTED as v2. v1 (printed pin stubs, full-length side walls) was
+// v3 (record GT): floor 2.5 mm higher, back wall 2 mm closer to the motor.
+// STATUS: UNTESTED as v3. v1 (printed pin stubs, full-length side walls) was
 // printed by Evan: dimensions "alright", but the back third of the side walls
 // hit the encoder housing (record GL). v2: those wall sections removed, a back
 // wall added, and REAL black friction pins instead of printed stubs.
@@ -11,7 +12,7 @@
 //
 // PIN SOCKETS follow the Technic pin geometry in
 // docs/research/2026-10-12_technic-pin-snap-geometry.md: each arm's top 7.8 mm
-// is shaped like a Lego beam (6.2 x 0.8 recess for the pin's collar, 4.8 bore),
+// is shaped like a Lego beam (6.2 x 0.8 recess for the pin's collar, 4.875 bore),
 // with a 6.2 cavity below it where the pin's 5.2 mm tip lip snaps in.
 // The pin goes into beam A/B from below; the arm then pushes up onto its lower half.
 //
@@ -22,8 +23,8 @@ use <lib/lego.scad>
 
 EPS = 0.01;
 
-FLOOR_Z0 = 18.5;
-FLOOR_Z1 = 20.9;
+FLOOR_Z0 = 21.0;         // v3 (2026-10-12, Evan): floor up 2.5 mm (was 18.5)
+FLOOR_Z1 = 23.4;         // was 20.9
 WALL_TOP = 26.2;
 WALL_IN = 6.4;
 WALL_OUT = 8.4;
@@ -33,7 +34,7 @@ ARM_Y1 = 19.9;            // room for the 6.2 recess/cavity around a pin at y 16
 PIN_Y = 16;
 BEAM_UNDER = 33.13;       // underside of the short beams holding A/B (record GI)
 ARM_TOP = BEAM_UNDER;     // flush, like two pinned Lego beams
-PIN_D = 4.8;
+PIN_D = 4.875;            // 4.80 + 0.075 (Evan, 2026-10-12, record GU)
 RECESS_D = 6.2;           // cailliau, measured; coupon row B tests it in PLA
 RECESS_DEPTH = 0.8;
 BORE_L = 6.2;             // as in a real 7.8 mm beam (7.8 - 2 x 0.8)
@@ -52,7 +53,8 @@ BACK_GAP = 0.5;
 BACK_T = 2.0;
 BACK_TOP = 28.0;          // below the connector (z 31.45 up)
 BACK_RELIEF_D = 7.0;      // the wall bears on the rim of the encoder cap, not its centre
-BACK_X = ENCODER_END_X_UNMEASURED - BACK_GAP;   // inner face of the back wall
+BACK_SHIFT = 2.0;         // v3 (Evan): back wall 2 mm toward the motor's front
+BACK_X = ENCODER_END_X_UNMEASURED - BACK_GAP + BACK_SHIFT;   // inner face of the back wall (-6.35)
 AXLE_Z = 26.2;
 
 // Negative volume: one pin socket, top face at z = ARM_TOP.

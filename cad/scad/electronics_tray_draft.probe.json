@@ -1,14 +1,14 @@
 {
   "bbox": [[-78, -62.5, 0], [78, 62.5, 23.0]],
   "holes": [
-    {"name": "post -72,-58.5", "center": [-72, -58.5, 19.1], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "post 72,-58.5", "center": [72, -58.5, 19.1], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "post -72,58.5", "center": [-72, 58.5, 19.1], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "post 72,58.5", "center": [72, 58.5, 19.1], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "frame -48,32", "center": [-48, 32, 3.9], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "frame -48,48", "center": [-48, 48, 3.9], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "frame 48,32", "center": [48, 32, 3.9], "axis": "z", "d": 4.8, "ring": true},
-    {"name": "frame 48,48", "center": [48, 48, 3.9], "axis": "z", "d": 4.8, "ring": true}
+    {"name": "post -72,-58.5", "center": [-72, -58.5, 19.1], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "post 72,-58.5", "center": [72, -58.5, 19.1], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "post -72,58.5", "center": [-72, 58.5, 19.1], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "post 72,58.5", "center": [72, 58.5, 19.1], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "frame -48,32", "center": [-48, 32, 3.9], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "frame -48,48", "center": [-48, 48, 3.9], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "frame 48,32", "center": [48, 32, 3.9], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "frame 48,48", "center": [48, 48, 3.9], "axis": "z", "d": 4.875, "ring": true}
   ],
   "open_points": [[0, -20, 10], [0, 40, 10], [77, -20, 10]],
   "solid_points": [[0, -20, 1.0], [0, -53.5, 8]]
