@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-12 ~11:13 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-12 ~11:22 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 198 appendices A–GP; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 200 appendices A–GR; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -630,6 +630,7 @@ NEXT ACTIONS, cheapest first:
    - SERVO MOUNT cad/servo_mount.stl v1 (GP): printable, UNTESTED - open under
      the body, ears on plastic, pinned at the L's corner (stud 3). Print and
      fit: ears sit flat, pilot size, near-ear pad clear of neighbours.
+     Pins at the L's corner (stud 3), which Evan freed (GQ).
    - ELECTRONICS TRAY/DECK: LAYOUT DRAFTS (cad/scad/*_draft.scad, GJ), NOT
      printable, placeholders named *_UNMEASURED; E11 (top-down photo + heights) for the electronics.
      Known defect: the deck's rocker hole sits over the holder/BMS.

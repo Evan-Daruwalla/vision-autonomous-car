@@ -233,6 +233,8 @@ the dated entry, not the digest.
 - [GN - docs-sync pass and HANDOFF drift check](#appendix-gn---docs-sync-pass-and-handoff-drift-check-2026-10-12-1055-cdt) (10-12)
 - [GO - Servo measured: case, ears, ear holes; servo draft updated](#appendix-go---servo-measured-case-ears-ear-holes-servo-draft-updated-2026-10-12-1106-cdt) (10-12)
 - [GP - Servo mount v1: open under the body, ears on plastic, pinned at the L's corner](#appendix-gp---servo-mount-v1-open-under-the-body-ears-on-plastic-pinned-at-the-ls-corner-2026-10-12-1113-cdt) (10-12)
+- [GQ - Servo L liftarm: corner stud freed, servo mount v1 stands](#appendix-gq---servo-l-liftarm-corner-stud-freed-servo-mount-v1-stands-2026-10-12-1130-cdt) (10-12)
+- [GR - Correction: GQ's timestamp](#appendix-gr---correction-gqs-timestamp-2026-10-12-1122-cdt) (10-12)
 
 ---
 
@@ -17625,3 +17627,29 @@ the 1.0 mm ear hole vs the screw size (GO) - the pilot comes from the coupon.
 **Checks:** manifold PASS; bbox (-14.5,-12,0)..(28,12,7.3) PASS; probes
 59/59 PASS; second render byte-identical (sha256 7b02ebc2383b4b6f...);
 check_artifacts 35 checked, 0 drifted; run_checks 16/16. STL sent to Evan.
+
+# Appendix GQ - Servo L liftarm: corner stud freed, servo mount v1 stands (2026-10-12 ~11:30 CDT)
+**WHAT:** Which studs of the servo's Lego 2x4 L liftarm can take a pin
+(Evan, 2026-10-12), and what it means for `cad/servo_mount.stl` v1 (GP).
+
+First report (as the car stands): stud 0 = axle hole (servo shaft), stud 1
+closed (can be opened with a blue connector piece), stud 2 open, stud 3 (the
+corner) closed, short-leg end closed. On that, Opus told Evan not to print
+v1, whose only usable pin hole is at the corner (stud 3), and offered three
+workarounds (studs 1 and 2 both clash with the servo: stud 1 sits under the
+case, which is ~5.8 mm above the L against a ~7.8 mm pin; stud 2 sits under
+the far ear, 1 mm from its screw).
+
+Second report: Evan can free one more stud, giving studs 1, 2 and 3 (corner)
+OPEN and only the short-leg end closed (sketched from both faces of the L).
+With the corner open, **v1 works as designed**: its pin at (24, 0) is the
+corner; the two short-leg holes at (24, +/-8) are spares, one over the
+closed end, harmless. The "do not print v1" advice is withdrawn. Studs 1 and
+2 stay unusable for pins under this servo.
+
+Unanswered: whether the L is fixed to the chassis or turns with the steering
+axle in its cross hole at stud 0 (a cross hole locks an axle). The mount
+assumes it is fixed.
+
+# Appendix GR - Correction: GQ's timestamp (2026-10-12 ~11:22 CDT)
+**Correction to Appendix GQ:** its heading says "~11:30 CDT", but the `date` call made just before writing it returned 11:21:18 CDT. The heading time was typed, not copied from that output. GQ was written at about 11:21 CDT on 2026-10-12. Nothing else in GQ changes.
