@@ -12,14 +12,21 @@
   ML work stays in the venv. Wheel availability was verified by SIM-POC P1's
   done-check, not assumed.
 - Machine facts (verified 2026-07-23): git 2.53.0 with Evan's identity
-  configured; real Python 3.14.4 (not the Store stub); PrusaSlicer AND
-  Bambu Studio installed; OpenSCAD NOT installed (the coupon generator is
-  zero-dependency Python for this reason). Printer model + filament stock
+  configured; real Python 3.14.4 (not the Store stub); ~~PrusaSlicer AND~~
+  Bambu Studio installed (PrusaSlicer NOT found on 2026-10-11 - stale claim); ~~OpenSCAD NOT installed (the coupon generator is
+  zero-dependency Python for this reason).~~ **OpenSCAD 2021.01 INSTALLED 2026-10-11** (see below). Printer model + filament stock
   still uncatalogued (M1.2).
 - Multi-line git commit messages on this machine: write to a file and use
   `git commit -F <file>` — PowerShell here-strings mangle embedded quotes
   into pathspecs (hit 2026-07-23).
-- CAD tool choice still pending (M1.2; Onshape recommended, not decided).
+- ~~CAD tool choice still pending (M1.2; Onshape recommended, not decided).~~
+  **2026-10-11 (Evan): printed mounts are OpenSCAD.** OpenSCAD 2021.01 (latest
+  stable), the official portable zip `OpenSCAD-2021.01-x86-64.zip` from
+  files.openscad.org, 21,884,613 bytes, SHA-256 verified against the published
+  file, unpacked to `~/tools/openscad-2021.01/` (NOT on PATH). Use
+  `openscad.com` for the CLI (it prints to the console; `openscad.exe` is the
+  GUI). `scripts/render_scad.py` finds it there (or `$OPENSCAD`) and writes a
+  canonical, validated STL. Only numpy is in the venv: no CSG library.
 - **`arduino-cli` ships INSIDE the Arduino IDE (found 2026-09-02)** — no separate
   install, and it is not on PATH:
   `~/AppData/Local/Programs/Arduino IDE/resources/app/lib/backend/resources/arduino-cli.exe`

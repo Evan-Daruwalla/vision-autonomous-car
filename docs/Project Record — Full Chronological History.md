@@ -215,6 +215,9 @@ the dated entry, not the digest.
 - [FV - Cells confirmed Samsung 25R by their wrap (INR18650-25R, 2500 mAh) - count and authenticity not yet established](#appendix-fv---cells-confirmed-samsung-25r-by-their-wrap-inr18650-25r-2500-mah---count-and-authenticity-not-yet-established-2026-10-11-1439-cdt) (10-11)
 - [FW - Four Samsung 25R cells on hand, not two - the 2S pack uses two, two are spares](#appendix-fw---four-samsung-25r-cells-on-hand-not-two---the-2s-pack-uses-two-two-are-spares-2026-10-11-1440-cdt) (10-11)
 - [FX - Wiring-diagram audit + fix all: doc and firmware agree pin for pin; rail to 5.0 V, cut-cable test gate, BMS solder order, pixels reordered, host_test --wired guard](#appendix-fx---wiring-diagram-audit--fix-all-doc-and-firmware-agree-pin-for-pin-rail-to-50-v-cut-cable-test-gate-bms-solder-order-pixels-reordered-host_test---wired-guard-2026-10-11-1501-cdt) (10-11)
+- [FY - Printed mounts, Phase A: OpenSCAD installed, render_scad.py validator, PLA fit coupon - the servo, motor and electronics STLs wait on measurements](#appendix-fy---printed-mounts-phase-a-openscad-installed-render_scadpy-validator-pla-fit-coupon---the-servo-motor-and-electronics-stls-wait-on-measurements-2026-10-11-1639-cdt) (10-11)
+- [FZ - Mount dimensions looked up online: Lego counterbore 6.2 x 0.8 sourced, Pi 5 / Uno / BMS / LM2596 / XT30 / rocker found - and the BOM's LM2596 link now shows a different part](#appendix-fz---mount-dimensions-looked-up-online-lego-counterbore-62-x-08-sourced-pi-5--uno--bms--lm2596--xt30--rocker-found---and-the-boms-lm2596-link-now-shows-a-different-part-2026-10-11-1743-cdt) (10-11)
+- [GA - Correction to FZ: Pololu publishes the #5159 motor's dimensions (M1-M4)](#appendix-ga---correction-to-fz-pololu-publishes-the-5159-motors-dimensions-m1-m4-2026-10-11-2047-cdt) (10-11)
 
 ---
 
@@ -16824,3 +16827,239 @@ Checks after the fixes:
 to 544-2400 us). The fix needs the servo_bench endpoint numbers. Changing
 `attach()` alone would leave the two SELFTEST asserts on the 180-degree
 model, a half-fix.
+
+# Appendix FY - Printed mounts, Phase A: OpenSCAD installed, render_scad.py validator, PLA fit coupon - the servo, motor and electronics STLs wait on measurements (2026-10-11 16:39 CDT)
+**WHAT:** Evan sent 8 photos of the built Lego Technic chassis and asked for
+STL mounts that connect to the Lego body:
+- one for the MG90D-270 servo, through its own screw ears, driving the
+  white printed coupler;
+- one for "all of the electronics";
+- one for the motor, driving the differential on the bottom.
+
+These are PRD tasks 5, 6 and 7. Phase A of the plan is done; the STLs
+themselves are gated on measurements.
+
+## Why no mount STL exists yet
+
+Two read-only surveys found the repo records:
+- **no position** of the pinion, servo, diff input or motor relative to the
+  Lego frame (no CAD of the car);
+- **no dimension** for the servo's ears or shaft offset, any electronics
+  board, the Pi case, or the diff input height;
+- **no counterbore dimension** for pin collars, anywhere.
+
+Only numpy is installed, so nothing could build counterbored plates with
+off-grid screw holes.
+
+A phone photo gives about +/-3-5 mm, and a pin hole off by 1 mm will not
+take a pin. PLA pin fit is also unknown: the 4.80 mm figure came from ABS
+coupons judged by feel, and the motor D-bore needed +0.15 mm in PLA.
+
+So the plan is measure first, then generate.
+
+## Evan's decisions (2026-10-11)
+
+| Question | Answer |
+|---|---|
+| CAD tool | OpenSCAD - parts become editable parametric `.scad` files |
+| Electronics scope | Wiring-diagram parts + Pi 5 + power bank. Bank measured by Evan: **151.5 x 69.7 x 18.5 mm, USB outputs on a short side** |
+| On hand | Digital calipers, zip ties, spare black friction pins. **No M2/M3 screw kit** |
+| Lego body | Small changes OK (e.g. a longer drive axle) |
+
+Consequence of the bank size: it covers about the whole center frame, so
+the electronics mount becomes two printed parts. A **tray** carries the bank
+and the pack; a **deck** on posts carries the Pi, Uno and LM2596. This is a
+proposal, to confirm against the measurements.
+
+## Phase A, done
+
+- **OpenSCAD 2021.01** (latest stable): official portable zip
+  `OpenSCAD-2021.01-x86-64.zip` from files.openscad.org, 21,884,613 bytes.
+  SHA-256 `fb0caabf...ba7` matched the published file. Unpacked to
+  `~/tools/openscad-2021.01/` (not on PATH). `openscad --version` ->
+  `OpenSCAD version 2021.01`.
+- **`cad/scad/lib/lego.scad`** has the Technic interface primitives:
+  - `technic_hole` with optional counterbores;
+  - `pin_grid`;
+  - `pilot_hole`;
+  - `zip_slot`;
+  - `ghost_box` (preview-only component stand-ins).
+
+  Holes are circumscribed polygons, so they never print smaller than
+  nominal.
+- **`scripts/render_scad.py`** renders a `.scad` into a CANONICAL binary STL
+  and validates it before writing:
+  - **canonical:** OpenSCAD's raw output is NOT byte-stable (two raw renders
+    differed in 4114 of 7880 facets), so facets are sorted and the header is
+    fixed;
+  - **mesh checks:** closed manifold, positive volume, bounding box;
+  - **ray probes:** every listed hole must be open and its wall solid, plus
+    open and solid points.
+
+  It writes nothing on failure, and a 900 s timeout kills the OpenSCAD
+  process tree. A plain subprocess timeout did NOT bound it on Windows: a
+  5 s timeout fired after 23.6 s.
+
+  Its `self_check` (now in `run_checks.py`) proves, through the same
+  `validate()` that `main()` uses:
+  - a hole moved 1 mm FAILS;
+  - a solid point placed in a hole FAILS;
+  - a wrong bbox FAILS;
+  - two renders are byte-identical;
+  - a hung command is killed in 1.5 s.
+- **`cad/pla_fit_coupon.stl`** (from `cad/scad/pla_fit_coupon.scad`),
+  72 x 34 x 17 mm, contains:
+  - vertical pin holes 4.75 / 4.80 / 4.85 / 4.90 / 4.95 / 5.00, plain (row A)
+    and with a 6.2 x 0.8 counterbore (row B);
+  - six 4.90 holes at 8 mm pitch (row C: pitch check across a 1x7 beam);
+  - three horizontal THROUGH holes 4.8 / 4.9 / 5.0;
+  - servo-screw pilot holes 1.5 / 1.7 / 1.9;
+  - zip slots 3.0 / 3.5 / 4.0 / 5.0;
+  - a chamfered corner marking the 4.75 end.
+
+  Registered in `check_artifacts.py`. **Untested - not printed.**
+
+One spec error, mine, was caught by the agent: the first coupon's horizontal
+holes were BLIND, because the pilot block sat behind the fin's exits. Fixed by
+raising the holes to z 12.5 in a 17 mm fin; through-ness was checked with an
+axis ray.
+
+Verification (Opus re-ran these, not quoted from the agent):
+
+    render_scad.py cad/scad/pla_fit_coupon.scad -> triangles 7892, manifold PASS,
+      bbox (0,0,0)..(72,34,17) PASS, probes 228/228 PASS, OVERALL PASS
+    second render: byte-identical (sha256 821d4fb8...)
+    run_checks.py: 16 passed, 0 failed, 0 skipped (of 16)
+    check_artifacts.py: 33 artifacts checked, 0 drifted, 0 errored, 2 uncheckable
+
+Also: the agent wrote two stray log files into `D:\Git` (the Git install
+folder) by a shell slip. Both were inspected and deleted this session.
+`tooling.md`: OpenSCAD is installed, and the "PrusaSlicer installed" claim is
+stale (not found on disk).
+
+## Gate - BLOCKED-ON-EVAN
+
+1. Print the coupon. Report the vertical hole that takes a black friction pin
+   firmly, whether the counterbore lets it sit flush on a beam, row C's pitch
+   result, and the best horizontal hole, pilot hole and zip slot.
+2. Fill in the measurement sheet: servo S1-S9, motor M1-M6, electronics
+   E1-E11, Lego L1-L2, all in the plan.
+
+Then Phase B (Opus specs + preview PNGs for approval), Phase C (Sonnet
+writes the 4 `.scad` files), and Phase D (print and fit, recorded).
+
+# Appendix FZ - Mount dimensions looked up online: Lego counterbore 6.2 x 0.8 sourced, Pi 5 / Uno / BMS / LM2596 / XT30 / rocker found - and the BOM's LM2596 link now shows a different part (2026-10-11 17:43 CDT)
+**WHAT:** Evan asked to look up the electronics and Lego dimensions online
+instead of measuring them all. This is what the sources say, each with its
+source and how far to trust it. The parts in hand were NOT measured; mount
+holes and pockets still get one caliper check before printing (Phase B).
+
+## Lego Technic (cailliau.org - the site the repo already cites for the 4.8 mm axle)
+
+| Dimension | Value | Source |
+|---|---|---|
+| Unit pitch | 8.0 mm (exact) | cailliau.org Lego Dimensions, General Considerations |
+| Pin hole ("bearing") | 4.9 mm, derived from the knob diameter; the axle itself is 4.8 mm, measured | cailliau.org, More Dimensions |
+| Counterbore at hole ends | **6.2 mm diameter, 0.8 mm deep** | cailliau.org, More Dimensions |
+| Liftarm (studless beam) thickness | **7.4 mm** ("7.4mm thick instead of 7.8"); production varies 7.4-7.8 | cailliau.org, both pages |
+| Peg (pin) ring width | 1.6 mm | cailliau.org, General Considerations |
+| Pin total length, collar diameter | **not found** (Brick Architect and Brick Owl give none; a retail "0.6 in" figure is packaging, ignored) | - |
+
+So the `CB_D 6.2` / `CB_DEPTH 0.8` in `cad/scad/lib/lego.scad`, written as
+"community values, unverified", now have a named source. Fit is still the
+PLA coupon's job: the printed hole that grips a pin is an empirical number.
+
+## Electronics
+
+| Part | Value | Source | Trust |
+|---|---|---|---|
+| Raspberry Pi 5 board | 85 x 56 mm; mounting holes 58 x 49 mm apart, 3.5 mm in from the edges, dia 2.7 mm; edge positions 11.2 / 25.8 / 39.2 (USB-C/HDMI side) and 29.1 / 47 (USB-A side) | Official drawing RP-008347-DS-1 (Raspberry Pi Ltd); text extracted from the PDF | Official; the drawing says "approximate, for reference purposes only" |
+| Vilros Pi 5 aluminium case (passive + active cooling) | 3.55 x 2.45 x 1.05 in = **90.2 x 62.2 x 26.7 mm**; vented bottom, NO mounting holes or feet listed; open slots on all sides | vilros.com product page | Vendor page. **Not confirmed to be the case in Evan's kit** |
+| Arduino Uno R3 | 68.58 x 53.34 mm; 4 holes dia 3.2 at (2.54, 15.24), (17.78, 66.04), (45.72, 66.04), (50.8, 13.97) (x across the 53.34 width, y along the length from the USB end) | kellyegan/OpenSCAD-Arduino-Mounting-Library `arduino.scad` (community; Arduino's own datasheet PDF is font-encoded and did not extract) | Community, widely used; check two holes with calipers |
+| ACEIRMC 2S 8A BMS (B08HLQQCQJ) | **41 x 8 x 2.2 mm** ("Size: 41x8x2.2mm"); pads B+, B-, MB, P+, P- | Amazon listing description | Seller. The same page's Amazon metadata says "0.09 x 0.31 x 0.31 in" - contradictory; the description is taken |
+| LM2596 with voltmeter display | **66 x 36 x 12 mm** (another seller: 14 mm tall); **mounting holes 61 x 31 mm centres, 3 mm holes** | littlebirdelectronics.com.au (66 x 36 x 12, mounting 61 x 31); search summary of az-delivery / makerworld (3 mm holes, 14 mm height) | Generic form factor, two sellers agree on 66 x 36 / 61 x 31 |
+| DIANN 2-slot 18650 holder (B0BJV9ZL3J) | 7.6 x 4.0 x 1.9 cm (3.0 x 1.6 x 0.7 in); no mounting holes stated | Amazon listing | The BOM already calls this listing copy unreliable |
+| Rocker switch, DaierTek (B07S1MV462) | **ROUND snap-in, 20 mm (0.787 in) mounting hole** | Amazon listing | Seller. NOT the rectangular KCD1 21 x 15 first searched |
+| Frienda XT30 (B0875MBLNH) | male 13.7 x 10.2 x 5.2 mm; female 12.4 x 10.2 x 5.2 mm; mated length not stated | Amazon listing | Seller |
+| Anyongora inline ATO fuse holder (B0F6NPV287) | body size **not stated** (only the bag, 9 x 7.6 x 0.6 in); 12 in of total wire | Amazon listing | - |
+| Adeept p0374 2S USB-C charger | adeept.com states **no dimensions**. A search summary gave 25 x 18 x 6 mm for a "2S 8.4V 2A Type-C" module, but the page it came from (robu.in) returned 403, so it is **unattributed** | - | Not usable; measure |
+| Power bank | Evan: 151.5 x 69.7 x 18.5 mm, USB on a short side. Model unknown, so nothing to look up | Evan | Measured |
+
+## Two findings
+
+1. **The BOM's LM2596 link no longer shows the part Evan received.** BOM row
+   12's `B09R49R76K` opens "EPLZON LM2596S Buck Converter ... 3A ... (Pack of
+   6 Pcs)", with no display; Amazon also redirected to a sibling ASIN. Evan's
+   arrival list names the "with Voltmeter Display ... 2A ... (Pack of 2)"
+   module. The dimensions above are for the display version; the BOM link
+   needs a dated note.
+2. **The rocker is round (20 mm hole), not rectangular.** Any panel cutout
+   in the deck is a 20 mm circle; panel thickness for the snap-in is not
+   stated.
+
+## What still needs calipers (the measurement sheet shrinks)
+
+- Servo S1-S9 and motor M1-M6: none are published for these exact parts.
+- Electronics:
+  - the case actually in the kit (confirm 90.2 x 62.2 x 26.7);
+  - the bank's port positions;
+  - the holder;
+  - the charger;
+  - the fuse holder body;
+  - zip tie width x thickness;
+  - two Uno holes and one LM2596 hole spacing, as spot checks;
+  - E11, the car photo and protrusion heights.
+- Lego: nothing; cailliau covers it. The pin length is not needed for the
+  design.
+
+# Appendix GA - Correction to FZ: Pololu publishes the #5159 motor's dimensions (M1-M4) (2026-10-11 ~20:47 CDT)
+**WHAT:** Correction to Appendix FZ. FZ says "Servo S1-S9 and motor M1-M6:
+none are published for these exact parts." That is FALSE for the motor's
+bench items (M1-M4), and it was never checked: FZ searched for the
+electronics and the Lego, not the motor. BOM row 5 already says #5159 has a
+"full spec sheet + CAD envelope", and the record's earlier verification of #1093
+(same gearbox family) matched "3 mm D-shaft 9 mm, 10x12 mm". Found when Evan
+asked what S1-S9 and M1-M6 are.
+
+## Pololu #5159 (30:1 Micro Metal Gearmotor HP 6V, 12 CPR encoder, side connector)
+
+Source: pololu.com/product/5159 (page title confirms the side connector) and
+its dimension diagram, pololu.com/file/0J949/micro-metal-gearmotor-dimensions.pdf,
+page 2 "Micro Metal Gearmotors with 12 CPR Encoder, Side Connector", dated
+03 April 2024. The PDF's text is not extractable; the numbers were read off
+the rendered drawing at 66% zoom in the browser, so a misread digit is
+possible.
+
+| Item | Value (mm) |
+|---|---|
+| Gearbox face | 12.0 wide x 10.0 tall |
+| Gearbox length L | 9 (all ratios except 1000:1, which is 12.5) |
+| Motor can length | 15 |
+| Encoder section length | 8 |
+| Overall length, max | 32.5 |
+| Encoder cap, front view | 13.6 wide x 14 tall (wider and taller than the gearbox) |
+| Gearbox face mounting holes | 2 x M1.6, 4.5 each side of the shaft centre (9.0 apart) |
+| Bushing boss | dia 4.0, sticks out 0.7 |
+| Output shaft | dia 3.0, D-shaped; "10" dimensioned along the shaft (the product page text says "9 mm long"; which face the 10 is measured from was not resolved); 2.5 dimensioned at the shaft, read as the across-flat |
+
+Product page text: "gearbox cross section of 10x12 mm"; "9 mm long, 3 mm
+diameter D-shaped gearbox output shaft"; the encoder "extends past the
+gearbox cross section by 0.25 mm" and past it "by 3 mm or 4 mm on the
+connector side".
+
+## The servo stays on calipers
+
+The HOOYIJ MG90D-270 listing (B0D5YBL2JX), read 2026-10-11, gives only
+Amazon's "0.88 x 0.49 x 0.89 inches" (22.4 x 12.4 x 22.6 mm) and nothing on
+the ears. The ear holes need about 0.2 mm; a clone listing will not give
+that. S1-S9 stand.
+
+## Measurement sheet after this
+
+- Motor: M1, M2 and M4 are covered by the drawing. M3 is reduced to one
+  check: calipers on the real shaft's diameter and across-flat (2 numbers),
+  to catch a misread and to compare with the 2.5 the coupler v1 used. M5 and
+  M6 (on the car) stand.
+- Servo: S1-S9 unchanged.
+
+Untested; nothing printed or measured in this entry.

@@ -1,0 +1,31 @@
+{
+  "bbox": [[0, 0, 0], [72, 34, 17]],
+  "holes": [
+    {"name": "A 4.75", "center": [4, 4, 3.0], "axis": "z", "d": 4.75, "ring": true},
+    {"name": "A 4.80", "center": [12, 4, 3.0], "axis": "z", "d": 4.8, "ring": true},
+    {"name": "A 4.85", "center": [20, 4, 3.0], "axis": "z", "d": 4.85, "ring": true},
+    {"name": "A 4.90", "center": [28, 4, 3.0], "axis": "z", "d": 4.9, "ring": true},
+    {"name": "A 4.95", "center": [36, 4, 3.0], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "A 5.00", "center": [44, 4, 3.0], "axis": "z", "d": 5.0, "ring": true},
+    {"name": "B 4.75", "center": [4, 12, 3.0], "axis": "z", "d": 4.75, "ring": true},
+    {"name": "B 4.80", "center": [12, 12, 3.0], "axis": "z", "d": 4.8, "ring": true},
+    {"name": "B 4.85", "center": [20, 12, 3.0], "axis": "z", "d": 4.85, "ring": true},
+    {"name": "B 4.90", "center": [28, 12, 3.0], "axis": "z", "d": 4.9, "ring": true},
+    {"name": "B 4.95", "center": [36, 12, 3.0], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "B 5.00", "center": [44, 12, 3.0], "axis": "z", "d": 5.0, "ring": true},
+    {"name": "C1", "center": [4, 20, 3.0], "axis": "z", "d": 4.9, "ring": true},
+    {"name": "C2", "center": [12, 20, 3.0], "axis": "z", "d": 4.9, "ring": true},
+    {"name": "C3", "center": [20, 20, 3.0], "axis": "z", "d": 4.9, "ring": true},
+    {"name": "C4", "center": [28, 20, 3.0], "axis": "z", "d": 4.9, "ring": true},
+    {"name": "C5", "center": [36, 20, 3.0], "axis": "z", "d": 4.9, "ring": true},
+    {"name": "C6", "center": [44, 20, 3.0], "axis": "z", "d": 4.9, "ring": true},
+    {"name": "H 4.8", "center": [52, 3.9, 12.5], "axis": "y", "d": 4.8, "ring": true},
+    {"name": "H 4.9", "center": [60, 3.9, 12.5], "axis": "y", "d": 4.9, "ring": true},
+    {"name": "H 5.0", "center": [68, 3.9, 12.5], "axis": "y", "d": 5.0, "ring": true},
+    {"name": "P 1.5", "center": [52, 16, 3.9], "axis": "z", "d": 1.5, "ring": true},
+    {"name": "P 1.7", "center": [60, 16, 3.9], "axis": "z", "d": 1.7, "ring": true},
+    {"name": "P 1.9", "center": [68, 16, 3.9], "axis": "z", "d": 1.9, "ring": true}
+  ],
+  "open_points": [[9, 29, 1.5], [27, 29, 1.5], [45, 29, 1.5], [63, 29, 1.5], [52, 9.0, 12.5], [60, 9.0, 12.5], [68, 9.0, 12.5]],
+  "solid_points": [[2.5, 16, 3.9], [70, 30, 1.5], [60, 4, 9.0], [44, 23, 3.9], [60, 4, 16.0]]
+}

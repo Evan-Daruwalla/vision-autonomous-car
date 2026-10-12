@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-11 ~15:03 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-11 ~20:47 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 180 appendices A–FX; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 183 appendices A–GA; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -621,6 +621,17 @@ UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
 (2026-09-30, 60 findings) have not been worked.
 
 NEXT ACTIONS, cheapest first:
+000. PRINTED MOUNTS (servo, motor, electronics tray + deck) - Appendix FY. Phase A
+   done: OpenSCAD 2021.01 at ~/tools/openscad-2021.01, scripts/render_scad.py
+   (canonical STL + probes), cad/pla_fit_coupon.stl. BLOCKED-ON-EVAN: print the
+   coupon and report fits; fill in the measurement sheet (FY / the task plan at
+   ~/.claude/task-plans/autonomous-car-printed-mounts.md). Then: specs + preview
+   PNGs for approval, then Sonnet writes the 4 .scad files. Untested; not printed.
+   Online dimensions (Appendix FZ): Lego 6.2 x 0.8 counterbore + 7.4 beam (cailliau),
+   Pi 5 / Uno / BMS / LM2596 / XT30 / rocker (ROUND, 20 mm hole) found; servo, motor,
+   case-in-kit, bank ports, holder, charger, fuse body and zip ties still need calipers.
+   Appendix GA corrects FZ: Pololu's drawing covers motor M1, M2, M4; M3 is now a
+   2-number spot check (shaft dia + across-flat); M5-M6 and servo S1-S9 stand.
 00. WIRING AUDIT DONE 2026-10-11 (Appendix FX): doc and firmware agree pin
    for pin. Before wiring ANYTHING, follow WIRING_PROTOSHIELD section 5 as
    rewritten: rail trimmed to 5.0 V (not 5.2) and the pot locked; step 1b

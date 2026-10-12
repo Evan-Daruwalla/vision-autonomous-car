@@ -150,6 +150,9 @@ ARTIFACTS = [
               "--od", "7.4", "--bore-dia", "3.15", "--bore-flat", "2.65",
               "--screw-dia", "1.5", "--bore-depth", "8", "--socket-depth", "5",
               "-o", "{out}"]),
+    # PLA fit coupon (2026-10-11): pin holes, pitch, pilot holes, zip slots - OpenSCAD via render_scad.py.
+    dict(kind="file", artifact="cad/pla_fit_coupon.stl",
+         cmd=["scripts/render_scad.py", "cad/scad/pla_fit_coupon.scad", "-o", "{out}"]),
     dict(kind="file", artifact="cad/tolerance_coupon_v2.stl",
          cmd=["scripts/gen_tolerance_coupon.py", "-o", "{out}"]),
 

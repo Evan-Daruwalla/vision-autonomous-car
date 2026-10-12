@@ -296,3 +296,45 @@ coupling problem ~5× worse (BOM row 7).
 
 Print it in **PETG**, not PLA: this is a loaded joint and PLA is the material
 Appendix BV's failing numbers were computed against.
+
+## OpenSCAD parts - `cad/scad/` (2026-10-11, Appendix FY)
+
+Printed mounts are parametric OpenSCAD files. OpenSCAD 2021.01 lives at
+`~/tools/openscad-2021.01/` (not on PATH; `scripts/render_scad.py` finds it,
+or set `$OPENSCAD`). Never hand-export from the GUI for the repo: render with
+
+```bash
+.venv/Scripts/python.exe scripts/render_scad.py cad/scad/pla_fit_coupon.scad -o cad/pla_fit_coupon.stl --png preview.png
+```
+
+It writes a CANONICAL binary STL (OpenSCAD's raw output reorders facets run to
+run, so `check_artifacts.py` could not byte-compare it otherwise). It writes
+NOTHING unless the mesh is a closed manifold, the volume is positive, the
+bounding box matches, and every ray probe in `<part>.probe.json` passes.
+A probe file lists the holes that must be open (with solid walls) and the
+points that must be open or solid. `--png` writes a preview with the
+`ghost_box` component stand-ins visible.
+
+Shared primitives are in `cad/scad/lib/lego.scad`: `technic_hole` (with optional
+counterbores), `pin_grid`, `pilot_hole`, `zip_slot`, `ghost_box`. Holes are
+circumscribed polygons, so they never print smaller than nominal.
+
+### pla_fit_coupon.stl - print this FIRST (untested)
+
+72 x 34 x 17 mm. Every mount's Lego interface depends on PLA fits nobody has
+measured: the 4.80 mm pin hole came from ABS coupons judged by feel. Print it
+with the same settings as the parts (P1S, PLA, 0.1 mm, 2 walls), then report:
+
+- **Row A** (plain, 4.75 / 4.80 / 4.85 / 4.90 / 4.95 / 5.00 from the chamfered
+  corner): which hole takes a black friction pin FIRMLY, by hand, without
+  force.
+- **Row B** (same sizes, 6.2 x 0.8 counterbore on top): does the counterbore
+  let the coupon sit flush against a Lego beam when pinned?
+- **Row C** (six 4.90 holes at 8 mm pitch): pin a 1x7 beam across all six; if
+  the end pins bind, the printer's X/Y scale is off.
+- **Horizontal holes** (4.8 / 4.9 / 5.0, through the fin): the same pin test;
+  holes printed sideways come out less round.
+- **Pilot holes** (1.5 / 1.7 / 1.9): which one a servo mounting screw drives
+  into firmly without splitting.
+- **Zip slots** (3.0 / 3.5 / 4.0 / 5.0 wide x 1.8): the smallest your zip tie
+  passes through.

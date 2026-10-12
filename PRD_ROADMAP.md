@@ -397,7 +397,7 @@ transfer gap) must not block the capstone.
    lengths, hub interfaces, and whether any part of the assembled car exceeds
    the (now 155 mm, front-governed) tire track. No dimensioned sketch exists yet.
 5. **CAD: front steering module.** Printed frame holding the Lego steering
-   geometry + servo mount accepting MG90S AND MG996R footprints + printed
+   geometry + servo mount accepting ~~MG90S AND MG996R footprints~~ the MG90D-270 footprint (2026-10-11: neither the MG90S nor the MG996R is in the BOM any more) + printed
    servo-horn→Lego-axle link (adapt Printables 61922/147626). Done: STL
    exported, printed, Lego parts seat without force.
    ⚠️ **HARD CONSTRAINT ADDED 2026-09-02 (Appendix BV): the "printed
@@ -409,6 +409,7 @@ transfer gap) must not block the capstone.
    axle and never print the cross profile**, and the servo must never reach
    stall (task 8c). Printables 61922/147626 are acceptable only as
    socket-style adapters. Constraint: `docs/WIRING_PROTOSHIELD.md` §2.4a.
+   **2026-10-11 (Appendix FY): the servo mount is being built in OpenSCAD (`cad/scad/`), gated on the measurement sheet (S1-S9) and the PLA fit coupon.**
 6. **CAD: rear drive module.** Diff mounts, ~~PF motor~~ **N20 #5159 motor**
    cradle (10 × 12 × 26 mm body, +3-4 mm on the connector side for the
    encoder board, 3 mm D-shaft; drive coupler is a socket gripping a real
@@ -416,6 +417,7 @@ transfer gap) must not block the capstone.
    coupon-calibrated size (PETG). Done: printed; axle+diff spin freely by
    hand with motor engaged. *(Term corrected 2026-09-02 — "PF motor" has been
    wrong since 2026-07-23 ~17:21, when Evan confirmed he owns no Lego motors.)*
+   **2026-10-11 (Appendix FY): the motor mount is being built in OpenSCAD, gated on M1-M6 (2026-10-11, Appendix GA: M1/M2/M4 now come from Pololu's drawing; M3 is a spot check) and the PLA fit coupon. The material in practice is PLA; the PETG named above is unresolved.**
 7. **CAD: chassis plate.** Bays for Pi, ~~LiPo (low, central), TB6612+UBEC~~
    **2× 18650 holder (low, central) · the Arduino Uno + proto shield (68.6 ×
    53.4 mm — 60% of the 114.75 mm car width, so it mounts lengthwise; stack
@@ -428,6 +430,7 @@ transfer gap) must not block the capstone.
    printed + test-fit; M1 success criterion checked. *(Power terms corrected
    2026-09-02 — LiPo/UBEC was superseded by the split-source 18650 design on
    2026-07-23 ~17:59; the Uno bay is new since 2026-09-02, Appendix BC.)*
+   **2026-10-11 (Appendix FY): scope set by Evan - the wiring-diagram parts + Pi 5 + power bank (151.5 x 69.7 x 18.5 mm, USB on a short side). Proposed as TWO prints: a tray (bank + pack) and a deck on posts (Pi, Uno, LM2596); the camera mast comes later. Gated on E1-E11 and the PLA fit coupon.**
 
 ### M2 — Electronics + teleop
 
