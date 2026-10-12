@@ -231,6 +231,8 @@ the dated entry, not the digest.
 - [GL - Motor mount v1 printed (encoder hits the walls); v2 with real-pin snap sockets](#appendix-gl---motor-mount-v1-printed-encoder-hits-the-walls-v2-with-real-pin-snap-sockets-2026-10-12-1042-cdt) (10-12)
 - [GM - Decision: real black friction pins for every printed part](#appendix-gm---decision-real-black-friction-pins-for-every-printed-part-2026-10-12-1053-cdt) (10-12)
 - [GN - docs-sync pass and HANDOFF drift check](#appendix-gn---docs-sync-pass-and-handoff-drift-check-2026-10-12-1055-cdt) (10-12)
+- [GO - Servo measured: case, ears, ear holes; servo draft updated](#appendix-go---servo-measured-case-ears-ear-holes-servo-draft-updated-2026-10-12-1106-cdt) (10-12)
+- [GP - Servo mount v1: open under the body, ears on plastic, pinned at the L's corner](#appendix-gp---servo-mount-v1-open-under-the-body-ears-on-plastic-pinned-at-the-ls-corner-2026-10-12-1113-cdt) (10-12)
 
 ---
 
@@ -17549,3 +17551,77 @@ in PLA.
 - Process slip: the HANDOFF line counting appendices was written as "A-GN"
   before this entry existed, i.e. pre-cited. Checked against the script's
   assignment after appending.
+
+# Appendix GO - Servo measured: case, ears, ear holes; servo draft updated (2026-10-12 ~11:06 CDT)
+**WHAT:** Evan measured the MG90D-270 servo (caliper), 2026-10-12.
+
+| Item | Value (mm) | Sheet item |
+|---|---|---|
+| Case length x width x height | 22.88 x 12.44 x 22.60 | S1 |
+| Each ear (flange): length past the case end, width, thickness | 5.0, same as the case (12.44), 2.65 | S2 |
+| Ear hole centre from the case end (both ears) | 2.5 | S2 |
+| Ear hole diameter | 1.0 (as reported) | S2 |
+| Top of the ears above the L bracket | 18.0 | S8-related |
+| Screw threaded length | 7.0 | S6 (length only) |
+
+Derived: ear span 22.88 + 2 x 5 = **32.88**; ear hole spacing 22.88 + 2 x
+2.5 = **27.88** centre to centre (the draft's placeholders were 32.0 and
+27.5).
+
+**Cross-check:** record GB had the ear UNDERSIDE 15.3 mm above the L piece's
+BOTTOM face (13.80 + 1.5). With the 2.65 ear thickness that puts the ear TOP
+at 17.95, against today's 18.0 - so today's 18 is also from the L piece's
+bottom face, and the two measurements agree to 0.05 mm (inference from the
+match; the reference face was not stated).
+
+**Open question, not resolved:** a 1.0 mm ear hole is smaller than the
+screws that normally pass through these ears; either the hole is 1 mm and the
+screw threads into it, or the figure is the screw's size. The pilot hole in
+the mount depends on the screw's THREAD diameter, which is not measured; the
+coupon's 1.5 / 1.7 / 1.9 pilots settle it empirically. The draft keeps 1.7.
+
+**Draft updated** (`cad/scad/servo_mount_draft.scad`): case, ears, ear hole
+spacing, screw length and pilot depth (screw 7.0 - ear 2.65 = 4.35 mm into
+the plate; pilot 6.0 deep) now measured; still placeholders: shaft offset
+(S4), boss clearance (S5), L piece thickness and its hole positions relative
+to the shaft. Render: manifold PASS, bbox PASS, probes 192/192 PASS (pilot
+probes moved to x -8.44 / 19.44). Still a LAYOUT DRAFT - not printable.
+
+# Appendix GP - Servo mount v1: open under the body, ears on plastic, pinned at the L's corner (2026-10-12 ~11:13 CDT)
+**WHAT:** The servo mount stops being a draft: `cad/servo_mount.scad` ->
+`cad/servo_mount.stl` (printable, UNTESTED), registered in
+`check_artifacts.py`. The layout draft `servo_mount_draft.scad` and its
+probe were deleted (created this session).
+
+**Evan's inputs (2026-10-12):**
+- "leave it as open space; we only need the body to be supported by plastic
+  on the flanges" - the plate is cut through under the whole case footprint
+  (+0.5 mm); only the ears rest on plastic. This also removes the need for
+  the boss height (S5).
+- The L bracket is the regular Lego Technic 4 x 2 L-shaped liftarm with the
+  axle hole at the end of the 4-long leg. The servo shaft is at that axle
+  hole (stud 0); the FAR ear's screw hole is 2 studs + 1 mm = 17.0 mm from
+  the shaft.
+
+**Derived:** with the 27.88 mm hole spacing (GO), the near ear's hole is at
+-10.88 mm and the case centre sits 3.06 mm from the shaft (shaft 8.38 mm from
+the near case end). Check this on the car: the near ear's hole should sit
+1 stud + 2.88 mm from the shaft on the other side.
+
+**Design:** plate z 0..7.3 on the L's top face (top = ear underside: 15.3
+above the L's bottom, GB, minus an assumed 8.0 L thickness - a thinner real
+L leaves a gap the ear screws close). Pilots 1.7 x 6.0 deep at x -10.88 and
+17.0 (screw 7.0 - ear 2.65 = 4.35 engaged). Studs 0-2 cannot take pins (axle
+hole / under the case / 1 mm from the far ear's screw), so the plate pins at
+stud 3, the L's corner: holes at (24, 0) and at BOTH possible positions of
+the short leg, (24, +8) and (24, -8), Lego-beam shaped (4.8 bore, 6.2 x 0.8
+recess both faces) for the black 2780 pins (decision GM). Strip y +/-9 (1 mm
+past the L each side), pin pad y +/-12 over x 20-28.
+
+**Risks named, not resolved:** the near ear's pad overhangs the L's end
+(x -14.5 to -4) - whatever sits at that height next to stud -1 is unknown;
+the 1.0 mm ear hole vs the screw size (GO) - the pilot comes from the coupon.
+
+**Checks:** manifold PASS; bbox (-14.5,-12,0)..(28,12,7.3) PASS; probes
+59/59 PASS; second render byte-identical (sha256 7b02ebc2383b4b6f...);
+check_artifacts 35 checked, 0 drifted; run_checks 16/16. STL sent to Evan.

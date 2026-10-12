@@ -155,6 +155,8 @@ ARTIFACTS = [
          cmd=["scripts/render_scad.py", "cad/scad/pla_fit_coupon.scad", "-o", "{out}"]),
     dict(kind="file", artifact="cad/motor_mount.stl",
          cmd=["scripts/render_scad.py", "cad/scad/motor_mount.scad", "-o", "{out}"]),
+    dict(kind="file", artifact="cad/servo_mount.stl",
+         cmd=["scripts/render_scad.py", "cad/scad/servo_mount.scad", "-o", "{out}"]),
     dict(kind="file", artifact="cad/tolerance_coupon_v2.stl",
          cmd=["scripts/gen_tolerance_coupon.py", "-o", "{out}"]),
 
