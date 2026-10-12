@@ -238,6 +238,7 @@ the dated entry, not the digest.
 - [GS - Servo mount v2: a frame across both L liftarms](#appendix-gs---servo-mount-v2-a-frame-across-both-l-liftarms-2026-10-12-1128-cdt) (10-12)
 - [GT - Motor mount v3: floor up 2.5 mm, back wall 2 mm closer](#appendix-gt---motor-mount-v3-floor-up-25-mm-back-wall-2-mm-closer-2026-10-12-1731-cdt) (10-12)
 - [GU - Pin holes +0.075 mm (4.875) in every mount](#appendix-gu---pin-holes-0075-mm-4875-in-every-mount-2026-10-12-1737-cdt) (10-12)
+- [GV - Servo mount v3: 6 mm higher, rails and bridges instead of a plate](#appendix-gv---servo-mount-v3-6-mm-higher-rails-and-bridges-instead-of-a-plate-2026-10-12-1748-cdt) (10-12)
 
 ---
 
@@ -17735,4 +17736,34 @@ dd2c703a173836c1... and d9ef74ecfbe72457...); check_artifacts 35 checked, 0
 drifted. Untested; not printed.
 
 **Process note:** the .scad comments cite "record GU" before this entry was
+appended (pre-cite), checked against the script's assignment.
+
+# Appendix GV - Servo mount v3: 6 mm higher, rails and bridges instead of a plate (2026-10-12 ~17:48 CDT)
+**WHAT:** Servo mount v3, from Evan (2026-10-12): "the servo mount needs to
+be 6mm higher and use less material". Whether this came from a fit of v2
+was not stated.
+
+**Changes (`cad/scad/servo_mount.scad`):**
+- ear supports 6.0 mm higher: top at **13.3 mm** above the Ls' top faces
+  (was 7.3; `RAISE = 6.0`). By the GB/GO numbers this puts the ear underside
+  21.3 mm above the Ls' bottom - the earlier 15.3 (GB) is therefore NOT what
+  Evan's car needs; the reason was not stated.
+- no more solid plate: **two rails** along the Ls (8 wide, 7.8 tall - a
+  Lego beam's height, so each pin half sits fully, with the collar recess
+  underneath and the tip recess on top) and **two bridges** rail to rail under
+  the ears (near x -14.5..-8.88, far x 15.0..20.5; z 7.8..13.3). Everything
+  else is open.
+- pilots unchanged in x/y (-10.88 and 17.0), 6.0 deep from the new top,
+  through the 5.5 mm bridges.
+- volume 6743 mm^3 (v2 9130 mm^3 at 7.3 mm tall; a solid plate at 13.3 mm
+  would be about twice v2's).
+
+**Print note:** upright, rails on the bed; each bridge spans 24 mm across
+open air between the rails - a normal bridge for a P1S, no supports.
+
+**Checks:** manifold PASS; bbox (-14.5,-20,0)..(28,20,13.3) PASS; probes
+88/88 PASS; second render byte-identical (sha256 34a382ed47e7b97b...);
+check_artifacts 35 checked, 0 drifted. Untested; not printed.
+
+**Process note:** the .scad header cites "record GV" before this entry was
 appended (pre-cite), checked against the script's assignment.

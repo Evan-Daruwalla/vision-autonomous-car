@@ -1,6 +1,9 @@
-// Servo mount v2 (2026-10-12): PLA frame that sits on the TWO Lego 2x4 L-shaped
+// Servo mount v3 (2026-10-12): PLA frame that sits on the TWO Lego 2x4 L-shaped
 // liftarms either side of the MG90D-270 and carries the servo by its two ears.
 // UNTESTED - not printed.
+// v3 (record GV, Evan): ear supports 6 mm higher (13.3 above the Ls) and less
+// material - two pinned rails along the Ls plus two bridges under the ears,
+// open everywhere else.
 //
 // FRAME: origin on the servo output shaft. x along the servo's long axis = the
 // L legs (stud 0 = the Ls' axle holes, studs 1, 2, 3 at x 8, 16, 24); y across;
@@ -31,7 +34,9 @@ L_SPACING_UNMEASURED = 4 * PITCH;          // centre to centre of the two L legs
 L_Y = L_SPACING_UNMEASURED / 2;            // 16
 L_W = 8.0;                                 // a liftarm is one stud wide
 EAR_ABOVE_L_BOTTOM = 15.3;                 // GB
-EAR_Z = EAR_ABOVE_L_BOTTOM - L_T_UNMEASURED;   // plate top = ear underside (7.3)
+RAISE = 6.0;                               // v3 (Evan): 6 mm higher than v2
+EAR_Z = EAR_ABOVE_L_BOTTOM - L_T_UNMEASURED + RAISE;   // bridge top = ear underside (13.3)
+RAIL_H = 7.8;                              // a Lego beam's height: a pin half fits fully
 
 CASE_L = 22.88;
 CASE_W = 12.44;
@@ -45,7 +50,7 @@ NEAR_HOLE_X = FAR_HOLE_X - EAR_HOLE_SPACING;          // -10.88
 CASE_CX = (FAR_HOLE_X + NEAR_HOLE_X) / 2;             // 3.06
 
 PILOT_D = 1.7;            // pick from the coupon's 1.5 / 1.7 / 1.9 row
-PILOT_DEPTH = 6.0;        // screw 7.0 - ear 2.65 = 4.35 into the plate
+PILOT_DEPTH = 6.0;        // screw 7.0 - ear 2.65 = 4.35 into the bridge
 OPEN_CLEAR = 0.5;
 
 X0 = NEAR_HOLE_X - EAR_HOLE_FROM_CASE - 1.12;   // -14.5: past the near ear tip (-13.38)
@@ -53,9 +58,16 @@ X1 = 3 * PITCH + L_W / 2;                       // 28: the Ls' far end
 Y_OUT = L_Y + L_W / 2;                          // 20: outer faces of the Ls
 
 PIN_X = [PITCH, 2 * PITCH, 3 * PITCH];          // studs 1, 2, 3
+NEAR_BRIDGE = [X0, CASE_CX - CASE_L / 2 - OPEN_CLEAR];        // x -14.5 .. -8.88
+FAR_BRIDGE = [CASE_CX + CASE_L / 2 + OPEN_CLEAR, FAR_HOLE_X + 3.5];   // x 15.0 .. 20.5
 
 difference() {
-  translate([X0, -Y_OUT, 0]) cube([X1 - X0, 2 * Y_OUT, EAR_Z]);
+  union() {
+    // two rails along the Ls
+    for (s = [1, -1]) translate([X0, s * L_Y - L_W / 2, 0]) cube([X1 - X0, L_W, RAIL_H]);
+    // two bridges under the ears, rail to rail
+    for (b = [NEAR_BRIDGE, FAR_BRIDGE]) translate([b[0], -Y_OUT, RAIL_H - EPS]) cube([b[1] - b[0], 2 * Y_OUT, EAR_Z - RAIL_H + EPS]);
+  }
   // open space under the whole servo body
   translate([CASE_CX - CASE_L / 2 - OPEN_CLEAR, -(CASE_W / 2 + OPEN_CLEAR), -EPS])
     cube([CASE_L + 2 * OPEN_CLEAR, CASE_W + 2 * OPEN_CLEAR, EAR_Z + 2 * EPS]);
@@ -64,7 +76,7 @@ difference() {
     translate([x, 0, EAR_Z - PILOT_DEPTH]) pilot_hole(PILOT_D, PILOT_DEPTH + EPS);
   // pin holes over both Ls, Lego-beam shaped
   for (x = PIN_X, s = [1, -1])
-    translate([x, s * L_Y, 0]) technic_hole(d = PIN_D, h = EAR_Z, cb_d = 6.2, cb_top = 0.8, cb_bot = 0.8);
+    translate([x, s * L_Y, 0]) technic_hole(d = PIN_D, h = RAIL_H, cb_d = 6.2, cb_top = 0.8, cb_bot = 0.8);
 }
 
 // preview-only ghosts
