@@ -161,6 +161,8 @@ ARTIFACTS = [
          cmd=["scripts/render_scad.py", "cad/scad/electronics_tray.scad", "-o", "{out}"]),
     dict(kind="file", artifact="cad/electronics_deck.stl",
          cmd=["scripts/render_scad.py", "cad/scad/electronics_deck.scad", "-o", "{out}"]),
+    dict(kind="file", artifact="cad/camera_mast.stl",
+         cmd=["scripts/render_scad.py", "cad/scad/camera_mast.scad", "-o", "{out}"]),
     dict(kind="file", artifact="cad/tolerance_coupon_v2.stl",
          cmd=["scripts/gen_tolerance_coupon.py", "-o", "{out}"]),
 

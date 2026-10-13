@@ -545,3 +545,4 @@ FLIPPED 2026-09-05 (Appendix DM), see below:**
   Uno; (2) a mount for a STURDY camera mast (camera in shipping; the Pi's
   camera connector faces forward on the deck).
 - 2026-10-12 (record HD) CAMERA MAST figures: lens 109 mm above the floor (+/-3; up to ~6 lower if the 250 mm lane is edge-to-edge), pitch 28-30 deg, over/just ahead of the front axle, centred; software rotation+lens remap to the sim view. Module 3 Wide V-FOV 67 deg (sim 90) - no pose matches without the remap. Mast: pinned pitch 20-35 deg, +/-0.3 deg, resonance >= 35-50 Hz (rule of thumb), focus locked. docs/research/2026-10-12_camera-mast-pose.md.
+- 2026-10-12 (record HE) CAMERA MAST v1 + cable channel built (UNTESTED): mast pins to the two front "+" holes (axle-pins 43093) and servo-mount stud 2 (3L pins 6558); L tops 62.09 above floor (Evan); tray x 0 = rear-left centre-frame corner hole (photo matches RAIL_PIN_X); front axle tray x ~201, encoder socket x ~110 (photo, +/-3).

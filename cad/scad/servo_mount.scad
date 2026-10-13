@@ -10,6 +10,10 @@
 // v5 (Evan, 2026-10-12): the bridges no longer overlap the rails - they span
 // only y -12..12, between the rails' inner faces. In v3/v4 the far bridge
 // (x 15..20.5) sat on top of both rails and capped the stud-2 pin holes.
+// v7 (Evan, 2026-10-12): servo 1.6 mm further forward (+x) and 0.5 mm higher:
+// pilots, case opening, bridges and gussets move with SERVO_DX; bridge tops
+// 13.3 -> 13.8. Rails and peg holes stay on the Ls; the rail rear end follows
+// the near ear (x -14.5 -> -12.9).
 // v6 (Evan, 2026-10-12): 4 mm triangular gussets where each bridge meets each
 // rail's inner face, z 0..7.8, inside y -12..12 - a bigger bridge-to-rail joint
 // with the rail tops and peg holes still clear.
@@ -43,8 +47,8 @@ L_SPACING_UNMEASURED = 4 * PITCH;          // centre to centre of the two L legs
 L_Y = L_SPACING_UNMEASURED / 2;            // 16
 L_W = 8.0;                                 // a liftarm is one stud wide
 EAR_ABOVE_L_BOTTOM = 15.3;                 // GB
-RAISE = 6.0;                               // v3 (Evan): 6 mm higher than v2
-EAR_Z = EAR_ABOVE_L_BOTTOM - L_T_UNMEASURED + RAISE;   // bridge top = ear underside (13.3)
+RAISE = 6.5;                               // v3 (Evan): 6 mm higher than v2; v7 (Evan): +0.5
+EAR_Z = EAR_ABOVE_L_BOTTOM - L_T_UNMEASURED + RAISE;   // bridge top = ear underside (13.8)
 RAIL_H = 7.8;                              // a Lego beam's height: a pin half fits fully
 
 CASE_L = 22.88;
@@ -54,22 +58,23 @@ EAR_L = 5.0;
 EAR_T = 2.65;
 EAR_HOLE_FROM_CASE = 2.5;
 EAR_HOLE_SPACING = CASE_L + 2 * EAR_HOLE_FROM_CASE;   // 27.88
-FAR_HOLE_X = 2 * PITCH + 1.0;                         // 17.0 (Evan)
-NEAR_HOLE_X = FAR_HOLE_X - EAR_HOLE_SPACING;          // -10.88
-CASE_CX = (FAR_HOLE_X + NEAR_HOLE_X) / 2;             // 3.06
+SERVO_DX = 1.6;                                       // v7 (Evan): servo 1.6 mm further forward (+x)
+FAR_HOLE_X = 2 * PITCH + 1.0 + SERVO_DX;              // 18.6 (17.0 Evan, + v7 shift)
+NEAR_HOLE_X = FAR_HOLE_X - EAR_HOLE_SPACING;          // -9.28 (v6: -10.88)
+CASE_CX = (FAR_HOLE_X + NEAR_HOLE_X) / 2;             // 4.66 (v6: 3.06)
 
 PILOT_D = 1.7;            // pick from the coupon's 1.5 / 1.7 / 1.9 row
 PILOT_DEPTH = 6.0;        // screw 7.0 - ear 2.65 = 4.35 into the bridge
 OPEN_CLEAR = 0.5;
 
-X0 = NEAR_HOLE_X - EAR_HOLE_FROM_CASE - 1.12;   // -14.5: past the near ear tip (-13.38)
+X0 = NEAR_HOLE_X - EAR_HOLE_FROM_CASE - 1.12;   // -12.9: past the near ear tip (-11.78)
 X1 = 3 * PITCH + L_W / 2;                       // 28: the Ls' far end
 Y_OUT = L_Y + L_W / 2;                          // 20: outer faces of the Ls
 Y_IN = L_Y - L_W / 2;                           // 12: inner faces of the rails (v5 bridge edge)
 
 PIN_X = [PITCH, 2 * PITCH, 3 * PITCH];          // studs 1, 2, 3
-NEAR_BRIDGE = [X0, CASE_CX - CASE_L / 2 - OPEN_CLEAR];        // x -14.5 .. -8.88
-FAR_BRIDGE = [CASE_CX + CASE_L / 2 + OPEN_CLEAR, FAR_HOLE_X + 3.5];   // x 15.0 .. 20.5
+NEAR_BRIDGE = [X0, CASE_CX - CASE_L / 2 - OPEN_CLEAR];        // x -12.9 .. -7.28
+FAR_BRIDGE = [CASE_CX + CASE_L / 2 + OPEN_CLEAR, FAR_HOLE_X + 3.5];   // x 16.6 .. 22.1
 
 GUSSET = 4.0;             // v6: gusset leg length, along x and along y
 

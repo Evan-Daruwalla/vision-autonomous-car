@@ -247,6 +247,8 @@ the dated entry, not the digest.
 - [HB - Servo mount v6: bridge-to-rail gussets](#appendix-hb---servo-mount-v6-bridge-to-rail-gussets-2026-10-12-2119-cdt) (10-12)
 - [HC - Motor mount v6: side walls 3 mm taller](#appendix-hc---motor-mount-v6-side-walls-3-mm-taller-2026-10-12-2129-cdt) (10-12)
 - [HD - Camera mast research brief: 109 mm, 28-30 deg, front axle, remap](#appendix-hd---camera-mast-research-brief-109-mm-28-30-deg-front-axle-remap-2026-10-12-2139-cdt) (10-12)
+- [HE - Tray/deck v2 cable channel + camera mast v1](#appendix-he---traydeck-v2-cable-channel--camera-mast-v1-2026-10-12-2215-cdt) (10-12)
+- [HF - Servo mount v7: servo 1.6 mm forward, 0.5 mm higher](#appendix-hf---servo-mount-v7-servo-16-mm-forward-05-mm-higher-2026-10-12-2235-cdt) (10-12)
 
 ---
 
@@ -18065,3 +18067,109 @@ range). Scratch scripts were not committed.
 
 **Status:** desk result. Nothing printed, nothing measured on the real
 camera. The mast is NOT designed yet.
+
+# Appendix HE - Tray/deck v2 cable channel + camera mast v1 (2026-10-12, ~22:15 CDT)
+**WHAT:** Tray/deck v2 (encoder-cable channel) and camera mast v1 - the two
+open requirements of record GX - designed and built in OpenSCAD. All three
+parts are printable and UNTESTED (not printed, not fitted). Opus specified
+every number; Sonnet agents wrote the code; Opus re-rendered each part,
+compared bytes and read the diffs before accepting (plan-split rule).
+
+**Inputs from Evan (2026-10-12):** mast = its own part pinned to the front
+Lego structure; cable = under the tray floor and up its side; the 250 mm
+lane is centre-to-centre of the lines (so the record-HD lens height of
+109 mm stands); camera board held by a slide-in holder (no M2 screws);
+rear anchor with 3L friction pins (6558) - he has them; the two front "+"
+holes are free and their top face is level with the L tops; the L tops are
+**62.09 mm above the floor (measured)**; nothing sticks up above the frame
+top under the tray (the ball joint does not); his red outline on the
+top-down photo is the electronics footprint and the current tray fits it.
+
+**Read off Evan's top-down photo (ESTIMATES, +/-3 mm; scale from the 8 mm
+stud):** frame holes at studs 0,4,6,10,11,15,16 match the tray's
+RAIL_PIN_X exactly -> tray x = 0 is the rear-left corner hole of the centre
+frames, 4.92 px/mm at frame-top height. Front axle at tray x ~201, rear
+axle ~20.5 (wheelbase ~180.5 vs the 185.95 estimate, 3%). Encoder JST
+socket (the cable's rise point) at tray x ~110, y ~0. Servo shaft at tray
+x ~170. The free front "+" holes at servo-frame x ~32, y +/-16 (tray x
+~202, on the front axle). Frame top 43.2 above the floor (record GD).
+Camera cable 200 mm suffices (~85-110 mm path). Camera Module 3 Wide board
+from the official mechanical drawing: 25 x 23.862 x 1.12 mm, holes d 2.2 at
+21 x 12.5 mm, lens 14.4 above the bottom edge, 8.3 proud, back connector
+block 19.61 x 5.71.
+
+**Tray v2 / deck v2 (`cad/electronics_tray.stl`, `cad/electronics_deck.stl`):**
+notch in the -y rail x 100..108, z 0..5 (between the pins at 88 and 120);
+slot x 100..108, y -41.0..-38.5 through the tray floor and the deck (just
+outside the bank fence, clear of the LM2596 standoffs, Pi brackets and deck
+posts). The #4763 cable's bare-wire end threads down from the top; route
+~165 mm of its 30 cm. Tray 205/205 probes, deck 79/79, both manifold;
+Opus re-render byte-identical to the agent's.
+
+**Camera mast v1 (`cad/scad/camera_mast.scad` -> `cad/camera_mast.stl`,
+new, registered in `scripts/check_artifacts.py`):** servo-mount frame
+(z 0 = L tops). Base x 28.3..36 on the front "+" holes (blue axle-pins
+43093, pin end up into Lego-beam holes at (32, +/-16)); side members
+x 12..36 on the servo-mount rail tops with Lego-beam holes at (16, +/-16)
+for 3L pins through mast + rail + L, and a relief over the stud-3 pins;
+two uprights (y +/-12.7..16.3) and two ribs (y +/-9..11) carry a slide-in
+holder pitched 29 deg: back plate 3 mm behind 3 mm of connector
+clearance, edge grooves 1.32 mm for the 1.12 mm board (0.2 clearance),
+bottom stops with an 18 mm ribbon gap, and a 2.0 mm cross-hole above the
+board for a 1.75 mm filament retaining rod. Lens target: x 35 (servo
+frame; tray ~205), z 46.91 (109 mm above the floor). Assembly: 3L pins'
+long side down through rail + L, axle-pins into the "+" holes, then press
+the mast down over all four. Print base-down with supports under the
+holder's 29-deg bottom.
+
+**Defect caught and fixed before acceptance:** the first build FAILED the
+manifold check (6 duplicate directed edges at x 30.5378, z 63.8595). The
+agent stopped as instructed. Cause was in Opus's spec: the upright polygon's
+vertices sat on the holder's rotated corners, rounded to 4 decimals, leaving
+faces 0.0001 mm apart. Amendment: vertices inset 0.25-0.5 mm so the solids
+overlap, and the side walls raised 1 mm (keeps >= 1.75 mm of plastic over
+the retaining-rod hole; a 0.75 mm wall was rejected).
+
+**Checks (real output, 2026-10-12 ~22:15 CDT):** camera_mast manifold
+PASS, volume 13219.92 mm^3, bbox (12, -20, 0)..(38.737, 20, 64.734),
+probes 75/75 PASS, Opus re-render byte-identical. check_artifacts: 38
+checked, 0 drifted, 0 errored, 2 uncheckable. run_checks: 16 passed, 0
+failed, 0 skipped (of 16).
+
+**Open / risks (check at the first fit):** lens x is photo-derived (+/-3
+mm); the 0.2 mm board-groove clearance is untested in PLA; which edge the
+camera's ribbon connector is on is not confirmed (the holder works either
+way; the image may need a 180 deg software rotation); the cable notch
+position assumes the photo's x ~110 rise point; mast stiffness not measured.
+
+# Appendix HF - Servo mount v7: servo 1.6 mm forward, 0.5 mm higher (2026-10-12, ~22:35 CDT)
+**WHAT:** Evan (2026-10-12): servo mount changes so the servo sits 1.6 mm
+further forward and 0.5 mm higher. Servo mount v7 (`cad/scad/servo_mount.scad`,
+`cad/servo_mount.stl`): new SERVO_DX = 1.6 (FAR_HOLE_X 17.0 -> 18.6, +x =
+forward, studs 1-3 are ahead of the servo); RAISE 6.0 -> 6.5 (ear bridges'
+tops = ear underside 13.3 -> 13.8). Everything tied to the servo follows:
+pilots x -10.88/17.0 -> -9.28/18.6 (z 7.8..13.8), case opening x -8.88..15.0
+-> -7.28..16.6, near bridge -> x -12.9..-7.28, far bridge -> x 16.6..22.1,
+gussets at -7.28 / 16.6 / 22.1. Rails and the six peg holes (studs 1-3 of
+both Ls) do NOT move. The rail rear end follows the near ear (x -14.5 ->
+-12.9).
+
+**Consequence (Evan's call, noted):** the servo output shaft moves 1.6 mm
+forward of the old stud-0 line that the coupler and pinion were assumed to
+share - taken as the correction of the misalignment Evan saw on the car.
+
+**Camera mast (record HE) re-checked against v7:** far bridge (x <= 22.1,
+top 13.8) stays clear of the mast's ribs and side members; servo top-front
+corner (16.1, 34.9) is 3.27 mm from the holder's lower edge. Mast preview
+ghost updated to the v7 servo position; the mast STL is byte-identical.
+
+**Checks (real output, 2026-10-12 ~22:35 CDT):** probes updated FIRST and
+run against the unchanged v6: FAIL, 16 checks (bbox, both pilots, the
+new open/solid points). Four new points pin the shift: (16.2, 0, 5) open,
+(-7.5, 0, 5) solid, (18, 4, 13.6) solid, (-13.7, 16, 4) open. Three old
+gusset points that sat 0.28-0.4 mm from an edge were moved clear. v7:
+manifold PASS, volume 8148.84 mm^3, bbox (-12.9, -20, 0)..(28, 20, 13.8),
+probes 113/113 PASS, sha256 83736f848cccc8e9...; check_artifacts 38
+checked, 0 drifted; run_checks 16 passed, 0 failed (of 16).
+
+**Status:** UNTESTED - v7 not printed, not fitted.

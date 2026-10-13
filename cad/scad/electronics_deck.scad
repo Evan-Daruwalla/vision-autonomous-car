@@ -3,6 +3,7 @@
 // Arduino Uno (4 standoffs + pegs) and two LM2596 buck boards (4 standoffs + pegs).
 // UNTESTED - not printed.
 // spec: record GW
+// v2 (2026-10-12): encoder-cable slot (x 100..108, y -41.0..-38.5), above the tray's; see the record entry of that date.
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, pin rows at y = +/-24; z = 0 on the Lego frames' top face. The deck's
@@ -103,6 +104,8 @@ difference() {
   // zip slots
   for (p = ZIP_XY)
     translate([p[0], p[1], DECK_BOT - EPS]) zip_slot(ZIP_W, ZIP_T, PLATE_T + 2 * EPS);
+  // encoder-cable slot (x 100..108, y -41.0..-38.5), above the tray's
+  translate([100, -41.0, 30.0 - EPS]) cube([8, 2.5, 2.5 + 2 * EPS]);
 }
 
 // preview-only ghosts

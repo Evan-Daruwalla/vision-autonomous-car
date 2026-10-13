@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-12 ~21:40 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-12 ~22:35 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 212 appendices A–HD; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 214 appendices A–HF; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -627,19 +627,21 @@ NEXT ACTIONS, cheapest first:
      at a PHOTO-ESTIMATED gap. PRINT AND FIT v6, report: do the pins snap,
      does the motor sit level with the coupler, is the back-wall gap ~0.5 mm.
      Axle centre 26.20 mm above the floor (GE); motor connector UP (GF).
-   - SERVO MOUNT cad/servo_mount.stl v6 (HB: + 4 mm bridge-to-rail gussets; v5 HA bridges only between the rails, all 6 peg holes open; v4 GY; v3 GV; v2 GS): printable, UNTESTED - on
+   - SERVO MOUNT cad/servo_mount.stl v7 (HF: servo 1.6 mm forward + 0.5 mm higher, shaft now 1.6 ahead of stud 0; v6 HB + 4 mm bridge-to-rail gussets; v5 HA bridges only between the rails, all 6 peg holes open; v4 GY; v3 GV; v2 GS): printable, UNTESTED - on
      BOTH 2x4 L liftarms (one each side of the servo), case footprint open,
      ears on plastic, pin holes at studs 1-3 of each L. Print and fit: L spacing
      (photo: 32 mm), ears sit flat, pilot size.
-   - ELECTRONICS: cad/electronics_tray.stl (layer 1: bank, holder, charger
-     parts; pins into the middle frames' free holes) + cad/electronics_deck.stl
-     (layer 2 on 6 posts: Pi, Uno, LM2596, rocker) - printable, UNTESTED (GW).
-     The 48 mm pin-row spacing is inferred - check it on the first print;
-   - OPEN REQUIREMENTS (Evan, GX), not designed yet: (a) the motor's encoder
-     cable comes up from BELOW the frames - the tray needs a cable channel
-     (the bank now sits right over the lightening window above the motor);
-     (b) a mounting place for a STURDY camera mast - FIGURES IN (HD, docs/research/2026-10-12_camera-mast-pose.md): lens 109 mm above floor, pitch 28-30 deg, over/just ahead of the front axle, + software remap; Module 3 Wide V-FOV is 67 not 90, so the old row-42 target is wrong (deck has the Pi's camera
-     connector facing forward, no mast mount yet); E11 (top-down photo + heights) for the electronics.
+   - ELECTRONICS v2 (HE): cad/electronics_tray.stl (layer 1: bank, holder, charger
+     parts; pins into the centre frames' holes) + cad/electronics_deck.stl (layer 2
+     on 6 posts: Pi, Uno, LM2596, rocker) - printable, UNTESTED (GW; v2 HE adds the
+     encoder-cable channel: notch in the -y rail x 100..108 + slot x 100..108,
+     y -41.0..-38.5 in tray floor and deck). Pin rows: the photo shows the frame holes
+     at exactly RAIL_PIN_X (studs 0,4,6,10,11,15,16), 48 mm rows - photo, not caliper.
+   - CAMERA MAST v1 (HE, NEW): cad/camera_mast.stl - printable, UNTESTED. Pins to the
+     two front "+" holes (blue axle-pins 43093) + servo-mount stud 2 (3L pins 6558);
+     slide-in holder, lens 109 mm above floor at pitch 29 deg, ~tray x 205 (lens x is
+     photo-derived +/-3). Figures: HD + docs/research/2026-10-12_camera-mast-pose.md.
+     Assembly order + print notes in the scad header. L tops = 62.09 above floor (Evan).
      Known defect: the deck's rocker hole sits over the holder/BMS.
    - DECISION (GM): every printed part uses real black 2780 pins, no printed
      stubs (.claude/project-memory/decisions.md). Pin bore 4.875 in all mounts (GU).

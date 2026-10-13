@@ -2,6 +2,8 @@
 // battery bank, the battery holder, the charger / small parts, and the deck posts.
 // UNTESTED - not printed.
 // spec: record GW
+// v2 (2026-10-12): encoder-cable notch in the -y rail (x 100..108, z 0..5) and floor slot
+// (x 100..108, y -41.0..-38.5); see the record entry of that date.
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, the Lego pin rows at y = +/-24; z = 0 on the Lego frames' top face, z up. mm.
@@ -91,6 +93,10 @@ difference() {
   // 12 zip slots
   for (p = concat(ZIP_BANK, ZIP_HOLDER, ZIP_SMALL))
     translate([p[0], p[1], RAIL_H - EPS]) zip_slot(ZIP_W, ZIP_T, FLOOR_T + 2 * EPS);
+  // 13 encoder-cable notch in the -y rail (x 100..108, between pins 88/120)
+  translate([100, -28 - EPS, -EPS]) cube([8, 8 + 2 * EPS, 5.0 + EPS]);
+  // 14 encoder-cable floor slot just outside the bank fence (y -41.0..-38.5)
+  translate([100, -41.0, RAIL_H - EPS]) cube([8, 2.5, 2.0 + 2 * EPS]);
 }
 
 // preview-only ghosts
