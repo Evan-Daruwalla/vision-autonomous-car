@@ -31,10 +31,14 @@ EPS = 0.01;
 //                   value, UNTESTED here.
 //   "rotate"      : Lego axle spinning in a printed bore - NOT calibrated in
 //                   PLA (ABS coupon: 5.00 bore); asking for it stops the render.
+//   "pocket"      : a bought part (battery bank, holder, Pi case) dropped into
+//                   a printed fence or bracket pocket. 0.50 across = 0.25 per
+//                   side (research Rule 11: 0.2-0.3 static). UNTESTED.
 function fit_offset(fit) =
   fit == "friction_pin" ? 0.15 :
   fit == "press_shaft"  ? 0.15 :
   fit == "slide"        ? 0.30 :
+  fit == "pocket"       ? 0.50 :
   fit == "rotate"       ? assert(false, "fit 'rotate' is not calibrated in PLA - print the coupon first") 0 :
   assert(false, str("unknown fit class: ", fit)) 0;
 

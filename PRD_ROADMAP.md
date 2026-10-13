@@ -296,7 +296,7 @@ transfer gap) must not block the capstone.
    USB peripherals, CPU inference) or whether ~3A suffices — if 3A is
    adequate, cheap 5V/3A sources become viable and the architecture and cost
    both change. Safety is a first-class criterion, not a footnote: this is a
-   17-year-old charging cells at home. Done: complete power kit chosen with
+   ~~17-year-old~~ 18-year-old (struck 2026-10-13; 18 since 2026-09-08) charging cells at home. Done: complete power kit chosen with
    Evan's go (cells + charger + connectors + switch/fusing), runtime
    estimate recorded, `architecture.md` + BOM updated.
    **RESEARCH RESOLVED 2026-07-23 ~17:59 CDT** —
@@ -436,6 +436,7 @@ transfer gap) must not block the capstone.
    **2026-10-11 (Appendix FY): scope set by Evan - the wiring-diagram parts + Pi 5 + power bank (151.5 x 69.7 x 18.5 mm, USB on a short side). Proposed as TWO prints: a tray (bank + pack) and a deck on posts (Pi, Uno, LM2596); the camera mast comes later. Gated on E1-E11 and the PLA fit coupon.**
    **2026-10-12 (Appendices GW, GX): tray + deck built (printable, UNTESTED). Still open: a routed path for the motor's encoder cable, which comes up from below the frames, and a mount for a STURDY camera mast. Done-check NOT passed.**
    **2026-10-13 (Appendices HD, HE): both open items designed - tray/deck v2 encoder-cable channel (notch in the -y rail + slot through tray floor and deck) and camera mast v1 (`cad/camera_mast.stl`: lens 109 mm above the floor at 29 deg, from the research brief HD). All UNTESTED. Done-check NOT passed.**
+   **2026-10-13 (Appendix IA): tray + deck v3 - print-friendly redo per the CAD-rules brief (HI): ribs under the tray floor turn every overhang into a <= ~21 mm bridge (v2: 34 mm cantilevers), zip-tie paths unblocked, Pi pocket +0.25/side, lead-in chamfers. UNTESTED. Done-check NOT passed.**
 
 ### M2 — Electronics + teleop
 

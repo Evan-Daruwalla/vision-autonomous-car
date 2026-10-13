@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~14:18 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~14:43 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 234 appendices A–HZ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 235 appendices A–IA; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -616,7 +616,8 @@ rack; the 125/1525 numbers come from a backlash model fit to two bench
 observations - UNVERIFIED.
 PRINTED PARTS (all OpenSCAD in cad/scad/, rendered + probe-checked by
 scripts/render_scad.py, registered in check_artifacts): servo mount v7, motor
-mount v6, electronics tray v2 + deck v2 (encoder-cable channel), camera mast
+mount v6, electronics tray v3 + deck v3 (print-friendly redo, IA: ribs under
+the tray floor, no supports needed; Pi pocket +0.25/side), camera mast
 v1 (NEW). All UNTESTED at these versions. Only servo mount v6 has been printed
 and fitted: pins TOO TIGHT at 4.875 (HH) -> every pin hole is now 4.95, set
 ONLY through the fit classes in cad/scad/lib/lego.scad (HG, HL). Bambu Studio

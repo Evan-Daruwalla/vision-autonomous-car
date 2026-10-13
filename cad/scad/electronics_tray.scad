@@ -4,13 +4,19 @@
 // spec: record GW
 // v2 (2026-10-12): encoder-cable notch in the -y rail (x 100..108, z 0..5) and floor slot
 // (x 100..108, y -41.0..-38.5); see the record entry of that date.
+// v3 (2026-10-13): print-friendly per docs/research/2026-10-12_print-friendly-cad-rules.md:
+// ribs under the floor so every overhang is a bridge <= ~20 mm (Rule 7), zip-tie
+// notches in the ribs, -y feet moved off the small-parts tie paths, holder lobe to
+// y 85 (tie strip 0.6 -> 2.6 mm, Rule 8), 45 deg wedges under the four outer posts,
+// pockets from fit class "pocket" (Rules 2, 11), 0.5 lead-in chamfers on the pocket
+// tops (Rule 5). Print as modelled: z = 0 on the bed. See the record entry of 2026-10-13.
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, the Lego pin rows at y = +/-24; z = 0 on the Lego frames' top face, z up. mm.
 //
 // Layout: two rails (pinned to the frames), a floor with a lightening window, a
 // holder lobe (+y), a small-parts lobe (-y), a three-sided bank fence (no rear wall,
-// for ports), a holder fence, four feet, and six deck posts (pinned, z up to 30.0).
+// for ports), a holder fence, four feet, ribs under the floor, and six deck posts (pinned, z up to 30.0).
 
 use <lib/lego.scad>
 EPS = 0.01;
@@ -34,17 +40,21 @@ RAIL_X1 = 132;
 PIN_ROW_Y = 24;
 RAIL_PIN_X = [0, 32, 48, 80, 88, 120, 128];
 
+// pockets: the bought part's footprint + fit class "pocket" (0.25 per side)
+POCKET_C = fit_offset("pocket") / 2;
+BANK_POS = [-4, -35.275];  BANK_SIZE = [151.5, 70.55];    // battery bank
+HOLD_POS = [58.125, 37.85]; HOLD_SIZE = [75.75, 40.5];    // 2S holder
 // bank fence interior
-BANK_X0 = -4.25;
-BANK_X1 = 147.75;
-BANK_Y = 35.53;
+BANK_X0 = BANK_POS[0] - POCKET_C;
+BANK_X1 = BANK_POS[0] + BANK_SIZE[0] + POCKET_C;
+BANK_Y = BANK_SIZE[1] / 2 + POCKET_C;
 // holder fence interior
-HOLD_X0 = 57.875;
-HOLD_X1 = 134.125;
-HOLD_Y0 = 37.6;
-HOLD_Y1 = 78.6;
+HOLD_X0 = HOLD_POS[0] - POCKET_C;
+HOLD_X1 = HOLD_POS[0] + HOLD_SIZE[0] + POCKET_C;
+HOLD_Y0 = HOLD_POS[1] - POCKET_C;
+HOLD_Y1 = HOLD_POS[1] + HOLD_SIZE[1] + POCKET_C;
 
-FEET = [[64, 60], [124, 60], [64, -60], [124, -60]];
+FEET = [[64, 60], [124, 60], [78, -60], [106, -60]];   // -y feet clear of the small-parts tie paths (v3)
 POSTS = [[10, 41.6], [10, -41.6], [150, 41.6], [150, -41.6], [60, -82], [128, -82]];
 
 ZIP_BANK = [[35, 38.5], [35, -38.5], [140, 38.5], [140, -38.5]];
@@ -52,9 +62,20 @@ ZIP_HOLDER = [[75, 81.5], [117, 81.5]];
 ZIP_SMALL = [[64, -48], [92, -48], [120, -48], [64, -72], [92, -72], [120, -72]];
 ZIP_W = 4.0;
 ZIP_T = 1.8;
+RIB_T = 2.0;              // ribs under the floor (Rule 7)
+TIE_Z0 = 5.3;             // zip-tie passage under the floor: z TIE_Z0..RAIL_H
+LEAD = 0.5;               // lead-in chamfer on pocket tops (Rule 5)
 
 module box(x0, x1, y0, y1, z0, z1) {
   translate([x0, y0, z0]) cube([x1 - x0, y1 - y0, z1 - z0]);
+}
+module rib(x0, x1, y0, y1) { box(x0, x1, y0, y1, 0, RAIL_H + EPS); }
+module tie_notch(x0, x1, y0, y1) { translate([x0, y0 - EPS, TIE_Z0]) cube([x1 - x0, y1 - y0 + 2 * EPS, RAIL_H - TIE_Z0]); }
+module lead_in(x0, x1, y0, y1, ztop, c) {
+  hull() {
+    translate([x0, y0, ztop - c]) cube([x1 - x0, y1 - y0, EPS]);
+    translate([x0 - 2 * c, y0 - 2 * c, ztop + c]) cube([x1 - x0 + 4 * c, y1 - y0 + 4 * c, EPS]);
+  }
 }
 
 difference() {
@@ -66,7 +87,7 @@ difference() {
     // 2 floor
     box(-6, 156, -42, 42, RAIL_H, FLOOR_TOP);
     // 3 holder lobe floor
-    box(55, 137, 42, 83, RAIL_H, FLOOR_TOP);
+    box(55, 137, 42, 85, RAIL_H, FLOOR_TOP);
     // 4 small-parts lobe floor
     box(56, 132, -86, -42, RAIL_H, FLOOR_TOP);
     // 5 bank fence: front wall and two side walls, no rear wall
@@ -81,6 +102,21 @@ difference() {
     for (p = FEET) box(p[0] - FOOT_S / 2, p[0] + FOOT_S / 2, p[1] - FOOT_S / 2, p[1] + FOOT_S / 2, 0, RAIL_H);
     // 8 deck posts
     for (p = POSTS) box(p[0] - POST_S / 2, p[0] + POST_S / 2, p[1] - POST_S / 2, p[1] + POST_S / 2, FLOOR_TOP, POST_TOP);
+    // 8b ribs under the floor (Rule 7): edge ribs, rear skirt, rear cross, front cross, front skirt
+    rib(-6, 156, 40, 42); rib(-6, 156, -42, -40);
+    rib(-6, -4, -42, 42); rib(5, 7, -42, 42); rib(144, 146, -42, 42); rib(154, 156, -42, 42);
+    // holder lobe: outer skirt, two sides, middle
+    rib(55, 137, 83, 85); rib(55, 57, 42, 85); rib(135, 137, 42, 85); rib(55, 137, 61.5, 63.5);
+    // small-parts lobe: outer skirt, two sides, middle
+    rib(56, 132, -86, -84); rib(56, 58, -86, -42); rib(130, 132, -86, -42); rib(56, 132, -64, -62);
+    // 8c 45 deg wedges under the four outer posts, which overhang the floor edge (|y| 42) by 3.6
+    for (px = [10, 150], s = [1, -1]) {
+      d = 41.6 + POST_S / 2 - 42;     // 3.6
+      hull() {
+        translate([px - POST_S / 2, s > 0 ? 42 - EPS : -42, FLOOR_TOP - d]) cube([POST_S, EPS, d + EPS]);
+        translate([px - POST_S / 2, s > 0 ? 42 + d - EPS : -42 - d, FLOOR_TOP - EPS]) cube([POST_S, EPS, 2 * EPS]);
+      }
+    }
   }
   // 9 lightening window through the floor
   box(8, 140, -18, 18, RAIL_H - EPS, FLOOR_TOP + EPS);
@@ -97,6 +133,16 @@ difference() {
   translate([100, -28 - EPS, -EPS]) cube([8, 8 + 2 * EPS, 5.0 + EPS]);
   // 14 encoder-cable floor slot just outside the bank fence (y -41.0..-38.5)
   translate([100, -41.0, RAIL_H - EPS]) cube([8, 2.5, 2.0 + 2 * EPS]);
+  // 15 encoder-cable notch through the -y edge rib, full height, under the floor slot
+  translate([100, -42 - EPS, -EPS]) cube([8, 2 + 2 * EPS, RAIL_H + EPS]);
+  // 16 zip-tie notches in the ribs (z TIE_Z0..RAIL_H): bank ties around the floor edge,
+  // holder ties around the lobe edge, small-parts ties under the lobe between slot pairs
+  for (x = [35, 140], s = [1, -1]) tie_notch(x - 3, x + 3, s > 0 ? 40 : -42, s > 0 ? 42 : -40);
+  for (x = [75, 117]) tie_notch(x - 3, x + 3, 83, 85);
+  for (x = [64, 92, 120]) tie_notch(x - 3, x + 3, -64, -62);
+  // 17 lead-in chamfers on the pocket tops (Rule 5)
+  lead_in(BANK_X0, BANK_X1, -BANK_Y, BANK_Y, FENCE_TOP, LEAD);
+  lead_in(HOLD_X0, HOLD_X1, HOLD_Y0, HOLD_Y1, FENCE_TOP, LEAD);
 }
 
 // preview-only ghosts

@@ -269,6 +269,7 @@ the dated entry, not the digest.
 - [HX - Backlash MEASURED: centre 1525 confirmed, half-gap 75 us (not 125)](#appendix-hx---backlash-measured-centre-1525-confirmed-half-gap-75-us-not-125-2026-10-13-1407-cdt) (10-13)
 - [HY - uno_control flashed with backlash 75 us: SELFTEST PASS 86/86](#appendix-hy---uno_control-flashed-with-backlash-75-us-selftest-pass-8686-2026-10-13-1409-cdt) (10-13)
 - [HZ - Decision: steering gate unchanged; end-to-end steer test waits for the pack](#appendix-hz---decision-steering-gate-unchanged-end-to-end-steer-test-waits-for-the-pack-2026-10-13-1416-cdt) (10-13)
+- [IA - Electronics tray + deck v3: print-friendly redo per the CAD-rules brief](#appendix-ia---electronics-tray--deck-v3-print-friendly-redo-per-the-cad-rules-brief-2026-10-13-1441-cdt) (10-13)
 
 ---
 
@@ -18686,3 +18687,71 @@ uno_control.
 
 **Open, carried forward:** whether steering should share the pack inhibit (A)
 - revisit when the pack is wired and the car first runs on it.
+
+# Appendix IA - Electronics tray + deck v3: print-friendly redo per the CAD-rules brief (2026-10-13 ~14:41 CDT)
+**WHAT:** (2026-10-13 ~14:20-14:40 CDT) Evan: "redo the deck and tray using the
+3d printing friendly research" (brief docs/research/2026-10-12_print-friendly-cad-rules.md,
+record HI). Electronics tray and deck rebuilt as v3. Both UNTESTED - not printed.
+Plan-split rule: Opus audited and specified every number; two Sonnet agents
+edited one part each; Opus read both diffs, re-rendered both parts
+byte-identically and scanned them for overhangs independently.
+
+**Audit of v2 against the brief (Opus):**
+- Tray, Rule 7: printed as modelled (z 0 on the bed), every floor area outside
+  the rails is a flat overhang at z 7.8; the two lobes (41-44 mm) stood on four
+  8 mm feet only. Needed supports everywhere.
+- Tray, design defect: the -y feet at (64,-60) and (124,-60) sat in the path of
+  the small-parts zip ties (slot pairs at y -48 / -72) - those ties could not be
+  threaded.
+- Tray, Rule 8: the holder zip slots left a 0.6 mm floor strip to wrap a tie
+  around (minimum 0.9).
+- Tray: the four outer posts overhung the floor edge by 3.6 mm.
+- Deck, Rule 11: the Pi brackets had ZERO clearance around the 91.8 x 64.4
+  case (the tray's pockets already used 0.25 per side).
+- Both, Rule 5: no lead-ins on mating pockets, rocker hole or pegs.
+- Deck overhangs: already fine (worst 1 mm, the recess steps).
+- Not changed: pin bosses / rails / posts stay 8 mm (bore wall 1.525 mm = 3+
+  perimeters; the 6.2 recess ring is 0.9 = 2 perimeters, as on a real beam).
+
+**v3 changes:**
+- `lib/lego.scad`: new fit class "pocket" = 0.50 across (0.25 per side, Rule 11,
+  UNTESTED). Other parts unaffected (check_artifacts: 0 drifted).
+- Tray: 2 mm ribs from the bed up under the floor - edge ribs |y| 40..42, rear
+  skirt, cross ribs x 5..7 and 144..146, front skirt, and a skirt + middle rib
+  in each lobe - so every overhang is a bridge. Relies on Evan's HE statement
+  that nothing sticks up above the frame top under the tray (ribs at x 144..156
+  sit nearest the servo mount - check on the car). Zip-tie notches (z 5.3..7.8)
+  wherever a rib crosses a tie path; the encoder-cable notch through the -y
+  edge rib under the floor slot; -y feet moved to x 78 / 106; holder lobe out
+  to y 85 (tie strip 2.6 mm); 45 deg wedges under the outer posts; bank and
+  holder pockets now derived from the parts' footprints + "pocket"; 0.5
+  lead-in chamfers on both pocket tops.
+- Deck: Pi pocket 92.3 x 64.9 (+0.25 per side) via "pocket"; 0.5 lead-in on
+  the bracket tops; 0.4 chamfers on both faces of the 20 mm rocker hole; 0.4
+  lead-in on the Uno / LM2596 peg tops (peg heights unchanged).
+
+**Checks:**
+- render_scad: tray 245/245 probes PASS, manifold, bbox y max 83 -> 85; deck
+  88/88 PASS, manifold, bbox unchanged. Opus re-renders byte-identical to the
+  agents' STLs.
+- Overhang scan (Opus, scratchpad script: one vertical ray per 1 mm column; for
+  every surface that starts above the bed, the horizontal distance to the
+  nearest column solid 0.3 mm below it = how far the printer spans with
+  nothing under it; a bridge scores half its span):
+
+| part | points > 5 mm | points > 10 mm | worst |
+|---|---|---|---|
+| tray v2 | 10004 | 7112 | 34.06 mm (small-parts lobe edge, a cantilever) |
+| tray v3 | 2918 | 24 | 10.44 mm (lobe bays beside the tie notches = ~21 mm bridges) |
+| deck v2 | 0 | 0 | 1.00 mm |
+| deck v3 | 0 | 0 | 1.00 mm |
+
+  The first scan of deck v3 showed 20 "unreachable" points: the rocker bed
+  chamfer starts 0.18 mm above the bed and the script looked for support below
+  the bed. Script fixed (the bed counts as support), not the part.
+- check_artifacts: 38 checked, 0 drifted. run_checks: 16 passed, 0 failed.
+
+**Open / untested:** every fit (pocket 0.25, pin 4.95, pegs) is unprinted; the
+~21 mm bridges are within normal PLA bridging but Bambu gives no number;
+print with z 0 on the bed (tray) / the underside on the bed (deck), no
+supports expected. Rule 3 still says print the PLA fit coupon first.
