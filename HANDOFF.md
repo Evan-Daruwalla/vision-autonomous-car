@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-12 ~22:56 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~11:11 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 215 appendices A–HG; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 219 appendices A–HK; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -647,6 +647,12 @@ NEXT ACTIONS, cheapest first:
      stubs (.claude/project-memory/decisions.md). Pin bore 4.95 in all mounts (HG; was 4.875, GU).
    - cad/pla_fit_coupon.stl is still UNPRINTED: 4.80 bore / 6.2 recess are
      untested in PLA.
+   - FIT EVIDENCE + RULES (HH, HI): servo mount v6 printed, pins TOO TIGHT at
+     4.875 (print settings not recorded). 13 print-friendly CAD rules in
+     docs/research/2026-10-12_print-friendly-cad-rules.md. Bambu Studio X-Y
+     hole compensation is 0 (Evan, HK) - the CAD owns every clearance. NEXT:
+     ADD a 4.90-5.05 pin row to cad/scad/pla_fit_coupon.scad (it tops out at
+     5.00 today) and print it before the big parts.
    - Tooling: OpenSCAD 2021.01 at ~/tools/openscad-2021.01; scripts/render_scad.py
      (canonical STL + probes). Task plan: ~/.claude/task-plans/autonomous-car-printed-mounts.md.
 00. WIRING AUDIT DONE 2026-10-11 (Appendix FX): doc and firmware agree pin

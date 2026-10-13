@@ -250,6 +250,10 @@ the dated entry, not the digest.
 - [HE - Tray/deck v2 cable channel + camera mast v1](#appendix-he---traydeck-v2-cable-channel--camera-mast-v1-2026-10-12-2215-cdt) (10-12)
 - [HF - Servo mount v7: servo 1.6 mm forward, 0.5 mm higher](#appendix-hf---servo-mount-v7-servo-16-mm-forward-05-mm-higher-2026-10-12-2235-cdt) (10-12)
 - [HG - Pin holes 4.875 -> 4.95 mm in all five mounts](#appendix-hg---pin-holes-4875---495-mm-in-all-five-mounts-2026-10-12-2256-cdt) (10-12)
+- [HH - Servo mount v6 test print: pins too tight at 4.875](#appendix-hh---servo-mount-v6-test-print-pins-too-tight-at-4875-2026-10-12-2306-cdt) (10-12)
+- [HI - Print-friendly CAD rules research brief](#appendix-hi---print-friendly-cad-rules-research-brief-2026-10-12-2318-cdt) (10-12)
+- [HJ - Scheduled daily-audit: 61 findings - the train/val split re-draws on any corpus top-up with no corpus id in checkpoints, and steering moves on disarmed frames](#appendix-hj---scheduled-daily-audit-61-findings---the-trainval-split-re-draws-on-any-corpus-top-up-with-no-corpus-id-in-checkpoints-and-steering-moves-on-disarmed-frames-2026-10-13-0737-cdt) (10-13)
+- [HK - Bambu Studio X-Y hole compensation is 0 (Evan)](#appendix-hk---bambu-studio-x-y-hole-compensation-is-0-evan-2026-10-13-1111-cdt) (10-13)
 
 ---
 
@@ -18201,3 +18205,126 @@ check_artifacts: 38 checked, 0 drifted. run_checks: 16 passed, 0 failed
 
 **Status:** UNTESTED - no part printed at 4.95; the fit (pins snap vs too
 loose) is unknown in PLA.
+
+# Appendix HH - Servo mount v6 test print: pins too tight at 4.875 (2026-10-12, ~23:06 CDT)
+**WHAT (Evan, 2026-10-12):** servo mount **v6** (record HB) was PRINTED and
+fitted on the car (photo, mount without the servo, blue pins in the rails).
+Evan: **"the pins are too tight"** at PIN_D 4.875 - that is the reason he
+asked for the extra 0.075 mm, applied in record HG (PIN_D 4.95 in all five
+mounts). HG therefore rests on this measured fit, not a guess.
+
+**Missing (not given, not assumed):** printer settings and filament for this
+print (earlier PLA prints were Bambu P1S, PLA, 0.1 mm, 2 walls, solid -
+record FR - but nobody confirmed this one used them); how tight (would not
+seat vs seated with force); whether the ear bridges/servo were fitted.
+
+**Open from the photo (asked, unanswered):** the two front "+" holes the
+camera mast (HE) anchors to are not visible ahead of the mount's front end
+in this photo; the mast's rear anchor needs a 3L pin (short side up) at
+stud 2, where the photo seems to show a pin already. The mast is NOT
+verified to fit.
+
+**Status:** v6 fit = pins too tight (qualitative). v7 at 4.95 is UNTESTED.
+
+# Appendix HI - Print-friendly CAD rules research brief (2026-10-12, ~23:18 CDT)
+**WHAT:** Evan (2026-10-12): /research-brief on making 3D-printer-friendly
+CAD files, after servo mount v6's pin holes printed too tight (HH). Brief:
+`docs/research/2026-10-12_print-friendly-cad-rules.md`. Desk research; no
+print or measurement made.
+
+**Findings (detail, quotes and sources in the brief):**
+1. Printed holes come out undersized by a printer + filament + slicer
+   specific amount -> calibrate a clearance per fit type. Published PLA data
+   (vertical holes): Popescu et al. 2022, 0.12-0.20 mm under for 6-10 mm
+   holes at 0.2 mm layers, 0.15-0.36 mm under for 4.5 mm inclined holes;
+   Grgic et al. 2023 adopted 0.13 mm slicer hole expansion. The project's own
+   two PLA fits (D-bore +0.15 fits; pins +0.075 too tight) are ONE
+   confounded source and only consistent with ~+0.15 - the 4.95 holes (HG)
+   remain UNTESTED.
+2. Bambu Studio's X-Y hole compensation grows hole diameters by 2x the value
+   and is calibrated per filament. Evan's current value is UNKNOWN; if it is
+   non-zero every fit number in the repo is slicer-dependent. First action.
+3. Elephant's foot: P-series setting 0.15 (Bambu release notes); our Lego
+   holes have a 6.2 x 0.8 recess at the bed face, so the bore should miss
+   the flare - argued, not measured.
+4. PLA upright tensile 36% below flat (Eryildiz 2021: 55.49 vs 35.52 MPa):
+   keep loads in the layer plane; the camera mast's uprights are the part to
+   watch.
+5. 13 ranked rules: read and pin the slicer profile; named fit classes in
+   lib/lego.scad; print the coupon first (add a 4.90-5.05 pin row);
+   vertical pin holes; lead-in chamfers; recess/chamfer bed faces; no
+   unsupported overhang below 45 deg; >= 3 perimeters for loaded walls
+   (and calibrate with the same wall count - more walls make holes
+   smaller); load in-plane; overlap-never-touch meshes; 0.2-0.3 mm static
+   clearances; measure bores in the render check; one fixed print profile
+   for fit-critical parts.
+
+**Process:** two parallel Sonnet research agents (vendor docs; studies +
+OpenSCAD + polyholes); Opus re-read 16 of 18 load-bearing claims at source
+(curl, Crossref, PDF text, browser pane for MDPI's table DOM) - all present.
+Cold assessment downgraded 4 claims (H1 "survived" -> supported with an
+untested rival; project fits -> one confounded source; rival dismissal ->
+argued, not measured; chamfer size -> unsourced judgment), added 6
+limitations and rule 13, moved the vendor-concentration note to the TL;DR.
+
+**Open:** Evan's Bambu Studio X-Y hole compensation (and the other profile
+values) for the PLA prints so far; the PLA fit coupon is still unprinted.
+
+# Appendix HJ - Scheduled daily-audit: 61 findings - the train/val split re-draws on any corpus top-up with no corpus id in checkpoints, and steering moves on disarmed frames (2026-10-13, ~07:37 CDT)
+Audit run - 61 findings, top: ml/splits.py re-draws the train/val split when the corpus is topped up, and no checkpoint records which corpus it trained on.
+
+Scheduled daily-audit (read-only). Classified ACTIVE by churn: audit FD (2026-10-08) was followed by 17 non-audit commits. Method: /audit with 4 cold Sonnet workers (docs D1-D8; ML code M1-M3/M7 + G1-G4; firmware/CAD M1-M3/M7/M8; data/deps/tests M4/M8/M9/M10/M14/M15), then /landing-check on Appendix HI by a fresh agent. Manifest 308 files (304 tracked + 4 untracked), every file assigned; docs shard independently re-enumerated, 51 = 51. Nothing was fixed, committed or deleted.
+
+## Severity counts
+
+1 high, 23 med, 37 low. No crit.
+
+## Re-verified by the orchestrator (CONFIRMED)
+
+- HIGH, ml/splits.py:160-176: fit_val_episodes() shuffles by POSITION in the tracks array. Inserting one episode into the real 78-episode array (51 generated-track, 27 generated-roads) moved 0-7 of the 12 val episodes into fit (median 3; 80 insert positions tried, 8 moved none). torch.save in train_vae.py:164, train_mdnrnn.py:227 and train_controller.py:486 stores no corpus id. Current artifacts look coherent by timestamp; this is a trap for the next top-up, not a proven bad result.
+- MED, firmware/uno_control/uno_control.ino:367: steerServo.writeMicroseconds(steerToUs(steer)) runs after the mode switch for every CRC-valid frame, including DISARMED ones. SERIAL_PROTOCOL.md:121 says actuators are "inert unless" ARMED. The motor IS gated correctly.
+- MED, firmware/README.md:75 still says "No control firmware exists"; uno_control.ino is 761 lines.
+- LOW, HANDOFF.md:717-718 and .claude/project-memory/important.md entry 9 say `git add -A` / `git add .` are hard-denied. Neither settings file carries those rules any more (checked 2026-10-13 in the Trading STEP 0e sweep).
+
+## Other notable findings (worker evidence, not re-run here)
+
+- ml/exp_recovery.py:158-168 builds its own val set; 14 of 16 centred val episodes were VAE-trained while all off-centre ones were VAE-unseen (confound).
+- Latent-cache fingerprint guard cannot fire: no *_latents.key file exists; controller vae/rnn fingerprints have zero readers.
+- collect_recovery.py --smoke writes into the production recovery corpus; prep_dreamer_corpus.py --limit wipes the real dreamer dir first.
+- 11 sites read info.get("cte", 0.0); a missing key reads as perfect tracking.
+- Pre-commit artifact gate keys on staged artifacts only, so a generator/.scad edit without a re-render passes.
+- Public README.md:8-11 and BOM/LIGHTING_SPEC/budget/firmware README still say nothing is ordered (23 of 24 items arrived 2026-10-10).
+- uno_control compiles to 10668 B / 379 B (arduino-cli, 2026-10-13); HANDOFF:30/:176/:231 quote 9680 and 9694 B. Source has 72 SELFTEST CHECK sites vs the "49/49" verified build.
+- Brief docs/research/2026-10-12_print-friendly-cad-rules.md (untracked): says 2 agent-only claims, its own tables show at least 4; calls the slicer profile unknown although record FR records P1S/PLA/0.1 mm/2 walls; HANDOFF:650-653 implies the coupon has a 5.05 row (pla_fit_coupon.scad:35 tops out at 5.00).
+- Appendices HH and HI and the brief are uncommitted.
+
+## Verified true (load-bearing)
+
+- Record: 217 headings = 217 TOC lines, A..HI contiguous, 0 broken anchors.
+- PIN_D = 4.95 in all 5 mount .scad files; probe "d": 4.95 counts 6/6/20/6/4; no 4.875 bore in any of the 5 STLs (two independent measurements).
+- run_checks.py: 16 passed, 0 failed (of 16). check_artifacts.py: 38 checked, 0 drifted, 2 uncheckable.
+- verify_corpus.py ml/data/sim: PASS, 88/88 episodes, 102,888 frames.
+- Secrets: pm-secretscan --history/--worktree 0 findings; git log -p regex second pass 0. Remote == HEAD (b3962b9).
+
+## Not swept
+
+Runtime/sim/GPU behaviour, flashing or SELFTEST on the board, CVEs (no pip-audit), mutation score, external links. PRD_ROADMAP.md body ~1100 of 1462 lines only grepped.
+
+The full findings table, with file:line and one-line fixes, is in the 2026-10-13 daily-audit session report.
+
+# Appendix HK - Bambu Studio X-Y hole compensation is 0 (Evan) (2026-10-13, ~11:11 CDT)
+**WHAT:** Evan (2026-10-13) answered the first open item of record HI: his
+Bambu Studio process profile has **X-Y hole compensation = 0 mm**.
+
+**Consequence:** the biggest confound named in HI is gone - the slicer does
+not resize holes, so every hole size in the printed parts comes from the CAD
+alone, and the fit evidence so far (motor coupler D-bore fits at +0.15, GF;
+servo mount v6 pin holes too tight at +0.075, HH) is CAD offset vs printer,
+not CAD offset + slicer offset. Rule 1 of the brief's target ("hole
+compensation 0 so the CAD owns all clearance") is already met.
+
+**Still unknown (not given, not assumed):** X-Y contour compensation,
+elephant-foot value, layer height, wall count, wall generator, seam
+position, filament and dryness for the PLA prints so far. The two project
+fits remain one source (one printer and profile, tuned in sequence); the
+4.95 pin holes (HG) remain UNTESTED.
