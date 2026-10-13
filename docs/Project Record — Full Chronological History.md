@@ -244,6 +244,7 @@ the dated entry, not the digest.
 - [GY - Servo mount v4: ear bridges start from the rail level (z 0)](#appendix-gy---servo-mount-v4-ear-bridges-start-from-the-rail-level-z-0-2026-10-12-2106-cdt) (10-12)
 - [GZ - Motor mount v5: three pins per side (x -16, 0, +16)](#appendix-gz---motor-mount-v5-three-pins-per-side-x--16-0-16-2026-10-12-2113-cdt) (10-12)
 - [HA - Servo mount v5: ear bridges only between the rails; GZ time correction](#appendix-ha---servo-mount-v5-ear-bridges-only-between-the-rails-gz-time-correction-2026-10-12-2115-cdt) (10-12)
+- [HB - Servo mount v6: bridge-to-rail gussets](#appendix-hb---servo-mount-v6-bridge-to-rail-gussets-2026-10-12-2119-cdt) (10-12)
 
 ---
 
@@ -17959,3 +17960,35 @@ continuous, but the joint is smaller than in v4. Untested under servo load.
 **Correction to Appendix GZ:** its heading and its checks line say
 "~21:13 CDT"; `date` read 21:11:13 CDT when GZ was appended. The body was
 written before the clock was read. The real time is 21:11 CDT.
+
+# Appendix HB - Servo mount v6: bridge-to-rail gussets (2026-10-12, ~21:19 CDT)
+**WHAT:** Evan (2026-10-12) chose the gusset option offered after HA. HA's
+v5 made each ear bridge join each rail only through the rail's inner face
+(about 5.5 x 7.8 mm). Servo mount v6 (`cad/scad/servo_mount.scad`,
+`cad/servo_mount.stl`) adds six right-triangle gussets, 4 mm legs, z 0..7.8
+(rail height), in the corners where a bridge face meets a rail's inner face
+(y = +/-12):
+- near bridge, case side: corner (-8.88, +/-12), running toward +x;
+- far bridge, case side: corner (15.0, +/-12), running toward -x;
+- far bridge, outer side: corner (20.5, +/-12), running toward +x.
+(The near bridge's outer face is the part's end, x -14.5: no gusset there.)
+Each bridge-to-rail joint grows along x from ~5.5 mm to ~9.6 mm (near) and
+~13.5 mm (far).
+
+**Kept clear:** all gussets lie inside y -12..12, so nothing touches a rail
+top or a peg hole (recess reaches y 12.9). The deepest point (y +/-8) stays
+1.28 mm outside the servo-case cut (y +/-6.72).
+
+**Checks (real output, 2026-10-12 ~21:19 CDT):**
+- Probes written first and run against the unchanged v5: FAIL, exactly the 6
+  new gusset solid points, e.g. "(14, 11, 3) is open (expected solid)".
+  Added opens just outside each hypotenuse ((12, 9, 3), (-6, +/-9, 3),
+  (23.5, -9, 3)) and above a gusset ((14, 11, 9)).
+- v6 render: manifold PASS, probes 109/109 PASS, OVERALL PASS, 263284 bytes,
+  sha256 466bb7b4bd06e85d..., bbox unchanged (-14.5, -20, 0)..(28, 20, 13.3).
+- Volume 7842.44 -> 8214.97 mm^3 (+372.5). Expected 6 x (0.5 x 4 x 4) x 7.8
+  = 374.4, less the EPS overlaps that merge into the rails and bridges: agrees.
+- `scripts/check_artifacts.py`: 37 checked, 0 drifted, 0 errored, 2 uncheckable.
+- `scripts/run_checks.py`: 16 passed, 0 failed, 0 skipped (of 16).
+
+**Status:** UNTESTED - v6 not printed, not fitted, not loaded.

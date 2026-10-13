@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-12 ~21:15 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-12 ~21:19 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 209 appendices A–HA; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 210 appendices A–HB; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -627,7 +627,7 @@ NEXT ACTIONS, cheapest first:
      at a PHOTO-ESTIMATED gap. PRINT AND FIT v5, report: do the pins snap,
      does the motor sit level with the coupler, is the back-wall gap ~0.5 mm.
      Axle centre 26.20 mm above the floor (GE); motor connector UP (GF).
-   - SERVO MOUNT cad/servo_mount.stl v5 (HA: ear bridges only between the rails, all 6 peg holes open; v4 GY; v3 GV; v2 GS): printable, UNTESTED - on
+   - SERVO MOUNT cad/servo_mount.stl v6 (HB: + 4 mm bridge-to-rail gussets; v5 HA bridges only between the rails, all 6 peg holes open; v4 GY; v3 GV; v2 GS): printable, UNTESTED - on
      BOTH 2x4 L liftarms (one each side of the servo), case footprint open,
      ears on plastic, pin holes at studs 1-3 of each L. Print and fit: L spacing
      (photo: 32 mm), ears sit flat, pilot size.

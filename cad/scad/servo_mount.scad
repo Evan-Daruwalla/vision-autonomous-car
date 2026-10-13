@@ -10,6 +10,9 @@
 // v5 (Evan, 2026-10-12): the bridges no longer overlap the rails - they span
 // only y -12..12, between the rails' inner faces. In v3/v4 the far bridge
 // (x 15..20.5) sat on top of both rails and capped the stud-2 pin holes.
+// v6 (Evan, 2026-10-12): 4 mm triangular gussets where each bridge meets each
+// rail's inner face, z 0..7.8, inside y -12..12 - a bigger bridge-to-rail joint
+// with the rail tops and peg holes still clear.
 //
 // FRAME: origin on the servo output shaft. x along the servo's long axis = the
 // L legs (stud 0 = the Ls' axle holes, studs 1, 2, 3 at x 8, 16, 24); y across;
@@ -68,6 +71,16 @@ PIN_X = [PITCH, 2 * PITCH, 3 * PITCH];          // studs 1, 2, 3
 NEAR_BRIDGE = [X0, CASE_CX - CASE_L / 2 - OPEN_CLEAR];        // x -14.5 .. -8.88
 FAR_BRIDGE = [CASE_CX + CASE_L / 2 + OPEN_CLEAR, FAR_HOLE_X + 3.5];   // x 15.0 .. 20.5
 
+GUSSET = 4.0;             // v6: gusset leg length, along x and along y
+
+// Right-triangle gusset at the corner (x0, Y_IN): one leg on the rail's inner
+// face running dir * GUSSET along x, the other on the bridge face running
+// GUSSET inward (-y). Overlaps rail and bridge by EPS so the union is one body.
+module gusset(x0, dir) {
+  linear_extrude(height = RAIL_H)
+    polygon([[x0 - dir * EPS, Y_IN + EPS], [x0 + dir * GUSSET, Y_IN + EPS], [x0 - dir * EPS, Y_IN - GUSSET]]);
+}
+
 difference() {
   union() {
     // two rails along the Ls
@@ -75,6 +88,13 @@ difference() {
     // two bridges under the ears, from the Ls' top face (z 0) like the rails (v4),
     // only BETWEEN the rails (v5): nothing on top of a rail, so no pin hole is capped
     for (b = [NEAR_BRIDGE, FAR_BRIDGE]) translate([b[0], -Y_IN - EPS, 0]) cube([b[1] - b[0], 2 * (Y_IN + EPS), EAR_Z]);
+    // v6 gussets: triangles in the corners where a bridge meets a rail's inner face,
+    // rail height only, inside y -12..12 (never on a rail top, never near the case cut)
+    for (m = [0, 1]) mirror([0, m, 0]) {
+      gusset(NEAR_BRIDGE[1], 1);    // near bridge, case side
+      gusset(FAR_BRIDGE[0], -1);    // far bridge, case side
+      gusset(FAR_BRIDGE[1], 1);     // far bridge, outer side
+    }
   }
   // open space under the whole servo body
   translate([CASE_CX - CASE_L / 2 - OPEN_CLEAR, -(CASE_W / 2 + OPEN_CLEAR), -EPS])
