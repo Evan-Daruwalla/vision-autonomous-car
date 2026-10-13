@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~15:12 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~17:16 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 236 appendices A–IB; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 242 appendices A–IH; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -617,6 +617,10 @@ observations - UNVERIFIED.
 ELECTRONICS LAYOUT (IB): docs/ELECTRONICS_LAYOUT.md + docs/electronics_layout.svg,
 generated and checked by scripts/electronics_layout.py from the LAYOUT lists in
 the tray/deck .scad files; every arrived part accounted for. PLAN, UNTESTED.
+FILAMENT (IC): EVERY car part is printed in Bambu PETG Translucent (250 C / 70 C).
+PETG coupon: row D (the mounts' exact hole) "good" at 4.90-5.05, so 4.95 stays.
+Pocket gauge, row-D collar, pilot holes NOT reported yet. press_shaft (+0.15) is
+PLA-only. Tray/deck: slice with supports OFF (the profile supports bridges).
 PRINTED PARTS (all OpenSCAD in cad/scad/, rendered + probe-checked by
 scripts/render_scad.py, registered in check_artifacts): servo mount v7, motor
 mount v6, electronics tray v4 + deck v4 (print-friendly redo IA; deck raised

@@ -271,6 +271,12 @@ the dated entry, not the digest.
 - [HZ - Decision: steering gate unchanged; end-to-end steer test waits for the pack](#appendix-hz---decision-steering-gate-unchanged-end-to-end-steer-test-waits-for-the-pack-2026-10-13-1416-cdt) (10-13)
 - [IA - Electronics tray + deck v3: print-friendly redo per the CAD-rules brief](#appendix-ia---electronics-tray--deck-v3-print-friendly-redo-per-the-cad-rules-brief-2026-10-13-1441-cdt) (10-13)
 - [IB - Fit coupon row D + pocket gauge; deck raised 2 mm; verified electronics layout, every part accounted for](#appendix-ib---fit-coupon-row-d--pocket-gauge-deck-raised-2-mm-verified-electronics-layout-every-part-accounted-for-2026-10-13-1510-cdt) (10-13)
+- [IC - Fit coupon + pocket gauge printed in PETG: row D (the mounts' hole) good at 4.90-5.05; every part now PETG](#appendix-ic---fit-coupon--pocket-gauge-printed-in-petg-row-d-the-mounts-hole-good-at-490-505-every-part-now-petg-2026-10-13-1715-cdt) (10-13)
+- [ID - Zip slots 3.5 mm on tray + deck; servo pilot 1.7 confirmed](#appendix-id---zip-slots-35-mm-on-tray--deck-servo-pilot-17-confirmed-2026-10-13-1720-cdt) (10-13)
+- [IE - Row-D collar sits half in the recess - the expected Lego fit](#appendix-ie---row-d-collar-sits-half-in-the-recess---the-expected-lego-fit-2026-10-13-1730-cdt) (10-13)
+- [IF - Pocket gauge: holder snug (0.25/side OK); bank and Pi ~2 mm loose - wrong nominal widths](#appendix-if---pocket-gauge-holder-snug-025side-ok-bank-and-pi-2-mm-loose---wrong-nominal-widths-2026-10-13-1735-cdt) (10-13)
+- [IG - Tray v5: fences 4 -> 10 mm to hold the bank's flat sides](#appendix-ig---tray-v5-fences-4---10-mm-to-hold-the-banks-flat-sides-2026-10-13-1745-cdt) (10-13)
+- [IH - Measurements M1-M11: fuse holder has no place, rocker hole 21, LM2596 pegs 57.5 x 31.5; correction to IF](#appendix-ih---measurements-m1-m11-fuse-holder-has-no-place-rocker-hole-21-lm2596-pegs-575-x-315-correction-to-if-2026-10-13-1800-cdt) (10-13)
 
 ---
 
@@ -18820,3 +18826,206 @@ check. Now `self_check(stls=None)` loads the STLs itself and asserts.
 depth, the charger's USB-C edge, the holder's lead end, the servo lead
 length - all to measure. A ~25-30 cm USB-C cable for bank -> Pi: check one is
 on hand (no purchase implied). Print order: coupon + gauge first (Rule 3).
+
+# Appendix IC - Fit coupon + pocket gauge printed in PETG: row D (the mounts' hole) good at 4.90-5.05; every part now PETG (2026-10-13 ~17:15 CDT)
+**WHAT:** (2026-10-13, reported ~17:10 CDT) First print of the fit coupon with
+row D (record IB) and of the pocket gauge. Fit results for the coupon below;
+the gauge, the row-D collar check and the pilot holes are NOT reported yet.
+
+**Filament change (Evan): every car part is printed in Bambu PETG
+Translucent** ("I have the most of it"). Every earlier fit note said PLA. The
+couplers (FR, GF) were PLA; servo mount v6's filament (HH) was never recorded.
+`lib/lego.scad`'s fit-class comments now say PETG; `press_shaft` (+0.15, GF) is
+marked PLA-only, NOT tested in PETG. The research brief (HI) is PLA-sourced;
+its per-filament calibration rule is what applies.
+
+**Print settings (Evan's Bambu Studio screenshots + his message):**
+
+| Setting | Value |
+|---|---|
+| Printer / nozzle | Bambu Lab P1S, 0.4 mm, flow Standard |
+| Filament | Bambu PETG Translucent; nozzle 250 C, bed 70 C |
+| Process | "0.10mm Fine @BBL X1C - Copy", modified |
+| Layer height | 0.15 mm (first layer 0.2) |
+| Line widths | 0.42 default / outer; 0.45 inner wall and sparse infill |
+| Walls | 2 loops, Classic generator, inner/outer order |
+| Top / bottom shells | 7 / 7 layers, monotonic |
+| Sparse infill | 15 % cubic |
+| X-Y hole / contour compensation | 0 / 0 mm |
+| Elephant foot compensation | 0.25 mm |
+| Seam | Back, scarf seams on |
+| Speeds | outer and inner wall 200 mm/s; accel 4000 mm/s2 normal and outer wall |
+| Supports | ON: normal(auto), grid, 20 deg, build plate only; "Don't support bridges" UNCHECKED |
+| Adhesion | outer brim 5 mm, brim-object gap 0.05; prime tower on; print by object |
+
+**Orientation of the readings:** Evan held the coupon with the sideways-hole
+fin at the top left and read every row left to right, i.e. from the large
+holes to the small ones (rows A, B, D) and 5.0 -> 4.8 on the fin.
+
+**Results (X won't go in, T tight, G good, L loose; black 2780 pin):**
+
+| Row | Hole shape | 5.05 | 5.00 | 4.95 | 4.90 | 4.85 | 4.80 | 4.75 |
+|---|---|---|---|---|---|---|---|---|
+| D | recess 6.2 x 0.8 on BOTH faces (= the mounts) | G | G | G | G | - | - | - |
+| A | plain | - | L | L | G | T | X | X |
+| B | top recess only | - | L | L | L | G | T | X |
+
+- Sideways (horizontal, fin): 5.0 G, 4.9 L, 4.8 L.
+- Row C (pitch, six 4.90 holes at 8 mm): a real liftarm lines up.
+- Zip slots: the second smallest (3.5 mm wide x 1.8) is the best fit for
+  Evan's ties; the tray/deck slots are 4.0.
+
+**Reading (Opus):**
+- **The mounts' 4.95 hole is confirmed "good" in PETG** - row D is the
+  mounts' exact hole and rates G across 4.90-5.05. friction_pin stays +0.15.
+  No part changes.
+- **Rows A/B disagree with row D at the same diameters** (A/B 4.95 L, D 4.95
+  G). D's bottom recess shortens the gripping bore, so on geometry alone it
+  should be the looser one; the readings say the opposite. Unexplained.
+  Candidates, none tested: the 8 mm-wide row-D bar shrinks onto its holes more
+  than the 48 x 24 plate; or the G / L line is a judgement that moved between
+  rows. Row D matches the mounts in both hole shape and surrounding width, so
+  it is the row the decision rests on.
+- **The sideways holes do not read monotonic** (5.0 G but 4.9 / 4.8 L, i.e.
+  larger tighter). Unexplained; no current part has a horizontal pin hole
+  (Rule 4), so nothing depends on it.
+- Rows A/B show the expected order (bigger = looser) and B (one recess) runs
+  about one step looser than A (no recess).
+
+**Slicer note for the tray (raised to Evan):** with supports on and "Don't
+support bridges" unchecked, Bambu would fill every rib bay under the tray
+floor; supports OFF (or that box ticked) for the tray and deck.
+
+**Open:** pocket gauge (bank / Pi / holder), collar flush in row D, pilot
+holes, and whether 3.5 slots "pass easily with no slop" before the tray/deck
+slots change from 4.0.
+
+# Appendix ID - Zip slots 3.5 mm on tray + deck; servo pilot 1.7 confirmed (2026-10-13 ~17:20 CDT)
+**WHAT:** (2026-10-13 ~17:20 CDT) Two follow-ups to the PETG coupon (record IC).
+
+- **Zip slots 4.0 -> 3.5 mm** in the electronics tray and deck (`ZIP_W`):
+  Evan, the coupon's 3.5 x 1.8 slot "passes easily, no slop". Re-rendered:
+  tray 245/245, deck 88/88 probes PASS; electronics_layout.py 10 entries, 0
+  checks failed (SVG regenerated); check_artifacts 40 checked, 0 drifted;
+  run_checks 17 passed, 0 failed. Still UNTESTED on the tray/deck themselves.
+- **Servo screw pilot 1.7 mm confirmed good** (Evan: "the screw hole size used
+  was good"; the servo is mounted). `servo_mount.scad` PILOT_D = 1.7. Which
+  mount version and filament that print was is not stated. The coupon's
+  pilot row needs no reading.
+
+**Still open:** the pocket gauge (Evan asked what exactly is wanted; the test
+was re-explained) and the row-D collar check.
+
+# Appendix IE - Row-D collar sits half in the recess - the expected Lego fit (2026-10-13 ~17:30 CDT)
+**WHAT:** (2026-10-13 ~17:30 CDT) Row-D collar check on the PETG coupon
+(record IC). Evan: with a black 2780 pin pushed into a row-D hole, "1/2 of
+it is recessed and half is above" - the pin's centre collar sits half in the
+printed 6.2 x 0.8 recess and half proud of the surface.
+
+**Reading (Opus, I think - verify with a real beam):** this is the expected
+result. A friction pin's collar is shared by the two parts it joins: half
+sits in each part's counterbore, so the faces meet flush. A 0.8 recess taking
+half the collar matches a Lego beam's own counterbore (CB 6.2 x 0.8, record
+FZ). The collar also entered the 6.2 recess, so the recess diameter is not
+too small.
+
+**Confirming check (not done):** pin a real liftarm onto row D - the printed
+face and the liftarm's face should touch with no gap.
+
+**Still open:** the pocket gauge.
+
+# Appendix IF - Pocket gauge: holder snug (0.25/side OK); bank and Pi ~2 mm loose - wrong nominal widths (2026-10-13 ~17:35 CDT)
+**WHAT:** (2026-10-13 ~17:35 CDT) Pocket gauge results (PETG print, record
+IC). Evan's words: "the largest and middle ones are 2mm loose but the battery
+bank has curved edges and i measured from the middle"; then "holder is snug".
+
+| Column | Nominal W used | Result |
+|---|---|---|
+| Battery bank (widest) | 70.55 | ~2 mm loose |
+| Pi 5 Vilros case (middle) | 64.4 | ~2 mm loose |
+| 2S holder (narrowest) | 40.5 | snug |
+
+Read as columns (widest = bank, middle = Pi); which of the three U's per
+column, and whether "2 mm" is total play or per side, were not stated.
+
+**Reading (Opus):**
+- **The "pocket" clearance (0.25 per side) is fine** - the holder, a
+  straight-sided part, is snug.
+- **The bank's nominal width is wrong for a 4 mm fence**: 70.55 is its width
+  at mid-height (Evan measured "from the middle"); its edges are rounded, so
+  at the height a 4 mm fence touches it is about 2 mm narrower. The tray's bank
+  fence (FENCE_H 4.0) has the same fault: the bank would rattle ~2 mm.
+- **The Pi case's 64.4 is likely too big**: ~2 mm loose agrees with the
+  vendor's 62.2 width (record FZ: 90.2 x 62.2 x 26.7) rather than Evan's
+  earlier 64.4. Rounded edges or a wrong number - not yet known.
+
+**Proposed fix (Opus recommends A, awaiting measurements):** A) raise the
+bank fence (and if needed the Pi brackets) past the curve so they hold the
+flat side at full width; B) narrow the pockets to the curved bottom (holds
+only the curve - the part can tip out). Needs: the height above the bank's
+bottom where the curve ends; the Pi case's width at its bottom edge and
+whether it is rounded.
+
+# Appendix IG - Tray v5: fences 4 -> 10 mm to hold the bank's flat sides (2026-10-13 ~17:45 CDT)
+**WHAT:** (2026-10-13 ~17:45 CDT) Fix A for the loose bank (record IF), chosen
+by Evan: tray fences raised so they hold the bank's flat sides.
+
+**Measured (Evan):** the bank is rounded from its bottom up to 7 mm, flat
+above that, then rounds again toward the top (where the flat band ends was
+not given). The Pi case's sides are flat - so the ~2 mm play is a wrong width,
+not a curve; its real width is NOT measured yet (vendor 62.2, used 64.4).
+
+**Change - electronics tray v5:** `FENCE_H` 4.0 -> 10.0 (fence top z 13.8 ->
+19.8), so the bank fence spans 7..10 mm above the bank's bottom, inside its
+flat band (the top 0.5 mm is the lead-in). Pocket width unchanged: 70.55 +
+0.25 per side. The holder fence shares the constant and rises too (the holder
+is straight-sided and 20.5 tall; it was snug at 4 mm). Probes: the two
+lead-in points moved to z 19.75; two new solid points at z 18.0 prove the
+front and +y bank walls reach the flat band.
+
+**Checks:** render_scad tray 247/247 PASS, manifold; electronics_layout.py
+10 entries, 0 checks failed; overhang scan unchanged (worst 10.44 mm, 24
+points > 10 mm - vertical walls add none); check_artifacts 40 checked, 0
+drifted; run_checks 17 passed, 0 failed. UNTESTED - not printed.
+
+**Open:** the Pi case's width and length by caliper -> the deck's Pi pocket.
+
+# Appendix IH - Measurements M1-M11: fuse holder has no place, rocker hole 21, LM2596 pegs 57.5 x 31.5; correction to IF (2026-10-13 ~18:00 CDT)
+**WHAT:** (2026-10-13 ~18:00 CDT) Evan's caliper answers to the measurement
+sheet (M1-M11), what they changed, and a correction to record IF.
+
+| # | Part | Evan measured | Effect |
+|---|---|---|---|
+| M1 | Fuse holder | 50 long (wire to cap fitting) x 12 wide x 34.25 tall | **Does not fit the reserved 15 x 9.5 x 15 zone, nor anywhere on the tray**: 34.25 tall > the 22.2 under the deck; 50 x 34 flat does not fit the -y lobe beside the charger, BMS and XT30. Zone REMOVED from LAYOUT; placement is an open decision |
+| M2 | XT30 mated | 25 x 10.5 x 5.3 | zone -> real part at (104, -66), tie at x 120 |
+| M3 | Uno + shield | 24 tall, 53.7 wide, 70 long; 77.3 to the USB-B end, 74.1 to the barrel jack | LAYOUT box 53.7 x 70 x 24. The USB-B overhangs ~7.3 past the -y end, toward the deck boss at (10, -41.6), whose top is z 39.8 vs the Uno PCB bottom 38.5; the jacks' positions along the edge are NOT measured - collision not ruled out |
+| M4 | Rocker | body depth 23.8, body dia 20.50, 22.90 across the clips | **Body 20.50 > the 20.0 hole** -> `ROCKER_D` = 20.5 + pocket 0.5 = 21.0 (clips still overlap ~0.95 per side). Body hangs ~24 mm below the rear tab, behind the tray - free space there NOT checked |
+| M5 | Charger | 38.43 x 18.30 x 6.30; pads BAT, GND, GND, VIN | LAYOUT size updated. Wiring: BAT -> BMS P+, GND -> P- (no "BAT+/BAT-" labels). USB-C side not stated |
+| M6 | 2S holder | 20.30 tall; both leads leave the same end, 160 mm | 20.5 used (0.2 margin kept). 160 mm may be short for holder -> over the bank -> -y lobe (estimate ~150-170 mm) |
+| M7 | Servo lead | ~25 cm +/- 0.5 | reaches the shield (~150-200 mm route) |
+| M8 | LM2596 | holes 3.5 dia; 61 far edge to far edge; 31.5 centre to centre | **Peg spacing was wrong** (61 x 31 used): now 57.5 x 31.5 centres, `LM_XY` moved; peg 2.8 -> 3.2 (3.5 - slide 0.3) |
+| M9 | Uno holes | not measured (unclear which holes) | Uno pegs stay on the community pattern, UNVERIFIED |
+| M10 | Pi case | 91.8 x 64.4 x 27.2 confirmed; camera connector at the opposite end from the USB-A | pocket unchanged; layout already has camera at the front, USB-A at the rear |
+| M11 | Cables | USB-C > 25 cm; USB A-B > 18 in | both runs covered |
+
+**CORRECTION to record IF:** IF read "the largest and middle ones are 2 mm
+loose" as the bank and Pi COLUMNS and concluded the Pi case's 64.4 was likely
+wrong (vendor 62.2). Evan has now confirmed 91.8 x 64.4 by measurement, so
+the remark was about the bank column's own U's. The Pi pocket was never
+reported loose; it stays. IF's other conclusions (holder snug -> 0.25 per side
+fine; bank loose because of its rounded edges -> fix in IG) stand.
+
+**Deck v6 (`electronics_deck.scad`):** ROCKER_D 21.0; LM_XY 57.5 x 31.5
+centres; LM_PEG_D 3.2; LAYOUT Uno 53.7 x 70 x 24. Probes updated (rocker d 21
+and its chamfer points to r 10.75; LM peg point to the new centre). Tray
+LAYOUT: charger size, XT30 part, fuse zone removed (no geometry change).
+
+**Checks:** deck render 88/88 PASS, OVERALL PASS; tray render validated
+247/247 but could not WRITE `cad/electronics_tray.stl` ("OSError: Invalid
+argument" - the file is most likely open in another program); its geometry is
+unchanged by this round, and check_artifacts (40 checked, 0 drifted) confirms
+the file on disk matches the source. electronics_layout.py 9 entries, 0
+checks failed; run_checks 17 passed, 0 failed.
+
+**Open (Evan):** where the fuse holder goes; free space for the rocker body
+behind the tray; the Uno's USB-B / barrel jack positions along its short edge.

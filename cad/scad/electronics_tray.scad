@@ -13,6 +13,9 @@
 // v4 (2026-10-13): deck raised 2 mm (posts to z 32.0) - the 2S holder (20.5 tall, top
 // z 30.3) hit the deck underside at 30.0. LAYOUT list = every layer-1 electronic part
 // (preview ghosts + echoed for scripts/electronics_layout.py).
+// v5 (2026-10-13): fences 4 -> 10 mm tall. The PETG pocket gauge showed the bank ~2 mm
+// loose in a 4 mm fence: its edges are rounded and its sides are flat only from 7 mm
+// above its bottom (Evan). Pocket width unchanged (70.55 + 0.25 per side). Zip slots 3.5.
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, the Lego pin rows at y = +/-24; z = 0 on the Lego frames' top face, z up. mm.
@@ -30,8 +33,8 @@ RAIL_H = 7.8;             // a Lego beam's height: a pin half fits fully
 FLOOR_T = 2.0;
 FLOOR_TOP = RAIL_H + FLOOR_T;   // 9.8
 FENCE_T = 2.0;
-FENCE_H = 4.0;
-FENCE_TOP = FLOOR_TOP + FENCE_H;   // 13.8
+FENCE_H = 10.0;           // v5: past the bank's rounded bottom edge (flat side from 7 mm up, Evan 2026-10-13)
+FENCE_TOP = FLOOR_TOP + FENCE_H;   // 19.8
 POST_TOP = 32.0;
 POST_S = 8.0;
 FOOT_S = 8.0;
@@ -63,7 +66,7 @@ POSTS = [[10, 41.6], [10, -41.6], [150, 41.6], [150, -41.6], [60, -82], [128, -8
 ZIP_BANK = [[35, 38.5], [35, -38.5], [140, 38.5], [140, -38.5]];
 ZIP_HOLDER = [[75, 81.5], [117, 81.5]];
 ZIP_SMALL = [[64, -48], [92, -48], [120, -48], [64, -72], [92, -72], [120, -72]];
-ZIP_W = 4.0;
+ZIP_W = 3.5;              // PETG coupon: 3.5 x 1.8 passes the ties easily, no slop (2026-10-13)
 ZIP_T = 1.8;
 RIB_T = 2.0;              // ribs under the floor (Rule 7)
 TIE_Z0 = 5.3;             // zip-tie passage under the floor: z TIE_Z0..RAIL_H
@@ -154,10 +157,9 @@ difference() {
 LAYOUT = [
   ["battery bank (Pi power)", [151.5, 70.55, 18.0], [-4, -35.275, FLOOR_TOP], "part", "bank fence, open at the rear", "-x: USB-C + USB-A (20 / 45 mm from the left)"],
   ["2S holder + 2x Samsung 25R", [75.75, 40.5, 20.5], [58.125, 37.85, FLOOR_TOP], "part", "holder fence + 2 zip ties (slots x 75, 117)", "leads red / black + MB wire; exit end not measured"],
-  ["USB-C 2S charger (Adeept p0374)", [38.5, 18.5, 6.3], [60, -69.5, FLOOR_TOP], "part", "zip ties at x 64 and 92", "-x: USB-C (check on the board)"],
+  ["USB-C 2S charger (Adeept p0374)", [38.43, 18.3, 6.3], [60, -69.5, FLOOR_TOP], "part", "zip ties at x 64 and 92", "pads BAT, GND, GND, VIN; USB-C side not stated"],
   ["2S BMS (ACEIRMC B08HLQQCQJ)", [41, 8, 2.2], [66, -83, FLOOR_TOP], "part", "double-sided tape", "pads B+ B- MB P+ P-"],
-  ["fuse holder zone (body NOT measured)", [15, 9.5, 15], [108, -84, FLOOR_TOP], "zone", "tape or the tie at x 120", "inline 3 A ATO on the CELL+ wire"],
-  ["XT30 pair zone (mated length not stated)", [26, 17, 11], [102, -69, FLOOR_TOP], "zone", "zip tie at x 120", "BMS P+ / P- side; car side to the rocker"]
+  ["XT30 pair, mated (25 x 10.5 x 5.3)", [25, 10.5, 5.3], [104, -66, FLOOR_TOP], "part", "zip tie at x 120", "BMS P+ / P- side; car side to the rocker"]
 ];
 for (p = LAYOUT) if (p[3] != "note") ghost_box(p[1], p[2]);
 echo(LAYOUT_PARTS = LAYOUT);

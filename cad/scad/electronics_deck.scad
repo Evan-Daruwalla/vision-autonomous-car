@@ -58,19 +58,20 @@ UNO_PEG_D = 3.0;
 UNO_PEG_H = 3.0;          // z 38.5..41.5
 
 // LM2596 standoffs and pegs
-LM_XY = [[64.5, -44.5], [125.5, -44.5], [64.5, -75.5], [125.5, -75.5]];
+// Evan 2026-10-13: holes 3.5 dia, 61 outer edge to outer edge -> 57.5 centre to centre, 31.5 the other way
+LM_XY = [[66.25, -44.25], [123.75, -44.25], [66.25, -75.75], [123.75, -75.75]];
 LM_SO_D = 6.0;
 LM_SO_H = 3.0;            // z 34.5..37.5
-LM_PEG_D = 2.8;
+LM_PEG_D = 3.5 - fit_offset("slide");   // 3.2 in the 3.5 holes
 LM_PEG_H = 3.0;           // z 37.5..40.5
 
 // cut-outs
 VENT_X = [65, 137];
 VENT_Y = [-22, 22];
 ROCKER_XY = [-18, -32];
-ROCKER_D = 20.0;
+ROCKER_D = 20.5 + fit_offset("pocket");   // 21.0: body measured 20.50 (clips 22.90), Evan 2026-10-13
 ZIP_XY = [[59, 35.5], [59, -35.5], [143, 35.5], [143, -35.5]];
-ZIP_W = 4.0;
+ZIP_W = 3.5;              // PETG coupon: 3.5 x 1.8 passes the ties easily, no slop (2026-10-13)
 ZIP_T = 1.8;
 ROCK_CH = 0.4;            // rocker hole chamfer, both faces (Rules 5, 6)
 PEG_CH = 0.4;             // lead-in on peg tops
@@ -141,7 +142,7 @@ difference() {
 // LAYOUT: [name, [sx, sy, sz], [x, y, z], kind, held by, ports]; kind part | zone | note.
 LAYOUT = [
   ["Raspberry Pi 5 in Vilros case", [91.8, 64.4, 27.2], [55.1, -32.2, DECK_TOP], "part", "4 corner brackets, pocket +0.25 per side", "+x: camera + USB-C power; -x: 2x USB-A + LAN"],
-  ["Arduino Uno R3 + proto shield (TB6612, caps, divider)", [53.34, 68.58, 20], [-2, -34.29, DECK_TOP + UNO_SO_H], "part", "4 standoffs + pegs", "-y: USB-B (to the Pi) + DC jack; height NOT measured"],
+  ["Arduino Uno R3 + proto shield (TB6612, caps, divider)", [53.7, 70, 24], [-2.18, -35, DECK_TOP + UNO_SO_H], "part", "4 standoffs + pegs", "-y: USB-B (overhangs 7.3) + DC jack (4.1); jack positions NOT measured"],
   ["LM2596 buck, 5.00 V (display)", [66, 36, 14], [62, -78, DECK_TOP + LM_SO_H], "part", "4 standoffs + pegs", "display up; trim pot locked"],
   ["rocker switch (20 mm round)", [20, 20, 0], [-28, -42, DECK_TOP], "note", "snap-in 20 mm hole", "body hangs below the tab; depth NOT measured"]
 ];

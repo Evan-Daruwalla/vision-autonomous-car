@@ -22,11 +22,15 @@ EPS = 0.01;
 
 // Fit classes: ONE place for every printed-fit clearance (docs/research/
 // 2026-10-12_print-friendly-cad-rules.md, Rule 2). Diametral offset in mm over
-// the nominal size, PLA on the Bambu P1S, slicer X-Y hole compensation 0
-// (Evan, record HK). Calibrated per filament - change a value here, never in a part.
+// the nominal size. FILAMENT: Bambu PETG Translucent on the P1S - every car part
+// is printed in it (Evan, 2026-10-13); slicer X-Y hole compensation 0 (record HK).
+// Calibrated per filament - change a value here, never in a part.
 //   "friction_pin": Lego friction pin in a printed hole. +0.15 -> 4.95 (HG).
-//                   UNTESTED; +0.075 printed too tight (HH).
-//   "press_shaft" : motor D-shaft into a printed bore. +0.15 FITS (GF).
+//                   PETG coupon row D (the mounts' exact hole): 4.90-5.05 all
+//                   "good" (2026-10-13). +0.075 printed too tight (HH, filament
+//                   not recorded).
+//   "press_shaft" : motor D-shaft into a printed bore. +0.15 FITS in PLA (GF);
+//                   NOT tested in PETG.
 //   "slide"       : printed-to-printed sliding fit. 0.3 = Prusa's starting
 //                   value, UNTESTED here.
 //   "rotate"      : Lego axle spinning in a printed bore - NOT calibrated in
