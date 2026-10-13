@@ -9,7 +9,10 @@
 // studs behind A/B (x +16 and -16); each arm is now one rail x -20..20.
 // ASSUMED: the short beams have holes at x +/-16 at the same underside
 // height, and nothing hangs below their x +/-8 holes onto the rail.
-// STATUS: UNTESTED as v5. v1 (printed pin stubs, full-length side walls) was
+// v6 (Evan, 2026-10-12): side walls (and their front lips) 3 mm taller, top
+// z 29.2. Now ABOVE the 27.0 mm low point of the black steering parts, whose
+// position relative to the motor is unconfirmed. Back wall unchanged (28.0).
+// STATUS: UNTESTED as v6. v1 (printed pin stubs, full-length side walls) was
 // printed by Evan: dimensions "alright", but the back third of the side walls
 // hit the encoder housing (record GL). v2: those wall sections removed, a back
 // wall added, and REAL black friction pins instead of printed stubs.
@@ -32,7 +35,7 @@ EPS = 0.01;
 
 FLOOR_Z0 = 21.0;         // v3 (2026-10-12, Evan): floor up 2.5 mm (was 18.5)
 FLOOR_Z1 = 23.4;         // was 20.9
-WALL_TOP = 26.2;
+WALL_TOP = 29.2;          // v6 (Evan): side walls + their front lips 3 mm taller (was 26.2); back wall unchanged
 WALL_IN = 6.2;             // v4 (Evan): walls closed in 0.2 mm each (was 6.4)
 WALL_OUT = 8.4;
 WALL_X0 = 3;              // v2: walls start here; the back third (to the encoder) is gone

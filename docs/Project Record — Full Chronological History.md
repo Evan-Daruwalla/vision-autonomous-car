@@ -245,6 +245,7 @@ the dated entry, not the digest.
 - [GZ - Motor mount v5: three pins per side (x -16, 0, +16)](#appendix-gz---motor-mount-v5-three-pins-per-side-x--16-0-16-2026-10-12-2113-cdt) (10-12)
 - [HA - Servo mount v5: ear bridges only between the rails; GZ time correction](#appendix-ha---servo-mount-v5-ear-bridges-only-between-the-rails-gz-time-correction-2026-10-12-2115-cdt) (10-12)
 - [HB - Servo mount v6: bridge-to-rail gussets](#appendix-hb---servo-mount-v6-bridge-to-rail-gussets-2026-10-12-2119-cdt) (10-12)
+- [HC - Motor mount v6: side walls 3 mm taller](#appendix-hc---motor-mount-v6-side-walls-3-mm-taller-2026-10-12-2129-cdt) (10-12)
 
 ---
 
@@ -17992,3 +17993,30 @@ top or a peg hole (recess reaches y 12.9). The deepest point (y +/-8) stays
 - `scripts/run_checks.py`: 16 passed, 0 failed, 0 skipped (of 16).
 
 **Status:** UNTESTED - v6 not printed, not fitted, not loaded.
+
+# Appendix HC - Motor mount v6: side walls 3 mm taller (2026-10-12, ~21:29 CDT)
+**WHAT:** Evan (2026-10-12): raise the motor mount's side walls - only the
+walls that hold the motor in place - by 3 mm. Motor mount v6
+(`cad/scad/motor_mount.scad`, `cad/motor_mount.stl`): WALL_TOP 26.2 -> 29.2.
+That moves the two side walls (x 3..26, y +/-6.2..8.4) and their 1.5 mm front
+lips (x 26..27.5, same parts of the same walls, also holding the gearbox).
+Back wall unchanged (top 28.0); arms, floor, pins unchanged.
+
+**New risk (not checked on the car):** the wall tops (29.2) are now ABOVE
+the 27.0 mm low point of the short black steering parts (Evan, 2026-10-11,
+task plan after GE). Their position relative to the motor path was never
+confirmed; at 26.2 the walls stayed under that height, at 29.2 they do not.
+
+**Checks (real output, 2026-10-12 ~21:29 CDT):**
+- Probes first, against the unchanged v5: FAIL, exactly the 5 new wall
+  points, e.g. "(10, 7.3, 28.5) is open (expected solid)". Added opens above
+  the new tops ((10, 7.3, 29.5), (26.75, 5.2, 29.5)) and one above the back
+  wall ((-7.35, -5.5, 28.5)) to pin that the back wall did not move.
+- v6 render: manifold PASS, probes 134/134 PASS, OVERALL PASS, 250084 bytes,
+  sha256 2827783e97fc3c2d..., bbox unchanged (-20, -19.9, 21.0)..(27.5, 19.9,
+  33.13). Volume 8737.24 -> 9074.14 mm^3 (+336.9; walls 2 x 23 x 2.2 x 3 =
+  303.6 plus lips 2 x 1.5 x 3.7 x 3 = 33.3 -> 336.9: agrees).
+- `scripts/check_artifacts.py`: 37 checked, 0 drifted, 0 errored, 2 uncheckable.
+- `scripts/run_checks.py`: 16 passed, 0 failed, 0 skipped (of 16).
+
+**Status:** UNTESTED - v6 not printed, not fitted.
