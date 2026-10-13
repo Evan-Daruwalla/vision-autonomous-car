@@ -267,6 +267,7 @@ the dated entry, not the digest.
 - [HV - docs-sync pass + snapshot after the mounts/steering session](#appendix-hv---docs-sync-pass--snapshot-after-the-mountssteering-session-2026-10-13-1345-cdt) (10-13)
 - [HW - Steering gate blocks bench steering; banner fix; servo_bench flashed for the backlash test](#appendix-hw---steering-gate-blocks-bench-steering-banner-fix-servo_bench-flashed-for-the-backlash-test-2026-10-13-1400-cdt) (10-13)
 - [HX - Backlash MEASURED: centre 1525 confirmed, half-gap 75 us (not 125)](#appendix-hx---backlash-measured-centre-1525-confirmed-half-gap-75-us-not-125-2026-10-13-1407-cdt) (10-13)
+- [HY - uno_control flashed with backlash 75 us: SELFTEST PASS 86/86](#appendix-hy---uno_control-flashed-with-backlash-75-us-selftest-pass-8686-2026-10-13-1409-cdt) (10-13)
 
 ---
 
@@ -18640,3 +18641,18 @@ constant; both safe-limit clamp cases still clamp at 75 (560-75 = 485 < 550;
 COM3" - the Serial Monitor used for the test still holds the port (tooling.md
 trap). The board still runs servo_bench. Re-flash pending Evan closing the
 Serial Monitor.
+
+# Appendix HY - uno_control flashed with backlash 75 us: SELFTEST PASS 86/86 (2026-10-13 ~14:09 CDT)
+**WHAT:** (2026-10-13 ~14:09 CDT) Evan closed the Serial Monitor; uno_control
+at d0c0467 (backlash half-gap 75 us, record HX; new banner, HW) uploaded to
+COM3, exit 0, 11658 B flash / 388 B SRAM. Boot output read back over serial:
+
+    == UNO CONTROL == protocol v0.2, SERVO WIRED; MOTOR, ENCODER, LEDS, PACK UNWIRED
+    SELFTEST PASS 86/86
+
+The board and the repo source match again (important.md #3). The servo now
+boots to 1525 + 75 = 1600 (first command approaches from below).
+
+**Still open:** the 75 us value is verified only by hand in servo_bench (HX);
+through uno_control, ARMED frames cannot move the servo on the bench while the
+pack reads FAULT (HW). host_test.py has not been run on this build.
