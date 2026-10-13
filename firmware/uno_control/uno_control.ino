@@ -31,6 +31,8 @@
  * No motor, servo, encoder, LED or pack exists — nothing in docs/BOM.md is
  * ordered — so every actuator path is verified only as a DECISION this
  * firmware made, never as something that physically moved.
+ * 2026-10-13: the parts arrived (2026-10-10) and the SERVO is now wired to the
+ * board and on the car; motor, encoder, LED strip and pack are still unwired.
  *
  * DEFECT FIXED 2026-09-02 (found by the scheduled daily-audit, Appendix BY;
  * fix recorded in Appendix CA): loop() sampled millis() once at the top, then
@@ -153,20 +155,26 @@ const uint8_t ST_PACK_SHIFT = 4;    // 2 bits: PackState
  * gear backlash compensated (below), the rack lands where the command says, and
  * Evan's two straight-wheel procedures (450 -> 1650 -> 1500 and
  * 2600 -> 1400 -> 1500) both fit a backlash model whose straight-ahead rack
- * position is 1525. Fit to two observations, UNVERIFIED on the bench. */
+ * position is 1525. Fit to two observations, UNVERIFIED on the bench.
+ * MEASURED 2026-10-13 ~14:10 (record HX): holding without a return, straight
+ * is 1600 from the left and 1450 from the right -> centre 1525 confirmed. */
 const uint16_t SERVO_US_CENTRE = 1525;
 const uint16_t SERVO_US_SPAN   = 450;   // +/- from centre; 90% of measured lock
 const uint16_t SERVO_US_SPAN_GEOMETRIC = 500;  // 100% of lock, for SELFTEST
 
 /* STEERING BACKLASH COMPENSATION (Evan, 2026-10-13, records HM-HR).
  * The gear pair before the rack has tooth clearance: the rack lags the servo by
- * half the gap in the direction of motion. Evan's bench numbers fit a gap of
- * ~250 us, i.e. 125 us per side (fit to two observations - UNVERIFIED).
+ * half the gap in the direction of motion. Was 125 per side (record HR, a
+ * fit to two observations). MEASURED 2026-10-13 (record HX, servo_bench, no return to 1500): straight is
+ * held at 1600 approaching from the left and 1450 from the right, the same
+ * from a 950/2100 swing and from the 450/2600 locks -> gap 150 us, 75 per
+ * side. The 125 fit was wrong because both its procedures ended in a return
+ * to 1500, which re-crossed the gap.
  * Evan's choice: overshoot every target by the half-gap in the direction of
  * the last move and HOLD it (no return). The servo then sits at
- * target +/- 125, the rack exactly at the target, and the gear teeth stay
+ * target +/- 75, the rack exactly at the target, and the gear teeth stay
  * pressed. A reversal crosses the whole gap before the rack moves. */
-const uint16_t SERVO_BACKLASH_US = 125;      // half the gear gap (fit, UNVERIFIED)
+const uint16_t SERVO_BACKLASH_US = 75;       // half the gear gap (measured, HX)
 // Hard limits for the commanded pulse, overshoot included. The LEFT lock is the
 // rack's own stop (record HP): its first-contact pulse is NOT measured yet, so
 // the left limit sits 100 us inside the 450 us lock seen on the bench. The right
@@ -790,7 +798,7 @@ void setup() {
 
   Serial.begin(115200);
   delay(200);
-  Serial.println(F("== UNO CONTROL == protocol v0.2, ACTUATORS UNWIRED"));
+  Serial.println(F("== UNO CONTROL == protocol v0.2, SERVO WIRED; MOTOR, ENCODER, LEDS, PACK UNWIRED"));
   selftest();
 }
 

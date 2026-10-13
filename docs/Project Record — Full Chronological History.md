@@ -265,6 +265,8 @@ the dated entry, not the digest.
 - [HT - Steering gated to OUT_DRIVE (audit HJ fix); flash blocked, COM3 busy](#appendix-ht---steering-gated-to-out_drive-audit-hj-fix-flash-blocked-com3-busy-2026-10-13-1150-cdt) (10-13)
 - [HU - uno_control flashed: SELFTEST PASS 86/86 on the board](#appendix-hu---uno_control-flashed-selftest-pass-8686-on-the-board-2026-10-13-1340-cdt) (10-13)
 - [HV - docs-sync pass + snapshot after the mounts/steering session](#appendix-hv---docs-sync-pass--snapshot-after-the-mountssteering-session-2026-10-13-1345-cdt) (10-13)
+- [HW - Steering gate blocks bench steering; banner fix; servo_bench flashed for the backlash test](#appendix-hw---steering-gate-blocks-bench-steering-banner-fix-servo_bench-flashed-for-the-backlash-test-2026-10-13-1400-cdt) (10-13)
+- [HX - Backlash MEASURED: centre 1525 confirmed, half-gap 75 us (not 125)](#appendix-hx---backlash-measured-centre-1525-confirmed-half-gap-75-us-not-125-2026-10-13-1407-cdt) (10-13)
 
 ---
 
@@ -18565,3 +18567,76 @@ this pass was not a section-4 drift check.
 | Test suite | run_checks 16/16; check_artifacts 38 checked, 0 drifted | HL |
 | Research briefs | camera-mast pose; print-friendly CAD rules | HD, HI |
 | Daily audit 2026-10-13 | 61 findings; HIGH ml/splits.py open; disarmed-steering MED fixed | HJ, HT |
+
+# Appendix HW - Steering gate blocks bench steering; banner fix; servo_bench flashed for the backlash test (2026-10-13 ~14:00 CDT)
+**WHAT:** (2026-10-13 ~13:50-14:00 CDT) docs-sync committed and pushed
+(20181ff). Evan asked for an armed-frame steering bench check through
+`firmware/host_test.py` and a banner fix. The check turned out to be
+impossible as designed; servo_bench was flashed instead.
+
+**Finding - the steering gate blocks every bench steer (a defect of mine,
+record HT):** `steerAllowed()` passes only in OUT_DRIVE, and
+`outputModeFor()` returns OUT_DRIVE only when `!packInhibit`. With no pack
+divider wired, A0 floats, the pack reads FAULT, and `inhibits()` is true
+for FAULT (`packguard.h:65`). So on the bench no ARMED frame can ever move the
+servo; it holds its boot pulse. SELFTEST 86/86 tests the gate's truth table,
+which is correct as written, so it could not show that the bench never
+satisfies it. host_test.py has no steer mode either, and adding one would have
+commanded a servo that cannot move. Not fixed: the gate is behaving as
+specified; the open question is whether steering should share the pack
+inhibit (options logged for Evan: steer ignores pack state; a disarmed-only
+bench command; a real voltage on the divider).
+
+Also noted: Pi "full left" (steer -100) targets 1075 us and sends 950 with the
+overshoot; +100 targets 1975 and sends 2100 (SPAN 450 from centre 1525). The
+return to 0 holds 1650 from the left and 1400 from the right.
+
+**Banner fix (source only, NOT on the board):** `uno_control.ino` banner now
+"SERVO WIRED; MOTOR, ENCODER, LEDS, PACK UNWIRED", plus a dated note in the
+header comment. Compiles, exit 0, 11658 B. Still stale, left alone:
+host_test.py docstring lines 8-11 and SERIAL_PROTOCOL.md:9.
+
+**Flash:** Evan chose option 1 - test the compensator's exact pulses by hand.
+`servo_bench` uploaded to COM3, exit 0, 3140 B; banner read back over serial
+at 14:00 CDT: "== SERVO BENCH == type us (400-2600) + Enter, c = centre",
+"-> 1500 us". **The board no longer runs uno_control** (important.md #3);
+re-flash it after the test, which also puts the new banner on the board.
+
+**Test to run (Evan, by hand, Serial Monitor 115200, Newline):**
+950 -> 1650 (wheels straight?), 2100 -> 1400 (straight?), then the full-lock
+pair 450 -> 1650 and 2600 -> 1400. Pass = straight in all four with no 1500
+return. Result: NOT RUN yet.
+
+# Appendix HX - Backlash MEASURED: centre 1525 confirmed, half-gap 75 us (not 125) (2026-10-13 ~14:07 CDT)
+**WHAT:** (2026-10-13 ~14:05 CDT) Evan ran the backlash test from record HW by
+hand in servo_bench (Serial Monitor, Newline), holding with NO return to 1500.
+He reported the hold pulse that made the wheels straight:
+
+| Run | Approach | Straight at |
+|---|---|---|
+| 1. Pi full left | from 950 | 1600 |
+| 2. Pi full right | from 2100 | 1450 |
+| 3. Full left lock | from 450 | 1600 |
+| 4. Full right lock | from 2600 | 1450 |
+
+**Result:** centre (1600 + 1450) / 2 = **1525, confirmed**; half-gap
+(1600 - 1450) / 2 = **75 us, not 125** (gap 150 us). The two swing sizes give
+identical holds, so the dead band does not depend on travel or on loading at
+the lock. Resolution is whatever step Evan used to find "straight" (not
+reported; the values are multiples of 50, so assume about +/-25 us).
+
+**Why the 125 fit (HR) was wrong:** both of Evan's original procedures
+(450 -> 1650 -> 1500, 2600 -> 1400 -> 1500) ended with a return to 1500. That
+return reverses direction and re-crosses the gap, so the 1650/1400 overshoots
+were never the straight-hold values the fit assumed. The earlier "100-150 us"
+estimate (HM-HQ) was the right range.
+
+**Firmware:** `SERVO_BACKLASH_US` 125 -> 75 in `uno_control.ino`, comments
+updated (centre note + compensator block). SELFTEST checks are written in the
+constant; both safe-limit clamp cases still clamp at 75 (560-75 = 485 < 550;
+2550+75 = 2625 > 2600). Compiles, 11658 B.
+
+**Flash: FAILED, not on the board.** Upload at 14:06 CDT: "unable to open port
+COM3" - the Serial Monitor used for the test still holds the port (tooling.md
+trap). The board still runs servo_bench. Re-flash pending Evan closing the
+Serial Monitor.

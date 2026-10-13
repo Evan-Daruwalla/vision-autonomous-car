@@ -524,7 +524,7 @@ transfer gap) must not block the capstone.
         This calibration must be re-measured on the new rack before the
         servo is commanded anywhere near its old span; do not assume it
         scales from the old numbers.
-        **2026-10-13 (Appendices HM-HU): endpoints MEASURED by hand on the bench (left ~450 us = the rack stop, right ~2600 us = the servo's own end) and 100-150 us of gear backlash found; firmware compensation (overshoot 125 us and hold, centre 1525) and safe limits 550..2600 FLASHED, SELFTEST PASS 86/86. NOT the EEPROM calibration this item asks for: values are constants from a model fit to two observations. Done-check NOT passed.**
+        **2026-10-13 (Appendices HM-HU): endpoints MEASURED by hand on the bench (left ~450 us = the rack stop, right ~2600 us = the servo's own end) and 100-150 us of gear backlash found (2026-10-13 HX: MEASURED 150 us gap, 75 per side, centre 1525 confirmed); firmware compensation (overshoot 125 us and hold, centre 1525) and safe limits 550..2600 FLASHED, SELFTEST PASS 86/86. NOT the EEPROM calibration this item asks for: values are constants from a model fit to two observations. Done-check NOT passed.**
     (ii) **Choose a coupling that survives.** ⚠️ **The steering coupler is the
         HIGHEST-torque joint on the car and a PRINTED cross-axle stub FAILS
         there** — SF **0.57-0.96** at MG90S stall (~216 mN·m), against SF

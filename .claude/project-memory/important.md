@@ -19,7 +19,7 @@
 **Source:** CLAUDE.md:20-25.
 
 ## 3. The flashed Uno build and the repo source DIVERGE (2026-09-30)
-**What:** ~~the board runs the 2026-09-02 build (SELFTEST 49/49, 7888 B)~~ ~~**2026-10-10: the board runs `firmware/servo_bench` (Appendix FT); the 2026-09-02 build is gone from it.** The current uno_control source (WS2812B path, EU, FH) has never been flashed; no SELFTEST count exists for it. Actuators are unwired.~~ **2026-10-13 (record HU): the board runs the current uno_control source (backlash compensation HS + steering gate HT), boot banner "SELFTEST PASS 86/86".** The servo is on the car; motor, encoder, strip and pack are still unwired. Any later source edit re-opens the divergence - read the banner.
+**What:** ~~the board runs the 2026-09-02 build (SELFTEST 49/49, 7888 B)~~ ~~**2026-10-10: the board runs `firmware/servo_bench` (Appendix FT); the 2026-09-02 build is gone from it.** The current uno_control source (WS2812B path, EU, FH) has never been flashed; no SELFTEST count exists for it. Actuators are unwired.~~ ~~**2026-10-13 (record HU): the board runs the current uno_control source (backlash compensation HS + steering gate HT), boot banner "SELFTEST PASS 86/86".**~~ **2026-10-13 ~14:00 CDT (record HW): the board runs `firmware/servo_bench` again (for the backlash test); uno_control must be re-flashed after it, and the source now also has a new banner (unflashed).** The servo is on the car; motor, encoder, strip and pack are still unwired. Any later source edit re-opens the divergence - read the banner.
 **Constrains:** read the boot banner before trusting any firmware claim; never assume the repo is what runs.
 **Why:** a test against the wrong build verifies nothing.
 **Source:** HANDOFF.md:27-34; detail in firmware-traps.md.
