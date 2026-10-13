@@ -4,6 +4,12 @@
 // v3 (record GV, Evan): ear supports 6 mm higher (13.3 above the Ls) and less
 // material - two pinned rails along the Ls plus two bridges under the ears,
 // open everywhere else.
+// v4 (Evan, 2026-10-12): the ear bridges start at z 0, the same level as the
+// rails (they used to hang between the rails from z 7.8). Solid down to the Ls'
+// top face; assumes nothing sits between the Ls just outside the servo case.
+// v5 (Evan, 2026-10-12): the bridges no longer overlap the rails - they span
+// only y -12..12, between the rails' inner faces. In v3/v4 the far bridge
+// (x 15..20.5) sat on top of both rails and capped the stud-2 pin holes.
 //
 // FRAME: origin on the servo output shaft. x along the servo's long axis = the
 // L legs (stud 0 = the Ls' axle holes, studs 1, 2, 3 at x 8, 16, 24); y across;
@@ -56,6 +62,7 @@ OPEN_CLEAR = 0.5;
 X0 = NEAR_HOLE_X - EAR_HOLE_FROM_CASE - 1.12;   // -14.5: past the near ear tip (-13.38)
 X1 = 3 * PITCH + L_W / 2;                       // 28: the Ls' far end
 Y_OUT = L_Y + L_W / 2;                          // 20: outer faces of the Ls
+Y_IN = L_Y - L_W / 2;                           // 12: inner faces of the rails (v5 bridge edge)
 
 PIN_X = [PITCH, 2 * PITCH, 3 * PITCH];          // studs 1, 2, 3
 NEAR_BRIDGE = [X0, CASE_CX - CASE_L / 2 - OPEN_CLEAR];        // x -14.5 .. -8.88
@@ -65,8 +72,9 @@ difference() {
   union() {
     // two rails along the Ls
     for (s = [1, -1]) translate([X0, s * L_Y - L_W / 2, 0]) cube([X1 - X0, L_W, RAIL_H]);
-    // two bridges under the ears, rail to rail
-    for (b = [NEAR_BRIDGE, FAR_BRIDGE]) translate([b[0], -Y_OUT, RAIL_H - EPS]) cube([b[1] - b[0], 2 * Y_OUT, EAR_Z - RAIL_H + EPS]);
+    // two bridges under the ears, from the Ls' top face (z 0) like the rails (v4),
+    // only BETWEEN the rails (v5): nothing on top of a rail, so no pin hole is capped
+    for (b = [NEAR_BRIDGE, FAR_BRIDGE]) translate([b[0], -Y_IN - EPS, 0]) cube([b[1] - b[0], 2 * (Y_IN + EPS), EAR_Z]);
   }
   // open space under the whole servo body
   translate([CASE_CX - CASE_L / 2 - OPEN_CLEAR, -(CASE_W / 2 + OPEN_CLEAR), -EPS])

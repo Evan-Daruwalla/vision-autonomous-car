@@ -241,6 +241,9 @@ the dated entry, not the digest.
 - [GV - Servo mount v3: 6 mm higher, rails and bridges instead of a plate](#appendix-gv---servo-mount-v3-6-mm-higher-rails-and-bridges-instead-of-a-plate-2026-10-12-1748-cdt) (10-12)
 - [GW - Motor mount v4; printable electronics tray and deck](#appendix-gw---motor-mount-v4-printable-electronics-tray-and-deck-2026-10-12-1912-cdt) (10-12)
 - [GX - Camera in shipping; open requirements: motor cable routing, sturdy camera mast](#appendix-gx---camera-in-shipping-open-requirements-motor-cable-routing-sturdy-camera-mast-2026-10-12-2054-cdt) (10-12)
+- [GY - Servo mount v4: ear bridges start from the rail level (z 0)](#appendix-gy---servo-mount-v4-ear-bridges-start-from-the-rail-level-z-0-2026-10-12-2106-cdt) (10-12)
+- [GZ - Motor mount v5: three pins per side (x -16, 0, +16)](#appendix-gz---motor-mount-v5-three-pins-per-side-x--16-0-16-2026-10-12-2113-cdt) (10-12)
+- [HA - Servo mount v5: ear bridges only between the rails; GZ time correction](#appendix-ha---servo-mount-v5-ear-bridges-only-between-the-rails-gz-time-correction-2026-10-12-2115-cdt) (10-12)
 
 ---
 
@@ -17850,3 +17853,109 @@ paste-ready prompt); important.md entry 1 (camera status); hardware.md
 (the two requirements); PRD task 7 note. HTML twin / record index: the
 project has neither. Bins the cadence hook names as stalest (performance,
 security, ui) hold no fact this session changed - untouched.
+
+# Appendix GY - Servo mount v4: ear bridges start from the rail level (z 0) (2026-10-12, ~21:06 CDT)
+**WHAT:** Evan (2026-10-12): the part that holds the servo should start from
+the same level as the rails that pin onto the two L liftarms. Servo mount v4
+(`cad/scad/servo_mount.scad`, `cad/servo_mount.stl`) does that: both ear
+bridges are now solid from z 0 (the Ls' top face, where the rails sit) up to
+the ear underside at z 13.3. In v3 (record GV) they hung between the rails
+from z 7.8, over open space.
+
+**Unchanged:** rails, pin holes (studs 1-3 of both Ls, PIN_D 4.875), pilots
+(1.7, 6.0 deep), the open space under the servo case, bbox
+(-14.5, -20, 0)..(28, 20, 13.3). Bridges: near x -14.5..-8.88, far
+x 15.0..20.5, full width y -20..20.
+
+**Side effect:** the bottom face is now flat on the bed everywhere; the 24 mm
+bridge spans over open air in v3 are gone.
+
+**Assumption (not checked on the car):** nothing on the car sits between the
+two Ls just outside the servo case (x -14.5..-8.88 and 15.0..20.5,
+z 0..7.8). If something does, the bridge will hit it.
+
+**Checks (real output, 2026-10-12 ~21:06 CDT):**
+- Probe file: the two points under the bridges ((-12,0,5), (18,0,5)) moved
+  from open to solid; added solids (-12,5,0.5), (18.5,-5,0.5).
+- Planted-bug run: an extra open point (-12,0,2) made the render FAIL
+  ("point (-12, 0, 2) is solid (expected open)", OVERALL FAIL, NOT WRITTEN,
+  exit 1) - the probe sees the new material. Removed after.
+- Real render: probes 90/90 PASS, OVERALL PASS, 262484 bytes, sha256
+  fe262c15060a97ca...; volume 8819.35 mm^3.
+- `scripts/check_artifacts.py`: 37 checked, 0 drifted, 0 errored, 2 uncheckable.
+- `scripts/run_checks.py`: 16 passed, 0 failed, 0 skipped (of 16).
+
+**Status:** UNTESTED - not printed, not fitted.
+
+# Appendix GZ - Motor mount v5: three pins per side (x -16, 0, +16) (2026-10-12, ~21:13 CDT)
+**WHAT:** Evan (2026-10-12): the motor mount gets two more connection points
+on each side, one 2 studs in front of the existing pin and one 2 studs
+behind. Motor mount v5 (`cad/scad/motor_mount.scad`, `cad/motor_mount.stl`):
+pin sockets at x -16, 0, +16 on both sides (y +/-16) - six real black 2780
+pins instead of two. Each arm is now one rail x -20..20 (was x -4..4), same
+cross-section (y 11.6..19.9, z 21.0..33.13, top flush with the short beams'
+underside). Same socket shape at all six (6.2 x 0.8 recess, 4.875 bore 6.2
+long, 6.2 x 2.0 snap cavity; decisions.md).
+
+**Unchanged:** cradle, floor, walls, lips, back wall, zip slots.
+
+**Assumptions (not checked on the car):**
+1. The two short beams holding A/B have pin holes at x +/-16 at the same
+   underside height (33.13). The old ghost beams were 3 studs (x -12..12), a
+   guess; the ghosts are now 5 studs (x -20..20), also assumed.
+2. A rail runs continuously under the beam holes at x +/-8. Anything hanging
+   below those holes (a pin end, another part) hits it.
+3. Pre-existing, now longer: each rail's outer face (y 19.9) overlaps the
+   ASSUMED white-beam position (y 18.75..26.75, z 22.5..30.5) by 1.15 mm. v4
+   had this over x -4..4; v5 has it over x -8..20. The 18.75 figure is still
+   "to confirm" (record GF).
+
+**Checks (real output, 2026-10-12 ~21:13 CDT):**
+- Probes written FIRST and run against the unchanged v4 scad: FAIL, 24
+  checks (bbox min x -8.350 vs -20; 16 ring points around the four new bores
+  "open, expected solid"; new solid points). So the probes see the new sockets.
+- v5 render: probes 126/126 PASS, OVERALL PASS, 250084 bytes, sha256
+  d3d73735c60d947e..., volume 8737.24 mm^3, bbox (-20, -19.9, 21.0)..(27.5,
+  19.9, 33.13).
+- Probe point (20, 12, 22.5) moved to (22, 12, 22.5): x 20 is now the rail's
+  end face, and the point still checks that the floor extension stays narrow.
+- `scripts/check_artifacts.py`: 37 checked, 0 drifted, 0 errored, 2 uncheckable.
+- `scripts/run_checks.py`: 16 passed, 0 failed, 0 skipped (of 16).
+
+**Status:** UNTESTED - v5 not printed, not fitted.
+
+# Appendix HA - Servo mount v5: ear bridges only between the rails; GZ time correction (2026-10-12, ~21:15 CDT)
+**WHAT:** Evan (2026-10-12): the servo's cross beams (the two ear bridges)
+must not overlap the beams that carry the connector pegs (the two rails).
+Servo mount v5 (`cad/scad/servo_mount.scad`, `cad/servo_mount.stl`): both
+bridges now span only y -12..12, between the rails' inner faces (Y_IN = 12),
+still z 0..13.3. Nothing sits on top of a rail.
+
+**Defect this removes:** in v3 (GV) and v4 (GY) the far bridge (x 15..20.5)
+ran across both rails and sat on top of them, capping the stud-2 pin holes
+at (16, +/-16) - their bores were cut only through the 7.8 mm rail. The v3
+header called stud 2 "a spare", so the cap went unnoticed. Now all six peg
+holes (studs 1-3, both sides) are open top to bottom.
+
+**Trade-off:** each bridge now joins each rail only through the rail's inner
+face (about 5.5-5.6 mm along x by 7.8 mm high); above z 7.8 the bridges
+stand free between the rails. Same single print, so the material is
+continuous, but the joint is smaller than in v4. Untested under servo load.
+
+**Checks (real output, 2026-10-12 ~21:15 CDT):**
+- Probes written first and run against the unchanged v4: FAIL, 6 checks -
+  (16, 16, 10) and (16, -16, 10) "solid (expected open)" (the capped stud-2
+  holes), plus (-12, 16, 10), (18.5, -16, 10), (-12, 13, 8.5), (18, -13, 8.5).
+  The v4 solid points (-12, 16, 10) and (18.5, -16, 10) became open points;
+  added solids (-12, 11.5, 12), (18, -11.5, 12), (-12, 12.5, 4), (18, -12.5, 4).
+- v5 render: manifold PASS, probes 98/98 PASS, OVERALL PASS, 262084 bytes,
+  sha256 903963f58a3d2746..., volume 7842.44 mm^3, bbox unchanged
+  (-14.5, -20, 0)..(28, 20, 13.3).
+- `scripts/check_artifacts.py`: 37 checked, 0 drifted, 0 errored, 2 uncheckable.
+- `scripts/run_checks.py`: 16 passed, 0 failed, 0 skipped (of 16).
+
+**Status:** UNTESTED - v5 not printed, not fitted.
+
+**Correction to Appendix GZ:** its heading and its checks line say
+"~21:13 CDT"; `date` read 21:11:13 CDT when GZ was appended. The body was
+written before the clock was read. The real time is 21:11 CDT.

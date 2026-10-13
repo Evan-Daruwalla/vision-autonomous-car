@@ -5,7 +5,11 @@
 // v4 (record GW): walls + floor 11 mm longer at the front, walls 0.2 mm in,
 // a 1.5 x 1.5 front lip on each wall. Evan accepted the risk that the longer
 // floor runs under the coupler.
-// STATUS: UNTESTED as v4. v1 (printed pin stubs, full-length side walls) was
+// v5 (Evan, 2026-10-12): two more pins per side, 2 studs in front of and 2
+// studs behind A/B (x +16 and -16); each arm is now one rail x -20..20.
+// ASSUMED: the short beams have holes at x +/-16 at the same underside
+// height, and nothing hangs below their x +/-8 holes onto the rail.
+// STATUS: UNTESTED as v5. v1 (printed pin stubs, full-length side walls) was
 // printed by Evan: dimensions "alright", but the back third of the side walls
 // hit the encoder housing (record GL). v2: those wall sections removed, a back
 // wall added, and REAL black friction pins instead of printed stubs.
@@ -38,6 +42,9 @@ LIP_IN = 1.5;             // ... sticking 1.5 inward from each wall; sides only,
 ARM_Y0 = 11.6;
 ARM_Y1 = 19.9;            // room for the 6.2 recess/cavity around a pin at y 16
 PIN_Y = 16;
+PIN_X = [-16, 0, 16];      // v5: A/B plus one 2 studs ahead (+x) and one 2 studs behind
+ARM_X0 = -20;              // v5: arms run under all three pins (was -4..4)
+ARM_X1 = 20;
 BEAM_UNDER = 33.13;       // underside of the short beams holding A/B (record GI)
 ARM_TOP = BEAM_UNDER;     // flush, like two pinned Lego beams
 PIN_D = 4.875;            // 4.80 + 0.075 (Evan, 2026-10-12, record GU)
@@ -88,11 +95,11 @@ difference() {
     // 2b back wall
     translate([BACK_X - BACK_T, -WALL_OUT, FLOOR_Z1]) cube([BACK_T, 2 * WALL_OUT, BACK_TOP - FLOOR_Z1]);
     // 3 arms and their y-mirror
-    translate([-4, ARM_Y0, FLOOR_Z0]) cube([8, ARM_Y1 - ARM_Y0, ARM_TOP - FLOOR_Z0]);
-    translate([-4, -ARM_Y1, FLOOR_Z0]) cube([8, ARM_Y1 - ARM_Y0, ARM_TOP - FLOOR_Z0]);
+    translate([ARM_X0, ARM_Y0, FLOOR_Z0]) cube([ARM_X1 - ARM_X0, ARM_Y1 - ARM_Y0, ARM_TOP - FLOOR_Z0]);
+    translate([ARM_X0, -ARM_Y1, FLOOR_Z0]) cube([ARM_X1 - ARM_X0, ARM_Y1 - ARM_Y0, ARM_TOP - FLOOR_Z0]);
   }
   // 4 pin sockets
-  for (s = [1, -1]) translate([0, s * PIN_Y, 0]) pin_socket();
+  for (x = PIN_X, s = [1, -1]) translate([x, s * PIN_Y, 0]) pin_socket();
   // 5 zip slots through the floor
   for (x = ZIP_X, y = [ZIP_Y, -ZIP_Y])
     translate([x, y, FLOOR_Z0]) zip_slot(ZIP_W, ZIP_T, FLOOR_Z1 - FLOOR_Z0);
@@ -109,7 +116,7 @@ difference() {
 ghost_box([24, 12, 10], [0, -6, 21.2]);            // gearbox + can
 ghost_box([8, 12.5, 10.5], [-8, -6.25, 20.95]);    // encoder
 ghost_box([6, 9.6, 3.75], [-7, -4.8, 31.45]);      // connector
-ghost_box([24, 8, 8], [-12, 12, 33.13]);           // beam A
-ghost_box([24, 8, 8], [-12, -20, 33.13]);          // beam B
+ghost_box([40, 8, 8], [-20, 12, 33.13]);           // beam A (v5: 5 studs assumed)
+ghost_box([40, 8, 8], [-20, -20, 33.13]);          // beam B (v5: 5 studs assumed)
 ghost_box([32, 8, 8], [-8, 18.75, 22.5]);          // white beam (assumed)
 ghost_box([32, 8, 8], [-8, -26.75, 22.5]);         // white beam (assumed)
