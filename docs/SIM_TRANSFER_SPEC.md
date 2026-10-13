@@ -230,6 +230,15 @@ is the safe direction to err.
      frame (35% down)** at 90° vertical FOV, and the real projection
      reproduces the training projection in pitch. Checkable with a spirit
      level and one test photo.
+   - **CORRECTION 2026-10-12 (`docs/research/2026-10-12_camera-mast-pose.md`):
+     the row-42 target above does NOT hold for the real lens.** The Camera
+     Module 3 Wide's VERTICAL FOV is 67 deg (official spec), not the sim's 90,
+     so row 42 means a 10.9 deg pitch and still misses the sim projection by
+     13-17 px RMS. Height is now measured: the sim camera sat at 0.435 x the
+     lane width (corpus lane-width profile, zero at row 42.36 vs horizon
+     41.97). Recommended: lens 109 mm above the floor, pitch 28-30 deg, over
+     or just ahead of the front axle, plus a software rotation remap to the
+     sim view (exact for a matched camera centre; 92-96% coverage).
 4. **Achievable control rate on the target board.** Determines whether §2.1
    holds at all.
 

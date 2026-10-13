@@ -246,6 +246,7 @@ the dated entry, not the digest.
 - [HA - Servo mount v5: ear bridges only between the rails; GZ time correction](#appendix-ha---servo-mount-v5-ear-bridges-only-between-the-rails-gz-time-correction-2026-10-12-2115-cdt) (10-12)
 - [HB - Servo mount v6: bridge-to-rail gussets](#appendix-hb---servo-mount-v6-bridge-to-rail-gussets-2026-10-12-2119-cdt) (10-12)
 - [HC - Motor mount v6: side walls 3 mm taller](#appendix-hc---motor-mount-v6-side-walls-3-mm-taller-2026-10-12-2129-cdt) (10-12)
+- [HD - Camera mast research brief: 109 mm, 28-30 deg, front axle, remap](#appendix-hd---camera-mast-research-brief-109-mm-28-30-deg-front-axle-remap-2026-10-12-2139-cdt) (10-12)
 
 ---
 
@@ -18020,3 +18021,47 @@ confirmed; at 26.2 the walls stayed under that height, at 29.2 they do not.
 - `scripts/run_checks.py`: 16 passed, 0 failed, 0 skipped (of 16).
 
 **Status:** UNTESTED - v6 not printed, not fitted.
+
+# Appendix HD - Camera mast research brief: 109 mm, 28-30 deg, front axle, remap (2026-10-12, ~21:39 CDT)
+**WHAT:** Evan (2026-10-12): /research-brief for the camera mast - ideal
+height, pitch and placement "biased off of the training we've already done"
+(GX open requirement b). Brief:
+`docs/research/2026-10-12_camera-mast-pose.md`. Desk + computation; the
+camera is still in shipping, so nothing is measured on real hardware.
+
+**Findings (detail and sources in the brief):**
+1. NEW MEASUREMENT - sim camera height, which Appendix AR could not
+   identify. The lane's pixel width (yellow centre line to the right white
+   line) is linear in image row on the generated-roads corpus; its zero
+   sits at row 42.36 (p50; all-profile 42.39) against the sky horizon 41.97
+   (AR). Slope gives lane / camera height W/h = 2.2971 (r0 fixed; IQR
+   2.2906-2.3107; no-filter 2.3216), i.e. h_sim = 0.435 x lane.
+2. Sim source (tawnkramer/sdsandbox master ec04c400, raw files, re-read by
+   me after a research agent): Donkey_new_phys.prefab camera y 1.1203952,
+   15.0 deg pitch, fov 90; 1.61-1.73 units above ground. Prefab pitch 15.0
+   vs in-world 16.3 (AR) - kept as a discrepancy. Consistent with (1), not
+   independent of it.
+3. Camera Module 3 Wide VERTICAL FoV is 67 deg (Raspberry Pi docs raw
+   hardware_specification.adoc; H 102, f 2.75 mm, 6.45 x 3.63 mm, motorised
+   focus ~5 cm to infinity). The sim's 90 is vertical. Appendix AI's
+   "matches within 2-4 deg" compared H and diagonal only. CORRECTION to
+   SIM_TRANSFER_SPEC 5.3's mount target (horizon on row 42): for this lens
+   that is 10.9 deg pitch and still 13-17 px RMS off. Dated note added there.
+4. No mount pose reproduces the sim projection (best direct fit 22.65 deg,
+   104 mm lens height: 9.2 px RMS on 160x120).
+5. Recommended: lens 109 mm above the floor (+/-3 mm; up to ~6 mm lower if
+   the 250 mm lane is edge-to-edge of the markings - undefined in the repo),
+   pitch 28-30 deg down (92-96% coverage of the sim's road pixels), over or
+   just ahead of the front axle (no tyre/body in frame), plus a software
+   rotation + lens remap to the sim view (exact at the matched height).
+   Mast: pinned pitch 20-35 deg, +/-0.3 deg repeatable, first resonance
+   >= 35-50 Hz (rule of thumb), exposure ~1 ms, autofocus locked.
+
+**Process:** stage 8.5 caught a sign error in my own coverage script
+(maximum on the search boundary; fixed, self-check added - horizon row
+41.95 as predicted). Stage 10.5 cold assessment downgraded 3 claims, added 4
+limitations, corrected 2 numbers; one extra round (filter sensitivity, focus
+range). Scratch scripts were not committed.
+
+**Status:** desk result. Nothing printed, nothing measured on the real
+camera. The mast is NOT designed yet.

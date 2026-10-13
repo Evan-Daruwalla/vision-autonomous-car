@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-12 ~21:29 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-12 ~21:40 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 211 appendices A–HC; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 212 appendices A–HD; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -638,7 +638,7 @@ NEXT ACTIONS, cheapest first:
    - OPEN REQUIREMENTS (Evan, GX), not designed yet: (a) the motor's encoder
      cable comes up from BELOW the frames - the tray needs a cable channel
      (the bank now sits right over the lightening window above the motor);
-     (b) a mounting place for a STURDY camera mast (deck has the Pi's camera
+     (b) a mounting place for a STURDY camera mast - FIGURES IN (HD, docs/research/2026-10-12_camera-mast-pose.md): lens 109 mm above floor, pitch 28-30 deg, over/just ahead of the front axle, + software remap; Module 3 Wide V-FOV is 67 not 90, so the old row-42 target is wrong (deck has the Pi's camera
      connector facing forward, no mast mount yet); E11 (top-down photo + heights) for the electronics.
      Known defect: the deck's rocker hole sits over the holder/BMS.
    - DECISION (GM): every printed part uses real black 2780 pins, no printed
