@@ -10,13 +10,16 @@
 // y 85 (tie strip 0.6 -> 2.6 mm, Rule 8), 45 deg wedges under the four outer posts,
 // pockets from fit class "pocket" (Rules 2, 11), 0.5 lead-in chamfers on the pocket
 // tops (Rule 5). Print as modelled: z = 0 on the bed. See the record entry of 2026-10-13.
+// v4 (2026-10-13): deck raised 2 mm (posts to z 32.0) - the 2S holder (20.5 tall, top
+// z 30.3) hit the deck underside at 30.0. LAYOUT list = every layer-1 electronic part
+// (preview ghosts + echoed for scripts/electronics_layout.py).
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, the Lego pin rows at y = +/-24; z = 0 on the Lego frames' top face, z up. mm.
 //
 // Layout: two rails (pinned to the frames), a floor with a lightening window, a
 // holder lobe (+y), a small-parts lobe (-y), a three-sided bank fence (no rear wall,
-// for ports), a holder fence, four feet, ribs under the floor, and six deck posts (pinned, z up to 30.0).
+// for ports), a holder fence, four feet, ribs under the floor, and six deck posts (pinned, z up to 32.0).
 
 use <lib/lego.scad>
 EPS = 0.01;
@@ -29,7 +32,7 @@ FLOOR_TOP = RAIL_H + FLOOR_T;   // 9.8
 FENCE_T = 2.0;
 FENCE_H = 4.0;
 FENCE_TOP = FLOOR_TOP + FENCE_H;   // 13.8
-POST_TOP = 30.0;
+POST_TOP = 32.0;
 POST_S = 8.0;
 FOOT_S = 8.0;
 
@@ -146,7 +149,16 @@ difference() {
 }
 
 // preview-only ghosts
-ghost_box([151.5, 70.55, 18.0], [-4, -35.275, FLOOR_TOP]);          // battery bank
-ghost_box([75.75, 40.5, 20.5], [58.125, 37.85, FLOOR_TOP]);         // battery holder
-ghost_box([38.5, 18.5, 6.3], [70, -66, FLOOR_TOP]);                 // charger
+// LAYOUT: [name, [sx, sy, sz], [x, y, z], kind, held by, ports]; kind part | zone | note.
+// A zone reserves space for a part whose size is NOT measured.
+LAYOUT = [
+  ["battery bank (Pi power)", [151.5, 70.55, 18.0], [-4, -35.275, FLOOR_TOP], "part", "bank fence, open at the rear", "-x: USB-C + USB-A (20 / 45 mm from the left)"],
+  ["2S holder + 2x Samsung 25R", [75.75, 40.5, 20.5], [58.125, 37.85, FLOOR_TOP], "part", "holder fence + 2 zip ties (slots x 75, 117)", "leads red / black + MB wire; exit end not measured"],
+  ["USB-C 2S charger (Adeept p0374)", [38.5, 18.5, 6.3], [60, -69.5, FLOOR_TOP], "part", "zip ties at x 64 and 92", "-x: USB-C (check on the board)"],
+  ["2S BMS (ACEIRMC B08HLQQCQJ)", [41, 8, 2.2], [66, -83, FLOOR_TOP], "part", "double-sided tape", "pads B+ B- MB P+ P-"],
+  ["fuse holder zone (body NOT measured)", [15, 9.5, 15], [108, -84, FLOOR_TOP], "zone", "tape or the tie at x 120", "inline 3 A ATO on the CELL+ wire"],
+  ["XT30 pair zone (mated length not stated)", [26, 17, 11], [102, -69, FLOOR_TOP], "zone", "zip tie at x 120", "BMS P+ / P- side; car side to the rocker"]
+];
+for (p = LAYOUT) if (p[3] != "note") ghost_box(p[1], p[2]);
+echo(LAYOUT_PARTS = LAYOUT);
 ghost_box([168, 56, 7.8], [-4, -28, -7.8]);                         // middle frames (approx)

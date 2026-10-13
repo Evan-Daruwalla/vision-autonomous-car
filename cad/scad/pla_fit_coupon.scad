@@ -9,11 +9,14 @@
 //     fin and out above the pilot block.
 //   - Self-tapping servo-screw pilot holes: 1.5 / 1.7 / 1.9 mm.
 //   - Zip-tie slots: 3.0 / 3.5 / 4.0 / 5.0 mm wide, 1.8 mm thick.
+//   - Row D (added 2026-10-13): the exact hole the mounts use (6.2 x 0.8 recess on
+//     BOTH faces) at 4.90 / 4.95 / 5.00 / 5.05 mm - the mounts use 4.95 (fit class
+//     friction_pin).
 //
 // ORIENTATION: the chamfered corner at x=0, y=0 marks the 4.75 end. Diameters
 // grow along +X in rows A and B.
 //
-// MAP (mm; x right, y back, z up; 72 x 34 x 17 overall)
+// MAP (mm; x right, y back, z up; 72 x 42 x 17 overall)
 //   Region 1, plate x 0..48, y 0..24, z 0..7.8
 //     row A  y=4   plain holes, x = 4, 12, 20, 28, 36, 44
 //     row B  y=12  counterbored (top, 0.8 deep, 6.2 dia), same x and diameters
@@ -26,6 +29,8 @@
 //     pilot holes at y=16, x = 52, 60, 68 (1.5 / 1.7 / 1.9)
 //   Region 4, strip x 0..72, y 24..34, z 0..3
 //     zip slots at y=29, x = 9, 27, 45, 63 (3.0 / 3.5 / 4.0 / 5.0 wide)
+//   Region 5, bar x 0..32, y 34..42, z 0..7.8
+//     row D y=38, x = 4, 12, 20, 28 (4.90 / 4.95 / 5.00 / 5.05), recess top and bottom
 //
 // Render with scripts/render_scad.py: it checks the mesh against
 // pla_fit_coupon.probe.json before it writes cad/pla_fit_coupon.stl.
@@ -40,12 +45,14 @@ difference() {
     translate([48, 0, 0]) cube([24, T, 17]);    // region 2: horizontal-hole fin
     translate([48, T, 0]) cube([24, 24 - T, T]); // region 3: pilot holes
     translate([0, 24, 0]) cube([72, 10, 3]);    // region 4: zip-slot strip
+    translate([0, 34 - EPS, 0]) cube([32, 8 + EPS, T]);   // region 5: row D bar
   }
   for (i = [0 : 5]) translate([4 + 8 * i, 4, 0]) technic_hole(d = DIAS[i], h = T);               // row A plain
   for (i = [0 : 5]) translate([4 + 8 * i, 12, 0]) technic_hole(d = DIAS[i], h = T, cb_top = 0.8); // row B counterbored
   for (i = [0 : 5]) translate([4 + 8 * i, 20, 0]) technic_hole(d = 4.90, h = T);                  // row C pitch check
   for (i = [0 : 2]) translate([52 + 8 * i, 0, 12.5]) rotate([-90, 0, 0]) technic_hole(d = [4.8, 4.9, 5.0][i], h = T); // horizontal, along +Y
   for (i = [0 : 2]) translate([52 + 8 * i, 16, 0]) pilot_hole([1.5, 1.7, 1.9][i], T);
+  for (i = [0 : 3]) translate([4 + 8 * i, 38, 0]) technic_hole(d = [4.90, 4.95, 5.00, 5.05][i], h = T, cb_d = 6.2, cb_top = 0.8, cb_bot = 0.8);   // row D as-built: Lego recess both faces
   for (i = [0 : 3]) translate([9 + 18 * i, 29, 0]) zip_slot(w = [3.0, 3.5, 4.0, 5.0][i], t = 1.8, h = 3);
   translate([0, 0, -EPS]) linear_extrude(T + 1) polygon([[-EPS, -EPS], [1.5, -EPS], [-EPS, 1.5]]); // orientation chamfer at the 4.75 corner
 }

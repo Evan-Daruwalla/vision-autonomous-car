@@ -163,6 +163,12 @@ ARTIFACTS = [
          cmd=["scripts/render_scad.py", "cad/scad/electronics_deck.scad", "-o", "{out}"]),
     dict(kind="file", artifact="cad/camera_mast.stl",
          cmd=["scripts/render_scad.py", "cad/scad/camera_mast.scad", "-o", "{out}"]),
+    # Pocket gauge (2026-10-13): drop-in width gauges for the bank, Pi case and holder pockets.
+    dict(kind="file", artifact="cad/pla_pocket_gauge.stl",
+         cmd=["scripts/render_scad.py", "cad/scad/pla_pocket_gauge.scad", "-o", "{out}"]),
+    # Electronics layout drawing (2026-10-13): from the tray/deck LAYOUT lists + STLs; exits 1 on a collision.
+    dict(kind="file", artifact="docs/electronics_layout.svg",
+         cmd=["scripts/electronics_layout.py", "-o", "{out}"]),
     dict(kind="file", artifact="cad/tolerance_coupon_v2.stl",
          cmd=["scripts/gen_tolerance_coupon.py", "-o", "{out}"]),
 

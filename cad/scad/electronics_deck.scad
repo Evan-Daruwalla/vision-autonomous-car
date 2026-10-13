@@ -1,6 +1,6 @@
 // Electronics DECK v1 (2026-10-12): PLA plate that sits on the six posts of the
 // electronics tray and carries the Raspberry Pi 5 case (corner brackets), the
-// Arduino Uno (4 standoffs + pegs) and two LM2596 buck boards (4 standoffs + pegs).
+// Arduino Uno (4 standoffs + pegs) and one LM2596 buck board (66 x 36, holes 61 x 31; record FZ) on 4 standoffs + pegs.
 // UNTESTED - not printed.
 // spec: record GW
 // v2 (2026-10-12): encoder-cable slot (x 100..108, y -41.0..-38.5), above the tray's; see the record entry of that date.
@@ -8,11 +8,13 @@
 // Pi case pocket from fit class "pocket" (was zero clearance; Rules 2, 11), 0.5 lead-in
 // chamfer on the Pi bracket tops (Rule 5), 0.4 chamfers on both faces of the rocker hole
 // (Rules 5, 6), 0.4 lead-in on the Uno / LM2596 peg tops. Print as modelled: the
-// underside (z = 30.0) on the bed. See the record entry of 2026-10-13.
+// underside (z = 32.0) on the bed. See the record entry of 2026-10-13.
+// v4 (2026-10-13): raised 2 mm (underside z 32.0) to clear the tray's 2S holder; LAYOUT
+// list = every layer-2 electronic part (preview ghosts + echoed for scripts/electronics_layout.py).
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, pin rows at y = +/-24; z = 0 on the Lego frames' top face. The deck's
-// underside is z = 30.0 (the top of the tray's posts). mm.
+// underside is z = 32.0 (the top of the tray's posts). mm.
 
 use <lib/lego.scad>
 EPS = 0.01;
@@ -20,12 +22,12 @@ $fn = 64;
 PIN_D = lego_pin_d();     // 4.95: lib/lego.scad fit class "friction_pin" (record GU, HG)
 
 // deck levels
-DECK_BOT = 30.0;          // top of the tray posts
+DECK_BOT = 32.0;          // top of the tray posts
 PLATE_T = 2.5;
-DECK_TOP = DECK_BOT + PLATE_T;    // 32.5
+DECK_TOP = DECK_BOT + PLATE_T;    // 34.5
 BOSS = 8.0;               // pin boss footprint, square
 BOSS_H = 7.8;             // a Lego beam's height
-BOSS_TOP = DECK_BOT + BOSS_H;     // 37.8
+BOSS_TOP = DECK_BOT + BOSS_H;     // 39.8
 
 // plate, wing, rocker tab
 PLATE_X = [-6, 156];
@@ -45,22 +47,22 @@ PI_Y0 = -32.2 - POCKET_C;
 PI_Y1 = 32.2 + POCKET_C;
 BR_T = 1.5;               // bracket wall thickness
 BR_LEG = 10.0;            // free leg length beyond the case corner
-BR_H = 6.0;               // bracket height above the deck (z 32.5..38.5)
+BR_H = 6.0;               // bracket height above the deck (z 34.5..40.5)
 LEAD = 0.5;               // lead-in chamfer on the Pi bracket tops (Rule 5)
 
 // Arduino Uno standoffs and pegs
 UNO_XY = [[0.54, -19.05], [15.78, 31.75], [43.72, 31.75], [48.8, -20.32]];
 UNO_SO_D = 6.0;
-UNO_SO_H = 4.0;           // z 32.5..36.5
+UNO_SO_H = 4.0;           // z 34.5..38.5
 UNO_PEG_D = 3.0;
-UNO_PEG_H = 3.0;          // z 36.5..39.5
+UNO_PEG_H = 3.0;          // z 38.5..41.5
 
 // LM2596 standoffs and pegs
 LM_XY = [[64.5, -44.5], [125.5, -44.5], [64.5, -75.5], [125.5, -75.5]];
 LM_SO_D = 6.0;
-LM_SO_H = 3.0;            // z 32.5..35.5
+LM_SO_H = 3.0;            // z 34.5..37.5
 LM_PEG_D = 2.8;
-LM_PEG_H = 3.0;           // z 35.5..38.5
+LM_PEG_H = 3.0;           // z 37.5..40.5
 
 // cut-outs
 VENT_X = [65, 137];
@@ -132,10 +134,17 @@ difference() {
   for (p = ZIP_XY)
     translate([p[0], p[1], DECK_BOT - EPS]) zip_slot(ZIP_W, ZIP_T, PLATE_T + 2 * EPS);
   // encoder-cable slot (x 100..108, y -41.0..-38.5), above the tray's
-  translate([100, -41.0, 30.0 - EPS]) cube([8, 2.5, 2.5 + 2 * EPS]);
+  translate([100, -41.0, DECK_BOT - EPS]) cube([8, 2.5, 2.5 + 2 * EPS]);
 }
 
 // preview-only ghosts
-ghost_box([91.8, 64.4, 27.2], [55.1, -32.2, 32.5]);         // Pi case
-ghost_box([53.34, 68.58, 20], [-2, -34.29, 36.5]);          // Uno
-ghost_box([66, 36, 14], [62, -78, 35.5]);                   // LM2596
+// LAYOUT: [name, [sx, sy, sz], [x, y, z], kind, held by, ports]; kind part | zone | note.
+LAYOUT = [
+  ["Raspberry Pi 5 in Vilros case", [91.8, 64.4, 27.2], [55.1, -32.2, DECK_TOP], "part", "4 corner brackets, pocket +0.25 per side", "+x: camera + USB-C power; -x: 2x USB-A + LAN"],
+  ["Arduino Uno R3 + proto shield (TB6612, caps, divider)", [53.34, 68.58, 20], [-2, -34.29, DECK_TOP + UNO_SO_H], "part", "4 standoffs + pegs", "-y: USB-B (to the Pi) + DC jack; height NOT measured"],
+  ["LM2596 buck, 5.00 V (display)", [66, 36, 14], [62, -78, DECK_TOP + LM_SO_H], "part", "4 standoffs + pegs", "display up; trim pot locked"],
+  ["rocker switch (20 mm round)", [20, 20, 0], [-28, -42, DECK_TOP], "note", "snap-in 20 mm hole", "body hangs below the tab; depth NOT measured"]
+];
+for (p = LAYOUT) if (p[3] != "note") ghost_box(p[1], p[2]);
+echo(LAYOUT_PARTS = LAYOUT);
+echo(LAYOUT_PEGS = concat(UNO_XY, LM_XY));

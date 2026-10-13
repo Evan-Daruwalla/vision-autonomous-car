@@ -270,6 +270,7 @@ the dated entry, not the digest.
 - [HY - uno_control flashed with backlash 75 us: SELFTEST PASS 86/86](#appendix-hy---uno_control-flashed-with-backlash-75-us-selftest-pass-8686-2026-10-13-1409-cdt) (10-13)
 - [HZ - Decision: steering gate unchanged; end-to-end steer test waits for the pack](#appendix-hz---decision-steering-gate-unchanged-end-to-end-steer-test-waits-for-the-pack-2026-10-13-1416-cdt) (10-13)
 - [IA - Electronics tray + deck v3: print-friendly redo per the CAD-rules brief](#appendix-ia---electronics-tray--deck-v3-print-friendly-redo-per-the-cad-rules-brief-2026-10-13-1441-cdt) (10-13)
+- [IB - Fit coupon row D + pocket gauge; deck raised 2 mm; verified electronics layout, every part accounted for](#appendix-ib---fit-coupon-row-d--pocket-gauge-deck-raised-2-mm-verified-electronics-layout-every-part-accounted-for-2026-10-13-1510-cdt) (10-13)
 
 ---
 
@@ -18755,3 +18756,67 @@ byte-identically and scanned them for overhangs independently.
 ~21 mm bridges are within normal PLA bridging but Bambu gives no number;
 print with z 0 on the bed (tray) / the underside on the bed (deck), no
 supports expected. Rule 3 still says print the PLA fit coupon first.
+
+# Appendix IB - Fit coupon row D + pocket gauge; deck raised 2 mm; verified electronics layout, every part accounted for (2026-10-13 ~15:10 CDT)
+**WHAT:** (2026-10-13 ~14:50-15:10 CDT) Evan: "1 then verify and give layout
+for all the electronics on the trays" (1 = coupon pin row + pocket test), then
+"I have 22 pieces make sure everything is accounted for" ("not exactly 22 but
+you know what i mean"). Planned in plan mode; plan-split rule: Opus reasoned
+and specified, three Sonnet agents coded disjoint files, Opus reviewed every
+diff and re-ran every check. All parts UNTESTED - nothing printed.
+
+**Found while planning (Opus), decided by Evan (AskUserQuestion):**
+- **The 2S holder collided with the deck.** Holder 20.5 tall on the floor (z
+  9.8) -> top z 30.3; the deck underside was z 30.0 and the plate covers the
+  holder's inner 4 mm strip (y 37.85..42). Evan: **raise the deck 2 mm** (tray
+  posts 30 -> 32). Clearance now 1.7 mm; 4.2 mm over the bank.
+- **Two bank widths on record:** FZ 151.5 x 69.7 x 18.5 vs GW 151.5 x 70.55 x
+  18.0. Evan: **70.55 is right** (FZ's numbers superseded).
+- **BMS, fuse holder and XT30 had no place on any tray.** Evan: the -y
+  small-parts lobe with the charger; the holder leads cross over the bank.
+- **Deck header said "two LM2596 boards"**; its 4 standoffs are ONE 66 x 36
+  board (holes 61 x 31, FZ). Comment fixed.
+- Layout form: repo doc + generated SVG with automatic checks (Evan).
+
+**Built:**
+- `cad/scad/pla_fit_coupon.scad`: row D = the exact mount hole (6.2 x 0.8
+  recess on both faces) at 4.90 / 4.95 / 5.00 / 5.05; coupon now 72 x 42 x 17.
+- NEW `cad/scad/pla_pocket_gauge.scad` -> `cad/pla_pocket_gauge.stl`: drop-in
+  width gauges for the bank (70.55), Pi case (64.4) and holder (40.5) at 0.15
+  / 0.25 / 0.35 mm per side (0.25 = fit class "pocket"); 201.55 x 38 x 5.2,
+  chamfered corner = the 0.15 end. Registered in check_artifacts.
+- Tray v4 (posts 32.0) and deck v4 (underside 32.0, encoder-slot literal
+  replaced by DECK_BOT): every electronic part now lives in a `LAYOUT` list
+  in the .scad (preview ghosts + echoed): tray = bank, holder, charger (60..98.5
+  x -69.5..-51, ties x 64 / 92), BMS (66..107 x -83..-75, tape), ZONES for the
+  fuse holder and the XT30 pair (sizes not measured); deck = Pi case, Uno +
+  shield (TB6612, caps, divider), LM2596, rocker (note).
+- NEW `scripts/electronics_layout.py`: reads LAYOUT via OpenSCAD's ECHO,
+  checks every box against the rendered STLs (no material inside, no overlaps,
+  supported), reports deck clearances, draws `docs/electronics_layout.svg`
+  (registered in check_artifacts). Self-check plants a bug per check.
+- NEW `docs/ELECTRONICS_LAYOUT.md`: both layers, an accounting table for all
+  22 arrival items (FI) plus the owned Uno, bank, USB cable, the #5159 motor
+  and the camera in shipping, cable routes with estimated lengths, and what
+  is still unmeasured.
+
+**Checks (real output):**
+- render_scad: coupon 276/276, gauge 96/96, tray 245/245, deck 88/88, all
+  manifold, OVERALL PASS; Opus re-renders byte-identical to the agents'.
+- Overhang scan: coupon worst 1.5-3 mm (24 points, the recess steps), gauge
+  none.
+- electronics_layout.py: 10 entries, 0 checks failed; gaps to the deck
+  underside: holder 1.7, bank 4.2, fuse zone 7.2, XT30 zone 11.2, charger
+  15.9, BMS 20.0 mm.
+- check_artifacts: 40 checked, 0 drifted. run_checks: 17 passed, 0 failed.
+
+**Bug found in review (agent code, fixed by Opus):** run_checks.py
+auto-calls every module's `self_check()` with no argument; the new script's
+took `stls` (TypeError, 16/17). It also returned a bool, and run_checks
+reads an int return != 0 as failure - True would have FAILED a passing
+check. Now `self_check(stls=None)` loads the STLs itself and asserts.
+
+**Open:** fuse holder body, XT30 mated length, Uno + shield height, rocker
+depth, the charger's USB-C edge, the holder's lead end, the servo lead
+length - all to measure. A ~25-30 cm USB-C cable for bank -> Pi: check one is
+on hand (no purchase implied). Print order: coupon + gauge first (Rule 3).

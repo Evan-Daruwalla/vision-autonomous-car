@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~14:43 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~15:12 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 235 appendices A–IA; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 236 appendices A–IB; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -614,10 +614,14 @@ measured - firmware safe limit 550); right lock ~2600 us is the servo's own
 end. 100-150 us of free play = tooth clearance in the gear pair before the
 rack; the 125/1525 numbers come from a backlash model fit to two bench
 observations - UNVERIFIED.
+ELECTRONICS LAYOUT (IB): docs/ELECTRONICS_LAYOUT.md + docs/electronics_layout.svg,
+generated and checked by scripts/electronics_layout.py from the LAYOUT lists in
+the tray/deck .scad files; every arrived part accounted for. PLAN, UNTESTED.
 PRINTED PARTS (all OpenSCAD in cad/scad/, rendered + probe-checked by
 scripts/render_scad.py, registered in check_artifacts): servo mount v7, motor
-mount v6, electronics tray v3 + deck v3 (print-friendly redo, IA: ribs under
-the tray floor, no supports needed; Pi pocket +0.25/side), camera mast
+mount v6, electronics tray v4 + deck v4 (print-friendly redo IA; deck raised
+2 mm in IB so the 2S holder clears it), PLA fit coupon (row D 4.90-5.05 added)
++ NEW pocket gauge (IB), camera mast
 v1 (NEW). All UNTESTED at these versions. Only servo mount v6 has been printed
 and fitted: pins TOO TIGHT at 4.875 (HH) -> every pin hole is now 4.95, set
 ONLY through the fit classes in cad/scad/lib/lego.scad (HG, HL). Bambu Studio
