@@ -12,7 +12,7 @@
 use <lib/lego.scad>
 EPS = 0.01;
 $fn = 64;
-PIN_D = 4.95;             // pin-hole bore: 4.80 + 0.075 (record GU) + 0.075 (Evan, 2026-10-12)
+PIN_D = lego_pin_d();     // 4.95: lib/lego.scad fit class "friction_pin" (record GU, HG)
 
 // deck levels
 DECK_BOT = 30.0;          // top of the tray posts

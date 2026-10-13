@@ -8,7 +8,8 @@ STATUS: started 2026-10-12. Older dated decisions still live in HANDOFF.md
 friction pins (LEGO 2780: a ring in the middle and a wider lip at each end).
 No more printed pin stubs (motor mount v1 used them; v2 replaced them).
 **How to apply:** a through hole gets the Lego hole shape: a 4.95 bore (PIN_D; was 4.875 until 2026-10-12 record HG,
-2026-10-12 record GU: 4.80 + 0.075; set it in each part - the lib default is 4.80) with a
+2026-10-12 record GU: 4.80 + 0.075; since 2026-10-13 every part sets PIN_D = lego_pin_d(),
+the "friction_pin" fit class in lib/lego.scad - change fits THERE, never in a part) with a
 6.2 x 0.8 recess at both faces (`technic_hole(..., cb_top=0.8, cb_bot=0.8)`
 in `cad/scad/lib/lego.scad`). A BLIND socket that takes half a pin from a
 beam above (a mount coming in from below) needs the `pin_socket()` shape in

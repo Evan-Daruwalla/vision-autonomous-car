@@ -3,9 +3,10 @@
 // Every module marked "Negative volume" is meant to be SUBTRACTED with
 // difference().
 //
-// PIN_D 4.80 is the ABS-coupon value. The PLA value comes from the
-// pla_fit_coupon print (cad/scad/pla_fit_coupon.scad); re-check PIN_D once
-// that coupon has been fitted.
+// PIN_D 4.80 is the ABS-coupon value (the nominal Lego pin hole). Parts do NOT
+// use it directly: they take lego_pin_d() below, which adds the calibrated
+// friction-pin fit offset. Re-check the offsets once the pla_fit_coupon print
+// (cad/scad/pla_fit_coupon.scad) has been fitted.
 // CB_D 6.2 / CB_DEPTH 0.8 are community values for the counterbore of a
 // Technic pin hole. UNVERIFIED until measured on a real liftarm.
 //
@@ -18,6 +19,31 @@ CB_D = 6.2;
 CB_DEPTH = 0.8;
 FN = 64;
 EPS = 0.01;
+
+// Fit classes: ONE place for every printed-fit clearance (docs/research/
+// 2026-10-12_print-friendly-cad-rules.md, Rule 2). Diametral offset in mm over
+// the nominal size, PLA on the Bambu P1S, slicer X-Y hole compensation 0
+// (Evan, record HK). Calibrated per filament - change a value here, never in a part.
+//   "friction_pin": Lego friction pin in a printed hole. +0.15 -> 4.95 (HG).
+//                   UNTESTED; +0.075 printed too tight (HH).
+//   "press_shaft" : motor D-shaft into a printed bore. +0.15 FITS (GF).
+//   "slide"       : printed-to-printed sliding fit. 0.3 = Prusa's starting
+//                   value, UNTESTED here.
+//   "rotate"      : Lego axle spinning in a printed bore - NOT calibrated in
+//                   PLA (ABS coupon: 5.00 bore); asking for it stops the render.
+function fit_offset(fit) =
+  fit == "friction_pin" ? 0.15 :
+  fit == "press_shaft"  ? 0.15 :
+  fit == "slide"        ? 0.30 :
+  fit == "rotate"       ? assert(false, "fit 'rotate' is not calibrated in PLA - print the coupon first") 0 :
+  assert(false, str("unknown fit class: ", fit)) 0;
+
+// nominal + offset, rounded to 0.0001 mm so a value written as a literal before
+// (e.g. 4.95) comes out bit-identical and the STL does not change.
+function fit_d(nominal, fit) = round((nominal + fit_offset(fit)) * 10000) / 10000;
+
+// The printed Lego pin-hole bore every part uses.
+function lego_pin_d() = fit_d(4.80, "friction_pin");
 
 // Circumscribed polygon: flats at d/2, so a printed HOLE is never smaller than d.
 module hole_cyl(d, h, fn=FN) { cylinder(r = d / 2 / cos(180 / fn), h = h, $fn = fn); }

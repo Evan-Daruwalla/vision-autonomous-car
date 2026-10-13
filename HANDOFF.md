@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~11:11 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~11:17 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 219 appendices A–HK; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 220 appendices A–HL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -644,7 +644,7 @@ NEXT ACTIONS, cheapest first:
      Assembly order + print notes in the scad header. L tops = 62.09 above floor (Evan).
      Known defect: the deck's rocker hole sits over the holder/BMS.
    - DECISION (GM): every printed part uses real black 2780 pins, no printed
-     stubs (.claude/project-memory/decisions.md). Pin bore 4.95 in all mounts (HG; was 4.875, GU).
+     stubs (.claude/project-memory/decisions.md). Pin bore 4.95 in all mounts (HG; was 4.875, GU) - set ONLY via the fit classes in cad/scad/lib/lego.scad (HL).
    - cad/pla_fit_coupon.stl is still UNPRINTED: 4.80 bore / 6.2 recess are
      untested in PLA.
    - FIT EVIDENCE + RULES (HH, HI): servo mount v6 printed, pins TOO TIGHT at

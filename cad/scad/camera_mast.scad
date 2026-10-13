@@ -20,7 +20,7 @@
 use <lib/lego.scad>
 EPS = 0.01;
 $fn = 64;
-PIN_D = 4.95;              // 4.80 + 0.075 (record GU) + 0.075 (Evan, 2026-10-12)
+PIN_D = lego_pin_d();     // 4.95: lib/lego.scad fit class "friction_pin" (record GU, HG)
 PITCH = 29.0;
 LENS_X = 35.0;
 LENS_Z = 46.91;   // 109.0 - 62.09

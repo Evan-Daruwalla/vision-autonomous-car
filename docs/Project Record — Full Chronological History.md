@@ -254,6 +254,7 @@ the dated entry, not the digest.
 - [HI - Print-friendly CAD rules research brief](#appendix-hi---print-friendly-cad-rules-research-brief-2026-10-12-2318-cdt) (10-12)
 - [HJ - Scheduled daily-audit: 61 findings - the train/val split re-draws on any corpus top-up with no corpus id in checkpoints, and steering moves on disarmed frames](#appendix-hj---scheduled-daily-audit-61-findings---the-trainval-split-re-draws-on-any-corpus-top-up-with-no-corpus-id-in-checkpoints-and-steering-moves-on-disarmed-frames-2026-10-13-0737-cdt) (10-13)
 - [HK - Bambu Studio X-Y hole compensation is 0 (Evan)](#appendix-hk---bambu-studio-x-y-hole-compensation-is-0-evan-2026-10-13-1111-cdt) (10-13)
+- [HL - Fit classes in lib/lego.scad; parts use lego_pin_d()](#appendix-hl---fit-classes-in-liblegoscad-parts-use-lego_pin_d-2026-10-13-1117-cdt) (10-13)
 
 ---
 
@@ -18328,3 +18329,36 @@ elephant-foot value, layer height, wall count, wall generator, seam
 position, filament and dryness for the PLA prints so far. The two project
 fits remain one source (one printer and profile, tuned in sequence); the
 4.95 pin holes (HG) remain UNTESTED.
+
+# Appendix HL - Fit classes in lib/lego.scad; parts use lego_pin_d() (2026-10-13, ~11:17 CDT)
+**WHAT:** Evan (2026-10-13) chose option 3 after HI: build the brief's Rule 2
+(named fit classes, one place to calibrate) into `cad/scad/lib/lego.scad`.
+
+**Added to lib/lego.scad:**
+- `fit_offset(fit)` - diametral offset over nominal, PLA on the P1S, slicer
+  X-Y hole compensation 0 (HK): "friction_pin" +0.15 (4.95, HG; UNTESTED,
+  +0.075 too tight HH), "press_shaft" +0.15 (motor D-bore fits, GF),
+  "slide" 0.30 (Prusa starting value, UNTESTED), "rotate" = assert-fail (not
+  calibrated in PLA; ABS coupon 5.00), anything else = assert-fail.
+- `fit_d(nominal, fit)` - nominal + offset rounded to 0.0001 mm, so 4.80 +
+  0.15 is bit-identical to the old literal 4.95.
+- `lego_pin_d()` = fit_d(4.80, "friction_pin").
+All five parts (servo_mount, motor_mount, electronics_tray, electronics_deck,
+camera_mast) now set `PIN_D = lego_pin_d();` instead of a typed 4.95.
+decisions.md updated: change fits in the lib, never in a part.
+
+**Not converted (named, left as is):** the motor coupler's D-bore lives in a
+Python generator, not OpenSCAD; the servo pilots (1.7) and the mast's 0.3 mm
+part-to-part clearances are still literals.
+
+**Checks (real output, 2026-10-13 ~11:17 CDT):**
+- Scratch test with OpenSCAD 2021.01: `lego_pin_d()` = 4.95 and
+  `lego_pin_d() == 4.95` is true; fit_d(3.0,"press_shaft") = 3.15;
+  fit_d(5.0,"slide") = 5.3. Planted failures: "rotate" -> "ERROR: Assertion
+  'false' failed: fit 'rotate' is not calibrated in PLA - print the coupon
+  first"; a typo "frcition_pin" -> "unknown fit class: frcition_pin".
+  Note: openscad.com exits 0 even on a failed assertion in echo mode; the
+  render gate relies on the mesh/probe checks, not the exit code.
+- All five parts re-rendered BYTE-IDENTICAL to the committed STLs (servo
+  113/113, motor 134/134, mast 75/75, tray 205/205, deck 79/79 probes).
+- check_artifacts: 38 checked, 0 drifted. run_checks: 16 passed, 0 failed.
