@@ -7,7 +7,7 @@ STATUS: started 2026-10-12. Older dated decisions still live in HANDOFF.md
 **What:** every printed mount pins to the Technic frame with Evan's black
 friction pins (LEGO 2780: a ring in the middle and a wider lip at each end).
 No more printed pin stubs (motor mount v1 used them; v2 replaced them).
-**How to apply:** a through hole gets the Lego hole shape: a 4.875 bore (PIN_D,
+**How to apply:** a through hole gets the Lego hole shape: a 4.95 bore (PIN_D; was 4.875 until 2026-10-12 record HG,
 2026-10-12 record GU: 4.80 + 0.075; set it in each part - the lib default is 4.80) with a
 6.2 x 0.8 recess at both faces (`technic_hole(..., cb_top=0.8, cb_bot=0.8)`
 in `cad/scad/lib/lego.scad`). A BLIND socket that takes half a pin from a

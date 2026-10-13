@@ -22,7 +22,7 @@
 //
 // PIN SOCKETS follow the Technic pin geometry in
 // docs/research/2026-10-12_technic-pin-snap-geometry.md: each arm's top 7.8 mm
-// is shaped like a Lego beam (6.2 x 0.8 recess for the pin's collar, 4.875 bore),
+// is shaped like a Lego beam (6.2 x 0.8 recess for the pin's collar, PIN_D bore),
 // with a 6.2 cavity below it where the pin's 5.2 mm tip lip snaps in.
 // The pin goes into beam A/B from below; the arm then pushes up onto its lower half.
 //
@@ -50,7 +50,7 @@ ARM_X0 = -20;              // v5: arms run under all three pins (was -4..4)
 ARM_X1 = 20;
 BEAM_UNDER = 33.13;       // underside of the short beams holding A/B (record GI)
 ARM_TOP = BEAM_UNDER;     // flush, like two pinned Lego beams
-PIN_D = 4.875;            // 4.80 + 0.075 (Evan, 2026-10-12, record GU)
+PIN_D = 4.95;             // 4.80 + 0.075 (record GU) + 0.075 (Evan, 2026-10-12)
 RECESS_D = 6.2;           // cailliau, measured; coupon row B tests it in PLA
 RECESS_DEPTH = 0.8;
 BORE_L = 6.2;             // as in a real 7.8 mm beam (7.8 - 2 x 0.8)

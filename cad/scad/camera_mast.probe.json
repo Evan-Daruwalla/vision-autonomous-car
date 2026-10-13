@@ -1,10 +1,10 @@
 {
   "bbox": [[12, -20, 0], [38.7367, 20, 64.7341]],
   "holes": [
-    {"name": "front pin +y", "center": [32, 16, 3.9], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "front pin -y", "center": [32, -16, 3.9], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "rear pin +y", "center": [16, 16, 11.7], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "rear pin -y", "center": [16, -16, 11.7], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "front pin +y", "center": [32, 16, 3.9], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "front pin -y", "center": [32, -16, 3.9], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "rear pin +y", "center": [16, 16, 11.7], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "rear pin -y", "center": [16, -16, 11.7], "axis": "z", "d": 4.95, "ring": true},
     {"name": "retaining pin +y", "center": [35.3057, 14.0, 58.9299], "axis": "y", "d": 2.0, "ring": true},
     {"name": "retaining pin -y", "center": [35.3057, -14.0, 58.9299], "axis": "y", "d": 2.0, "ring": true}
   ],

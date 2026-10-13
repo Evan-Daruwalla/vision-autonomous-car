@@ -15,7 +15,7 @@
 use <lib/lego.scad>
 EPS = 0.01;
 $fn = 64;
-PIN_D = 4.875;            // pin-hole bore: 4.80 + 0.075 (Evan, 2026-10-12, record GU)
+PIN_D = 4.95;             // pin-hole bore: 4.80 + 0.075 (record GU) + 0.075 (Evan, 2026-10-12)
 
 RAIL_H = 7.8;             // a Lego beam's height: a pin half fits fully
 FLOOR_T = 2.0;

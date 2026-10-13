@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-12 ~22:35 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-12 ~22:56 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 214 appendices A–HF; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 215 appendices A–HG; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -644,7 +644,7 @@ NEXT ACTIONS, cheapest first:
      Assembly order + print notes in the scad header. L tops = 62.09 above floor (Evan).
      Known defect: the deck's rocker hole sits over the holder/BMS.
    - DECISION (GM): every printed part uses real black 2780 pins, no printed
-     stubs (.claude/project-memory/decisions.md). Pin bore 4.875 in all mounts (GU).
+     stubs (.claude/project-memory/decisions.md). Pin bore 4.95 in all mounts (HG; was 4.875, GU).
    - cad/pla_fit_coupon.stl is still UNPRINTED: 4.80 bore / 6.2 recess are
      untested in PLA.
    - Tooling: OpenSCAD 2021.01 at ~/tools/openscad-2021.01; scripts/render_scad.py

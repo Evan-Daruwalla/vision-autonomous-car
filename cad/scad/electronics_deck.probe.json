@@ -1,12 +1,12 @@
 {
   "bbox": [[-30, -86, 30], [156, 45.6, 39.5]],
   "holes": [
-    {"name": "boss 10,41.6", "center": [10, 41.6, 33.9], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "boss 10,-41.6", "center": [10, -41.6, 33.9], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "boss 150,41.6", "center": [150, 41.6, 33.9], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "boss 150,-41.6", "center": [150, -41.6, 33.9], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "boss 60,-82", "center": [60, -82, 33.9], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "boss 128,-82", "center": [128, -82, 33.9], "axis": "z", "d": 4.875, "ring": true},
+    {"name": "boss 10,41.6", "center": [10, 41.6, 33.9], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "boss 10,-41.6", "center": [10, -41.6, 33.9], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "boss 150,41.6", "center": [150, 41.6, 33.9], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "boss 150,-41.6", "center": [150, -41.6, 33.9], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "boss 60,-82", "center": [60, -82, 33.9], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "boss 128,-82", "center": [128, -82, 33.9], "axis": "z", "d": 4.95, "ring": true},
     {"name": "rocker", "center": [-18, -32, 31.25], "axis": "z", "d": 20, "ring": true}
   ],
   "open_points": [[100, 0, 31.25], [20, 0, 34], [59, 35.5, 31.25], [143, -35.5, 31.25], [60, 0, 34], [104, -39.75, 31.25]],

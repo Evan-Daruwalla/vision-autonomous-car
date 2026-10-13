@@ -249,6 +249,7 @@ the dated entry, not the digest.
 - [HD - Camera mast research brief: 109 mm, 28-30 deg, front axle, remap](#appendix-hd---camera-mast-research-brief-109-mm-28-30-deg-front-axle-remap-2026-10-12-2139-cdt) (10-12)
 - [HE - Tray/deck v2 cable channel + camera mast v1](#appendix-he---traydeck-v2-cable-channel--camera-mast-v1-2026-10-12-2215-cdt) (10-12)
 - [HF - Servo mount v7: servo 1.6 mm forward, 0.5 mm higher](#appendix-hf---servo-mount-v7-servo-16-mm-forward-05-mm-higher-2026-10-12-2235-cdt) (10-12)
+- [HG - Pin holes 4.875 -> 4.95 mm in all five mounts](#appendix-hg---pin-holes-4875---495-mm-in-all-five-mounts-2026-10-12-2256-cdt) (10-12)
 
 ---
 
@@ -18173,3 +18174,30 @@ probes 113/113 PASS, sha256 83736f848cccc8e9...; check_artifacts 38
 checked, 0 drifted; run_checks 16 passed, 0 failed (of 16).
 
 **Status:** UNTESTED - v7 not printed, not fitted.
+
+# Appendix HG - Pin holes 4.875 -> 4.95 mm in all five mounts (2026-10-12, ~22:56 CDT)
+**WHAT:** Evan (2026-10-12): increase the tolerance on all peg connectors by
+0.075 mm. Read as the Lego pin holes (PIN_D, the black 2780 / blue 6558 /
+axle-pin 43093 pin ends): PIN_D 4.875 -> **4.950** in all five printed
+mounts - `cad/scad/servo_mount.scad` (v7), `motor_mount.scad` (v6),
+`electronics_tray.scad` (v2), `electronics_deck.scad` (v2),
+`camera_mast.scad` (v1) - and every `"d": 4.875` probe in their
+`.probe.json` files (6 + 6 + 20 + 6 + 4). History of the number: 4.80
+(ABS coupon, DI) -> 4.875 (GU) -> 4.95 (this entry).
+
+**Not changed:** the 6.2 x 0.8 collar recesses, the motor mount's 6.2 snap
+cavity, the deck's printed Uno/LM2596 pegs, the lib default (4.80, unused
+because each part sets PIN_D), and `cad/pla_fit_coupon.stl` (its holes are a
+deliberate 4.75-5.00 sweep).
+
+**Checks (real output, 2026-10-12 ~22:56 CDT):** all five renders: manifold
+PASS, OVERALL PASS - servo 113/113, motor 134/134, mast 75/75, tray
+205/205, deck 79/79 probes. The probes cannot see a 0.0375 mm radius change,
+so the bore was MEASURED in each mesh (vertices of one hole per part): vertex
+radius 2.4404 before (= 4.875/2 / cos(180/64), the 64-gon circumscribes the
+nominal circle) -> 2.4780 after in all five, i.e. +0.075 on the diameter.
+check_artifacts: 38 checked, 0 drifted. run_checks: 16 passed, 0 failed
+(of 16).
+
+**Status:** UNTESTED - no part printed at 4.95; the fit (pins snap vs too
+loose) is unknown in PLA.

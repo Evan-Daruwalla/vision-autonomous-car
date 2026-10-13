@@ -1,12 +1,12 @@
 {
   "bbox": [[-20, -19.9, 21.0], [27.5, 19.9, 33.13]],
   "holes": [
-    {"name": "A bore", "center": [0, 16, 29.2], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "B bore", "center": [0, -16, 29.2], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "A front bore", "center": [16, 16, 29.2], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "A back bore", "center": [-16, 16, 29.2], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "B front bore", "center": [16, -16, 29.2], "axis": "z", "d": 4.875, "ring": true},
-    {"name": "B back bore", "center": [-16, -16, 29.2], "axis": "z", "d": 4.875, "ring": true}
+    {"name": "A bore", "center": [0, 16, 29.2], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "B bore", "center": [0, -16, 29.2], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "A front bore", "center": [16, 16, 29.2], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "A back bore", "center": [-16, 16, 29.2], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "B front bore", "center": [16, -16, 29.2], "axis": "z", "d": 4.95, "ring": true},
+    {"name": "B back bore", "center": [-16, -16, 29.2], "axis": "z", "d": 4.95, "ring": true}
   ],
   "solid_points": [[7, 0, 21.5], [7, 0, 23.0], [7, 7.4, 24.0], [7, -7.4, 24.0], [7, 6.3, 25.0], [7, -6.3, 25.0],
                    [22, 7.4, 25.0], [22, -7.4, 25.0], [24, 0, 22.5], [26.75, 5.2, 25.0], [26.75, -5.2, 25.0],
