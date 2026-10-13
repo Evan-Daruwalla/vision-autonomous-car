@@ -264,6 +264,7 @@ the dated entry, not the digest.
 - [HS - Backlash compensation: overshoot 125 us and hold (no return)](#appendix-hs---backlash-compensation-overshoot-125-us-and-hold-no-return-2026-10-13-1148-cdt) (10-13)
 - [HT - Steering gated to OUT_DRIVE (audit HJ fix); flash blocked, COM3 busy](#appendix-ht---steering-gated-to-out_drive-audit-hj-fix-flash-blocked-com3-busy-2026-10-13-1150-cdt) (10-13)
 - [HU - uno_control flashed: SELFTEST PASS 86/86 on the board](#appendix-hu---uno_control-flashed-selftest-pass-8686-on-the-board-2026-10-13-1340-cdt) (10-13)
+- [HV - docs-sync pass + snapshot after the mounts/steering session](#appendix-hv---docs-sync-pass--snapshot-after-the-mountssteering-session-2026-10-13-1345-cdt) (10-13)
 
 ---
 
@@ -18517,3 +18518,50 @@ flashed since servo_bench replaced it (FT).
 **What the board runs now:** the current uno_control SOURCE - backlash compensation (HS: overshoot 125 us and hold, centre 1525, safe limits 550..2600) plus the steering gate (HT: servo follows commands only in OUT_DRIVE), compiled 11628 B / 388 B. servo_bench (FT) is gone from the board. The flashed build equals the working-tree source; the HT gate is NOT yet committed at the time of this entry. First on-board run of every SELFTEST check added since 2026-09-02 (49/49 then; 86 now).
 
 **Notes:** the banner string still says "ACTUATORS UNWIRED" although the servo is now on the car - a stale string, not a fault. The bench test of the compensation (full left -> 0 and full right -> 0 give straight wheels) needs ARMED frames from a host (firmware/host_test.py or the Pi); typing pulses as in servo_bench no longer works. NOT done yet.
+
+# Appendix HV - docs-sync pass + snapshot after the mounts/steering session (2026-10-13, ~13:45 CDT)
+**WHAT:** /docs-sync full pass (Evan, 2026-10-13) after the session that ran
+from HEAD a50f4c9 (2026-10-12 ~21:00 CDT) to b351400 (2026-10-13 ~13:42 CDT):
+11 commits, records GY-HU, every change already logged in its own entry.
+
+**Docs changed by this pass:**
+- HANDOFF.md: the fenced paste-ready prompt was rewritten (146 -> ~91
+  lines). The old one still said the Uno runs servo_bench, still listed
+  "flash uno_control" as open (done, HU), named superseded part versions,
+  omitted the 2026-10-13 daily audit (HJ) and still called `git add -A`
+  hard-denied (audit HJ: the settings rule is gone). Three open items the
+  first draft dropped (FG's open rows, metering the 25R cells, PRD task 8
+  closing on the camera) were caught on a re-read and restored. The "Uno
+  firmware" workstream row now leads with HU.
+- PRD_ROADMAP.md: dated notes on tasks 5, 6, 7 and 8c(i). No status moved -
+  no done-check passed (only servo mount v6 was printed, and it failed fit).
+- Bins: testing.md (flash + 86/86; host_test not yet run), tooling.md
+  (OpenSCAD asserts exit 0; COM3 busy on upload), INDEX.md (five bin lines
+  dated). important.md, steering.md, hardware.md, decisions.md and
+  firmware-traps.md were already updated during the session.
+- Memory: car-doc-tooling-traps (escaped quotes also break heredocs) and
+  its MEMORY.md line.
+
+**Checked, nothing to change:** data, performance, security, ui, ml-training,
+track, sim-harness and the stub bins (the cadence hook named them stale by
+age, 40 days, but no work this session touched them). No HTML twin and no
+record-index script exist in this project. Drift-check stamp not written:
+this pass was not a section-4 drift check.
+
+**Snapshot 2026-10-13 ~13:45 CDT:**
+
+| Item | State | Evidence |
+|---|---|---|
+| Servo mount | v7 (servo 1.6 mm fwd, 0.5 mm up), UNTESTED; v6 printed, pins too tight | HF, HH |
+| Motor mount | v6 (3 pins/side, walls +3 mm), UNTESTED | GZ, HC |
+| Electronics tray / deck | v2 (encoder-cable channel), UNTESTED | HE |
+| Camera mast | v1 NEW, lens 109 mm at 29 deg, UNTESTED | HD, HE |
+| Pin holes | 4.95 everywhere, only via lib/lego.scad fit classes | HG, HL |
+| Slicer | Bambu X-Y hole compensation 0 | HK |
+| Uno firmware | uno_control flashed, SELFTEST PASS 86/86 | HU |
+| Steering | locks ~450 (rack stop) / ~2600 (servo end); backlash comp 125 us hold, centre 1525; servo gated to OUT_DRIVE | HM-HT |
+| Steering bench check | NOT done (needs ARMED frames) | - |
+| Camera Module 3 Wide | in shipping | GX |
+| Test suite | run_checks 16/16; check_artifacts 38 checked, 0 drifted | HL |
+| Research briefs | camera-mast pose; print-friendly CAD rules | HD, HI |
+| Daily audit 2026-10-13 | 61 findings; HIGH ml/splits.py open; disarmed-steering MED fixed | HJ, HT |

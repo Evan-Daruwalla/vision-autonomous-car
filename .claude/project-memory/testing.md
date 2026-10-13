@@ -139,7 +139,7 @@ convention instead — here, that the two directions are exact opposites and tha
 - `host_test.py` test 4b: lost-byte frame 10 then DISARMED frame 11 with
   payload `T ? B`; expects CRC_BAD, then a clean seq-11 reply, then no stray
   SELFTEST / bench-quiet / status text. The board-level gate for FH.
-- Neither has run: uno_control with FH has never been flashed (FT).
+- ~~Neither has run: uno_control with FH has never been flashed (FT).~~ 2026-10-13 (HU): uno_control (with FH, EU, HS, HT) FLASHED - SELFTEST PASS 86/86 on the board; host_test.py (and its test 4b) NOT yet run on this build.
 
 ## The watchdog defect, and the test that looked right but could not see it (2026-09-02, Appendices BY/CA)
 

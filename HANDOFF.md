@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~13:40 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~13:46 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 229 appendices A–HU; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 230 appendices A–HV; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -400,7 +400,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Track layout | M1.4 | **v1 + v2 drawn, NOT committed** | 2026-09-01, Appendices AM/AT/AX/AY. `cad/track_layout_v1.py` = figure-8 with a flat causeway bridge + 5 landmarks; `cad/track_layout_v2.py` = 3x3 city grid, 9 intersections, figure-8 route through the centre. ~~8.31 m, 103.5 mm spare at R=500~~ ~~RE-RUN 2026-09-05 ... span 2710 mm, spare only 90 mm at R=500 — UNDER the script's own 100 mm self-check, which now FAILS~~ ~~**CURRENT, real output 2026-09-06 at lane 310 mm: route 8.23 m, pitch 1190 mm, span 2690 mm, spare 110 mm at R=500**~~ (struck 2026-09-09, Appendix ET: wrong in every number — the lane had already moved 310 → 250 mm and nothing propagated it). **CURRENT, real `cad/track_layout_v2.py` stdout 2026-09-09: lane 250 mm (1.613 × the 155 mm car, DELIBERATELY under the 2.0× rule), route 7.51 m, pitch 1100 mm, span 2700 mm of 2800 usable, spare 100 mm at R=500, `self_check: PASS`.** The SVG and JSON had been silently frozen since 2026-09-05 — `main()` runs `self_check()` before it writes, so the failing assert meant no regeneration; the committed JSON still read the old 148.25 mm car. Both regenerated. Print plan, live 2026-09-09: corner arcs 6.28 m, intersection boxes 18.00 m, **122 tiles at 200 mm, ~627 g** of filament, street lines 32.40 m taped not printed (~~10.67 → 11.16 m / 85 → 88 tiles / ~1051 → ~1081 g~~ struck same date, same cause). Corner geometry stays FROZEN until T2 regardless |
 | Track: sim rehearsal | — | **IMPOSSIBLE, settled** | 2026-09-01, Appendix AX. gym-donkeycar's protocol has ten message types and none defines a road; `load_scene` picks from 11 prebuilt Unity scenes. A custom track needs a Unity build. Costs little: M3 trains on real laps, not the sim corpus |
 | Track surface | T3 | **Decided: hybrid** | 2026-09-01, Appendix AX. NOT 225 printed panels (~12.6 kg, 169-900 h, 225 bed clears, 28 camera-visible seams). Print the 6.28 m of corner arcs + 9.36 m of intersection boxes as ~79 tiles (~970 g); tape the 31.9 m of straight street lines |
-| Uno firmware | — | ~~**CONTROL FIRMWARE RUNS ON THE BOARD (2026-09-02)**~~ **2026-10-10: board runs `servo_bench` (FT); uno_control to be re-flashed** | Appendices BD/BJ/BO. `firmware/` — `uno_bringup` (board proven), `uno_memtest` (2048 B SRAM, 16.0042 MHz), `uno_echo` (link p99 1.069 ms), `uno_packguard` (SELFTEST 27/27), **`uno_control` (implements `SERIAL_PROTOCOL.md` v0.2: **SELFTEST 49/49, `host_test.py` 13/13 exit 0**, 7888 B flash / 313 B SRAM, loop 2-3 ms; the status LED is quiet on a bench board and loud once a real pack has ever been seen — Appendix CE)** — **CURRENTLY FLASHED, fixed build, as of 2026-09-02 ~19:55 CDT.** Evan had put `uno_packguard` back on it in between, so **read the boot banner, never this line, for what the board is running.** ⚠️ **Watchdog defect found by the daily-audit (BY), fixed (CA): two `millis()` samples per loop iteration made the watchdog trip in the same iteration as every good frame — after the reply was sent, so no status byte ever showed it; a wired car would drive ~2 ms then brake ~48 ms, repeating.** The probe that catches it reads `armed` inside the window; the status-bit check the audit suggested passes on the broken build. `SERIAL_PROTOCOL.md` is no longer design-only. **ACTUATORS UNWIRED** — link + state machine only. ⚠️ **The repo source no longer matches what's flashed, as of 2026-09-03 (Appendix DC): `uno_control.ino`'s lighting path was rewritten for WS2812B (task 8e) after this row's "CURRENTLY FLASHED" build. That rewrite is compiled, not flashed** — the board still runs the 2026-09-02 build described in the rest of this row; SELFTEST 49/49 and 7888 B flash refer to THAT build, not the current source (58 checks, 9680 B, per Appendix DC) |
+| Uno firmware | — | ~~**CONTROL FIRMWARE RUNS ON THE BOARD (2026-09-02)**~~ ~~**2026-10-10: board runs `servo_bench` (FT); uno_control to be re-flashed**~~ **2026-10-13 (HU): uno_control re-flashed - SELFTEST PASS 86/86; backlash compensation (HS) + steering gate (HT). The rest of this row describes older builds.** | Appendices BD/BJ/BO. `firmware/` — `uno_bringup` (board proven), `uno_memtest` (2048 B SRAM, 16.0042 MHz), `uno_echo` (link p99 1.069 ms), `uno_packguard` (SELFTEST 27/27), **`uno_control` (implements `SERIAL_PROTOCOL.md` v0.2: **SELFTEST 49/49, `host_test.py` 13/13 exit 0**, 7888 B flash / 313 B SRAM, loop 2-3 ms; the status LED is quiet on a bench board and loud once a real pack has ever been seen — Appendix CE)** — **CURRENTLY FLASHED, fixed build, as of 2026-09-02 ~19:55 CDT.** Evan had put `uno_packguard` back on it in between, so **read the boot banner, never this line, for what the board is running.** ⚠️ **Watchdog defect found by the daily-audit (BY), fixed (CA): two `millis()` samples per loop iteration made the watchdog trip in the same iteration as every good frame — after the reply was sent, so no status byte ever showed it; a wired car would drive ~2 ms then brake ~48 ms, repeating.** The probe that catches it reads `armed` inside the window; the status-bit check the audit suggested passes on the broken build. `SERIAL_PROTOCOL.md` is no longer design-only. **ACTUATORS UNWIRED** — link + state machine only. ⚠️ **The repo source no longer matches what's flashed, as of 2026-09-03 (Appendix DC): `uno_control.ino`'s lighting path was rewritten for WS2812B (task 8e) after this row's "CURRENTLY FLASHED" build. That rewrite is compiled, not flashed** — the board still runs the 2026-09-02 build described in the rest of this row; SELFTEST 49/49 and 7888 B flash refer to THAT build, not the current source (58 checks, 9680 B, per Appendix DC) |
 | Vehicle lighting | — | **Spec written, nothing wired** | 2026-09-01, Appendix AY. `docs/LIGHTING_SPEC.md`. Headlights/tail/DRL/indicators. Only the headlight beam is in the camera's view. ~~Settles the PCA9685.~~ Superseded 2026-09-02 (BC): an **Arduino Uno** takes actuation instead. Turn signals are a THIRD policy head and gate the M3 collection run via PRD task 11b |
 | ~~Harness trustworthiness~~ | ~~P6~~ | ~~**OPEN — BLOCKING all closed-loop claims**~~ **STALE ROW, STRUCK 2026-09-02** | ⚠️ **This row contradicted the P6 row above it and was two days out of date.** It is dated 2026-08-11 (Appendix AD, cause unknown); the row above is dated **2026-08-13 (Appendix AI/AJ) and found the cause** — `donkey-generated-track-v0` regenerates the track per launch. **P6 is DONE.** The live rule that survives is narrower: never compare closed-loop numbers ACROSS launches; use `ml/eval_paired.py` |
 | Track fabrication | T1-T6 | **Designed, not built** | figure-8; print markings not surface. ~~1.6×2.8 m, 1:14~~ **SUPERSEDED — floor is 3.0 × 3.0 m (Evan, 2026-09-01) and the layout is `cad/track_layout_v2.py` at lane 230 mm / 171 mm spare on the MEASURED 114.75 mm car (2026-09-02, Appendix BO).** T1 scale is CLOSED except its marking table; **T2 still blocks every corner tile** — it needs an empirical turning test on the rolling chassis. `R_min = 0.625 × wheelbase ≈ 116.2 mm` as of 2026-09-05 (58° max steer, 13-stud rack; was `1.600 × wheelbase ≈ 297.5 mm` on the old rack) |
@@ -587,146 +587,91 @@ original floor and the pre-2026-08-12 scale decision.)*
 ```
 Read, in order:
 1. D:\ClaudeCode\Autonomous Car Project\HANDOFF.md  (ONLY live snapshot)
-2. PRD_ROADMAP.md
+2. PRD_ROADMAP.md (tasks 5-7 carry dated notes from 2026-10-13)
 3. .claude/project-memory/INDEX.md, then ONLY the bins your task touches
-   (track.md before ANY track/marking/xodr work; steering.md before ANY
-   servo/steering work)
+   (steering.md before ANY servo/steering work; hardware.md + decisions.md
+   before ANY printed-mount work; track.md before track work)
 
-STATE (2026-10-12 ~20:54 CDT). Parts ORDERED and 23 of 24 ARRIVED 2026-10-10
-(Appendices FI-FL; the Camera Module 3 Wide is on a separate order, IN SHIPPING 2026-10-12).
-Nothing is wired. The Uno now runs firmware/servo_bench (FT), NOT uno_control:
-re-flash uno_control and read its boot banner - no SELFTEST count is known
-for the current source. The MG90D-270 is positional (turns and stops).
-Couplers print in PLA on a Bambu P1S (0.1 mm, 2 walls, solid; FR): servo v2
-fitted, v3 next; motor coupler v3 FITS the shaft (GF; not load-tested). Tolerance
-coupons (ABS) gave pin 4.80 mm, axle 5.00 mm. BOM $422.25 before shipping. The sim lane ended in a well-instrumented NEGATIVE: no learned
-policy drives reliably, cause understood. The LaneMaker/OpenDRIVE simulation
-thread is CLOSED as a negative after seven failed hypotheses -- do not
-re-open it. The 2026-09-09 daily-audit (Appendix ES) is FULLY WORKED: docs in
-ET, code in EU. Dash density (accept 18.7) and cornering clearance (accept
-29.6 mm/side, rule re-pointed at the road edge) were DECIDED 2026-09-09.
-THE TEST SUITE is `python scripts/run_checks.py` (16/16 on 2026-10-12 --
-re-run it, never quote it). A pre-commit guard blocks any staged generated
-artifact that no longer matches its generator. ~~Repo is IN SYNC with
-origin/main (0 ahead, 0 behind, fetched 2026-10-04) -- those 6 commits were
-pushed.~~ ~~**2026-10-10, fetched: 3 commits AHEAD of origin/main, 0 behind,
-unpublished** (caaf191, 6a12c26, de8f12e, plus 6caccea on 2026-10-10; the Appendix FF work is uncommitted) - Appendix FD
-caught this line saying "in sync" after those commits landed.~~ **2026-10-10: this file no longer
-records publish state at all.** Every pinned count here went stale on the next commit (FD row 1,
-three times). Run `git fetch` then `git status -sb`. This file claimed "6 commits UNPUSHED" for three weeks and TWO
-daily-audits flagged it (EW, EX) before it was corrected; re-derive push state
-from the remote, never from this line.
+STATE (2026-10-13 ~13:44 CDT). Parts ORDERED; 23 of 24 arrived 2026-10-10
+(FI-FL); the Camera Module 3 Wide is IN SHIPPING (GX) - PRD task 8 closes
+when it arrives. Paid ~$430 (Evan's recollection, FU).
+FIRMWARE: the Uno runs the CURRENT uno_control source - flashed 2026-10-13,
+boot banner "SELFTEST PASS 86/86" (HU). It includes the steering backlash
+compensation (HS: servo held 125 us past each target in the direction of the
+last move; centre 1525) and the steering gate (HT: the servo moves only in
+OUT_DRIVE, i.e. armed + pack OK + link alive). Only the servo is on the car;
+motor, encoder, strip and pack are unwired. host_test.py has NOT been run on
+this build.
+STEERING (HM-HQ): left lock ~450 us is the RACK STOP (first-contact pulse not
+measured - firmware safe limit 550); right lock ~2600 us is the servo's own
+end. 100-150 us of free play = tooth clearance in the gear pair before the
+rack; the 125/1525 numbers come from a backlash model fit to two bench
+observations - UNVERIFIED.
+PRINTED PARTS (all OpenSCAD in cad/scad/, rendered + probe-checked by
+scripts/render_scad.py, registered in check_artifacts): servo mount v7, motor
+mount v6, electronics tray v2 + deck v2 (encoder-cable channel), camera mast
+v1 (NEW). All UNTESTED at these versions. Only servo mount v6 has been printed
+and fitted: pins TOO TIGHT at 4.875 (HH) -> every pin hole is now 4.95, set
+ONLY through the fit classes in cad/scad/lib/lego.scad (HG, HL). Bambu Studio
+X-Y hole compensation is 0 (HK), so the CAD owns every clearance.
+RESEARCH this cycle: docs/research/2026-10-12_camera-mast-pose.md (lens 109 mm
+above floor, pitch 28-30 deg, software remap to the sim view; the Module 3
+Wide's vertical FOV is 67 deg, not the sim's 90) and
+docs/research/2026-10-12_print-friendly-cad-rules.md (13 ranked rules).
+The sim lane ended in a well-instrumented NEGATIVE; LaneMaker/OpenDRIVE is
+CLOSED - do not re-open. THE TEST SUITE is scripts/run_checks.py (16/16 on
+2026-10-13 - re-run it, never quote it). Push state: run `git fetch` then
+`git status -sb`; this file does not record it.
 
-UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
-(2026-09-30, 60 findings) have not been worked.
+AUDIT BACKLOG: HJ (2026-10-13, 61 findings; its HIGH: ml/splits.py re-draws
+the train/val split on any corpus top-up and checkpoints store no corpus id;
+its steering-on-DISARMED-frames MED is FIXED in HT). EW (9) and EX (60) are
+still unworked; FG's 35-row table has rows 11, 13, 16-35 open and row 14 half
+done (checkpoint fingerprints written, never checked).
 
-NEXT ACTIONS, cheapest first:
-000. PRINTED MOUNTS - Appendices FY (plan) and GA-GM (measurements, builds).
-   - MOTOR MOUNT cad/motor_mount.stl v6 (HC: side walls + lips 3 mm taller, top 29.2 - above the 27.0 steering parts, position unconfirmed; v5 GZ: 3 pins per side at x -16/0/+16, rails x -20..20 - ASSUMES beam holes at +/-16 and nothing hanging below the +/-8 holes; v4 GW; v3 GT; v2 GL): real black 2780 pins in snap
-     sockets; side walls trimmed after v1's print hit the encoder; back wall
-     at a PHOTO-ESTIMATED gap. PRINT AND FIT v6, report: do the pins snap,
-     does the motor sit level with the coupler, is the back-wall gap ~0.5 mm.
-     Axle centre 26.20 mm above the floor (GE); motor connector UP (GF).
-   - SERVO MOUNT cad/servo_mount.stl v7 (HF: servo 1.6 mm forward + 0.5 mm higher, shaft now 1.6 ahead of stud 0; v6 HB + 4 mm bridge-to-rail gussets; v5 HA bridges only between the rails, all 6 peg holes open; v4 GY; v3 GV; v2 GS): printable, UNTESTED - on
-     BOTH 2x4 L liftarms (one each side of the servo), case footprint open,
-     ears on plastic, pin holes at studs 1-3 of each L. Print and fit: L spacing
-     (photo: 32 mm), ears sit flat, pilot size.
-   - ELECTRONICS v2 (HE): cad/electronics_tray.stl (layer 1: bank, holder, charger
-     parts; pins into the centre frames' holes) + cad/electronics_deck.stl (layer 2
-     on 6 posts: Pi, Uno, LM2596, rocker) - printable, UNTESTED (GW; v2 HE adds the
-     encoder-cable channel: notch in the -y rail x 100..108 + slot x 100..108,
-     y -41.0..-38.5 in tray floor and deck). Pin rows: the photo shows the frame holes
-     at exactly RAIL_PIN_X (studs 0,4,6,10,11,15,16), 48 mm rows - photo, not caliper.
-   - CAMERA MAST v1 (HE, NEW): cad/camera_mast.stl - printable, UNTESTED. Pins to the
-     two front "+" holes (blue axle-pins 43093) + servo-mount stud 2 (3L pins 6558);
-     slide-in holder, lens 109 mm above floor at pitch 29 deg, ~tray x 205 (lens x is
-     photo-derived +/-3). Figures: HD + docs/research/2026-10-12_camera-mast-pose.md.
-     Assembly order + print notes in the scad header. L tops = 62.09 above floor (Evan).
-     Known defect: the deck's rocker hole sits over the holder/BMS.
-   - DECISION (GM): every printed part uses real black 2780 pins, no printed
-     stubs (.claude/project-memory/decisions.md). Pin bore 4.95 in all mounts (HG; was 4.875, GU) - set ONLY via the fit classes in cad/scad/lib/lego.scad (HL).
-   - cad/pla_fit_coupon.stl is still UNPRINTED: 4.80 bore / 6.2 recess are
-     untested in PLA.
-   - FIT EVIDENCE + RULES (HH, HI): servo mount v6 printed, pins TOO TIGHT at
-     4.875 (print settings not recorded). 13 print-friendly CAD rules in
-     docs/research/2026-10-12_print-friendly-cad-rules.md. Bambu Studio X-Y
-     hole compensation is 0 (Evan, HK) - the CAD owns every clearance. NEXT:
-     ADD a 4.90-5.05 pin row to cad/scad/pla_fit_coupon.scad (it tops out at
-     5.00 today) and print it before the big parts.
-   - Tooling: OpenSCAD 2021.01 at ~/tools/openscad-2021.01; scripts/render_scad.py
-     (canonical STL + probes). Task plan: ~/.claude/task-plans/autonomous-car-printed-mounts.md.
-00. WIRING AUDIT DONE 2026-10-11 (Appendix FX): doc and firmware agree pin
-   for pin. Before wiring ANYTHING, follow WIRING_PROTOSHIELD section 5 as
-   rewritten: rail trimmed to 5.0 V (not 5.2) and the pot locked; step 1b
-   proves the cut-5V USB cable on this FT232RL clone FIRST (fail = stop and
-   redesign); step 2a cells OUT, B- then MB then B+, fuse last. Strips are cut
-   2 + 1 per side (tail on a rear jumper; firmware PX order changed). Run
-   host_test.py with --wired once anything is wired. Compiled, never flashed.
-0. PARTS ARRIVED 2026-10-10 (Appendices FI-FL). Camera IN SHIPPING (GX);
-   motor is #5159; item 3 is the PiShop cable. Cells: 4x Samsung 25R by wrap (FV/FW; 2 for the pack, 2 spares) - meter each.
-   SERVO BENCH: servo_bench is ON the board and works (FT); servo is
-   positional. Still to measure: per-unit DOA, angle table, end-of-travel
-   pulses, centre slop; then re-flash uno_control.
-   BEFORE THE SERVO IS WIRED: uno_control is still set for a
-   180-degree MG90S - SERVO_US_SPAN 450 gives +/-60.75 deg of the +/-135 the
-   rack needs, and attach() has no limits, so the Servo library clamps to
-   544-2400 us. Needs attach(PIN_SERVO, 500, 2500) + a span chosen after a
-   bench endpoint measurement. (FJ timestamp note: paid in FK.)
-   MEASURED 2026-10-13 (HM-HQ): right lock ~2600 us = the servo's own end
-   (rack 0.5 mm short of its stop); left lock ~450 us = the RACK STOP, so the
-   firmware left limit must sit inside the first-contact pulse (not yet
-   measured) or the servo stalls. Straight = 1500 only after an overshoot
-   (1650 from the left, 1400 from the right): 100-150 us of BACKLASH in the
-   gear pair before the rack (tooth clearance). Fix not chosen: spring
-   preload / remove that gear stage / firmware compensation (supplement).
-   CHOSEN (Evan, HR/HS): firmware compensation, overshoot 125 us and HOLD;
-   centre 1525; servo gated to OUT_DRIVE (HT, audit HJ fix). FLASHED
-   2026-10-13 (HU): SELFTEST PASS 86/86 on the board. NEXT: bench-check with
-   ARMED frames (firmware/host_test.py or the Pi) that 0 steer is straight
-   from both full left and full right.
-1. ~~Print v2 and test-fit it~~ v2 FITTED 2026-10-10 ("dimensions are good",
-   Appendix FM); settings recorded in FR (P1S, PLA, 0.1 mm, 2 walls, solid).
-   Print `cad/servo_lego_coupler_v3.stl` (half the wall, 14 mm long; the 2 mm
-   shortening was a guess) and test-fit it; record the same four things.
-1a. Drive-motor coupler v3 FITS the #5159 shaft and is installed on the diff
-   input (Appendix GF; v1 too tight, FQ). Fit only - NOT load-tested.
-1b. Work the daily audit's OPEN rows - Appendix FG holds the full 35-row
-   table; open are 11, 13, 16-35, plus row 14 half done (checkpoint
-   fingerprints written, never checked). (The BMS wiring
-   redraw this item used to lead with landed 2026-10-10.) (The Appendix EV commit this
-   item used to ask for landed as caaf191 on 2026-10-04.)
-2. Flash uno_control and read the banner. The ST_DROPPED fix (Appendix EU)
-   is compiled, never flashed -- the board runs servo_bench now (FT).
-   The same flash delivers FD row 15 (Appendix FH: parser resync on a bad
-   CRC, T/B refused while ARMED), also compiled only. Then run
-   firmware/host_test.py: its new test 4b is that fix's board-level gate.
-   Read the real SELFTEST count off the banner; none is known for this build.
-3. diag_copycat.py:96-99 makes the same DART choice train_controller.py now
-   routes through select_actions(), inline and unguarded. Route it through
-   the same function so the self_check covers both.
-4. Pitch-row scale check + caliper the printed coupons (Evan's hands).
-5. Confirm a 12-tooth bevel gear is in the parts bin.
-6. ~~THE ORDER -- BLOCKED-ON-EVAN~~ ORDERED; 23/24 arrived (FI-FL). Still
-   paid: ~$430 (Evan's recollection, FU - shipping included or not unknown).
-   PRD task 8 closes when the camera (separate order) arrives.
-7. Evan's call, and LARGER than this file used to disclose. **98 tracked files
-   carry the local workspace path `D:\ClaudeCode\...`** on the PUBLIC remote
-   (measured 2026-10-04; 95 are provenance JSONs under `ml/runs/`, written by
-   `ml/provenance.write_result`, which stores `cwd`). The Windows HOME path is
-   a separate, smaller surface: 2 occurrences, both in the record. Appendices
-   EW/EX measured the 98-file scope while this file disclosed only the 2.
-   Two independent decisions: stop the source (store a repo-relative path
-   instead of `cwd`) and/or scrub the committed files (a history rewrite).
+NEXT ACTIONS, highest value first:
+1. STEERING BENCH CHECK on the flashed build: send ARMED frames (check whether
+   firmware/host_test.py can do steer-only moves; add a small mode if not):
+   full left -> 0 and full right -> 0 must both give straight wheels with no
+   manual overshoot. Measure the LEFT first-contact pulse (step down from ~600
+   in 10 us steps). Retune SERVO_BACKLASH_US / SERVO_US_CENTRE from the result.
+2. PRINT ORDER: first ADD a 4.90-5.05 pin row to cad/scad/pla_fit_coupon.scad
+   (it tops out at 5.00) and print the coupon with the SAME profile as the
+   parts; then servo mount v7 -> motor mount v6 -> camera mast v1 -> tray/deck.
+   Record printer, filament, layer height, walls and the measured fit of every
+   print (CLAUDE.md rule). Mount checks: pins snap; servo shaft lines up with
+   the pinion after the v7 1.6 mm shift; the mast's two front "+" holes are
+   exposed past the servo mount's front end (unconfirmed in the last photo);
+   mast stud-2 needs 3L pins (6558) with the short side up.
+3. Audit HJ's HIGH: ml/splits.py split stability + a corpus id in checkpoints.
+4. Couplers: print cad/servo_lego_coupler_v3.stl and test-fit it; motor
+   coupler v3 FITS (GF) but is not load-tested.
+5. Before wiring ANYTHING: WIRING_PROTOSHIELD section 5 as rewritten (FX):
+   rail 5.0 V, cut-5V USB cable proven first, cells OUT / B- then MB then B+,
+   fuse last; run host_test.py --wired once anything is wired. Cells: 4x
+   Samsung 25R by wrap (FV/FW; 2 for the pack, 2 spares) - meter each first.
+6. Small backlog: diag_copycat.py:96-99 DART choice through select_actions();
+   uno_control banner still says "ACTUATORS UNWIRED" (servo now wired);
+   servo_bench prompt still says "400-2600" (US_MAX is 2800); pitch-row check
+   + caliper the coupons; confirm the 12-tooth bevel gear.
+7. Evan's call: 98 tracked files carry the local path D:\ClaudeCode\... on the
+   PUBLIC remote (95 provenance JSONs; ml/provenance.write_result stores cwd);
+   2 HOME-path occurrences in the record. Stop the source and/or rewrite history.
 
 HARD CONSTRAINTS
 - Corner geometry FROZEN until T2's empirical turning test.
 - No hardware purchase without Evan's explicit go.
-- The record is append-only + hook-guarded: run `date`, append via
-  ~/.claude/skills/project-memory/append-record-entry.js, and NEVER pre-cite
-  an appendix letter -- the script assigns it live.
-- Physical claims stay honest: unprinted is "untested", sim-only is "sim-only".
-- Do NOT type a backslash inside a heredoc'd Python script.
+- The record is append-only: run `date`, append via
+  ~/.claude/skills/project-memory/append-record-entry.js, never pre-cite a letter.
+- Physical claims stay honest: unprinted/unfitted = "untested", sim-only = "sim-only".
+- Plan-split rule for long tasks (Opus specs, Sonnet codes, Opus re-renders and
+  byte-compares); every printed part must pass render_scad.py + check_artifacts.
+- Pin/fit sizes live ONLY in cad/scad/lib/lego.scad fit classes.
+- Do NOT type a backslash inside a heredoc'd script; heredocs also break on
+  quotes - write scripts with the Write tool.
 - Use ./.venv/Scripts/python.exe -- bare `python` has no numpy.
-- `git add -A` and `git add .` are HARD-DENIED in settings.json; conversational
-  approval cannot override them. List every file path explicitly.
+- Never `git add -A` / `git add .` - list every path (the settings deny rule is
+  GONE per audit HJ, so this is discipline, not enforcement). Leave
+  .claude/pm-cadence.json, drift-check.stamp and the *.tmp files out.
+- ASCII-only text in any .md you write.
 ```

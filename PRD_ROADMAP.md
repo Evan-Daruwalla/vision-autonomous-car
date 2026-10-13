@@ -410,6 +410,7 @@ transfer gap) must not block the capstone.
    stall (task 8c). Printables 61922/147626 are acceptable only as
    socket-style adapters. Constraint: `docs/WIRING_PROTOSHIELD.md` §2.4a.
    **2026-10-11 (Appendix FY): the servo mount is being built in OpenSCAD (`cad/scad/`), gated on the measurement sheet (S1-S9) and the PLA fit coupon.**
+   **2026-10-13 (Appendices GV-HL): servo mount iterated v3 -> v7 (v7: servo 1.6 mm forward + 0.5 mm higher, HF). v6 was PRINTED and fitted: pins TOO TIGHT at 4.875 (HH) -> pin holes 4.95 in every part via the lib fit classes (HG, HL). v7 UNTESTED. Done-check NOT passed.**
 6. **CAD: rear drive module.** Diff mounts, ~~PF motor~~ **N20 #5159 motor**
    cradle (10 × 12 × 26 mm body, +3-4 mm on the connector side for the
    encoder board, 3 mm D-shaft; drive coupler is a socket gripping a real
@@ -419,6 +420,7 @@ transfer gap) must not block the capstone.
    wrong since 2026-07-23 ~17:21, when Evan confirmed he owns no Lego motors.)*
    **2026-10-11 (Appendix FY): the motor mount is being built in OpenSCAD, gated on M1-M6 (2026-10-11, Appendix GA: M1/M2/M4 now come from Pololu's drawing; M3 is a spot check) and the PLA fit coupon. The material in practice is PLA; the PETG named above is unresolved.**
    **2026-10-12 (Appendices GJ, GL): v1 printed - dimensions fine, encoder hit the back third of the side walls; v2 (real black pins in snap sockets, trimmed walls, back wall) built, UNTESTED. Done-check NOT passed.**
+   **2026-10-13 (Appendices GW, GZ, HC): motor mount v6 - three pins per side (x -16/0/+16), side walls 3 mm taller; UNTESTED (v1 is the only motor-mount print). Done-check NOT passed.**
 7. **CAD: chassis plate.** Bays for Pi, ~~LiPo (low, central), TB6612+UBEC~~
    **2× 18650 holder (low, central) · the Arduino Uno + proto shield (68.6 ×
    53.4 mm — 60% of the 114.75 mm car width, so it mounts lengthwise; stack
@@ -433,6 +435,7 @@ transfer gap) must not block the capstone.
    2026-07-23 ~17:59; the Uno bay is new since 2026-09-02, Appendix BC.)*
    **2026-10-11 (Appendix FY): scope set by Evan - the wiring-diagram parts + Pi 5 + power bank (151.5 x 69.7 x 18.5 mm, USB on a short side). Proposed as TWO prints: a tray (bank + pack) and a deck on posts (Pi, Uno, LM2596); the camera mast comes later. Gated on E1-E11 and the PLA fit coupon.**
    **2026-10-12 (Appendices GW, GX): tray + deck built (printable, UNTESTED). Still open: a routed path for the motor's encoder cable, which comes up from below the frames, and a mount for a STURDY camera mast. Done-check NOT passed.**
+   **2026-10-13 (Appendices HD, HE): both open items designed - tray/deck v2 encoder-cable channel (notch in the -y rail + slot through tray floor and deck) and camera mast v1 (`cad/camera_mast.stl`: lens 109 mm above the floor at 29 deg, from the research brief HD). All UNTESTED. Done-check NOT passed.**
 
 ### M2 — Electronics + teleop
 
@@ -521,6 +524,7 @@ transfer gap) must not block the capstone.
         This calibration must be re-measured on the new rack before the
         servo is commanded anywhere near its old span; do not assume it
         scales from the old numbers.
+        **2026-10-13 (Appendices HM-HU): endpoints MEASURED by hand on the bench (left ~450 us = the rack stop, right ~2600 us = the servo's own end) and 100-150 us of gear backlash found; firmware compensation (overshoot 125 us and hold, centre 1525) and safe limits 550..2600 FLASHED, SELFTEST PASS 86/86. NOT the EEPROM calibration this item asks for: values are constants from a model fit to two observations. Done-check NOT passed.**
     (ii) **Choose a coupling that survives.** ⚠️ **The steering coupler is the
         HIGHEST-torque joint on the car and a PRINTED cross-axle stub FAILS
         there** — SF **0.57-0.96** at MG90S stall (~216 mN·m), against SF

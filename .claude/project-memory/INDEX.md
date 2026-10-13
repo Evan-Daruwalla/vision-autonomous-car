@@ -11,9 +11,9 @@ Core bins:
 - features.md — inventory of the 34 ml/ scripts by pipeline stage (updated 2026-09-03)
 - conventions.md — general code style across ml/, counts re-derived to 34 files, + the provenance.write_result rule (updated 2026-09-03; 39 lines)
 - gotchas.md — **SPLIT 2026-09-02, now a 24-line ROUTER only.** Kept because CLAUDE.md/HANDOFF reference it by name; follow its pointers
-- hardware.md — printing + Lego fit, power, motors/drivers, the Uno's pin budget and current limits, the pack, measured vehicle geometry (**SPLIT 2026-09-03**; 535 lines (2026-10-11), over the ~150 cap. Includes the charger-vs-BMS category error and cell C-rating traps)
-- firmware-traps.md — Arduino toolchain + firmware logic traps: build, clock handling, status-LED semantics (new 2026-09-03; 101 lines 2026-10-11, + in-band ASCII command collision FH)
-- steering.md — servo choice, measured rack-and-pinion geometry, the coupler that must survive it, calibration (new 2026-09-03; updated 2026-10-04 - printed-coupler decision, MG90D fit caveat)
+- hardware.md — printing + Lego fit, power, motors/drivers, the Uno's pin budget and current limits, the pack, measured vehicle geometry (**SPLIT 2026-09-03**; 535 lines (2026-10-11), over the ~150 cap. Includes the charger-vs-BMS category error and cell C-rating traps) [2026-10-13: 548 lines; printed-mount facts (camera mast, cable channel, frame/axle positions from photos, HE)]
+- firmware-traps.md — Arduino toolchain + firmware logic traps: build, clock handling, status-LED semantics (new 2026-09-03; 101 lines 2026-10-11, + in-band ASCII command collision FH) [2026-10-13: 102 lines; + .ino prototype-before-struct trap (HR)]
+- steering.md — servo choice, measured rack-and-pinion geometry, the coupler that must survive it, calibration (new 2026-09-03; updated 2026-10-04 - printed-coupler decision, MG90D fit caveat) [2026-10-13: 379 lines; bench locks 450/2600 us, gear backlash, compensation 125 us + hold, centre 1525, flashed 86/86 (HM-HU)]
 - track.md — track layout, markings, surface, what the camera sees of the environment, **plus the whole 3DStreet / OpenDRIVE / LaneMaker trail** (updated 2026-09-09 — the 1:11.80 scale struck in four places against the live 1:14.63, the 114.75 mm car width superseded by 155.00 mm, and the marking/dash table re-derived from live output; Appendix ET. **512 lines, 2.6× over the ~200 cap — SPLIT OVERDUE: the xodr/LaneMaker material is its own bin, and that thread is now closed as a negative so it is a clean cut**)
 - sim-harness.md — the simulator, the eval harness, training-time GPU limits (new 2026-09-02; 131 lines)
 - ml-training.md — GPU memory + world-model training facts MEASURED on this
@@ -24,9 +24,9 @@ Core bins:
 Standards bins (only those the codebase actually commits to):
 - dependencies.md — planned stack (DonkeyCar 5.x plumbing + PyTorch models) + the ON-CAR inference runtime decision: export to ONNX, and why RAM was never the binding constraint (updated 2026-09-03)
 - ui.md — N/A, no frontend planned; teleop UI TBD at M2 (re-checked 2026-09-02, still N/A)
-- testing.md — the runnable done-checks + verification rules, ml AND firmware (updated 2026-09-10 -- `scripts/run_checks.py` is the suite; a self_check must fail on its own bug)
+- testing.md — the runnable done-checks + verification rules, ml AND firmware (updated 2026-09-10 -- `scripts/run_checks.py` is the suite; a self_check must fail on its own bug) [2026-10-13: uno_control flashed, SELFTEST 86/86 on the board (HU)]
 - data.md — THE episode data contract: npz schema, t=0 rule, both alignment gates, 3-way split rule, the SPLIT-SEED rule, the torn-preprocess guard in load_proc, + the Pi/Uno serial frame contract (updated 2026-09-03; 190 lines, over the ~150 cap)
-- tooling.md — Python 3.12.10 venv, machine facts, git -F quirk, shell/encoding traps from the gotchas split (updated 2026-09-02)
+- tooling.md — Python 3.12.10 venv, machine facts, git -F quirk, shell/encoding traps from the gotchas split (updated 2026-09-02) [2026-10-13: + OpenSCAD asserts exit 0; COM3 busy on upload = Serial Monitor (HL, HT)]
 
 Cross-bin invariants:
 - No hardware purchase without Evan's explicit go (BLOCKED-ON-EVAN).
