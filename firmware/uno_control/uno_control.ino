@@ -359,6 +359,9 @@ OutMode outputModeFor(bool isArmed, bool packInhibit, bool wdTripped,
   return (msUnsafe < BRAKE_MS) ? OUT_BRAKE : OUT_OFF;
 }
 
+// Steering follows commands only in OUT_DRIVE - the same gate as the motor.
+bool steerAllowed(OutMode m) { return m == OUT_DRIVE; }
+
 // ---- encoder ---------------------------------------------------------------
 // 4x quadrature. Raw counts only: SERIAL_PROTOCOL.md section 6 makes converting
 // ticks to distance the Pi's job, and counts-per-rev is unverified until the
@@ -413,7 +416,12 @@ void applyOutputs(OutMode mode, int8_t steer, int8_t throttle) {
       digitalWrite(PIN_STBY, LOW);               // hardware disable
       break;
   }
-  steerServo.writeMicroseconds(backlashCommand(steerComp, steerToUs(steer)));
+  // Actuators are inert unless ARMED (SERIAL_PROTOCOL.md): the servo follows the
+  // command only when the motor may drive too. Otherwise it keeps its last pulse
+  // (the Servo library repeats it) - held, not centred. Fixed 2026-10-13: the
+  // daily audit (record HJ) found the servo following DISARMED frames.
+  if (steerAllowed(mode))
+    steerServo.writeMicroseconds(backlashCommand(steerComp, steerToUs(steer)));
 }
 
 uint32_t lastLightsMs = 0;
@@ -681,6 +689,18 @@ void selftest() {
     CHECK(backlashCommand(e, 560) == SERVO_US_MIN_SAFE, "overshoot never goes past the left safe limit");
     Backlash g = {2500, -1};
     CHECK(backlashCommand(g, 2550) == SERVO_US_MAX_SAFE, "overshoot never goes past the right safe limit");
+    // Steering gate (audit HJ): a DISARMED, pack-inhibited or watchdog-tripped
+    // state never moves the servo; only OUT_DRIVE does.
+    CHECK(!steerAllowed(outputModeFor(false, false, false, true, 0)),
+          "a disarmed frame does not steer (brake window)");
+    CHECK(!steerAllowed(outputModeFor(false, false, false, false, 0)),
+          "never-armed boot state does not steer");
+    CHECK(!steerAllowed(outputModeFor(true, true, false, true, 0)),
+          "armed but pack-inhibited does not steer");
+    CHECK(!steerAllowed(outputModeFor(true, false, true, true, 0)),
+          "armed but watchdog-tripped does not steer");
+    CHECK(steerAllowed(outputModeFor(true, false, false, true, 0)),
+          "armed, pack OK, link alive: steers");
     CHECK(steerToUs(-100) - SERVO_BACKLASH_US > SERVO_US_MIN_SAFE &&
           steerToUs(100) + SERVO_BACKLASH_US < SERVO_US_MAX_SAFE,
           "full steer plus overshoot stays inside both safe limits");

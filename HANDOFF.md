@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~11:48 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~13:40 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 227 appendices A–HS; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 229 appendices A–HU; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -25,7 +25,7 @@ BOARD** (`firmware/uno_control/`, host_test 13/13, Appendices BO/CA/CE).
 time was found by the 2026-09-02 daily-audit (BY) and fixed the same evening
 (CA); "verified on the board" before CA covered the link, not this path.**
 ⚠️ **The flashed build and the repo source now DIVERGE** (2026-09-03, Appendix
-DC): ~~the board still runs the 2026-09-02 build (SELFTEST 49/49, 7888 B)~~ **2026-10-10: Evan uploaded `firmware/servo_bench` over it (Appendix FT) - the board runs servo_bench until uno_control is re-flashed**, while
+DC): ~~the board still runs the 2026-09-02 build (SELFTEST 49/49, 7888 B)~~ **2026-10-10: Evan uploaded `firmware/servo_bench` over it (Appendix FT) - the board runs servo_bench until uno_control is re-flashed** ~~(superseded)~~ **2026-10-13 (HU): uno_control re-flashed, SELFTEST PASS 86/86 on the board**, while
 `uno_control.ino`'s lighting path was rewritten for WS2812B afterwards —
 compiled clean (58 checks, 9680 B) but **never flashed**. Read the boot banner,
 never a doc, for what the board is actually running.
@@ -680,8 +680,10 @@ NEXT ACTIONS, cheapest first:
    gear pair before the rack (tooth clearance). Fix not chosen: spring
    preload / remove that gear stage / firmware compensation (supplement).
    CHOSEN (Evan, HR/HS): firmware compensation, overshoot 125 us and HOLD;
-   centre 1525. Compiled, NOT flashed: flash uno_control, read SELFTEST, then
-   bench-check that 0 steer is straight from both sides.
+   centre 1525; servo gated to OUT_DRIVE (HT, audit HJ fix). FLASHED
+   2026-10-13 (HU): SELFTEST PASS 86/86 on the board. NEXT: bench-check with
+   ARMED frames (firmware/host_test.py or the Pi) that 0 steer is straight
+   from both full left and full right.
 1. ~~Print v2 and test-fit it~~ v2 FITTED 2026-10-10 ("dimensions are good",
    Appendix FM); settings recorded in FR (P1S, PLA, 0.1 mm, 2 walls, solid).
    Print `cad/servo_lego_coupler_v3.stl` (half the wall, 14 mm long; the 2 mm

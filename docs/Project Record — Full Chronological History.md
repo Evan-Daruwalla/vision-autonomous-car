@@ -262,6 +262,8 @@ the dated entry, not the digest.
 - [HQ - Steering slop is gear tooth clearance, not axle spread](#appendix-hq---steering-slop-is-gear-tooth-clearance-not-axle-spread-2026-10-13-1141-cdt) (10-13)
 - [HR - Steering backlash compensation in uno_control (overshoot, then return)](#appendix-hr---steering-backlash-compensation-in-uno_control-overshoot-then-return-2026-10-13-1146-cdt) (10-13)
 - [HS - Backlash compensation: overshoot 125 us and hold (no return)](#appendix-hs---backlash-compensation-overshoot-125-us-and-hold-no-return-2026-10-13-1148-cdt) (10-13)
+- [HT - Steering gated to OUT_DRIVE (audit HJ fix); flash blocked, COM3 busy](#appendix-ht---steering-gated-to-out_drive-audit-hj-fix-flash-blocked-com3-busy-2026-10-13-1150-cdt) (10-13)
+- [HU - uno_control flashed: SELFTEST PASS 86/86 on the board](#appendix-hu---uno_control-flashed-selftest-pass-8686-on-the-board-2026-10-13-1340-cdt) (10-13)
 
 ---
 
@@ -18497,3 +18499,21 @@ flashed since servo_bench replaced it (FT).
 **SELFTEST (rewritten, 9 backlash checks):** first command 1525 -> 1650; unchanged target keeps 1650; 2000 -> 2125; 1500 -> 1375; 1490 -> 1365 (same side); 1495 -> 1620 (reversal); both safe-limit clamps; full steer + overshoot inside the limits.
 
 **Checks (real output, 2026-10-13 ~11:48 CDT):** compile "Sketch uses 11598 bytes (35%)", "Global variables use 388 bytes (18%)"; grep for the removed names finds none; run_checks 16 passed, 0 failed. SELFTEST NOT run (on-board; not flashed).
+
+# Appendix HT - Steering gated to OUT_DRIVE (audit HJ fix); flash blocked, COM3 busy (2026-10-13, ~11:50 CDT)
+**WHAT:** Evan (2026-10-13): "1 then 2 then 3" - (1) commit + push the backlash compensation: done, 5de132e. (2) flash + test: BLOCKED - `arduino-cli upload -p COM3` failed twice with "cannot open port \.\COM3: Access is denied" (another program holds the port, most likely the Arduino IDE Serial Monitor from the servo_bench session); not forced. (3) the daily-audit finding (record HJ, MED): the servo followed DISARMED frames - fixed in source.
+
+**Fix (`firmware/uno_control/uno_control.ino`):** new pure `steerAllowed(mode)` = (mode == OUT_DRIVE) - the same gate the motor already uses (armed, pack not inhibiting, watchdog not tripped). `applyOutputs()` writes the servo only when it is true; otherwise the servo keeps its last pulse (held, not centred), matching SERIAL_PROTOCOL.md "ARMED - actuators are inert unless set". The boot-time write in setup() (centre through the compensator, 1650) is kept. 5 new SELFTEST checks: disarmed-after-driving, never-armed, pack-inhibited and watchdog-tripped states do not steer; armed + pack OK + link alive does.
+
+**Checks (real output, 2026-10-13 ~11:50 CDT):** compile "Sketch uses 11628 bytes (36%)", "Global variables use 388 bytes (18%)"; run_checks 16 passed, 0 failed. SELFTEST NOT run - board not flashed (port busy).
+
+# Appendix HU - uno_control flashed: SELFTEST PASS 86/86 on the board (2026-10-13, ~13:40 CDT)
+**WHAT:** Evan (2026-10-13): "flash it". The COM3 port was free this time.
+
+- `arduino-cli upload -p COM3 --fqbn arduino:avr:uno firmware/uno_control`: exit 0 ("New upload port: COM3 (serial)").
+- Boot banner read over serial (115200, pyserial, 6 s capture):
+  "== UNO CONTROL == protocol v0.2, ACTUATORS UNWIRED" and **"SELFTEST PASS 86/86"**.
+
+**What the board runs now:** the current uno_control SOURCE - backlash compensation (HS: overshoot 125 us and hold, centre 1525, safe limits 550..2600) plus the steering gate (HT: servo follows commands only in OUT_DRIVE), compiled 11628 B / 388 B. servo_bench (FT) is gone from the board. The flashed build equals the working-tree source; the HT gate is NOT yet committed at the time of this entry. First on-board run of every SELFTEST check added since 2026-09-02 (49/49 then; 86 now).
+
+**Notes:** the banner string still says "ACTUATORS UNWIRED" although the servo is now on the car - a stale string, not a fault. The bench test of the compensation (full left -> 0 and full right -> 0 give straight wheels) needs ARMED frames from a host (firmware/host_test.py or the Pi); typing pulses as in servo_bench no longer works. NOT done yet.
