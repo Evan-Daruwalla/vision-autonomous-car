@@ -432,6 +432,7 @@ transfer gap) must not block the capstone.
    2026-09-02 — LiPo/UBEC was superseded by the split-source 18650 design on
    2026-07-23 ~17:59; the Uno bay is new since 2026-09-02, Appendix BC.)*
    **2026-10-11 (Appendix FY): scope set by Evan - the wiring-diagram parts + Pi 5 + power bank (151.5 x 69.7 x 18.5 mm, USB on a short side). Proposed as TWO prints: a tray (bank + pack) and a deck on posts (Pi, Uno, LM2596); the camera mast comes later. Gated on E1-E11 and the PLA fit coupon.**
+   **2026-10-12 (Appendices GW, GX): tray + deck built (printable, UNTESTED). Still open: a routed path for the motor's encoder cable, which comes up from below the frames, and a mount for a STURDY camera mast. Done-check NOT passed.**
 
 ### M2 — Electronics + teleop
 

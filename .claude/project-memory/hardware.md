@@ -539,3 +539,8 @@ FLIPPED 2026-09-05 (Appendix DM), see below:**
   The printed mounts are OpenSCAD (`cad/scad/`), gated on it and the measurements.
 - 2026-10-11 (Appendix FS): motor coupler v3 = D-bore +0.150 over v1 (3.150 /
   2.650 across flat). v2 inferred still too tight. Shaft still unmeasured.
+- 2026-10-12 (record GX) OPEN DESIGN REQUIREMENTS for the printed mounts: (1) the
+  #5159 encoder cable comes up from BELOW the frames (motor under the centre
+  frame, connector up) - the electronics tray needs a cable channel up to the
+  Uno; (2) a mount for a STURDY camera mast (camera in shipping; the Pi's
+  camera connector faces forward on the deck).

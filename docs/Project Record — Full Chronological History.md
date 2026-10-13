@@ -239,6 +239,8 @@ the dated entry, not the digest.
 - [GT - Motor mount v3: floor up 2.5 mm, back wall 2 mm closer](#appendix-gt---motor-mount-v3-floor-up-25-mm-back-wall-2-mm-closer-2026-10-12-1731-cdt) (10-12)
 - [GU - Pin holes +0.075 mm (4.875) in every mount](#appendix-gu---pin-holes-0075-mm-4875-in-every-mount-2026-10-12-1737-cdt) (10-12)
 - [GV - Servo mount v3: 6 mm higher, rails and bridges instead of a plate](#appendix-gv---servo-mount-v3-6-mm-higher-rails-and-bridges-instead-of-a-plate-2026-10-12-1748-cdt) (10-12)
+- [GW - Motor mount v4; printable electronics tray and deck](#appendix-gw---motor-mount-v4-printable-electronics-tray-and-deck-2026-10-12-1912-cdt) (10-12)
+- [GX - Camera in shipping; open requirements: motor cable routing, sturdy camera mast](#appendix-gx---camera-in-shipping-open-requirements-motor-cable-routing-sturdy-camera-mast-2026-10-12-2054-cdt) (10-12)
 
 ---
 
@@ -17767,3 +17769,84 @@ check_artifacts 35 checked, 0 drifted. Untested; not printed.
 
 **Process note:** the .scad header cites "record GV" before this entry was
 appended (pre-cite), checked against the script's assignment.
+
+# Appendix GW - Motor mount v4; printable electronics tray and deck (2026-10-12 ~19:12 CDT)
+**WHAT:** Motor mount v4 and the first printable electronics mount (tray +
+deck). Plan approved by Evan in plan mode; the spec is in the task plan.
+
+## Motor mount v4 (Evan's instruction, Opus edit)
+
+"11mm from the front of the motor mount extend the walls and floor. close
+the walls in by 0.2mm each. Then AFTER the 11mm make a flat part (parallel
+plane to the back wall) 1.5 mm towards the inside and 1.5mm thick." Applied:
+walls and a floor strip run to x 26 (was 15); wall inner faces y +/-6.2
+(was 6.4); a 1.5 x 1.5 mm lip on each side wall at x 26..27.5 (sides only,
+Evan: no floor lip). Evan ACCEPTED the risk that the longer floor (top z
+23.4) runs under the coupler, whose bottom is 22.5 by the GE numbers.
+Checks: probes 77/77, re-render identical (dab607b3bc13fd68...).
+
+## Electronics tray + deck (`cad/electronics_tray.stl`, `cad/electronics_deck.stl`)
+
+Inputs from Evan (2026-10-12): a top-down photo with the free space outlined
+(unlimited room upward; may grow to the rear and both sides, not toward the
+servo); "first layer directly on the lego base"; Pi 5 in a Vilros case 91.8 x
+64.4 x 27.2 (front LAN + USB-A, right HDMI, back USB-C + camera connector,
+fan on top); bank 151.5 x 70.55 x 18.0 with USB-C / USB-A at 20 / 45 mm from
+the left on one short side; 2S holder 75.75 x 40.5 x 20.5; Adeept charger
+38.5 x 18.5 x 6.3; the free pin holes along both long edges of the middle
+frame row, one character per stud: `oxxxosoxxxooxxxooxxxo` (stud 20 maybe
+blocked by the servo mount, dropped). Decisions: bank + holder + charger
+parts on layer 1, Pi + Uno + LM2596 + rocker on layer 2; bank ports to the
+rear; Pi's back (camera connector) to the front.
+
+Frame: x = 0 at the rear corner hole, +x forward; pin rows y = +/-24 (48 mm
+apart: 5x7 frames, inferred, NOT measured); z = 0 on the frames' top.
+- Tray: two 7.8-tall rails with Lego-beam pin holes at x 0, 32, 48, 80, 88,
+  120, 128 (Evan's free studs; they match the photo's frame corners); a 2 mm
+  floor (lightening window under the bank); bank fence open at the rear; a
+  holder lobe (+y) and a small-parts lobe (-y) with zip slots; four feet on
+  the side frames; six 30-mm posts with pin holes for the deck.
+- Deck (on the posts, z 30): Pi corner brackets + vent window under the Pi,
+  Uno standoffs/pegs (community hole pattern), LM2596 on a -y wing, rocker
+  20 mm hole on a rear tab clear of the bank's plugs.
+- Opus caught 3 spec errors before coding (rocker hole off its tab; LM2596
+  corner on two wing posts; a bank zip slot under the holder) and the deck
+  agent caught a fourth (a "solid" probe point on a pin-hole axis, Opus's
+  error) - fixed in the probe file by Opus.
+
+Checks: tray probes 195/195, deck 75/75, both re-rendered byte-identically
+(1e4d5bd21e18d937..., 9822bf9cf144a293...); check_artifacts 37 checked, 0
+drifted. The layout drafts (`electronics_*_draft`) are deleted. All three
+parts UNTESTED - not printed.
+
+**Found, not fixed:** `ml/provenance.py`'s self-check fails when a `git rm`
+is STAGED (a staged deletion is neither on disk nor in `git ls-files`), so
+`run_checks.py` showed 15/16 with the draft deletions staged and 16/16 with
+them unstaged. Offered to Evan as a separate task.
+
+# Appendix GX - Camera in shipping; open requirements: motor cable routing, sturdy camera mast (2026-10-12 ~20:54 CDT)
+**WHAT:** /docs-sync pass before a commit, plus three facts from Evan
+(2026-10-12):
+
+1. **Camera:** the PiShop Camera Module 3 Wide is IN SHIPPING (it was the one
+   BOM item not arrived on 2026-10-10, ordered separately from its cable).
+   PRD task 8 still closes only when it arrives.
+2. **Requirement - motor cable routing:** the #5159's encoder cable comes up
+   from BELOW the frames (the motor hangs under the centre frame, connector
+   up). The electronics tray (GW) covers that area: the tray's lightening
+   window (x 8..140, y -18..18) lies over the motor, but the power bank sits
+   directly on top of it, so there is NO routed path yet. A cable channel
+   from the window to the Uno on the deck is needed.
+3. **Requirement - camera mast:** there must be a mounting place for a mast
+   that holds the camera, and the mast must be STURDY. The deck (GW) has the
+   Pi's camera connector facing forward but no mast mount yet; the front of
+   the car is the servo area, so the mast's base location is open.
+
+Neither requirement is designed yet; both are carried in HANDOFF item 000,
+the PRD task 7 note, hardware.md and the task plan.
+
+**Docs touched:** this entry; HANDOFF (stamp, camera status, item 000,
+paste-ready prompt); important.md entry 1 (camera status); hardware.md
+(the two requirements); PRD task 7 note. HTML twin / record index: the
+project has neither. Bins the cadence hook names as stalest (performance,
+security, ui) hold no fact this session changed - untouched.

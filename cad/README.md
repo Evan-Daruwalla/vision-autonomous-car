@@ -360,9 +360,13 @@ carrying it by its ears only (the case footprint is open). Two ear screws into
 1.7 mm pilots (swap for the coupon's best pilot). Pin holes at studs 1, 2 and 3
 of each L; pin studs 1 and 3. Print flat side down, no supports.
 
-### electronics_tray_draft.scad, electronics_deck_draft.scad - LAYOUT DRAFTS
+### electronics_tray.stl + electronics_deck.stl - printable, UNTESTED (Appendix GW)
 
-Not printable. Every value named `*_UNMEASURED` is a placeholder (frame pin
-positions, holder, charger, Pi case). They exist
-so the layout can be approved; no STL is committed until the measurements
-replace the placeholders.
+Layer 1 (tray) pins straight onto the middle frame row (free holes at studs 0,
+4, 6, 10, 11, 15, 16 along both long edges, 48 mm apart) and carries the power
+bank (ports to the rear), the 2S holder (one side lobe) and the charger / BMS /
+fuse / XT30 (other lobe, zip slots). Layer 2 (deck) pins onto the tray's six
+posts and carries the Pi case (camera connector forward, vent window under
+it), the Uno on pegs, the LM2596 on a wing and the rocker on a rear tab.
+Print both flat side down; the tray is ~162 x 169 mm.
+

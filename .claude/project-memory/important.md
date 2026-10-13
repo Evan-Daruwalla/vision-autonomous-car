@@ -7,7 +7,7 @@
 > Created 2026-09-30 from CLAUDE.md, HANDOFF.md, PRD_ROADMAP.md and the bins (Skills record EA follow-up).
 
 ## 1. No hardware purchase without Evan's explicit go (2026-09-30)
-**What:** the BOM (`docs/BOM.md`) stands at $422.25 before shipping (2026-10-04 cart review, was $411.45; shipping not re-estimated), ~~UNBOUGHT, BLOCKED-ON-EVAN~~ **ORDERED; 23 of 24 items ARRIVED 2026-10-10 (Appendices FI-FL) - Camera Module 3 Wide not arrived (separate order); motor confirmed #5159.** Any NEW purchase still needs his explicit go. The BMS is confirmed: `B08HLQQCQJ` (2026-10-04). Purchase tasks are worked against specs and stubs until he acts.
+**What:** the BOM (`docs/BOM.md`) stands at $422.25 before shipping (2026-10-04 cart review, was $411.45; shipping not re-estimated), ~~UNBOUGHT, BLOCKED-ON-EVAN~~ **ORDERED; 23 of 24 items ARRIVED 2026-10-10 (Appendices FI-FL) - Camera Module 3 Wide not arrived (separate order); motor confirmed #5159.** **2026-10-12: the camera is IN SHIPPING (PiShop; record GX).** Any NEW purchase still needs his explicit go. The BMS is confirmed: `B08HLQQCQJ` (2026-10-04). Purchase tasks are worked against specs and stubs until he acts.
 **Constrains:** never place, start or "prepare to submit" an order; re-verify prices before he buys.
 **Why:** money, and the BOM has been re-priced four times.
 **Source:** CLAUDE.md:18-19; HANDOFF.md:39, :191, :495; detail in budget.md / hardware.md.

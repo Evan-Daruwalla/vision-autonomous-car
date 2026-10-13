@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-12 ~17:48 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-12 ~20:54 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 204 appendices A–GV; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 206 appendices A–GX; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -36,7 +36,7 @@ banked. ~~Nothing has been printed and nothing has been ordered since
 2026-07-23.~~ **PRINTING STARTED 2026-09-05** — two tolerance coupons (v1 and
 v2) printed on a Bambu P1S in Bambu ABS, giving M1.3's two headline numbers
 (pin holes 4.80 mm, rotating axle bores 5.00 mm, Appendices DI/DK). **Still
-nothing ORDERED** — the BOM stands at ~~$411.45~~ **$422.25 before shipping (2026-10-04 cart review)**, ~~unbought~~ **ORDERED; 23 of 24 items ARRIVED 2026-10-10 (Appendices FI/FJ/FK). NOT arrived: Camera Module 3 Wide (a separate order from the cable). Motor confirmed #5159 by its label (FL).**
+nothing ORDERED** — the BOM stands at ~~$411.45~~ **$422.25 before shipping (2026-10-04 cart review)**, ~~unbought~~ **ORDERED; 23 of 24 items ARRIVED 2026-10-10 (Appendices FI/FJ/FK). NOT arrived: Camera Module 3 Wide (a separate order from the cable) - IN SHIPPING as of 2026-10-12 (GX). Motor confirmed #5159 by its label (FL).**
 
 **2026-09-07: a REAL DEFECT was found and fixed in the controller** (commit
 `bfa953e`, Appendix EJ). `ml/train_controller.py` overwrote `act` with the
@@ -592,8 +592,8 @@ Read, in order:
    (track.md before ANY track/marking/xodr work; steering.md before ANY
    servo/steering work)
 
-STATE (2026-10-12 ~10:55 CDT). Parts ORDERED and 23 of 24 ARRIVED 2026-10-10
-(Appendices FI-FL; the Camera Module 3 Wide is on a separate order, not in).
+STATE (2026-10-12 ~20:54 CDT). Parts ORDERED and 23 of 24 ARRIVED 2026-10-10
+(Appendices FI-FL; the Camera Module 3 Wide is on a separate order, IN SHIPPING 2026-10-12).
 Nothing is wired. The Uno now runs firmware/servo_bench (FT), NOT uno_control:
 re-flash uno_control and read its boot banner - no SELFTEST count is known
 for the current source. The MG90D-270 is positional (turns and stops).
@@ -622,7 +622,7 @@ UNWORKED AUDIT BACKLOG: Appendix EW (2026-09-17, 9 findings) and Appendix EX
 
 NEXT ACTIONS, cheapest first:
 000. PRINTED MOUNTS - Appendices FY (plan) and GA-GM (measurements, builds).
-   - MOTOR MOUNT cad/motor_mount.stl v3 (GT: floor +2.5 mm, back wall 2 mm in; v2 GL): real black 2780 pins in snap
+   - MOTOR MOUNT cad/motor_mount.stl v4 (GW: walls/floor +11 mm at the front, walls 0.2 in, side lips; v3 GT; v2 GL): real black 2780 pins in snap
      sockets; side walls trimmed after v1's print hit the encoder; back wall
      at a PHOTO-ESTIMATED gap. PRINT AND FIT v2, report: do the pins snap,
      does the motor sit level with the coupler, is the back-wall gap ~0.5 mm.
@@ -631,8 +631,15 @@ NEXT ACTIONS, cheapest first:
      BOTH 2x4 L liftarms (one each side of the servo), case footprint open,
      ears on plastic, pin holes at studs 1-3 of each L. Print and fit: L spacing
      (photo: 32 mm), ears sit flat, pilot size.
-   - ELECTRONICS TRAY/DECK: LAYOUT DRAFTS (cad/scad/*_draft.scad, GJ), NOT
-     printable, placeholders named *_UNMEASURED; E11 (top-down photo + heights) for the electronics.
+   - ELECTRONICS: cad/electronics_tray.stl (layer 1: bank, holder, charger
+     parts; pins into the middle frames' free holes) + cad/electronics_deck.stl
+     (layer 2 on 6 posts: Pi, Uno, LM2596, rocker) - printable, UNTESTED (GW).
+     The 48 mm pin-row spacing is inferred - check it on the first print;
+   - OPEN REQUIREMENTS (Evan, GX), not designed yet: (a) the motor's encoder
+     cable comes up from BELOW the frames - the tray needs a cable channel
+     (the bank now sits right over the lightening window above the motor);
+     (b) a mounting place for a STURDY camera mast (deck has the Pi's camera
+     connector facing forward, no mast mount yet); E11 (top-down photo + heights) for the electronics.
      Known defect: the deck's rocker hole sits over the holder/BMS.
    - DECISION (GM): every printed part uses real black 2780 pins, no printed
      stubs (.claude/project-memory/decisions.md). Pin bore 4.875 in all mounts (GU).
@@ -647,7 +654,7 @@ NEXT ACTIONS, cheapest first:
    redesign); step 2a cells OUT, B- then MB then B+, fuse last. Strips are cut
    2 + 1 per side (tail on a rear jumper; firmware PX order changed). Run
    host_test.py with --wired once anything is wired. Compiled, never flashed.
-0. PARTS ARRIVED 2026-10-10 (Appendices FI-FL). Camera still in transit;
+0. PARTS ARRIVED 2026-10-10 (Appendices FI-FL). Camera IN SHIPPING (GX);
    motor is #5159; item 3 is the PiShop cable. Cells: 4x Samsung 25R by wrap (FV/FW; 2 for the pack, 2 spares) - meter each.
    SERVO BENCH: servo_bench is ON the board and works (FT); servo is
    positional. Still to measure: per-unit DOA, angle table, end-of-travel
