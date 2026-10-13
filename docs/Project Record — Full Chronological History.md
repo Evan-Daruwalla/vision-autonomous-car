@@ -255,6 +255,11 @@ the dated entry, not the digest.
 - [HJ - Scheduled daily-audit: 61 findings - the train/val split re-draws on any corpus top-up with no corpus id in checkpoints, and steering moves on disarmed frames](#appendix-hj---scheduled-daily-audit-61-findings---the-trainval-split-re-draws-on-any-corpus-top-up-with-no-corpus-id-in-checkpoints-and-steering-moves-on-disarmed-frames-2026-10-13-0737-cdt) (10-13)
 - [HK - Bambu Studio X-Y hole compensation is 0 (Evan)](#appendix-hk---bambu-studio-x-y-hole-compensation-is-0-evan-2026-10-13-1111-cdt) (10-13)
 - [HL - Fit classes in lib/lego.scad; parts use lego_pin_d()](#appendix-hl---fit-classes-in-liblegoscad-parts-use-lego_pin_d-2026-10-13-1117-cdt) (10-13)
+- [HM - Servo bench: lock 450-2600 us, 100-150 us of steering free play](#appendix-hm---servo-bench-lock-450-2600-us-100-150-us-of-steering-free-play-2026-10-13-1119-cdt) (10-13)
+- [HN - Servo right lock about 2650 us (estimate past the bench ceiling)](#appendix-hn---servo-right-lock-about-2650-us-estimate-past-the-bench-ceiling-2026-10-13-1134-cdt) (10-13)
+- [HO - Servo right lock = servo end of travel (~2600 us), rack 0.5 mm short of its stop](#appendix-ho---servo-right-lock--servo-end-of-travel-2600-us-rack-05-mm-short-of-its-stop-2026-10-13-1136-cdt) (10-13)
+- [HP - Left lock is the rack stop; steering slop is the bevel-gear pair](#appendix-hp---left-lock-is-the-rack-stop-steering-slop-is-the-bevel-gear-pair-2026-10-13-1139-cdt) (10-13)
+- [HQ - Steering slop is gear tooth clearance, not axle spread](#appendix-hq---steering-slop-is-gear-tooth-clearance-not-axle-spread-2026-10-13-1141-cdt) (10-13)
 
 ---
 
@@ -18362,3 +18367,68 @@ part-to-part clearances are still literals.
 - All five parts re-rendered BYTE-IDENTICAL to the committed STLs (servo
   113/113, motor 134/134, mast 75/75, tray 205/205, deck 79/79 probes).
 - check_artifacts: 38 checked, 0 drifted. run_checks: 16 passed, 0 failed.
+
+# Appendix HM - Servo bench: lock 450-2600 us, 100-150 us of steering free play (2026-10-13, ~11:19 CDT)
+**WHAT (bench measurement, Evan, 2026-10-13):** MG90D-270 on the car,
+driven by `firmware/servo_bench` (pulse typed in us):
+- **450 us = full lock turning LEFT; 2600 us = full lock turning RIGHT.**
+- **Hysteresis / free play:** coming back from full left (450), commanding
+  1500 does NOT straighten the wheels; Evan sets **1650 then 1500** and they
+  are straight. Coming back from full right (2600), he sets **1400 then
+  1500**. So the steering needs an overshoot of 150 us (from the left) and
+  100 us (from the right) past centre before 1500 gives straight wheels.
+  Evan's reading: "low tolerance in the system" (mechanical play).
+
+**Caveat found in the firmware:** `servo_bench` clamps every pulse to
+400-2600 us (US_MIN/US_MAX, `servo.attach(PIN_SERVO, 400, 2600)`). 2600 is
+that ceiling, so "full right lock at 2600" may be the bench limit, not the
+steering's mechanical lock. 450 sits above the 400 floor, so the left value
+is a real reading. Not yet known: whether 450 / 2600 put the steering
+against a hard stop (servo straining) or are where the servo itself stops.
+
+**Arithmetic (estimates, not measurements):** at the listing's unverified
+0.135 deg/us, 100-150 us of overshoot is 13.5-20 deg of servo rotation taken
+up as free play. Through the bare-linkage ratio from 2026-09-05 (58 deg wheel
+/ 270 deg pinion, unconfirmed on the current rack) that is roughly 2.9-4.3
+deg of wheel angle. The MG90D's own deadband is not this large (typical hobby
+servos: a few us; not measured), so the play is most likely in the drive
+train: servo spline <-> coupler, coupler <-> Lego axle, pinion <-> rack, tie
+rods, or the servo moving in its mount.
+
+**Why it matters:** a steering dead zone of this size means small steering
+corrections from a controller produce no wheel motion until the play is
+taken up - the classic cause of weaving / limit cycles in lane keeping.
+
+**Firmware state unchanged:** uno_control still has SERVO_US_CENTRE 1500,
+SERVO_US_SPAN 450 (+/-450 us) and an unlimited attach(); not reflashed.
+**Status:** measured by hand on the bench; free-play location not found.
+
+# Appendix HN - Servo right lock about 2650 us (estimate past the bench ceiling) (2026-10-13, ~11:34 CDT)
+**WHAT (Evan, 2026-10-13):** answering the HM caveat - the steering goes "a tiny bit beyond 2600, maybe 2650". So the right-hand lock is about **2650 us**, an ESTIMATE: servo_bench clamps every pulse at 2600 (US_MAX), so nothing above 2600 has been commanded or measured.
+
+**Consequence (arithmetic):** travel from the straight-ahead command (1500, reached after the overshoot of HM) is about 1050 us to the left (450) and about 1150 us to the right (~2650) - not symmetric; the midpoint of the two locks is about 1550 us. Firmware limits must be chosen inside BOTH locks with margin; nothing changed in firmware yet.
+
+**Open:** an exact right-lock value needs servo_bench US_MAX raised (e.g. 2700) and reflashed; whether either lock is a hard mechanical stop (servo straining) is still unknown; the free-play location (HM) is still unknown.
+
+# Appendix HO - Servo right lock = servo end of travel (~2600 us), rack 0.5 mm short of its stop (2026-10-13, ~11:36 CDT)
+**WHAT (Evan, 2026-10-13):** servo_bench reflashed with US_MAX 2600 -> 2800 (`firmware/servo_bench/servo_bench.ino:20`, Evan's local edit, uncommitted when this was written). Commanding past 2600 (Evan tried 2700) moves the rack to the SAME angle as 2600, and the rack still has about **0.5 mm** of travel left at that point.
+
+**Conclusion:** the right-hand lock is the SERVO's own end of travel (it stops turning at about 2600 us), not the rack hitting its stop. So on the right the servo cannot stall against the rack. This supersedes HN's "~2650" estimate: pulses above ~2600 add nothing. Right travel from the straight-ahead 1500 is about 1100 us; left (450) about 1050 us.
+
+**Still open:** whether the LEFT lock (450 us) is also the servo's end or the rack's stop (servo straining); where the 100-150 us of free play (HM) lives - the wheel-rocking test.
+
+**Note:** the bench's startup prompt still prints "type us (400-2600)" (servo_bench.ino:36) after the limit change.
+
+# Appendix HP - Left lock is the rack stop; steering slop is the bevel-gear pair (2026-10-13, ~11:39 CDT)
+**WHAT (Evan, 2026-10-13):**
+1. **Left lock is PHYSICAL**, not the servo: at full left (~450 us) the steering is at its mechanical stop. (Right lock is the servo end of travel, HO.) Consequence: any command past the first-contact point on the left pushes the rack into its stop and STALLS the servo - load on the coupler, the joint never cleared for stall torque (important.md #5). The firmware left limit must sit INSIDE first contact; the first-contact pulse is not yet measured (450 is where Evan saw full lock, not necessarily where contact begins).
+2. **The free play (HM, 100-150 us) is located:** the gap between the 2 gears that turn the drive from the servo's axis into the plane of the shaft that drives the rack (the bevel pair before the rack). Gear backlash, not the coupler, not the mount.
+
+**Not yet known:** whether the backlash grows because the two gear axles can spread apart (fixable by holding their spacing) or is the gears' own tooth clearance (needs a preload or removing that gear stage); the gear part numbers / tooth counts.
+
+# Appendix HQ - Steering slop is gear tooth clearance, not axle spread (2026-10-13, ~11:41 CDT)
+**WHAT (Evan, 2026-10-13):** "the slop only comes from the gap between teeth" - the 100-150 us of steering free play (HM, HP) is the tooth clearance (backlash) of the gear pair itself, not the gear axles spreading apart.
+
+**Consequence:** a printed brace that holds the axle spacing (option A offered in chat) would not help and is dropped. Remaining fixes: B spring/elastic preload so the teeth always rest on one flank; C remove that gear stage by putting the servo on the rack shaft's own axis; D firmware backlash compensation (only a supplement - assumes the gap stays constant). No choice made yet.
+
+**Committed with this entry:** Evan's servo_bench edit US_MAX 2600 -> 2800 (the build he used for HO); its startup prompt (servo_bench.ino:36) still says "400-2600".

@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~11:17 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~11:41 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 220 appendices A–HL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 225 appendices A–HQ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -672,6 +672,13 @@ NEXT ACTIONS, cheapest first:
    rack needs, and attach() has no limits, so the Servo library clamps to
    544-2400 us. Needs attach(PIN_SERVO, 500, 2500) + a span chosen after a
    bench endpoint measurement. (FJ timestamp note: paid in FK.)
+   MEASURED 2026-10-13 (HM-HQ): right lock ~2600 us = the servo's own end
+   (rack 0.5 mm short of its stop); left lock ~450 us = the RACK STOP, so the
+   firmware left limit must sit inside the first-contact pulse (not yet
+   measured) or the servo stalls. Straight = 1500 only after an overshoot
+   (1650 from the left, 1400 from the right): 100-150 us of BACKLASH in the
+   gear pair before the rack (tooth clearance). Fix not chosen: spring
+   preload / remove that gear stage / firmware compensation (supplement).
 1. ~~Print v2 and test-fit it~~ v2 FITTED 2026-10-10 ("dimensions are good",
    Appendix FM); settings recorded in FR (P1S, PLA, 0.1 mm, 2 walls, solid).
    Print `cad/servo_lego_coupler_v3.stl` (half the wall, 14 mm long; the 2 mm

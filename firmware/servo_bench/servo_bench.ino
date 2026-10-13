@@ -17,7 +17,7 @@
 #include <Servo.h>
 
 const uint8_t PIN_SERVO = 9;
-const int US_MIN = 400, US_MAX = 2600;
+const int US_MIN = 400, US_MAX = 2800;
 
 Servo servo;
 char line[8];
