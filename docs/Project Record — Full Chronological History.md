@@ -268,6 +268,7 @@ the dated entry, not the digest.
 - [HW - Steering gate blocks bench steering; banner fix; servo_bench flashed for the backlash test](#appendix-hw---steering-gate-blocks-bench-steering-banner-fix-servo_bench-flashed-for-the-backlash-test-2026-10-13-1400-cdt) (10-13)
 - [HX - Backlash MEASURED: centre 1525 confirmed, half-gap 75 us (not 125)](#appendix-hx---backlash-measured-centre-1525-confirmed-half-gap-75-us-not-125-2026-10-13-1407-cdt) (10-13)
 - [HY - uno_control flashed with backlash 75 us: SELFTEST PASS 86/86](#appendix-hy---uno_control-flashed-with-backlash-75-us-selftest-pass-8686-2026-10-13-1409-cdt) (10-13)
+- [HZ - Decision: steering gate unchanged; end-to-end steer test waits for the pack](#appendix-hz---decision-steering-gate-unchanged-end-to-end-steer-test-waits-for-the-pack-2026-10-13-1416-cdt) (10-13)
 
 ---
 
@@ -18656,3 +18657,32 @@ boots to 1525 + 75 = 1600 (first command approaches from below).
 **Still open:** the 75 us value is verified only by hand in servo_bench (HX);
 through uno_control, ARMED frames cannot move the servo on the bench while the
 pack reads FAULT (HW). host_test.py has not been run on this build.
+
+# Appendix HZ - Decision: steering gate unchanged; end-to-end steer test waits for the pack (2026-10-13 ~14:16 CDT)
+**DECISION (Evan, 2026-10-13 ~14:16 CDT): option D - leave the steering gate
+as it is.** No firmware change. Frame -> servo through uno_control is tested
+end to end only after the pack is wired (cells metered, BMS installed,
+WIRING_PROTOSHIELD.md section 2.1).
+
+**Context (record HW):** the servo moves only in OUT_DRIVE, which needs a good
+pack reading; on the bench A0 floats, reads FAULT and blocks every steer.
+Options offered:
+
+| Option | Gist | Taken |
+|---|---|---|
+| A | steering gated on armed + link alive, not pack state | no |
+| B | disarmed-only typed bench command running the steer sequence | no |
+| C | wire the pack now | later (it is what unblocks the test) |
+| D | do nothing; HX hand test + SELFTEST suffice for now | **yes** |
+
+Claude recommended A (a low or faulted pack would otherwise freeze steering
+while the motor brakes); Evan chose D, keeping the audit-HJ gate unchanged
+until the pack exists.
+
+**What stands verified:** the compensator math (SELFTEST 86/86 on the board,
+HY) and the physical constants (centre 1525, half-gap 75 us, HX, by hand in
+servo_bench). **Not verified:** a Pi frame actually moving the servo through
+uno_control.
+
+**Open, carried forward:** whether steering should share the pack inhibit (A)
+- revisit when the pack is wired and the car first runs on it.

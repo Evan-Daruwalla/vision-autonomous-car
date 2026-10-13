@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~14:11 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~14:18 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 233 appendices A–HY; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 234 appendices A–HZ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -604,6 +604,7 @@ OUT_DRIVE, i.e. armed + pack OK + link alive). Only the servo is on the car;
 motor, encoder, strip and pack are unwired. host_test.py has NOT been run on
 this build. HW: with no pack wired the pack reads FAULT, so the HT gate never
 reaches OUT_DRIVE - ARMED frames CANNOT move the servo on the bench.
+HZ (Evan): left as-is - the frame->servo test waits for the pack wiring.
 Backlash test by hand in servo_bench: 950->1650, 2100->1400, 450->1650,
 2600->1400; pass = wheels straight with no 1500 return. RUN (HX): straight
 at 1600 from the left, 1450 from the right in all four -> centre 1525

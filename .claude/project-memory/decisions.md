@@ -19,3 +19,15 @@ then a 6.2 pocket 2.0 tall where the tip lip snaps.
 weak across layers and their fit is untested.
 **Source:** record GL and GM; docs/research/2026-10-12_technic-pin-snap-geometry.md.
 Recess and pocket sizes are still UNTESTED in PLA (coupon row B, first v2 print).
+
+## 2026-10-13 - steering gate stays coupled to the pack check until the pack is wired (Evan)
+**What:** the servo keeps moving only in OUT_DRIVE (armed + pack OK + link
+alive). No bench bypass. Frame -> servo through uno_control is first tested
+end to end after the pack is wired (cells metered, BMS in).
+**Why:** keeps the audit-HJ gate unchanged before the pack exists; the
+compensator math (SELFTEST 86/86) and constants (1525 / 75 us, measured by
+hand) are already verified separately.
+**Rejected:** A (steer on armed + link alive, ignoring the pack - Claude's
+recommendation; revisit when the car first runs on the pack), B (disarmed
+bench command).
+**Source:** records HW, HX, HY, HZ.
