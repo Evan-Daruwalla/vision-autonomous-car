@@ -277,6 +277,7 @@ the dated entry, not the digest.
 - [IF - Pocket gauge: holder snug (0.25/side OK); bank and Pi ~2 mm loose - wrong nominal widths](#appendix-if---pocket-gauge-holder-snug-025side-ok-bank-and-pi-2-mm-loose---wrong-nominal-widths-2026-10-13-1735-cdt) (10-13)
 - [IG - Tray v5: fences 4 -> 10 mm to hold the bank's flat sides](#appendix-ig---tray-v5-fences-4---10-mm-to-hold-the-banks-flat-sides-2026-10-13-1745-cdt) (10-13)
 - [IH - Measurements M1-M11: fuse holder has no place, rocker hole 21, LM2596 pegs 57.5 x 31.5; correction to IF](#appendix-ih---measurements-m1-m11-fuse-holder-has-no-place-rocker-hole-21-lm2596-pegs-575-x-315-correction-to-if-2026-10-13-1800-cdt) (10-13)
+- [II - Deck +10 mm for the fuse holder (on the bank); Uno standoffs 6 mm so the USB plug clears a pin boss](#appendix-ii---deck-10-mm-for-the-fuse-holder-on-the-bank-uno-standoffs-6-mm-so-the-usb-plug-clears-a-pin-boss-2026-10-13-1820-cdt) (10-13)
 
 ---
 
@@ -19029,3 +19030,41 @@ checks failed; run_checks 17 passed, 0 failed.
 
 **Open (Evan):** where the fuse holder goes; free space for the rocker body
 behind the tray; the Uno's USB-B / barrel jack positions along its short edge.
+
+# Appendix II - Deck +10 mm for the fuse holder (on the bank); Uno standoffs 6 mm so the USB plug clears a pin boss (2026-10-13 ~18:20 CDT)
+**WHAT:** (2026-10-13 ~18:20 CDT) Evan chose option A for the fuse holder
+(record IH): raise the deck 10 mm so the fuse holder lies flat on top of the
+bank. He also confirmed the space behind the tray under the rocker is clear,
+and gave the Uno's jack positions: "starting on the left side, its 13mm to the
+middle of the usb and 43 from the left to the barrel".
+
+**Changes:**
+- **Tray v6:** `POST_TOP` 32 -> 42. LAYOUT: inline fuse holder 50 x 34.25 x
+  12 lying flat ON the bank, x 40..90, y 0..34.25, z 27.8..39.8 (2.2 mm under
+  the deck).
+- **Deck v7:** `DECK_BOT` 32 -> 42 (top 44.5). **Uno standoffs 4 -> 6 mm**:
+  with the jack centre 13 mm from the Uno's left edge (deck x ~11), the USB-B
+  plug crosses the deck pin boss at (10, -41.6) (x 6..14, top z 49.8). With
+  4 mm standoffs the PCB top sits at 50.1 and the plug's lower edge about 1 mm
+  below the jack (an allowance - the plug was not measured) would be at 49.1,
+  into the boss; with 6 mm it is at 51.1. LAYOUT: new "clearance" entry for
+  the plug (16 x 30 x 13 allowance, x 3..19, y -72.3..-42.3, z 51.1..64.1).
+  The barrel jack (x ~41, 4.1 out) is clear of everything.
+- **scripts/electronics_layout.py:** new kind "clearance" (must stay empty,
+  hangs in the air: checked for material and overlap, not support); support
+  check now also accepts resting on another box's top face (the fuse on the
+  bank). Self-check extended: a floating box fails, a box on a box passes, a
+  clearance is skipped - all caught.
+- Probes: tray post holes z 28.1 -> 38.1, bbox z 42; deck every z +10 (the two
+  Uno-peg chamfer points +12), bbox z 42..53.5.
+- docs/ELECTRONICS_LAYOUT.md updated to the measured sizes and new heights.
+
+**Not done (judgment, stated):** no braces on the now 32 mm-tall posts - the
+deck pinned on all six tops ties them into a frame, so they are not free
+cantilevers. Revisit if the deck sways on the car.
+
+**Checks:** render_scad tray 247/247, deck 88/88, OVERALL PASS; layout 11
+entries, 0 checks failed (gaps to the deck: fuse 2.2, holder 11.7, bank
+14.2 mm); overhang scan: deck none > 1.5 mm, tray unchanged (worst 10.44 mm);
+layout --self-check PASS (6 cases); check_artifacts 40 checked, 0 drifted;
+run_checks 17 passed, 0 failed. UNTESTED - not printed.

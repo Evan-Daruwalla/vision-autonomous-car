@@ -16,13 +16,15 @@
 // v5 (2026-10-13): fences 4 -> 10 mm tall. The PETG pocket gauge showed the bank ~2 mm
 // loose in a 4 mm fence: its edges are rounded and its sides are flat only from 7 mm
 // above its bottom (Evan). Pocket width unchanged (70.55 + 0.25 per side). Zip slots 3.5.
+// v6 (2026-10-13): posts 32 -> 42 (deck +10 mm, Evan's option A): the inline fuse holder
+// (50 x 34.25 x 12, measured) lies flat on top of the bank, and the holder leads get room.
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, the Lego pin rows at y = +/-24; z = 0 on the Lego frames' top face, z up. mm.
 //
 // Layout: two rails (pinned to the frames), a floor with a lightening window, a
 // holder lobe (+y), a small-parts lobe (-y), a three-sided bank fence (no rear wall,
-// for ports), a holder fence, four feet, ribs under the floor, and six deck posts (pinned, z up to 32.0).
+// for ports), a holder fence, four feet, ribs under the floor, and six deck posts (pinned, z up to 42.0).
 
 use <lib/lego.scad>
 EPS = 0.01;
@@ -35,7 +37,7 @@ FLOOR_TOP = RAIL_H + FLOOR_T;   // 9.8
 FENCE_T = 2.0;
 FENCE_H = 10.0;           // v5: past the bank's rounded bottom edge (flat side from 7 mm up, Evan 2026-10-13)
 FENCE_TOP = FLOOR_TOP + FENCE_H;   // 19.8
-POST_TOP = 32.0;
+POST_TOP = 42.0;
 POST_S = 8.0;
 FOOT_S = 8.0;
 
@@ -159,6 +161,7 @@ LAYOUT = [
   ["2S holder + 2x Samsung 25R", [75.75, 40.5, 20.5], [58.125, 37.85, FLOOR_TOP], "part", "holder fence + 2 zip ties (slots x 75, 117)", "leads red / black + MB wire; exit end not measured"],
   ["USB-C 2S charger (Adeept p0374)", [38.43, 18.3, 6.3], [60, -69.5, FLOOR_TOP], "part", "zip ties at x 64 and 92", "pads BAT, GND, GND, VIN; USB-C side not stated"],
   ["2S BMS (ACEIRMC B08HLQQCQJ)", [41, 8, 2.2], [66, -83, FLOOR_TOP], "part", "double-sided tape", "pads B+ B- MB P+ P-"],
+  ["inline fuse holder, 3 A ATO (50 x 34.25 x 12, lying flat)", [50, 34.25, 12], [40, 0, FLOOR_TOP + 18.0], "part", "on top of the bank; tape or ride under a bank tie", "in the CELL+ wire, before the BMS"],
   ["XT30 pair, mated (25 x 10.5 x 5.3)", [25, 10.5, 5.3], [104, -66, FLOOR_TOP], "part", "zip tie at x 120", "BMS P+ / P- side; car side to the rocker"]
 ];
 for (p = LAYOUT) if (p[3] != "note") ghost_box(p[1], p[2]);

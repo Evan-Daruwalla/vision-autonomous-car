@@ -7,8 +7,9 @@ with echo(LAYOUT_PARTS = LAYOUT); the deck also prints echo(LAYOUT_PEGS = ...).
 One LAYOUT entry is
     [name, [sx, sy, sz], [x, y, z], kind, held_by, ports]
 [x, y, z] is the MIN corner of the box (the ghost_box convention), mm; x is
-along the car (+x = front), y across, z up. kind is "part", "zone" or "note"
-(a note has no volume: it is only drawn). `ports` is a string whose
+along the car (+x = front), y across, z up. kind is "part", "zone",
+"clearance" or "note" (a clearance is space that must stay empty but hangs in
+the air, e.g. a cable plug; a note has no volume: it is only drawn). `ports` is a string whose
 ";"-separated segments may start with a side tag -x: +x: -y: +y:.
 This script runs OpenSCAD on each .scad, reads those echo lines, loads the two
 committed STLs (cad/electronics_tray.stl, cad/electronics_deck.stl) and checks
@@ -20,8 +21,10 @@ every part/zone box against them:
      the pegs are meant to go into the parts' holes.
   b) overlap: no two part/zone boxes (either layer) overlap in volume. Boxes
      that only touch at a face do not overlap.
-  c) support: on a 2 mm grid over the footprint (inset 0.3 mm), at least one
-     point 0.3 mm below the bottom face is solid in one of the STLs.
+  c) support (parts and zones, not clearances): on a 2 mm grid over the
+     footprint (inset 0.3 mm), at least one point 0.3 mm below the bottom face
+     is solid in one of the STLs, or lies on the top face of another box (a
+     part resting on a part, within 0.5 mm).
   d) report only: for each layer-1 part/zone whose footprint overlaps the deck
      STL's xy bounding box, its top z and the gap up to the deck underside.
 
@@ -74,13 +77,14 @@ DEFAULT_SVG = REPO / "docs" / "electronics_layout.svg"
 
 # ---- tunables (mm unless noted) ---------------------------------------------
 OPENSCAD_TIMEOUT = 120    # s
-KINDS = ("part", "zone", "note")
+KINDS = ("part", "zone", "clearance", "note")
 INSET = 0.3               # samples sit this far inside every face
 THIN = 0.9                # boxes thinner than this get one mid-plane z sample
 GRID_XYZ = (5, 5, 3)      # material samples per axis
 PEG_CLEAR = 2.5           # skip material samples this close (x, y) to a peg
 SUPPORT_STEP = 2.0        # support grid pitch
 SUPPORT_DROP = 0.3        # support point sits this far below the bottom face
+PART_REST = 0.5           # a box resting on another box's top face counts as supported
 OVERLAP_EPS = 1e-6        # overlap in an axis must exceed this to count
 MAX_MATERIAL_REPORTS = 3  # per part
 
@@ -146,8 +150,8 @@ def make_entries(parts: list, layer: int, scad: Path) -> list[dict]:
 
 
 def bodies(entries: list[dict]) -> list[dict]:
-    """Entries that occupy volume (kind part or zone)."""
-    return [e for e in entries if e["kind"] in ("part", "zone")]
+    """Entries that occupy volume (kind part, zone or clearance)."""
+    return [e for e in entries if e["kind"] in ("part", "zone", "clearance")]
 
 
 # ---- checks: each returns [(ok, text)] ---------------------------------------
@@ -201,7 +205,10 @@ def check_overlap(entries: list[dict]) -> list[tuple[bool, str]]:
 
 def check_support(entries: list[dict], stls: list[np.ndarray]) -> list[tuple[bool, str]]:
     results = []
-    for e in bodies(entries):
+    body = bodies(entries)
+    for e in body:
+        if e["kind"] == "clearance":
+            continue
         (x0, y0, z0), (sx, sy, _) = e["pos"], e["size"]
         xs = np.arange(x0 + INSET, x0 + sx - INSET + 1e-9, SUPPORT_STEP)
         ys = np.arange(y0 + INSET, y0 + sy - INSET + 1e-9, SUPPORT_STEP)
@@ -211,6 +218,12 @@ def check_support(entries: list[dict], stls: list[np.ndarray]) -> list[tuple[boo
             ys = np.array([y0 + sy / 2.0])
         z = z0 - SUPPORT_DROP
         held = any(inside(t, (x, y, z)) for x in xs for y in ys for t in stls)
+        # or resting on another box: its top within PART_REST of this bottom, under a grid point
+        held = held or any(
+            b is not e and abs(b["pos"][2] + b["size"][2] - z0) <= PART_REST
+            and b["pos"][0] <= x <= b["pos"][0] + b["size"][0]
+            and b["pos"][1] <= y <= b["pos"][1] + b["size"][1]
+            for b in body if b["kind"] != "clearance" for x in xs for y in ys)
         results.append((True, f"support {e['name']}") if held
                        else (False, f"{e['name']}: nothing under it"))
     return results
@@ -352,7 +365,7 @@ def panel_svg(title: str, tris: np.ndarray, entries: list[dict], left: float) ->
         if e["kind"] == "part":
             g.append(f'<rect x="{fmt(bx0)}" y="{fmt(by0)}" width="{fmt(bx1 - bx0)}" height="{fmt(by1 - by0)}" '
                      f'fill="{colour}" fill-opacity="0.35" stroke="{colour}" stroke-width="{fmt(1)}"/>')
-        elif e["kind"] == "zone":
+        elif e["kind"] in ("zone", "clearance"):
             g.append(f'<rect x="{fmt(bx0)}" y="{fmt(by0)}" width="{fmt(bx1 - bx0)}" height="{fmt(by1 - by0)}" '
                      f'fill="none" stroke="{colour}" stroke-width="{fmt(1)}" stroke-dasharray="{fmt(4)} {fmt(3)}"/>')
         else:
@@ -403,7 +416,20 @@ def self_check(stls: list[np.ndarray] | None = None) -> None:
     clean = all(ok for ok, _ in check_overlap([box1, dict(box2, pos=[210.0, 0.0, 0.0])]))
     print(f"self-check (b) two overlapping boxes are caught: {'ok' if caught_b else 'NOT CAUGHT'}")
     print(f"self-check (b) two boxes touching at a face are not flagged: {'ok' if clean else 'FALSE ALARM'}")
-    assert caught_a and caught_b and clean, "a planted bug was not caught (see the lines above)"
+    # (c) far from both meshes: a floating box fails, one resting on it passes, a clearance is skipped
+    base = dict(solid, name="fake base", pos=[300.0, 0.0, 20.0], idx=1)
+    rest = dict(solid, name="fake rest", pos=[302.0, 2.0, 21.0], idx=2)
+    hang = dict(solid, name="fake hang", pos=[300.0, 40.0, 20.0], kind="clearance", idx=3)
+    sup = dict((text.split(": ")[0].replace("support ", ""), ok)
+               for ok, text in check_support([base, rest, hang], stls))
+    caught_c = sup.get("fake base") is False
+    rests = sup.get("fake rest") is True
+    skipped = "fake hang" not in sup
+    print(f"self-check (c) a floating box is caught: {'ok' if caught_c else 'NOT CAUGHT'}")
+    print(f"self-check (c) a box resting on another box is supported: {'ok' if rests else 'FALSE ALARM'}")
+    print(f"self-check (c) a clearance is not support-checked: {'ok' if skipped else 'CHECKED'}")
+    assert caught_a and caught_b and clean and caught_c and rests and skipped, \
+        "a planted bug was not caught (see the lines above)"
 
 
 # ---- main -----------------------------------------------------------------------
