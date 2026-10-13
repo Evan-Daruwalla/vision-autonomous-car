@@ -260,6 +260,8 @@ the dated entry, not the digest.
 - [HO - Servo right lock = servo end of travel (~2600 us), rack 0.5 mm short of its stop](#appendix-ho---servo-right-lock--servo-end-of-travel-2600-us-rack-05-mm-short-of-its-stop-2026-10-13-1136-cdt) (10-13)
 - [HP - Left lock is the rack stop; steering slop is the bevel-gear pair](#appendix-hp---left-lock-is-the-rack-stop-steering-slop-is-the-bevel-gear-pair-2026-10-13-1139-cdt) (10-13)
 - [HQ - Steering slop is gear tooth clearance, not axle spread](#appendix-hq---steering-slop-is-gear-tooth-clearance-not-axle-spread-2026-10-13-1141-cdt) (10-13)
+- [HR - Steering backlash compensation in uno_control (overshoot, then return)](#appendix-hr---steering-backlash-compensation-in-uno_control-overshoot-then-return-2026-10-13-1146-cdt) (10-13)
+- [HS - Backlash compensation: overshoot 125 us and hold (no return)](#appendix-hs---backlash-compensation-overshoot-125-us-and-hold-no-return-2026-10-13-1148-cdt) (10-13)
 
 ---
 
@@ -18432,3 +18434,66 @@ SERVO_US_SPAN 450 (+/-450 us) and an unlimited attach(); not reflashed.
 **Consequence:** a printed brace that holds the axle spacing (option A offered in chat) would not help and is dropped. Remaining fixes: B spring/elastic preload so the teeth always rest on one flank; C remove that gear stage by putting the servo on the rack shaft's own axis; D firmware backlash compensation (only a supplement - assumes the gap stays constant). No choice made yet.
 
 **Committed with this entry:** Evan's servo_bench edit US_MAX 2600 -> 2800 (the build he used for HO); its startup prompt (servo_bench.ino:36) still says "400-2600".
+
+# Appendix HR - Steering backlash compensation in uno_control (overshoot, then return) (2026-10-13, ~11:46 CDT)
+**WHAT:** Evan (2026-10-13) chose option D for the steering gear backlash
+(HM-HQ) with his own twist: on a move, overshoot past the target, then come
+back to the target ("going from 1500 to 2000 make it go to 2060 then back to
+2000"). Implemented in `firmware/uno_control/uno_control.ino` (source only;
+NOT flashed).
+
+**Model behind the numbers (Opus, fit to Evan's two observations - exactly
+determined, UNVERIFIED):** pure gear backlash with a gap b ~ 250 us and the
+straight-ahead rack position at 1525. It reproduces both bench procedures:
+from the left the servo must reach 1525 + 125 = 1650, from the right
+1525 - 125 = 1400 (Evan's 1650 and 1400); the step back to 1500 is smaller
+than the gap, so the rack does not move during it. Consequences used here:
+- the overshoot must be HALF the gap, **125 us**, not Evan's illustrative 60
+  (with 60 a 1500 -> 2000 move would leave the rack ~65 us short);
+- with that overshoot, Evan's overshoot-then-return lands the rack exactly
+  on the target AND parks the servo mid-gap, so the next move in either
+  direction again needs exactly one half-gap - the method is consistent;
+- its cost: after the return the teeth are unloaded, so road forces can move
+  the wheels within the gap. A switch keeps the classic alternative.
+
+**Code (diff +101 / -6 lines):**
+- SERVO_US_CENTRE 1500 -> **1525** (model's straight-ahead).
+- New constants: SERVO_BACKLASH_US 125, SERVO_BACKLASH_RETURN true (false =
+  overshoot-and-hold), SERVO_DWELL_BASE_MS 20, SERVO_US_PER_MS 4 (listing
+  ~0.1 s/60 deg, unverified), SERVO_US_MIN_SAFE 550 (100 us inside the 450
+  rack-stop lock; first contact still unmeasured), SERVO_US_MAX_SAFE 2600.
+- `struct Backlash` + pure `backlashCommand(b, target, now)`: on a NEW target
+  it sets the direction, dwell = 20 ms + (travel + 125)/4 ms, and returns
+  target +/- 125 until the dwell ends, then the target (or keeps the
+  overshoot if RETURN is false); an unchanged target never restarts it (the
+  watchdog path calls it every loop); clamped to the safe limits; the first
+  command approaches from below so the start is deterministic.
+- `applyOutputs()` takes `now`; both callers pass it; setup()'s first servo
+  write goes through the compensator.
+- 10 new SELFTEST checks (first-command overshoot, dwell hold, return,
+  no restart on an unchanged target, up/down overshoot, dwell formula, both
+  safe-limit clamps, full steer + overshoot inside the limits); a millis()
+  wrap is straddled on purpose.
+- Steering span unchanged (+/-450): commands stay within 950..2100.
+
+**Checks (real output, 2026-10-13 ~11:46 CDT):** first compile FAILED
+("'Backlash' was not declared in this scope") - the .ino preprocessor puts
+function prototypes above the first function, before a struct declared
+later; fixed by declaring the struct with the constants. Second compile:
+"Sketch uses 11998 bytes (37%)", "Global variables use 406 bytes (19%)".
+SELFTEST was NOT run: it runs on the Uno, which Evan flashes; no host C++
+compiler is installed, so the checks were hand-traced only.
+
+**Not changed (named):** the audit finding that steering follows DISARMED
+frames (HJ) - the compensator inherits it; uno_control has never been
+flashed since servo_bench replaced it (FT).
+**Status:** compiled, not flashed, not bench-tested.
+
+# Appendix HS - Backlash compensation: overshoot 125 us and hold (no return) (2026-10-13, ~11:48 CDT)
+**WHAT (Evan, 2026-10-13):** "don't do the return just overshoot by 125". The backlash compensation of record HR is changed to overshoot-and-HOLD: `backlashCommand(b, target)` returns target + dir x 125 us, where dir is the direction of the last target change, and keeps it - the gear teeth stay pressed and the rack sits on the target. A reversal crosses the whole ~250 us gap before the rack moves. Supersedes HR's return step.
+
+**Removed (not kept behind a flag - Evan rejected the return):** SERVO_BACKLASH_RETURN, SERVO_DWELL_BASE_MS, SERVO_US_PER_MS, the struct's startMs/dwellMs, the `now` argument (applyOutputs() back to its original signature, both callers restored). Kept from HR: SERVO_BACKLASH_US 125, SERVO_US_CENTRE 1525, safe limits 550..2600, deterministic first approach from below.
+
+**SELFTEST (rewritten, 9 backlash checks):** first command 1525 -> 1650; unchanged target keeps 1650; 2000 -> 2125; 1500 -> 1375; 1490 -> 1365 (same side); 1495 -> 1620 (reversal); both safe-limit clamps; full steer + overshoot inside the limits.
+
+**Checks (real output, 2026-10-13 ~11:48 CDT):** compile "Sketch uses 11598 bytes (35%)", "Global variables use 388 bytes (18%)"; grep for the removed names finds none; run_checks 16 passed, 0 failed. SELFTEST NOT run (on-board; not flashed).

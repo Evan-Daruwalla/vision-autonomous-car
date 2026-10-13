@@ -149,9 +149,40 @@ const uint8_t ST_PACK_SHIFT = 4;    // 2 bits: PackState
  * STILL UNVERIFIED: MG90S pulse range varies by unit (some are 500-2400 us for
  * 180 degrees, not 1000-2000). Confirm the real endpoints on the bench before
  * trusting 450, and never command full lock until you have. */
-const uint16_t SERVO_US_CENTRE = 1500;
+/* CENTRE 1525, not 1500 (2026-10-13, records HM-HQ): with the steering
+ * gear backlash compensated (below), the rack lands where the command says, and
+ * Evan's two straight-wheel procedures (450 -> 1650 -> 1500 and
+ * 2600 -> 1400 -> 1500) both fit a backlash model whose straight-ahead rack
+ * position is 1525. Fit to two observations, UNVERIFIED on the bench. */
+const uint16_t SERVO_US_CENTRE = 1525;
 const uint16_t SERVO_US_SPAN   = 450;   // +/- from centre; 90% of measured lock
 const uint16_t SERVO_US_SPAN_GEOMETRIC = 500;  // 100% of lock, for SELFTEST
+
+/* STEERING BACKLASH COMPENSATION (Evan, 2026-10-13, records HM-HR).
+ * The gear pair before the rack has tooth clearance: the rack lags the servo by
+ * half the gap in the direction of motion. Evan's bench numbers fit a gap of
+ * ~250 us, i.e. 125 us per side (fit to two observations - UNVERIFIED).
+ * Evan's choice: overshoot every target by the half-gap in the direction of
+ * the last move and HOLD it (no return). The servo then sits at
+ * target +/- 125, the rack exactly at the target, and the gear teeth stay
+ * pressed. A reversal crosses the whole gap before the rack moves. */
+const uint16_t SERVO_BACKLASH_US = 125;      // half the gear gap (fit, UNVERIFIED)
+// Hard limits for the commanded pulse, overshoot included. The LEFT lock is the
+// rack's own stop (record HP): its first-contact pulse is NOT measured yet, so
+// the left limit sits 100 us inside the 450 us lock seen on the bench. The right
+// lock (~2600) is the servo's end of travel (HO). With SPAN 450 the commands
+// stay within 950..2100 and never reach either limit; the Servo library's own
+// 544-2400 clamp (unlimited attach) also applies.
+const uint16_t SERVO_US_MIN_SAFE = 550;
+const uint16_t SERVO_US_MAX_SAFE = 2600;
+
+// Backlash compensator state. target == 0 means "no command yet". Declared up
+// here, above every function: the .ino preprocessor inserts function prototypes
+// before the first function, so a struct declared later breaks the build.
+struct Backlash {
+  uint16_t target;    // last requested pulse (what the rack should end at)
+  int8_t   dir;       // +1 last move went up, -1 down
+};
 
 // Duty cap: the N20 is a 6 V motor on a pack that reaches 8.4 V. 71% of full
 // scale keeps mean voltage at ~6 V (docs/BOM.md row 5 reasoning).
@@ -281,6 +312,22 @@ uint16_t steerToUs(int8_t steer) {
   return (uint16_t)(SERVO_US_CENTRE + ((int32_t)steer * SERVO_US_SPAN) / 100);
 }
 
+/* Pure: returns the pulse to write for a requested target, updating `b`.
+ * The direction only changes when the target does, so repeated calls with the
+ * same target (the watchdog path calls this thousands of times a second) keep
+ * the same overshoot. The very first call approaches from below (dir +1) so
+ * the start is deterministic. */
+uint16_t backlashCommand(Backlash &b, uint16_t target) {
+  if (b.target == 0 || target != b.target) {
+    b.dir = (b.target == 0 || target > b.target) ? 1 : -1;
+    b.target = target;
+  }
+  int32_t us = (int32_t)b.target + b.dir * (int32_t)SERVO_BACKLASH_US;
+  if (us < SERVO_US_MIN_SAFE) us = SERVO_US_MIN_SAFE;
+  if (us > SERVO_US_MAX_SAFE) us = SERVO_US_MAX_SAFE;
+  return (uint16_t)us;
+}
+
 uint8_t throttleToDuty(int8_t t) {
   int16_t a = t < 0 ? -(int16_t)t : (int16_t)t;
   if (a > 100) a = 100;
@@ -340,6 +387,8 @@ int32_t readTicks() {
 }
 
 // ---- actuator writes -------------------------------------------------------
+Backlash steerComp = {0, 0};
+
 void applyOutputs(OutMode mode, int8_t steer, int8_t throttle) {
   switch (mode) {
     case OUT_DRIVE:
@@ -364,7 +413,7 @@ void applyOutputs(OutMode mode, int8_t steer, int8_t throttle) {
       digitalWrite(PIN_STBY, LOW);               // hardware disable
       break;
   }
-  steerServo.writeMicroseconds(steerToUs(steer));
+  steerServo.writeMicroseconds(backlashCommand(steerComp, steerToUs(steer)));
 }
 
 uint32_t lastLightsMs = 0;
@@ -616,6 +665,27 @@ void selftest() {
     CHECK(cmdAllowed('T', false) && cmdAllowed('B', false), "'T' and 'B' allowed when disarmed");
   }
 
+  {
+    // Backlash compensator (records HM-HQ). Local state: the live steerComp
+    // is never touched by SELFTEST.
+    Backlash b = {0, 0};
+    CHECK(backlashCommand(b, 1525) == 1525 + SERVO_BACKLASH_US,
+          "first command approaches from below: target + half-gap");
+    CHECK(backlashCommand(b, 1525) == 1525 + SERVO_BACKLASH_US,
+          "an unchanged target keeps its overshoot (watchdog path), no return");
+    CHECK(backlashCommand(b, 2000) == 2000 + SERVO_BACKLASH_US, "moving up overshoots above");
+    CHECK(backlashCommand(b, 1500) == 1500 - SERVO_BACKLASH_US, "moving down overshoots below");
+    CHECK(backlashCommand(b, 1490) == 1490 - SERVO_BACKLASH_US, "a further step down keeps the low side");
+    CHECK(backlashCommand(b, 1495) == 1495 + SERVO_BACKLASH_US, "a reversal up switches to the high side");
+    Backlash e = {600, 1};
+    CHECK(backlashCommand(e, 560) == SERVO_US_MIN_SAFE, "overshoot never goes past the left safe limit");
+    Backlash g = {2500, -1};
+    CHECK(backlashCommand(g, 2550) == SERVO_US_MAX_SAFE, "overshoot never goes past the right safe limit");
+    CHECK(steerToUs(-100) - SERVO_BACKLASH_US > SERVO_US_MIN_SAFE &&
+          steerToUs(100) + SERVO_BACKLASH_US < SERVO_US_MAX_SAFE,
+          "full steer plus overshoot stays inside both safe limits");
+  }
+
   Serial.print(F("SELFTEST ")); Serial.print(fail ? F("FAIL ") : F("PASS "));
   Serial.print(pass); Serial.print('/'); Serial.println(pass + fail);
   #undef CHECK
@@ -691,7 +761,9 @@ void setup() {
   TCCR2B = (uint8_t)((TCCR2B & 0xF8) | 0x01);
 
   steerServo.attach(PIN_SERVO);
-  steerServo.writeMicroseconds(SERVO_US_CENTRE);
+  // Through the compensator: the first approach is from below, so the rack
+  // starts on a known side of the gear gap.
+  steerServo.writeMicroseconds(backlashCommand(steerComp, SERVO_US_CENTRE));
 
   analogReference(INTERNAL);        // 1.1 V band gap — packguard.h
   pinMode(PG_PIN, INPUT);

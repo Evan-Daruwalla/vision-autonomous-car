@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~11:41 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~11:48 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 225 appendices A–HQ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 227 appendices A–HS; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -679,6 +679,9 @@ NEXT ACTIONS, cheapest first:
    (1650 from the left, 1400 from the right): 100-150 us of BACKLASH in the
    gear pair before the rack (tooth clearance). Fix not chosen: spring
    preload / remove that gear stage / firmware compensation (supplement).
+   CHOSEN (Evan, HR/HS): firmware compensation, overshoot 125 us and HOLD;
+   centre 1525. Compiled, NOT flashed: flash uno_control, read SELFTEST, then
+   bench-check that 0 steer is straight from both sides.
 1. ~~Print v2 and test-fit it~~ v2 FITTED 2026-10-10 ("dimensions are good",
    Appendix FM); settings recorded in FR (P1S, PLA, 0.1 mm, 2 walls, solid).
    Print `cad/servo_lego_coupler_v3.stl` (half the wall, 14 mm long; the 2 mm

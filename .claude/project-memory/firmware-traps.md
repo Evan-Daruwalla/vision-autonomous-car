@@ -99,3 +99,4 @@ Board/electrical facts (pin budget, current limits, the pack) stay in
   so "two consecutive bad frames" can come from one corruption.
 - Compiled 2026-10-10 (10668 B / 379 B), **never flashed**; SELFTEST count
   for this build is unknown until it is.
+- **.ino prototype trap (2026-10-13, record HR):** the Arduino preprocessor inserts function prototypes above the FIRST function, so a struct used in a function signature must be declared before any function (else "was not declared in this scope").
