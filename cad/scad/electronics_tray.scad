@@ -152,8 +152,8 @@ LAYOUT = [
   ["velcro under the bank (~4 mm)", [151.5, 70.55, VELCRO], [-4, -35.275, FLOOR_TOP], "zone", "adhesive both sides", ""],
   ["velcro under the holder (~4 mm)", [75.75, 40.5, VELCRO], [58.125, 44.25, LOBE_T], "zone", "adhesive both sides", ""],
   ["battery bank (Pi power)", [151.5, 70.55, 18.0], [-4, -35.275, FLOOR_TOP + VELCRO], "part", "velcro + 14 mm bank fence, open at the rear", "-x: USB-C + USB-A (20 / 45 mm from the left)"],
-  ["2S holder + 2x Samsung 25R", [75.75, 40.5, 20.5], [58.125, 44.25, LOBE_T + VELCRO], "part", "velcro + 4-sided 14 mm fence on its lobe", "leads red / black + MB wire; exit end not measured"],
-  ["USB-C 2S charger (Adeept p0374)", [38.43, 18.3, 6.3], [60, -69.5, LOBE_T], "part", "double-sided tape or velcro", "pads BAT, GND, GND, VIN; USB-C side not stated"],
+  ["2S holder + 2x Samsung 25R", [75.75, 40.5, 20.5], [58.125, 44.25, LOBE_T + VELCRO], "part", "velcro + 4-sided 14 mm fence on its lobe", "-x: red / black leads + MB wire, 160 mm, from a SHORT end (Evan 2026-10-14) - seat that end at -x"],
+  ["USB-C 2S charger (Adeept p0374)", [38.43, 18.3, 6.3], [60, -69.5, LOBE_T], "part", "double-sided tape or velcro", "-x: USB-C on a SHORT end (Evan 2026-10-14), out the open lobe edge at x 56; pads BAT, GND, GND, VIN"],
   ["2S BMS (ACEIRMC B08HLQQCQJ)", [41, 8, 2.2], [66, -83, LOBE_T], "part", "double-sided tape", "pads B+ B- MB P+ P-"],
   ["inline fuse holder, 3 A ATO (50 x 34.25 x 12, lying flat)", [50, 34.25, 12], [40, 0, FLOOR_TOP + VELCRO + 18.0], "part", "on top of the bank; tape or velcro", "in the CELL+ wire, before the BMS"],
   ["XT30 pair, mated (25 x 10.5 x 5.3)", [25, 10.5, 5.3], [104, -66, LOBE_T], "part", "double-sided tape or velcro (pack half)", "BMS P+ / P- side; car side to the rocker"]

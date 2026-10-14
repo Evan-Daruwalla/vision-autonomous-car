@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="840.0" height="702.0" viewBox="0 0 840.0 702.0" font-family="sans-serif">
-<rect x="0.0" y="0.0" width="840.0" height="702.0" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="840.0" height="714.0" viewBox="0 0 840.0 714.0" font-family="sans-serif">
+<rect x="0.0" y="0.0" width="840.0" height="714.0" fill="#ffffff"/>
 <text x="20.0" y="28.0" font-size="12.0" font-weight="bold">Layer 1 - electronics tray</text>
 <rect x="20.0" y="36.0" width="380.0" height="350.0" fill="#ffffff" stroke="#999999" stroke-width="1.0"/>
 <g shape-rendering="crispEdges">
@@ -608,7 +608,9 @@
 <rect x="76.0" y="139.4" width="303.0" height="141.1" fill="#4daf4a" fill-opacity="0.35" stroke="#4daf4a" stroke-width="1.0"/>
 <polygon points="76.0,207.0 76.0,213.0 70.0,210.0" fill="#4daf4a"/>
 <rect x="200.2" y="40.5" width="151.5" height="81.0" fill="#984ea3" fill-opacity="0.35" stroke="#984ea3" stroke-width="1.0"/>
+<polygon points="200.2,78.0 200.2,84.0 194.2,81.0" fill="#984ea3"/>
 <rect x="204.0" y="312.4" width="76.9" height="36.6" fill="#ff7f00" fill-opacity="0.35" stroke="#ff7f00" stroke-width="1.0"/>
+<polygon points="204.0,327.7 204.0,333.7 198.0,330.7" fill="#ff7f00"/>
 <rect x="216.0" y="360.0" width="82.0" height="16.0" fill="#a65628" fill-opacity="0.35" stroke="#a65628" stroke-width="1.0"/>
 <rect x="164.0" y="141.5" width="100.0" height="68.5" fill="#e41a1c" fill-opacity="0.35" stroke="#e41a1c" stroke-width="1.0"/>
 <rect x="292.0" y="321.0" width="50.0" height="21.0" fill="#377eb8" fill-opacity="0.35" stroke="#377eb8" stroke-width="1.0"/>
@@ -629,18 +631,19 @@
 <text x="20.0" y="502.0" font-size="9.0" font-family="monospace" xml:space="preserve">   open at the rear | ports: -x: USB-C + USB-A (20 / 45 mm from the</text>
 <text x="20.0" y="514.0" font-size="9.0" font-family="monospace" xml:space="preserve">   left)</text>
 <text x="20.0" y="526.0" font-size="9.0" font-family="monospace" xml:space="preserve">4. 2S holder + 2x Samsung 25R | held by: velcro + 4-sided 14 mm</text>
-<text x="20.0" y="538.0" font-size="9.0" font-family="monospace" xml:space="preserve">   fence on its lobe | ports: leads red / black + MB wire; exit end</text>
-<text x="20.0" y="550.0" font-size="9.0" font-family="monospace" xml:space="preserve">   not measured</text>
+<text x="20.0" y="538.0" font-size="9.0" font-family="monospace" xml:space="preserve">   fence on its lobe | ports: -x: red / black leads + MB wire, 160</text>
+<text x="20.0" y="550.0" font-size="9.0" font-family="monospace" xml:space="preserve">   mm, from a SHORT end (Evan 2026-10-14) - seat that end at -x</text>
 <text x="20.0" y="562.0" font-size="9.0" font-family="monospace" xml:space="preserve">5. USB-C 2S charger (Adeept p0374) | held by: double-sided tape or</text>
-<text x="20.0" y="574.0" font-size="9.0" font-family="monospace" xml:space="preserve">   velcro | ports: pads BAT, GND, GND, VIN; USB-C side not stated</text>
-<text x="20.0" y="586.0" font-size="9.0" font-family="monospace" xml:space="preserve">6. 2S BMS (ACEIRMC B08HLQQCQJ) | held by: double-sided tape | ports:</text>
-<text x="20.0" y="598.0" font-size="9.0" font-family="monospace" xml:space="preserve">   pads B+ B- MB P+ P-</text>
-<text x="20.0" y="610.0" font-size="9.0" font-family="monospace" xml:space="preserve">7. inline fuse holder, 3 A ATO (50 x 34.25 x 12, lying flat) | held</text>
-<text x="20.0" y="622.0" font-size="9.0" font-family="monospace" xml:space="preserve">   by: on top of the bank; tape or velcro | ports: in the CELL+</text>
-<text x="20.0" y="634.0" font-size="9.0" font-family="monospace" xml:space="preserve">   wire, before the BMS</text>
-<text x="20.0" y="646.0" font-size="9.0" font-family="monospace" xml:space="preserve">8. XT30 pair, mated (25 x 10.5 x 5.3) | held by: double-sided tape</text>
-<text x="20.0" y="658.0" font-size="9.0" font-family="monospace" xml:space="preserve">   or velcro (pack half) | ports: BMS P+ / P- side; car side to the</text>
-<text x="20.0" y="670.0" font-size="9.0" font-family="monospace" xml:space="preserve">   rocker</text>
+<text x="20.0" y="574.0" font-size="9.0" font-family="monospace" xml:space="preserve">   velcro | ports: -x: USB-C on a SHORT end (Evan 2026-10-14), out</text>
+<text x="20.0" y="586.0" font-size="9.0" font-family="monospace" xml:space="preserve">   the open lobe edge at x 56; pads BAT, GND, GND, VIN</text>
+<text x="20.0" y="598.0" font-size="9.0" font-family="monospace" xml:space="preserve">6. 2S BMS (ACEIRMC B08HLQQCQJ) | held by: double-sided tape | ports:</text>
+<text x="20.0" y="610.0" font-size="9.0" font-family="monospace" xml:space="preserve">   pads B+ B- MB P+ P-</text>
+<text x="20.0" y="622.0" font-size="9.0" font-family="monospace" xml:space="preserve">7. inline fuse holder, 3 A ATO (50 x 34.25 x 12, lying flat) | held</text>
+<text x="20.0" y="634.0" font-size="9.0" font-family="monospace" xml:space="preserve">   by: on top of the bank; tape or velcro | ports: in the CELL+</text>
+<text x="20.0" y="646.0" font-size="9.0" font-family="monospace" xml:space="preserve">   wire, before the BMS</text>
+<text x="20.0" y="658.0" font-size="9.0" font-family="monospace" xml:space="preserve">8. XT30 pair, mated (25 x 10.5 x 5.3) | held by: double-sided tape</text>
+<text x="20.0" y="670.0" font-size="9.0" font-family="monospace" xml:space="preserve">   or velcro (pack half) | ports: BMS P+ / P- side; car side to the</text>
+<text x="20.0" y="682.0" font-size="9.0" font-family="monospace" xml:space="preserve">   rocker</text>
 <text x="440.0" y="28.0" font-size="12.0" font-weight="bold">Layer 2 - electronics deck</text>
 <rect x="440.0" y="36.0" width="380.0" height="350.0" fill="#ffffff" stroke="#999999" stroke-width="1.0"/>
 <g shape-rendering="crispEdges">

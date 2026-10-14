@@ -281,6 +281,8 @@ the dated entry, not the digest.
 - [IJ - Velcro (4 mm) for the bank, holder and Pi - the tie slots could never close; tray v7 / deck v8](#appendix-ij---velcro-4-mm-for-the-bank-holder-and-pi---the-tie-slots-could-never-close-tray-v7--deck-v8-2026-10-13-1905-cdt) (10-13)
 - [IK - Tray v8: side lobes dropped onto the frames; all zip slots removed (deck v9)](#appendix-ik---tray-v8-side-lobes-dropped-onto-the-frames-all-zip-slots-removed-deck-v9-2026-10-13-1930-cdt) (10-13)
 - [IL - docs-sync pass + snapshot after the tray/deck redesign evening](#appendix-il---docs-sync-pass--snapshot-after-the-traydeck-redesign-evening-2026-10-13-2036-cdt) (10-13)
+- [IM - Scheduled daily-audit: 44 findings - the public repo still carries the private path in 98 files and the public README says nothing is ordered](#appendix-im---scheduled-daily-audit-44-findings---the-public-repo-still-carries-the-private-path-in-98-files-and-the-public-readme-says-nothing-is-ordered-2026-10-14-0737-cdt) (10-14)
+- [IN - Tray/deck renders; charger USB-C and holder leads both on a SHORT end; holder lead likely short](#appendix-in---traydeck-renders-charger-usb-c-and-holder-leads-both-on-a-short-end-holder-lead-likely-short-2026-10-14-1157-cdt) (10-14)
 
 ---
 
@@ -19186,3 +19188,126 @@ not written (not a section-4 drift check).
 | Layout check | 14 entries, 0 failed (electronics_layout.py) | IK |
 | Suite | run_checks 17/17; check_artifacts 40 checked, 0 drifted | IK |
 | Camera | in shipping | GX |
+
+# Appendix IM - Scheduled daily-audit: 44 findings - the public repo still carries the private path in 98 files and the public README says nothing is ordered (2026-10-14, ~07:37 CDT)
+Scheduled `daily-audit` run (read-only; nothing fixed, nothing committed). Classified
+ACTIVE by the churn override: audit HJ (2026-10-13 ~07:37 CDT) was followed by 13
+non-audit commits (8f7f236..HEAD). HEAD 6d08db5, equal to origin/main.
+
+Method: /audit with 3 cold Sonnet workers (code M1-M15 + G1-G4; docs D1-D8;
+cross-domain X-series + public-leak sweep), then /landing-check on records II-IL
+(1 more worker). The session model re-ran both highs and the code worker's high.
+
+## Result: 44 findings - 2 high, 16 med, 26 low
+
+Top: the public repo still carries the private workspace path in 98 tracked files
+(96 under ml/runs, written by `ml/provenance.py` write_result dumping `vars(args)`),
+and the record has 3 Windows-username lines, not the "2" that HANDOFF.md:667 and
+important.md:60 state.
+
+### High
+1. Path leak on the PUBLIC repo - 98 files (`git grep -lIiE 'D:.{1,2}ClaudeCode' | wc -l`
+   = 98, 96 under ml/runs); source still unfixed so every new run adds more; record
+   lines 5889, 6608, 13607 carry the username (3, docs say 2). Fix: write repo-relative
+   paths in `ml/provenance.py` write_result; correct "2" -> "3"; history rewrite is
+   Evan's call.
+2. Public README.md:8-11 and :117 say "No parts have been ordered" / "Nothing is
+   bought" / status as of 2026-09-09; HANDOFF:596 says 23 of 24 arrived 2026-10-10.
+
+### Med
+3. (high->med: the live tree passes; only a fresh clone fails) scripts/check_artifacts.py:209,223
+   compares bytes with filecmp; a `core.autocrlf=true` clone reports 7 false DRIFT
+   (6 .xodr + docs/electronics_layout.svg), exit 1 - reproduced by the session model.
+4. check_artifacts.py:241-275 `--staged` rechecks an artifact only if the artifact is
+   staged; an edited .scad or generator alone passes the hook with 0 rechecked.
+5. scripts/render_scad.py:369,407 - an empty or typo'd probe file prints "0/0 PASS,
+   OVERALL PASS" and writes the STL.
+6. ml/splits.py:160-172 - train/val split shifts on a corpus top-up (20 -> 22 episodes
+   moved val [4,6,19] to [10,16,19]); HJ high still open.
+7. ml/exp_recovery.py:75 and ml/train_cte_probe.py:54 - train_cte.npy cache has only a
+   frame-count guard (CONSTRUCTED: swap one 1201-frame episode).
+8. scripts/run_checks.py:57,100 - FileNotFoundError counts as SKIP (exit 0);
+   SystemExit escapes and aborts the runner without a summary.
+9. cad/rescale_reference_xodr.py:284 - `--scale nan` writes length="nan", exit 0.
+10. ml/requirements.txt lacks pyserial (firmware/host_test.py:26 imports serial).
+11. .claude/project-memory/important.md:58 says `git add -A` is hard-denied; no such
+    deny rule exists in any settings file, and .claude tmp/stamp files are un-ignored.
+12. HANDOFF.md:27-34, :30, :231 and uno_control.ino:10-16 still say "never flashed" /
+    SELFTEST unknown; record HY says flashed, 86/86.
+13. PRD_ROADMAP.md:1211-1212 unstruck "floor-fit self-check FAILS"; the code prints PASS.
+14. PRD_ROADMAP.md:68-84 "What exists": 31 ml scripts (34), four sketches (6),
+    121-appendix record (246), "nothing purchased/printed/wired".
+15. HANDOFF.md:400 track layout "NOT committed" - all tracked.
+16. firmware/README.md:75 "No control firmware exists".
+17. HANDOFF.md:408-453 hardware facts (Pi $70, camera $35, MG90S, 5.1 mm pin,
+    budget $247-274) contradict BOM.md.
+18. .claude/project-memory/budget.md:1 "unbought".
+
+### Low (26)
+.mcp.json unpinned `npx -y 3dstreet-mcp`; VENDOR_COMMIT never checked
+(ml/run_dreamer_p4.py:65-74); uno_control.ino setup() writes the servo on boot vs
+SERIAL_PROTOCOL.md:152 "inert on boot"; SERVO_US_MAX_SAFE 2600 above the library
+clamp 2400 (uno_control.ino:185); SERIAL_PROTOCOL.md title "DRAFT v0.1" and unwired
+banner; HANDOFF.md:155-163 stale 15/15 and 27 artifacts; ml/splits.py:44-52
+stat-only fingerprint; check_artifacts staged_paths ignores git returncode;
+ml/eval_paired.py has no batch_valid gate; dirty .claude/pm-cadence.json + 2 .tmp +
+stamp; hardware.md:200 wrong PRD path; HANDOFF:5 corrections list incomplete; record
+TOC line 70 (AG) dated 08-13 vs heading 08-12; timeline.md:1 PRD range; INDEX.md line
+counts; packguard.h hand copy; electronics_layout.py weak support check and 0-entry
+pass; 33 unused imports, 2 read_text without encoding; no LICENSE on a public repo;
+sim_conf.py has no self_check; 120x160 hardcoded in 3 scripts; pre-commit worktree
+copy is CRLF; track_layout_v2.py accepts --radius 0; record IL pairs HV with commit
+b351400 (HV landed in 20181ff); 17/17 holds only under .venv (system python 14 + 3
+skipped); hardware.md:549,551 describe removed zip-slot design unmarked; README
+Layout block omits firmware/, cad/scad/, run_checks.py.
+
+## Verified true (load-bearing)
+- run_checks 17 passed / 0 failed under .venv; check_artifacts 40 checked, 0 drifted,
+  2 uncheckable in the live tree; tray probes 241/241, deck 88/88; layout 14 entries,
+  0 failed; tray and deck STLs re-render byte-identical.
+- Record: 246 headings A..IL, unique, contiguous, TOC order == heading order, 0
+  broken anchors, 0 CRLF.
+- verify_corpus 102,888 frames PASS; ConvVAE 4,348,547 params; BOM sums to 422.25.
+- pre-commit fails closed (rc=1 with no scanner); core.hooksPath live; history
+  secret scan 0 findings; HEAD == origin/main.
+
+## Landing-check (records II-IL)
+Verdict SAFE (already pushed). Every checkable IK/IL claim reproduced except the
+overhang-scan table (no tracked script; UNVERIFIED). No misland, no new leak in the
+last 5 commits.
+
+## Not swept
+Firmware on the board, host_test.py, Unity sim and GPU runs; mutation/fuzz (no
+tools); pip-audit (not installed); most of the record body and PRD past line 84.
+
+# Appendix IN - Tray/deck renders; charger USB-C and holder leads both on a SHORT end; holder lead likely short (2026-10-14 ~11:57 CDT)
+**WHAT:** (2026-10-14 ~11:45-11:57 CDT) Evan asked to see the deck, then the tray
+with the bank, holder and Pi as labelled grey blocks, then what goes on the other
+(-y) side lobe. Renders were made in OpenSCAD 2021.01 from the committed
+`cad/electronics_tray.stl` plus throwaway scratch .scad (not in the repo): the
+deck v9 alone (iso + top), the tray with bank 151.5 x 70.55 x 18, holder 75.75 x
+40.5 x 20.5 and Pi case 91.8 x 64.4 x 27.2 on assumed 4 mm velcro, and the -y lobe
+with the charger 38.43 x 18.3 x 6.3, BMS 41 x 8 x 2.2 and mated XT30 25 x 10.5 x 5.3.
+
+**Two facts from Evan (closes two open items in docs/ELECTRONICS_LAYOUT.md):**
+- The charger's USB-C is on a SHORT end. With the charger placed long-axis along
+  x, that end faces -x, 4 mm from the -y lobe's open edge (x 56). No move needed;
+  the plug sticks out past the edge. NOT checked: what on the car sits at x < 56,
+  y -70..-51 (the plug and cable need ~30 mm there).
+- The 2S holder's red / black leads (and MB wire) leave a SHORT end. Seat the
+  holder with that end at -x (x 58), nearest the fuse and the BMS.
+
+**Lead-length re-estimate (replaces the 150-170 mm guess):** black lead to BMS B-,
+straight-line segments from the -x end: ~33 mm up onto the bank top + ~70 across
+the bank + ~53 down into the -y lobe = ~156 mm before slack, vs 160 mm leads ->
+likely short; plan a 22 AWG extension. The under-floor route is not available
+(only the -y edge rib has a notch, for the encoder cable). Red only needs to reach
+the fuse on the bank (~45 mm).
+
+**Changed:** tray LAYOUT port strings (holder, charger) now carry "-x:" side tags,
+so the SVG draws their port arrows; ELECTRONICS_LAYOUT.md rows 2-3, the holder
+route row, the "does NOT prove" line and the still-to-check list. No geometry
+change (tray STL unchanged).
+
+**Checks:** electronics_layout.py 14 entries, 0 checks failed (exit 0);
+run_checks 17 passed, 0 failed (exit 0). Not committed.

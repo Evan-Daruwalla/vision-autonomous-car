@@ -27,8 +27,8 @@ Printed in Bambu PETG Translucent.
 | # | Part | Box x .. / y .. / z .. | Held by | Ports / leads |
 |---|---|---|---|---|
 | 1 | Power bank (Pi only) 151.5 x 70.55 x 18.0 | -4..147.5 / -35.3..35.3 / 13.8..31.8 | ~4 mm velcro + bank fence 14 mm tall (holds the flat sides; edges rounded below 7 mm), open rear | USB-C + USB-A on the REAR end (-x), 20 / 45 mm from the left |
-| 2 | 2S holder + 2x Samsung 25R, 75.75 x 40.5 x 20.5 (measured 20.30 tall) | 58.1..133.9 / 44.3..84.8 / 7.0..27.5 | ~4 mm velcro + 4-sided 14 mm fence on its lobe plate | red / black leads leave the SAME end, 160 mm; + the MB wire soldered to the series strap |
-| 3 | USB-C 2S charger (Adeept p0374) 38.43 x 18.30 x 6.30 | 60..98.4 / -69.5..-51.2 / 3.0..9.3 | double-sided tape or velcro | pads BAT (-> BMS P+), GND (-> P-), GND, VIN; point the USB-C at the open lobe edge |
+| 2 | 2S holder + 2x Samsung 25R, 75.75 x 40.5 x 20.5 (measured 20.30 tall) | 58.1..133.9 / 44.3..84.8 / 7.0..27.5 | ~4 mm velcro + 4-sided 14 mm fence on its lobe plate | red / black leads leave the SAME SHORT end (Evan 2026-10-14), 160 mm; + the MB wire soldered to the series strap. Seat the holder with that end at -x (x 58), the end nearest the fuse and the BMS |
+| 3 | USB-C 2S charger (Adeept p0374) 38.43 x 18.30 x 6.30 | 60..98.4 / -69.5..-51.2 / 3.0..9.3 | double-sided tape or velcro | pads BAT (-> BMS P+), GND (-> P-), GND, VIN; USB-C on a SHORT end (Evan 2026-10-14) -> faces -x, 4 mm from the open lobe edge (x 56); the plug sticks out past that edge |
 | 4 | 2S BMS (ACEIRMC) 41 x 8 x 2.2 | 66..107 / -83..-75 / 3.0..5.2 | double-sided tape | pads B+ B- MB P+ P- |
 | 5 | Inline 3 A ATO fuse holder, 50 x 34.25 x 12 lying flat | 40..90 / 0..34.3 / 31.8..43.8 (ON TOP of the bank) | tape or velcro | in the CELL+ wire, before the BMS |
 | 6 | XT30 pair, mated, 25 x 10.5 x 5.3 | 104..129 / -66..-55.5 / 3.0..8.3 | double-sided tape or velcro (pack half) | BMS P+/P- side; car side goes to the rocker |
@@ -86,7 +86,7 @@ the WS2812B reel and the fuses.
 
 | From -> to | Route | ~Length |
 |---|---|---|
-| Holder red -> fuse -> BMS B+; black -> B-; MB -> MB | out of the holder's lead end, up onto the bank top (fuse there), across under the deck (14.2 mm over the bank), down into the -y lobe | ~150-170 mm (estimate) vs 160 mm leads - extend with 22 AWG if short |
+| Holder red -> fuse -> BMS B+; black -> B-; MB -> MB | out of the holder's lead end, up onto the bank top (fuse there), across under the deck (14.2 mm over the bank), down into the -y lobe | black to B- ~155-175 mm straight-line estimate from the -x end (2026-10-14: 33 up onto the bank + 70 across + 53 down to the BMS, before slack) vs 160 mm leads - likely short; plan a 22 AWG extension. Red only has to reach the fuse (~45 mm) |
 | Charger BAT+/BAT- -> BMS P+/P- | inside the -y lobe | short |
 | BMS P+/P- -> XT30 (pack side) | inside the -y lobe | short |
 | XT30 (car side) -> rocker -> VBAT | up the -y lobe's outer edge onto the deck wing, back along the deck to the rear tab; VBAT then to the shield (TB6612 VMOT, LM2596 VIN, divider top) | ~190 mm |
@@ -113,12 +113,12 @@ on the bank), and the gap from each layer-1 top to the deck underside (z
 above the pin boss it crosses; with 4 mm Uno standoffs it would hit it.
 
 What this does NOT prove: any fit (unprinted), the USB-B plug's real size
-(an allowance), the charger's USB-C side, or that the cables reach.
+(an allowance), that the space past the -y lobe's -x edge is clear for the charger's USB-C plug, or that the cables reach.
 
 ## Still to measure / check
 
 - The USB-B plug body (the 16 x 30 x 13 allowance is a guess).
-- Which edge the charger's USB-C is on (point it at the open lobe edge).
+- What on the car sits past the -y lobe's -x edge (x < 56, y -70..-51, z 3..10): the charger's USB-C plug and cable need ~30 mm there (USB-C on a short end, Evan 2026-10-14).
 - Whether the holder's 160 mm leads reach the BMS once routed.
 - The velcro's real thickness (4 mm assumed; it is the `VELCRO` constant in both .scad files).
 - The two Uno holes as a spot check of the peg pattern (not measured).
