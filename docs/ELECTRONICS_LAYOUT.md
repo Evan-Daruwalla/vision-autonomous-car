@@ -12,11 +12,14 @@ in the .scad, never here, then re-run the script. Record: the entry of
 
 **Frame (mm):** x along the car, x = 0 at the rear corner pin hole of the
 centre frames, **+x = front**; y across, +y = the car's left (up in the drawing);
-z = 0 on the Lego frames' top face. Layer 1 sits on the tray floor (z 9.8);
+z = 0 on the Lego frames' top face. Layer 1: the bank on the raised middle
+floor (z 9.8); everything else on the two lobe plates, which sit on the frames
+(z 0..3, tray v8);
 layer 2 on the deck (underside z 46.0, top z 48.5: raised on 2026-10-13 for
 the 2S holder, the fuse holder on the bank, and the 4 mm velcro under the bank).
-The bank, holder and Pi case sit on ~4 mm velcro (removable; Evan) - their
-zip-tie slots could never close a loop and are unused.
+The bank, holder and Pi case sit on ~4 mm velcro (removable; Evan); the
+charger, BMS and XT30 on tape or velcro. No zip ties anywhere - every tie slot
+was removed (tray v8, deck v9).
 Printed in Bambu PETG Translucent.
 
 ## Layer 1 - electronics tray
@@ -24,11 +27,11 @@ Printed in Bambu PETG Translucent.
 | # | Part | Box x .. / y .. / z .. | Held by | Ports / leads |
 |---|---|---|---|---|
 | 1 | Power bank (Pi only) 151.5 x 70.55 x 18.0 | -4..147.5 / -35.3..35.3 / 13.8..31.8 | ~4 mm velcro + bank fence 14 mm tall (holds the flat sides; edges rounded below 7 mm), open rear | USB-C + USB-A on the REAR end (-x), 20 / 45 mm from the left |
-| 2 | 2S holder + 2x Samsung 25R, 75.75 x 40.5 x 20.5 (measured 20.30 tall) | 58.1..133.9 / 37.9..78.4 / 13.8..34.3 | ~4 mm velcro + holder fence 14 mm tall | red / black leads leave the SAME end, 160 mm; + the MB wire soldered to the series strap |
-| 3 | USB-C 2S charger (Adeept p0374) 38.43 x 18.30 x 6.30 | 60..98.4 / -69.5..-51.2 / 9.8..16.1 | zip ties at x 64 and 92 | pads BAT (-> BMS P+), GND (-> P-), GND, VIN; point the USB-C at the open lobe edge |
-| 4 | 2S BMS (ACEIRMC) 41 x 8 x 2.2 | 66..107 / -83..-75 / 9.8..12.0 | double-sided tape | pads B+ B- MB P+ P- |
-| 5 | Inline 3 A ATO fuse holder, 50 x 34.25 x 12 lying flat | 40..90 / 0..34.3 / 31.8..43.8 (ON TOP of the bank) | tape, or ride under a bank zip tie | in the CELL+ wire, before the BMS |
-| 6 | XT30 pair, mated, 25 x 10.5 x 5.3 | 104..129 / -66..-55.5 / 9.8..15.1 | zip tie at x 120 | BMS P+/P- side; car side goes to the rocker |
+| 2 | 2S holder + 2x Samsung 25R, 75.75 x 40.5 x 20.5 (measured 20.30 tall) | 58.1..133.9 / 44.3..84.8 / 7.0..27.5 | ~4 mm velcro + 4-sided 14 mm fence on its lobe plate | red / black leads leave the SAME end, 160 mm; + the MB wire soldered to the series strap |
+| 3 | USB-C 2S charger (Adeept p0374) 38.43 x 18.30 x 6.30 | 60..98.4 / -69.5..-51.2 / 3.0..9.3 | double-sided tape or velcro | pads BAT (-> BMS P+), GND (-> P-), GND, VIN; point the USB-C at the open lobe edge |
+| 4 | 2S BMS (ACEIRMC) 41 x 8 x 2.2 | 66..107 / -83..-75 / 3.0..5.2 | double-sided tape | pads B+ B- MB P+ P- |
+| 5 | Inline 3 A ATO fuse holder, 50 x 34.25 x 12 lying flat | 40..90 / 0..34.3 / 31.8..43.8 (ON TOP of the bank) | tape or velcro | in the CELL+ wire, before the BMS |
+| 6 | XT30 pair, mated, 25 x 10.5 x 5.3 | 104..129 / -66..-55.5 / 3.0..8.3 | double-sided tape or velcro (pack half) | BMS P+/P- side; car side goes to the rocker |
 
 ## Layer 2 - electronics deck
 
@@ -98,15 +101,15 @@ the WS2812B reel and the fuses.
 Wiring rules live in `docs/WIRING_PROTOSHIELD.md` (section 2.1: nothing but
 the BMS touches B+ / MB / B-; star ground at the TB6612 GND pad).
 
-## Verification (2026-10-13, tray v7 / deck v8)
+## Verification (2026-10-13, tray v8 / deck v9)
 
 `./.venv/Scripts/python.exe scripts/electronics_layout.py`: 14 entries, 0
 checks failed - no part, zone or clearance box contains printed material
 (tray or deck), no two boxes overlap, every part rests on printed material
 or on another box (velcro on the floor, the bank on velcro, the fuse holder
 on the bank), and the gap from each layer-1 top to the deck underside (z
-46.0) is 2.2 mm (fuse holder on the bank), 11.7 (holder), 14.2 (bank), 29.9
-(charger), 30.9 (XT30), 34.0 (BMS). The USB-B plug allowance starts 1.3 mm
+46.0) is 2.2 mm (fuse holder on the bank), 14.2 (bank), 18.5 (holder),
+36.7 (charger), 37.7 (XT30), 40.8 (BMS). The USB-B plug allowance starts 1.3 mm
 above the pin boss it crosses; with 4 mm Uno standoffs it would hit it.
 
 What this does NOT prove: any fit (unprinted), the USB-B plug's real size

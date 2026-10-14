@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~19:08 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~20:36 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 244 appendices A–IJ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -588,54 +588,51 @@ original floor and the pre-2026-08-12 scale decision.)*
 Read, in order:
 1. D:\ClaudeCode\Autonomous Car Project\HANDOFF.md  (ONLY live snapshot)
 2. PRD_ROADMAP.md (tasks 5-7 carry dated notes from 2026-10-13)
+   and docs/ELECTRONICS_LAYOUT.md before ANY tray/deck/wiring work
 3. .claude/project-memory/INDEX.md, then ONLY the bins your task touches
    (steering.md before ANY servo/steering work; hardware.md + decisions.md
    before ANY printed-mount work; track.md before track work)
 
-STATE (2026-10-13 ~13:44 CDT). Parts ORDERED; 23 of 24 arrived 2026-10-10
+STATE (2026-10-13 ~20:35 CDT). Parts ORDERED; 23 of 24 arrived 2026-10-10
 (FI-FL); the Camera Module 3 Wide is IN SHIPPING (GX) - PRD task 8 closes
 when it arrives. Paid ~$430 (Evan's recollection, FU).
 FIRMWARE: the Uno runs the CURRENT uno_control source - flashed 2026-10-13
 ~14:09 (HY), boot banner "SERVO WIRED; MOTOR, ENCODER, LEDS, PACK UNWIRED" +
-"SELFTEST PASS 86/86". It includes the steering backlash
-compensation (HS: servo held 75 us [HX: MEASURED; was 125] past each target in the direction of the
-last move; centre 1525) and the steering gate (HT: the servo moves only in
-OUT_DRIVE, i.e. armed + pack OK + link alive). Only the servo is on the car;
-motor, encoder, strip and pack are unwired. host_test.py has NOT been run on
-this build. HW: with no pack wired the pack reads FAULT, so the HT gate never
-reaches OUT_DRIVE - ARMED frames CANNOT move the servo on the bench.
-HZ (Evan): left as-is - the frame->servo test waits for the pack wiring.
-Backlash test by hand in servo_bench: 950->1650, 2100->1400, 450->1650,
-2600->1400; pass = wheels straight with no 1500 return. RUN (HX): straight
-at 1600 from the left, 1450 from the right in all four -> centre 1525
-confirmed, half-gap 75 us. Flashed (HY).
+"SELFTEST PASS 86/86". Steering backlash compensation holds the servo 75 us
+past each target in the direction of the last move, centre 1525 - both
+MEASURED by hand in servo_bench (HX: straight at 1600 from the left, 1450
+from the right). The steering gate (HT) moves the servo only in OUT_DRIVE
+(armed + pack OK + link alive); with no pack wired the pack reads FAULT, so
+ARMED frames CANNOT move the servo on the bench (HW). Evan (HZ): leave the
+gate; the frame -> servo test waits for the pack wiring. host_test.py has NOT
+been run on this build. Only the servo is wired.
 STEERING (HM-HQ): left lock ~450 us is the RACK STOP (first-contact pulse not
-measured - firmware safe limit 550); right lock ~2600 us is the servo's own
-end. 100-150 us of free play = tooth clearance in the gear pair before the
-rack; the 125/1525 numbers come from a backlash model fit to two bench
-observations - UNVERIFIED.
-ELECTRONICS LAYOUT (IB): docs/ELECTRONICS_LAYOUT.md + docs/electronics_layout.svg,
-generated and checked by scripts/electronics_layout.py from the LAYOUT lists in
-the tray/deck .scad files; every arrived part accounted for. PLAN, UNTESTED.
-FILAMENT (IC): EVERY car part is printed in Bambu PETG Translucent (250 C / 70 C).
-PETG coupon: row D (the mounts' exact hole) "good" at 4.90-5.05, so 4.95 stays.
-Pocket gauge, row-D collar, pilot holes NOT reported yet. press_shaft (+0.15) is
-PLA-only. Tray/deck: slice with supports OFF (the profile supports bridges).
-PRINTED PARTS (all OpenSCAD in cad/scad/, rendered + probe-checked by
-scripts/render_scad.py, registered in check_artifacts): servo mount v7, motor
-mount v6, electronics tray v7 + deck v8 (IA-IJ: bank, holder and Pi on ~4 mm VELCRO, 14 mm fences, 10 mm Pi brackets, deck at z 46 with the fuse on the bank, Uno standoffs 6, 3.5 zip slots for the small-lobe parts; earlier: deck raised
-2 mm in IB so the 2S holder clears it), PLA fit coupon (row D 4.90-5.05 added)
-+ NEW pocket gauge (IB), camera mast
-v1 (NEW). All UNTESTED at these versions. Only servo mount v6 has been printed
-and fitted: pins TOO TIGHT at 4.875 (HH) -> every pin hole is now 4.95, set
-ONLY through the fit classes in cad/scad/lib/lego.scad (HG, HL). Bambu Studio
-X-Y hole compensation is 0 (HK), so the CAD owns every clearance.
-RESEARCH this cycle: docs/research/2026-10-12_camera-mast-pose.md (lens 109 mm
-above floor, pitch 28-30 deg, software remap to the sim view; the Module 3
-Wide's vertical FOV is 67 deg, not the sim's 90) and
+measured; firmware safe limit 550); right lock ~2600 us is the servo's end.
+PRINTING: EVERY car part is Bambu PETG Translucent, 250 C / 70 C, P1S 0.4,
+0.15 mm layers, 2 walls, X-Y hole comp 0 (IC). PETG coupon (IC-IE): row D (the
+mounts' exact hole) good at 4.90-5.05 -> pins stay 4.95; collar sits half in
+the recess (correct); rows A/B read looser at the same sizes (unexplained);
+zip slot 3.5 x 1.8 best. Pocket gauge (IF): holder snug (0.25/side OK), bank
+loose only because its edges are rounded (flat from 7 mm up). Servo pilot
+1.7 mm confirmed good; Evan has mounted the servo (mount version not stated,
+ID). press_shaft (+0.15) is PLA-calibrated only.
+PARTS (OpenSCAD in cad/scad/, render_scad.py + probes, check_artifacts):
+electronics tray v8 + deck v9 (IA-IK) - side lobes are flat 3 mm plates ON
+the frames; bank, holder and Pi on ~4 mm velcro (VELCRO constant, assumed);
+14 mm fences; deck at z 46 with the 50 x 34.25 x 12 fuse holder lying on the
+bank; Pi brackets 10 mm; Uno standoffs 6 mm (USB-B plug over a pin boss);
+rocker hole 21.0; LM2596 pegs 57.5 x 31.5; NO zip ties anywhere. Servo mount
+v7, motor mount v6, camera mast v1, fit coupon + pocket gauge. All UNTESTED
+at these versions except the coupon and gauge (printed, IC-IF). Slice the
+tray and deck with supports OFF (Evan's profile supports bridges).
+ELECTRONICS LAYOUT: docs/ELECTRONICS_LAYOUT.md + docs/electronics_layout.svg,
+generated and checked by scripts/electronics_layout.py from the LAYOUT lists
+in the tray/deck .scad files (14 entries, 0 checks failed); every part Evan
+has is accounted for; measured sizes from IH.
+RESEARCH this cycle: docs/research/2026-10-12_camera-mast-pose.md and
 docs/research/2026-10-12_print-friendly-cad-rules.md (13 ranked rules).
 The sim lane ended in a well-instrumented NEGATIVE; LaneMaker/OpenDRIVE is
-CLOSED - do not re-open. THE TEST SUITE is scripts/run_checks.py (16/16 on
+CLOSED - do not re-open. THE TEST SUITE is scripts/run_checks.py (17/17 on
 2026-10-13 - re-run it, never quote it). Push state: run `git fetch` then
 `git status -sb`; this file does not record it.
 
@@ -646,30 +643,25 @@ still unworked; FG's 35-row table has rows 11, 13, 16-35 open and row 14 half
 done (checkpoint fingerprints written, never checked).
 
 NEXT ACTIONS, highest value first:
-1. STEERING BENCH CHECK on the flashed build: send ARMED frames (check whether
-   firmware/host_test.py can do steer-only moves; add a small mode if not):
-   full left -> 0 and full right -> 0 must both give straight wheels with no
-   manual overshoot. Measure the LEFT first-contact pulse (step down from ~600
-   in 10 us steps). Retune SERVO_BACKLASH_US / SERVO_US_CENTRE from the result.
-2. PRINT ORDER: first ADD a 4.90-5.05 pin row to cad/scad/pla_fit_coupon.scad
-   (it tops out at 5.00) and print the coupon with the SAME profile as the
-   parts; then servo mount v7 -> motor mount v6 -> camera mast v1 -> tray/deck.
-   Record printer, filament, layer height, walls and the measured fit of every
-   print (CLAUDE.md rule). Mount checks: pins snap; servo shaft lines up with
-   the pinion after the v7 1.6 mm shift; the mast's two front "+" holes are
-   exposed past the servo mount's front end (unconfirmed in the last photo);
-   mast stud-2 needs 3L pins (6558) with the short side up.
-3. Audit HJ's HIGH: ml/splits.py split stability + a corpus id in checkpoints.
-4. Couplers: print cad/servo_lego_coupler_v3.stl and test-fit it; motor
-   coupler v3 FITS (GF) but is not load-tested.
-5. Before wiring ANYTHING: WIRING_PROTOSHIELD section 5 as rewritten (FX):
-   rail 5.0 V, cut-5V USB cable proven first, cells OUT / B- then MB then B+,
-   fuse last; run host_test.py --wired once anything is wired. Cells: 4x
-   Samsung 25R by wrap (FV/FW; 2 for the pack, 2 spares) - meter each first.
-6. Small backlog: diag_copycat.py:96-99 DART choice through select_actions();
-   uno_control banner still says "ACTUATORS UNWIRED" (servo now wired);
-   servo_bench prompt still says "400-2600" (US_MAX is 2800); pitch-row check
-   + caliper the coupons; confirm the 12-tooth bevel gear.
+1. PRINT tray v8 + deck v9 (supports OFF) after measuring the velcro pair
+   (change VELCRO in both .scad files if it is not ~4 mm). Fit report: rails
+   pin onto the frames; lobes sit flat on the frames; bank and holder seat in
+   their fences on velcro; deck pins onto the 46 mm posts; Pi brackets, Uno /
+   LM2596 pegs, rocker hole; anything rubbing. Record settings + fit.
+2. Print / fit what is not yet confirmed: servo mount v7 (if not the mounted
+   one), motor mount v6, camera mast v1. Record each.
+3. PACK WIRING PREP (unblocks the motor AND the frame -> servo test, HZ):
+   meter the 4x Samsung 25R (FV/FW), then WIRING_PROTOSHIELD section 2.1 /
+   section 5 order (cells OUT, B- then MB then B+, fuse last); rail 5.0 V,
+   cut-5V USB cable first; then host_test.py --wired.
+4. Audit HJ's HIGH: ml/splits.py split stability + a corpus id in checkpoints.
+5. Couplers: print in PETG and re-test the fit (press_shaft is PLA-only);
+   servo coupler v3 untested; none load-tested.
+6. Small backlog: firmware/host_test.py docstring and SERIAL_PROTOCOL.md:9
+   still say nothing is wired (the servo is); servo_bench prompt says
+   "400-2600" (US_MAX is 2800); diag_copycat.py:96-99 DART choice through
+   select_actions(); confirm the 12-tooth bevel gear; measure the USB-B plug
+   (the layout uses a 16 x 30 x 13 allowance).
 7. Evan's call: 98 tracked files carry the local path D:\ClaudeCode\... on the
    PUBLIC remote (95 provenance JSONs; ml/provenance.write_result stores cwd);
    2 HOME-path occurrences in the record. Stop the source and/or rewrite history.

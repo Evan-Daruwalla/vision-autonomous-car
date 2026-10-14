@@ -17,6 +17,7 @@
 // v8 (2026-10-13): underside 42 -> 46 (tray posts follow the velcro-lifted bank); the Pi case
 // sits on ~4 mm velcro (Evan; removable), so its brackets go 6 -> 10 mm.
 VELCRO = 4.0;             // velcro pair thickness under the Pi case (Evan: roughly 4)
+// v9 (2026-10-13): the (unused) Pi zip slots removed - the Pi is held by velcro.
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, pin rows at y = +/-24; z = 0 on the Lego frames' top face. The deck's
@@ -76,9 +77,6 @@ VENT_X = [65, 137];
 VENT_Y = [-22, 22];
 ROCKER_XY = [-18, -32];
 ROCKER_D = 20.5 + fit_offset("pocket");   // 21.0: body measured 20.50 (clips 22.90), Evan 2026-10-13
-ZIP_XY = [[59, 35.5], [59, -35.5], [143, 35.5], [143, -35.5]];
-ZIP_W = 3.5;              // PETG coupon: 3.5 x 1.8 passes the ties easily, no slop (2026-10-13)
-ZIP_T = 1.8;
 ROCK_CH = 0.4;            // rocker hole chamfer, both faces (Rules 5, 6)
 PEG_CH = 0.4;             // lead-in on peg tops
 
@@ -137,9 +135,6 @@ difference() {
   translate([ROCKER_XY[0], ROCKER_XY[1], DECK_TOP - ROCK_CH]) chamfer_cone(ROCKER_D / 2 - EPS, ROCKER_D / 2 + 2 * ROCK_CH, 2 * ROCK_CH);
   // lead-in on the Pi bracket tops (Rule 5)
   lead_in(PI_X0, PI_X1, PI_Y0, PI_Y1, DECK_TOP + BR_H, LEAD);
-  // zip slots
-  for (p = ZIP_XY)
-    translate([p[0], p[1], DECK_BOT - EPS]) zip_slot(ZIP_W, ZIP_T, PLATE_T + 2 * EPS);
   // encoder-cable slot (x 100..108, y -41.0..-38.5), above the tray's
   translate([100, -41.0, DECK_BOT - EPS]) cube([8, 2.5, 2.5 + 2 * EPS]);
 }

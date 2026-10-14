@@ -438,6 +438,7 @@ transfer gap) must not block the capstone.
    **2026-10-13 (Appendices HD, HE): both open items designed - tray/deck v2 encoder-cable channel (notch in the -y rail + slot through tray floor and deck) and camera mast v1 (`cad/camera_mast.stl`: lens 109 mm above the floor at 29 deg, from the research brief HD). All UNTESTED. Done-check NOT passed.**
    **2026-10-13 (Appendix IA): tray + deck v3 - print-friendly redo per the CAD-rules brief (HI): ribs under the tray floor turn every overhang into a <= ~21 mm bridge (v2: 34 mm cantilevers), zip-tie paths unblocked, Pi pocket +0.25/side, lead-in chamfers. UNTESTED. Done-check NOT passed.**
    **2026-10-13 (Appendix IB): deck raised 2 mm (the 2S holder hit it by 0.3 mm); every electronic part placed and collision-checked against the STLs (`scripts/electronics_layout.py`, `docs/ELECTRONICS_LAYOUT.md`); BMS / fuse / XT30 given a home in the -y lobe. Coupon row D + pocket gauge added for the fits. UNTESTED. Done-check NOT passed.**
+   **2026-10-13 (Appendices IC-IK): PETG coupon + pocket gauge printed and read (pins 4.95 good; holder pocket snug); measured part sizes in; tray v8 / deck v9 - side lobes on the frames, bank / holder / Pi on ~4 mm velcro, deck at z 46 with the fuse holder on the bank, no zip ties. UNTESTED (tray/deck not printed). Done-check NOT passed.**
 
 ### M2 — Electronics + teleop
 

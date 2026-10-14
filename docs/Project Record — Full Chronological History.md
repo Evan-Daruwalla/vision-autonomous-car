@@ -279,6 +279,8 @@ the dated entry, not the digest.
 - [IH - Measurements M1-M11: fuse holder has no place, rocker hole 21, LM2596 pegs 57.5 x 31.5; correction to IF](#appendix-ih---measurements-m1-m11-fuse-holder-has-no-place-rocker-hole-21-lm2596-pegs-575-x-315-correction-to-if-2026-10-13-1800-cdt) (10-13)
 - [II - Deck +10 mm for the fuse holder (on the bank); Uno standoffs 6 mm so the USB plug clears a pin boss](#appendix-ii---deck-10-mm-for-the-fuse-holder-on-the-bank-uno-standoffs-6-mm-so-the-usb-plug-clears-a-pin-boss-2026-10-13-1820-cdt) (10-13)
 - [IJ - Velcro (4 mm) for the bank, holder and Pi - the tie slots could never close; tray v7 / deck v8](#appendix-ij---velcro-4-mm-for-the-bank-holder-and-pi---the-tie-slots-could-never-close-tray-v7--deck-v8-2026-10-13-1905-cdt) (10-13)
+- [IK - Tray v8: side lobes dropped onto the frames; all zip slots removed (deck v9)](#appendix-ik---tray-v8-side-lobes-dropped-onto-the-frames-all-zip-slots-removed-deck-v9-2026-10-13-1930-cdt) (10-13)
+- [IL - docs-sync pass + snapshot after the tray/deck redesign evening](#appendix-il---docs-sync-pass--snapshot-after-the-traydeck-redesign-evening-2026-10-13-2036-cdt) (10-13)
 
 ---
 
@@ -19104,3 +19106,83 @@ assumption (its slots fail the same way), stated to Evan.
 14.2 mm); overhangs unchanged (tray worst 10.44 mm, deck none > 1.5);
 check_artifacts 40 checked, 0 drifted; run_checks 17 passed, 0 failed.
 UNTESTED - not printed. Velcro thickness assumed, not measured.
+
+# Appendix IK - Tray v8: side lobes dropped onto the frames; all zip slots removed (deck v9) (2026-10-13 ~19:30 CDT)
+**WHAT:** (2026-10-13 ~19:30 CDT) Evan, looking at the sliced tray from below:
+were the "floating" parts necessary? The green in his screenshot was Bambu
+support filling every bay under the floor (supports were on in his profile).
+His follow-up question - is the floor NEEDED that high - was the right one:
+only the middle floor must be raised (the bank spans the 7.8 mm pin rails);
+the two side lobes sit outside the rails and were raised only because v2
+carried the middle floor's level outward. Evan: "drop the lobes, frames are
+level".
+
+**Tray v8:**
+- Both lobes are flat `LOBE_T` = 3.0 mm plates at z 0, on the bed / on the
+  Lego frames, joined to the raised middle by its edge ribs (1 mm overlap).
+  Lobe ribs, feet and bridges removed.
+- Holder moved out 6.4 mm (y 37.85 -> 44.25) to sit wholly on its lobe, in a
+  4-sided 14 mm fence on the plate (fence top z 17; holder on 4 mm velcro, top
+  z 27.5). Lobe to y 87.
+- The two lobe deck posts (60 / 128, -82) now rise from the bed.
+- Every zip slot and tie notch removed from the tray, and the Pi's from the
+  deck (deck v9) - nothing is tied any more (record IJ: velcro). Charger, BMS
+  and XT30 on tape or velcro on the -y plate.
+
+**Effect on printing (overhang scan, 1 mm columns):**
+
+| | downward-surface points | > 10 mm reach | worst reach |
+|---|---|---|---|
+| tray v7 | 11962 | 24 | 10.44 mm |
+| tray v8 | 6196 | 0 | 7.07 mm (middle-floor bays, ~14 mm bridges) |
+
+**Checks:** render_scad tray 241/241 (probe file rebuilt: lobe plates, holder
+fence walls and lead-in, middle floor where the slots were, lobe posts from
+the bed), deck 88/88; electronics_layout.py 14 entries, 0 checks failed
+(gaps to the deck: fuse 2.2, bank 14.2, holder 18.5 mm); check_artifacts 40
+checked, 0 drifted; run_checks 17 passed, 0 failed. UNTESTED - not printed.
+Slice with supports OFF.
+
+# Appendix IL - docs-sync pass + snapshot after the tray/deck redesign evening (2026-10-13 ~20:36 CDT)
+**WHAT:** /docs-sync full pass (Evan, 2026-10-13 evening) over everything since
+the previous pass (record HV, commit b351400): commits 20181ff .. a993bbc plus
+the uncommitted tray v8 / deck v9 round, records HW-IK.
+
+**Docs changed by this pass:**
+- HANDOFF.md: the paste-ready prompt's STATE / NEXT ACTIONS rewritten. The old
+  one (13:44) still listed the steering bench check as action 1 (decided in
+  HZ: waits for the pack), "add a 4.90-5.05 coupon row" (done, IB), the
+  "ACTUATORS UNWIRED" banner (fixed, HW), "pocket gauge not reported" (done,
+  IF), a 125 / 1525 model "UNVERIFIED" (75 / 1525 measured, HX) and 16/16
+  (now 17/17). Read order gains docs/ELECTRONICS_LAYOUT.md.
+- decisions.md: three dated decisions - PETG for every part (IC), velcro not
+  zip ties (IJ), side lobes on the frames (IK).
+- INDEX.md: hardware.md and steering.md lines dated.
+- PRD_ROADMAP.md: task 7 note (IC-IK); no status moved - no done-check passed
+  (the tray and deck are not printed).
+- Earlier in the session (already in place): important.md #3 (HY),
+  steering.md (HX), hardware.md (IB-IK), docs/ELECTRONICS_LAYOUT.md.
+
+**Checked, nothing to change:** testing.md (still "flashed 86/86" - true
+for the 75 us build, HY); firmware-traps.md, tooling.md; the data,
+performance, security, ui, ml-training, track and stub bins (named stale by
+age only - nothing this session touched them). Memory files: no durable
+convention changed. No HTML twin or record index exists. Drift-check stamp
+not written (not a section-4 drift check).
+
+**Snapshot 2026-10-13 ~20:36 CDT:**
+
+| Item | State | Evidence |
+|---|---|---|
+| Uno firmware | uno_control flashed, SELFTEST 86/86; backlash 75 us MEASURED, centre 1525; banner "SERVO WIRED ..." | HX, HY |
+| Steering gate | unchanged (OUT_DRIVE only); frame -> servo test waits for the pack | HW, HZ |
+| Filament | Bambu PETG Translucent for every part | IC |
+| Pin holes | 4.95, good in PETG (coupon row D, recess both faces) | IC, IE |
+| Pocket clearance | 0.25 / side, holder snug | IF |
+| Electronics tray | v8: lobes on the frames, 14 mm fences, posts 46, no zip slots - UNTESTED | IK |
+| Electronics deck | v9: z 46, Pi brackets 10, Uno standoffs 6, rocker 21, LM2596 57.5 x 31.5 - UNTESTED | IH-IK |
+| Retention | velcro (~4 mm, assumed) under bank, holder, Pi; tape / velcro for charger, BMS, XT30 | IJ, IK |
+| Fuse holder | 50 x 34.25 x 12, lying on the bank, 2.2 mm under the deck | II |
+| Layout check | 14 entries, 0 failed (electronics_layout.py) | IK |
+| Suite | run_checks 17/17; check_artifacts 40 checked, 0 drifted | IK |
+| Camera | in shipping | GX |
