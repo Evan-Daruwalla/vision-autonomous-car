@@ -284,6 +284,11 @@ the dated entry, not the digest.
 - [IM - Scheduled daily-audit: 44 findings - the public repo still carries the private path in 98 files and the public README says nothing is ordered](#appendix-im---scheduled-daily-audit-44-findings---the-public-repo-still-carries-the-private-path-in-98-files-and-the-public-readme-says-nothing-is-ordered-2026-10-14-0737-cdt) (10-14)
 - [IN - Tray/deck renders; charger USB-C and holder leads both on a SHORT end; holder lead likely short](#appendix-in---traydeck-renders-charger-usb-c-and-holder-leads-both-on-a-short-end-holder-lead-likely-short-2026-10-14-1157-cdt) (10-14)
 - [IO - BMS moved onto the 2S holder so the unfused B- / MB leads stay short; wire-length estimates](#appendix-io---bms-moved-onto-the-2s-holder-so-the-unfused-b---mb-leads-stay-short-wire-length-estimates-2026-10-14-1350-cdt) (10-14)
+- [IP - The 2S holder has no reachable midpoint - the BMS MB wire cannot be made as planned](#appendix-ip---the-2s-holder-has-no-reachable-midpoint---the-bms-mb-wire-cannot-be-made-as-planned-2026-10-14-1350-cdt) (10-14)
+- [IQ - MB tap: the brass rivet on the holder's no-lead end is likely the series node - meter before soldering](#appendix-iq---mb-tap-the-brass-rivet-on-the-holders-no-lead-end-is-likely-the-series-node---meter-before-soldering-2026-10-14-1352-cdt) (10-14)
+- [IR - MB tap confirmed: the holder rivet reads one cell each side (3.55 / 3.55 V)](#appendix-ir---mb-tap-confirmed-the-holder-rivet-reads-one-cell-each-side-355--355-v-2026-10-14-1405-cdt) (10-14)
+- [IS - Correction: IR's timestamp](#appendix-is---correction-irs-timestamp-2026-10-14-1449-cdt) (10-14)
+- [IT - MB wire soldered to the holder rivet; reads 3.55 V to each cell (not yet on the BMS)](#appendix-it---mb-wire-soldered-to-the-holder-rivet-reads-355-v-to-each-cell-not-yet-on-the-bms-2026-10-14-1523-cdt) (10-14)
 
 ---
 
@@ -19336,3 +19341,73 @@ saved to the repo).
 
 **Checks:** electronics_layout.py 14 entries, 0 checks failed (BMS material and
 support PASS); run_checks 17 passed, 0 failed. Not committed.
+
+# Appendix IP - The 2S holder has no reachable midpoint - the BMS MB wire cannot be made as planned (2026-10-14 ~13:50 CDT)
+**WHAT:** Evan (2026-10-14): "i cant connect anything in between the 2
+batteries". The MB (midpoint) wire planned since 2026-10-10 - "solder to [the
+DIANN holder's] strap" (WIRING_PROTOSHIELD.md section 2.1, MB row) - cannot be
+made on the holder he has. Why it is not possible (strap enclosed, or other) was
+not stated.
+
+**Why it matters:** a 2S BMS watches each cell through B+ / MB / B-. Without MB
+it cannot see either cell on its own, so the per-cell over-discharge cutoff
+(2.9 V) that important.md #4 requires is not provided; boards of this kind may
+also read the missing tap as a dead cell and stay off. The firmware pack sense
+reads the total only, so a weak cell hides behind a healthy one. Leaving MB
+floating is NOT an option.
+
+**Not decided yet** - options given to Evan: two 1S holders in series (the link
+wire is the MB tap; a purchase - BLOCKED-ON-EVAN), open the existing holder to
+reach its strap, or a printed 2S holder with its own tap (needs contacts not on
+hand). Never solder to the cells themselves. Pack wiring is BLOCKED until one is
+chosen.
+
+# Appendix IQ - MB tap: the brass rivet on the holder's no-lead end is likely the series node - meter before soldering (2026-10-14 ~13:52 CDT)
+**WHAT:** Follow-up to IP. Evan sent a photo of the 2S holder: the end WITHOUT
+the leads carries a brass star rivet on its outside face (plus a round hole and
+a slot). Inside, the lead end has the + button (red lead) in one slot and a
+spring in the other; the rivet end has a spring in one slot and the other
+slot's contact behind the rivet. In a 2-cell series holder the end without the
+leads is where cell 1 - meets cell 2 +, so the rivet is most likely the series
+node = MB. This is an inference from the photo, NOT yet metered.
+
+**Plan (unblocks IP if the meter agrees):** cells in, meter rivet -> black lead
+and rivet -> red lead; both must read 3.6-4.2 V (one cell each). If they do:
+cells OUT, scrape / tin the rivet, solder the MB wire quickly (the plastic holds
+the contact - long heat can loosen it), sleeve it. With the BMS on the holder
+top (IO), MB now runs from the end opposite the leads - so place the BMS MB pad
+toward that end; MB stays short (~20-40 mm estimate).
+
+**Changed:** WIRING_PROTOSHIELD.md section 2.1 MB row notes the rivet and the
+meter gate. Option 1 of IP (two 1S holders) is not needed if the meter passes.
+
+# Appendix IR - MB tap confirmed: the holder rivet reads one cell each side (3.55 / 3.55 V) (2026-10-14 ~14:05 CDT)
+**WHAT:** Evan metered the holder's brass rivet (IQ), cells in, DT830B on DCV 20:
+rivet -> black lead 3.55 V, rivet -> red lead 3.55 V (his reading, both equal).
+Each reads ONE cell, so the rivet IS the series node: MB is CONFIRMED there and
+IP's blocker is cleared - no new holder needed.
+
+**Caveats:** the meter showed its low-battery icon in Evan's photo; whether he
+replaced the 9 V battery before reading was not stated, so the absolute 3.55 V
+may be off - the topology result (each side = one cell, equal) does not depend
+on it. 3.55 V is below the 3.6 V lower bound I gave in IQ: that bound was too
+tight - 3.55 V at rest is a low-but-normal shipping charge, well above the BMS's
+2.9 V cutoff, and the two cells match (balanced). Charge them with the onboard
+charger after wiring; re-read with a fresh meter battery.
+
+**Next:** cells OUT, scrape / flux / tin the rivet, solder MB in 2-3 s, sleeve.
+
+# Appendix IS - Correction: IR's timestamp (2026-10-14 ~14:49 CDT)
+**Correction to IR:** IR's heading time "~14:05 CDT" is wrong - I wrote it before running `date`, which then read 14:48 CDT (2026-10-14). IR was appended at ~14:48 CDT. Its content stands. Process slip: the timestamp must come from the `date` call, never a guess.
+
+# Appendix IT - MB wire soldered to the holder rivet; reads 3.55 V to each cell (not yet on the BMS) (2026-10-14 ~15:23 CDT)
+**WHAT:** Evan soldered the MB wire to the 2S holder's brass rivet (the series
+node confirmed in IR). The wire is NOT yet on the BMS's MB pad. Re-metered from
+the end of the new wire: 3.55 V to each battery (his reading, both sides) - the
+joint conducts and still sits between the two cells.
+
+**Pack wiring state:** MB wire on the holder - done (joint method and heat time
+not recorded). Not yet done: cells -> 3 A fuse (violet ATO; the kit mixes 3-15 A,
+Evan asked, the 3 A one was identified by colour), fuse -> B+, black -> B-, MB ->
+MB pad, charger and XT30 on P+ / P-. Meter caveat from IR stands (low-battery
+icon on the DT830B; replacement not stated).

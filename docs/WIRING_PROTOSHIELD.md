@@ -146,7 +146,7 @@ flowchart LR
 |---|---|---|---|---|
 | `CELL+` | holder RED (cell 1 +) | 3 A ATO fuse | 22 | **2026-10-10: fuse at the source, BEFORE the BMS** (Evan) - covers the BMS board, its B+ lead and the charge path. **It does NOT cover the MB or B- leads**, which run unfused straight off the cells: keep both short, sleeved and strain-relieved (audit 2026-10-11) |
 | `B+` | fuse out | BMS `B+` | 22 | |
-| `MB` | holder's internal series strap (cell 1 - / cell 2 +) | BMS `MB` | 22 | **new 3rd wire** - the DIANN holder has only 2 leads, so solder to its strap. Meter 3.6-4.2 V from MB to B- |
+| `MB` | holder's internal series strap (cell 1 - / cell 2 +) | BMS `MB` | 22 | **new 3rd wire** - the DIANN holder has only 2 leads, so solder to its strap. Meter 3.6-4.2 V from MB to B- **2026-10-14 (record IQ): the strap is not reachable inside; solder MB to the brass star rivet on the OUTSIDE of the end WITHOUT the leads (Evan's photo) - it holds that end's cell contact, the series node. Meter it first, cells in: rivet to black = 3.6-4.2 V AND rivet to red = 3.6-4.2 V; only then solder, cells OUT.** |
 | `B-` | holder BLACK (cell 2 -) | BMS `B-` | 22 | **nothing else ever touches B+ / MB / B-** |
 | `CHG+` / `CHG-` | charger `BAT+` / `BAT-` | BMS `P+` / `P-` | 22 | charger on the protected side; keep its USB-C port reachable with the pack installed. Its drain on the pack with no USB plugged in is UNMEASURED |
 | `PACK+` | BMS `P+` | XT30 male + | 22 | **2026-10-10: the BMS output** (was holder + -> fuse) |
