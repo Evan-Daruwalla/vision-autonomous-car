@@ -138,6 +138,10 @@ flowchart LR
 
 ### 2.1 Pack and power distribution
 
+**2026-10-14 (record IO): every BMS connection, one picture** - `docs/bms_wiring.svg`. The table below stays the authority. Physically the BMS now sits ON TOP of the 2S holder so the two unfused leads (B-, MB) stay short; only the fused, BMS-protected P+ / P- cross the bank to the charger and the XT30 (lengths: `docs/ELECTRONICS_LAYOUT.md`, cable routes).
+
+![BMS wiring](bms_wiring.svg)
+
 | Net | From | To | Wire | Notes |
 |---|---|---|---|---|
 | `CELL+` | holder RED (cell 1 +) | 3 A ATO fuse | 22 | **2026-10-10: fuse at the source, BEFORE the BMS** (Evan) - covers the BMS board, its B+ lead and the charge path. **It does NOT cover the MB or B- leads**, which run unfused straight off the cells: keep both short, sleeved and strain-relieved (audit 2026-10-11) |

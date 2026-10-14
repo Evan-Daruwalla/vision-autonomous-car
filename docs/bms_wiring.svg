@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="420" viewBox="0 0 680 420" font-family="Arial, Helvetica, sans-serif">
+<title>2S pack wiring through the BMS (2026-10-14)</title>
+<desc>Cell 1 + goes through the 3 A fuse to BMS B+. The series strap goes to MB. Cell 2 - goes to B-. BMS P+ and P- feed both the charger and the XT30 to the car. Physical placement: the BMS sits on top of the 2S holder (record IO).</desc>
+<rect x="0" y="0" width="680" height="420" fill="#FFFFFF"/>
+<text x="40" y="30" font-size="14" font-weight="bold" fill="#2C2C2A">2S pack: every BMS connection (net names as in section 2.1)</text>
+<rect x="40" y="70" width="190" height="270" rx="12" fill="none" stroke="#888780" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="135" y="333" font-size="12" text-anchor="middle" fill="#5F5E5A">2S holder (BMS taped on top)</text>
+<rect x="70" y="110" width="130" height="56" rx="6" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+<text x="135" y="134" font-size="14" font-weight="bold" text-anchor="middle" fill="#444441">Cell 1 (25R)</text>
+<text x="135" y="154" font-size="12" text-anchor="middle" fill="#5F5E5A">+ at top</text>
+<rect x="70" y="234" width="130" height="56" rx="6" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+<text x="135" y="258" font-size="14" font-weight="bold" text-anchor="middle" fill="#444441">Cell 2 (25R)</text>
+<text x="135" y="278" font-size="12" text-anchor="middle" fill="#5F5E5A">- at bottom</text>
+<line x1="135" y1="166" x2="135" y2="234" stroke="#444441" stroke-width="3"/>
+<circle cx="135" cy="200" r="4.5" fill="#BA7517"/>
+<rect x="270" y="70" width="80" height="44" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="1"/>
+<text x="310" y="97" font-size="14" font-weight="bold" text-anchor="middle" fill="#633806">3 A fuse</text>
+<text x="200" y="85" font-size="12" text-anchor="middle" fill="#A32D2D">CELL+</text>
+<text x="375" y="85" font-size="12" text-anchor="middle" fill="#A32D2D">B+</text>
+<rect x="400" y="70" width="120" height="260" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+<text x="466" y="155" font-size="14" font-weight="bold" text-anchor="middle" fill="#085041">BMS</text>
+<text x="466" y="175" font-size="12" text-anchor="middle" fill="#0F6E56">cutoff 2.9 V</text>
+<text x="410" y="96" font-size="12" fill="#085041">B+</text>
+<text x="410" y="204" font-size="12" fill="#085041">MB</text>
+<text x="410" y="314" font-size="12" fill="#085041">B-</text>
+<text x="490" y="92" font-size="12" text-anchor="middle" fill="#085041">P+</text>
+<text x="490" y="316" font-size="12" text-anchor="middle" fill="#085041">P-</text>
+<rect x="548" y="110" width="92" height="56" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+<text x="594" y="134" font-size="14" font-weight="bold" text-anchor="middle" fill="#3C3489">Charger</text>
+<text x="594" y="154" font-size="12" text-anchor="middle" fill="#534AB7">BAT / GND</text>
+<rect x="548" y="220" width="92" height="56" rx="6" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+<text x="594" y="244" font-size="14" font-weight="bold" text-anchor="middle" fill="#444441">XT30</text>
+<text x="594" y="264" font-size="12" text-anchor="middle" fill="#5F5E5A">to car (rocker)</text>
+<path d="M135 110 L135 92 L270 92" fill="none" stroke="#E24B4A" stroke-width="2"/>
+<line x1="350" y1="92" x2="400" y2="92" stroke="#E24B4A" stroke-width="2"/>
+<line x1="135" y1="200" x2="400" y2="200" stroke="#BA7517" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="270" y="193" font-size="12" text-anchor="middle" fill="#854F0B">MB (soldered to strap)</text>
+<path d="M135 290 L135 310 L400 310" fill="none" stroke="#888780" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="270" y="303" font-size="12" text-anchor="middle" fill="#5F5E5A">B- (holder black)</text>
+<path d="M490 70 L490 50 L652 50 L652 248 L640 248" fill="none" stroke="#E24B4A" stroke-width="2"/>
+<line x1="594" y1="50" x2="594" y2="110" stroke="#E24B4A" stroke-width="2"/>
+<circle cx="594" cy="50" r="3" fill="#E24B4A"/>
+<text x="560" y="43" font-size="12" text-anchor="middle" fill="#A32D2D">PACK+ / CHG+</text>
+<path d="M490 330 L490 350 L594 350 L594 276" fill="none" stroke="#888780" stroke-width="2"/>
+<path d="M548 150 L530 150 L530 350" fill="none" stroke="#888780" stroke-width="2"/>
+<circle cx="530" cy="350" r="3" fill="#888780"/>
+<text x="560" y="365" font-size="12" text-anchor="middle" fill="#5F5E5A">PACK- / CHG-</text>
+<line x1="40" y1="395" x2="70" y2="395" stroke="#E24B4A" stroke-width="2"/>
+<text x="76" y="399" font-size="12" fill="#2C2C2A">+ side</text>
+<line x1="130" y1="395" x2="160" y2="395" stroke="#888780" stroke-width="2"/>
+<text x="166" y="399" font-size="12" fill="#2C2C2A">- side</text>
+<line x1="215" y1="395" x2="245" y2="395" stroke="#888780" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="251" y="399" font-size="12" fill="#2C2C2A">no fuse: keep short, sleeve</text>
+<circle cx="440" cy="395" r="4.5" fill="#BA7517"/>
+<text x="450" y="399" font-size="12" fill="#2C2C2A">MB solder point (3.6-4.2 V to B-)</text>
+</svg>

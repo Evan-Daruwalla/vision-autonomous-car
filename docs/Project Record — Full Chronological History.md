@@ -283,6 +283,7 @@ the dated entry, not the digest.
 - [IL - docs-sync pass + snapshot after the tray/deck redesign evening](#appendix-il---docs-sync-pass--snapshot-after-the-traydeck-redesign-evening-2026-10-13-2036-cdt) (10-13)
 - [IM - Scheduled daily-audit: 44 findings - the public repo still carries the private path in 98 files and the public README says nothing is ordered](#appendix-im---scheduled-daily-audit-44-findings---the-public-repo-still-carries-the-private-path-in-98-files-and-the-public-readme-says-nothing-is-ordered-2026-10-14-0737-cdt) (10-14)
 - [IN - Tray/deck renders; charger USB-C and holder leads both on a SHORT end; holder lead likely short](#appendix-in---traydeck-renders-charger-usb-c-and-holder-leads-both-on-a-short-end-holder-lead-likely-short-2026-10-14-1157-cdt) (10-14)
+- [IO - BMS moved onto the 2S holder so the unfused B- / MB leads stay short; wire-length estimates](#appendix-io---bms-moved-onto-the-2s-holder-so-the-unfused-b---mb-leads-stay-short-wire-length-estimates-2026-10-14-1350-cdt) (10-14)
 
 ---
 
@@ -19311,3 +19312,27 @@ change (tray STL unchanged).
 
 **Checks:** electronics_layout.py 14 entries, 0 checks failed (exit 0);
 run_checks 17 passed, 0 failed (exit 0). Not committed.
+
+# Appendix IO - BMS moved onto the 2S holder so the unfused B- / MB leads stay short; wire-length estimates (2026-10-14 ~13:50 CDT)
+**WHAT:** Evan asked how long the BMS wires should be. Answering it exposed a
+layout flaw (Claude's, from IJ-IK): the BMS sat on the -y lobe, so the two
+UNFUSED leads - B- (holder black) and MB (soldered to the series strap) - were
+the longest pack wires (~160-200 mm up over the bank). WIRING_PROTOSHIELD.md:143
+says keep both short: a short between them is cell 2 shorted with no fuse and no
+BMS in the path. Evan: "move BMS onto the holder".
+
+**Change:** BMS 41 x 8 x 2.2 now on double-sided tape ON TOP of the 2S holder
+(x 62..103, y 60.5..68.5, z 27.5..29.7), near the holder's -x lead end. Only the
+fused, BMS-protected P+ / P- now cross the bank to the charger and XT30 on the
+-y lobe. Cost: peel the BMS off to swap cells. Gap to the deck underside 16.3 mm
+(46.0 - 29.7, arithmetic; the checker's gap report omits a part resting on
+another part). No geometry change.
+
+**Wire estimates (straight-line, before slack; not measured):** B- ~20-40, MB
+~40-60, red -> fuse ~45-65, fuse out -> B+ ~40-60, charger BAT/GND -> P+/P- and
+P+/P- -> XT30 ~150-170 each (cut ~190), or one pair with the charger spliced in
+on the -y lobe. A wiring diagram of every BMS connection was shown in chat (not
+saved to the repo).
+
+**Checks:** electronics_layout.py 14 entries, 0 checks failed (BMS material and
+support PASS); run_checks 17 passed, 0 failed. Not committed.
