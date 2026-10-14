@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~18:22 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-13 ~19:08 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 243 appendices A–II; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 244 appendices A–IJ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -623,7 +623,7 @@ Pocket gauge, row-D collar, pilot holes NOT reported yet. press_shaft (+0.15) is
 PLA-only. Tray/deck: slice with supports OFF (the profile supports bridges).
 PRINTED PARTS (all OpenSCAD in cad/scad/, rendered + probe-checked by
 scripts/render_scad.py, registered in check_artifacts): servo mount v7, motor
-mount v6, electronics tray v6 + deck v7 (IA-II: 10 mm fences, 3.5 zip slots, deck at z 42 with the fuse on the bank, Uno standoffs 6; earlier: deck raised
+mount v6, electronics tray v7 + deck v8 (IA-IJ: bank, holder and Pi on ~4 mm VELCRO, 14 mm fences, 10 mm Pi brackets, deck at z 46 with the fuse on the bank, Uno standoffs 6, 3.5 zip slots for the small-lobe parts; earlier: deck raised
 2 mm in IB so the 2S holder clears it), PLA fit coupon (row D 4.90-5.05 added)
 + NEW pocket gauge (IB), camera mast
 v1 (NEW). All UNTESTED at these versions. Only servo mount v6 has been printed

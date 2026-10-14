@@ -8,16 +8,19 @@
 // Pi case pocket from fit class "pocket" (was zero clearance; Rules 2, 11), 0.5 lead-in
 // chamfer on the Pi bracket tops (Rule 5), 0.4 chamfers on both faces of the rocker hole
 // (Rules 5, 6), 0.4 lead-in on the Uno / LM2596 peg tops. Print as modelled: the
-// underside (z = 42.0) on the bed. See the record entry of 2026-10-13.
+// underside (z = 46.0) on the bed. See the record entry of 2026-10-13.
 // v4 (2026-10-13): raised 2 mm (underside z 32.0) to clear the tray's 2S holder; LAYOUT
 // list = every layer-2 electronic part (preview ghosts + echoed for scripts/electronics_layout.py).
 // v6 (2026-10-13): rocker hole 21.0 (body 20.50), LM2596 pegs 57.5 x 31.5, Uno + shield 53.7 x 70 x 24.
 // v7 (2026-10-13): underside 32 -> 42 (deck +10 mm for the fuse holder); Uno standoffs 4 -> 6 so
 // the USB-B plug (jack centre 13 mm from the Uno's left edge, Evan) clears the boss at (10, -41.6).
+// v8 (2026-10-13): underside 42 -> 46 (tray posts follow the velcro-lifted bank); the Pi case
+// sits on ~4 mm velcro (Evan; removable), so its brackets go 6 -> 10 mm.
+VELCRO = 4.0;             // velcro pair thickness under the Pi case (Evan: roughly 4)
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, pin rows at y = +/-24; z = 0 on the Lego frames' top face. The deck's
-// underside is z = 42.0 (the top of the tray's posts). mm.
+// underside is z = 46.0 (the top of the tray's posts). mm.
 
 use <lib/lego.scad>
 EPS = 0.01;
@@ -25,12 +28,12 @@ $fn = 64;
 PIN_D = lego_pin_d();     // 4.95: lib/lego.scad fit class "friction_pin" (record GU, HG)
 
 // deck levels
-DECK_BOT = 42.0;          // top of the tray posts
+DECK_BOT = 46.0;          // top of the tray posts
 PLATE_T = 2.5;
-DECK_TOP = DECK_BOT + PLATE_T;    // 44.5
+DECK_TOP = DECK_BOT + PLATE_T;    // 48.5
 BOSS = 8.0;               // pin boss footprint, square
 BOSS_H = 7.8;             // a Lego beam's height
-BOSS_TOP = DECK_BOT + BOSS_H;     // 49.8
+BOSS_TOP = DECK_BOT + BOSS_H;     // 53.8
 
 // plate, wing, rocker tab
 PLATE_X = [-6, 156];
@@ -50,23 +53,23 @@ PI_Y0 = -32.2 - POCKET_C;
 PI_Y1 = 32.2 + POCKET_C;
 BR_T = 1.5;               // bracket wall thickness
 BR_LEG = 10.0;            // free leg length beyond the case corner
-BR_H = 6.0;               // bracket height above the deck (z 44.5..50.5)
+BR_H = 10.0;              // bracket height above the deck (z 48.5..58.5); 6 -> 10 for the 4 mm velcro
 LEAD = 0.5;               // lead-in chamfer on the Pi bracket tops (Rule 5)
 
 // Arduino Uno standoffs and pegs
 UNO_XY = [[0.54, -19.05], [15.78, 31.75], [43.72, 31.75], [48.8, -20.32]];
 UNO_SO_D = 6.0;
-UNO_SO_H = 6.0;           // z 44.5..50.5; was 4: the USB-B plug crosses the boss at (10, -41.6)
+UNO_SO_H = 6.0;           // z 48.5..54.5; was 4: the USB-B plug crosses the boss at (10, -41.6)
 UNO_PEG_D = 3.0;
-UNO_PEG_H = 3.0;          // z 50.5..53.5
+UNO_PEG_H = 3.0;          // z 54.5..57.5
 
 // LM2596 standoffs and pegs
 // Evan 2026-10-13: holes 3.5 dia, 61 outer edge to outer edge -> 57.5 centre to centre, 31.5 the other way
 LM_XY = [[66.25, -44.25], [123.75, -44.25], [66.25, -75.75], [123.75, -75.75]];
 LM_SO_D = 6.0;
-LM_SO_H = 3.0;            // z 44.5..47.5
+LM_SO_H = 3.0;            // z 48.5..51.5
 LM_PEG_D = 3.5 - fit_offset("slide");   // 3.2 in the 3.5 holes
-LM_PEG_H = 3.0;           // z 47.5..50.5
+LM_PEG_H = 3.0;           // z 51.5..54.5
 
 // cut-outs
 VENT_X = [65, 137];
@@ -144,7 +147,8 @@ difference() {
 // preview-only ghosts
 // LAYOUT: [name, [sx, sy, sz], [x, y, z], kind, held by, ports]; kind part | zone | note.
 LAYOUT = [
-  ["Raspberry Pi 5 in Vilros case", [91.8, 64.4, 27.2], [55.1, -32.2, DECK_TOP], "part", "4 corner brackets, pocket +0.25 per side", "+x: camera + USB-C power; -x: 2x USB-A + LAN"],
+  ["velcro under the Pi case (~4 mm)", [91.8, 64.4, VELCRO], [55.1, -32.2, DECK_TOP], "zone", "adhesive both sides", ""],
+  ["Raspberry Pi 5 in Vilros case", [91.8, 64.4, 27.2], [55.1, -32.2, DECK_TOP + VELCRO], "part", "velcro + 4 corner brackets (10 mm), pocket +0.25 per side", "+x: camera + USB-C power; -x: 2x USB-A + LAN"],
   ["Arduino Uno R3 + proto shield (TB6612, caps, divider)", [53.7, 70, 24], [-2.18, -35, DECK_TOP + UNO_SO_H], "part", "4 standoffs + pegs", "-y: USB-B (overhangs 7.3) + DC jack (4.1); jack positions NOT measured"],
   ["USB-B plug clearance (16 x 30 x 13 allowance, plug NOT measured)", [16, 30, 13], [3, -72.3, DECK_TOP + UNO_SO_H + 1.6 - 1.0], "clearance", "hangs from the Uno jack", "-y: to the Pi"],
   ["LM2596 buck, 5.00 V (display)", [66, 36, 14], [62, -78, DECK_TOP + LM_SO_H], "part", "4 standoffs + pegs", "display up; trim pot locked"],

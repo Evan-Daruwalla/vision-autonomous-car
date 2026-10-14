@@ -278,6 +278,7 @@ the dated entry, not the digest.
 - [IG - Tray v5: fences 4 -> 10 mm to hold the bank's flat sides](#appendix-ig---tray-v5-fences-4---10-mm-to-hold-the-banks-flat-sides-2026-10-13-1745-cdt) (10-13)
 - [IH - Measurements M1-M11: fuse holder has no place, rocker hole 21, LM2596 pegs 57.5 x 31.5; correction to IF](#appendix-ih---measurements-m1-m11-fuse-holder-has-no-place-rocker-hole-21-lm2596-pegs-575-x-315-correction-to-if-2026-10-13-1800-cdt) (10-13)
 - [II - Deck +10 mm for the fuse holder (on the bank); Uno standoffs 6 mm so the USB plug clears a pin boss](#appendix-ii---deck-10-mm-for-the-fuse-holder-on-the-bank-uno-standoffs-6-mm-so-the-usb-plug-clears-a-pin-boss-2026-10-13-1820-cdt) (10-13)
+- [IJ - Velcro (4 mm) for the bank, holder and Pi - the tie slots could never close; tray v7 / deck v8](#appendix-ij---velcro-4-mm-for-the-bank-holder-and-pi---the-tie-slots-could-never-close-tray-v7--deck-v8-2026-10-13-1905-cdt) (10-13)
 
 ---
 
@@ -19068,3 +19069,38 @@ entries, 0 checks failed (gaps to the deck: fuse 2.2, holder 11.7, bank
 14.2 mm); overhang scan: deck none > 1.5 mm, tray unchanged (worst 10.44 mm);
 layout --self-check PASS (6 cases); check_artifacts 40 checked, 0 drifted;
 run_checks 17 passed, 0 failed. UNTESTED - not printed.
+
+# Appendix IJ - Velcro (4 mm) for the bank, holder and Pi - the tie slots could never close; tray v7 / deck v8 (2026-10-13 ~19:05 CDT)
+**WHAT:** (2026-10-13 ~19:05 CDT) Retention for the bank, holder and Pi case
+switched from zip ties to velcro (Evan: "I'll do velcro so they are
+removable ... roughly 4mm").
+
+**Why ties were dropped (a design flaw found 2026-10-13, Opus's own from
+GW):** Evan's ties are 100 mm (fit the 3.5 x 1.8 slots) and 200 mm (need slots
+about 1.75 x 5.0 by 1.5 x 1.8 = 8.75 x 2.7, his estimate). A tie must close
+its loop. The bank and Pi slots only anchor at the edges, and the holder has
+no inner-side slot (it sits against the bank fence), so NO tie length could
+close a loop around those three; the rails also block a path under the bank.
+Estimated loops (head and tail ~25 mm extra; not measured): holder ~135, bank
+~190, Pi ~195 mm vs ~175 usable from a 200 mm tie. Only the small-lobe slot
+pairs (charger, XT30) work - 100 mm ties fit those. Opus recommended chaining
+two 200 mm ties; Evan chose velcro. Velcro under the holder too is Opus's
+assumption (its slots fail the same way), stated to Evan.
+
+**Changes (VELCRO = 4.0 constant in both files, Evan's rough number):**
+- Tray v7: bank and holder raised 4 mm onto velcro (LAYOUT zones for the
+  velcro, parts on top); fences 10 -> 14 mm so the lifted bank's flat band
+  (7 mm above its bottom) is still held; posts 42 -> 46 so the fuse holder on
+  the lifted bank still clears the deck (2.2 mm). Bank/holder tie slots left
+  in place, unused.
+- Deck v8: underside 42 -> 46; Pi case on 4 mm velcro, corner brackets 6 ->
+  10 mm (else they would hold 2 mm of the case).
+- Probes: tray post holes 42.1, bbox z 46, fence/lead-in points +4; deck all
+  z +4 (bracket points +8), bbox z 46..58.5.
+- docs/ELECTRONICS_LAYOUT.md updated.
+
+**Checks:** render_scad tray 247/247, deck 88/88 PASS; electronics_layout.py
+14 entries, 0 checks failed (gaps to the deck: fuse 2.2, holder 11.7, bank
+14.2 mm); overhangs unchanged (tray worst 10.44 mm, deck none > 1.5);
+check_artifacts 40 checked, 0 drifted; run_checks 17 passed, 0 failed.
+UNTESTED - not printed. Velcro thickness assumed, not measured.
