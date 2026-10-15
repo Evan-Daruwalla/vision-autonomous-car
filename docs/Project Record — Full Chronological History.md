@@ -293,6 +293,10 @@ the dated entry, not the digest.
 - [IV - BMS output measured: P+ to P- = 7.21 V](#appendix-iv---bms-output-measured-p-to-p---721-v-2026-10-14-2123-cdt) (10-14)
 - [IW - Charger and XT30 both on the BMS output pads (two wires per pad); wire list](#appendix-iw---charger-and-xt30-both-on-the-bms-output-pads-two-wires-per-pad-wire-list-2026-10-14-2256-cdt) (10-14)
 - [IX - Camera arrived - all 24 parts in; PRD task 8 done](#appendix-ix---camera-arrived---all-24-parts-in-prd-task-8-done-2026-10-15-1145-cdt) (10-15)
+- [IY - First charge: charger was wired reversed; swapped, now charging (CR LED)](#appendix-iy---first-charge-charger-was-wired-reversed-swapped-now-charging-cr-led-2026-10-15-1252-cdt) (10-15)
+- [IZ - First charge stopped early at 3.83 V per cell (not overcharged); charger reads ~8.8 V with no load](#appendix-iz---first-charge-stopped-early-at-383-v-per-cell-not-overcharged-charger-reads-88-v-with-no-load-2026-10-15-1412-cdt) (10-15)
+- [JA - Second charge stopped by itself at 8.29 V (under 8.4 V); pack ready for the LM2596 step](#appendix-ja---second-charge-stopped-by-itself-at-829-v-under-84-v-pack-ready-for-the-lm2596-step-2026-10-15-1510-cdt) (10-15)
+- [JB - Correction: JA's timestamp](#appendix-jb---correction-jas-timestamp-2026-10-15-1727-cdt) (10-15)
 
 ---
 
@@ -19473,3 +19477,71 @@ Process note: these edits cite "IX" written before this entry was appended
 **Next for the camera:** check the Pi 5 cable (Standard-Mini, 200 mm) is the one
 in hand - the module ships with the wrong cable for a Pi 5 (hardware.md); then
 a first capture on the Pi (rpicam-still) once the Pi has power.
+
+# Appendix IY - First charge: charger was wired reversed; swapped, now charging (CR LED) (2026-10-15 ~12:52 CDT)
+**WHAT:** First charge attempt, charger (Adeept p0374) and XT30 now on the BMS
+P+ / P- pads (IW). Symptom: green "OK" LED on, pack voltage did not rise in
+15 min; XT30 read -8.80 V with USB-C in; at the fuse holder (cell side) 7.11 V.
+Evan had already fitted a NEW 9 V battery in the DT830B (so these readings are
+not the low-battery suspicion raised in IR).
+
+**Root cause (found by Evan):** the charger was wired REVERSED - red to the
+charger's GND, black to BAT. Evan swapped the two wires; the red "CR" LED is now
+lit (charging). No heat, smoke or damage reported. Consistent with the BMS
+switching off its output against a reversed charger (cell side stayed 7.11 V
+while the P side followed the charger, 8.8 V the other way round). The
+charger's own output voltage is still unknown: 8.80 V was read against a
+nearly open circuit and may be its no-battery float, not its charge voltage.
+
+**Gate on this charge:** watch the pack voltage at the end - it must stop at or
+below ~8.4 V (4.2 V per cell); above 8.45 V means the charger overcharges -
+unplug and do not use it. Then rest 30 min and meter each cell (rivet to each
+lead) for balance. Whether the reversed hookup stressed the BMS or charger is
+not known; their protection functions remain UNTESTED.
+
+# Appendix IZ - First charge stopped early at 3.83 V per cell (not overcharged); charger reads ~8.8 V with no load (2026-10-15 ~14:12 CDT)
+**WHAT:** First charge result (continues IY). Readings by Evan, DT830B with the
+new 9 V battery:
+- 15 min: cells (fuse side) 7.50 V, XT30 7.75 V (0.25 V across BMS + fuse +
+  wire under charge current).
+- +25 min: cells 7.82 V, XT30 8.09 V; charger board "a little hot", holdable
+  for an extended time; nothing else warm.
+- Charger then went to green "OK". Still plugged in: pack and XT30 both
+  jumping 8.75-8.92 V. Told to unplug at once (above 8.4 V for 2S).
+- Unplugged and rested: each cell 3.83 V (both equal - balanced), P+ to P-
+  7.68 V.
+
+**Reading:** the cells were NOT overcharged - they rest at 3.83 V each, well
+under 4.2 V - and the charge stopped early (~3.83 V/cell at rest is roughly
+half to two-thirds full; a full 25R rests ~4.1-4.2 V). WHY it stopped early is
+NOT known. Candidates, none tested: the charger terminates on its own terminal
+voltage, which the 0.25-0.27 V path drop pushes up; or the BMS cut the charge
+path and the charger then floated to its no-load ~8.8 V (also seen in IY). The
+8.75-8.92 V plugged-in reading is therefore most likely the charger's no-load
+output, not the cells.
+
+**Open:** the charger's real no-load output (BAT lifted, USB-C in, BAT to GND)
+- 8.4 V is correct; a steady 8.8 V means the board is wrong for this pack.
+Until measured: no further charging.
+
+# Appendix JA - Second charge stopped by itself at 8.29 V (under 8.4 V); pack ready for the LM2596 step (2026-10-15 ~15:10 CDT)
+**WHAT:** Second charge (continues IZ). Evan plugged USB-C back in without the
+no-load charger test asked for in IZ; Claude's pushback: then Evan is the
+cutoff - meter the cell side every 5 min, unplug at 8.40 V. Readings (Evan,
+cell side): 8.10 V at restart (charging), 8.04 V, 8.11 V, then the charger
+stopped by itself at **8.29 V, pack and XT30 reading the same** (no current
+flowing, so no path drop). Nothing hot ("everything looking good").
+
+**Reading:** the charger terminated at 8.29 V - under the 8.4 V limit - so on
+this charge it behaved correctly; IZ's early stop at 3.83 V/cell and the
+8.75-8.92 V plugged-in readings remain unexplained (most likely the idle
+output while the BMS or the charger had stopped current). Per-cell resting
+voltages after this charge were NOT measured. The charger's no-load output test
+(BAT lifted, BAT to GND) is still not done; until it is, charges are attended.
+
+**Pack status:** usable for the bench steps. Next per WIRING_PROTOSHIELD.md
+section 5: step 1 (LM2596 to 5.0 V, unloaded, fed from the pack via an XT30
+female lead), then 1b (cut-5V USB cable + host_test.py).
+
+# Appendix JB - Correction: JA's timestamp (2026-10-15 ~17:27 CDT)
+**Correction to JA:** JA's heading time "~15:10 CDT" is wrong - it was guessed before running `date`, which then read 17:26 CDT (2026-10-15). JA was appended at ~17:26 CDT; its content stands. Second time this session (see IS): the date call must come FIRST, in its own step, before the entry is written.

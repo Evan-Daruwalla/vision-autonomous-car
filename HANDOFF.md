@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-15 ~11:45 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-15 ~17:27 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -654,8 +654,11 @@ NEXT ACTIONS, highest value first:
    DONE 2026-10-14 (IP-IV): MB tapped at the holder's brass rivet (strap not
    reachable), BMS wired B- / MB / fuse -> B+, P+ to P- = 7.21 V. NEXT (IW):
    4 x 190 mm 22 AWG - charger BAT/GND and XT30 both on P+ / P- (two wires
-   per pad); first charge attended, expect <= 8.4 V. BMS sits ON the holder
-   (IO). Then rail 5.0 V, cut-5V USB cable; then host_test.py --wired.
+   per pad) - DONE 2026-10-15; charger was wired reversed, fixed (IY); first
+   charge stopped early at 3.83 V/cell (IZ), second stopped itself at 8.29 V
+   (JA). Charger no-load output test still NOT done - attend every charge.
+   BMS sits ON the holder (IO). NEXT: section 5 step 1 (LM2596 to 5.0 V,
+   unloaded), 1b (cut-5V USB cable + host_test.py), then 2b.
 4. Audit HJ's HIGH: ml/splits.py split stability + a corpus id in checkpoints.
 5. Couplers: print in PETG and re-test the fit (press_shaft is PLA-only);
    servo coupler v3 untested; none load-tested.
