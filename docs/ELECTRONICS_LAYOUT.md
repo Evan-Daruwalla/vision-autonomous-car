@@ -88,8 +88,8 @@ the WS2812B reel and the fuses.
 |---|---|---|
 | Holder black -> BMS B-; MB -> MB | out of the holder's -x lead end, up onto the holder top (BMS there) | ~20-40 (B-), ~40-60 (MB, from the strap inside) - trim the 160 mm black lead (2026-10-14 estimate; was ~155-175 with the BMS on the -y lobe) |
 | Holder red -> fuse -> BMS B+ | red up onto the bank top to the fuse, fuse out back up to the holder top | red ~45-65, fuse out -> B+ ~40-60 (2026-10-14 estimate) |
-| Charger BAT+/BAT- -> BMS P+/P- | holder top, across under the deck over the bank, down into the -y lobe | ~150-170 each (2026-10-14 estimate: ~33 up + 70 across + ~45 down); cut ~190 |
-| BMS P+/P- -> XT30 (pack side) | same route as the charger pair | ~150-170 each; cut ~190. Or run ONE pair and splice the charger in on the -y lobe (shorter, one more joint) |
+| Charger BAT+/BAT- -> BMS P+/P- | holder top, across under the deck over the bank, down into the -y lobe | ~150-170 each (2026-10-14 estimate: ~33 up + 70 across + ~45 down); cut 190. Charger BAT -> P+, the GND next to BAT -> P- (the two GND pads metered 0.4 ohm = common); VIN unused |
+| BMS P+/P- -> XT30 (pack side) | same route as the charger pair | ~150-170 each; cut 190. **Evan's choice 2026-10-14: TWO pairs on the BMS pads** (charger pair + XT30 pair, twisted and tinned together per pad, one heat) - 4 x 22 AWG at 190 mm (2 red, 2 black); one wire per XT30 cup. Rejected: one 190 pair + a 60 mm charger pair sharing the XT30 cups (380 mm less wire). Strain-relieve the four wires on the holder top |
 | XT30 (car side) -> rocker -> VBAT | up the -y lobe's outer edge onto the deck wing, back along the deck to the rear tab; VBAT then to the shield (TB6612 VMOT, LM2596 VIN, divider top) | ~190 mm |
 | LM2596 VOUT -> shield `+5V2` | deck wing -> shield | short |
 | Bank USB-C -> Pi USB-C | from the bank's REAR end, up behind the deck, forward along the deck's +y side to the Pi's front | ~230 mm - Evan has a USB-C cable > 25 cm |

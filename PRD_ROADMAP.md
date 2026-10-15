@@ -455,6 +455,7 @@ transfer gap) must not block the capstone.
    (actual paid per vendor + shipping) are not recorded.~~ Paid ~$430 (Evan's
    recollection, Appendix FU; vs $422.25 BOM before shipping). OPEN only until
    the camera arrives.**
+   **2026-10-15 (Appendix IX): the camera has ARRIVED (Evan) - all 24 items in. Done-check met (order placed, arrival and paid amount recorded). DONE.**
    - *(Price corrected 2026-09-01: ≈$176-179 is stale by ~$60. The BOM
      re-priced 2026-08-08 to **$221.82–$224.82** before shipping, and rows
      17–20 — lighting and I/O added 2026-09-01 (Appendix AY) — took it to

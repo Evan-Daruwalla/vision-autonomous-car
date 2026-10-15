@@ -291,6 +291,8 @@ the dated entry, not the digest.
 - [IT - MB wire soldered to the holder rivet; reads 3.55 V to each cell (not yet on the BMS)](#appendix-it---mb-wire-soldered-to-the-holder-rivet-reads-355-v-to-each-cell-not-yet-on-the-bms-2026-10-14-1523-cdt) (10-14)
 - [IU - BMS wired to the cells (B-, MB, fuse -> B+); Evan reports it works, P+/P- reading not given](#appendix-iu---bms-wired-to-the-cells-b--mb-fuse---b-evan-reports-it-works-pp--reading-not-given-2026-10-14-1644-cdt) (10-14)
 - [IV - BMS output measured: P+ to P- = 7.21 V](#appendix-iv---bms-output-measured-p-to-p---721-v-2026-10-14-2123-cdt) (10-14)
+- [IW - Charger and XT30 both on the BMS output pads (two wires per pad); wire list](#appendix-iw---charger-and-xt30-both-on-the-bms-output-pads-two-wires-per-pad-wire-list-2026-10-14-2256-cdt) (10-14)
+- [IX - Camera arrived - all 24 parts in; PRD task 8 done](#appendix-ix---camera-arrived---all-24-parts-in-prd-task-8-done-2026-10-15-1145-cdt) (10-15)
 
 ---
 
@@ -19442,3 +19444,32 @@ chosen by Claude for him to accept or reject: ONE 190 mm pair BMS P+ / P- -> the
 XT30 pack half, and a short (~60 mm) charger pair from BAT / GND into the SAME
 XT30 solder cups (two 22 AWG wires per cup), since the charger sits next to the
 XT30 on the -y lobe. Charger VIN pad stays unused. Untested.
+
+# Appendix IW - Charger and XT30 both on the BMS output pads (two wires per pad); wire list (2026-10-14 ~22:56 CDT)
+**WHAT:** Charger + XT30 wiring plan settled. Evan metered the charger: BAT to
+GND open (correct - no short on the charger output); GND pad to GND pad 0.4 ohm
+(common; mostly lead resistance). Evan chose to put two wires on each BMS output
+pad rather than share the XT30 cups: P+ -> charger BAT and XT30 +, P- -> charger
+GND (the one next to BAT) and XT30 -. VIN unused.
+
+**Wire list (estimates, not measured on the car - the tray is unprinted):** 4 x
+22 AWG at 190 mm (2 red, 2 black), plus the B- / MB / fuse leads from IO. Cost
+vs the rejected shared-cup plan: ~380 mm more wire over the bank, and two wires
+per small BMS pad (twist + tin each pair, solder in one heat; strain-relieve).
+docs/ELECTRONICS_LAYOUT.md cable-route rows updated.
+
+# Appendix IX - Camera arrived - all 24 parts in; PRD task 8 done (2026-10-15 ~11:45 CDT)
+**WHAT:** Evan (2026-10-15): "camera has arrived". All 24 ordered items are now
+in (23 arrived 2026-10-10, FI-FL; the camera was a separate PiShop order, in
+shipping since GX). Model as ordered: Camera Module 3 Wide - not re-checked
+against the box. NOT yet connected to the Pi or tested; no frame captured.
+
+**Docs:** PRD task 8 (purchase) marked DONE - its done-check (order placed,
+arrival and paid amount recorded) is met; HANDOFF state + next action 3 (pack
+wiring progress IP-IW) and the Last-updated stamp; important.md #1.
+Process note: these edits cite "IX" written before this entry was appended
+(the never-pre-cite rule); the script assigned IX as expected.
+
+**Next for the camera:** check the Pi 5 cable (Standard-Mini, 200 mm) is the one
+in hand - the module ships with the wrong cable for a Pi 5 (hardware.md); then
+a first capture on the Pi (rpicam-still) once the Pi has power.

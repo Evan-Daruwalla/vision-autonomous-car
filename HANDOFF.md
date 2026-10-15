@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-13 ~20:36 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-15 ~11:45 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -36,7 +36,7 @@ banked. ~~Nothing has been printed and nothing has been ordered since
 2026-07-23.~~ **PRINTING STARTED 2026-09-05** — two tolerance coupons (v1 and
 v2) printed on a Bambu P1S in Bambu ABS, giving M1.3's two headline numbers
 (pin holes 4.80 mm, rotating axle bores 5.00 mm, Appendices DI/DK). **Still
-nothing ORDERED** — the BOM stands at ~~$411.45~~ **$422.25 before shipping (2026-10-04 cart review)**, ~~unbought~~ **ORDERED; 23 of 24 items ARRIVED 2026-10-10 (Appendices FI/FJ/FK). NOT arrived: Camera Module 3 Wide (a separate order from the cable) - IN SHIPPING as of 2026-10-12 (GX). Motor confirmed #5159 by its label (FL).**
+nothing ORDERED** — the BOM stands at ~~$411.45~~ **$422.25 before shipping (2026-10-04 cart review)**, ~~unbought~~ **ORDERED; 23 of 24 items ARRIVED 2026-10-10 (Appendices FI/FJ/FK). ~~NOT arrived: Camera Module 3 Wide (a separate order from the cable) - IN SHIPPING as of 2026-10-12 (GX).~~ **2026-10-15: the camera has ARRIVED (Evan; record IX) - all 24 items in. Not yet connected or tested.** Motor confirmed #5159 by its label (FL).**
 
 **2026-09-07: a REAL DEFECT was found and fixed in the controller** (commit
 `bfa953e`, Appendix EJ). `ml/train_controller.py` overwrote `act` with the
@@ -593,9 +593,9 @@ Read, in order:
    (steering.md before ANY servo/steering work; hardware.md + decisions.md
    before ANY printed-mount work; track.md before track work)
 
-STATE (2026-10-13 ~20:35 CDT). Parts ORDERED; 23 of 24 arrived 2026-10-10
-(FI-FL); the Camera Module 3 Wide is IN SHIPPING (GX) - PRD task 8 closes
-when it arrives. Paid ~$430 (Evan's recollection, FU).
+STATE (2026-10-15 ~11:45 CDT). Parts ORDERED; 23 of 24 arrived 2026-10-10
+(FI-FL); the camera ARRIVED 2026-10-15 (IX) - all in; PRD task 8 done.
+Not yet connected or tested. Paid ~$430 (Evan's recollection, FU).
 FIRMWARE: the Uno runs the CURRENT uno_control source - flashed 2026-10-13
 ~14:09 (HY), boot banner "SERVO WIRED; MOTOR, ENCODER, LEDS, PACK UNWIRED" +
 "SELFTEST PASS 86/86". Steering backlash compensation holds the servo 75 us
@@ -650,10 +650,12 @@ NEXT ACTIONS, highest value first:
    LM2596 pegs, rocker hole; anything rubbing. Record settings + fit.
 2. Print / fit what is not yet confirmed: servo mount v7 (if not the mounted
    one), motor mount v6, camera mast v1. Record each.
-3. PACK WIRING PREP (unblocks the motor AND the frame -> servo test, HZ):
-   meter the 4x Samsung 25R (FV/FW), then WIRING_PROTOSHIELD section 2.1 /
-   section 5 order (cells OUT, B- then MB then B+, fuse last); rail 5.0 V,
-   cut-5V USB cable first; then host_test.py --wired.
+3. PACK WIRING (unblocks the motor AND the frame -> servo test, HZ):
+   DONE 2026-10-14 (IP-IV): MB tapped at the holder's brass rivet (strap not
+   reachable), BMS wired B- / MB / fuse -> B+, P+ to P- = 7.21 V. NEXT (IW):
+   4 x 190 mm 22 AWG - charger BAT/GND and XT30 both on P+ / P- (two wires
+   per pad); first charge attended, expect <= 8.4 V. BMS sits ON the holder
+   (IO). Then rail 5.0 V, cut-5V USB cable; then host_test.py --wired.
 4. Audit HJ's HIGH: ml/splits.py split stability + a corpus id in checkpoints.
 5. Couplers: print in PETG and re-test the fit (press_shaft is PLA-only);
    servo coupler v3 untested; none load-tested.
