@@ -297,6 +297,9 @@ the dated entry, not the digest.
 - [IZ - First charge stopped early at 3.83 V per cell (not overcharged); charger reads ~8.8 V with no load](#appendix-iz---first-charge-stopped-early-at-383-v-per-cell-not-overcharged-charger-reads-88-v-with-no-load-2026-10-15-1412-cdt) (10-15)
 - [JA - Second charge stopped by itself at 8.29 V (under 8.4 V); pack ready for the LM2596 step](#appendix-ja---second-charge-stopped-by-itself-at-829-v-under-84-v-pack-ready-for-the-lm2596-step-2026-10-15-1510-cdt) (10-15)
 - [JB - Correction: JA's timestamp](#appendix-jb---correction-jas-timestamp-2026-10-15-1727-cdt) (10-15)
+- [JC - Charger board was swapped for a spare - timing unknown; first board marked suspect](#appendix-jc---charger-board-was-swapped-for-a-spare---timing-unknown-first-board-marked-suspect-2026-10-15-1729-cdt) (10-15)
+- [JD - Swap was before the second charge: the first charger board is the likely fault](#appendix-jd---swap-was-before-the-second-charge-the-first-charger-board-is-the-likely-fault-2026-10-15-1729-cdt) (10-15)
+- [JE - Build step 1: LM2596 set to 4.95 V unloaded (meter), display 4.9](#appendix-je---build-step-1-lm2596-set-to-495-v-unloaded-meter-display-49-2026-10-15-1750-cdt) (10-15)
 
 ---
 
@@ -19545,3 +19548,47 @@ female lead), then 1b (cut-5V USB cable + host_test.py).
 
 # Appendix JB - Correction: JA's timestamp (2026-10-15 ~17:27 CDT)
 **Correction to JA:** JA's heading time "~15:10 CDT" is wrong - it was guessed before running `date`, which then read 17:26 CDT (2026-10-15). JA was appended at ~17:26 CDT; its content stands. Second time this session (see IS): the date call must come FIRST, in its own step, before the entry is written.
+
+# Appendix JC - Charger board was swapped for a spare - timing unknown; first board marked suspect (2026-10-15 ~17:29 CDT)
+**WHAT:** Evan (2026-10-15): "idk why but i swapped boards (i had an extra
+charger)" - a second Adeept p0374 (or same-model spare; model not re-checked)
+replaced the first charger board at some point. WHEN is not yet stated, so it is
+not known which board produced which result in IY / IZ / JA.
+
+**Why it matters:** if the swap happened before the second charge, the two
+charges are two different boards: board 1 = the one wired reversed (IY), idling
+at ~8.8 V and stopping early at 3.83 V/cell (IZ); board 2 = stopped correctly at
+8.29 V (JA). That would point at board 1 being faulty or damaged by the reversed
+hookup, and would explain why no single cause fit both charges. Until Evan
+confirms the timing this is a hypothesis.
+
+**Action:** board 1 is marked SUSPECT - keep it separate, do not reuse until its
+no-load output (USB-C in, nothing on BAT) is metered. The installed board's
+no-load test is also still not done.
+
+# Appendix JD - Swap was before the second charge: the first charger board is the likely fault (2026-10-15 ~17:29 CDT)
+**WHAT:** Evan confirmed the charger board swap (JC) happened BEFORE the second
+charge. So: board 1 = wired reversed (IY), idled at ~8.8 V, first charge stopped
+early at 3.83 V/cell (IZ); board 2 (the spare, now installed) = second charge,
+stopped by itself at 8.29 V (JA).
+
+**Conclusion (likely, not proven):** board 1 is faulty, most plausibly damaged
+by the reversed hookup - no other single cause fit both charges. Board 1 stays
+retired (SUSPECT) unless a no-load test (USB-C in, nothing on BAT, BAT to GND)
+shows <= 8.45 V. Board 2 has one good charge but no no-load test yet; charges
+stay attended until it has one. Lesson for the build order: meter a charger's
+BAT / GND polarity before it ever touches the pack (step 2a gains a polarity
+check).
+
+# Appendix JE - Build step 1: LM2596 set to 4.95 V unloaded (meter), display 4.9 (2026-10-15 ~17:50 CDT)
+**WHAT:** WIRING_PROTOSHIELD.md section 5 step 1 done by Evan: LM2596 (EPLZON,
+with display) fed from the charged pack (8.29 V after JA) through an XT30-female
+bench lead, output UNLOADED, set to **4.95 V on the DT830B** (the module's own
+display reads 4.9). Passes the step's gate (4.95-5.05 V) - at its lower edge.
+Whether the trim pot was locked was not stated.
+
+**Note:** 4.95 V unloaded leaves 0.15 V above the 4.8 V servo-peak floor of step
+6; the sag under load is unmeasured (step 8 finds it). Nudging to ~5.00 V is
+optional. Next: step 1b - Uno powered from the LM2596 on its 5V pin, USB cable
+with its 5 V wire cut, then `firmware/host_test.py`; if the board does not
+enumerate, STOP (the clone's FT232RL may need USB 5 V).

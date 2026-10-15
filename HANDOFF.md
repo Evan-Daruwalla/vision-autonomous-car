@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-15 ~17:27 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-15 ~17:55 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -657,8 +657,10 @@ NEXT ACTIONS, highest value first:
    per pad) - DONE 2026-10-15; charger was wired reversed, fixed (IY); first
    charge stopped early at 3.83 V/cell (IZ), second stopped itself at 8.29 V
    (JA). Charger no-load output test still NOT done - attend every charge.
-   BMS sits ON the holder (IO). NEXT: section 5 step 1 (LM2596 to 5.0 V,
-   unloaded), 1b (cut-5V USB cable + host_test.py), then 2b.
+   Charger board 1 RETIRED (likely damaged by the reversal, JC/JD); board 2
+   installed. BMS sits ON the holder (IO). Step 1 DONE: LM2596 4.99 V
+   unloaded (JE + hardware.md). NEXT: 1b (cut-5V USB cable + host_test.py;
+   STOP if the Uno does not enumerate), then 2b.
 4. Audit HJ's HIGH: ml/splits.py split stability + a corpus id in checkpoints.
 5. Couplers: print in PETG and re-test the fit (press_shaft is PLA-only);
    servo coupler v3 untested; none load-tested.
