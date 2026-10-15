@@ -289,6 +289,8 @@ the dated entry, not the digest.
 - [IR - MB tap confirmed: the holder rivet reads one cell each side (3.55 / 3.55 V)](#appendix-ir---mb-tap-confirmed-the-holder-rivet-reads-one-cell-each-side-355--355-v-2026-10-14-1405-cdt) (10-14)
 - [IS - Correction: IR's timestamp](#appendix-is---correction-irs-timestamp-2026-10-14-1449-cdt) (10-14)
 - [IT - MB wire soldered to the holder rivet; reads 3.55 V to each cell (not yet on the BMS)](#appendix-it---mb-wire-soldered-to-the-holder-rivet-reads-355-v-to-each-cell-not-yet-on-the-bms-2026-10-14-1523-cdt) (10-14)
+- [IU - BMS wired to the cells (B-, MB, fuse -> B+); Evan reports it works, P+/P- reading not given](#appendix-iu---bms-wired-to-the-cells-b--mb-fuse---b-evan-reports-it-works-pp--reading-not-given-2026-10-14-1644-cdt) (10-14)
+- [IV - BMS output measured: P+ to P- = 7.21 V](#appendix-iv---bms-output-measured-p-to-p---721-v-2026-10-14-2123-cdt) (10-14)
 
 ---
 
@@ -19411,3 +19413,32 @@ not recorded). Not yet done: cells -> 3 A fuse (violet ATO; the kit mixes 3-15 A
 Evan asked, the 3 A one was identified by colour), fuse -> B+, black -> B-, MB ->
 MB pad, charger and XT30 on P+ / P-. Meter caveat from IR stands (low-battery
 icon on the DT830B; replacement not stated).
+
+# Appendix IU - BMS wired to the cells (B-, MB, fuse -> B+); Evan reports it works, P+/P- reading not given (2026-10-14 ~16:44 CDT)
+**WHAT:** Evan: "1 done it works" - the BMS pack side is wired per the order
+given after IT: black -> B-, MB (from the holder rivet) -> MB, red -> 3 A violet
+ATO fuse -> B+, fuse inserted last, cells back in, then P+ to P- metered. He
+asked first whether the fuse has a direction: it does not; it belongs in the red
+(positive) lead only.
+
+**NOT recorded:** the P+ to P- voltage (expected ~7.1 V = 2 x 3.55 V). "it works"
+is Evan's verdict; the number was asked for and is missing until he gives it.
+Joint method, wire lengths used, and where the BMS sits physically (IO planned
+it taped on top of the holder) were not stated.
+
+**Still to wire on the pack:** charger BAT / GND -> P+ / P-, P+ / P- -> XT30
+(pack half), with ~150-170 mm runs per IO. This build is the BMS's first time in
+circuit - its 2.9 V cutoff and short-circuit trip are NOT tested.
+
+# Appendix IV - BMS output measured: P+ to P- = 7.21 V (2026-10-14 ~21:23 CDT)
+**WHAT:** Evan gave the missing number from IU: BMS P+ to P- = 7.21 V, cells in,
+fuse in. The BMS passes the pack through (first measured proof). Expected ~7.10 V
+(2 x 3.55 V, IR/IT); the 0.11 V gap is within what a DT830B showing its
+low-battery icon (IR) and readings taken at different times can explain - not
+investigated.
+
+**Next on the pack (steps given to Evan):** charger and XT30 on P+ / P-. Plan
+chosen by Claude for him to accept or reject: ONE 190 mm pair BMS P+ / P- -> the
+XT30 pack half, and a short (~60 mm) charger pair from BAT / GND into the SAME
+XT30 solder cups (two 22 AWG wires per cup), since the charger sits next to the
+XT30 on the -y lobe. Charger VIN pad stays unused. Untested.
