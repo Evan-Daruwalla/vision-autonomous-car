@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-16 ~17:22 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-16 ~17:58 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -640,7 +640,8 @@ mast v1. All UNTESTED at these versions except the coupon and gauge. Slice the
 tray and deck with supports OFF.
 ELECTRONICS LAYOUT: docs/ELECTRONICS_LAYOUT.md + docs/electronics_layout.svg
 (scripts/electronics_layout.py, 14 entries, 0 failed); pack wiring picture
-docs/bms_wiring.svg; build order = docs/WIRING_PROTOSHIELD.md section 5.
+docs/bms_wiring.svg; everything on the pack: docs/pack_wiring_full.svg (JS);
+build order = docs/WIRING_PROTOSHIELD.md section 5.
 The sim lane ended in a well-instrumented NEGATIVE; LaneMaker/OpenDRIVE is
 CLOSED - do not re-open. THE TEST SUITE is scripts/run_checks.py (17/17 on
 2026-10-16 - re-run it, never quote it). Push state: run `git fetch` then

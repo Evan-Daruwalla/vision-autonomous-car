@@ -71,6 +71,10 @@ to the BMS is part of the redraw. Redrawing these nets is an OPEN task.~~ **RESO
 
 ### 2.0 Diagrams (added 2026-10-10)
 
+**2026-10-16: everything on the 18650 pack in one picture - `docs/pack_wiring_full.svg`** (pack -> XT30 -> rocker -> VBAT -> TB6612 / LM2596 / divider; Uno pins as net labels; the Uno and servo are NOT on the pack, JF / JR). The tables below stay the authority.
+
+![Pack wiring](pack_wiring_full.svg)
+
 Three small diagrams, one question each - one combined drawing was tried first and was unreadable (20 nodes, ~35 crossing lines). **The tables below stay the authority on pins and wire;** these are the map. Every Uno pin NUMBER matches `firmware/uno_control/uno_control.ino:82-95` (and A0 at `packguard.h:23`). The 2026-10-10 script compared pin numbers only; the 2026-10-11 audit checked each pin's FUNCTION by hand - all agree. Not re-rendered after the 2026-10-11 edits.
 
 #### Power - where every volt comes from

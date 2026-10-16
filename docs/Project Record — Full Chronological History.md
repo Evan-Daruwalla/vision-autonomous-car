@@ -313,6 +313,7 @@ the dated entry, not the digest.
 - [JP - Servo on the Uno's 5V: serial bytes lost on 2 of 3 big swings, 0 of 16 at rest](#appendix-jp---servo-on-the-unos-5v-serial-bytes-lost-on-2-of-3-big-swings-0-of-16-at-rest-2026-10-16-1715-cdt) (10-16)
 - [JQ - Build step 1b PASSED: uno_control 86/86 and host_test all ok, run from the Pi over one USB cable](#appendix-jq---build-step-1b-passed-uno_control-8686-and-host_test-all-ok-run-from-the-pi-over-one-usb-cable-2026-10-16-1722-cdt) (10-16)
 - [JR - Decision: the servo runs from the Uno's 5V header (Evan); jumper to +5V2 kept as the fallback](#appendix-jr---decision-the-servo-runs-from-the-unos-5v-header-evan-jumper-to-5v2-kept-as-the-fallback-2026-10-16-1724-cdt) (10-16)
+- [JS - Pack-side wiring diagram (docs/pack_wiring_full.svg); LM2596 stays 5.0 V; motor hookup](#appendix-js---pack-side-wiring-diagram-docspack_wiring_fullsvg-lm2596-stays-50-v-motor-hookup-2026-10-16-1758-cdt) (10-16)
 
 ---
 
@@ -19918,3 +19919,28 @@ is wired to the shield; optional 470 uF at the servo header.
 
 **Edited:** WIRING_PROTOSHIELD.md (servo table V+, `+5V2` row, power diagram,
 the JF rules line); decisions.md; HANDOFF state line.
+
+# Appendix JS - Pack-side wiring diagram (docs/pack_wiring_full.svg); LM2596 stays 5.0 V; motor hookup (2026-10-16 ~17:58 CDT)
+**WHAT:** Evan asked (1) what the LM2596 should be set to now that only the
+motor side and lights run from the pack, (2) where exactly the motor wires in,
+and (3) for an SVG of everything connected to the 18650 pack.
+
+**Answers (no design change):**
+- LM2596 stays at **5.0 V** (4.99 V is right): the WS2812B strips are 5 V
+  parts, and the encoder's Vcc comes from `+5V2` while its A / B outputs swing
+  to that Vcc into Uno D2 / D3 - so `+5V2` must sit level with the Uno's own
+  5 V (now the Pi's USB, which can sag toward ~4.8 V under servo load). The
+  motor is not on the buck: VBAT -> TB6612 VM, speed by PWM.
+- Motor: the 6-wire JST cable - red / black to TB6612 AO1+BO1 / AO2+BO2
+  (bridged), blue -> `+5V2`, green -> star, yellow -> D2, white -> D3; TB6612
+  VM <- VBAT, GND pad = the star, VCC <- Uno 5V, D11 / D8 / D12 / D10 for
+  PWM / direction / STBY; 470-1000 uF at VM, 0.1 uF across the motor. The
+  channel pairing is still flagged unverified against the datasheet
+  (WIRING_PROTOSHIELD.md 2.2).
+
+**New file:** `docs/pack_wiring_full.svg` - pack -> XT30 -> rocker -> VBAT ->
+TB6612 / LM2596 / divider, motor + encoder, strips; Uno pins as net labels;
+every ground symbol = its own wire to the star; Uno and servo marked as NOT on
+the pack (JF, JR). Linked at the top of WIRING_PROTOSHIELD.md section 2.0;
+the tables stay the authority. Drawn from the section 2 tables, not from the
+built hardware (step 2b onward is unbuilt).
