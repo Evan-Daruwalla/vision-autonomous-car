@@ -314,6 +314,7 @@ the dated entry, not the digest.
 - [JQ - Build step 1b PASSED: uno_control 86/86 and host_test all ok, run from the Pi over one USB cable](#appendix-jq---build-step-1b-passed-uno_control-8686-and-host_test-all-ok-run-from-the-pi-over-one-usb-cable-2026-10-16-1722-cdt) (10-16)
 - [JR - Decision: the servo runs from the Uno's 5V header (Evan); jumper to +5V2 kept as the fallback](#appendix-jr---decision-the-servo-runs-from-the-unos-5v-header-evan-jumper-to-5v2-kept-as-the-fallback-2026-10-16-1724-cdt) (10-16)
 - [JS - Pack-side wiring diagram (docs/pack_wiring_full.svg); LM2596 stays 5.0 V; motor hookup](#appendix-js---pack-side-wiring-diagram-docspack_wiring_fullsvg-lm2596-stays-50-v-motor-hookup-2026-10-16-1758-cdt) (10-16)
+- [JT - docs-sync pass after step 1b, the servo decision and the pack diagram](#appendix-jt---docs-sync-pass-after-step-1b-the-servo-decision-and-the-pack-diagram-2026-10-16-1759-cdt) (10-16)
 
 ---
 
@@ -19944,3 +19945,21 @@ every ground symbol = its own wire to the star; Uno and servo marked as NOT on
 the pack (JF, JR). Linked at the top of WIRING_PROTOSHIELD.md section 2.0;
 the tables stay the authority. Drawn from the section 2 tables, not from the
 built hardware (step 2b onward is unbuilt).
+
+# Appendix JT - docs-sync pass after step 1b, the servo decision and the pack diagram (2026-10-16 ~17:59 CDT)
+**WHAT:** /docs-sync pass (Evan) over the work since JL (commit 6c00350):
+commits 5393ab2 (records JM-JR) and b2e6476 (JS).
+
+**Docs changed:** HANDOFF.md next action 2 rewritten to "NEXT: build step 2b"
+with what is now done (1b JQ, flashing from the Pi, servo decision JR, pack
+picture JS) - it still described 1b and the servo test as to-do;
+hardware.md (flash-from-Pi recipe with avrdude, servo decision, `+5V2` 5.0 V
+rationale); testing.md (host_test runs on the Pi; banner-first lesson from
+JM); PRD task 9 note (Pi-side host_test pass; done-check NOT passed).
+Already current: important.md #3 (JQ), decisions.md (JR), WIRING_PROTOSHIELD
+(JR, JS). Checked, nothing to change: steering.md (geometry / calibration
+unchanged), firmware-traps.md (no new trap beyond "read the banner"), the
+age-stale bins (untouched), memory (no new durable convention). No HTML twin
+or record index exists.
+
+**Untracked on purpose:** `firmware/uno_control/build/` (IDE export output).

@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-16 ~17:58 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-16 ~17:59 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -655,13 +655,14 @@ open, row 14 half done.
 
 NEXT ACTIONS, highest value first:
 1. (DONE 2026-10-16, JJ/JK: Bookworm + first camera photo.)
-2. Build step 1b PASSED 2026-10-16 (JQ): host_test all ok from the Pi,
-   uno_control 86/86 (re-flashed; board had servo_bench, JM). Servo-supply
-   test done (JN-JP): servo on the Uno 5V loses serial bytes on big swings ->
-   recommendation `+5V2` + jumper, Evan's call. WAS: plain USB cable Pi -> Uno, `firmware/host_test.py`;
-   then the servo-power test (servo on the Uno 5V header, Pi on the bank, hold
-   the left stop) and settle the servo's supply; then step 2b (XT30 female,
-   rocker, star ground).
+2. NEXT: build step 2b (WIRING_PROTOSHIELD.md section 5): XT30 female,
+   rocker (2 or 3 pins? - ask), VBAT + star ground on the shield, LM2596 input
+   after the rocker; checks: switch OFF = 0 V downstream, XT30 polarity +8.x V
+   before any load. DONE before it: step 1b (JQ, host_test all ok from the Pi,
+   uno_control flashed FROM the Pi with avrdude); servo supply DECIDED (JR):
+   servo on the Uno 5V header (Evan) - fit the 3-pin jumper and re-measure
+   CRC_BAD while steering once the pack reaches the shield (JP: bytes lost on
+   big swings). Full pack picture: docs/pack_wiring_full.svg (JS).
 3. Charger board 2 no-load test (BAT lifted, USB-C in, BAT to GND: 8.4 V OK,
    >= 8.6 V reject). Optional: the barrel-cable voltage test (JG).
 4. PRINT tray v8 + deck v9 (supports OFF) after measuring the velcro pair.

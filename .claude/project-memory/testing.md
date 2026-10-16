@@ -170,3 +170,4 @@ that was visible in the script's own printed output (`status=0x33` in the
 very first run, bit 1 set) went unread for hours because the assertion next to
 it was about a different bit. **Read the whole status line, not the bit the
 assertion names.**
+- 2026-10-16 (records JM, JQ): host_test.py now runs ON THE PI (`python3 host_test.py --port /dev/ttyUSB0`, python3-serial 3.5 from apt): all ok, SELFTEST 86/86. Its first Pi run FAILED 12/13 because the board held servo_bench, not uno_control - read the boot banner before reading the assertions.
