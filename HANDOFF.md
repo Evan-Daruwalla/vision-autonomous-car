@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-15 ~17:55 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-16 ~13:02 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -659,8 +659,10 @@ NEXT ACTIONS, highest value first:
    (JA). Charger no-load output test still NOT done - attend every charge.
    Charger board 1 RETIRED (likely damaged by the reversal, JC/JD); board 2
    installed. BMS sits ON the holder (IO). Step 1 DONE: LM2596 4.99 V
-   unloaded (JE + hardware.md). NEXT: 1b (cut-5V USB cable + host_test.py;
-   STOP if the Uno does not enumerate), then 2b.
+   unloaded (JE + hardware.md). POWER ENTRY CHANGED 2026-10-16 (JF): the Uno
+   runs on the Pi's USB (plain cable, NOT cut); `+5V2` feeds only servo, strips,
+   encoder - never the Uno 5V pin; servo V+ on `+5V2`. NEXT: 1b (plain-cable
+   host_test.py), then 2b.
 4. Audit HJ's HIGH: ml/splits.py split stability + a corpus id in checkpoints.
 5. Couplers: print in PETG and re-test the fit (press_shaft is PLA-only);
    servo coupler v3 untested; none load-tested.

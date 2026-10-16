@@ -300,6 +300,8 @@ the dated entry, not the digest.
 - [JC - Charger board was swapped for a spare - timing unknown; first board marked suspect](#appendix-jc---charger-board-was-swapped-for-a-spare---timing-unknown-first-board-marked-suspect-2026-10-15-1729-cdt) (10-15)
 - [JD - Swap was before the second charge: the first charger board is the likely fault](#appendix-jd---swap-was-before-the-second-charge-the-first-charger-board-is-the-likely-fault-2026-10-15-1729-cdt) (10-15)
 - [JE - Build step 1: LM2596 set to 4.95 V unloaded (meter), display 4.9](#appendix-je---build-step-1-lm2596-set-to-495-v-unloaded-meter-display-49-2026-10-15-1750-cdt) (10-15)
+- [JF - Uno powered by the Pi's USB, not the LM2596 - no cut cable; servo moves to +5V2](#appendix-jf---uno-powered-by-the-pis-usb-not-the-lm2596---no-cut-cable-servo-moves-to-5v2-2026-10-16-1302-cdt) (10-16)
+- [JG - Barrel-jack idea for the Uno: the bank can give 12 V only if the cable negotiates it; test given](#appendix-jg---barrel-jack-idea-for-the-uno-the-bank-can-give-12-v-only-if-the-cable-negotiates-it-test-given-2026-10-16-1344-cdt) (10-16)
 
 ---
 
@@ -19592,3 +19594,60 @@ Whether the trim pot was locked was not stated.
 optional. Next: step 1b - Uno powered from the LM2596 on its 5V pin, USB cable
 with its 5 V wire cut, then `firmware/host_test.py`; if the board does not
 enumerate, STOP (the clone's FT232RL may need USB 5 V).
+
+# Appendix JF - Uno powered by the Pi's USB, not the LM2596 - no cut cable; servo moves to +5V2 (2026-10-16 ~13:02 CDT)
+**WHAT:** Power-entry change, Evan's decision (option 1). Before wiring step
+1b, Evan asked why the Uno could not run from the power bank's own port. The
+bank's USB-A cannot: the Uno has one USB jack and it carries the Pi link. But
+the idea exposed a simpler design: the Pi is already on the bank, so the Pi's
+USB cable can power the Uno. The "Uno 5V pin fed from the LM2596 through a
+cut-5V cable" architecture was stated as a rule in record CR with no reason
+beyond avoiding two supplies back-feeding - which this also avoids, as long as
+the LM2596 never touches the Uno's 5V pin.
+
+**New design:** Pi 5 USB-A -> Uno over a PLAIN USB cable (power + data). The
+LM2596 (`+5V2`, 4.99 V, JE) feeds only the servo V+, both strip segments and
+the encoder Vcc. TB6612 VCC (logic) stays on the Uno 5V pin, now USB 5 V. One
+shared ground at the star; the USB cable's ground is the single Pi-to-star
+connection (bank and pack are separate batteries, so no loop).
+
+**Why (vs the cut cable):** no cable surgery; the old step 1b risk (the clone's
+FT232RL possibly needing USB 5 V) is gone; and the Uno now survives a dead pack,
+blown fuse, tripped BMS or rocker OFF - A0 reads ~0 V -> PACK_FAULT, which
+inhibits driving AND is reported, where before the Uno simply went dark (the
+2026-10-11 audit's "FAULT is never seen"). A slowly dying pack crosses CUTOFF
+(latched until reset) before the BMS trips. Checked against
+firmware/uno_control/packguard.h (FAULT below 4000 mV, inhibits()): no
+firmware change needed.
+
+**Costs:** rocker OFF no longer powers the Uno down; its output pins can push a
+little current into the unpowered strips / servo / encoder - the strips already
+have 400 ohm DIN resistors (shield item 5); servo and encoder back-feed is
+unmeasured. **Evan's follow-up question - "isn't the servo on the Arduino's 5V"
+- matters:** on the bench (servo_bench, HM-HX) the servo was powered from the
+Uno; in the car it MUST be on `+5V2`, never the Uno's 5V header: stall current
+through the Uno's USB polyfuse and the Pi port would brown the Uno out.
+
+**Edited:** WIRING_PROTOSHIELD.md - power diagram (Pi USB -> Uno), `+5V2` row,
+a superseded-note over the three old warnings (kept as history), pack-sense
+FAULT note, build steps 1b (plain-cable host_test) and 3 (flash over the normal
+cable); BOM row 20 (cable no longer cut). Not edited: the old warnings' text
+(history). Untested on hardware.
+
+# Appendix JG - Barrel-jack idea for the Uno: the bank can give 12 V only if the cable negotiates it; test given (2026-10-16 ~13:44 CDT)
+**WHAT:** Evan proposed powering the Uno from the power bank's USB-A port via
+an A -> C adapter and his USB-C -> barrel-jack cable. Claude first said the
+USB-A port gives only 5 V - **wrong as stated**: Evan read the bank's label,
+which rates the output up to 12 V. Corrected: the higher voltage needs the
+cable to NEGOTIATE it (Quick Charge on USB-A; USB-PD on USB-C); a plain or
+PD-only barrel cable gets 5 V through USB-A, and the Uno barrel jack needs
+7-12 V (onboard regulator dropout ~1-1.2 V; 5 V in leaves ~3.8-4 V).
+
+**Test given (free, not yet run):** meter the barrel plug from the bank's USB-C
+port, then through the A -> C adapter on USB-A; 9-12 V on the second = the
+idea works electrically. Claude's view: not worth adding even then - the Pi
+USB cable (needed for data) already powers the Uno under JF; the barrel saves
+~50 mA and adds an adapter purchase (Evan's go), a third cable and a
+re-negotiation fallback. Evan wants to try it; JF stays the plan of record.
+
+**Next (Evan):** Raspberry Pi 5 set-up (PRD task 9's Pi half: OS, SSH, camera).

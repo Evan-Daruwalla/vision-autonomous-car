@@ -57,3 +57,9 @@ bed with no bridges; the holder moved out to sit wholly on its lobe.
 **Why:** the lobes were raised only because v2 carried the middle floor's
 level outward; Evan confirmed the frames under them are level.
 **Source:** record IK.
+
+## 2026-10-16 - the Uno is powered by the Pi's USB, not the LM2596 (Evan)
+**What:** plain USB cable Pi -> Uno for power + data; the LM2596 `+5V2` rail feeds only the servo, both strips and the encoder; `+5V2` never touches the Uno 5V pin; servo V+ on `+5V2`, never the Uno 5V header.
+**Why:** no cut-5V cable (and no FT232RL risk); the Uno survives a dead pack / blown fuse / rocker OFF and reports PACK_FAULT instead of going dark.
+**Rejected:** the 2026-09/10 design (Uno 5V pin on `+5V2`, USB 5 V conductor cut).
+**Source:** record JF.

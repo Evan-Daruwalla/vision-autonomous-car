@@ -94,7 +94,7 @@ flowchart TB
   TB -- "AO1+BO1 / AO2+BO2" --> MOT["N20 motor - Pololu 5159"]
   SW -- "VBAT" --> BUCK["LM2596 - trim to 5.00 V UNLOADED, lock the pot"]
   SW -- "VBAT" --> DIV["Pack-sense divider"]
-  BUCK -- "+5V2" --> UNO["Uno 5V pin - NOT VIN"]
+  PI["Pi 5 USB-A - plain USB cable (2026-10-16)"] -- "USB 5 V + data" --> UNO["Uno USB-B - NOT the LM2596"]
   BUCK -- "+5V2" --> SERVO["Servo V+"]
   BUCK -- "+5V2 - never VBAT" --> ENC["Encoder Vcc"]
   BUCK -- "+5V2" --> STRIPS["Both WS2812B segments + 470 uF at feed"]
@@ -155,20 +155,22 @@ flowchart LR
 | ~~`PACK+F`~~ | ~~fuse out~~ | ~~XT30 male~~ | ~~22~~ | ~~disconnect point~~ **SUPERSEDED 2026-10-10: the fuse moved to the cell side, and the XT30 now takes BMS P+** |
 | `PACK+SW` | XT30 female | rocker switch | 22 | on the shield |
 | `VBAT` | rocker out | TB6612 `VMOT`, LM2596 `VIN+`, divider top | 22 | the switched 7.4 V rail |
-| `+5V2` | LM2596 `VOUT+` | Uno `5V` pin, servo V+, **both strip segments' +5V**, encoder `Vcc` | 22 | **set the trim pot to ~~5.20 V~~ 5.00 V with the module unloaded before connecting anything, then lock the pot** (audit 2026-10-11). The net keeps its name `+5V2`. TB6612 `VCC` hangs off this rail too, through the Uno 5V pin (section 2.2) |
+| `+5V2` | LM2596 `VOUT+` | ~~Uno `5V` pin,~~ servo V+, **both strip segments' +5V**, encoder `Vcc` (**2026-10-16: the Uno is powered by the Pi's USB instead - `+5V2` must NEVER touch the Uno's 5V pin**) | 22 | **set the trim pot to ~~5.20 V~~ 5.00 V with the module unloaded before connecting anything, then lock the pot** (audit 2026-10-11). The net keeps its name `+5V2`. ~~TB6612 `VCC` hangs off this rail too, through the Uno 5V pin (section 2.2)~~ **2026-10-16: TB6612 `VCC` (logic only, mA) stays on the Uno 5V pin, which is now USB 5 V from the Pi** |
 | `GND` | see §3 | — | 22 | single star point |
 | `VIN-` / `VOUT-` | LM2596 | joined on the module | 22 | ONE leg to the star; the buck's input return shares it (audit 2026-10-11) |
 
-> ⚠️ **The Uno is fed at its `5V` pin, which BYPASSES the onboard regulator and
+> **2026-10-16 (Evan; record JF): SUPERSEDED - the Uno is powered by the Pi over a plain USB cable; the LM2596 feeds only the servo, both strips and the encoder. The three notes below are kept as history.** Why: no cable surgery, no dependence on the clone's FT232RL running without USB 5 V (the old step 1b risk), and the Uno now stays alive when the pack dies or the fuse blows, so it can report `CUTOFF` / `FAULT` instead of going dark. Cost: with the rocker off the Uno stays on (the car still cannot drive: no `VBAT`, and A0 reads 0 V = `FAULT`, which inhibits); its signal pins can feed a little current into the unpowered strips / servo / encoder - the strips already have 400 ohm `DIN` resistors (shield item 5). **Rules: `+5V2` never touches the Uno 5V pin; the servo V+ is on `+5V2`, never the Uno's 5V header (a stalling servo through the Uno's USB fuse would brown it out); all grounds meet at the star, and the USB cable's ground joins the Pi to it at that one point.**
+
+> ⚠️ **(history - superseded 2026-10-16)** **The Uno is fed at its `5V` pin, which BYPASSES the onboard regulator and
 > its reverse-protection.** ~~5.2 V is inside spec~~ **5.0 V leaves 0.5 V of margin (5.2 V left only 0.3 V)** (audit 2026-10-11); anything above ~5.5 V kills
 > the ATmega, and NOTHING on this rail clamps it - a bumped or failing trim pot is the whole risk, which is why the pot is locked. Meter the LM2596 output before it ever touches that pin. Do not
 > connect the LM2596 to `VIN`.
 
-> ⚠️ **The USB cable to the Pi must have its 5 V conductor cut** (`BOM.md`
+> ~~⚠️ **The USB cable to the Pi must have its 5 V conductor cut** (`BOM.md`~~ **2026-10-16: NOT cut - a plain cable (JF)**
 > row 20). With the shield feeding the Uno's 5V pin, an intact USB 5 V wire
 > back-feeds the Pi's bank into the LM2596 rail — two supplies fighting.
 
-> **This cut cable has never been tested on this clone Uno** (an FTDI FT232RL board; whether its USB-serial chip runs from the USB 5 V line is unknown). Section 5 step 1b tests it before anything else is wired. If the link fails, STOP: the power entry needs a redesign (Evan's decision B, 2026-10-11).
+> ~~**This cut cable has never been tested on this clone Uno**~~ **2026-10-16: moot - no cut cable (JF).** (an FTDI FT232RL board; whether its USB-serial chip runs from the USB 5 V line is unknown). Section 5 step 1b tests it before anything else is wired. If the link fails, STOP: the power entry needs a redesign (Evan's decision B, 2026-10-11).
 
 > **The USB ground is the ONE deliberate Pi-to-car ground link.** The 5 V conductor is cut; GND is not. While driving, add no second Pi-to-car ground path (HDMI to a monitor, Ethernet to a grounded switch) - it would close a loop around the motor return (audit 2026-10-11).
 
@@ -375,7 +377,7 @@ actually needed, not to a convenient length.
 | divider bottom | 12 kΩ (= 10 kohm + 2 kohm in series, 2026-10-04) | star ground |
 
 Tapping **after** the rocker means the divider stops drawing (≈75 µA at 8.4 V)
-when the car is off. ~~A blown fuse reads 0 V -> `FAULT`~~ **A blown fuse also unpowers the Uno** (it runs off the pack through the LM2596, and the USB 5 V is cut), so that `FAULT` is never seen (audit 2026-10-11). What `FAULT` really catches is a lost sense wire: divider top open reads 0 V; divider bottom open or the A0 wire off reads high or floating. `uno_packguard` handles those distinctly from `CUTOFF`.
+when the car is off. ~~A blown fuse reads 0 V -> `FAULT`~~ ~~**A blown fuse also unpowers the Uno** (it runs off the pack through the LM2596, and the USB 5 V is cut), so that `FAULT` is never seen (audit 2026-10-11).~~ **2026-10-16 (JF): the Uno runs on the Pi's USB now, so a blown fuse, a tripped BMS or the rocker OFF all read ~0 V -> `FAULT` (inhibits driving) and are REPORTED; a slowly dying pack crosses `CUTOFF` (latched until reset) before the BMS trips. `uno_control` needs no change - checked against `packguard.h`.** What `FAULT` really catches is a lost sense wire: divider top open reads 0 V; divider bottom open or the A0 wire off reads high or floating. `uno_packguard` handles those distinctly from `CUTOFF`.
 
 **AREF stays unconnected.** The firmware selects the internal 1.1 V reference (`analogReference(INTERNAL)`); never tie the shield's AREF pad to anything (audit 2026-10-11).
 
@@ -453,11 +455,11 @@ Nothing proceeds to the next row until the check passes.
 |---|---|---|
 | 0 | **Flash `uno_control` FIRST** over a normal USB cable, with the Uno OFF the shield (nothing on its 5V pin but USB) (audit 2026-10-11) | the boot banner shows `SELFTEST PASS`; record the count |
 | 1 | Set LM2596 to ~~5.2 V~~ **5.0 V**, **unloaded, nothing else connected**, fed from a bench supply at ~7.4 V or from the finished step-2a pack at P+ / P-; then **lock the pot** (audit 2026-10-11) | meter reads ~~5.15–5.25 V~~ **4.95-5.05 V** |
-| 1b | **Prove the cut-5V cable** (Evan's decision B): LM2596 output to the Uno's 5V pin + GND, the 5 V conductor of the USB cable cut, connect to the PC or Pi, run `firmware/host_test.py` (audit 2026-10-11) | the board enumerates and host_test PASSES. **If it fails, STOP** - the FT232RL may be powered from USB 5 V on this clone, and the power entry needs a redesign |
+| 1b | **2026-10-16 (JF): REPLACED** - plain USB cable Pi (or PC) -> Uno, Uno OFF the LM2596 entirely; run `firmware/host_test.py`; check: board enumerates and host_test PASSES. ~~**Prove the cut-5V cable** (Evan's decision B): LM2596 output to the Uno's 5V pin + GND, the 5 V conductor of the USB cable cut, connect to the PC or Pi, run `firmware/host_test.py` (audit 2026-10-11)~~ | ~~the board enumerates and host_test PASSES. **If it fails, STOP** - the FT232RL may be powered from USB 5 V on this clone, and the power entry needs a redesign~~ **board enumerates; host_test PASSES** |
 | ~~2~~ | ~~Solder pack path: fuse, XT30, rocker, star ground~~ | ~~continuity; **switch off = 0 V downstream**~~ **SPLIT 2026-10-10 into 2a / 2b** |
 | 2a | Pack assembly, **cells OUT of the holder** (audit 2026-10-11): MB 3rd wire onto the holder's strap; solder the BMS **B- first, then MB, then B+** (the usual order for multi-cell protection boards - external, unverified; follow the seller's sheet if it says otherwise); charger to P+ / P- (**2026-10-15, records IY-JD: charger BAT -> P+ and GND -> P- - a reversed charger blocked charging and likely ruined the first board; check the pad labels twice before soldering**); XT30 male on P+ / P-; fit the fuse in the RED lead LAST; then insert the cells | MB to B- reads 3.6-4.2 V and B+ to B- reads their sum. **P+ may read 0 V until the BMS is ACTIVATED by connecting the charger once** (cheap boards ship locked - hardware.md); only then does P+ to P- show pack voltage |
 | 2b | Shield power path: XT30 female, rocker, star ground | continuity; **switch off = 0 V downstream**; with the pack plugged in, **meter the XT30 female's polarity BEFORE any load is connected** (audit 2026-10-11) |
-| 3 | Fit divider, wire A0, flash `uno_packguard` **over the cut cable with the rocker ON** - never a normal cable once `+5V2` reaches the Uno 5V pin (two 5 V supplies would meet) (audit 2026-10-11) | `SELFTEST` 27/27, then `REAL` reports pack voltage within ~~0.1 V~~ **0.2 V** of the meter (1% resistors allow about +/-1.8% = 0.15 V at 8.4 V) |
+| 3 | Fit divider, wire A0, flash `uno_packguard` ~~**over the cut cable with the rocker ON** - never a normal cable once `+5V2` reaches the Uno 5V pin (two 5 V supplies would meet) (audit 2026-10-11)~~ **over the normal USB cable, rocker ON (2026-10-16, JF)** | `SELFTEST` 27/27, then `REAL` reports pack voltage within ~~0.1 V~~ **0.2 V** of the meter (1% resistors allow about +/-1.8% = 0.15 V at 8.4 V) |
 | 4 | Solder TB6612 + caps, including `STBY` to D10 | with D10 low, motor terminals high-Z; with D10 high after an ARMED frame (DIR = H/H) and PWM 0, they short-brake. D10 forced high by hand with the idle L/L state just COASTS (audit 2026-10-11) |
 | 5 | Motor + encoder. **From here on run `host_test.py` only with `--wired`** - without it the script now refuses to stream once a real pack is sensed (audit 2026-10-11) | drive at 20 % duty both directions; `ticks` counts up one way, down the other, ≈358 per output rev by hand |
 | 6 | Servo | sweeps full travel without buzzing at the ends; check the `+5V2` rail (5.0 V) does not sag below 4.8 V at peak |
