@@ -302,6 +302,8 @@ the dated entry, not the digest.
 - [JE - Build step 1: LM2596 set to 4.95 V unloaded (meter), display 4.9](#appendix-je---build-step-1-lm2596-set-to-495-v-unloaded-meter-display-49-2026-10-15-1750-cdt) (10-15)
 - [JF - Uno powered by the Pi's USB, not the LM2596 - no cut cable; servo moves to +5V2](#appendix-jf---uno-powered-by-the-pis-usb-not-the-lm2596---no-cut-cable-servo-moves-to-5v2-2026-10-16-1302-cdt) (10-16)
 - [JG - Barrel-jack idea for the Uno: the bank can give 12 V only if the cable negotiates it; test given](#appendix-jg---barrel-jack-idea-for-the-uno-the-bank-can-give-12-v-only-if-the-cable-negotiates-it-test-given-2026-10-16-1344-cdt) (10-16)
+- [JH - Pi 5 first boot: SSH works; card has Trixie / Python 3.13, not the PRD's Bookworm / 3.11](#appendix-jh---pi-5-first-boot-ssh-works-card-has-trixie--python-313-not-the-prds-bookworm--311-2026-10-16-1455-cdt) (10-16)
+- [JI - docs-sync pass + snapshot after the pack build and Pi bring-up](#appendix-ji---docs-sync-pass--snapshot-after-the-pack-build-and-pi-bring-up-2026-10-16-1502-cdt) (10-16)
 
 ---
 
@@ -19651,3 +19653,67 @@ USB cable (needed for data) already powers the Uno under JF; the barrel saves
 re-negotiation fallback. Evan wants to try it; JF stays the plan of record.
 
 **Next (Evan):** Raspberry Pi 5 set-up (PRD task 9's Pi half: OS, SSH, camera).
+
+# Appendix JH - Pi 5 first boot: SSH works; card has Trixie / Python 3.13, not the PRD's Bookworm / 3.11 (2026-10-16 ~14:55 CDT)
+**WHAT:** First Pi 5 bring-up (PRD task 9, Pi half). Evan flashed the kit's
+32 GB card with Raspberry Pi Imager; hostname `EvanDaruwallaPi5`; SSH works
+from PowerShell after clearing a stale host key (an earlier flash, `ssh-keygen
+-R`) and fixing a username mix-up (hostname vs username). Updated with
+`apt full-upgrade`. Output (Evan): `Debian GNU/Linux 13 (trixie)`, 13.7;
+`Python 3.13.5`; `aarch64`. Raspberry Pi Connect: not enabled (Claude: skip
+for now - SSH covers bench work; `rpi-connect-lite` can be added later).
+
+**Mismatch with the plan:** the PRD pins 64-bit **Bookworm + Python 3.11**
+(PRD :174 and task 11) because DonkeyCar 5.x (camera part, teleop UI, tub
+recorder) is documented for Bookworm. The card has Trixie + Python 3.13. The
+camera stack (libcamera + picamera2) comes from apt for the SYSTEM Python, so
+a separate 3.11 venv on Trixie would lose easy camera access. Whether DonkeyCar
+now installs on Trixie / 3.13 is NOT checked (Claude: "I think it does not
+officially; verify").
+
+**Recommended to Evan:** re-flash now with Raspberry Pi OS Lite (Legacy,
+64-bit) = Bookworm - nothing is installed yet, so it costs ~20 min. Decision
+pending. Camera not yet tested.
+
+# Appendix JI - docs-sync pass + snapshot after the pack build and Pi bring-up (2026-10-16 ~15:02 CDT)
+**WHAT:** /docs-sync full pass (Evan) over everything since the previous pass
+(IL, commit 6d08db5): commits 08930ca .. a007541 plus the uncommitted JH
+entry; records IM-JH.
+
+**Docs changed by this pass:**
+- HANDOFF.md: paste-ready prompt STATE / NEXT ACTIONS rewritten. The old one
+  (2026-10-15 ~11:45) still said the camera was untested-but-arrived only, the
+  pack was half-wired, and step 1b was a cut-5V cable; it had no Pi state, no
+  JF power entry, no charger-board retirement, no servo-supply question. Read
+  order now names WIRING_PROTOSHIELD.md sections 2.1 / 5.
+- PRD_ROADMAP.md: dated notes on task 9 (Pi first boot, re-flash to Bookworm)
+  and task 10 (step 2a and step 1 done, power entry changed). No status moved -
+  neither done-check passed.
+- Bins: hardware.md (Pi bring-up, JF), important.md #4 (BMS in circuit,
+  charger polarity), decisions.md (BMS on the holder, IO; JF was already
+  added), INDEX.md hardware line dated.
+- Memory: new feedback memory date-before-timestamp (three guessed times this
+  session, two record corrections IS / JB) + MEMORY.md line.
+
+**Checked, nothing to change:** steering.md (servo supply is still an open
+question, not a fact); firmware-traps.md / testing.md (no flash or firmware
+change since HY); the data, performance, security, ui, ml-training, track and
+stub bins (stale by age only; nothing this session touched them). No HTML twin
+or record index exists. No drift-check stamp (not a section-4 drift check).
+
+**Snapshot 2026-10-16 ~15:02 CDT:**
+
+| Item | State | Evidence |
+|---|---|---|
+| Parts | all 24 in (camera 2026-10-15) | IX |
+| Pack | built, BMS in circuit, charged to 8.29 V (board 2) | IP-JA |
+| Charger | board 1 retired (reversed hookup); board 2 no-load test owed | IY-JD |
+| BMS protections | cutoff / short trip UNTESTED | - |
+| LM2596 | 4.99 V unloaded (build step 1 done) | JE |
+| Power entry | Uno on the Pi's USB; `+5V2` for servo / strips / encoder | JF |
+| Servo supply | open: Uno 5V header vs `+5V2`, test on Pi USB pending | JF |
+| Pi 5 | SSH OK; re-flash Trixie -> Bookworm in progress (`ed-pi5`) | JH |
+| Camera | arrived, NOT tested | IX |
+| Tray / deck | v8 / v9, BMS on the holder in the layout, UNPRINTED | IK-IO |
+| Uno firmware | uno_control, SELFTEST 86/86 | HY |
+| Suite | run_checks 17/17 (2026-10-16) | this entry |

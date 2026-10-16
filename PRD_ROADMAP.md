@@ -623,6 +623,7 @@ transfer gap) must not block the capstone.
    Pi, camera, TB6612, motor, servo — is untouched.** For the servo sweep:
    use `uno_control`'s calibrated span, never a raw full-range sweep, or the
    first bench test drives the servo into the Lego hard stop (task 8c).
+   **2026-10-16 (Appendices JH, JF): Pi 5 first boot OK (SSH, updated) but on Trixie / Python 3.13 - being re-flashed to Bookworm (Lite, Legacy 64-bit) per this task; camera arrived 2026-10-15, NOT yet tested; Uno power entry changed to the Pi's USB (JF). Done-check NOT passed.**
 10. **Power integration.** ~~LiPo + UBEC + split rails~~ **2× 18650 + 2S BMS
     + LM2596 @ 5.2 V for the actuator side, USB bank for the Pi, one star
     ground** on the chassis; measure ~~5V rail~~ **both rails** under motor
@@ -638,6 +639,7 @@ transfer gap) must not block the capstone.
     re-verified live 2026-10-04), and `docs/WIRING_PROTOSHIELD.md` section 2.1
     now wires the pack through it (Appendix FE). Until that redraw the wiring
     bypassed the BMS (Appendix FA). Still to do on the bench: build step 2a.
+    **2026-10-15/16 (Appendices IP-JF): build step 2a DONE - pack built and charged (BMS P+/P- 7.21 V; charge stopped at 8.29 V on charger board 2; board 1 retired); step 1 DONE - LM2596 4.99 V unloaded; power entry changed: the Uno runs on the Pi's USB, `+5V2` only for servo/strips/encoder (JF). Rails under load NOT measured; done-check NOT passed.**
 11. **Teleop + logging.** DonkeyCar install, web/gamepad teleop, tub
     recorder verified (images + steering/throttle synced). Done: M2 success
     criterion (full-session drive + ≥10 readable laps).

@@ -63,3 +63,9 @@ level outward; Evan confirmed the frames under them are level.
 **Why:** no cut-5V cable (and no FT232RL risk); the Uno survives a dead pack / blown fuse / rocker OFF and reports PACK_FAULT instead of going dark.
 **Rejected:** the 2026-09/10 design (Uno 5V pin on `+5V2`, USB 5 V conductor cut).
 **Source:** record JF.
+
+## 2026-10-14 - the BMS sits on top of the 2S holder (Evan)
+**What:** BMS taped on the holder top near its -x lead end; only the fused, BMS-protected P+ / P- cross the bank to the charger and XT30 on the -y lobe.
+**Why:** with the BMS on the -y lobe the two UNFUSED leads (B-, MB) were the longest pack wires (~160-200 mm); a short between them shorts cell 2 with no fuse or BMS in the path.
+**Cost:** peel the BMS off to swap cells.
+**Source:** record IO.

@@ -25,7 +25,7 @@
 **Source:** HANDOFF.md:27-34; detail in firmware-traps.md.
 
 ## 4. Battery safety: a charger is not a BMS (2026-09-30)
-**What:** a 2S 18650 pack needs a board that DOCUMENTS over-discharge cutoff, or protected cells; BOM row 11's "BMS" documents over-voltage and short-circuit only. Firmware cannot guard a pack while it is off. 2026-10-04: the chosen BMS (row 11b, `B08HLQQCQJ`, 2.9 V set point re-verified live) must actually be IN the circuit - `docs/WIRING_PROTOSHIELD.md`'s net list omitted it until 2026-10-10 (now section 2.1: cells -> fuse -> B+/MB/B-, everything else on P+/P-), and anything wired to B+/B- instead of P+/P- bypasses it.
+**What:** a 2S 18650 pack needs a board that DOCUMENTS over-discharge cutoff, or protected cells; BOM row 11's "BMS" documents over-voltage and short-circuit only. Firmware cannot guard a pack while it is off. 2026-10-04: the chosen BMS (row 11b, `B08HLQQCQJ`, 2.9 V set point re-verified live) must actually be IN the circuit - `docs/WIRING_PROTOSHIELD.md`'s net list omitted it until 2026-10-10 (now section 2.1: cells -> fuse -> B+/MB/B-, everything else on P+/P-), and anything wired to B+/B- instead of P+/P- bypasses it. **2026-10-14/15 (records IU-JA): the BMS IS in the circuit - P+ to P- 7.21 V; charger and XT30 on P+ / P-; first pack charge done (stopped at 8.29 V). Its 2.9 V cutoff and short trip remain UNTESTED. A charger wired reversed (IY) likely ruined one board - check BAT -> P+, GND -> P- twice.**
 **Constrains:** no pack is specified or bought without a documented over-discharge cutoff.
 **Why:** an over-discharged lithium pack is a fire and safety risk.
 **Source:** HANDOFF.md:474-483; hardware.md (power section).
