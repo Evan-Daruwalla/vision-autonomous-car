@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-16 ~15:01 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-16 ~17:01 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -622,12 +622,11 @@ limit), hold the servo on the left stop, watch for Uno resets / Pi
 over-current; a 3-pin jumper on the shield (Uno 5V | servo + | +5V2) keeps
 both options. Evan's barrel-jack idea (bank USB-A -> A-to-C -> USB-C-to-barrel
 -> Uno) works only if the cable negotiates 9-12 V: meter it (JG).
-PI 5 (JH): first boot OK (SSH from PowerShell, apt full-upgrade) but the card
-got Trixie / Python 3.13; the PRD pins Bookworm / Python 3.11 (DonkeyCar 5.x,
-picamera2 via apt). Evan is RE-FLASHING Raspberry Pi OS Lite (Legacy, 64-bit)
-= Bookworm: hostname `ed-pi5`, user `ed` (`ssh ed@ed-pi5.local`). Camera
-(Module 3 Wide) NOT yet connected or tested; the Pi 5 needs a 22-pin
-mini-to-standard cable (kit has a 120 mm one, fit unchecked; BOM row 3 200 mm).
+PI 5 (JH-JK): Raspberry Pi OS Lite (Legacy, 64-bit) = Debian 12 bookworm,
+Python 3.11.2, aarch64 (JJ); hostname `ed-pi5`, user `ed` (`ssh ed@ed-pi5.local`).
+CAMERA WORKS (JK): Module 3 Wide, `rpicam-still` photo OK (orientation set by
+the mast; list-cameras text not captured). TWO identical Wides on hand - the
+second is a spare / later stereo experiment, not in the M3 plan.
 PRINTING: EVERY car part is Bambu PETG Translucent, 250 C / 70 C, P1S 0.4,
 0.15 mm layers, 2 walls, X-Y hole comp 0 (IC). Pins stay 4.95 (coupon row D);
 pocket 0.25/side (IF). press_shaft (+0.15) is PLA-calibrated only.
@@ -652,11 +651,7 @@ audit, 44 findings). EW (9) and EX (60) still unworked; FG rows 11, 13, 16-35
 open, row 14 half done.
 
 NEXT ACTIONS, highest value first:
-1. PI: finish the Bookworm re-flash; log in, apt full-upgrade, record
-   `cat /etc/os-release; python3 --version; uname -m` (expect bookworm, 3.11,
-   aarch64). Then camera: check the cable, connect with the Pi OFF,
-   `rpicam-hello --list-cameras` (expect imx708_wide), `rpicam-still -o
-   test.jpg`, scp it back. Record all output (PRD task 9).
+1. (DONE 2026-10-16, JJ/JK: Bookworm + first camera photo.)
 2. Build step 1b (JF): plain USB cable Pi -> Uno, `firmware/host_test.py`;
    then the servo-power test (servo on the Uno 5V header, Pi on the bank, hold
    the left stop) and settle the servo's supply; then step 2b (XT30 female,

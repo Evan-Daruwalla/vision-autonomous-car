@@ -623,7 +623,7 @@ transfer gap) must not block the capstone.
    Pi, camera, TB6612, motor, servo — is untouched.** For the servo sweep:
    use `uno_control`'s calibrated span, never a raw full-range sweep, or the
    first bench test drives the servo into the Lego hard stop (task 8c).
-   **2026-10-16 (Appendices JH, JF): Pi 5 first boot OK (SSH, updated) but on Trixie / Python 3.13 - being re-flashed to Bookworm (Lite, Legacy 64-bit) per this task; camera arrived 2026-10-15, NOT yet tested; Uno power entry changed to the Pi's USB (JF). Done-check NOT passed.**
+   **2026-10-16 (Appendices JH, JF): Pi 5 first boot OK (SSH, updated) but on Trixie / Python 3.13 - being re-flashed to Bookworm (Lite, Legacy 64-bit) per this task; camera arrived 2026-10-15, NOT yet tested; Uno power entry changed to the Pi's USB (JF). Done-check NOT passed.** **2026-10-16 (Appendices JJ, JK): Pi on Bookworm 12 / Python 3.11.2 / aarch64; first camera photo with `rpicam-still` - the Pi + camera half is DONE. Remaining for the done-check: TB6612 + N20 and the servo sweep through the shield.**
 10. **Power integration.** ~~LiPo + UBEC + split rails~~ **2× 18650 + 2S BMS
     + LM2596 @ 5.2 V for the actuator side, USB bank for the Pi, one star
     ground** on the chassis; measure ~~5V rail~~ **both rails** under motor

@@ -304,6 +304,9 @@ the dated entry, not the digest.
 - [JG - Barrel-jack idea for the Uno: the bank can give 12 V only if the cable negotiates it; test given](#appendix-jg---barrel-jack-idea-for-the-uno-the-bank-can-give-12-v-only-if-the-cable-negotiates-it-test-given-2026-10-16-1344-cdt) (10-16)
 - [JH - Pi 5 first boot: SSH works; card has Trixie / Python 3.13, not the PRD's Bookworm / 3.11](#appendix-jh---pi-5-first-boot-ssh-works-card-has-trixie--python-313-not-the-prds-bookworm--311-2026-10-16-1455-cdt) (10-16)
 - [JI - docs-sync pass + snapshot after the pack build and Pi bring-up](#appendix-ji---docs-sync-pass--snapshot-after-the-pack-build-and-pi-bring-up-2026-10-16-1502-cdt) (10-16)
+- [JJ - Pi 5 on Bookworm: Debian 12, Python 3.11.2, aarch64](#appendix-jj---pi-5-on-bookworm-debian-12-python-3112-aarch64-2026-10-16-1511-cdt) (10-16)
+- [JK - First camera light: Camera Module 3 Wide captures on the Pi 5](#appendix-jk---first-camera-light-camera-module-3-wide-captures-on-the-pi-5-2026-10-16-1659-cdt) (10-16)
+- [JL - docs-sync pass after Pi on Bookworm and first camera photo](#appendix-jl---docs-sync-pass-after-pi-on-bookworm-and-first-camera-photo-2026-10-16-1701-cdt) (10-16)
 
 ---
 
@@ -19717,3 +19720,52 @@ or record index exists. No drift-check stamp (not a section-4 drift check).
 | Tray / deck | v8 / v9, BMS on the holder in the layout, UNPRINTED | IK-IO |
 | Uno firmware | uno_control, SELFTEST 86/86 | HY |
 | Suite | run_checks 17/17 (2026-10-16) | this entry |
+
+# Appendix JJ - Pi 5 on Bookworm: Debian 12, Python 3.11.2, aarch64 (2026-10-16 ~15:11 CDT)
+**WHAT:** Pi 5 re-flashed with Raspberry Pi OS Lite (Legacy, 64-bit), as
+recommended in JH. Hostname `ed-pi5`, user `ed`. Output from the Pi (Evan):
+`Debian GNU/Linux 12 (bookworm)`, `Python 3.11.2`, `aarch64` - matches the
+PRD pin (64-bit Bookworm, Python 3.11, PRD :174 / task 9). Whether
+`apt full-upgrade` ran before this output was not stated.
+
+**Still open in PRD task 9 (Pi half):** camera test (cable check,
+`rpicam-hello --list-cameras`, `rpicam-still`). Done-check NOT passed.
+
+# Appendix JK - First camera light: Camera Module 3 Wide captures on the Pi 5 (2026-10-16 ~16:59 CDT)
+**WHAT:** First camera light. Camera Module 3 Wide on the Pi 5 (Bookworm, JJ),
+`rpicam-still -o test.jpg`, copied to the PC with scp. Evan sent the photo: a
+sharp, correctly exposed wide-angle frame of a room (window, ceiling, wall
+vent), held by hand, rotated / upside down relative to the room (camera
+orientation in Evan's hand; the mast fixes it, and a 180-degree flip is a
+capture setting). The `rpicam-hello --list-cameras` text (expected imx708_wide)
+was NOT sent. Which cable was used (kit 120 mm or other) was not stated.
+
+**Status:** the camera path Pi 5 -> CSI -> libcamera -> JPEG works. PRD task 9:
+Pi OS + SSH + camera DONE; TB6612 + motor and the servo sweep through the
+shield remain, so the task's done-check is NOT passed. The photo is NOT
+committed (it shows Evan's room; the repo is public).
+
+**Not yet measured:** frame rate at the driving resolution, latency, mounted
+orientation, exposure at speed.
+
+# Appendix JL - docs-sync pass after Pi on Bookworm and first camera photo (2026-10-16 ~17:01 CDT)
+**WHAT:** /docs-sync pass (Evan) over the work since JI (commit 21088fa):
+records JJ (Pi on Bookworm 12 / Python 3.11.2 / aarch64) and JK (first camera
+photo), the second-camera fact, HANDOFF updates.
+
+**Docs changed:** PRD_ROADMAP.md task 9 note (Pi OS + SSH + camera done; TB6612
+/ motor / servo sweep remain - done-check NOT passed); hardware.md (two
+identical Camera Module 3 Wide on hand; one through M3, the second a spare /
+later stereo experiment); HANDOFF.md (PI 5 line, next action 1 marked done,
+Last updated). Checked, nothing to change: important.md (camera arrival
+already in #1), decisions.md (no new decision), steering / firmware-traps /
+testing bins (no flash, no firmware change), the age-stale data / performance /
+security / ui / ml-training / track / stub bins (untouched this session),
+memory (no new durable convention). No HTML twin or record index exists.
+
+**Left out of git on purpose:** `test.jpg` in the repo root (Evan's camera
+photo, scp'd into the working folder) - it shows his room and the repo is
+public; untracked, not deleted.
+
+**Next:** build step 1b - Uno on the Pi's USB, `firmware/host_test.py` run ON
+the Pi.
