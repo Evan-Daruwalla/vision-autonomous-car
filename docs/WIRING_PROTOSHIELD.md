@@ -95,7 +95,7 @@ flowchart TB
   SW -- "VBAT" --> BUCK["LM2596 - trim to 5.00 V UNLOADED, lock the pot"]
   SW -- "VBAT" --> DIV["Pack-sense divider"]
   PI["Pi 5 USB-A - plain USB cable (2026-10-16)"] -- "USB 5 V + data" --> UNO["Uno USB-B - NOT the LM2596"]
-  BUCK -- "+5V2" --> SERVO["Servo V+"]
+  UNO -- "5V pin (JR, 2026-10-16)" --> SERVO["Servo V+"]
   BUCK -- "+5V2 - never VBAT" --> ENC["Encoder Vcc"]
   BUCK -- "+5V2" --> STRIPS["Both WS2812B segments + 470 uF at feed"]
   classDef safety fill:#fde2e1,stroke:#b42318,color:#000
@@ -155,11 +155,11 @@ flowchart LR
 | ~~`PACK+F`~~ | ~~fuse out~~ | ~~XT30 male~~ | ~~22~~ | ~~disconnect point~~ **SUPERSEDED 2026-10-10: the fuse moved to the cell side, and the XT30 now takes BMS P+** |
 | `PACK+SW` | XT30 female | rocker switch | 22 | on the shield |
 | `VBAT` | rocker out | TB6612 `VMOT`, LM2596 `VIN+`, divider top | 22 | the switched 7.4 V rail |
-| `+5V2` | LM2596 `VOUT+` | ~~Uno `5V` pin,~~ servo V+, **both strip segments' +5V**, encoder `Vcc` (**2026-10-16: the Uno is powered by the Pi's USB instead - `+5V2` must NEVER touch the Uno's 5V pin**) | 22 | **set the trim pot to ~~5.20 V~~ 5.00 V with the module unloaded before connecting anything, then lock the pot** (audit 2026-10-11). The net keeps its name `+5V2`. ~~TB6612 `VCC` hangs off this rail too, through the Uno 5V pin (section 2.2)~~ **2026-10-16: TB6612 `VCC` (logic only, mA) stays on the Uno 5V pin, which is now USB 5 V from the Pi** |
+| `+5V2` | LM2596 `VOUT+` | ~~Uno `5V` pin,~~ ~~servo V+,~~ (servo moved to the Uno 5V pin 2026-10-16, JR) **both strip segments' +5V**, encoder `Vcc` (**2026-10-16: the Uno is powered by the Pi's USB instead - `+5V2` must NEVER touch the Uno's 5V pin**) | 22 | **set the trim pot to ~~5.20 V~~ 5.00 V with the module unloaded before connecting anything, then lock the pot** (audit 2026-10-11). The net keeps its name `+5V2`. ~~TB6612 `VCC` hangs off this rail too, through the Uno 5V pin (section 2.2)~~ **2026-10-16: TB6612 `VCC` (logic only, mA) stays on the Uno 5V pin, which is now USB 5 V from the Pi** |
 | `GND` | see §3 | — | 22 | single star point |
 | `VIN-` / `VOUT-` | LM2596 | joined on the module | 22 | ONE leg to the star; the buck's input return shares it (audit 2026-10-11) |
 
-> **2026-10-16 (Evan; record JF): SUPERSEDED - the Uno is powered by the Pi over a plain USB cable; the LM2596 feeds only the servo, both strips and the encoder. The three notes below are kept as history.** Why: no cable surgery, no dependence on the clone's FT232RL running without USB 5 V (the old step 1b risk), and the Uno now stays alive when the pack dies or the fuse blows, so it can report `CUTOFF` / `FAULT` instead of going dark. Cost: with the rocker off the Uno stays on (the car still cannot drive: no `VBAT`, and A0 reads 0 V = `FAULT`, which inhibits); its signal pins can feed a little current into the unpowered strips / servo / encoder - the strips already have 400 ohm `DIN` resistors (shield item 5). **Rules: `+5V2` never touches the Uno 5V pin; the servo V+ is on `+5V2`, never the Uno's 5V header (a stalling servo through the Uno's USB fuse would brown it out); all grounds meet at the star, and the USB cable's ground joins the Pi to it at that one point.**
+> **2026-10-16 (Evan; record JF): SUPERSEDED - the Uno is powered by the Pi over a plain USB cable; the LM2596 feeds only the servo, both strips and the encoder. The three notes below are kept as history.** Why: no cable surgery, no dependence on the clone's FT232RL running without USB 5 V (the old step 1b risk), and the Uno now stays alive when the pack dies or the fuse blows, so it can report `CUTOFF` / `FAULT` instead of going dark. Cost: with the rocker off the Uno stays on (the car still cannot drive: no `VBAT`, and A0 reads 0 V = `FAULT`, which inhibits); its signal pins can feed a little current into the unpowered strips / servo / encoder - the strips already have 400 ohm `DIN` resistors (shield item 5). **Rules: `+5V2` never touches the Uno 5V pin; ~~the servo V+ is on `+5V2`, never the Uno's 5V header (a stalling servo through the Uno's USB fuse would brown it out);~~ the servo V+ is on the Uno's 5V header (Evan, 2026-10-16, JR - tested on Pi USB: no resets / no over-current, but serial bytes lost on big swings, JP; jumper to `+5V2` recommended); all grounds meet at the star, and the USB cable's ground joins the Pi to it at that one point.**
 
 > ⚠️ **(history - superseded 2026-10-16)** **The Uno is fed at its `5V` pin, which BYPASSES the onboard regulator and
 > its reverse-protection.** ~~5.2 V is inside spec~~ **5.0 V leaves 0.5 V of margin (5.2 V left only 0.3 V)** (audit 2026-10-11); anything above ~5.5 V kills
@@ -240,7 +240,7 @@ table below stands; the PART NAME does not. (propagated 2026-09-09, daily-audit 
 | Wire | To |
 |---|---|
 | signal (orange/white) | Uno **D9** |
-| V+ (red) | `+5V2` |
+| V+ (red) | ~~`+5V2`~~ **Uno `5V` pin = USB 5 V from the Pi (Evan's decision 2026-10-16, record JR).** Known cost (JP): with the servo here, 2 of 3 large swings (2600 -> 1500 us) lost serial bytes Uno -> Pi; 0 of 16 at rest; no resets, no USB over-current (dmesg). Fit the 3-pin jumper on the shield (Uno 5V \| servo + \| `+5V2`) so it can move to `+5V2` with one jumper |
 | GND (brown/black) | star ground |
 
 Servo peak ~700 mA. Its return current must not share a conductor with the

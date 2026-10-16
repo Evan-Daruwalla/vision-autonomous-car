@@ -69,3 +69,9 @@ level outward; Evan confirmed the frames under them are level.
 **Why:** with the BMS on the -y lobe the two UNFUSED leads (B-, MB) were the longest pack wires (~160-200 mm); a short between them shorts cell 2 with no fuse or BMS in the path.
 **Cost:** peel the BMS off to swap cells.
 **Source:** record IO.
+
+## 2026-10-16 - the steering servo is powered from the Uno's 5V header (Evan)
+**What:** servo V+ on the Uno 5V pin (USB 5 V from the Pi); signal D9; GND to the star. `+5V2` keeps the strips and encoder.
+**Why:** ease of setup and repair - three pins into the shield on the Uno; it drove the rack (incl. the left stop) on PC USB (HM-HQ) and on Pi USB with no reset or USB over-current (JN-JO).
+**Known cost / rejected:** Claude recommended `+5V2`: with the servo on the Uno 5V, 2 of 3 large swings lost serial bytes Uno -> Pi (JP). Mitigation: a 3-pin jumper (Uno 5V | servo + | `+5V2`) on the shield; re-measure CRC-reject rate while steering once the pack is on the shield.
+**Source:** records JN-JP, JR.

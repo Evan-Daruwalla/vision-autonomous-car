@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-16 ~17:01 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-16 ~17:22 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -615,7 +615,9 @@ taped ON TOP of the 2S holder (IO).
 POWER ENTRY (JF, 2026-10-16, Evan): the Uno is powered by the Pi's USB over a
 PLAIN cable (no cut-5V cable any more). The LM2596 `+5V2` rail - set to 4.99 V
 UNLOADED from the pack (JE, build step 1 DONE; pot lock not recorded) - feeds
-servo, both strips and the encoder, NEVER the Uno 5V pin. OPEN: Evan prefers
+servo (NO - see JR), both strips and the encoder, NEVER the Uno 5V pin. DECIDED 2026-10-16
+(JR): servo V+ on the Uno 5V header (Evan), despite JP's lost bytes on big
+swings; 3-pin jumper on the shield. HISTORY: Evan prefers
 the servo on the Uno's 5V header (ease; it drove the rack incl. the left stop
 on PC USB - HM-HQ). Agreed test: Uno on the Pi (Pi on the bank, 600 mA USB
 limit), hold the servo on the left stop, watch for Uno resets / Pi
@@ -652,7 +654,10 @@ open, row 14 half done.
 
 NEXT ACTIONS, highest value first:
 1. (DONE 2026-10-16, JJ/JK: Bookworm + first camera photo.)
-2. Build step 1b (JF): plain USB cable Pi -> Uno, `firmware/host_test.py`;
+2. Build step 1b PASSED 2026-10-16 (JQ): host_test all ok from the Pi,
+   uno_control 86/86 (re-flashed; board had servo_bench, JM). Servo-supply
+   test done (JN-JP): servo on the Uno 5V loses serial bytes on big swings ->
+   recommendation `+5V2` + jumper, Evan's call. WAS: plain USB cable Pi -> Uno, `firmware/host_test.py`;
    then the servo-power test (servo on the Uno 5V header, Pi on the bank, hold
    the left stop) and settle the servo's supply; then step 2b (XT30 female,
    rocker, star ground).

@@ -307,6 +307,12 @@ the dated entry, not the digest.
 - [JJ - Pi 5 on Bookworm: Debian 12, Python 3.11.2, aarch64](#appendix-jj---pi-5-on-bookworm-debian-12-python-3112-aarch64-2026-10-16-1511-cdt) (10-16)
 - [JK - First camera light: Camera Module 3 Wide captures on the Pi 5](#appendix-jk---first-camera-light-camera-module-3-wide-captures-on-the-pi-5-2026-10-16-1659-cdt) (10-16)
 - [JL - docs-sync pass after Pi on Bookworm and first camera photo](#appendix-jl---docs-sync-pass-after-pi-on-bookworm-and-first-camera-photo-2026-10-16-1701-cdt) (10-16)
+- [JM - Step 1b on the Pi: link works, but the board runs servo_bench, not uno_control](#appendix-jm---step-1b-on-the-pi-link-works-but-the-board-runs-servo_bench-not-uno_control-2026-10-16-1706-cdt) (10-16)
+- [JN - Servo on the Uno's 5V via Pi USB: no reset seen, one garbled line; bank was flaky](#appendix-jn---servo-on-the-unos-5v-via-pi-usb-no-reset-seen-one-garbled-line-bank-was-flaky-2026-10-16-1712-cdt) (10-16)
+- [JO - Servo test: run 2 was on the new bank; the garbled line was a lost-byte glitch on c; no USB over-current](#appendix-jo---servo-test-run-2-was-on-the-new-bank-the-garbled-line-was-a-lost-byte-glitch-on-c-no-usb-over-current-2026-10-16-1713-cdt) (10-16)
+- [JP - Servo on the Uno's 5V: serial bytes lost on 2 of 3 big swings, 0 of 16 at rest](#appendix-jp---servo-on-the-unos-5v-serial-bytes-lost-on-2-of-3-big-swings-0-of-16-at-rest-2026-10-16-1715-cdt) (10-16)
+- [JQ - Build step 1b PASSED: uno_control 86/86 and host_test all ok, run from the Pi over one USB cable](#appendix-jq---build-step-1b-passed-uno_control-8686-and-host_test-all-ok-run-from-the-pi-over-one-usb-cable-2026-10-16-1722-cdt) (10-16)
+- [JR - Decision: the servo runs from the Uno's 5V header (Evan); jumper to +5V2 kept as the fallback](#appendix-jr---decision-the-servo-runs-from-the-unos-5v-header-evan-jumper-to-5v2-kept-as-the-fallback-2026-10-16-1724-cdt) (10-16)
 
 ---
 
@@ -19769,3 +19775,146 @@ public; untracked, not deleted.
 
 **Next:** build step 1b - Uno on the Pi's USB, `firmware/host_test.py` run ON
 the Pi.
+
+# Appendix JM - Step 1b on the Pi: link works, but the board runs servo_bench, not uno_control (2026-10-16 ~17:06 CDT)
+**WHAT:** Build step 1b (JF version) attempted: Uno on the Pi 5's USB (plain
+cable), `python3 host_test.py --port /dev/ttyUSB0` run ON the Pi
+(python3-serial 3.5 from apt; the clone enumerates as /dev/ttyUSB0).
+
+**Result: 12 FAIL, 1 ok - but not a link failure.** The boot output was
+`== SERVO BENCH == type us (400-2600) + Enter, c = centre` / `-> 1500 us`: the
+board is running **firmware/servo_bench**, not uno_control. important.md #3
+(record HY: uno_control flashed 2026-10-13 ~14:09, SELFTEST 86/86) is
+therefore STALE - the board was re-flashed with servo_bench after HY, when and
+by whom not recorded (most likely during Evan's own servo work). Every
+assertion that needs uno_control's protocol failed as a consequence.
+
+**What DID pass:** the Uno enumerated on the Pi with no other supply, the Pi
+opened the port (which reset the board) and read the banner correctly at
+115200 - the Pi-USB power entry (JF) and the serial link work.
+
+**Next:** with servo_bench already on the board, run the servo-supply test
+(JF) now - Pi on the power bank, servo on the Uno 5V header, hold near the
+left rack stop - then re-flash uno_control from the PC and re-run host_test
+on the Pi for the real 1b gate.
+
+# Appendix JN - Servo on the Uno's 5V via Pi USB: no reset seen, one garbled line; bank was flaky (2026-10-16 ~17:12 CDT)
+**WHAT:** Servo-supply test (JF question), servo on the Uno's 5V header, Uno
+on the Pi 5's USB, Pi on the power bank, `servo_bench` on the board, driven
+from the Pi with `python3 -m serial.tools.miniterm /dev/ttyUSB0 115200`.
+
+**Run 1:** 1500 (boot), 1525, 2400, 600, then `c` (centre, Evan) -> 1500,
+1525. No banner reprint = no reset. No stall hold was done.
+**Run 2:** 1500 (boot), 1525, **400** (past the ~450 us left rack stop - a
+stall against the stop; hold time not stated), 1525, **2600** (servo end),
+then a line printed as **`->150 us`** (malformed: the firmware prints
+`-> NNNN us`; Evan's input there not stated - likely `c` / 1500 with two
+characters lost), 1525. No banner reprint in either run = **no Uno reset
+seen**.
+
+**Reading (not conclusive):** the Uno survived a stall at 400 us and full
+lock-to-lock swings on Pi-USB power - evidence FOR Evan's servo-on-Uno-5V
+preference. But the malformed line right after the 2600 -> centre swing is a
+possible serial glitch from supply noise; it is unexplained. `dmesg` was not
+captured. Evan then reported the bank was "flakey" and is switching to a newer
+bank - so this run's supply was itself suspect.
+
+**To close it:** repeat on the new bank: 450 hold ~3 s x3, full swings, then
+`dmesg | grep -i -E "over-current|usb"`; count malformed lines. Then re-flash
+uno_control and re-run host_test (the real step 1b gate, JM).
+
+# Appendix JO - Servo test: run 2 was on the new bank; the garbled line was a lost-byte glitch on c; no USB over-current (2026-10-16 ~17:13 CDT)
+**WHAT:** Clarifications and dmesg for the servo-supply test (corrects JN):
+- Run 2 (400 / 2600 / garbled line) was on the NEW power bank, not the flaky
+  one - JN called that run's supply "suspect"; that was wrong. Run 1 was on
+  the old, flaky bank.
+- The garbled `->150 us` line WAS Evan pressing `c`. servo_bench prints
+  `-> 1500 us` for `c` (servo_bench.ino:30, :43; run 1 printed it correctly),
+  so TWO characters were lost on the Uno -> Pi serial line, right after the
+  2600 -> 1500 swing - the largest servo move of the run.
+- `dmesg | grep -i -E "over-current|usb"`: no over-current; the FT232R
+  (0403:6001, ttyUSB0) attached once at boot (~5.6 s) and never
+  disconnected/re-enumerated. ("Unable to read latency timer: -32" at attach -
+  common on FT232 clones, not investigated.)
+
+**Reading:** on Pi-USB power the servo on the Uno's 5V did NOT reset the Uno
+and did NOT trip the Pi's USB port, but a large servo move corrupted serial
+data (2 bytes lost). Most likely cause: servo current surges disturbing the
+shared 5 V that also powers the Uno's FT232 / UART (not proven). In
+uno_control every frame is CRC-checked, so corruption becomes dropped frames;
+bursts during steering could approach the 150 ms watchdog. One event, not a
+rate.
+
+**Options given to Evan:** servo + on `+5V2` (recommended; the 3-pin jumper
+keeps the swap one move), or keep the Uno 5V and add a 470 uF cap at the servo
+header, then measure the CRC_BAD rate with uno_control while steering.
+
+# Appendix JP - Servo on the Uno's 5V: serial bytes lost on 2 of 3 big swings, 0 of 16 at rest (2026-10-16 ~17:15 CDT)
+**WHAT:** Run 3 of the servo-supply test (new bank; servo on the Uno's 5V;
+Uno on the Pi's USB; servo_bench via miniterm on the Pi). 25 reply lines:
+- 16 x `-> 1500 us` with the servo AT REST (repeated `c`): all clean.
+- 400, then 2600, then `c` -> printed **`-> 1500 u`** (one character lost),
+  then two clean 1500s, 2600, 1500 (clean), 400, 1500 (clean).
+
+**Tally across runs 2 and 3 (JN, JO):** every corrupted line (2 of them)
+came on the reply to a LARGE move, 2600 -> 1500, the moment the servo starts
+its biggest swing; 0 corrupted of 16 replies at rest; large swings to centre
+were corrupted in 2 of 3 cases (2600 -> 1500), 0 of 2 for 400 -> 1500. No
+resets, no USB disconnects (dmesg, JO).
+
+**Reading:** a reproducible correlation, not a one-off: serial bytes from the
+Uno are lost when the servo draws its start-of-swing surge from the same 5 V
+(Uno 5V header <- Pi USB). Mechanism (supply ripple reaching the FT232 / UART)
+is likely, not measured - no scope. In uno_control this becomes CRC-rejected
+frames exactly when steering changes fastest. Small sample (n = 3 large swings
+to centre).
+
+**Recommendation stands, now on data:** servo + on `+5V2` (LM2596), with the
+3-pin jumper on the shield; optionally also a 470 uF cap at the servo header.
+Evan's call. Then re-flash uno_control and run host_test on the Pi.
+
+# Appendix JQ - Build step 1b PASSED: uno_control 86/86 and host_test all ok, run from the Pi over one USB cable (2026-10-16 ~17:22 CDT)
+**WHAT:** Build step 1b PASSED (JF version). uno_control re-flashed onto the
+Uno (method not stated by Evan; the steps given were: Arduino IDE "Export
+Compiled Binary" on the PC, scp the .hex to the Pi, `avrdude -p atmega328p -c
+arduino -P /dev/ttyUSB0 -b 115200 -D -U flash:w:uno_control.ino.hex:i` on the
+Pi). Then, ON the Pi, with the Uno powered only by the Pi's USB (Pi on the new
+power bank): `python3 host_test.py --port /dev/ttyUSB0`.
+
+**Output (Evan):** banner `== UNO CONTROL == protocol v0.2, SERVO WIRED;
+MOTOR, ENCODER, LEDS, PACK UNWIRED`, `SELFTEST PASS 86/86`; all 16 assertions
+`ok` - CRC-valid replies, seq echo, ARMED bit, floating pack sense reads FAULT,
+20 Hz stream with no WATCHDOG, armed held inside the window, CRC_BAD on a bad
+CRC and on a lost byte, WATCHDOG after 150 ms silence, recovery after a lost
+byte, no stray command bytes, `?` status line, STBY LOW with no pack. The
+final summary line was not in the paste; no FAIL line appears.
+
+**Meaning:** the JF power entry is proven: the Pi powers AND talks to the Uno
+over one plain USB cable; the old cut-cable / FT232 risk is gone. important.md
+#3 is current again: the board runs uno_control (86/86), not servo_bench (JM).
+This is the first host_test run from the Pi (all earlier runs were from the
+PC).
+
+**Still open:** the servo-supply decision (JP data: lost bytes on big swings
+with the servo on the Uno's 5V); build step 2b (XT30 female, rocker, star
+ground); the CRC-reject rate while steering needs the pack wired to the shield.
+
+# Appendix JR - Decision: the servo runs from the Uno's 5V header (Evan); jumper to +5V2 kept as the fallback (2026-10-16 ~17:24 CDT)
+**WHAT:** Evan's decision: the steering servo is powered from the Uno's 5V
+header (USB 5 V from the Pi), not from `+5V2`. Reason (Evan): ease of setup and
+repair - three pins into the shield on the Uno - and it has worked: drove the
+rack incl. the left stop on PC USB (HM-HQ), and on Pi USB with no Uno reset and
+no USB over-current (JN, JO).
+
+**Against (Claude's recommendation, rejected):** `+5V2` + a 3-pin jumper.
+Data JP: with the servo on the Uno 5V, 2 of 3 large swings (2600 -> 1500 us)
+lost serial bytes Uno -> Pi; 0 of 16 replies at rest. In uno_control a
+corrupted frame is CRC-rejected, so the cost is dropped steering updates during
+the fastest steering changes - unmeasured as a rate.
+
+**Mitigation kept:** fit the 3-pin jumper on the shield (Uno 5V | servo + |
+`+5V2`); re-measure the CRC_BAD rate while steering lock to lock once the pack
+is wired to the shield; optional 470 uF at the servo header.
+
+**Edited:** WIRING_PROTOSHIELD.md (servo table V+, `+5V2` row, power diagram,
+the JF rules line); decisions.md; HANDOFF state line.
