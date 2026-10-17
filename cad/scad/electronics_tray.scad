@@ -36,7 +36,8 @@
 // turned, USB-C out the -y lobe edge; XT30 at the lobe's inner edge.
 // v9 audit (2026-10-16): fuse holder x 40 -> 10 so it no longer sits under the deck's Pi vent window (x 65..137); LAYOUT only, no geometry change.
 // v10 (2026-10-16): room for wires and connectors (Evan). Rear posts x 10 -> -12 (the deck grows rearward for a 40 mm USB-A plug zone behind the Pi). Holder fence END walls removed: the -x wall blocked the lead exit, the +x wall pressed on the MB solder joint at the rivet. LAYOUT: clearance boxes reserve plug, cable and access space (bank USB-C plug / run / rise, P+/P- crossing, charger USB-C, XT30 unplug, holder lead and rivet ends).
-VELCRO = 4.0;             // velcro pair thickness under the bank and holder (Evan: roughly 4)
+// v11 (2026-10-16): Evan's bench results - velcro measured 3.5 per mated pair (15.5 mm dots); fuse holder x 10 -> 30, off the bank's charge LEDs (top, -y side, ~10-40 mm from the rear end, read from the side); bank USB-C cable re-routed along the bank's -y side below its top, rising past the wing's front end. LAYOUT only, no geometry change.
+VELCRO = 3.5;             // velcro pair thickness (Evan 2026-10-16: measured 3.5 per mated pair, 15.5 mm dots)
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, the Lego pin rows at y = +/-24; z = 0 on the Lego frames' top face, z up. mm.
@@ -158,21 +159,21 @@ difference() {
 // LAYOUT: [name, [sx, sy, sz], [x, y, z], kind, held by, ports]; kind part | zone | note.
 // A zone reserves space for a part whose size is NOT measured.
 LAYOUT = [
-  ["velcro under the bank (~4 mm)", [168, 62.16, VELCRO], [-14.25, -31.08, FLOOR_TOP], "zone", "adhesive both sides", ""],
-  ["velcro under the holder (~4 mm)", [75.75, 40.5, VELCRO], [58.125, 44.25, LOBE_T], "zone", "adhesive both sides", ""],
-  ["battery bank (Pi power)", [168, 62.16, 22.51], [-14.25, -31.08, FLOOR_TOP + VELCRO], "part", "velcro + 18 mm bank fence, open at the rear", "-x: USB-C at the -y rear corner, USB-A at the +y rear corner; charge button on the -y side ~10 mm forward of the rear end (fence open x < 15)"],
+  ["velcro under the bank (3.5 mm pair)", [168, 62.16, VELCRO], [-14.25, -31.08, FLOOR_TOP], "zone", "adhesive both sides", ""],
+  ["velcro under the holder (3.5 mm pair)", [75.75, 40.5, VELCRO], [58.125, 44.25, LOBE_T], "zone", "adhesive both sides", ""],
+  ["battery bank (Pi power)", [168, 62.16, 22.51], [-14.25, -31.08, FLOOR_TOP + VELCRO], "part", "velcro + 18 mm bank fence, open at the rear", "-x: USB-C at the -y rear corner, USB-A at the +y rear corner; charge button on the -y side ~10 mm forward of the rear end (fence open x < 15); charge LEDs on top near the -y side, ~10-40 mm from the rear end (read from the side)"],
   ["2S holder + 2x Samsung 25R", [75.75, 40.5, 20.5], [58.125, 44.25, LOBE_T + VELCRO], "part", "velcro + 4-sided 14 mm fence on its lobe", "-x: red / black leads + MB wire, 160 mm, from a SHORT end (Evan 2026-10-14) - seat that end at -x; MB 55 mm from the brass rivet on the +x end"],
-  ["velcro under the fuse holder (~4 mm)", [50, 34.25, VELCRO], [10, -17.125, FLOOR_TOP + VELCRO + 22.51], "zone", "adhesive both sides", ""],
-  ["inline fuse holder, 3 A ATO (50 x 34.25 x 12, lying flat)", [50, 34.25, 12], [10, -17.125, FLOOR_TOP + VELCRO + 22.51 + VELCRO], "part", "velcro on top of the bank", "in the CELL+ wire, before the BMS"],
-  ["velcro under the BMS (~4 mm)", [41, 8, VELCRO], [92, 44.75, LOBE_T + VELCRO + 20.5], "zone", "adhesive both sides", ""],
+  ["velcro under the fuse holder (3.5 mm pair)", [50, 34.25, VELCRO], [30, -17.125, FLOOR_TOP + VELCRO + 22.51], "zone", "adhesive both sides", ""],
+  ["inline fuse holder, 3 A ATO (50 x 34.25 x 12, lying flat)", [50, 34.25, 12], [30, -17.125, FLOOR_TOP + VELCRO + 22.51 + VELCRO], "part", "velcro on top of the bank", "in the CELL+ wire, before the BMS"],
+  ["velcro under the BMS (3.5 mm pair)", [41, 8, VELCRO], [92, 44.75, LOBE_T + VELCRO + 20.5], "zone", "adhesive both sides", ""],
   ["2S BMS (ACEIRMC B08HLQQCQJ)", [41, 8, 2.2], [92, 44.75, LOBE_T + VELCRO + 20.5 + VELCRO], "part", "velcro on top of the 2S holder", "+x: pads toward the rivet end (MB wire 55 mm); P+ / P- 4 x 190 mm over the bank to the -y lobe"],
-  ["velcro under the charger (~4 mm)", [18.3, 38.43, VELCRO], [104, -85.5, LOBE_T], "zone", "adhesive both sides", ""],
+  ["velcro under the charger (3.5 mm pair)", [18.3, 38.43, VELCRO], [104, -85.5, LOBE_T], "zone", "adhesive both sides", ""],
   ["USB-C 2S charger (Adeept p0374)", [18.3, 38.43, 6.3], [104, -85.5, LOBE_T + VELCRO], "part", "velcro", "-y: USB-C out the -y lobe edge; BAT / GND pads at the +y end"],
-  ["velcro under the XT30 (~4 mm)", [25, 10.5, VELCRO], [76, -58, LOBE_T], "zone", "adhesive both sides", ""],
+  ["velcro under the XT30 (3.5 mm pair)", [25, 10.5, VELCRO], [76, -58, LOBE_T], "zone", "adhesive both sides", ""],
   ["XT30 pair, mated (25 x 10.5 x 5.3)", [25, 10.5, 5.3], [76, -58, LOBE_T + VELCRO], "part", "velcro (pack half)", "+x: pack half (BMS P+/P-, soldered); car half -x to the rocker"],
   ["bank USB-C plug", [30, 14, 12], [-44.25, -30, 19], "clearance", "keep clear", ""],
-  ["bank USB-C cable over the bank", [200, 8, 6], [-44, -37, 37], "clearance", "keep clear", ""],
-  ["bank USB-C cable rise at the front", [10, 8, 30], [156, -37, 37], "clearance", "keep clear", ""],
+  ["bank USB-C cable along the bank's -y side (below its top, off the LED strip)", [168, 4, 6], [-14, -37.6, 28], "clearance", "keep clear", ""],
+  ["bank USB-C cable rise past the wing's front end", [8, 8, 40], [133, -50, 34], "clearance", "keep clear", ""],
   ["P+/P- crossing over the bank", [22, 89, 6], [110, -45, 44], "clearance", "keep clear", ""],
   ["charger USB-C plug", [10, 30, 10], [108.15, -116, 7], "clearance", "keep clear", ""],
   ["XT30 unplug room", [20, 10.5, 5.3], [56, -58, 7], "clearance", "keep clear", ""],

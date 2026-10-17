@@ -87,3 +87,7 @@ level outward; Evan confirmed the frames under them are level.
 **Why:** JU's layout passed the checker with no cable room (Pi USB-A 3.6 mm from the Uno, Pi USB-C plug near the mast, fence walls on the holder leads / MB joint). Evan chose rearward growth over right-angle cables (purchase) or a wider -y wing (car already 173 mm wide vs 155 track).
 **Cost:** car ~58 mm longer at deck height; 52 mm deck cantilever; servo lead needs a Dupont extension; bank->Pi USB-C ~300-350 mm.
 **Source:** record JV.
+## 2026-10-16 - deck -y wing order and Pi brackets follow the real ports (Evan's bench results)
+**What:** LM2596 x 10..76, rocker at (100, -64) over the XT30 / charger, Pi USB-C plug zone on the -y side at the wing's front end; Pi bracket legs removed at the USB/LAN end and at the USB-C side corner; fuse holder x 30 and the bank USB-C cable below the bank top so the charge LEDs stay readable from the side.
+**Why:** ports 4 mm from the case sides and a side-facing USB-C (Evan) collided with the brackets / LM2596; Evan prefers reading the LEDs from the side over a deck window (window weakens the plate near the rear posts and the USB cable crosses it).
+**Source:** record JW.

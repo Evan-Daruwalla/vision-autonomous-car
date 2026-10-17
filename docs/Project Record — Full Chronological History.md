@@ -317,6 +317,7 @@ the dated entry, not the digest.
 - [JT - docs-sync pass after step 1b, the servo decision and the pack diagram](#appendix-jt---docs-sync-pass-after-step-1b-the-servo-decision-and-the-pack-diagram-2026-10-16-1759-cdt) (10-16)
 - [JU - Tray v9 + deck v10 for the new 168 x 62.16 x 22.51 power bank, fitted to the soldered pack wires; final audit](#appendix-ju---tray-v9--deck-v10-for-the-new-168-x-6216-x-2251-power-bank-fitted-to-the-soldered-pack-wires-final-audit-2026-10-16-1850-cdt) (10-16)
 - [JV - Tray v10 + deck v11: room for wires and connectors (Pi / Uno first); encoder route explained](#appendix-jv---tray-v10--deck-v11-room-for-wires-and-connectors-pi--uno-first-encoder-route-explained-2026-10-16-1921-cdt) (10-16)
+- [JW - Bench results applied: tray v11 + deck v12 (velcro 3.5, Pi USB-C on its side, wing re-ordered, LEDs kept visible)](#appendix-jw---bench-results-applied-tray-v11--deck-v12-velcro-35-pi-usb-c-on-its-side-wing-re-ordered-leds-kept-visible-2026-10-16-2058-cdt) (10-16)
 
 ---
 
@@ -20115,3 +20116,64 @@ deck 96/96, both manifold; `electronics_layout.py` 34 entries, 0 checks failed;
 **Named, not fixed:** the tray lobes are 173 mm wide vs the 155 mm front track
 (hardware.md, vehicle width) - a lane-width question for Evan; cad/README.md
 :363-371 stale; pla_pocket_gauge.scad gauges the old bank.
+
+# Appendix JW - Bench results applied: tray v11 + deck v12 (velcro 3.5, Pi USB-C on its side, wing re-ordered, LEDs kept visible) (2026-10-16 ~20:58 CDT)
+**WHAT:** Evan ran the pre-print bench checks given after JV and reported the
+results; tray v11 + deck v12 apply them. Generated and checked; UNTESTED (not
+printed). Commit 8e3f824 held v10 / v11.
+
+**Bench results (Evan, 2026-10-16):**
+
+| Check | Result |
+|---|---|
+| Bank USB-C -> Pi cable | "a lot longer than 320 mm" - OK |
+| Encoder cable along the route | ~30 mm spare ("hard to judge the exact path") |
+| 45 mm plug + bend allowance | right; the camera mast is unprinted and can change |
+| Pi ports | USB-A + LAN 4 mm from the case sides; the USB-C is on the case's SIDE ("on the right face near the back" seen from the USB-A end = the car's -y side), ~7 mm from the +x end; camera opening mid +x face, ~5-6 mm (he is modifying the case) |
+| BMS at the rivet end + all pack wires | room to spare |
+| Velcro | 15.5 mm dots, 3.5 mm per mated pair (4.0 was assumed) |
+| Bank charge LEDs | top, near the button (-y) side, ~10-40 mm from the port end; he will read them from the side |
+| LM2596 terminals | on the short ends (confirmed) |
+
+**Correction to the record:** the 2026-10-12 tray/deck entry's case note
+("back USB-C + camera connector") put the Pi's USB-C on the camera end. It is on
+a side face. v11's +x "USB-C + camera" zone was therefore wrong, and the real
+USB-C plug would have hit the -y bracket leg at the +x corner and the LM2596.
+
+**Changes:**
+- `VELCRO = 3.5` in both files (LAYOUT only; labels "(3.5 mm pair)"). The deck
+  stays at 54.5, so the fuse-holder gap grows 2.2 -> 3.2 mm.
+- Pi brackets: both -x end legs removed (they covered 3.75 mm, the ports start
+  at 4); the -y side leg at the +x corner removed (USB-C). Kept: the +x end legs
+  (4 mm), both +y side legs, and the -y side leg at the -x corner.
+- Zones:
+  - new Pi USB-C plug zone on the -y side, x 116.8..131.8, y -77.2..-32.2;
+  - the +x zone is now the camera ribbon only;
+  - the USB-A zone widens to the full case width.
+- -y wing re-ordered (WING_X 24 -> 0): LM2596 x 62..128 -> 10..76 (terminal
+  zones 0..10 and 76..86); rocker (42, -64) -> (100, -64), hanging over the
+  XT30 / charger (terminals end z 20.7 vs charger top 13.3), so the XT30 ->
+  rocker run is ~30-50 mm; power slot x 96..104. Nothing hangs under the wing
+  at the LED strip.
+- Fuse holder x 10 -> 30 (off the LEDs).
+- Bank USB-C cable re-routed along the bank's -y side BELOW its top (x
+  -14..154, y -37.6..-33.6, z 28..34), rising outside the deck edge past the
+  wing's front end (x 133..141, y -50..-42).
+
+**Checks (real output, 2026-10-16 ~20:55 CDT):** tray 252/252 probes, STL
+byte-identical to 8e3f824 (LAYOUT-only); deck 97/97, manifold;
+`electronics_layout.py` 35 entries, 0 checks failed (fuse holder 3.2 mm under
+the deck); `--self-check` PASS. Two Sonnet agents edited; Opus re-rendered
+(identical) and read both diffs. Not committed.
+
+**Audit (short):**
+- print: no new overhang; fewer bracket legs.
+- function:
+  - the Pi is located in -x by velcro only;
+  - plugging the USB-A pushes +x into the remaining +x legs;
+  - the rocker is now over the pack wiring;
+  - the P+/P- descent at x 110..132 passes beside the rocker body (x 88.6..111.5), a 1.5 mm overlap in x at different y - route the wires on the +x side of it.
+- setup: the charge LEDs are readable from the -y side; the rocker is reachable from above the wing.
+
+**Open:** the camera mast fit vs the ribbon zone and Evan's case modification;
+the encoder's real path (~30 mm spare).
