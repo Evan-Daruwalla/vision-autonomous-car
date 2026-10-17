@@ -315,6 +315,8 @@ the dated entry, not the digest.
 - [JR - Decision: the servo runs from the Uno's 5V header (Evan); jumper to +5V2 kept as the fallback](#appendix-jr---decision-the-servo-runs-from-the-unos-5v-header-evan-jumper-to-5v2-kept-as-the-fallback-2026-10-16-1724-cdt) (10-16)
 - [JS - Pack-side wiring diagram (docs/pack_wiring_full.svg); LM2596 stays 5.0 V; motor hookup](#appendix-js---pack-side-wiring-diagram-docspack_wiring_fullsvg-lm2596-stays-50-v-motor-hookup-2026-10-16-1758-cdt) (10-16)
 - [JT - docs-sync pass after step 1b, the servo decision and the pack diagram](#appendix-jt---docs-sync-pass-after-step-1b-the-servo-decision-and-the-pack-diagram-2026-10-16-1759-cdt) (10-16)
+- [JU - Tray v9 + deck v10 for the new 168 x 62.16 x 22.51 power bank, fitted to the soldered pack wires; final audit](#appendix-ju---tray-v9--deck-v10-for-the-new-168-x-6216-x-2251-power-bank-fitted-to-the-soldered-pack-wires-final-audit-2026-10-16-1850-cdt) (10-16)
+- [JV - Tray v10 + deck v11: room for wires and connectors (Pi / Uno first); encoder route explained](#appendix-jv---tray-v10--deck-v11-room-for-wires-and-connectors-pi--uno-first-encoder-route-explained-2026-10-16-1921-cdt) (10-16)
 
 ---
 
@@ -19963,3 +19965,153 @@ age-stale bins (untouched), memory (no new durable convention). No HTML twin
 or record index exists.
 
 **Untracked on purpose:** `firmware/uno_control/build/` (IDE export output).
+
+# Appendix JU - Tray v9 + deck v10 for the new 168 x 62.16 x 22.51 power bank, fitted to the soldered pack wires; final audit (2026-10-16 ~18:50 CDT)
+**WHAT:** Evan replaced the flaky power bank with a new one, 168 x 62.16 x
+22.51 mm (was 151.5 x 70.55 x 18.0), and asked for a tray / deck redesign that
+respects every wire already soldered. Result: electronics tray v9 + deck v10,
+generated and checked; UNTESTED (not printed, not fitted). Opus planned and
+made every decision; Sonnet agents edited the .scad / probe files (plan-split
+rule); Opus re-rendered both parts (byte-identical to the agents' STLs) and
+read the diffs.
+
+**Inputs from Evan (2026-10-16, this session):**
+- Bank: ports on its rear (short) end, rounded edges; USB-C at the -y corner
+  ("right side looking from the back"), USB-A at the other; the charge-level
+  button on the -y side ~1 cm forward of the USB-C; he wants to keep seeing the
+  charge level, so the bank is not flipped.
+- Soldered pack wires, NOT to be re-soldered ("everything connecting up to the
+  xt30 male is soldered"): P+ / P- 4 x 190 mm (as planned in IW); fuse wire
+  B+ -> holder + = 153 + 4 x 43.27 = 326 mm (his calipers stop at 153); MB 55
+  mm; encoder #4763 uncut (300 mm). B- length not given.
+- The BMS is not stuck down yet; the charger's BAT / GND pads are at the end
+  opposite its USB-C; the rear wheels peak 11 mm above the frame top; the space
+  ~10 mm behind the frames' rear end is clear.
+- Velcro (~4 mm) secures many parts - he asked that the design and the audit
+  remember it; given the choice, he took deck +8.5 over thin tape under the fuse.
+
+**Design (tray v9 / deck v10):**
+
+| Item | v8 / v9 | v9 / v10 | Why |
+|---|---|---|---|
+| Bank pocket | x -4..147.5, y +/-35.3 | x -14.25..153.75, y +/-31.08 | servo mount starts at x ~157, so the 16.5 mm went backward |
+| Floor / ribs | from x -6 | from x -16 (skirt rib -16..-14) | supports the bank's rear; bridge -14..5 = 19 mm (Rule 7) |
+| Bank fence | 14 mm (top 23.8) | 18 mm (top 27.8); -y wall starts at x 15 | rounding unmeasured; opening keeps the charge button reachable |
+| Posts / deck underside | 46.0 | 54.5 | bank +4.5, velcro under the fuse holder +4: fuse top 52.31, gap 2.19 as before |
+| Velcro | bank, holder, Pi | + fuse holder, BMS, charger, XT30 | every part removable, modelled at +4 |
+| Rocker | rear tab (-18, -32) | -y wing (42, -64), WING_X 24..132, tab deleted | the rear tab sits in the bank's port / cable exit; body clears the lobe post by 2.55 and the wheels by 19.7 |
+| Power slot | - | deck x 38..46, y -49.5..-45.5 | VBAT / GND from the rocker up to the shield |
+| BMS | holder top at the -x lead end | holder top, +x rivet end, inner edge (x 92..133) | the 55 mm MB wire comes off the +x rivet - the old spot could not be reached |
+| Charger | along x, USB-C -x | turned, USB-C out the -y lobe edge (x 104..122.3) | charge without lifting the deck; pads face the BMS |
+| XT30 | x 104..129, y -66 | x 76..101, y -58..-47.5 | shorter P-wire run; car half toward the rocker |
+| Fuse holder | on the bank x 40..90 | on the bank x 10..60 | audit: kept out from under the Pi vent window (x 65..137) |
+
+**Reach of the soldered wires (estimates; Manhattan / diagonal):** P+ / P- to
+the charger ~149 / ~135 of 190; to the XT30 ~168 / ~146 of 190; MB ~20-30 of 55;
+fuse wire ~150-200 of 326; B- ~90 needed, length unknown; encoder ~174 of 300.
+Rejected: P+ / P- under the tray floor (would mean re-threading the soldered
+pack).
+
+**Checks (real output, 2026-10-16 ~18:45 CDT):** tray render 252/252 probes,
+manifold PASS, bbox (-16, -86, 0)..(156, 87, 54.5); deck 90/90, bbox (-6, -86,
+54.5)..(156, 45.6, 67.0); `electronics_layout.py` 19 entries, 0 checks failed
+(gaps to the deck: fuse 2.2, bank 18.2, BMS 20.8, holder 27.0, charger 41.2,
+XT30 42.2); `--self-check` PASS; `check_artifacts.py` 40 artifacts, 0 drifted,
+0 errored; `run_checks.py` 17 passed, 0 failed. Not committed.
+
+**Final audit (Evan asked for one; printing / function / setup, velcro included):**
+
+| # | Area | Finding | Sev | Action |
+|---|---|---|---|---|
+| 1 | print | Both fit the P1S plate (tray 172 x 173, deck 162 x 132); no new overhang under 45 deg; new floor bridge 19 mm; wing prints flat | ok | - |
+| 2 | print | Posts now 54.5 tall, 8 x 8 (4 rise 44.7 above the floor, 2 stand 54.5 from the bed, ~6.8:1); a sideways knock bends them across layer lines (Rule 9). The pinned deck ties all six for normal loads | MED | reported: 10 x 10 posts is NOT a one-number change (the lobe posts would overhang the lobe edge) |
+| 3 | print | Pin-hole wall 1.5 mm, 0.9 mm at the 6.2 counterbore (unchanged since v8) | LOW | none |
+| 4 | function | Two velcro layers stack under the fuse holder; the 2.2 mm gap covers only +1.1 mm per layer | MED | measure the velcro pair before printing |
+| 5 | function | P wires to the XT30 keep only ~20-45 mm slack; B- length unknown | MED | bench check with the BMS held at the rivet end |
+| 6 | function | Bank USB-C -> Pi needs ~230-260 mm; the cable is only known to be "> 25 cm" | MED | measure the cable |
+| 7 | function | Fuse holder was under the Pi vent window | fixed | moved to x 10..60 (LAYOUT only) |
+| 8 | function | Deck +8.5 raises the Pi top to ~88 mm above the frame top - a higher centre of mass, not quantified | INFO | watch in the T2 turning test |
+| 9 | function | Heat: charger 41 mm under the wing; LM2596 on top of it | LOW | none |
+| 10 | setup | The deck is one removable module (Pi, Uno + shield, LM2596, rocker); to lift it: unplug the XT30, the bank USB-C, the servo Dupont and the camera ribbon; the encoder slides through its slot (~125 mm slack) | ok | - |
+| 11 | setup | Holder + BMS sit outside the deck plate (y > 44): a cell swap needs no deck removal | ok | - |
+| 12 | setup | Charging: the USB-C faces out the car's -y side | ok | - |
+| 13 | setup | A fuse swap needs the deck off (fuse holder 2.2 mm under it) | MED | accepted cost of keeping the fuse on the bank |
+| 14 | setup | Charge button (~x -4, -y side): reachable from the side above the wheel (z 11) or from behind, 10 mm from the post at (10, -41.6) - plausible, unverified; where the charge LEDs are is unknown | MED | check on the car |
+
+**Open:** everything is UNTESTED. Bench check before printing (BMS spot, B- /
+MB / fuse / P-wire reach); measure the velcro, the USB-C cable, the LED spot.
+`cad/README.md:363-371` is stale (zip slots) and `pla_pocket_gauge.scad` gauges
+the OLD bank - named, not fixed.
+
+# Appendix JV - Tray v10 + deck v11: room for wires and connectors (Pi / Uno first); encoder route explained (2026-10-16 ~19:21 CDT)
+**WHAT:** Evan: "redo it leaving space for wires and connectors around the
+whole project but especially around the Arduino and Pi", and "how is the
+encoder wire supposed to come up through the body". Result: electronics tray
+v10 + deck v11 (on top of JU's uncommitted v9 / v10), generated and checked;
+UNTESTED (not printed, not fitted). Opus planned and decided; two Sonnet agents
+edited the .scad / probe files (plan-split rule); Opus re-rendered both
+(byte-identical to the agents' STLs) and read the diffs.
+
+**Flaws in JU's v9 / v10 that this fixes (Claude's, not caught by JU's audit):**
+- The Pi's -x end (USB-A + LAN, per Evan's 2026-10-12 case description) sat
+  3.6 mm from the Uno - a straight USB-A plug needs ~40 mm.
+- The Pi's front USB-C plug + bend reached ~5 mm from the camera mast (x ~182,
+  photo estimate).
+- The holder fence's -x end wall blocked the lead exit; its +x end wall pressed
+  on the MB solder joint at the rivet.
+- The Pi brackets' 10 mm legs on the port ends could block the outer plugs.
+JU's checker passed because it only proves boxes don't collide - it had no
+boxes for plugs or cables. Lesson: reserve connector / cable space as boxes.
+
+**Evan's choices (2026-10-16):** grow the deck rearward (no new cables); plug
+estimates USB-A 40, USB-C 30, USB-B 35 mm; there IS an opening in the frames
+above the motor's encoder socket.
+
+**Changes:**
+
+| Item | v9 / v10 | v10 / v11 |
+|---|---|---|
+| Deck plate | x -6..156 | x -64..156 |
+| Rear posts (tray + deck) | x 10 | x -12 (on the floor's rear end) |
+| Pi case | x 55.1..146.9 | x 40.0..131.8; vent window x 50..122 |
+| Uno | x -2.18..51.52 | x -58.18..-4.48 (pegs shifted -56) |
+| Deck ribs | - | 2 x 3 mm at y +/-12, x -60..-6, under the Uno (52 mm cantilever) |
+| Pi bracket legs on the port ends | 10 mm | 4 mm (BR_LEG_END) |
+| Holder fence | 4 sides | side walls only (end walls removed) |
+| Clearance boxes | none for cables | 15: Pi USB-A / LAN (x -2..39.7), Pi front USB-C + camera (x 132.1..176.8), Pi top, Uno shield wiring, Uno USB-B, LM2596 terminals x2, rocker terminals, bank USB-C plug / run over the bank / rise in front, P+/P- crossing, charger USB-C, XT30 unplug, holder lead + rivet ends |
+| Layout SVG view | x -32..158, y -88..87 | x -70..182, y -120..90 |
+
+**Encoder route (answer to Evan; slots unchanged):** motor socket below the
+frames (x ~110, y ~0) -> up through the frame opening -> along the frame top
+under the raised tray floor -> -y rail notch + edge-rib notch (x 100..108) ->
+up the floor slot beside the bank fence (y -41..-38.5) -> deck slot directly
+above -> along the deck to the shield. Estimate now ~220-270 of 300 mm (the Uno
+moved back 56 mm); fallback a Dupont splice at the shield end.
+
+**Costs:** car ~58 mm longer at deck height; servo lead ~260-300 vs ~250 ->
+Dupont extension (on hand); bank USB-C -> Pi by the reserved route ~300-350 mm
+vs a cable only known to be "> 25 cm" (a longer / right-angle cable is a
+purchase - BLOCKED-ON-EVAN); camera ribbon ~110-135 of 200.
+
+**Checks (real output, 2026-10-16 ~19:20 CDT):** tray render 252/252 probes,
+deck 96/96, both manifold; `electronics_layout.py` 34 entries, 0 checks failed;
+`--self-check` PASS; `check_artifacts.py` 40 artifacts, 0 drifted, 0 errored;
+`run_checks.py` 17 passed, 0 failed. Not committed.
+
+**Audit (printing / function / setup, velcro included):**
+
+| # | Finding | Sev | Action |
+|---|---|---|---|
+| 1 | Deck now 220 x 132 (fits the P1S 256 plate); prints flat, ribs grow up, no new overhang | ok | - |
+| 2 | 52 mm cantilever past the rear posts carries the Uno; ribs added; a hard push on the USB-B is in-plane (stiff) | LOW | watch on the fit print |
+| 3 | Rear posts stand on the floor's rear 12 mm, which is past the frames' end (x -4): load goes through the floor + skirt / edge ribs to the frames | MED | check flex on the fit print |
+| 4 | Pi held by 4 mm end legs + 10 mm side legs + velcro | LOW | - |
+| 5 | Camera mast and servo mount are NOT in the checker: the Pi front zone ends ~5 mm from the mast (estimate +/-3) | MED | eyeball on the car before printing |
+| 6 | Bank USB-C cable length (~300-350 needed) | MED | measure |
+| 7 | Encoder ~220-270 of 300; servo lead short | MED | lay the encoder cable; use a Dupont extension for the servo |
+| 8 | LM2596 terminal ends assumed to be the short ends | LOW | check the board |
+| 9 | Fuse swap still needs the deck off (2.2 mm gap, two velcro layers) | MED | carried from JU |
+
+**Named, not fixed:** the tray lobes are 173 mm wide vs the 155 mm front track
+(hardware.md, vehicle width) - a lane-width question for Evan; cad/README.md
+:363-371 stale; pla_pocket_gauge.scad gauges the old bank.

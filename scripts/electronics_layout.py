@@ -90,8 +90,8 @@ MAX_MATERIAL_REPORTS = 3  # per part
 
 # ---- SVG layout --------------------------------------------------------------
 SCALE = 2.0                          # px per mm
-VIEW_X = (-32, 158)                  # mm, x range drawn
-VIEW_Y = (-88, 87)                   # mm, y range drawn
+VIEW_X = (-70, 182)                  # mm, x range drawn
+VIEW_Y = (-120, 90)                   # mm, y range drawn
 NX = VIEW_X[1] - VIEW_X[0]           # 190 height-map columns
 NY = VIEW_Y[1] - VIEW_Y[0]           # 175 height-map rows
 CELL_OFF = (0.5 + 0.0137, 0.5 + 0.0291)   # ray offset inside a 1 mm cell

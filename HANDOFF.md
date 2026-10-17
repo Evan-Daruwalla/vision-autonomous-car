@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-16 ~17:59 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-16 ~19:22 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -633,13 +633,19 @@ PRINTING: EVERY car part is Bambu PETG Translucent, 250 C / 70 C, P1S 0.4,
 0.15 mm layers, 2 walls, X-Y hole comp 0 (IC). Pins stay 4.95 (coupon row D);
 pocket 0.25/side (IF). press_shaft (+0.15) is PLA-calibrated only.
 PARTS (OpenSCAD in cad/scad/, render_scad.py + probes, check_artifacts):
-electronics tray v8 + deck v9 (IA-IK; layout IN/IO) - lobes are flat 3 mm
-plates ON the frames; bank, holder, Pi on ~4 mm velcro (VELCRO constant,
-assumed); deck at z 46; NO zip ties. Servo mount v7, motor mount v6, camera
+electronics tray v10 + deck v11 (JU + JV, 2026-10-16: NEW power bank 168 x
+62.16 x 22.51; JV = room for plugs / cables: deck x -64..156, Uno moved back
+behind a 40 mm USB-A zone, Pi x 40..131.8, rear posts x -12, 15 clearance
+boxes) - lobes are flat 3 mm plates ON the frames;
+EVERY part on ~4 mm velcro (VELCRO constant, assumed: bank, holder, Pi, fuse
+holder, BMS, charger, XT30); deck underside z 54.5; rocker on the deck's -y
+wing (rear tab gone); BMS at the holder's +x rivet end; charger USB-C out the
+-y side; layout fitted to the SOLDERED pack wires (P+/P- 4 x 190, fuse wire
+326, MB 55 - Evan will not re-solder); NO zip ties. Servo mount v7, motor mount v6, camera
 mast v1. All UNTESTED at these versions except the coupon and gauge. Slice the
 tray and deck with supports OFF.
 ELECTRONICS LAYOUT: docs/ELECTRONICS_LAYOUT.md + docs/electronics_layout.svg
-(scripts/electronics_layout.py, 14 entries, 0 failed); pack wiring picture
+(scripts/electronics_layout.py, 34 entries, 0 failed; JU + JV audit tables); pack wiring picture
 docs/bms_wiring.svg; everything on the pack: docs/pack_wiring_full.svg (JS);
 build order = docs/WIRING_PROTOSHIELD.md section 5.
 The sim lane ended in a well-instrumented NEGATIVE; LaneMaker/OpenDRIVE is
@@ -665,9 +671,15 @@ NEXT ACTIONS, highest value first:
    big swings). Full pack picture: docs/pack_wiring_full.svg (JS).
 3. Charger board 2 no-load test (BAT lifted, USB-C in, BAT to GND: 8.4 V OK,
    >= 8.6 V reject). Optional: the barrel-cable voltage test (JG).
-4. PRINT tray v8 + deck v9 (supports OFF) after measuring the velcro pair.
-   Fit report incl. the BMS on the holder top and the P+ / P- runs (~150-170
-   mm, IO/IW). Record settings + fit.
+4. Before printing tray v10 + deck v11 (JU, JV): bench check - hold the BMS at the
+   holder's rivet end (pads +x, inner edge) and confirm B- (length unknown),
+   MB, fuse -> B+ and the 190 mm P wires reach; measure the velcro pair (2.2 mm
+   gap under the deck with two layers under the fuse), the bank USB-C -> Pi
+   cable (needs ~300-350 mm, JV), where the bank's charge LEDs are; lay the
+   encoder cable along its route (~220-270 of 300); eyeball the Pi front
+   plug zone vs the camera mast (not in the checker). Then PRINT
+   (supports OFF); fit report + settings in the record. JU audit MED: the
+   54.5 mm 8 x 8 posts bend across layers if knocked.
 5. Print / fit servo mount v7 (if not the mounted one), motor mount v6, camera
    mast v1. Record each.
 6. Audit HJ's HIGH: ml/splits.py split stability + a corpus id in checkpoints.

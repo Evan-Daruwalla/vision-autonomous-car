@@ -1,12 +1,12 @@
-# Electronics layout - where every part goes (2026-10-13)
+# Electronics layout - where every part goes (2026-10-16, tray v10 / deck v11)
 
 **Status: PLAN, UNTESTED.** Nothing here has been printed or fitted. Parts
 and positions come from the `LAYOUT` lists in
 `cad/scad/electronics_tray.scad` (layer 1) and `cad/scad/electronics_deck.scad`
 (layer 2); `scripts/electronics_layout.py` reads them, checks them against
 the rendered STLs and draws `docs/electronics_layout.svg`. Change a position
-in the .scad, never here, then re-run the script. Record: the entry of
-2026-10-13 that introduced this file.
+in the .scad, never here, then re-run the script. Records: the entry of
+2026-10-13 that introduced this file; records JU (v9 / v10) and the 2026-10-16 entry for v10 / v11 (cable room).
 
 ![layout](electronics_layout.svg)
 
@@ -14,34 +14,72 @@ in the .scad, never here, then re-run the script. Record: the entry of
 centre frames, **+x = front**; y across, +y = the car's left (up in the drawing);
 z = 0 on the Lego frames' top face. Layer 1: the bank on the raised middle
 floor (z 9.8); everything else on the two lobe plates, which sit on the frames
-(z 0..3, tray v8);
-layer 2 on the deck (underside z 46.0, top z 48.5: raised on 2026-10-13 for
-the 2S holder, the fuse holder on the bank, and the 4 mm velcro under the bank).
-The bank, holder and Pi case sit on ~4 mm velcro (removable; Evan); the
-charger, BMS and XT30 on tape or velcro. No zip ties anywhere - every tie slot
-was removed (tray v8, deck v9).
-Printed in Bambu PETG Translucent.
+(z 0..3). Layer 2 on the deck (underside z 54.5, top z 57.0 - raised 8.5 mm on
+2026-10-16 for the taller bank and the velcro under the fuse holder on it).
+**Every part sits on ~4 mm velcro** (the `VELCRO` constant, assumed, not
+measured): bank, holder, Pi case, fuse holder, BMS, charger, XT30 - all
+removable without unsoldering. No zip ties anywhere.
+Printed in Bambu PETG Translucent, supports OFF.
 
-## Layer 1 - electronics tray
+**Why v9 / v10 (2026-10-16):** Evan replaced the flaky bank with a 168 x 62.16
+x 22.51 one (16.5 longer, 8.4 narrower, 4.5 taller). The servo mount starts at
+x ~157, so the bank moved BACK (rear end x -14.25, ~10 mm past the frames - that
+space is clear, Evan). The pack is soldered up to the XT30 male and is NOT to be
+re-soldered, so the layout was fitted to the wires as built: 4 x 190 mm P+ / P-,
+fuse wire B+ -> holder + 326 mm (Evan: 153 + 4 x 43.27), MB 55 mm from the
+holder's brass rivet, encoder #4763 uncut (300 mm).
+
+**Why v10 / v11 (2026-10-16, Evan: "leave space for wires and connectors ...
+especially around the Arduino and Pi"):** v10 left 3.6 mm between the Pi's
+USB-A / LAN end and the Uno (a straight USB-A plug needs ~40 mm), the Pi's front
+USB-C plug + bend reached ~5 mm from the camera mast, the holder fence's end
+walls blocked the lead exit and pressed on the MB joint, and the Pi brackets'
+10 mm legs could block the outer plugs. Evan chose to grow the deck rearward
+(no new cables). Plug estimates (Evan: use them): USB-A 40, USB-C 30, USB-B 35
+mm. Every reserved space is a `clearance` box in the LAYOUT lists, so the
+checker proves nothing printed or placed sits in it.
+
+## Layer 1 - electronics tray (v9)
 
 | # | Part | Box x .. / y .. / z .. | Held by | Ports / leads |
 |---|---|---|---|---|
-| 1 | Power bank (Pi only) 151.5 x 70.55 x 18.0 | -4..147.5 / -35.3..35.3 / 13.8..31.8 | ~4 mm velcro + bank fence 14 mm tall (holds the flat sides; edges rounded below 7 mm), open rear | USB-C + USB-A on the REAR end (-x), 20 / 45 mm from the left |
-| 2 | 2S holder + 2x Samsung 25R, 75.75 x 40.5 x 20.5 (measured 20.30 tall) | 58.1..133.9 / 44.3..84.8 / 7.0..27.5 | ~4 mm velcro + 4-sided 14 mm fence on its lobe plate | red / black leads leave the SAME SHORT end (Evan 2026-10-14), 160 mm; + the MB wire soldered to the series strap. Seat the holder with that end at -x (x 58), the end nearest the fuse and the BMS |
-| 3 | USB-C 2S charger (Adeept p0374) 38.43 x 18.30 x 6.30 | 60..98.4 / -69.5..-51.2 / 3.0..9.3 | double-sided tape or velcro | pads BAT (-> BMS P+), GND (-> P-), GND, VIN; USB-C on a SHORT end (Evan 2026-10-14) -> faces -x, 4 mm from the open lobe edge (x 56); the plug sticks out past that edge |
-| 4 | 2S BMS (ACEIRMC) 41 x 8 x 2.2 | 62..103 / 60.5..68.5 / 27.5..29.7 (ON TOP of the 2S holder, 2026-10-14; was on the -y lobe) | double-sided tape on the holder top; peel off to swap cells | pads B+ B- MB P+ P- (pad order not checked). Moved so the two UNFUSED leads (B-, MB) stay short; only the fused, BMS-protected P+ / P- cross the bank |
-| 5 | Inline 3 A ATO fuse holder, 50 x 34.25 x 12 lying flat | 40..90 / 0..34.3 / 31.8..43.8 (ON TOP of the bank) | tape or velcro | in the CELL+ wire, before the BMS |
-| 6 | XT30 pair, mated, 25 x 10.5 x 5.3 | 104..129 / -66..-55.5 / 3.0..8.3 | double-sided tape or velcro (pack half) | BMS P+/P- side; car side goes to the rocker |
+| 1 | Power bank (Pi only) 168 x 62.16 x 22.51 | -14.25..153.75 / -31.08..31.08 / 13.8..36.3 | velcro + bank fence 18 mm tall (top z 27.8), open rear; the -y wall starts at x 15 | REAR end (-x): USB-C at the -y corner, USB-A at the +y corner (Evan). Charge button on the -y side face ~10 mm forward of the rear end (Evan) - the fence is open there. Edges rounded (Evan; radius not measured). Keep this orientation so the charge level stays readable |
+| 2 | 2S holder + 2x Samsung 25R, 75.75 x 40.5 x 20.5 | 58.1..133.9 / 44.3..84.8 / 7.0..27.5 | velcro + 14 mm side walls on its lobe plate (v10: end walls removed for the leads and the MB joint) | red / black leads leave the -x (short) end; MB wire 55 mm from the brass rivet on the +x (no-lead) end |
+| 3 | Inline 3 A ATO fuse holder, 50 x 34.25 x 12 lying flat | 10..60 / -17.1..17.1 / 40.3..52.3 (on top of the bank) | velcro | in the CELL+ wire (326 mm total, coil the slack); x 10 keeps it out from under the deck's Pi vent window (x 65..137) |
+| 4 | 2S BMS (ACEIRMC) 41 x 8 x 2.2 | 92..133 / 44.75..52.75 / 31.5..33.7 (on top of the holder, at its +x rivet end, inner edge) | velcro | pads toward +x - forced by the 55 mm MB wire (not stuck down yet, Evan). Inner edge = shortest P+ / P- run across the bank |
+| 5 | USB-C 2S charger (Adeept p0374), turned: 18.3 x 38.43 x 6.3 | 104..122.3 / -85.5..-47.1 / 7.0..13.3 | velcro | USB-C faces -y, out the lobe's outer edge (charge without lifting the deck); BAT / GND pads at the +y end (Evan: opposite the USB-C) |
+| 6 | XT30 pair, mated, 25 x 10.5 x 5.3 | 76..101 / -58..-47.5 / 7.0..12.3 | velcro (pack half) | pack half +x (BMS P+ / P-, soldered); car half -x toward the rocker |
 
-## Layer 2 - electronics deck
+## Layer 2 - electronics deck (v11)
+
+Plate x -64..156 (was -6..156), rear posts at x -12 (were 10): the Uno sits on
+a 52 mm cantilever behind them, stiffened by two 2 x 3 mm ribs under it.
 
 | # | Part | Box x .. / y .. / z .. | Held by | Ports |
 |---|---|---|---|---|
-| 1 | Raspberry Pi 5 in Vilros case 91.8 x 64.4 x 27.2 (confirmed) | 55.1..146.9 / -32.2..32.2 / 52.5..79.7 | ~4 mm velcro + 4 corner brackets 10 mm tall, +0.25 per side | FRONT (+x): camera connector + USB-C power; REAR (-x): 2x USB-A + LAN |
-| 2 | Arduino Uno R3 + proto shield (TB6612 on headers, 470 uF + 0.1 uF, 100k/12k divider), 53.7 x 70 x 24 | -2.2..51.5 / -35..35 / 54.5..78.5 | 4 standoffs (6 mm, so the USB plug clears the pin boss) + pegs | -y end: USB-B (centre 13 mm from the left edge, sticks out 7.3) and DC jack (43 mm, 4.1) |
-| - | USB-B plug clearance (allowance 16 x 30 x 13; plug NOT measured) | 3..19 / -72.3..-42.3 / 55.1..68.1 | hangs from the jack | must stay empty: passes over the pin boss at (10, -41.6), top z 53.8 |
-| 3 | LM2596 buck, 5.00 V, with display, 66 x 36 x 14 | 62..128 / -78..-42 / 51.5..65.5 | 4 standoffs + 3.2 pegs on 57.5 x 31.5 hole centres (measured) | display up; trim pot set to 5.00 V unloaded, then locked |
-| - | Rocker switch: body 20.50 dia (22.90 over the clips), 23.8 deep | 21.0 hole at (-18, -32) on the rear tab | snap-in | body hangs ~24 mm below the tab, behind the tray (space clear - Evan) |
+| 1 | Raspberry Pi 5 in Vilros case 91.8 x 64.4 x 27.2 | 40.0..131.8 / -32.2..32.2 / 61.0..88.2 | velcro + 4 corner brackets 10 mm tall (legs 10 mm on the sides, 4 mm on the port ends), +0.25 per side | FRONT (+x): camera connector + USB-C power; REAR (-x): USB-A + LAN (Evan, 2026-10-12); HDMI on a side (unused); fan on top |
+| 2 | Arduino Uno R3 + proto shield, 53.7 x 70 x 24 | -58.2..-4.5 / -35..35 / 63.0..87.0 | 4 standoffs (6 mm) + pegs, 2 ribs under | -y end: USB-B (plug box below) and DC jack |
+| 3 | LM2596 buck, 5.00 V, with display, 66 x 36 x 14 | 62..128 / -78..-42 / 60.0..74.0 | 4 standoffs + 3.2 pegs (57.5 x 31.5) | display up; terminals at the short ends (assumed) |
+| 4 | Rocker switch, 21.0 hole at (42, -64) on the -y wing | body 30.55..53.45 / -75.45..-52.55 / 30.7..54.5 | snap-in | power slot x 38..46, y -49.5..-45.5 for VBAT / GND up to the shield |
+
+## Reserved space (clearance boxes, both layers)
+
+| Space | Box x .. / y .. / z .. | For |
+|---|---|---|
+| Pi USB-A / LAN plugs | -2..39.7 / -28.4..28.4 / 61..88.2 | 40 mm straight plug; the A-B cable then bends -y and loops to the Uno's USB-B (cable > 18 in, coil the spare) |
+| Pi front USB-C + camera ribbon | 132.1..176.8 / -28.4..28.4 / 61..88.2 | 30 mm plug + 15 mm bend; ends ~5 mm short of the camera mast (x ~182 +/- 3, photo estimate - the mast is not in the checker) |
+| Pi fan / top access | over the Pi, 15 mm | airflow, SD / cable access |
+| Uno shield wiring | over the Uno, 20 mm | Dupont housings, servo / encoder / strip leads |
+| Uno USB-B plug | -53..-37 / -72.3..-42.3 / 63.6..76.6 | allowance 16 x 30 x 13 (plug NOT measured) |
+| LM2596 terminals | 52..62 and 128..138 / -78..-42 / 60..74 | screw terminals at both short ends (assumed) |
+| Rocker terminals | below the body, z 20.7..30.7 | spade / solder tabs |
+| Bank USB-C plug | -44.25..-14.25 / -30..-16 / 19..31 | plug at the bank's rear -y corner |
+| Bank USB-C cable over the bank | -44..156 / -37..-29 / 37..43 | under the deck, beside the fuse holder |
+| Bank USB-C cable rise | 156..166 / -37..-29 / 37..67 | up in front of the tray, outside the servo mount (y -37..-29 vs its |y| <= 20), then back into the Pi's plug |
+| P+ / P- crossing | 110..132 / -45..44 / 44..50 | the four 190 mm pack wires over the bank |
+| Charger USB-C plug | 108.15..118.15 / -116..-86 / 7..17 | out the car's -y side |
+| XT30 unplug room | 56..76 / -58..-47.5 / 7..12.3 | pull the car half off |
+| Holder lead exit / MB rivet end | 43.1..58.1 and 133.9..141.9 / 44.25..84.75 / 7..27.5 | leads and the MB joint |
 
 ## Every part you have, accounted for
 
@@ -58,7 +96,7 @@ came later.
 | 5 | Vilros Pi 5 kit | Pi in its case = layer 2 #1 (SD card inside); PSU / HDMI adapter stay off the car |
 | 6 | Fuse holder + fuses | layer 1 #5, on top of the bank |
 | 7 | WS2812B reel | two short segments at the car's front and rear, fed from the shield |
-| 8 | Rocker switch | deck rear tab |
+| 8 | Rocker switch | deck -y wing (since tray v9 / deck v10; was the rear tab) |
 | 9 | XT30 | layer 1 #6 |
 | 10 | 470 uF caps | on the shield at the TB6612, and at the strip feed point |
 | 11 | TB6612 carrier | on the shield (layer 2 #2) |
@@ -74,52 +112,67 @@ came later.
 | 21 | 2S holder | layer 1 #2 |
 | 22 | 18650 cells | in the holder |
 | owned | Arduino Uno R3 clone | layer 2 #2 |
-| owned | Power bank 5 V / 3 A | layer 1 #1 |
+| owned | Power bank 5 V / 3 A, 168 x 62.16 x 22.51 (2026-10-16; replaced the flaky 151.5 x 70.55 x 18.0 bank) | layer 1 #1 |
 | owned | Data-only USB cable | Pi USB-A -> Uno USB-B |
 | later | Pololu #5159 motor | motor mount |
-| in shipping | Camera Module 3 Wide | camera mast |
+| arrived 2026-10-15 | Camera Module 3 Wide (+ a second one, spare) | camera mast |
 
 Spares that stay off the car: 7 BMS boards, 1 LM2596, 3 servos, the rest of
 the WS2812B reel and the fuses.
 
-## Cable routes (planned, lengths are estimates)
+## Cable routes (estimates - nothing is routed on a printed tray yet)
+
+Soldered wires (fixed lengths, Evan 2026-10-16) vs the v9 layout. Manhattan =
+along the axes; diagonal = straight across the bank top. The BMS P pads are
+taken at ~(131, 49, 33.7).
+
+| Wire | Length (fixed) | Route | Needs (Manhattan / diagonal) | Slack |
+|---|---|---|---|---|
+| BMS P+ / P- -> charger BAT / GND (2 wires) | 190 | holder top -> over the bank top (z 36.3, under the deck) -> down the -y side at x ~110-131 (clear of the encoder rise at x 100..108) -> charger +y end | ~149 / ~135 | ~40-55 |
+| BMS P+ / P- -> XT30 pack half (2 wires) | 190 | same, to the XT30's +x end | ~168 / ~146 | ~20-45 |
+| MB: holder rivet (+x end) -> BMS MB | 55 | up the holder's +x end face onto its top | ~20-30 | ~25-35 |
+| CELL+ -> fuse -> BMS B+ | 326 total | holder -x end -> fuse on the bank top (x 10..60) -> holder top | ~150-200 | coil the rest |
+| Holder black -> BMS B- | NOT recorded | along the holder top, -x end -> +x end | ~90 | unknown - bench-check |
+| Encoder #4763 | 300 (uncut) | motor socket below the frames (x ~110, y ~0) -> up through the frame opening there (Evan: there is one) -> along the frame top UNDER the tray floor -> -y rail notch + edge-rib notch (x 100..108) -> up the floor slot beside the bank fence (y -41..-38.5) -> deck slot right above -> along the deck to the shield at the rear | ~220-270 (v11: the Uno moved back 56 mm) | ~30-80; if short, splice Dupont leads at the shield end |
+
+Unsoldered runs (cut to fit):
 
 | From -> to | Route | ~Length |
 |---|---|---|
-| Holder black -> BMS B-; MB -> MB | out of the holder's -x lead end, up onto the holder top (BMS there) | ~20-40 (B-), ~40-60 (MB, from the strap inside) - trim the 160 mm black lead (2026-10-14 estimate; was ~155-175 with the BMS on the -y lobe) |
-| Holder red -> fuse -> BMS B+ | red up onto the bank top to the fuse, fuse out back up to the holder top | red ~45-65, fuse out -> B+ ~40-60 (2026-10-14 estimate) |
-| Charger BAT+/BAT- -> BMS P+/P- | holder top, across under the deck over the bank, down into the -y lobe | ~150-170 each (2026-10-14 estimate: ~33 up + 70 across + ~45 down); cut 190. Charger BAT -> P+, the GND next to BAT -> P- (the two GND pads metered 0.4 ohm = common); VIN unused |
-| BMS P+/P- -> XT30 (pack side) | same route as the charger pair | ~150-170 each; cut 190. **Evan's choice 2026-10-14: TWO pairs on the BMS pads** (charger pair + XT30 pair, twisted and tinned together per pad, one heat) - 4 x 22 AWG at 190 mm (2 red, 2 black); one wire per XT30 cup. Rejected: one 190 pair + a 60 mm charger pair sharing the XT30 cups (380 mm less wire). Strain-relieve the four wires on the holder top |
-| XT30 (car side) -> rocker -> VBAT | up the -y lobe's outer edge onto the deck wing, back along the deck to the rear tab; VBAT then to the shield (TB6612 VMOT, LM2596 VIN, divider top) | ~190 mm |
+| XT30 car half -> rocker | lobe (z ~10) up to the rocker terminals (z ~31) under the -y wing | ~80 |
+| Rocker out (VBAT) + GND -> shield | up through the wing's power slot (x 38..46) -> shield; VBAT also to the LM2596 VIN next to it | ~60-100 |
 | LM2596 VOUT -> shield `+5V2` | deck wing -> shield | short |
-| Bank USB-C -> Pi USB-C | from the bank's REAR end, up behind the deck, forward along the deck's +y side to the Pi's front | ~230 mm - Evan has a USB-C cable > 25 cm |
-| Pi USB-A -> Uno USB-B | Pi rear end -> Uno's -y end, on the deck | short; Evan's A-B cable is > 18 in - coil the spare |
-| Motor + encoder (#4763) | motor below the frames -> -y rail notch (x 100..108) -> under the tray floor -> up the floor + deck slot (x 100..108, y -41..-38.5) -> shield | ~165 mm of 300 (record HE) |
-| Servo lead | servo (tray x ~170) -> along the deck -> shield | ~150-200 mm; the lead is ~25 cm (measured) |
-| Camera cable | Pi front -> camera mast | 85-110 mm of 200 (record HE) |
+| Bank USB-C (-y rear corner) -> Pi USB-C (front) | under the deck over the bank (y -37..-29), up in front of the tray, back into the Pi's front plug | ~300-350 - Evan's cable is only known to be "> 25 cm": measure it; a longer or right-angle cable is a purchase (Evan's call) |
+| Pi USB-A -> Uno USB-B | Pi rear -> 40 mm plug zone -> bend -y -> Uno's -y end | ~150-200 of > 457; coil the spare |
+| Servo lead | servo (x ~170) -> along the deck -> shield at the rear | ~260-300 of ~250 - needs a Dupont extension (on hand) |
+| Camera cable | Pi front -> camera mast | ~110-135 of 200 |
 | Strip segments | shield -> car front / rear | per segment |
 
 Wiring rules live in `docs/WIRING_PROTOSHIELD.md` (section 2.1: nothing but
 the BMS touches B+ / MB / B-; star ground at the TB6612 GND pad).
 
-## Verification (2026-10-13, tray v8 / deck v9)
+## Verification (2026-10-16, tray v10 / deck v11)
 
-`./.venv/Scripts/python.exe scripts/electronics_layout.py`: 14 entries, 0
-checks failed - no part, zone or clearance box contains printed material
-(tray or deck), no two boxes overlap, every part rests on printed material
-or on another box (velcro on the floor, the bank on velcro, the fuse holder
-on the bank), and the gap from each layer-1 top to the deck underside (z
-46.0) is 2.2 mm (fuse holder on the bank), 14.2 (bank), 18.5 (holder),
-36.7 (charger), 37.7 (XT30), 16.3 (BMS on the holder, 2026-10-14). The USB-B plug allowance starts 1.3 mm
-above the pin boss it crosses; with 4 mm Uno standoffs it would hit it.
+- `render_scad.py`: tray 252/252 probes, deck 96/96, both manifold, exit 0
+  (re-run by Opus: byte-identical to the agents' STLs).
+- `./.venv/Scripts/python.exe scripts/electronics_layout.py`: 34 entries, 0
+  checks failed - no part, zone or clearance box contains printed material, no
+  two boxes overlap, every part rests on plastic or on another box.
 
-What this does NOT prove: any fit (unprinted), the USB-B plug's real size
-(an allowance), that the space past the -y lobe's -x edge is clear for the charger's USB-C plug, or that the cables reach.
+What this does NOT prove: any fit (unprinted), the plug sizes (estimates), the
+camera mast and servo mount clearances (not in the checker), the velcro's real
+thickness, or that the cables reach.
 
-## Still to measure / check
+## Still to measure / check (before printing)
 
-- The USB-B plug body (the 16 x 30 x 13 allowance is a guess).
-- What on the car sits past the -y lobe's -x edge (x < 56, y -70..-51, z 3..10): the charger's USB-C plug and cable need ~30 mm there (USB-C on a short end, Evan 2026-10-14).
-- Whether the P+ / P- runs (~150-170 mm, BMS on the holder -> -y lobe) clear the deck posts and the bank fence once routed.
-- The velcro's real thickness (4 mm assumed; it is the `VELCRO` constant in both .scad files).
-- The two Uno holes as a spot check of the peg pattern (not measured).
+- **Bench check (cheap, do first):** hold the BMS on the holder top at the rivet
+  end (pads toward +x, inner edge) and confirm B-, MB and fuse -> B+ all reach;
+  lay the 190 mm P wires across a 62 mm-wide stand-in for the bank to the
+  charger / XT30 spots.
+- The velcro pair's real thickness (4 mm assumed in both .scad files).
+- The bank USB-C -> Pi cable length (needs ~300-350 mm by the reserved route).
+- That the Pi's outer ports clear the 4 mm bracket legs on the port ends.
+- Lay the encoder cable along its route (~220-270 of 300).
+- The bank's charge LEDs: where they are, and whether the deck hides them.
+- The USB-B plug body (16 x 30 x 13 allowance).
+- The two Uno holes as a spot check of the peg pattern.

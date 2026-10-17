@@ -75,3 +75,15 @@ level outward; Evan confirmed the frames under them are level.
 **Why:** ease of setup and repair - three pins into the shield on the Uno; it drove the rack (incl. the left stop) on PC USB (HM-HQ) and on Pi USB with no reset or USB over-current (JN-JO).
 **Known cost / rejected:** Claude recommended `+5V2`: with the servo on the Uno 5V, 2 of 3 large swings lost serial bytes Uno -> Pi (JP). Mitigation: a 3-pin jumper (Uno 5V | servo + | `+5V2`) on the shield; re-measure CRC-reject rate while steering once the pack is on the shield.
 **Source:** records JN-JP, JR.
+
+## 2026-10-16 - tray v9 / deck v10 for the new 168 x 62.16 x 22.51 bank (Evan + Claude)
+**What:** bank pocket moved back (bank x -14.25..153.75, floor to x -16); bank fence 18 mm, -y wall open at the rear for the charge button; deck +8.5 (underside 54.5); ~4 mm velcro under EVERY part (bank, holder, Pi, fuse holder, BMS, charger, XT30); rocker moved from the rear tab to the deck's -y wing at (42, -64) with a power slot; BMS at the holder's +x rivet end; charger turned so its USB-C faces out the -y side; XT30 at the -y lobe's inner edge; fuse holder on the bank at x 10..60.
+**Why:** the old bank was flaky; the new one is 16.5 longer (servo mount at x ~157 forces it backward), 4.5 taller (fuse holder on velcro needs the deck at 54.5). The pack is soldered up to the XT30 male and Evan will NOT re-solder it, so the layout fits the wires as built (P+ / P- 4 x 190, fuse wire 326, MB 55, encoder 300 uncut). Evan chose deck +8.5 over thin tape under the fuse; Claude chose the -y wing for the rocker (the rear tab sits in the bank's port / cable exit; the rear wheels peak at z 11, Evan, so both were clear).
+**Rejected:** P+ / P- under the tray floor (would mean re-threading the soldered pack); fuse holder on thin tape with the deck at +4.5.
+**Source:** record JU; docs/ELECTRONICS_LAYOUT.md.
+
+## 2026-10-16 - reserve space for plugs and cables; deck grows rearward (Evan)
+**What:** tray v10 / deck v11: deck plate x -64..156, Uno behind a 40 mm USB-A plug zone, Pi x 40..131.8, rear posts x -12, holder fence end walls removed, Pi bracket end legs 4 mm, 15 LAYOUT clearance boxes (plugs, cable runs, terminals).
+**Why:** JU's layout passed the checker with no cable room (Pi USB-A 3.6 mm from the Uno, Pi USB-C plug near the mast, fence walls on the holder leads / MB joint). Evan chose rearward growth over right-angle cables (purchase) or a wider -y wing (car already 173 mm wide vs 155 track).
+**Cost:** car ~58 mm longer at deck height; 52 mm deck cantilever; servo lead needs a Dupont extension; bank->Pi USB-C ~300-350 mm.
+**Source:** record JV.
