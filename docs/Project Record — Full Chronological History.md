@@ -318,6 +318,7 @@ the dated entry, not the digest.
 - [JU - Tray v9 + deck v10 for the new 168 x 62.16 x 22.51 power bank, fitted to the soldered pack wires; final audit](#appendix-ju---tray-v9--deck-v10-for-the-new-168-x-6216-x-2251-power-bank-fitted-to-the-soldered-pack-wires-final-audit-2026-10-16-1850-cdt) (10-16)
 - [JV - Tray v10 + deck v11: room for wires and connectors (Pi / Uno first); encoder route explained](#appendix-jv---tray-v10--deck-v11-room-for-wires-and-connectors-pi--uno-first-encoder-route-explained-2026-10-16-1921-cdt) (10-16)
 - [JW - Bench results applied: tray v11 + deck v12 (velcro 3.5, Pi USB-C on its side, wing re-ordered, LEDs kept visible)](#appendix-jw---bench-results-applied-tray-v11--deck-v12-velcro-35-pi-usb-c-on-its-side-wing-re-ordered-leds-kept-visible-2026-10-16-2058-cdt) (10-16)
+- [JX - Camera mast v1 added to the layout checker: 9.0 mm worst-case gap to the camera-ribbon zone; no redesign needed](#appendix-jx---camera-mast-v1-added-to-the-layout-checker-90-mm-worst-case-gap-to-the-camera-ribbon-zone-no-redesign-needed-2026-10-16-2145-cdt) (10-16)
 
 ---
 
@@ -20177,3 +20178,35 @@ the deck); `--self-check` PASS. Two Sonnet agents edited; Opus re-rendered
 
 **Open:** the camera mast fit vs the ribbon zone and Evan's case modification;
 the encoder's real path (~30 mm spare).
+
+# Appendix JX - Camera mast v1 added to the layout checker: 9.0 mm worst-case gap to the camera-ribbon zone; no redesign needed (2026-10-16 ~21:45 CDT)
+**WHAT:** Evan chose "prove the fit" for the camera mast (options were: prove
+the fit, no-support printing, a two-camera mount, leave it). Mast v1 is
+unchanged; `scripts/electronics_layout.py` now checks it.
+
+**Why no redesign:** the conflict that prompted it is gone. In v11 the reserved
+Pi front zone held the USB-C plug + bend and ended ~5 mm from the mast; Evan's
+bench check (JW) put the USB-C on the Pi's SIDE, so only the flat camera ribbon
+leaves the front.
+
+**Change (scripts/electronics_layout.py):**
+- `MAST_STL` = cad/camera_mast.stl, moved from the servo-mount frame into the
+  tray frame by `MAST_OFFSET` = (167, 0, 18.89). x = servo shaft at tray ~170
+  (photo, +/-3, record HE) taken at the near end so the check is the worst
+  case; z = L tops 62.09 - frame top 43.2.
+- The mast counts as material in check (a): no LAYOUT box may reach into it.
+- New report: the nearest box behind the mast (sharing its y / z range), gap
+  found by marching forward in 0.5 mm steps on a 5 x 5 y / z grid with the
+  existing `inside` test.
+- self-check (e): a box planted inside the mast's base is caught.
+
+**Checks (real output, 2026-10-16 ~21:44 CDT):** layout 35 entries, 0 checks
+failed; "nearest box behind the camera mast: Pi front camera ribbon (front
+x=176.8); gap to the mast 9.0 mm (sampled, +/-0.5); mast bbox from x=179.0"
+(~12 mm at the nominal 170); self-check PASS incl. (e); run_checks 17 passed;
+docs/electronics_layout.svg unchanged. Not committed.
+
+**Limits:** the mast's position is a photo estimate; the servo mount is still not
+in the checker; the 200 mm ribbon needs ~75 mm of path, so ~125 mm folds flat.
+Mast v1 still needs supports under its 29-deg holder (not changed - Evan did not
+pick that option).

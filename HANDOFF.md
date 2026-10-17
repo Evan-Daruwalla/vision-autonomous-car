@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-16 ~20:59 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-16 ~21:45 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -677,8 +677,9 @@ NEXT ACTIONS, highest value first:
    OK, encoder ~30 mm spare, BMS spot OK, velcro 3.5, LEDs read from the side).
    Fit report + printer settings in the record. JU audit MED: the 54.5 mm
    8 x 8 posts bend across layers if knocked; JV: rear posts sit on the
-   floor's unsupported rear 12 mm - check flex. Camera mast fit vs the ribbon
-   zone when the mast is printed.
+   floor's unsupported rear 12 mm - check flex. Camera mast v1 now checked by
+   electronics_layout.py (JX): 9.0 mm gap to the ribbon zone at the worst-case
+   position - no mast change needed.
 5. Print / fit servo mount v7 (if not the mounted one), motor mount v6, camera
    mast v1. Record each.
 6. Audit HJ's HIGH: ml/splits.py split stability + a corpus id in checkpoints.

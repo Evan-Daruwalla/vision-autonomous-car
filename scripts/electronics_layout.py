@@ -27,6 +27,10 @@ every part/zone box against them:
      part resting on a part, within 0.5 mm).
   d) report only: for each layer-1 part/zone whose footprint overlaps the deck
      STL's xy bounding box, its top z and the gap up to the deck underside.
+  e) the camera mast: cad/camera_mast.stl is moved from the servo-mount frame
+     into the tray frame by MAST_OFFSET and counts as material in check a), so
+     no box may reach into it; the x gap from each box that ends in front of
+     the deck to the mast's rear (its bounding box: a lower bound) is reported.
 
 and writes docs/electronics_layout.svg: one panel per layer, a height map of
 the STL under the entries, a legend line per entry.
@@ -74,6 +78,11 @@ DECK_SCAD = REPO / "cad" / "scad" / "electronics_deck.scad"
 TRAY_STL = REPO / "cad" / "electronics_tray.stl"
 DECK_STL = REPO / "cad" / "electronics_deck.stl"
 DEFAULT_SVG = REPO / "docs" / "electronics_layout.svg"
+MAST_STL = REPO / "cad" / "camera_mast.stl"
+# servo-mount frame -> tray frame. x: servo shaft at tray x ~170 (photo, +/-3,
+# record HE), taken at the near end (167) so the check is the worst case; z: the
+# L tops are 62.09 above the floor, the frame top 43.2 (records HE, GD).
+MAST_OFFSET = (167.0, 0.0, 62.09 - 43.2)
 
 # ---- tunables (mm unless noted) ---------------------------------------------
 OPENSCAD_TIMEOUT = 120    # s
@@ -400,6 +409,31 @@ def build_svg(tray: np.ndarray, deck: np.ndarray, l1: list[dict], l2: list[dict]
 
 
 # ---- self-check -----------------------------------------------------------------
+def load_mast() -> np.ndarray:
+    """The camera mast's triangles, moved into the tray frame."""
+    return parse_stl(MAST_STL.read_bytes()) + np.asarray(MAST_OFFSET)
+
+
+def report_mast(entries: list[dict], mast: np.ndarray, step: float = 0.5) -> list[str]:
+    """For the box that ends nearest behind the mast (sharing its y / z range):
+    march forward in x from the box's front face on a 5 x 5 y / z grid until a
+    point is inside the mast. The gap is good to `step`."""
+    lo, hi = mast.reshape(-1, 3).min(axis=0), mast.reshape(-1, 3).max(axis=0)
+    behind = [e for e in entries if e["kind"] != "note" and e["pos"][0] + e["size"][0] <= lo[0]
+              and all(e["pos"][i] < hi[i] and e["pos"][i] + e["size"][i] > lo[i] for i in (1, 2))]
+    if not behind:
+        return []
+    e = max(behind, key=lambda b: b["pos"][0] + b["size"][0])
+    x1 = e["pos"][0] + e["size"][0]
+    ys = axis_samples(e["pos"][1], e["size"][1], 5, THIN)
+    zs = axis_samples(e["pos"][2], e["size"][2], 5, THIN)
+    gap = next((x - x1 for x in np.arange(x1, hi[0] + step, step)
+                if any(inside(mast, (x, y, z)) for y in ys for z in zs)), None)
+    found = f"{gap:.1f} mm (sampled, +/-{step})" if gap is not None else "none found"
+    return [f"report: nearest box behind the camera mast: {e['name']} (front x={x1:.1f}); "
+            f"gap to the mast {found}; mast bbox from x={lo[0]:.1f}"]
+
+
 def self_check(stls: list[np.ndarray] | None = None) -> None:
     """Plant one bug per check and prove it is caught; raises AssertionError if one
     slips through. Takes no argument when scripts/run_checks.py calls it."""
@@ -428,7 +462,12 @@ def self_check(stls: list[np.ndarray] | None = None) -> None:
     print(f"self-check (c) a floating box is caught: {'ok' if caught_c else 'NOT CAUGHT'}")
     print(f"self-check (c) a box resting on another box is supported: {'ok' if rests else 'FALSE ALARM'}")
     print(f"self-check (c) a clearance is not support-checked: {'ok' if skipped else 'CHECKED'}")
-    assert caught_a and caught_b and clean and caught_c and rests and skipped, \
+    # (e) a box inside the mast's base (servo frame x 28.3..36, y -20..20, z 0..7.8)
+    ox, _, oz = MAST_OFFSET
+    in_mast = dict(solid, name="fake in mast", size=[4.0, 4.0, 4.0], pos=[ox + 29.3, -2.0, oz + 1.0])
+    caught_e = any(not ok for ok, _ in check_material([in_mast], [load_mast()], []))
+    print(f"self-check (e) box planted inside the camera mast is caught: {'ok' if caught_e else 'NOT CAUGHT'}")
+    assert caught_a and caught_b and clean and caught_c and rests and skipped and caught_e, \
         "a planted bug was not caught (see the lines above)"
 
 
@@ -459,16 +498,17 @@ def main(argv=None) -> int:
         return 1
     tray = parse_stl(TRAY_STL.read_bytes())
     deck = parse_stl(DECK_STL.read_bytes())
+    mast = load_mast()
     entries = l1 + l2
 
     results = []
-    for res in (check_material(entries, [tray, deck], pegs),
+    for res in (check_material(entries, [tray, deck, mast], pegs),
                 check_overlap(entries),
                 check_support(entries, [tray, deck])):
         for ok, text in res:
             results.append(ok)
             print(f"PASS {text}" if ok else f"FAIL {text}")
-    for line in report_gaps(entries, deck):
+    for line in report_gaps(entries, deck) + report_mast(entries, mast):
         print(line)
 
     failed = results.count(False)

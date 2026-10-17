@@ -160,10 +160,14 @@ the BMS touches B+ / MB / B-; star ground at the TB6612 GND pad).
 - `./.venv/Scripts/python.exe scripts/electronics_layout.py`: 35 entries, 0
   checks failed. Fuse holder top z 51.3 -> 3.2 mm under the deck (two velcro
   pairs).
+- Camera mast (2026-10-16): `cad/camera_mast.stl` is loaded into the tray frame
+  (servo shaft taken at x 167, the near end of the photo's 170 +/- 3) and counts
+  as material, so no box reaches into it. Nearest box behind it: the Pi front
+  camera-ribbon zone, sampled gap 9.0 mm (+/- 0.5; ~12 at the nominal 170).
 
 What this does NOT prove: any fit (unprinted), the plug sizes (estimates), the
-camera mast and servo mount clearances (not in the checker), or that the cables
-reach.
+servo mount clearance (not in the checker), the mast's real position (photo
+estimate), or that the cables reach.
 
 ## Bench results (Evan, 2026-10-16, before printing)
 
@@ -180,8 +184,9 @@ reach.
 
 ## Still to measure / check
 
-- Fit the camera mast against the camera-ribbon zone (and Evan's case
-  modification for the camera opening).
+- The camera mast's real position once printed (the checker assumes the servo
+  shaft at x 167..170 from a photo); Evan's case modification for the camera
+  opening.
 - The encoder cable's real path once installed (~30 mm spare).
 - The USB-B plug body (16 x 30 x 13 allowance).
 - The two Uno holes as a spot check of the peg pattern.
