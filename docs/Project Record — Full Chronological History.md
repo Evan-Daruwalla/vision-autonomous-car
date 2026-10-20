@@ -319,6 +319,9 @@ the dated entry, not the digest.
 - [JV - Tray v10 + deck v11: room for wires and connectors (Pi / Uno first); encoder route explained](#appendix-jv---tray-v10--deck-v11-room-for-wires-and-connectors-pi--uno-first-encoder-route-explained-2026-10-16-1921-cdt) (10-16)
 - [JW - Bench results applied: tray v11 + deck v12 (velcro 3.5, Pi USB-C on its side, wing re-ordered, LEDs kept visible)](#appendix-jw---bench-results-applied-tray-v11--deck-v12-velcro-35-pi-usb-c-on-its-side-wing-re-ordered-leds-kept-visible-2026-10-16-2058-cdt) (10-16)
 - [JX - Camera mast v1 added to the layout checker: 9.0 mm worst-case gap to the camera-ribbon zone; no redesign needed](#appendix-jx---camera-mast-v1-added-to-the-layout-checker-90-mm-worst-case-gap-to-the-camera-ribbon-zone-no-redesign-needed-2026-10-16-2145-cdt) (10-16)
+- [JY - Camera mast v2: prints with supports OFF (two loose tabs under the side members)](#appendix-jy---camera-mast-v2-prints-with-supports-off-two-loose-tabs-under-the-side-members-2026-10-16-2150-cdt) (10-16)
+- [JZ - Camera mast: JY's print tabs removed (Evan); geometry back to v1, paint supports under the side members](#appendix-jz---camera-mast-jys-print-tabs-removed-evan-geometry-back-to-v1-paint-supports-under-the-side-members-2026-10-16-2200-cdt) (10-16)
+- [KA - Scheduled daily-audit: 48 findings, 3 high - BOM.md still feeds the Uno 5V pin from the LM2596 while the Uno is now on a plain Pi USB cable, and HANDOFF's top section and paste-ready prompt contradict JK/JM/JQ](#appendix-ka---scheduled-daily-audit-48-findings-3-high---bommd-still-feeds-the-uno-5v-pin-from-the-lm2596-while-the-uno-is-now-on-a-plain-pi-usb-cable-and-handoffs-top-section-and-paste-ready-prompt-contradict-jkjmjq-2026-10-17-0738-cdt) (10-17)
 
 ---
 
@@ -20210,3 +20213,130 @@ docs/electronics_layout.svg unchanged. Not committed.
 in the checker; the 200 mm ribbon needs ~75 mm of path, so ~125 mm folds flat.
 Mast v1 still needs supports under its 29-deg holder (not changed - Evan did not
 pick that option).
+
+# Appendix JY - Camera mast v2: prints with supports OFF (two loose tabs under the side members) (2026-10-16 ~21:50 CDT)
+**WHAT:** Camera mast v2: prints with supports OFF (Evan asked for this after
+JX). Generated and checked; UNTESTED (not printed).
+
+**Where v1 needed support (worked out from the v1 geometry, not a slicer):**
+- The side members' rear 16.3 mm (x 12..28.3, y +/-12.3..20, underside z 7.8)
+  hung in the air with ONE anchor, the base (x 28.3..36). This was the real
+  support need; v1's header only named the holder.
+- The holder's 29-deg underside: held by the ribs (|y| 9..11) and uprights
+  (|y| 12.7..16.3). Lowest edges: back plate (19.07, 36.99), bottom stops
+  (22.85, 34.90) (servo-mount frame x, z). The widest free span is 18 mm
+  (y -9..9), within the 20 mm bridge rule (Rule 7). The stops overhang the rib
+  by ~0.9 mm at their lowest edge. The back plate's underside in the middle
+  may sag slightly; it is not a fit face, and the camera ribbon passes below
+  it.
+- Rib and upright side faces are at most 20 deg from vertical; the front
+  upright edge is 3 deg.
+
+**Change (`cad/scad/camera_mast.scad`):** two tabs `TAB_X` x 12..12.8 (2
+perimeters), full side-member width, z 0..7.5. They sit `TAB_GAP` 0.3 (2 layers
+at 0.15) under the members, so the members' undersides become 15.5 mm bridges
+between the base and the tab tops. The tabs are separate loose bodies: pull
+both out before fitting, because the servo-mount rails sit there. Header PRINT
+note updated. Probes +6: tab solid / gap open / behind-tab open.
+
+**Checks (real output, 2026-10-16 ~21:49 CDT):** camera_mast render manifold
+PASS, 81/81 probes, bbox unchanged (12, -20, 0)..(38.737, 20, 64.734);
+electronics_layout.py 35 entries, 0 checks failed; mast gap to the ribbon zone
+still 9.0 mm (the tabs are low, z <= 26 in the tray frame); SVG unchanged.
+check_artifacts / run_checks: see the commit.
+
+**Honest limits:** no slicer preview was run; the "18 mm span prints clean"
+claim is the bridge rule, not a test. Fit and print quality are untested.
+
+# Appendix JZ - Camera mast: JY's print tabs removed (Evan); geometry back to v1, paint supports under the side members (2026-10-16 ~22:00 CDT)
+**WHAT:** Evan asked what the two thin bits next to the mast's mount were
+(JY's loose print tabs), then: "delete them". Taken as the tabs, not the ribs.
+That is stated as an assumption; the ribs brace the holder and stay. Both tabs
+are removed, so the mast geometry is v1 again: `cad/camera_mast.stl` is
+byte-identical to the committed v1 STL, and the probe file matches v1 (75/75
+PASS, manifold).
+
+**Consequence:** the side members' rear 16.3 mm overhang (x 12..28.3,
+underside z 7.8, one anchor) needs support again. The header PRINT note now
+says: paint supports under the two side members' rear ends only. JY's finding
+stands for the holder: no support needed (widest free span 18 mm).
+
+**Not committed** (JY's tab version was never committed either).
+
+# Appendix KA - Scheduled daily-audit: 48 findings, 3 high - BOM.md still feeds the Uno 5V pin from the LM2596 while the Uno is now on a plain Pi USB cable, and HANDOFF's top section and paste-ready prompt contradict JK/JM/JQ (2026-10-17, ~07:38 CDT)
+Audit run - 48 findings (3 high, 20 med, 25 low), top: docs/BOM.md:280,291,324-333 still says to feed the Uno 5V pin from the LM2596 and to cut the USB 5V wire. Since JF the Uno runs on a plain Pi USB cable, so following the BOM ties two 5 V supplies together.
+
+Scheduled `daily-audit` run (read-only; nothing fixed, nothing committed). Classified
+ACTIVE by the churn override: audit IM (2026-10-14 ~07:37 CDT, commit 08930ca) was
+followed by 15 non-audit commits (08930ca..HEAD). HEAD 70fff6e, equal to origin/main
+(git ls-remote, fetched). Uncommitted at audit time: JY, JZ, the camera_mast.scad
+comment edit, HANDOFF.md, .claude/pm-cadence.json.
+
+Method: /audit with 3 cold Sonnet workers (W1 CAD + layout code M1/M2/M3/M6/M7 +
+G1-G4; W2 docs D1-D8; W3 electrical cross-domain X-series + M7), then /landing-check
+(1 fresh agent) on JY/JZ. ml/ and firmware/ had zero diff since 08930ca and were not
+re-swept (covered by IM). Session re-ran: layout checker (35 entries, 0 checks failed,
+exit 0), pm-secretscan --history and --worktree (0 findings), the highs below.
+
+## High (all CONFIRMED by the session)
+
+1. docs/BOM.md:280,291,324-333 (+ row 20 :51, row 12 :41) - the wiring section is not
+   struck or dated and still says "Uno 5V pin fed from the LM2596" and "USB 5V wire
+   must be cut". JF, WIRING_PROTOSHIELD.md:101 and pack_wiring_full.svg:132 say the
+   opposite. Wiring it the BOM way while using the plain cable ties the Pi USB 5 V
+   and +5V2 together on the Uno 5V node.
+2. HANDOFF.md:599-603 - the paste-ready prompt says the board was "flashed 2026-10-13"
+   (HY) and that "host_test.py has NOT been run on this build". JM/JQ re-flashed it on
+   2026-10-16 ~17:22, and HANDOFF.md:669 says host_test was all ok.
+3. HANDOFF.md:32-34 and :39 - "Actuators are still unwired ... no ... pack exists" and
+   the camera is "Not yet connected or tested". In fact the servo is wired (HY/JQ
+   banner), the pack is built and charged (IU-JA), and the camera works (JK).
+
+## Med (top items)
+
+- PRD_ROADMAP.md:204,207,628 - the architecture section still says cut cable and LM2596
+  @ 5.2 V -> servo, Uno 5V pin.
+- WIRING_PROTOSHIELD.md:125,179 - "5 V wire CUT" / "conductor is cut" are not struck.
+- decisions.md:62 - JF's servo-on-+5V2 clause is not marked superseded by JR (:73-77).
+- hardware.md:241-243,277-278, architecture.md:95-96, LIGHTING_SPEC.md:113 still say
+  data-only USB, Uno fed from the LM2596.
+- important.md:58 (#9) says `git add -A` is "hard-denied". No deny rule exists in
+  either settings file.
+- HANDOFF.md:5 says "246 appendices A-IL". The record has 286 (A-JZ).
+- LM2596 4.99 V is credited to JE (svg:88, HANDOFF:617, PRD:642), but JE records
+  4.95 V. The nudge to 4.99 V is only in hardware.md:553, with no source.
+- WIRING:469 step 6 meters +5V2 for servo sag, but the servo is no longer on +5V2.
+  hardware.md:49-53 calls the 600 mA Pi USB cap irrelevant. That is untrue after JF/JR.
+- README.md:10,117 (public) still says nothing is ordered or bought. Open since IM.
+- scripts/electronics_layout.py:229 - the support check passes if any single grid
+  point is supported; an empty LAYOUT also passes with exit 0 (:495-503); nothing
+  checks that the tray posts line up with the deck bosses.
+- electronics_deck.scad:71,151 - the LM2596 board edge is flush (0.0 mm) with the
+  Pi-side boss (W1 harness; REPORTED).
+- ELECTRONICS_LAYOUT.md:47-51,63 - z values are stale (velcro 4.0 era). The v9/v11
+  headings and the #3/#5 cross-refs at :98,:108 are also stale.
+
+## Low (25)
+
+camera_mast.scad:14 contradicts :17-20 after JZ, and :15 is labelled "v2" over v1
+geometry. Other lows: checker edge cases (peg skip on all layers, thin-rib grid gap,
+negative size accepted, OpenSCAD WARNING ignored, SVG written on failure), stale
+comments in tray/deck scads, WIRING status lines and line cites, untracked
+firmware/uno_control/build/ and .claude/*.tmp not ignored, a public record carries
+the Pi hostname/user, and important.md #9 says 2 home-path occurrences while a
+case-insensitive grep finds 3 (record lines 5927, 6646, 13645).
+
+## Verified true
+
+Layout checker 35 entries / 0 failed, exit 0, and it fails closed on a planted
+collision (W1). All three STLs are byte-identical to fresh renders. JZ "geometry back
+to v1" is TRUE: the scad diff is comment-only, and the render is byte-identical to
+the HEAD STL (75/75 probes). Record structure: 286 headings = 286 TOC lines, all
+anchors resolve, 0 deletions since 08930ca. BOM total $422.25 re-summed. Firmware
+pins match the WIRING tables. Fuse path, polarity and the common ground are
+consistent across the docs and SVGs. Secret scan clean.
+
+## Not done
+
+No fixes. No commit. The PM-CADENCE bin reminder was skipped because this run is
+read-only.

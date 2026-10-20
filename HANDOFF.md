@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-16 ~21:45 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-16 ~22:00 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -644,7 +644,7 @@ holder, BMS, charger, XT30); deck underside z 54.5; rocker on the deck's -y
 wing (rear tab gone); BMS at the holder's +x rivet end; charger USB-C out the
 -y side; layout fitted to the SOLDERED pack wires (P+/P- 4 x 190, fuse wire
 326, MB 55 - Evan will not re-solder); NO zip ties. Servo mount v7, motor mount v6, camera
-mast v1. All UNTESTED at these versions except the coupon and gauge. Slice the
+mast v1 geometry (JY tabs removed, JZ: paint supports under the side members only). All UNTESTED at these versions except the coupon and gauge. Slice the
 tray and deck with supports OFF.
 ELECTRONICS LAYOUT: docs/ELECTRONICS_LAYOUT.md + docs/electronics_layout.svg
 (scripts/electronics_layout.py, 35 entries, 0 failed; JU + JV audit tables); pack wiring picture
@@ -681,7 +681,7 @@ NEXT ACTIONS, highest value first:
    electronics_layout.py (JX): 9.0 mm gap to the ribbon zone at the worst-case
    position - no mast change needed.
 5. Print / fit servo mount v7 (if not the mounted one), motor mount v6, camera
-   mast v1. Record each.
+   mast (paint supports under the 2 side members only, JZ). Record each.
 6. Audit HJ's HIGH: ml/splits.py split stability + a corpus id in checkpoints.
 7. Small backlog: host_test.py docstring and SERIAL_PROTOCOL.md:9 still say
    nothing is wired; servo_bench prompt "400-2600" (US_MAX 2800);

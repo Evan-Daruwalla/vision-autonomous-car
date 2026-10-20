@@ -12,6 +12,12 @@
 // "+" holes; then the mast drops on over all four from above.
 //
 // PRINT: print base-down; enable supports for the holder's 29-deg bottom.
+// v2 (2026-10-16): two loose print tabs under the side members were added so
+// it printed with supports OFF, then REMOVED at Evan's request (record JY and
+// the entry after it). Geometry = v1. PRINT: paint supports under the two side
+// members' rear ends only (x 12..28.3, underside z 7.8 - a 16.3 mm overhang
+// with one anchor); the holder's 29-deg underside needs none (ribs + uprights,
+// widest free span 18 mm).
 //
 // FRAME = the servo-mount frame: origin on the servo shaft axis, x forward
 // (studs 1-3 at x 8, 16, 24), y across (L rows at y +/-16), z = 0 on the L
