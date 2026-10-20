@@ -325,6 +325,7 @@ the dated entry, not the digest.
 - [KB - Deck v13: LM2596 was flush against a Lego-pin boss (Evan caught it); checker now fails parts touching material at a side](#appendix-kb---deck-v13-lm2596-was-flush-against-a-lego-pin-boss-evan-caught-it-checker-now-fails-parts-touching-material-at-a-side-2026-10-20-1757-cdt) (10-20)
 - [KC - Rocker switch has 2 pins (Evan): plain SPST in the + line, orientation does not matter](#appendix-kc---rocker-switch-has-2-pins-evan-plain-spst-in-the--line-orientation-does-not-matter-2026-10-20-1816-cdt) (10-20)
 - [KD - Pack wiring diagram redrawn: W1-W17 with lengths, star bar, cut list (scripts/pack_wiring_svg.py)](#appendix-kd---pack-wiring-diagram-redrawn-w1-w17-with-lengths-star-bar-cut-list-scriptspack_wiring_svgpy-2026-10-20-1853-cdt) (10-20)
+- [KE - BOM wiring section superseded: Uno on the Pi USB, +5V2 never on the Uno 5V pin (audit KA HIGH #1)](#appendix-ke---bom-wiring-section-superseded-uno-on-the-pi-usb-5v2-never-on-the-uno-5v-pin-audit-ka-high-1-2026-10-20-1855-cdt) (10-20)
 
 ---
 
@@ -20431,3 +20432,23 @@ reviewed render. Not committed.
 **Not changed:** the KA audit's HIGH (BOM.md wiring section still says the
 LM2596 feeds the Uno 5V pin) is still open. The new drawing agrees with JF:
 the Uno is on the Pi's USB.
+
+# Appendix KE - BOM wiring section superseded: Uno on the Pi USB, +5V2 never on the Uno 5V pin (audit KA HIGH #1) (2026-10-20 ~18:55 CDT)
+**WHAT:** Fixed audit KA's HIGH #1. `docs/BOM.md`'s wiring architecture still
+fed the Uno 5V pin from the LM2596 and said the USB 5V wire "must be cut". Wiring it
+that way while using the plain Pi cable (JF) would tie the Pi's USB 5 V and
+`+5V2` together on the Uno 5V node.
+
+**Change (dated, history kept):**
+- A SUPERSEDED 2026-10-16 note heads the section: Uno on the Pi's USB over a
+  plain cable; `+5V2` only for the strips and encoder, never the Uno 5V pin;
+  servo on the Uno 5V header (JR).
+- The "Why the Uno sits on the motor rail" and "Why the USB 5V wire must be cut"
+  paragraphs are struck, with the reason added after each.
+- The "USB data only" rule is amended: no power path still runs between the
+  Pi's bank and the pack.
+- Row 12 (LM2596) loads struck to "both strips + encoder". The 0.92-1.20 A peak
+  is struck and NOT re-derived.
+
+**Not done:** the KA MEDs (PRD_ROADMAP.md:204,207,628 still say cut cable /
+LM2596 at 5.2 V -> servo, Uno 5V pin) and HIGH #2 / #3 (HANDOFF top section).
