@@ -59,7 +59,7 @@ a 52 mm cantilever behind them, stiffened by two 2 x 3 mm ribs under it.
 |---|---|---|---|---|
 | 1 | Raspberry Pi 5 in Vilros case 91.8 x 64.4 x 27.2 | 40.0..131.8 / -32.2..32.2 / 60.5..87.7 | velcro + brackets 10 mm tall: +x end legs 4 mm, both +y side legs, the -y side leg at the -x corner (v12: the -x end legs and the -y leg at the +x corner removed so the plugs clear) | -x: USB-A + LAN, 4 mm from the case sides (Evan); -y SIDE: USB-C ~7 mm from the +x end (Evan 2026-10-16 - NOT the back end, as the 2026-10-12 note implied); +x: camera opening mid-face (Evan is modifying the case); fan on top |
 | 2 | Arduino Uno R3 + proto shield, 53.7 x 70 x 24 | -58.2..-4.5 / -35..35 / 63.0..87.0 | 4 standoffs (6 mm) + pegs, 2 ribs under | -y end: USB-B (plug box below) and DC jack |
-| 3 | LM2596 buck, 5.00 V, with display, 66 x 36 x 14 | 10..76 / -78..-42 / 60.0..74.0 | 4 standoffs + 3.2 pegs (57.5 x 31.5) | display up; terminals at the short ends (Evan confirmed) |
+| 3 | LM2596 buck, 5.00 V, with display, 66 x 36 x 14 | 10..76 / -74..-38 / 60.0..74.0 (v13: +4 in y, 4 mm clear of the lobe boss at (60, -82)) | 4 standoffs + 3.2 pegs (57.5 x 31.5) | display up; terminals at the short ends (Evan confirmed) |
 | 4 | Rocker switch, 21.0 hole at (100, -64) on the -y wing (WING_X 0..132) | body 88.55..111.45 / -75.45..-52.55 / 30.7..54.5 | snap-in | hangs over the XT30 / charger (terminals end z 20.7, charger top 13.3); power slot x 96..104, y -49.5..-45.5 for VBAT / GND up to the shield |
 
 ## Reserved space (clearance boxes, both layers)
@@ -72,7 +72,7 @@ a 52 mm cantilever behind them, stiffened by two 2 x 3 mm ribs under it.
 | Pi fan / top access | over the Pi, 15 mm | airflow, SD / cable access |
 | Uno shield wiring | over the Uno, 20 mm | Dupont housings, servo / encoder / strip leads |
 | Uno USB-B plug | -53..-37 / -72.3..-42.3 / 63.6..76.6 | allowance 16 x 30 x 13 (plug NOT measured) |
-| LM2596 terminals | 0..10 and 76..86 / -78..-42 / 60..74 | screw terminals at both short ends (Evan confirmed) |
+| LM2596 terminals | 0..10 and 76..86 / -74..-38 / 60..74 | screw terminals at both short ends (Evan confirmed) |
 | Rocker terminals | below the body, z 20.7..30.7 | spade / solder tabs |
 | Bank USB-C plug | -44.25..-14.25 / -30..-16 / 19..31 | plug at the bank's rear -y corner |
 | Bank USB-C cable along the bank's -y side | -14..154 / -37.6..-33.6 / 28..34 | below the bank's top, so it never covers the charge LEDs |
@@ -158,7 +158,8 @@ the BMS touches B+ / MB / B-; star ground at the TB6612 GND pad).
   change), deck 97/97, both manifold, exit 0 (re-run by Opus: identical to the
   agents' STLs).
 - `./.venv/Scripts/python.exe scripts/electronics_layout.py`: 35 entries, 0
-  checks failed. Fuse holder top z 51.3 -> 3.2 mm under the deck (two velcro
+  checks failed. Since 2026-10-20 a part's sides must also be 0.2 mm clear of
+  material (deck v12 put the LM2596 flush against a boss; Evan caught it). Fuse holder top z 51.3 -> 3.2 mm under the deck (two velcro
   pairs).
 - Camera mast (2026-10-16): `cad/camera_mast.stl` is loaded into the tray frame
   (servo shaft taken at x 167, the near end of the photo's 170 +/- 3) and counts

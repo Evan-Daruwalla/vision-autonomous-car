@@ -322,6 +322,7 @@ the dated entry, not the digest.
 - [JY - Camera mast v2: prints with supports OFF (two loose tabs under the side members)](#appendix-jy---camera-mast-v2-prints-with-supports-off-two-loose-tabs-under-the-side-members-2026-10-16-2150-cdt) (10-16)
 - [JZ - Camera mast: JY's print tabs removed (Evan); geometry back to v1, paint supports under the side members](#appendix-jz---camera-mast-jys-print-tabs-removed-evan-geometry-back-to-v1-paint-supports-under-the-side-members-2026-10-16-2200-cdt) (10-16)
 - [KA - Scheduled daily-audit: 48 findings, 3 high - BOM.md still feeds the Uno 5V pin from the LM2596 while the Uno is now on a plain Pi USB cable, and HANDOFF's top section and paste-ready prompt contradict JK/JM/JQ](#appendix-ka---scheduled-daily-audit-48-findings-3-high---bommd-still-feeds-the-uno-5v-pin-from-the-lm2596-while-the-uno-is-now-on-a-plain-pi-usb-cable-and-handoffs-top-section-and-paste-ready-prompt-contradict-jkjmjq-2026-10-17-0738-cdt) (10-17)
+- [KB - Deck v13: LM2596 was flush against a Lego-pin boss (Evan caught it); checker now fails parts touching material at a side](#appendix-kb---deck-v13-lm2596-was-flush-against-a-lego-pin-boss-evan-caught-it-checker-now-fails-parts-touching-material-at-a-side-2026-10-20-1757-cdt) (10-20)
 
 ---
 
@@ -20340,3 +20341,33 @@ consistent across the docs and SVGs. Secret scan clean.
 
 No fixes. No commit. The PM-CADENCE bin reminder was skipped because this run is
 read-only.
+
+# Appendix KB - Deck v13: LM2596 was flush against a Lego-pin boss (Evan caught it); checker now fails parts touching material at a side (2026-10-20 ~17:57 CDT)
+**WHAT:** Evan (2026-10-20): "the hole for the lego connectors interfere with
+the buck converter". He is right; the layout checker missed it.
+
+**Symptom -> root cause -> fix:**
+- Symptom: in deck v12 (JW) the LM2596 box (x 10..76, y -78..-42, from z 60)
+  sat flush against the -y lobe boss at (60, -82) (8 x 8, y -86..-78, z
+  54.5..62.3). The boss rises 2.3 mm above the board's underside, with 0 mm
+  side gap. JW's wing re-order moved the board from x 62..128 (which only
+  grazed that boss) onto it.
+- Root cause: `electronics_layout.py` check (a) samples only INSIDE each box
+  (inset 0.3) and check (b) treats a shared face as no overlap. So a part
+  pressed flush against a raised printed feature passed.
+- Fix (checker): parts (not zones or clearances) now also fail if material is
+  within `SIDE_CLEAR` = 0.2 mm outside any side face. Pockets give 0.25, so
+  the fenced bank, holder and Pi still pass. Run on deck v12, it failed only
+  the LM2596: "material inside or within 0.2 mm of a side at (59.35, -78.20,
+  60.30)". No other part flagged. Self-check (a2): a part flush against a tray
+  post is caught.
+- Fix (deck v13): LM2596 +4 in y, so y -74..-38 with a 4 mm gap to the boss.
+  Pegs `LM_XY` y -44.25 / -75.75 -> -40.25 / -71.75; terminal zones follow.
+  The probe for the peg moved with it.
+
+**Checks (real output, 2026-10-20 ~17:56 CDT):** deck render 97/97 probes,
+manifold; layout 35 entries, 0 checks failed; self-check PASS incl. (a2);
+check_artifacts 40, 0 drifted; run_checks 17 passed. Not committed.
+
+**Lesson:** "0 checks failed" said nothing about contact, only about overlap.
+Every new check type should be run once against a known-bad case first.

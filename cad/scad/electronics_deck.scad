@@ -21,6 +21,9 @@ VELCRO = 3.5;             // velcro pair thickness under the Pi case (Evan 2026-
 // v10 (2026-10-16): underside 46 -> 54.5 (deck +8.5, Evan): the new 168 x 62.16 x 22.51 power bank is 4.5 taller and the fuse holder on it now sits on ~4 mm velcro. Rear rocker tab deleted (the longer bank and its rear USB cables sit there); the rocker moves to the -y wing (WING_X 56 -> 24), hole at (42, -64), body hangs to z 30.7, clear of the rear wheels (peak z 11, Evan). New 8 x 4 power slot (x 38..46, y -49.5..-45.5) for VBAT / GND from the rocker up to the shield.
 // v11 (2026-10-16): room for wires and connectors (Evan). Plate rear edge -6 -> -64; rear bosses x 10 -> -12; Pi case 55.1 -> 40.0 (front USB-C plug + bend clear of the camera mast); Uno moved back 56 mm behind a 40 mm USB-A plug zone, two 3 mm ribs under it stiffen the 52 mm cantilever; Pi bracket legs on the port ends 10 -> 4 mm (BR_LEG_END) so they don't block the outer plugs; vent window follows the Pi. LAYOUT: clearance boxes reserve plug, cable and access space.
 // v12 (2026-10-16): Evan's bench results - velcro 3.5 per mated pair (15.5 mm dots); Pi USB/LAN ports sit 4 mm from the case sides, so both -x end bracket legs are removed; the Pi's USB-C is on its -y SIDE 7 mm from the +x end (not the back), so the -y side leg at the +x corner is removed and the -y wing is re-ordered: LM2596 x 10..76, rocker at (100, -64) over the XT30 / charger, power slot x 96..104; WING_X 24 -> 0.
+// v13 (2026-10-20): LM2596 moved +4 in y (y -74..-38, pegs y -40.25 / -71.75): Evan saw the board
+// flush against the lobe boss at (60, -82), which rises 2.3 mm above the board's underside. The layout
+// checker now also fails a part whose side touches material (SIDE_CLEAR 0.2).
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, pin rows at y = +/-24; z = 0 on the Lego frames' top face. The deck's
@@ -68,7 +71,7 @@ UNO_PEG_H = 3.0;          // z 54.5..57.5
 
 // LM2596 standoffs and pegs
 // Evan 2026-10-13: holes 3.5 dia, 61 outer edge to outer edge -> 57.5 centre to centre, 31.5 the other way
-LM_XY = [[14.25, -44.25], [71.75, -44.25], [14.25, -75.75], [71.75, -75.75]];
+LM_XY = [[14.25, -40.25], [71.75, -40.25], [14.25, -71.75], [71.75, -71.75]];   // v13: +4 in y, 4 mm clear of the boss at (60, -82)
 LM_SO_D = 6.0;
 LM_SO_H = 3.0;            // z 48.5..51.5
 LM_PEG_D = 3.5 - fit_offset("slide");   // 3.2 in the 3.5 holes
@@ -148,7 +151,7 @@ LAYOUT = [
   ["Raspberry Pi 5 in Vilros case", [91.8, 64.4, 27.2], [40.0, -32.2, DECK_TOP + VELCRO], "part", "velcro + brackets: +x end legs 4 mm, +y side legs, -y side leg at the -x corner (ports clear)", "+x: camera opening (mid-face); -y side: USB-C 7 mm from the +x end; -x: USB-A + LAN (4 mm from the sides)"],
   ["Arduino Uno R3 + proto shield (TB6612, caps, divider)", [53.7, 70, 24], [-58.18, -35, DECK_TOP + UNO_SO_H], "part", "4 standoffs + pegs", "-y: USB-B (overhangs 7.3) + DC jack (4.1); jack positions NOT measured"],
   ["USB-B plug clearance (16 x 30 x 13 allowance, plug NOT measured)", [16, 30, 13], [-53, -72.3, DECK_TOP + UNO_SO_H + 1.6 - 1.0], "clearance", "hangs from the Uno jack", "-y: to the Pi"],
-  ["LM2596 buck, 5.00 V (display)", [66, 36, 14], [10, -78, DECK_TOP + LM_SO_H], "part", "4 standoffs + pegs", "display up; trim pot locked"],
+  ["LM2596 buck, 5.00 V (display)", [66, 36, 14], [10, -74, DECK_TOP + LM_SO_H], "part", "4 standoffs + pegs", "display up; trim pot locked"],
   ["rocker switch (20 mm round)", [20, 20, 0], [90, -74, DECK_TOP], "note", "snap-in 21 mm hole on the -y wing", "body hangs 23.8 below the wing (to z 30.7)"],
   ["rocker body below the -y wing (clips 22.9, depth 23.8)", [22.9, 22.9, 23.8], [88.55, -75.45, DECK_BOT - 23.8], "clearance", "snap-in 21 mm hole", ""],
   ["Pi USB-A / LAN plugs", [41.7, 64.4, 27.2], [-2, -32.2, DECK_TOP + VELCRO], "clearance", "keep clear", ""],
@@ -156,8 +159,8 @@ LAYOUT = [
   ["Pi USB-C plug (-y side, 7 mm from the +x end)", [15, 45, 27.2], [116.8, -77.2, DECK_TOP + VELCRO], "clearance", "keep clear", ""],
   ["Pi fan / top access", [91.8, 64.4, 15], [40.0, -32.2, DECK_TOP + VELCRO + 27.2], "clearance", "keep clear", ""],
   ["Uno shield wiring", [53.7, 70, 20], [-58.18, -35, DECK_TOP + UNO_SO_H + 24], "clearance", "keep clear", ""],
-  ["LM2596 terminals -x", [10, 36, 14], [0, -78, DECK_TOP + LM_SO_H], "clearance", "keep clear", ""],
-  ["LM2596 terminals +x", [10, 36, 14], [76, -78, DECK_TOP + LM_SO_H], "clearance", "keep clear", ""],
+  ["LM2596 terminals -x", [10, 36, 14], [0, -74, DECK_TOP + LM_SO_H], "clearance", "keep clear", ""],
+  ["LM2596 terminals +x", [10, 36, 14], [76, -74, DECK_TOP + LM_SO_H], "clearance", "keep clear", ""],
   ["rocker terminals", [22.9, 22.9, 10], [88.55, -75.45, DECK_BOT - 23.8 - 10], "clearance", "keep clear", ""]
 ];
 for (p = LAYOUT) if (p[3] != "note") ghost_box(p[1], p[2]);

@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-16 ~22:00 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-20 ~17:57 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -633,7 +633,7 @@ PRINTING: EVERY car part is Bambu PETG Translucent, 250 C / 70 C, P1S 0.4,
 0.15 mm layers, 2 walls, X-Y hole comp 0 (IC). Pins stay 4.95 (coupon row D);
 pocket 0.25/side (IF). press_shaft (+0.15) is PLA-calibrated only.
 PARTS (OpenSCAD in cad/scad/, render_scad.py + probes, check_artifacts):
-electronics tray v11 + deck v12 (JU + JV + JW, 2026-10-16: NEW power bank 168 x
+electronics tray v11 + deck v13 (JU + JV + JW, 2026-10-16; v13 = LM2596 +4 mm clear of a boss, 2026-10-20: NEW power bank 168 x
 62.16 x 22.51; JV = room for plugs / cables: deck x -64..156, Uno moved back
 behind a 40 mm USB-A zone, Pi x 40..131.8, rear posts x -12, 15 clearance
 boxes; JW = Evan's bench results: velcro 3.5 mm dots, Pi USB-C on its -y
@@ -673,7 +673,7 @@ NEXT ACTIONS, highest value first:
    big swings). Full pack picture: docs/pack_wiring_full.svg (JS).
 3. Charger board 2 no-load test (BAT lifted, USB-C in, BAT to GND: 8.4 V OK,
    >= 8.6 V reject). Optional: the barrel-cable voltage test (JG).
-4. PRINT tray v11 + deck v12 (supports OFF): bench checks DONE (JW - cable
+4. PRINT tray v11 + deck v13 (supports OFF): bench checks DONE (JW - cable
    OK, encoder ~30 mm spare, BMS spot OK, velcro 3.5, LEDs read from the side).
    Fit report + printer settings in the record. JU audit MED: the 54.5 mm
    8 x 8 posts bend across layers if knocked; JV: rear posts sit on the

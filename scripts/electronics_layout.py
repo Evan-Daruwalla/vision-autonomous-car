@@ -91,6 +91,7 @@ INSET = 0.3               # samples sit this far inside every face
 THIN = 0.9                # boxes thinner than this get one mid-plane z sample
 GRID_XYZ = (5, 5, 3)      # material samples per axis
 PEG_CLEAR = 2.5           # skip material samples this close (x, y) to a peg
+SIDE_CLEAR = 0.2          # a part's sides must be this clear of material (pockets give 0.25)
 SUPPORT_STEP = 2.0        # support grid pitch
 SUPPORT_DROP = 0.3        # support point sits this far below the bottom face
 PART_REST = 0.5           # a box resting on another box's top face counts as supported
@@ -193,9 +194,23 @@ def check_material(entries: list[dict], stls: list[np.ndarray], pegs: list) -> l
                     break
             if len(bad) == MAX_MATERIAL_REPORTS:
                 break
+        # a part may not TOUCH material at its sides either (a box flush against a
+        # raised boss passes the inside test; 2026-10-20 LM2596 vs the deck boss)
+        if e["kind"] == "part" and not bad:
+            o = SIDE_CLEAR
+            ring = [(x, y0 - o) for x in xs] + [(x, y0 + sy + o) for x in xs] \
+                + [(x0 - o, y) for y in ys] + [(x0 + sx + o, y) for y in ys]
+            for x, y in ring:
+                if any((x - p[0]) ** 2 + (y - p[1]) ** 2 <= PEG_CLEAR ** 2 for p in pegs):
+                    continue
+                hit = next((z for z in zs if any(inside(t, (x, y, z)) for t in stls)), None)
+                if hit is not None:
+                    bad.append((x, y, hit))
+                    if len(bad) == MAX_MATERIAL_REPORTS:
+                        break
         if bad:
             for x, y, z in bad:
-                results.append((False, f"{e['name']}: material inside at ({x:.2f}, {y:.2f}, {z:.2f})"))
+                results.append((False, f"{e['name']}: material inside or within {SIDE_CLEAR} mm of a side at ({x:.2f}, {y:.2f}, {z:.2f})"))
         else:
             results.append((True, f"material {e['name']}"))
     return results
@@ -444,6 +459,11 @@ def self_check(stls: list[np.ndarray] | None = None) -> None:
     res = check_material([solid], stls, [])
     caught_a = any(not ok for ok, _ in res)
     print(f"self-check (a) box planted inside the tray material is caught: {'ok' if caught_a else 'NOT CAUGHT'}")
+    # (a2) a part flush against the +x face of the tray post at (150, 41.6) (x 146..154)
+    flush = dict(solid, name="fake flush", size=[5.0, 5.0, 5.0], pos=[154.0, 38.0, 20.0])
+    caught_a2 = any(not ok for ok, _ in check_material([flush], stls, []))
+    print(f"self-check (a2) a part touching material at its side is caught: {'ok' if caught_a2 else 'NOT CAUGHT'}")
+    caught_a = caught_a and caught_a2
     box1 = dict(solid, name="fake A", pos=[200.0, 0.0, 0.0], idx=1)
     box2 = dict(solid, name="fake B", pos=[205.0, 5.0, 0.5], idx=2)
     caught_b = any(not ok for ok, _ in check_overlap([box1, box2]))
