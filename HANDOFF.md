@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-20 ~17:57 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-20 ~18:53 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -648,7 +648,7 @@ mast v1 geometry (JY tabs removed, JZ: paint supports under the side members onl
 tray and deck with supports OFF.
 ELECTRONICS LAYOUT: docs/ELECTRONICS_LAYOUT.md + docs/electronics_layout.svg
 (scripts/electronics_layout.py, 35 entries, 0 failed; JU + JV audit tables); pack wiring picture
-docs/bms_wiring.svg; everything on the pack: docs/pack_wiring_full.svg (JS);
+docs/bms_wiring.svg; everything on the pack: docs/pack_wiring_full.svg (JS; redrawn KD with W1-W17 lengths + cut list, scripts/pack_wiring_svg.py);
 build order = docs/WIRING_PROTOSHIELD.md section 5.
 The sim lane ended in a well-instrumented NEGATIVE; LaneMaker/OpenDRIVE is
 CLOSED - do not re-open. THE TEST SUITE is scripts/run_checks.py (17/17 on
@@ -664,7 +664,7 @@ open, row 14 half done.
 NEXT ACTIONS, highest value first:
 1. (DONE 2026-10-16, JJ/JK: Bookworm + first camera photo.)
 2. NEXT: build step 2b (WIRING_PROTOSHIELD.md section 5): XT30 female,
-   rocker (2 or 3 pins? - ask), VBAT + star ground on the shield, LM2596 input
+   rocker (2 pins, Evan 2026-10-20: SPST in the + line, either way round), VBAT + star ground on the shield, LM2596 input
    after the rocker; checks: switch OFF = 0 V downstream, XT30 polarity +8.x V
    before any load. DONE before it: step 1b (JQ, host_test all ok from the Pi,
    uno_control flashed FROM the Pi with avrdude); servo supply DECIDED (JR):
