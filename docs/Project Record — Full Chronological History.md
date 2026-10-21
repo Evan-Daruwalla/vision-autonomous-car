@@ -335,6 +335,7 @@ the dated entry, not the digest.
 - [KL - Underside 3D render: top-side parts as labelled ghost outlines](#appendix-kl---underside-3d-render-top-side-parts-as-labelled-ghost-outlines-2026-10-21-1818-cdt) (10-21)
 - [KM - Shield renders: true top-down view, readable labelled underside](#appendix-km---shield-renders-true-top-down-view-readable-labelled-underside-2026-10-21-1823-cdt) (10-21)
 - [KN - Shield renders: labelled top view, holes drawn on both faces](#appendix-kn---shield-renders-labelled-top-view-holes-drawn-on-both-faces-2026-10-21-1828-cdt) (10-21)
+- [KO - Shield renders: 3/4 isometric-style view added](#appendix-ko---shield-renders-34-isometric-style-view-added-2026-10-21-1835-cdt) (10-21)
 
 ---
 
@@ -20692,3 +20693,10 @@ Checks (2026-10-21 ~18:23 CDT): render PASS (exit 0, every label placed); holema
 - `shield_holemap.py`: render caption mentions the labels and holes.
 Known weakness: the divider corner of the top view is crowded - C1, R2k, R10k, R100k labels sit together above the C1 can with leaders that cross. Readable, not elegant.
 Checks (2026-10-21 ~18:28 CDT): render PASS (all labels placed, exit 0); holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed. Labels inside the PNGs checked by eye.
+
+# Appendix KO - Shield renders: 3/4 isometric-style view added (2026-10-21, ~18:35 CDT)
+**Ask (Evan):** also include the isometric view.
+
+**Change:** `scripts/shield_render3d.py` renders a third view, `docs/shield_3d_iso.png`: the full top-side model (with the new top-face hole marks) in perspective from the front-left (camera rot 55,0,25, distance 185), unlabelled so it shows heights cleanly. `scripts/shield_holemap.py` embeds it between the top-down and the underside views (RENDER_FILES now 3) and links it from SHIELD_BUILD.md; caption updated. Strictly this is a perspective 3/4 view, not a true isometric projection.
+
+Checks (2026-10-21 ~18:35 CDT): render PASS; holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed.

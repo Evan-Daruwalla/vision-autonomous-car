@@ -49,9 +49,9 @@ from xml.sax.saxutils import escape
 LEGEND_COL = 340   # px per legend column (4 across at the 1400 px page)
 
 # 3D renders of the finished board (scripts/shield_render3d.py); embedded when present
-RENDER_FILES = ("shield_3d_top.png", "shield_3d_bottom.png")
+RENDER_FILES = ("shield_3d_top.png", "shield_3d_iso.png", "shield_3d_bottom.png")
 RENDER_CAPTION = [
-    "Top: straight down on the finished top side, every hole shown, parts and wires labelled. Bottom: straight up from below, the board flipped top-over-bottom (USB end still on the "
+    "Top: straight down on the finished top side, every hole shown, parts and wires labelled. Middle: isometric-style 3/4 view from the front-left (unlabelled), for heights. Bottom: straight up from below, the board flipped top-over-bottom (USB end still on the "
     "left, the digital-header edge now at the bottom) - the solder bridges; the top-side parts show as cyan "
     "ghost outlines and the top-side wires as pink lines, labelled (a thin line leads from a label pushed "
     "off its part).",

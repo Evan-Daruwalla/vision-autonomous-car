@@ -314,7 +314,7 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
                                bounds, Z_LABEL_TOP, flat, errs)
     bottom = s[:i_top] + s[i_bot:] + ghosts + labels_bottom
     top = s + labels_top
-    return ("\n".join(top) + "\n", "\n".join(bottom) + "\n"), errs, ((bx0 + bx1) / 2, (by0 + by1) / 2, 4.0)
+    return ("\n".join(top) + "\n", "\n".join(bottom) + "\n", "\n".join(s) + "\n"), errs, ((bx0 + bx1) / 2, (by0 + by1) / 2, 4.0)
 
 
 def _place_labels(view, targets, circles, segs, keep_out, bounds, z, flat, errs) -> list[str]:
@@ -401,7 +401,7 @@ def main(argv=None) -> int:
     ap.add_argument("--outdir", type=Path, default=ROOT / "docs")
     ap.add_argument("--scad-only", action="store_true", help="build and check the model, render nothing")
     args = ap.parse_args(argv)
-    (scad_text, scad_bottom), errs, centre = build_scad(load(args.layout))
+    (scad_text, scad_bottom, scad_iso), errs, centre = build_scad(load(args.layout))
     for e in errs:
         print(f"FAIL {e}")
     if errs:
@@ -414,6 +414,7 @@ def main(argv=None) -> int:
         # orthographic, i.e. the board flipped top-over-bottom (USB end still left),
         # with the top-side parts ghosted through a see-through board and labelled
         for name, text, rot, dist, proj in (("top", scad_text, (0, 0, 0), 205.0, "o"),
+                                            ("iso", scad_iso, (55, 0, 25), 185.0, "p"),
                                             ("bottom", scad_bottom, (180, 0, 0), 150.0, "o")):
             scad = Path(td) / f"shield_{name}.scad"
             scad.write_text(text, encoding="ascii")
