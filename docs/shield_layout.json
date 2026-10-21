@@ -746,6 +746,7 @@
    "id": "w3",
    "from": "L3/2",
    "to": "V/0",
+   "via": ["L3/0"],
    "net": "UNO5V",
    "note": "TB6612 VCC to the Uno 5V - ROUTE: left along row L3, then up column 0 (never under the carrier)"
   },
@@ -753,6 +754,7 @@
    "id": "w4",
    "from": "P4/7",
    "to": "P3/-1",
+   "via": ["P4/-1"],
    "net": "5V2",
    "note": "+5V2 to JP1's bottom pin - ROUTE: left along row P4 under the J1 pins, then up to P3/-1"
   },
@@ -760,6 +762,7 @@
    "id": "w5",
    "from": "B/2",
    "to": "P3/-2",
+   "via": ["B/-2"],
    "net": "GND",
    "note": "servo GND to the star - ROUTE: left along row B, then up to P3/-2"
   }

@@ -39,9 +39,9 @@ Left: from the front-left. Right: from below, the board flipped top-over-bottom 
 
 - **w1**: L3/7 -> L3/9 [VBAT] - VMOT to the VBAT strip, insulated, hops over L3/8
 - **w2**: L3/8 -> B/8 [GND] - TB6612 GND to the star rail, hops over P3/8 and P4/8
-- **w3**: L3/2 -> V/0 [UNO5V] - TB6612 VCC to the Uno 5V - ROUTE: left along row L3, then up column 0 (never under the carrier)
-- **w4**: P4/7 -> P3/-1 [5V2] - +5V2 to JP1's bottom pin - ROUTE: left along row P4 under the J1 pins, then up to P3/-1
-- **w5**: B/2 -> P3/-2 [GND] - servo GND to the star - ROUTE: left along row B, then up to P3/-2
+- **w3**: L3/2 -> L3/0 -> V/0 [UNO5V] - TB6612 VCC to the Uno 5V - ROUTE: left along row L3, then up column 0 (never under the carrier)
+- **w4**: P4/7 -> P4/-1 -> P3/-1 [5V2] - +5V2 to JP1's bottom pin - ROUTE: left along row P4 under the J1 pins, then up to P3/-1
+- **w5**: B/2 -> B/-2 -> P3/-2 [GND] - servo GND to the star - ROUTE: left along row B, then up to P3/-2
 
 ## Solder bridges (bottom side)
 

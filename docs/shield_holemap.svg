@@ -556,11 +556,11 @@
 <line x1="426" y1="560" x2="474" y2="560" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L2/-2 - L2/-1</title></line>
 <line x1="426" y1="512" x2="378" y2="512" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L1/-2 - L1/-3</title></line>
 <line x1="426" y1="608" x2="426" y2="656" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L3/-2 - P3/-2</title></line>
-<line x1="858" y1="608" x2="954" y2="608" stroke="#C62828" stroke-width="3" stroke-linecap="round" stroke-opacity="0.9"><title>w1: L3/7 to L3/9 VMOT to the VBAT strip, insulated, hops over L3/8</title></line>
-<line x1="906" y1="608" x2="906" y2="752" stroke="#222222" stroke-width="3" stroke-linecap="round" stroke-opacity="0.9"><title>w2: L3/8 to B/8 TB6612 GND to the star rail, hops over P3/8 and P4/8</title></line>
-<line x1="618" y1="608" x2="522" y2="464" stroke="#AD1457" stroke-width="3" stroke-linecap="round" stroke-opacity="0.9"><title>w3: L3/2 to V/0 TB6612 VCC to the Uno 5V - ROUTE: left along row L3, then up column 0 (never under the carrier)</title></line>
-<line x1="858" y1="704" x2="474" y2="656" stroke="#E07B00" stroke-width="3" stroke-linecap="round" stroke-opacity="0.9"><title>w4: P4/7 to P3/-1 +5V2 to JP1's bottom pin - ROUTE: left along row P4 under the J1 pins, then up to P3/-1</title></line>
-<line x1="618" y1="752" x2="426" y2="656" stroke="#222222" stroke-width="3" stroke-linecap="round" stroke-opacity="0.9"><title>w5: B/2 to P3/-2 servo GND to the star - ROUTE: left along row B, then up to P3/-2</title></line>
+<polyline points="858,608 954,608" fill="none" stroke="#C62828" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.9"><title>w1: L3/7 to L3/9 VMOT to the VBAT strip, insulated, hops over L3/8</title></polyline>
+<polyline points="906,608 906,752" fill="none" stroke="#222222" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.9"><title>w2: L3/8 to B/8 TB6612 GND to the star rail, hops over P3/8 and P4/8</title></polyline>
+<polyline points="618,608 522,608 522,464" fill="none" stroke="#AD1457" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.9"><title>w3: L3/2 to V/0 TB6612 VCC to the Uno 5V - ROUTE: left along row L3, then up column 0 (never under the carrier)</title></polyline>
+<polyline points="858,704 474,704 474,656" fill="none" stroke="#E07B00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.9"><title>w4: P4/7 to P3/-1 +5V2 to JP1's bottom pin - ROUTE: left along row P4 under the J1 pins, then up to P3/-1</title></polyline>
+<polyline points="618,752 426,752 426,656" fill="none" stroke="#222222" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.9"><title>w5: B/2 to P3/-2 servo GND to the star - ROUTE: left along row B, then up to P3/-2</title></polyline>
 <circle cx="570" cy="320" r="6" fill="#555555" stroke="#222" stroke-width="1"><title>TB.PWMA in U2/1</title></circle>
 <circle cx="618" cy="320" r="6" fill="#555555" stroke="#222" stroke-width="1"><title>TB.AIN2 in U2/2</title></circle>
 <circle cx="666" cy="320" r="6" fill="#555555" stroke="#222" stroke-width="1"><title>TB.AIN1 in U2/3</title></circle>
@@ -707,12 +707,12 @@
 <text x="1146.0" y="76.0" font-size="10" text-anchor="middle" fill="#555">13</text>
 <text x="1146.0" y="810.0" font-size="10" text-anchor="middle" fill="#555">13</text>
 <text x="558.2" y="293.8" font-size="11" text-anchor="middle" fill="#2a425b">TB</text>
-<text x="738.0" y="627.9" font-size="11" text-anchor="middle" fill="#854e17">J1</text>
+<text x="654.2" y="689.9" font-size="11" text-anchor="middle" fill="#854e17">J1</text>
 <text x="990.2" y="581.8" font-size="11" text-anchor="middle" fill="#30582b">J5</text>
 <text x="1038.2" y="785.9" font-size="11" text-anchor="middle" fill="#604358">J6</text>
 <text x="1086.2" y="785.9" font-size="11" text-anchor="middle" fill="#826e27">J3</text>
 <text x="1134.2" y="785.9" font-size="11" text-anchor="middle" fill="#406461">J4</text>
-<text x="511.0" y="579.2" font-size="11" text-anchor="middle" fill="#7b2f30">JP1</text>
+<text x="547.9" y="594.5" font-size="11" text-anchor="middle" fill="#7b2f30">JP1</text>
 <text x="414.2" y="485.8" font-size="11" text-anchor="middle" fill="#554034">J2</text>
 <text x="954.9" y="543.6" font-size="11" text-anchor="middle" fill="#66605e">R100k</text>
 <text x="951.4" y="296.2" font-size="11" text-anchor="middle" fill="#8c565b">R10k</text>
@@ -733,8 +733,8 @@
 <text x="810.0" y="347.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">BIN2</text>
 <text x="858.0" y="347.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">PWMB</text>
 <text x="906.0" y="347.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND3</text>
-<text x="594.0" y="539.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND1</text>
-<text x="637.4" y="563.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">VCC</text>
+<text x="570.0" y="539.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND1</text>
+<text x="618.0" y="539.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">VCC</text>
 <text x="666.0" y="539.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">AO1</text>
 <text x="714.0" y="539.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">AO2</text>
 <text x="762.0" y="539.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">BO2</text>
@@ -757,7 +757,7 @@
 <text x="1151.4" y="720.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">5V2</text>
 <text x="1151.4" y="768.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND</text>
 <text x="474.0" y="529.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">UNO5V</text>
-<text x="546.1" y="593.0" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">SERVO_V</text>
+<text x="534.8" y="624.0" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">SERVO_V</text>
 <text x="468.6" y="598.2" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">5V2</text>
 <text x="431.4" y="528.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">SIG</text>
 <text x="412.2" y="563.1" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">V</text>
@@ -770,9 +770,9 @@
 <text x="996.6" y="406.2" font-size="9" text-anchor="middle" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">b</text>
 <text x="891.6" y="620.5" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w1</text>
 <text x="892.8" y="683.5" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w2</text>
-<text x="596.4" y="553.1" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w3</text>
-<text x="664.7" y="693.5" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w4</text>
-<text x="527.6" y="696.2" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w5</text>
+<text x="535.2" y="539.5" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w3</text>
+<text x="550.8" y="698.5" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w4</text>
+<text x="550.8" y="746.5" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w5</text>
 <text x="20" y="842" font-size="13" font-weight="bold">Legend</text>
 <rect x="20" y="854" width="16" height="12" fill="#4e79a7" fill-opacity="0.3" stroke="#4e79a7" stroke-width="2"/>
 <text x="42" y="864" font-size="11" fill="#222">part: TB6612 carrier, chip up</text>

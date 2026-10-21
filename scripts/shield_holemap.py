@@ -93,6 +93,11 @@ class UF:
 
 
 # ---- geometry ---------------------------------------------------------------------
+def wire_path(w: dict) -> list:
+    """Holes a top-side wire visits: from, its optional "via" corners, to."""
+    return [w.get("from")] + list(w.get("via", [])) + [w.get("to")]
+
+
 def body_shape(body):
     """('rect', r0, r1, c0, c1) | ('circle', r, c, rad) | None."""
     if not body:
@@ -208,6 +213,14 @@ def analyze(data: dict) -> dict:
     for w in wires:
         need_hole(w.get("from"), f"wire {w.get('id')} from")
         need_hole(w.get("to"), f"wire {w.get('id')} to")
+        for v in w.get("via", []):
+            need_hole(v, f"wire {w.get('id')} via")
+        path = wire_path(w)
+        if len(path) > 2:   # a routed wire runs straight between corners
+            for a, b in zip(path, path[1:]):
+                ra, rb = hole_rc(a) if isinstance(a, str) else None, hole_rc(b) if isinstance(b, str) else None
+                if ra and rb and ra[0] != rb[0] and ra[1] != rb[1]:
+                    ref_errs.append(f"wire {w.get('id')}: leg {a} -> {b} is not straight (same row or column)")
         wn = w.get("net")
         if wn and wn not in nets and wn not in net_colors:
             ref_errs.append(f"wire {w.get('id')}: net {wn!r} is in neither nets nor net_colors")
@@ -562,10 +575,11 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
     for b in data.get("bridges", []):
         if len(b) == 2 and b[0] in rc and b[1] in rc:
             pl.seg(X(rc[b[0]][1]), Y(rc[b[0]][0]), X(rc[b[1]][1]), Y(rc[b[1]][0]), 4.5)
-    wires_pl = [w for w in data.get("wires", []) if w.get("from") in rc and w.get("to") in rc]
+    wires_pl = [w for w in data.get("wires", []) if all(h in rc for h in wire_path(w))]
     for w in wires_pl:
-        a, b = w["from"], w["to"]
-        pl.seg(X(rc[a][1]), Y(rc[a][0]), X(rc[b][1]), Y(rc[b][0]), 2.5)
+        path = wire_path(w)
+        for a, b in zip(path, path[1:]):
+            pl.seg(X(rc[a][1]), Y(rc[a][0]), X(rc[b][1]), Y(rc[b][0]), 2.5)
     for (h, _na), (n2, _nb) in A["hazards"]:
         mx = (X(rc[h][1]) + X(rc[n2][1])) / 2
         my = (Y(rc[h][0]) + Y(rc[n2][0])) / 2
@@ -641,7 +655,9 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
             emit(pn, 9, cx, cy, 'fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke"')
     # wire ids
     for w in wires_pl:
-        a, b = w["from"], w["to"]
+        path = wire_path(w)   # the id goes beside the longest leg
+        a, b = max(zip(path, path[1:]), key=lambda ab: math.hypot(rc[ab[1]][0] - rc[ab[0]][0],
+                                                                  rc[ab[1]][1] - rc[ab[0]][1]))
         x1, y1, x2, y2 = X(rc[a][1]), Y(rc[a][0]), X(rc[b][1]), Y(rc[b][0])
         L = math.hypot(x2 - x1, y2 - y1) or 1.0
         nx, ny = -(y2 - y1) / L, (x2 - x1) / L
@@ -704,14 +720,15 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
     # wires
     for w in data.get("wires", []):
         a, b = w.get("from"), w.get("to")
-        if a not in rc or b not in rc:
+        path = wire_path(w)
+        if not all(h in rc for h in path):
             continue
         col = A["net_color"](w["net"]) if w.get("net") else NO_NET
-        x1, y1, x2, y2 = X(rc[a][1]), Y(rc[a][0]), X(rc[b][1]), Y(rc[b][0])
-        out.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{col}" '
-                   f'stroke-width="3" stroke-linecap="round" stroke-opacity="0.9">'
+        pts = " ".join(f"{X(rc[h][1])},{Y(rc[h][0])}" for h in path)
+        out.append(f'<polyline points="{pts}" fill="none" stroke="{col}" '
+                   f'stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.9">'
                    f'<title>{esc(w.get("id"))}: {esc(a)} to {esc(b)} {esc(w.get("note", ""))}'
-                   f'</title></line>')
+                   f'</title></polyline>')
     # pins
     for p in data.get("parts", []):
         for pn, h in p.get("pins", {}).items():
@@ -844,7 +861,7 @@ def render_md(data: dict, A: dict, renders=()) -> str:
     if data.get("wires"):
         L += ["## Wires (top side)", ""]
         for w in data["wires"]:
-            L.append(f"- **{w.get('id')}**: {w.get('from')} -> {w.get('to')}" +
+            L.append(f"- **{w.get('id')}**: {' -> '.join(str(h) for h in wire_path(w))}" +
                      (f" [{w['net']}]" if w.get("net") else "") +
                      (f" - {w['note']}" if w.get("note") else ""))
         L.append("")
@@ -958,6 +975,8 @@ def self_check() -> None:
     must_fail("a net split in two", 5,
               lambda d: d["bridges"].remove(["B/3", "C/3"]), "split")
     must_fail("a missing hole", 1, lambda d: d["wires"][0].update(to="Z/9"), "Z/9")
+    must_fail("a wire via that leaves a diagonal leg", 1,
+              lambda d: d["wires"][0].update(via=["B/2"]), "not straight")
     must_fail("a step naming a missing hole", 6,
               lambda d: d["steps"][0]["do"].append("solder at A/9"), "A/9")
 

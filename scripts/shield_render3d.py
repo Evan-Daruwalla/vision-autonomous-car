@@ -33,15 +33,6 @@ BOARD_T = 1.6       # mm
 MARGIN = 3.0        # mm of board around the outermost holes
 IMG = (1600, 1100)
 
-# Top-side wire routes (corner holes) from SHIELD_BUILD.md step 6. The first and
-# last entries must equal the wire's from/to in the layout file (checked).
-WIRE_ROUTES = {
-    "w1": ["L3/7", "L3/9"],
-    "w2": ["L3/8", "B/8"],
-    "w3": ["L3/2", "L3/0", "V/0"],
-    "w4": ["P4/7", "P4/-1", "P3/-1"],
-    "w5": ["B/2", "B/-2", "P3/-2"],
-}
 # Carrier-top bridges (step 1), drawn as flat nested U's lying on the carrier:
 # (pin a, pin b) -> (how far the U reaches in from the pin row, mm; wire dia, mm).
 # Outer pin pairs reach further in so no two U's cross.
@@ -226,9 +217,11 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
 
     # ---- top-side jumper wires (step 6)
     for w in data.get("wires", []):
-        route = WIRE_ROUTES.get(w["id"])
-        if not route or route[0] != w["from"] or route[-1] != w["to"]:
-            errs.append(f"wire {w['id']} {w['from']}->{w['to']} does not match WIRE_ROUTES {route}")
+        route = [w["from"]] + list(w.get("via", [])) + [w["to"]]   # corners from the layout file
+        bad = [f"{a}->{b}" for a, b in zip(route, route[1:])
+               if a not in holes or b not in holes or (g.rc(a)[0] != g.rc(b)[0] and g.rc(a)[1] != g.rc(b)[1])]
+        if bad:
+            errs.append(f"wire {w['id']}: leg(s) {', '.join(bad)} missing or not straight")
             continue
         col = data["net_colors"].get(w.get("net"), "#999999")
         pts = [(*g.xy(route[0]), 0.0)] + [(*g.xy(h), 0.9) for h in route] + [(*g.xy(route[-1]), 0.0)]
