@@ -58,6 +58,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import subprocess
 import sys
 import tempfile
@@ -367,6 +368,78 @@ def port_triangle(side: str, bx0: float, by0: float, bx1: float, by1: float, col
     return f'<polygon points="{" ".join(fmt(px) + "," + fmt(py) for px, py in pts)}" fill="{colour}"/>'
 
 
+LABEL_SIZE = 10
+
+
+def _label_box(text: str, cx: float, cy: float) -> tuple[float, float, float, float]:
+    """Estimated box of a part-number label centred on (cx, cy)."""
+    hw = 0.62 * LABEL_SIZE * len(text) / 2.0
+    return (cx - hw, cy - LABEL_SIZE / 2.0, cx + hw, cy + LABEL_SIZE / 2.0)
+
+
+def _boxes_hit(a: tuple, b: tuple) -> bool:
+    return a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
+
+
+def _crosses_outline(box: tuple, o: tuple) -> bool:
+    """True if the label box touches the rect edge / circle ring (a box fully inside is fine)."""
+    if o[0] == "rect":
+        _, rx0, ry0, rx1, ry1 = o
+        if not _boxes_hit(box, (rx0 - 1, ry0 - 1, rx1 + 1, ry1 + 1)):
+            return False
+        inner = box[0] > rx0 + 1 and box[2] < rx1 - 1 and box[1] > ry0 + 1 and box[3] < ry1 - 1
+        return not inner
+    _, ox, oy, r = o
+    nx, ny = max(box[0], min(ox, box[2])), max(box[1], min(oy, box[3]))
+    near = math.hypot(nx - ox, ny - oy)
+    far = max(math.hypot(x - ox, y - oy) for x in (box[0], box[2]) for y in (box[1], box[3]))
+    return near <= r + 1 <= far + 2
+
+
+def place_labels(labels: list[dict], outlines: list[tuple], panel: tuple, colour: str) -> list[str]:
+    """Merge labels whose boxes collide ("1/3"), then move each to the first free spot.
+    Raises if a label cannot be placed free of outlines and other labels."""
+    def text(lb: dict) -> str:
+        return "/".join(str(i) for i in sorted(lb["idxs"]))
+    merged = True
+    while merged:
+        merged = False
+        for i in range(len(labels)):
+            for j in range(i + 1, len(labels)):
+                a, b = labels[i], labels[j]
+                if _boxes_hit(_label_box(text(a), a["cx"], a["cy"]), _label_box(text(b), b["cx"], b["cy"])):
+                    lo = a if min(a["idxs"]) < min(b["idxs"]) else b
+                    labels[i] = {"idxs": a["idxs"] + b["idxs"], "cx": lo["cx"], "cy": lo["cy"]}
+                    del labels[j]
+                    merged = True
+                    break
+            if merged:
+                break
+    placed: list[tuple] = []
+    out = []
+    for lb in labels:
+        t = text(lb)
+        w = 0.62 * LABEL_SIZE * len(t)
+        offs = [(0, 0), (0, -12), (0, 12), (-w, 0), (w, 0)]
+        for ring in (24, 48, 72):
+            offs += [(0, -ring), (0, ring), (-w - ring + 12, 0), (w + ring - 12, 0),
+                     (-w - ring + 12, -ring), (w + ring - 12, -ring), (-w - ring + 12, ring), (w + ring - 12, ring)]
+        for dx, dy in offs:
+            cx, cy = lb["cx"] + dx, lb["cy"] + dy
+            box = _label_box(t, cx, cy)
+            if box[0] < panel[0] or box[2] > panel[2] or box[1] < panel[1] or box[3] > panel[3]:
+                continue
+            if any(_crosses_outline(box, o) for o in outlines) or any(_boxes_hit(box, q) for q in placed):
+                continue
+            placed.append(box)
+            out.append(f'<text x="{fmt(cx)}" y="{fmt(cy + 3)}" font-size="{fmt(LABEL_SIZE)}" '
+                       f'text-anchor="middle" fill="{colour}">{t}</text>')
+            break
+        else:
+            raise RuntimeError(f"label {t} has no free spot")
+    return out
+
+
 def panel_svg(title: str, tris: np.ndarray, entries: list[dict], left: float) -> tuple[list[str], int]:
     """(svg lines, legend line count) for one panel whose left edge is at `left` px."""
     x0, y0 = left + MARGIN, MARGIN + TITLE_H
@@ -380,7 +453,7 @@ def panel_svg(title: str, tris: np.ndarray, entries: list[dict], left: float) ->
          f'<g shape-rendering="crispEdges">']
     g += height_rects(tris, x0, y0)
     g.append("</g>")
-    texts = []
+    outlines, labels = [], []
     for e in entries:
         colour = PALETTE[(e["idx"] - 1) % len(PALETTE)]
         (px, py, _), (sx, sy, _) = e["pos"], e["size"]
@@ -398,8 +471,12 @@ def panel_svg(title: str, tris: np.ndarray, entries: list[dict], left: float) ->
         if e["kind"] != "note":
             for side in port_sides(e["ports"]):
                 g.append(port_triangle(side, bx0, by0, bx1, by1, colour if e["kind"] == "part" else dark))
-        texts.append(f'<text x="{fmt((bx0 + bx1) / 2)}" y="{fmt((by0 + by1) / 2 + 3)}" font-size="{fmt(9)}" '
-                     f'text-anchor="middle" fill="{dark}">{e["idx"]}</text>')
+        if e["kind"] == "part" or e["kind"] in ("zone", "clearance"):
+            outlines.append(("rect", bx0, by0, bx1, by1))
+        else:
+            outlines.append(("circle", (bx0 + bx1) / 2, (by0 + by1) / 2, sx / 2 * SCALE))
+        labels.append({"idxs": [e["idx"]], "cx": (bx0 + bx1) / 2, "cy": (by0 + by1) / 2})
+    texts = place_labels(labels, outlines, (x0, y0, x0 + w, y0 + h), dark)
     g += texts
     g.append(f'<text x="{fmt(x0)}" y="{fmt(y0 + h + 16)}" font-size="{fmt(10)}" fill="{dark}">front of car -&gt;</text>')
     n_lines = 0
@@ -418,7 +495,7 @@ def build_svg(tray: np.ndarray, deck: np.ndarray, l1: list[dict], l2: list[dict]
     width = 2 * PANEL_W
     height = MARGIN + TITLE_H + NY * SCALE + LEGEND_TOP + max(n1, n2) * LEGEND_LINE + MARGIN
     head = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{fmt(width)}" height="{fmt(height)}" '
-            f'viewBox="0 0 {fmt(width)} {fmt(height)}" font-family="sans-serif">\n'
+            f'viewBox="0 0 {fmt(width)} {fmt(height)}" font-family="sans-serif" font-weight="bold">\n'
             f'<rect x="{fmt(0)}" y="{fmt(0)}" width="{fmt(width)}" height="{fmt(height)}" fill="#ffffff"/>')
     return head + "\n" + "\n".join(a + b) + "\n</svg>\n"
 

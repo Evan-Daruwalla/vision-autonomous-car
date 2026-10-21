@@ -2,6 +2,13 @@
 
 Top view, the Uno's USB end on the LEFT, digital headers at the top. Hole = ROW/COL.
 
+## Finished build (3D render, scripts/shield_render3d.py)
+
+Left: from the front-left. Right: from below, the board flipped top-over-bottom (USB end still on the left, the digital-header edge now at the bottom) - the solder bridges. The INTENDED build, not a photo: catalogue part sizes, board outline = hole field + 3 mm, board colour guessed; Dupont leads leave straight along their column (Uno header positions are not in the layout).
+
+![shield_3d_top](shield_3d_top.png)
+![shield_3d_bottom](shield_3d_bottom.png)
+
 ## Notes
 
 - Grid read off Evan's photos (2026-10-20). Rows: T top rail; P1 P2 plain; U1-U3 upper 3-hole strips (cols 1-10); G GND rail; V 5V rail (= the Uno 5V = the Pi's USB); L1-L3 lower strips; P3 P4 plain; B bottom GND rail = the STAR (Evan's choice).

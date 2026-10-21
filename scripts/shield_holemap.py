@@ -36,6 +36,7 @@ On FAIL the outputs are still written, with FAILED in the title.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import math
 import re
@@ -45,11 +46,20 @@ from collections import defaultdict
 from pathlib import Path
 from xml.sax.saxutils import escape
 
+# 3D renders of the finished board (scripts/shield_render3d.py); embedded when present
+RENDER_FILES = ("shield_3d_top.png", "shield_3d_bottom.png")
+RENDER_CAPTION = [
+    "Left: from the front-left. Right: from below, the board flipped top-over-bottom (USB end still on the "
+    "left, the digital-header edge now at the bottom) - the solder bridges.",
+    "The INTENDED build, not a photo: catalogue part sizes, board outline = hole field + 3 mm, board colour "
+    "guessed; Dupont leads leave straight along their column (Uno header positions are not in the layout).",
+]
+
 HOLE_RE = re.compile(r"^([A-Z][A-Z0-9]*)/(-?\d+)$")
 # A hole-looking token inside free text. The lookbehind stops "3V3/5" matching "V3/5".
 TOKEN_RE = re.compile(r"(?<![A-Za-z0-9])[A-Z][A-Z0-9]*/-?\d+")
 
-PITCH = 34
+PITCH = 48
 EPS = 1e-9
 NET_PALETTE = ["#d62728", "#1f77b4", "#2ca02c", "#ff7f0e", "#9467bd", "#8c564b",
                "#e377c2", "#17becf", "#bcbd22", "#7f7f7f"]
@@ -412,7 +422,98 @@ def title_of(data: dict, ok: bool) -> list[str]:
     return t
 
 
-def render_svg(data: dict, A: dict) -> str:
+def _seg_hits_box(x1, y1, x2, y2, b) -> bool:
+    """Liang-Barsky: does segment (x1,y1)-(x2,y2) touch box b = (x0,y0,x1,y1)?"""
+    t0, t1 = 0.0, 1.0
+    for p, q in ((x1 - x2, x1 - b[0]), (x2 - x1, b[2] - x1),
+                 (y1 - y2, y1 - b[1]), (y2 - y1, b[3] - y1)):
+        if p == 0:
+            if q < 0:
+                return False
+        elif p < 0:
+            t0 = max(t0, q / p)
+        else:
+            t1 = min(t1, q / p)
+        if t0 > t1:
+            return False
+    return True
+
+
+class Placer:
+    """Greedy text-label placer. Boxes and segments are obstacles; a label is a box
+    centred on a candidate point. Width estimate: 0.62 * font size * chars (bold Arial)."""
+
+    def __init__(self, xmin, xmax, ymin, ymax):
+        self.boxes: list[tuple] = []
+        self.segs: list[tuple] = []  # (x1, y1, x2, y2, half-width incl. margin)
+        self.lim = (xmin, xmax, ymin, ymax)
+        self.right = 0.0
+
+    def box(self, x0, y0, x1, y1) -> None:
+        self.boxes.append((x0, y0, x1, y1))
+
+    def seg(self, x1, y1, x2, y2, hw) -> None:
+        self.segs.append((x1, y1, x2, y2, hw))
+
+    def ring(self, cx, cy, r) -> None:
+        pts = [(cx + r * math.cos(k * math.pi / 16), cy + r * math.sin(k * math.pi / 16))
+               for k in range(33)]
+        for a, b in zip(pts, pts[1:]):
+            self.seg(a[0], a[1], b[0], b[1], 2)
+
+    @staticmethod
+    def size(text, fs):
+        return 0.62 * fs * len(text) + 6, fs  # +6: capitals in bold run wider than 0.62 em
+
+    def free(self, b) -> bool:
+        xmin, xmax, ymin, ymax = self.lim
+        if b[0] < xmin or b[2] > xmax or b[1] < ymin or b[3] > ymax:
+            return False
+        for o in self.boxes:
+            if b[0] < o[2] and o[0] < b[2] and b[1] < o[3] and o[1] < b[3]:
+                return False
+        for x1, y1, x2, y2, hw in self.segs:
+            if _seg_hits_box(x1, y1, x2, y2, (b[0] - hw, b[1] - hw, b[2] + hw, b[3] + hw)):
+                return False
+        return True
+
+    def place(self, text, fs, cands, what):
+        """First free candidate centre wins; returns (cx, cy). Raises if none is free."""
+        w, h = self.size(text, fs)
+        for cx, cy in cands:
+            b = (cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2)
+            if self.free(b):
+                self.boxes.append(b)
+                self.right = max(self.right, b[2])
+                return cx, cy
+        raise ValueError(f"no free spot for label {what}: {text}")
+
+    def fixed(self, text, fs, cx, cy):
+        w, h = self.size(text, fs)
+        self.boxes.append((cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2))
+        self.right = max(self.right, cx + w / 2)
+
+
+def _rings(cx, cy, start=8, stop=240, step=8):
+    """Fallback candidates: 16 compass points on growing rings around (cx, cy)."""
+    for r in range(start, stop, step):
+        for k in range(16):
+            a = k * math.pi / 8
+            yield cx + r * math.cos(a), cy + r * math.sin(a)
+
+
+def find_renders(folder: Path) -> list[tuple[Path, tuple[int, int]]]:
+    """The 3D renders next to an output file, with their pixel sizes (PNG IHDR)."""
+    out = []
+    for name in RENDER_FILES:
+        p = folder / name
+        if p.exists():
+            raw = p.read_bytes()[16:24]
+            out.append((p, (int.from_bytes(raw[:4], "big"), int.from_bytes(raw[4:], "big"))))
+    return out
+
+
+def render_svg(data: dict, A: dict, renders=()) -> str:
     rows, row_idx, holeset, hole_rc = A["rows"], A["row_idx"], A["holeset"], A["hole_rc"]
     grid = data.get("grid", {})
     n = len(rows)
@@ -438,6 +539,123 @@ def render_svg(data: dict, A: dict) -> str:
 
     def kind_color(k):
         return KIND_PALETTE[kinds.index(k) % len(KIND_PALETTE)] if k in kinds else "#888888"
+
+    # ---- label placement: obstacles first, then fixed texts, then the rest ----
+    pl = Placer(10, max(width, 10 ** 4), top - 44, ybot + 44)
+    SOCK = 30
+    for (r_, c_) in rc.values():
+        pl.box(X(c_) - 5, Y(r_) - 5, X(c_) + 5, Y(r_) + 5)
+    parts_pl = data.get("parts", [])
+    for p in parts_pl:
+        for h in p.get("pins", {}).values():
+            if h in rc:
+                pl.box(X(rc[h][1]) - 7, Y(rc[h][0]) - 7, X(rc[h][1]) + 7, Y(rc[h][0]) + 7)
+        sh = body_shape(p.get("body"))
+        if sh is None:
+            continue
+        if sh[0] == "rect":
+            x0, y0, x1, y1 = X(sh[3]), Y(sh[1]), X(sh[4]), Y(sh[2])
+            for e in ((x0, y0, x1, y0), (x1, y0, x1, y1), (x1, y1, x0, y1), (x0, y1, x0, y0)):
+                pl.seg(*e, 2)
+        else:
+            pl.ring(X(sh[2]), Y(sh[1]), sh[3] * PITCH)
+    for b in data.get("bridges", []):
+        if len(b) == 2 and b[0] in rc and b[1] in rc:
+            pl.seg(X(rc[b[0]][1]), Y(rc[b[0]][0]), X(rc[b[1]][1]), Y(rc[b[1]][0]), 4.5)
+    wires_pl = [w for w in data.get("wires", []) if w.get("from") in rc and w.get("to") in rc]
+    for w in wires_pl:
+        a, b = w["from"], w["to"]
+        pl.seg(X(rc[a][1]), Y(rc[a][0]), X(rc[b][1]), Y(rc[b][0]), 2.5)
+    for (h, _na), (n2, _nb) in A["hazards"]:
+        mx = (X(rc[h][1]) + X(rc[n2][1])) / 2
+        my = (Y(rc[h][0]) + Y(rc[n2][0])) / 2
+        pl.box(mx - 5, my - 5, mx + 5, my + 5)
+    socks_pl = [s_ for s_ in data.get("sockets", []) if s_.get("hole") in rc]
+    for s_ in socks_pl:
+        x, y = X(rc[s_["hole"]][1]), Y(rc[s_["hole"]][0])
+        up = rc[s_["hole"]][0] < (n - 1) / 2
+        pl.seg(x, y + (-7 if up else 7), x, y - SOCK if up else y + SOCK, 3)
+    labels: list[str] = []
+
+    def emit(text, fs, cx, cy, extra, anchor="middle"):
+        labels.append(f'<text x="{cx:.1f}" y="{cy + 0.35 * fs:.1f}" font-size="{fs}" '
+                      f'text-anchor="{anchor}" {extra}>{esc(text)}</text>')
+
+    # fixed texts: grid labels, row names, column numbers
+    for lb in grid.get("labels", []):
+        r, c = lb["at"]
+        cx, cy = pl.place(lb["text"], 11, [(X(c), Y(r) - 4)] + list(_rings(X(c), Y(r) - 4, 6)),
+                          "grid label")
+        emit(lb["text"], 11, cx, cy, 'fill="#444"')
+    for i, rn in enumerate(rows):
+        w_, h_ = Placer.size(rn, 12)
+        pl.fixed(rn, 12, left - 48 - w_ / 2, Y(i))
+        emit(rn, 12, left - 48, Y(i), 'fill="#222"', "end")
+    for c in cols_with:
+        for yy in (top - 52, ybot + 58):
+            pl.fixed(str(c), 10, X(c), yy - 3.5)
+            emit(str(c), 10, X(c), yy - 3.5, 'fill="#555"')
+    # part ids
+    for p in parts_pl:
+        sh = body_shape(p.get("body"))
+        if sh is None:
+            continue
+        col = kind_color(p.get("kind"))
+        # label text at 55% of the outline colour so pale kinds stay readable on white
+        col = "#" + "".join(f"{int(int(col[i:i + 2], 16) * 0.55):02x}" for i in (1, 3, 5))
+        if sh[0] == "rect":
+            x0, y0, x1, y1 = X(sh[3]), Y(sh[1]), X(sh[4]), Y(sh[2])
+        else:
+            x0, y0 = X(sh[2]) - sh[3] * PITCH, Y(sh[1]) - sh[3] * PITCH
+            x1, y1 = X(sh[2]) + sh[3] * PITCH, Y(sh[1]) + sh[3] * PITCH
+        w_, h_ = Placer.size(p["id"], 11)
+        cands = [(x0 + w_ / 2, y0 - h_ / 2 - 3), (x1 - w_ / 2, y0 - h_ / 2 - 3),
+                 (x0 + w_ / 2, y1 + h_ / 2 + 3), (x1 - w_ / 2, y1 + h_ / 2 + 3),
+                 (x0 - w_ / 2 - 3, (y0 + y1) / 2), (x1 + w_ / 2 + 3, (y0 + y1) / 2)]
+        cands += list(_rings((x0 + x1) / 2, (y0 + y1) / 2, 8))
+        cx, cy = pl.place(p["id"], 11, cands, "part id")
+        emit(p["id"], 11, cx, cy, f'fill="{col}"')
+    # socket labels
+    for s_ in socks_pl:
+        h = s_["hole"]
+        x, y = X(rc[h][1]), Y(rc[h][0])
+        up = rc[h][0] < (n - 1) / 2
+        t = f'-> {s_.get("uno")}'
+        w_, h_ = Placer.size(t, 10)
+        ty = (y - SOCK - h_ / 2 - 2) if up else (y + SOCK + h_ / 2 + 2)
+        cands = [(x, ty), (x - PITCH / 2, ty), (x + PITCH / 2, ty)] + list(_rings(x, ty, 6))
+        cx, cy = pl.place(t, 10, cands, "socket")
+        emit(t, 10, cx, cy, 'fill="#333"')
+    # pin labels
+    for p in parts_pl:
+        for pn, h in p.get("pins", {}).items():
+            if h not in rc:
+                continue
+            x, y = X(rc[h][1]), Y(rc[h][0])
+            w_, h_ = Placer.size(pn, 9)
+            hp = PITCH / 2
+            cands = [(x, y + hp), (x, y - hp), (x + 8 + w_ / 2, y), (x - 8 - w_ / 2, y),
+                     (x + hp, y + hp), (x - hp, y + hp), (x + hp, y - hp), (x - hp, y - hp)]
+            cands += list(_rings(x, y, 14))
+            cx, cy = pl.place(pn, 9, cands, f'pin {p["id"]}.{pn}')
+            emit(pn, 9, cx, cy, 'fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke"')
+    # wire ids
+    for w in wires_pl:
+        a, b = w["from"], w["to"]
+        x1, y1, x2, y2 = X(rc[a][1]), Y(rc[a][0]), X(rc[b][1]), Y(rc[b][0])
+        L = math.hypot(x2 - x1, y2 - y1) or 1.0
+        nx, ny = -(y2 - y1) / L, (x2 - x1) / L
+        t = str(w.get("id"))
+        w_, h_ = Placer.size(t, 10)
+        off = abs(nx) * w_ / 2 + abs(ny) * h_ / 2 + 4
+        cands = []
+        for f in (0.5, 0.35, 0.65, 0.2, 0.8):
+            px, py = x1 + (x2 - x1) * f, y1 + (y2 - y1) * f
+            cands += [(px + nx * off, py + ny * off), (px - nx * off, py - ny * off)]
+        cands += list(_rings((x1 + x2) / 2, (y1 + y2) / 2, 8))
+        cx, cy = pl.place(t, 10, cands, "wire id")
+        emit(t, 10, cx, cy, 'fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke"')
+    width = max(width, math.ceil(pl.right) + 10)
 
     out: list[str] = []
     # copper bars under the holes
@@ -473,13 +691,9 @@ def render_svg(data: dict, A: dict) -> str:
             out.append(f'<rect x="{x0}" y="{y0}" width="{(sh[4] - sh[3]) * PITCH}" '
                        f'height="{(sh[2] - sh[1]) * PITCH}" fill="{col}" fill-opacity="0.15" '
                        f'stroke="{col}" stroke-width="2"/>')
-            lx, ly = x0 + 3, y0 + 12
         else:
             out.append(f'<circle cx="{X(sh[2])}" cy="{Y(sh[1])}" r="{sh[3] * PITCH}" fill="{col}" '
                        f'fill-opacity="0.15" stroke="{col}" stroke-width="2"/>')
-            lx, ly = X(sh[2]) - sh[3] * PITCH + 3, Y(sh[1]) - sh[3] * PITCH + 12
-        out.append(f'<text x="{lx}" y="{ly}" font-size="11" font-weight="bold" fill="{col}">'
-                   f'{esc(p["id"])}</text>')
     # bridges
     for b in data.get("bridges", []):
         if len(b) == 2 and b[0] in rc and b[1] in rc:
@@ -498,9 +712,6 @@ def render_svg(data: dict, A: dict) -> str:
                    f'stroke-width="3" stroke-linecap="round" stroke-opacity="0.9">'
                    f'<title>{esc(w.get("id"))}: {esc(a)} to {esc(b)} {esc(w.get("note", ""))}'
                    f'</title></line>')
-        out.append(f'<text x="{(x1 + x2) / 2}" y="{(y1 + y2) / 2 - 4}" font-size="10" '
-                   f'text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" '
-                   f'paint-order="stroke">{esc(w.get("id"))}</text>')
     # pins
     for p in data.get("parts", []):
         for pn, h in p.get("pins", {}).items():
@@ -511,8 +722,6 @@ def render_svg(data: dict, A: dict) -> str:
             out.append(f'<circle cx="{x}" cy="{y}" r="6" fill="{pcol}" '
                        f'stroke="#222" stroke-width="1"><title>{esc(p["id"])}.{esc(pn)} in '
                        f'{esc(h)}</title></circle>')
-            out.append(f'<text x="{x + 7}" y="{y + 13}" font-size="8" fill="#222" '
-                       f'stroke="#fff" stroke-width="2" paint-order="stroke">{esc(pn)}</text>')
     # bridge hazards: small red x between the two holes of each pair
     for (h, _na), (n2, _nb) in A["hazards"]:
         mx = (X(rc[h][1]) + X(rc[n2][1])) / 2
@@ -527,24 +736,12 @@ def render_svg(data: dict, A: dict) -> str:
             continue
         x, y = X(rc[h][1]), Y(rc[h][0])
         up = rc[h][0] < (n - 1) / 2
-        y2 = y - 24 if up else y + 24
+        y2 = y - SOCK if up else y + SOCK
         out.append(f'<line x1="{x}" y1="{y + (-7 if up else 7)}" x2="{x}" y2="{y2}" '
                    f'stroke="#333" stroke-width="2" marker-end="url(#arr)"/>')
-        out.append(f'<text x="{x}" y="{y2 - 4 if up else y2 + 12}" font-size="10" '
-                   f'text-anchor="middle" fill="#333">-&gt; {esc(s.get("uno"))}</text>')
-    # grid labels
-    for lb in grid.get("labels", []):
-        r, c = lb["at"]
-        out.append(f'<text x="{X(c)}" y="{Y(r)}" font-size="11" fill="#444" '
-                   f'text-anchor="middle">{esc(lb["text"])}</text>')
-    # row names and col numbers
-    for i, rn in enumerate(rows):
-        out.append(f'<text x="{left - 48}" y="{Y(i) + 4}" font-size="12" text-anchor="end" '
-                   f'fill="#222">{esc(rn)}</text>')
-    for c in cols_with:
-        for yy in (top - 52, ybot + 58):
-            out.append(f'<text x="{X(c)}" y="{yy}" font-size="10" text-anchor="middle" '
-                       f'fill="#555">{c}</text>')
+    # all placed text labels (grid labels, row names, col numbers, part ids, sockets,
+    # pins, wire ids) go on top
+    out.extend(labels)
 
     # legend
     ly = ybot + 90
@@ -589,27 +786,49 @@ def render_svg(data: dict, A: dict) -> str:
         for line in textwrap.wrap(t, 190) or [""]:
             out.append(f'<text x="20" y="{ly}" font-size="11" fill="#333">{esc(line)}</text>')
             ly += 15
+    # finished-build 3D renders (scripts/shield_render3d.py), embedded side by side
+    if renders:
+        ly += 20
+        out.append(f'<text x="20" y="{ly}" font-size="13">Finished build - 3D render of this layout '
+                   f'(scripts/shield_render3d.py)</text>')
+        for line in RENDER_CAPTION:
+            ly += 16
+            out.append(f'<text x="20" y="{ly}" font-size="11" fill="#333">{esc(line)}</text>')
+        ly += 10
+        iw = (width - 60) // 2
+        ih = 0
+        for i, (png, (pw, ph)) in enumerate(renders):
+            h = round(iw * ph / pw)
+            ih = max(ih, h)
+            b64 = base64.b64encode(png.read_bytes()).decode("ascii")
+            out.append(f'<image x="{20 + i * (iw + 20)}" y="{ly}" width="{iw}" height="{h}" '
+                       f'href="data:image/png;base64,{b64}"/>')
+        ly += ih + 10
     height = ly + 20
 
     head = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
-            f'viewBox="0 0 {width} {height}" font-family="Arial, Helvetica, sans-serif">',
+            f'viewBox="0 0 {width} {height}" font-family="Arial, Helvetica, sans-serif" font-weight="bold">',
             '<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" '
             'orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#333"/></marker></defs>',
             f'<rect width="{width}" height="{height}" fill="#ffffff"/>']
     for i, t in enumerate(title):
         head.append(f'<text x="20" y="{30 + 18 * i}" font-size="{20 if i == 0 else 12}" '
-                    f'font-weight="{"bold" if i == 0 else "normal"}" '
+                    f'font-weight="bold" '
                     f'fill="{("#b00020" if not A["ok"] else "#111") if i == 0 else "#333"}">'
                     f'{esc(t)}</text>')
     return "\n".join(head + out + ["</svg>"]) + "\n"
 
 
 # ---- Markdown ---------------------------------------------------------------------
-def render_md(data: dict, A: dict) -> str:
+def render_md(data: dict, A: dict, renders=()) -> str:
     title = title_of(data, A["ok"])
     L = [f"# {title[0]}", ""]
     for t in title[1:]:
         L += [t, ""]
+    if renders:
+        L += ["## Finished build (3D render, scripts/shield_render3d.py)", ""]
+        L += [" ".join(RENDER_CAPTION), ""]
+        L += [f"![{p.stem}]({p.name})" for p, _ in renders] + [""]
     if data.get("notes"):
         L += ["## Notes", ""] + [f"- {t}" for t in data["notes"]] + [""]
     L += ["## Parts", ""]
@@ -789,10 +1008,10 @@ def main(argv=None) -> int:
     print_results(A)
     try:
         if args.svg:
-            write_ascii(args.svg, render_svg(data, A), True)
+            write_ascii(args.svg, render_svg(data, A, find_renders(args.svg.parent)), True)
             print(f"svg: {args.svg}")
         if args.md:
-            write_ascii(args.md, render_md(data, A), False)
+            write_ascii(args.md, render_md(data, A, find_renders(args.md.parent)), False)
             print(f"md: {args.md}")
     except (OSError, KeyError, TypeError, ValueError) as e:
         print(f"FAIL output: {type(e).__name__}: {e}")

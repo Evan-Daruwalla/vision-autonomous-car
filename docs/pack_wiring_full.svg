@@ -3,52 +3,52 @@
 <desc>Pack-side wiring of the autonomous car: 2S pack, BMS, fuse, charger, XT30, rocker, LM2596, TB6612, divider, motor + encoder, strips. Every wire is numbered W1-W17; the cut list gives its length. Solid = soldered as built; dashed = still to cut (estimates from the CAD, trim at the dry fit). Source: docs/WIRING_PROTOSHIELD.md section 2, docs/ELECTRONICS_LAYOUT.md, records IO-IW, JU-JW, KC.</desc>
 <rect x="0" y="0" width="1500" height="1290" fill="#FFFFFF"/>
 <text x="24" y="32" font-size="18" fill="#2C2C2A" text-anchor="start" font-weight="bold">18650 pack - every wire, with lengths (2026-10-20, tray v11 / deck v13)</text>
-<text x="24" y="54" font-size="12" fill="#4A4A46" text-anchor="start">Solid = soldered as built (length measured by Evan). Dashed = still to cut: estimate from the CAD, cut length in the list, trim at the dry fit. All wire 22 AWG.</text>
-<text x="24" y="72" font-size="12" fill="#4A4A46" text-anchor="start">Every ground wire lands on the STAR = the TB6612 GND pad on the shield (drawn as a bar: one pad, many wires). Grounds are never switched. Source: docs/WIRING_PROTOSHIELD.md section 2.</text>
+<text x="24" y="54" font-size="12" fill="#4A4A46" text-anchor="start" font-weight="bold">Solid = soldered as built (length measured by Evan). Dashed = still to cut: estimate from the CAD, cut length in the list, trim at the dry fit. All wire 22 AWG.</text>
+<text x="24" y="72" font-size="12" fill="#4A4A46" text-anchor="start" font-weight="bold">Every ground wire lands on the STAR = the TB6612 GND pad on the shield (drawn as a bar: one pad, many wires). Grounds are never switched. Source: docs/WIRING_PROTOSHIELD.md section 2.</text>
 <rect x="18" y="92" width="330" height="380" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
 <text x="28" y="108" font-size="11" fill="#6B6B66" text-anchor="start" font-weight="bold">PACK (holder on the +y lobe)</text>
 <rect x="362" y="92" width="222" height="380" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
 <text x="372" y="108" font-size="11" fill="#6B6B66" text-anchor="start" font-weight="bold">TRAY -y LOBE</text>
-<rect x="598" y="92" width="240" height="380" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="598" y="92" width="224" height="380" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
 <text x="608" y="108" font-size="11" fill="#6B6B66" text-anchor="start" font-weight="bold">DECK -y WING (rocker hangs below it)</text>
-<rect x="852" y="92" width="336" height="548" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
-<text x="862" y="108" font-size="11" fill="#6B6B66" text-anchor="start" font-weight="bold">PROTO SHIELD on the Uno (deck, rear)</text>
+<rect x="828" y="92" width="360" height="548" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="838" y="108" font-size="11" fill="#6B6B66" text-anchor="start" font-weight="bold">PROTO SHIELD on the Uno (deck, rear)</text>
 <rect x="1202" y="92" width="280" height="300" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
 <text x="1212" y="108" font-size="11" fill="#6B6B66" text-anchor="start" font-weight="bold">UNDER THE FRAMES</text>
 <rect x="1202" y="406" width="280" height="234" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
 <text x="1212" y="422" font-size="11" fill="#6B6B66" text-anchor="start" font-weight="bold">CAR FRONT + REAR</text>
 <rect x="40" y="130" width="130" height="52" rx="6" fill="#F5F5F2" stroke="#5F5E5A" stroke-width="1"/>
 <text x="48" y="148" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">Cell 1 (25R)</text>
-<text x="48" y="166" font-size="11" fill="#4A4A46" text-anchor="start">+ end at the lead end</text>
+<text x="48" y="166" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">+ end at the lead end</text>
 <rect x="40" y="255" width="130" height="52" rx="6" fill="#F5F5F2" stroke="#5F5E5A" stroke-width="1"/>
 <text x="48" y="273" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">Cell 2 (25R)</text>
-<text x="48" y="291" font-size="11" fill="#4A4A46" text-anchor="start">- end at the lead end</text>
+<text x="48" y="291" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">- end at the lead end</text>
 <line x1="105" y1="182" x2="105" y2="255" stroke="#444441" stroke-width="3"/>
 <circle cx="105" cy="218" r="5" fill="#BA7517"/>
-<text x="112" y="236" font-size="10" fill="#854F0B" text-anchor="start">brass rivet = series node</text>
-<text x="112" y="248" font-size="10" fill="#854F0B" text-anchor="start">(no-lead end, MB tap)</text>
+<text x="109" y="236" font-size="9" fill="#854F0B" text-anchor="start" font-weight="bold">brass rivet = series node</text>
+<text x="109" y="248" font-size="9" fill="#854F0B" text-anchor="start" font-weight="bold">(no-lead end, MB tap)</text>
 <rect x="40" y="392" width="130" height="44" rx="6" fill="#FAEEDA" stroke="#854F0B" stroke-width="1"/>
-<text x="48" y="410" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">3 A fuse (violet ATO)</text>
-<text x="48" y="428" font-size="11" fill="#4A4A46" text-anchor="start">lies on the bank top</text>
+<text x="48" y="410" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">3 A fuse (violet ATO)</text>
+<text x="48" y="428" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">lies on the bank top</text>
 <rect x="222" y="120" width="110" height="330" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
 <text x="230" y="138" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">BMS</text>
-<text x="230" y="156" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="230" y="171" font-size="11" fill="#4A4A46" text-anchor="start">B08HLQQCQJ</text>
-<text x="230" y="186" font-size="11" fill="#4A4A46" text-anchor="start">on the holder top,</text>
-<text x="230" y="201" font-size="11" fill="#4A4A46" text-anchor="start">rivet end</text>
-<text x="230" y="216" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="230" y="231" font-size="11" fill="#4A4A46" text-anchor="start">2.9 V cutoff</text>
-<text x="230" y="246" font-size="11" fill="#4A4A46" text-anchor="start">(untested)</text>
+<text x="230" y="156" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="230" y="171" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">B08HLQQCQJ</text>
+<text x="230" y="186" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">on the holder top,</text>
+<text x="230" y="201" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">rivet end</text>
+<text x="230" y="216" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="230" y="231" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">2.9 V cutoff</text>
+<text x="230" y="246" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">(untested)</text>
 <circle cx="222" cy="218" r="3" fill="#2C2C2A"/>
-<text x="229" y="222" font-size="11" fill="#2C2C2A" text-anchor="start">MB</text>
+<text x="229" y="222" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">MB</text>
 <circle cx="222" cy="300" r="3" fill="#2C2C2A"/>
-<text x="229" y="304" font-size="11" fill="#2C2C2A" text-anchor="start">B-</text>
+<text x="229" y="304" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">B-</text>
 <circle cx="222" cy="414" r="3" fill="#2C2C2A"/>
-<text x="229" y="418" font-size="11" fill="#2C2C2A" text-anchor="start">B+</text>
+<text x="229" y="418" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">B+</text>
 <circle cx="332" cy="150" r="3" fill="#2C2C2A"/>
-<text x="325" y="154" font-size="11" fill="#2C2C2A" text-anchor="end">P+</text>
+<text x="325" y="154" font-size="11" fill="#2C2C2A" text-anchor="end" font-weight="bold">P+</text>
 <circle cx="332" cy="430" r="3" fill="#2C2C2A"/>
-<text x="325" y="434" font-size="11" fill="#2C2C2A" text-anchor="end">P-</text>
+<text x="325" y="434" font-size="11" fill="#2C2C2A" text-anchor="end" font-weight="bold">P-</text>
 <path d="M40 150 L28 150 L28 414 L40 414" fill="none" stroke="#C62828" stroke-width="2.2"/>
 <rect x="42.0" y="205.0" width="52.0" height="15" rx="7" fill="#FFFFFF" stroke="#C62828" stroke-width="1"/>
 <text x="68.0" y="216.0" font-size="11" fill="#C62828" text-anchor="middle" font-weight="bold">W1 326</text>
@@ -61,32 +61,33 @@
 <text x="189.0" y="271.0" font-size="11" fill="#333333" text-anchor="middle" font-weight="bold">W2 ?</text>
 <rect x="382" y="205" width="86" height="150" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
 <text x="390" y="223" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">Charger</text>
-<text x="390" y="241" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="390" y="256" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="390" y="271" font-size="11" fill="#4A4A46" text-anchor="start">Adeept p0374</text>
-<text x="390" y="286" font-size="11" fill="#4A4A46" text-anchor="start">USB-C out</text>
-<text x="390" y="301" font-size="11" fill="#4A4A46" text-anchor="start">the -y side</text>
-<text x="390" y="316" font-size="11" fill="#4A4A46" text-anchor="start">VIN unused</text>
+<text x="390" y="241" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="390" y="256" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="390" y="271" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">Adeept p0374</text>
+<text x="390" y="286" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">USB-C out</text>
+<text x="390" y="301" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">the -y side</text>
+<text x="390" y="316" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">VIN unused</text>
 <circle cx="382" cy="235" r="3" fill="#2C2C2A"/>
-<text x="389" y="239" font-size="11" fill="#2C2C2A" text-anchor="start">BAT</text>
+<text x="389" y="239" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">BAT</text>
 <circle cx="382" cy="340" r="3" fill="#2C2C2A"/>
-<text x="389" y="344" font-size="11" fill="#2C2C2A" text-anchor="start">GND</text>
+<text x="389" y="344" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">GND</text>
 <rect x="478" y="120" width="96" height="330" rx="6" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
 <text x="486" y="138" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">XT30</text>
-<text x="486" y="156" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="486" y="171" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="486" y="186" font-size="11" fill="#4A4A46" text-anchor="start">pack | car</text>
-<text x="486" y="201" font-size="11" fill="#4A4A46" text-anchor="start">pack half:</text>
-<text x="486" y="216" font-size="11" fill="#4A4A46" text-anchor="start">male, soldered</text>
-<line x1="526" y1="160" x2="526" y2="440" stroke="#9A9A94" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="486" y="156" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="486" y="171" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="486" y="186" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">pack | car</text>
+<text x="486" y="201" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">pack half:</text>
+<text x="486" y="216" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">male, soldered</text>
+<line x1="526" y1="160" x2="526" y2="172" stroke="#9A9A94" stroke-width="1" stroke-dasharray="3 3"/>
+<line x1="526" y1="224" x2="526" y2="440" stroke="#9A9A94" stroke-width="1" stroke-dasharray="3 3"/>
 <circle cx="478" cy="150" r="3" fill="#2C2C2A"/>
-<text x="485" y="154" font-size="11" fill="#2C2C2A" text-anchor="start">+</text>
+<text x="485" y="154" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">+</text>
 <circle cx="478" cy="430" r="3" fill="#2C2C2A"/>
-<text x="485" y="434" font-size="11" fill="#2C2C2A" text-anchor="start">-</text>
+<text x="485" y="434" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">-</text>
 <circle cx="574" cy="150" r="3" fill="#2C2C2A"/>
-<text x="567" y="154" font-size="11" fill="#2C2C2A" text-anchor="end">+</text>
+<text x="567" y="154" font-size="11" fill="#2C2C2A" text-anchor="end" font-weight="bold">+</text>
 <circle cx="574" cy="430" r="3" fill="#2C2C2A"/>
-<text x="567" y="434" font-size="11" fill="#2C2C2A" text-anchor="end">-</text>
+<text x="567" y="434" font-size="11" fill="#2C2C2A" text-anchor="end" font-weight="bold">-</text>
 <path d="M332 150 L478 150" fill="none" stroke="#C62828" stroke-width="2.2"/>
 <rect x="409.0" y="133.0" width="52.0" height="15" rx="7" fill="#FFFFFF" stroke="#C62828" stroke-width="1"/>
 <text x="435.0" y="144.0" font-size="11" fill="#C62828" text-anchor="middle" font-weight="bold">W5 190</text>
@@ -99,76 +100,76 @@
 <path d="M332 422 L352 422 L352 340 L382 340" fill="none" stroke="#333333" stroke-width="2.2"/>
 <rect x="324.0" y="362.0" width="52.0" height="15" rx="7" fill="#FFFFFF" stroke="#333333" stroke-width="1"/>
 <text x="350.0" y="373.0" font-size="11" fill="#333333" text-anchor="middle" font-weight="bold">W6 190</text>
-<text x="372" y="466" font-size="10" fill="#6B6B66" text-anchor="start">W4+W5 share the P+ pad, W6+W7 the P- pad</text>
+<text x="372" y="466" font-size="10" fill="#6B6B66" text-anchor="start" font-weight="bold">W4+W5 share the P+ pad, W6+W7 the P- pad</text>
 <rect x="612" y="120" width="100" height="70" rx="6" fill="#FDE8E8" stroke="#C62828" stroke-width="1"/>
 <text x="620" y="138" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">Rocker</text>
-<text x="620" y="156" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="620" y="171" font-size="11" fill="#4A4A46" text-anchor="start">2 pins, SPST</text>
-<text x="620" y="186" font-size="11" fill="#4A4A46" text-anchor="start">either way round</text>
+<text x="620" y="156" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="620" y="171" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">2 pins, SPST</text>
+<text x="620" y="186" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">either way round</text>
 <circle cx="612" cy="150" r="3" fill="#2C2C2A"/>
-<text x="619" y="154" font-size="11" fill="#2C2C2A" text-anchor="start">1</text>
+<text x="619" y="154" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">1</text>
 <circle cx="712" cy="150" r="3" fill="#2C2C2A"/>
-<text x="705" y="154" font-size="11" fill="#2C2C2A" text-anchor="end">2</text>
+<text x="705" y="154" font-size="11" fill="#2C2C2A" text-anchor="end" font-weight="bold">2</text>
 <path d="M574 150 L612 150" fill="none" stroke="#C62828" stroke-width="2.2" stroke-dasharray="7 4"/>
 <rect x="570.5" y="131.0" width="45.0" height="15" rx="7" fill="#FFFFFF" stroke="#C62828" stroke-width="1"/>
 <text x="593.0" y="142.0" font-size="11" fill="#C62828" text-anchor="middle" font-weight="bold">W8 80</text>
 <rect x="640" y="262" width="170" height="150" rx="6" fill="#FFF3E0" stroke="#E07B00" stroke-width="1"/>
 <text x="648" y="280" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">LM2596 buck</text>
-<text x="648" y="298" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="648" y="313" font-size="11" fill="#4A4A46" text-anchor="start">set 4.99 V unloaded (JE)</text>
-<text x="648" y="328" font-size="11" fill="#4A4A46" text-anchor="start">turn it so IN faces the</text>
-<text x="648" y="343" font-size="11" fill="#4A4A46" text-anchor="start">rocker (+x end)</text>
-<text x="648" y="358" font-size="11" fill="#4A4A46" text-anchor="start">IN- and OUT- are common</text>
+<text x="648" y="298" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="648" y="313" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">set 4.99 V unloaded (JE)</text>
+<text x="648" y="328" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">turn it so IN faces the</text>
+<text x="648" y="343" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">rocker (+x end)</text>
+<text x="648" y="358" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">IN- and OUT- are common</text>
 <circle cx="640" cy="292" r="3" fill="#2C2C2A"/>
-<text x="647" y="296" font-size="11" fill="#2C2C2A" text-anchor="start">IN+</text>
+<text x="647" y="296" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">IN+</text>
 <circle cx="640" cy="392" r="3" fill="#2C2C2A"/>
-<text x="647" y="396" font-size="11" fill="#2C2C2A" text-anchor="start">IN-</text>
+<text x="647" y="396" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">IN-</text>
 <circle cx="810" cy="292" r="3" fill="#2C2C2A"/>
-<text x="803" y="296" font-size="11" fill="#2C2C2A" text-anchor="end">OUT+</text>
+<text x="803" y="296" font-size="11" fill="#2C2C2A" text-anchor="end" font-weight="bold">OUT+</text>
 <rect x="736" y="212" width="40" height="12" rx="2" fill="#FFFFFF" stroke="#5F5E5A"/>
-<text x="780" y="222" font-size="10" fill="#4A4A46" text-anchor="start">power slot</text>
-<text x="780" y="234" font-size="10" fill="#4A4A46" text-anchor="start">(W9 + W12 go up)</text>
+<text x="736" y="208" font-size="10" fill="#4A4A46" text-anchor="start" font-weight="bold">power slot</text>
+<text x="732" y="236" font-size="10" fill="#4A4A46" text-anchor="start" font-weight="bold">(W9 + W12 go up)</text>
 <path d="M712 162 L726 162 L726 245 L624 245 L624 292 L640 292" fill="none" stroke="#C62828" stroke-width="2.2" stroke-dasharray="7 4"/>
 <rect x="645.5" y="228.0" width="59.0" height="15" rx="7" fill="#FFFFFF" stroke="#C62828" stroke-width="1"/>
 <text x="675.0" y="239.0" font-size="11" fill="#C62828" text-anchor="middle" font-weight="bold">W10 100</text>
 <rect x="882" y="128" width="172" height="262" rx="6" fill="#E8F0FE" stroke="#1A56B0" stroke-width="1"/>
 <text x="890" y="146" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">TB6612FNG</text>
-<text x="890" y="164" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="890" y="179" font-size="11" fill="#4A4A46" text-anchor="start">VCC &lt;- Uno 5V</text>
-<text x="890" y="194" font-size="11" fill="#4A4A46" text-anchor="start">PWMA+B &lt;- D11</text>
-<text x="890" y="209" font-size="11" fill="#4A4A46" text-anchor="start">AIN1+BIN1 &lt;- D8</text>
-<text x="890" y="224" font-size="11" fill="#4A4A46" text-anchor="start">AIN2+BIN2 &lt;- D12</text>
-<text x="890" y="239" font-size="11" fill="#4A4A46" text-anchor="start">STBY &lt;- D10</text>
-<text x="890" y="254" font-size="11" fill="#4A4A46" text-anchor="start">470-1000 uF</text>
-<text x="890" y="269" font-size="11" fill="#4A4A46" text-anchor="start"> VM-GND, at board</text>
-<text x="890" y="284" font-size="11" fill="#4A4A46" text-anchor="start">AO1+BO1 bridged</text>
-<text x="890" y="299" font-size="11" fill="#4A4A46" text-anchor="start">AO2+BO2 bridged</text>
+<text x="890" y="164" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="890" y="179" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">VCC &lt;- Uno 5V</text>
+<text x="890" y="194" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">PWMA+B &lt;- D11</text>
+<text x="890" y="209" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">AIN1+BIN1 &lt;- D8</text>
+<text x="890" y="224" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">AIN2+BIN2 &lt;- D12</text>
+<text x="890" y="239" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">STBY &lt;- D10</text>
+<text x="890" y="254" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">470-1000 uF</text>
+<text x="890" y="269" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"> VM-GND, at board</text>
+<text x="890" y="284" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">AO1+BO1 bridged</text>
+<text x="890" y="299" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">AO2+BO2 bridged</text>
 <circle cx="882" cy="150" r="3" fill="#2C2C2A"/>
-<text x="889" y="154" font-size="11" fill="#2C2C2A" text-anchor="start">VM</text>
+<text x="889" y="164" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">VM</text>
 <circle cx="1054" cy="200" r="3" fill="#2C2C2A"/><circle cx="1054" cy="240" r="3" fill="#2C2C2A"/>
-<text x="1060" y="196" font-size="10" fill="#6A1B9A" text-anchor="start">AO1+BO1</text>
-<text x="1060" y="236" font-size="10" fill="#6A1B9A" text-anchor="start">AO2+BO2</text>
+<text x="1060" y="196" font-size="10" fill="#6A1B9A" text-anchor="start" font-weight="bold">AO1+BO1</text>
+<text x="1060" y="236" font-size="10" fill="#6A1B9A" text-anchor="start" font-weight="bold">AO2+BO2</text>
 <circle cx="868" cy="150" r="4" fill="#C62828"/>
-<text x="862" y="172" font-size="10" fill="#C62828" text-anchor="end">VBAT pad</text>
+<text x="876" y="124" font-size="10" fill="#C62828" text-anchor="start" font-weight="bold">VBAT pad</text>
 <path d="M712 142 L868 142 L868 150 L882 150" fill="none" stroke="#C62828" stroke-width="2.2" stroke-dasharray="7 4"/>
 <rect x="754.0" y="125.0" width="52.0" height="15" rx="7" fill="#FFFFFF" stroke="#C62828" stroke-width="1"/>
 <text x="780.0" y="136.0" font-size="11" fill="#C62828" text-anchor="middle" font-weight="bold">W9 250</text>
 <rect x="1086" y="250" width="92" height="120" rx="6" fill="#F4F4F0" stroke="#5F5E5A" stroke-width="1"/>
 <text x="1094" y="268" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">Divider</text>
-<text x="1094" y="286" font-size="11" fill="#4A4A46" text-anchor="start">top 100k</text>
-<text x="1094" y="301" font-size="11" fill="#4A4A46" text-anchor="start">bottom 12k</text>
-<text x="1094" y="316" font-size="11" fill="#4A4A46" text-anchor="start">(10k + 2k)</text>
-<text x="1094" y="331" font-size="11" fill="#4A4A46" text-anchor="start">mid -&gt; A0</text>
+<text x="1094" y="286" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">top 100k</text>
+<text x="1094" y="301" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">bottom 12k</text>
+<text x="1094" y="316" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">(10k + 2k)</text>
+<text x="1094" y="331" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">mid -&gt; A0</text>
 <path d="M868 150 L868 112 L1132 112 L1132 250" fill="none" stroke="#C62828" stroke-width="2.2" stroke-dasharray="7 4"/>
-<rect x="1064.0" y="95.0" width="52.0" height="15" rx="7" fill="#FFFFFF" stroke="#C62828" stroke-width="1"/>
-<text x="1090.0" y="106.0" font-size="11" fill="#C62828" text-anchor="middle" font-weight="bold">W11 40</text>
+<rect x="1106.0" y="150.0" width="52.0" height="15" rx="7" fill="#FFFFFF" stroke="#C62828" stroke-width="1"/>
+<text x="1132.0" y="161.0" font-size="11" fill="#C62828" text-anchor="middle" font-weight="bold">W11 40</text>
 <line x1="1178" y1="320" x2="1192" y2="320" stroke="#757575" stroke-width="1.5"/>
-<text x="1194" y="324" font-size="11" fill="#757575" text-anchor="start" font-weight="bold">A0</text>
+<text x="1174" y="316" font-size="11" fill="#757575" text-anchor="end" font-weight="bold">A0</text>
 <rect x="898" y="452" width="160" height="9" rx="3" fill="#111111"/>
-<text x="898" y="478" font-size="11" fill="#333333" text-anchor="start" font-weight="bold">STAR = TB6612 GND pad</text>
-<text x="898" y="492" font-size="10" fill="#333333" text-anchor="start">one pad, every ground wire</text>
+<text x="982" y="508" font-size="11" fill="#333333" text-anchor="start" font-weight="bold">STAR = TB6612 GND pad</text>
+<text x="982" y="522" font-size="10" fill="#333333" text-anchor="start" font-weight="bold">one pad, every ground wire</text>
 <path d="M968 390 L968 452" fill="none" stroke="#333333" stroke-width="3"/>
-<text x="974" y="422" font-size="10" fill="#333333" text-anchor="start">TB6612 GND</text>
+<text x="962" y="412" font-size="10" fill="#333333" text-anchor="end" font-weight="bold">TB6612 GND</text>
 <path d="M574 430 L590 430 L590 440 L906 440 L906 452" fill="none" stroke="#333333" stroke-width="2.2" stroke-dasharray="7 4"/>
 <rect x="778.5" y="443.0" width="59.0" height="15" rx="7" fill="#FFFFFF" stroke="#333333" stroke-width="1"/>
 <text x="808.0" y="454.0" font-size="11" fill="#333333" text-anchor="middle" font-weight="bold">W12 260</text>
@@ -180,81 +181,81 @@
 <text x="1062.0" y="378.0" font-size="11" fill="#333333" text-anchor="middle" font-weight="bold">div. bottom</text>
 <rect x="882" y="530" width="296" height="106" rx="6" fill="#F5F5F2" stroke="#5F5E5A" stroke-width="1"/>
 <text x="890" y="548" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">Uno R3 (shield sits on it)</text>
-<text x="890" y="566" font-size="11" fill="#4A4A46" text-anchor="start">powered by the Pi's USB (JF), NOT the pack</text>
-<text x="890" y="581" font-size="11" fill="#4A4A46" text-anchor="start">D11 D8 D12 D10 -&gt; TB6612, D2 D3 &lt;- encoder</text>
-<text x="890" y="596" font-size="11" fill="#4A4A46" text-anchor="start">D4 D7 -&gt; strips (via 400 ohm), A0 &lt;- divider</text>
-<text x="890" y="611" font-size="11" fill="#4A4A46" text-anchor="start">5V -&gt; TB6612 VCC + servo V+ (JR, NOT the pack)</text>
-<text x="890" y="626" font-size="11" fill="#4A4A46" text-anchor="start">+5V2 must NEVER touch the Uno 5V pin</text>
+<text x="890" y="566" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">powered by the Pi's USB (JF), NOT the pack</text>
+<text x="890" y="581" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">D11 D8 D12 D10 -&gt; TB6612, D2 D3 &lt;- encoder</text>
+<text x="890" y="596" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">D4 D7 -&gt; strips (via 400 ohm), A0 &lt;- divider</text>
+<text x="890" y="611" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">5V -&gt; TB6612 VCC + servo V+ (JR, NOT the pack)</text>
+<text x="890" y="626" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">+5V2 must NEVER touch the Uno 5V pin</text>
 <path d="M946 530 L946 510 L946 461" fill="none" stroke="#333333" stroke-width="2.2" stroke-dasharray="7 4"/>
 <rect x="920.0" y="515.0" width="52.0" height="15" rx="7" fill="#FFFFFF" stroke="#333333" stroke-width="1"/>
 <text x="946.0" y="526.0" font-size="11" fill="#333333" text-anchor="middle" font-weight="bold">W15 40</text>
 <circle cx="868" cy="292" r="4" fill="#E07B00"/>
-<text x="868" y="312" font-size="10" fill="#E07B00" text-anchor="middle">+5V2 pad</text>
+<text x="878" y="312" font-size="10" fill="#E07B00" text-anchor="end" font-weight="bold">+5V2 pad</text>
 <path d="M810 292 L868 292" fill="none" stroke="#E07B00" stroke-width="2.2" stroke-dasharray="7 4"/>
 <rect x="809.5" y="273.0" width="59.0" height="15" rx="7" fill="#FFFFFF" stroke="#E07B00" stroke-width="1"/>
 <text x="839.0" y="284.0" font-size="11" fill="#E07B00" text-anchor="middle" font-weight="bold">W14 120</text>
 <rect x="1226" y="128" width="236" height="246" rx="6" fill="#F3E5F5" stroke="#6A1B9A" stroke-width="1"/>
 <text x="1234" y="146" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">N20 motor + encoder</text>
-<text x="1234" y="164" font-size="11" fill="#4A4A46" text-anchor="start">Pololu #5159, 12 CPR</text>
-<text x="1234" y="179" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="1234" y="194" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="1234" y="209" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="1234" y="224" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="1234" y="239" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="1234" y="254" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="1234" y="269" font-size="11" fill="#4A4A46" text-anchor="start">blue  (enc Vcc) -&gt; +5V2</text>
-<text x="1234" y="284" font-size="11" fill="#4A4A46" text-anchor="start">yellow (A) -&gt; D2</text>
-<text x="1234" y="299" font-size="11" fill="#4A4A46" text-anchor="start">white (B) -&gt; D3</text>
-<text x="1234" y="314" font-size="11" fill="#4A4A46" text-anchor="start">0.1 uF across M1-M2</text>
-<text x="1234" y="329" font-size="11" fill="#4A4A46" text-anchor="start">cable W16: #4763, 300 UNCUT</text>
+<text x="1234" y="164" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">Pololu #5159, 12 CPR</text>
+<text x="1234" y="179" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="1234" y="194" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="1234" y="209" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="1234" y="224" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="1234" y="239" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="1234" y="254" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="1234" y="269" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">blue  (enc Vcc) -&gt; +5V2</text>
+<text x="1234" y="284" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">yellow (A) -&gt; D2</text>
+<text x="1234" y="299" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">white (B) -&gt; D3</text>
+<text x="1234" y="314" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">0.1 uF across M1-M2</text>
+<text x="1234" y="329" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">cable W16: #4763, 300 UNCUT</text>
 <circle cx="1226" cy="200" r="3" fill="#2C2C2A"/>
-<text x="1233" y="204" font-size="11" fill="#2C2C2A" text-anchor="start">M1 red</text>
+<text x="1233" y="204" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">M1 red</text>
 <circle cx="1226" cy="240" r="3" fill="#2C2C2A"/>
-<text x="1233" y="244" font-size="11" fill="#2C2C2A" text-anchor="start">M2 black</text>
+<text x="1233" y="244" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">M2 black</text>
 <path d="M1054 200 L1226 200" fill="none" stroke="#6A1B9A" stroke-width="2.2" stroke-dasharray="7 4"/>
 <rect x="1124.5" y="183.0" width="31.0" height="15" rx="7" fill="#FFFFFF" stroke="#6A1B9A" stroke-width="1"/>
 <text x="1140.0" y="194.0" font-size="11" fill="#6A1B9A" text-anchor="middle" font-weight="bold">W16</text>
 <path d="M1054 240 L1226 240" fill="none" stroke="#6A1B9A" stroke-width="2.2"/>
 <circle cx="1226" cy="362" r="3" fill="#2C2C2A"/>
-<text x="1233" y="366" font-size="11" fill="#2C2C2A" text-anchor="start">green (enc GND) -&gt; STAR</text>
+<text x="1233" y="366" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">green (enc GND) -&gt; STAR</text>
 <path d="M1226 362 L1196 362 L1196 444 L1012 444 L1012 452" fill="none" stroke="#333333" stroke-width="1.6"/>
 <rect x="1107.5" y="427.0" width="73.0" height="15" rx="7" fill="#FFFFFF" stroke="#333333" stroke-width="1"/>
 <text x="1144.0" y="438.0" font-size="11" fill="#333333" text-anchor="middle" font-weight="bold">W16 green</text>
 <rect x="1226" y="430" width="236" height="196" rx="6" fill="#FFFDE7" stroke="#B59F00" stroke-width="1"/>
 <text x="1234" y="448" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">WS2812B strips x2</text>
-<text x="1234" y="466" font-size="11" fill="#4A4A46" text-anchor="start">front and rear segment, each:</text>
-<text x="1234" y="481" font-size="11" fill="#4A4A46" text-anchor="start">+5V2 &lt;- +5V2 pad (W17)</text>
-<text x="1234" y="496" font-size="11" fill="#4A4A46" text-anchor="start">DIN &lt;- D4 (left) / D7 (right)</text>
-<text x="1234" y="511" font-size="11" fill="#4A4A46" text-anchor="start">  via 400 ohm (2 x 200)</text>
-<text x="1234" y="526" font-size="11" fill="#4A4A46" text-anchor="start">GND -&gt; STAR, own wire (W17)</text>
-<text x="1234" y="541" font-size="11" fill="#4A4A46" text-anchor="start">470 uF +5V2-GND at the feed</text>
-<text x="1234" y="556" font-size="11" fill="#4A4A46" text-anchor="start"></text>
-<text x="1234" y="571" font-size="11" fill="#4A4A46" text-anchor="start">W17 lengths: measure on the car</text>
-<text x="1234" y="586" font-size="11" fill="#4A4A46" text-anchor="start">(strip positions not designed)</text>
+<text x="1234" y="466" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">front and rear segment, each:</text>
+<text x="1234" y="481" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">+5V2 &lt;- +5V2 pad (W17)</text>
+<text x="1234" y="496" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">DIN &lt;- D4 (left) / D7 (right)</text>
+<text x="1234" y="511" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">  via 400 ohm (2 x 200)</text>
+<text x="1234" y="526" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">GND -&gt; STAR, own wire (W17)</text>
+<text x="1234" y="541" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">470 uF +5V2-GND at the feed</text>
+<text x="1234" y="556" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"></text>
+<text x="1234" y="571" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">W17 lengths: measure on the car</text>
+<text x="1234" y="586" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">(strip positions not designed)</text>
 <circle cx="1226" cy="600" r="3" fill="#2C2C2A"/>
-<text x="1233" y="604" font-size="11" fill="#2C2C2A" text-anchor="start">GND x2</text>
+<text x="1233" y="604" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">GND x2</text>
 <path d="M1226 600 L1196 600 L1196 492 L1034 492 L1034 461" fill="none" stroke="#333333" stroke-width="1.6" stroke-dasharray="7 4"/>
 <rect x="1139.5" y="475.0" width="31.0" height="15" rx="7" fill="#FFFFFF" stroke="#333333" stroke-width="1"/>
 <text x="1155.0" y="486.0" font-size="11" fill="#333333" text-anchor="middle" font-weight="bold">W17</text>
-<rect x="18" y="486" width="820" height="154" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="18" y="486" width="800" height="154" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
 <text x="28" y="502" font-size="11" fill="#6B6B66" text-anchor="start" font-weight="bold">HOW TO READ IT</text>
 <path d="M32 510 L72 510" fill="none" stroke="#C62828" stroke-width="2.2"/>
-<text x="80" y="514" font-size="11" fill="#2C2C2A" text-anchor="start">pack + / VBAT, soldered</text>
+<text x="80" y="514" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">pack + / VBAT, soldered</text>
 <path d="M32 528 L72 528" fill="none" stroke="#C62828" stroke-width="2.2" stroke-dasharray="7 4"/>
-<text x="80" y="532" font-size="11" fill="#2C2C2A" text-anchor="start">VBAT, still to cut</text>
+<text x="80" y="532" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">VBAT, still to cut</text>
 <path d="M32 546 L72 546" fill="none" stroke="#333333" stroke-width="2.2"/>
-<text x="80" y="550" font-size="11" fill="#2C2C2A" text-anchor="start">ground (P- side)</text>
+<text x="80" y="550" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">ground (P- side)</text>
 <path d="M32 564 L72 564" fill="none" stroke="#E07B00" stroke-width="2.2" stroke-dasharray="7 4"/>
-<text x="80" y="568" font-size="11" fill="#2C2C2A" text-anchor="start">+5V2 (LM2596 out, 5.0 V)</text>
+<text x="80" y="568" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">+5V2 (LM2596 out, 5.0 V)</text>
 <path d="M32 582 L72 582" fill="none" stroke="#6A1B9A" stroke-width="2.2" stroke-dasharray="7 4"/>
-<text x="80" y="586" font-size="11" fill="#2C2C2A" text-anchor="start">motor (driver -&gt; motor)</text>
-<text x="300" y="512" font-size="11" fill="#2C2C2A" text-anchor="start">Tag = wire number + length in mm (cut length for dashed).</text>
-<text x="300" y="530" font-size="11" fill="#2C2C2A" text-anchor="start">W2 ? = soldered, length never recorded.</text>
-<text x="300" y="548" font-size="11" fill="#2C2C2A" text-anchor="start">Nothing but the BMS touches B+ / MB / B- (unfused).</text>
-<text x="300" y="566" font-size="11" fill="#2C2C2A" text-anchor="start">Encoder Vcc from +5V2 only, never VBAT.</text>
-<text x="300" y="584" font-size="11" fill="#2C2C2A" text-anchor="start">Switch OFF = 0 V on VBAT; meter XT30 polarity (+8.x V) before any load.</text>
-<text x="300" y="602" font-size="11" fill="#2C2C2A" text-anchor="start">The servo and the Uno are NOT on the pack (Pi USB, records JF / JR).</text>
-<text x="300" y="620" font-size="11" fill="#2C2C2A" text-anchor="start">Lengths for dashed wires are CAD estimates - cut long, trim at the dry fit.</text>
+<text x="80" y="586" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">motor (driver -&gt; motor)</text>
+<text x="300" y="512" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">Tag = wire number + length in mm (cut length for dashed).</text>
+<text x="300" y="530" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">W2 ? = soldered, length never recorded.</text>
+<text x="300" y="548" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">Nothing but the BMS touches B+ / MB / B- (unfused).</text>
+<text x="300" y="566" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">Encoder Vcc from +5V2 only, never VBAT.</text>
+<text x="300" y="584" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">Switch OFF = 0 V on VBAT; meter XT30 polarity (+8.x V) before any load.</text>
+<text x="300" y="602" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">The servo and the Uno are NOT on the pack (Pi USB, records JF / JR).</text>
+<text x="300" y="620" font-size="11" fill="#2C2C2A" text-anchor="start" font-weight="bold">Lengths for dashed wires are CAD estimates - cut long, trim at the dry fit.</text>
 <text x="24" y="664" font-size="15" fill="#2C2C2A" text-anchor="start" font-weight="bold">CUT LIST</text>
 <text x="24" y="690" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Wire</text>
 <text x="78" y="690" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">From -&gt; to</text>
@@ -263,106 +264,106 @@
 <text x="900" y="690" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Route / note</text>
 <line x1="24" y1="696" x2="1476" y2="696" stroke="#BDBDB8" stroke-width="1"/>
 <text x="24" y="720" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W1</text>
-<text x="78" y="720" font-size="12" fill="#2C2C2A" text-anchor="start">Holder red (CELL+) -&gt; 3 A fuse -&gt; BMS B+</text>
-<text x="520" y="720" font-size="12" fill="#2C2C2A" text-anchor="start">red</text>
-<text x="640" y="720" font-size="12" fill="#0F6E56" text-anchor="start">326 total, SOLDERED</text>
-<text x="900" y="720" font-size="12" fill="#2C2C2A" text-anchor="start">measured by Evan (153 + 4 x 43.27); coil slack on the bank top</text>
+<text x="78" y="720" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Holder red (CELL+) -&gt; 3 A fuse -&gt; BMS B+</text>
+<text x="520" y="720" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">red</text>
+<text x="640" y="720" font-size="12" fill="#0F6E56" text-anchor="start" font-weight="bold">326 total, SOLDERED</text>
+<text x="900" y="720" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">measured by Evan (153 + 4 x 43.27); coil slack on the bank top</text>
 <line x1="24" y1="730" x2="1476" y2="730" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="750" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W2</text>
-<text x="78" y="750" font-size="12" fill="#2C2C2A" text-anchor="start">Holder black (cell 2 -) -&gt; BMS B-</text>
-<text x="520" y="750" font-size="12" fill="#2C2C2A" text-anchor="start">black</text>
-<text x="640" y="750" font-size="12" fill="#0F6E56" text-anchor="start">SOLDERED, not recorded</text>
-<text x="900" y="750" font-size="12" fill="#2C2C2A" text-anchor="start">unfused - keep short, sleeve it</text>
+<text x="78" y="750" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Holder black (cell 2 -) -&gt; BMS B-</text>
+<text x="520" y="750" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">black</text>
+<text x="640" y="750" font-size="12" fill="#0F6E56" text-anchor="start" font-weight="bold">SOLDERED, not recorded</text>
+<text x="900" y="750" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">unfused - keep short, sleeve it</text>
 <line x1="24" y1="760" x2="1476" y2="760" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="780" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W3</text>
-<text x="78" y="780" font-size="12" fill="#2C2C2A" text-anchor="start">Holder brass rivet (series node) -&gt; BMS MB</text>
-<text x="520" y="780" font-size="12" fill="#2C2C2A" text-anchor="start">-</text>
-<text x="640" y="780" font-size="12" fill="#0F6E56" text-anchor="start">55, SOLDERED</text>
-<text x="900" y="780" font-size="12" fill="#2C2C2A" text-anchor="start">unfused - BMS sits at the rivet end of the holder top</text>
+<text x="78" y="780" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Holder brass rivet (series node) -&gt; BMS MB</text>
+<text x="520" y="780" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">-</text>
+<text x="640" y="780" font-size="12" fill="#0F6E56" text-anchor="start" font-weight="bold">55, SOLDERED</text>
+<text x="900" y="780" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">unfused - BMS sits at the rivet end of the holder top</text>
 <line x1="24" y1="790" x2="1476" y2="790" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="810" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W4</text>
-<text x="78" y="810" font-size="12" fill="#2C2C2A" text-anchor="start">BMS P+ -&gt; charger BAT</text>
-<text x="520" y="810" font-size="12" fill="#2C2C2A" text-anchor="start">red</text>
-<text x="640" y="810" font-size="12" fill="#0F6E56" text-anchor="start">190, SOLDERED</text>
-<text x="900" y="810" font-size="12" fill="#2C2C2A" text-anchor="start">over the bank top to the -y lobe</text>
+<text x="78" y="810" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">BMS P+ -&gt; charger BAT</text>
+<text x="520" y="810" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">red</text>
+<text x="640" y="810" font-size="12" fill="#0F6E56" text-anchor="start" font-weight="bold">190, SOLDERED</text>
+<text x="900" y="810" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">over the bank top to the -y lobe</text>
 <line x1="24" y1="820" x2="1476" y2="820" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="840" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W5</text>
-<text x="78" y="840" font-size="12" fill="#2C2C2A" text-anchor="start">BMS P+ -&gt; XT30 pack half +</text>
-<text x="520" y="840" font-size="12" fill="#2C2C2A" text-anchor="start">red</text>
-<text x="640" y="840" font-size="12" fill="#0F6E56" text-anchor="start">190, SOLDERED</text>
-<text x="900" y="840" font-size="12" fill="#2C2C2A" text-anchor="start">same route; tightest pack wire (~20-45 spare)</text>
+<text x="78" y="840" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">BMS P+ -&gt; XT30 pack half +</text>
+<text x="520" y="840" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">red</text>
+<text x="640" y="840" font-size="12" fill="#0F6E56" text-anchor="start" font-weight="bold">190, SOLDERED</text>
+<text x="900" y="840" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">same route; tightest pack wire (~20-45 spare)</text>
 <line x1="24" y1="850" x2="1476" y2="850" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="870" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W6</text>
-<text x="78" y="870" font-size="12" fill="#2C2C2A" text-anchor="start">BMS P- -&gt; charger GND (the one next to BAT)</text>
-<text x="520" y="870" font-size="12" fill="#2C2C2A" text-anchor="start">black</text>
-<text x="640" y="870" font-size="12" fill="#0F6E56" text-anchor="start">190, SOLDERED</text>
-<text x="900" y="870" font-size="12" fill="#2C2C2A" text-anchor="start">over the bank top to the -y lobe</text>
+<text x="78" y="870" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">BMS P- -&gt; charger GND (the one next to BAT)</text>
+<text x="520" y="870" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">black</text>
+<text x="640" y="870" font-size="12" fill="#0F6E56" text-anchor="start" font-weight="bold">190, SOLDERED</text>
+<text x="900" y="870" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">over the bank top to the -y lobe</text>
 <line x1="24" y1="880" x2="1476" y2="880" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="900" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W7</text>
-<text x="78" y="900" font-size="12" fill="#2C2C2A" text-anchor="start">BMS P- -&gt; XT30 pack half -</text>
-<text x="520" y="900" font-size="12" fill="#2C2C2A" text-anchor="start">black</text>
-<text x="640" y="900" font-size="12" fill="#0F6E56" text-anchor="start">190, SOLDERED</text>
-<text x="900" y="900" font-size="12" fill="#2C2C2A" text-anchor="start">same route</text>
+<text x="78" y="900" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">BMS P- -&gt; XT30 pack half -</text>
+<text x="520" y="900" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">black</text>
+<text x="640" y="900" font-size="12" fill="#0F6E56" text-anchor="start" font-weight="bold">190, SOLDERED</text>
+<text x="900" y="900" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">same route</text>
 <line x1="24" y1="910" x2="1476" y2="910" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="930" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W8</text>
-<text x="78" y="930" font-size="12" fill="#2C2C2A" text-anchor="start">XT30 car half + -&gt; rocker pin 1</text>
-<text x="520" y="930" font-size="12" fill="#2C2C2A" text-anchor="start">red</text>
-<text x="640" y="930" font-size="12" fill="#8A4B00" text-anchor="start">cut 80 (est 30-50)</text>
-<text x="900" y="930" font-size="12" fill="#2C2C2A" text-anchor="start">straight up to the rocker hanging under the wing</text>
+<text x="78" y="930" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">XT30 car half + -&gt; rocker pin 1</text>
+<text x="520" y="930" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">red</text>
+<text x="640" y="930" font-size="12" fill="#8A4B00" text-anchor="start" font-weight="bold">cut 80 (est 30-50)</text>
+<text x="900" y="930" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">straight up to the rocker hanging under the wing</text>
 <line x1="24" y1="940" x2="1476" y2="940" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="960" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W9</text>
-<text x="78" y="960" font-size="12" fill="#2C2C2A" text-anchor="start">Rocker pin 2 -&gt; shield VBAT pad -&gt; TB6612 VM</text>
-<text x="520" y="960" font-size="12" fill="#2C2C2A" text-anchor="start">red</text>
-<text x="640" y="960" font-size="12" fill="#8A4B00" text-anchor="start">cut 250 (est ~230)</text>
-<text x="900" y="960" font-size="12" fill="#2C2C2A" text-anchor="start">up the power slot, along the deck, twisted with W12</text>
+<text x="78" y="960" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Rocker pin 2 -&gt; shield VBAT pad -&gt; TB6612 VM</text>
+<text x="520" y="960" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">red</text>
+<text x="640" y="960" font-size="12" fill="#8A4B00" text-anchor="start" font-weight="bold">cut 250 (est ~230)</text>
+<text x="900" y="960" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">up the power slot, along the deck, twisted with W12</text>
 <line x1="24" y1="970" x2="1476" y2="970" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="990" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W10</text>
-<text x="78" y="990" font-size="12" fill="#2C2C2A" text-anchor="start">Rocker pin 2 -&gt; LM2596 IN+</text>
-<text x="520" y="990" font-size="12" fill="#2C2C2A" text-anchor="start">red</text>
-<text x="640" y="990" font-size="12" fill="#8A4B00" text-anchor="start">cut 100 (est ~80)</text>
-<text x="900" y="990" font-size="12" fill="#2C2C2A" text-anchor="start">LM2596 IN end facing +x (else ~150)</text>
+<text x="78" y="990" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Rocker pin 2 -&gt; LM2596 IN+</text>
+<text x="520" y="990" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">red</text>
+<text x="640" y="990" font-size="12" fill="#8A4B00" text-anchor="start" font-weight="bold">cut 100 (est ~80)</text>
+<text x="900" y="990" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">LM2596 IN end facing +x (else ~150)</text>
 <line x1="24" y1="1000" x2="1476" y2="1000" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="1020" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W11</text>
-<text x="78" y="1020" font-size="12" fill="#2C2C2A" text-anchor="start">Shield VBAT pad -&gt; divider top (100k)</text>
-<text x="520" y="1020" font-size="12" fill="#2C2C2A" text-anchor="start">red</text>
-<text x="640" y="1020" font-size="12" fill="#8A4B00" text-anchor="start">jumper 30-50</text>
-<text x="900" y="1020" font-size="12" fill="#2C2C2A" text-anchor="start">on the shield; keeps the rocker tab to 2 wires</text>
+<text x="78" y="1020" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Shield VBAT pad -&gt; divider top (100k)</text>
+<text x="520" y="1020" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">red</text>
+<text x="640" y="1020" font-size="12" fill="#8A4B00" text-anchor="start" font-weight="bold">jumper 30-50</text>
+<text x="900" y="1020" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">on the shield; keeps the rocker tab to 2 wires</text>
 <line x1="24" y1="1030" x2="1476" y2="1030" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="1050" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W12</text>
-<text x="78" y="1050" font-size="12" fill="#2C2C2A" text-anchor="start">XT30 car half - -&gt; STAR</text>
-<text x="520" y="1050" font-size="12" fill="#2C2C2A" text-anchor="start">black</text>
-<text x="640" y="1050" font-size="12" fill="#8A4B00" text-anchor="start">cut 260 (est ~250)</text>
-<text x="900" y="1050" font-size="12" fill="#2C2C2A" text-anchor="start">with W9 through the power slot</text>
+<text x="78" y="1050" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">XT30 car half - -&gt; STAR</text>
+<text x="520" y="1050" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">black</text>
+<text x="640" y="1050" font-size="12" fill="#8A4B00" text-anchor="start" font-weight="bold">cut 260 (est ~250)</text>
+<text x="900" y="1050" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">with W9 through the power slot</text>
 <line x1="24" y1="1060" x2="1476" y2="1060" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="1080" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W13</text>
-<text x="78" y="1080" font-size="12" fill="#2C2C2A" text-anchor="start">LM2596 IN- (= OUT-) -&gt; STAR</text>
-<text x="520" y="1080" font-size="12" fill="#2C2C2A" text-anchor="start">black</text>
-<text x="640" y="1080" font-size="12" fill="#8A4B00" text-anchor="start">cut 220 (est 150-200)</text>
-<text x="900" y="1080" font-size="12" fill="#2C2C2A" text-anchor="start">one leg for both; along the deck to the shield</text>
+<text x="78" y="1080" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">LM2596 IN- (= OUT-) -&gt; STAR</text>
+<text x="520" y="1080" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">black</text>
+<text x="640" y="1080" font-size="12" fill="#8A4B00" text-anchor="start" font-weight="bold">cut 220 (est 150-200)</text>
+<text x="900" y="1080" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">one leg for both; along the deck to the shield</text>
 <line x1="24" y1="1090" x2="1476" y2="1090" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="1110" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W14</text>
-<text x="78" y="1110" font-size="12" fill="#2C2C2A" text-anchor="start">LM2596 OUT+ -&gt; shield +5V2 pad</text>
-<text x="520" y="1110" font-size="12" fill="#2C2C2A" text-anchor="start">orange</text>
-<text x="640" y="1110" font-size="12" fill="#8A4B00" text-anchor="start">cut 120 (est 80-100)</text>
-<text x="900" y="1110" font-size="12" fill="#2C2C2A" text-anchor="start">+5V2 = 4.99 V; never to the Uno 5V pin</text>
+<text x="78" y="1110" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">LM2596 OUT+ -&gt; shield +5V2 pad</text>
+<text x="520" y="1110" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">orange</text>
+<text x="640" y="1110" font-size="12" fill="#8A4B00" text-anchor="start" font-weight="bold">cut 120 (est 80-100)</text>
+<text x="900" y="1110" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">+5V2 = 4.99 V; never to the Uno 5V pin</text>
 <line x1="24" y1="1120" x2="1476" y2="1120" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="1140" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W15</text>
-<text x="78" y="1140" font-size="12" fill="#2C2C2A" text-anchor="start">Uno GND (shield header) -&gt; STAR</text>
-<text x="520" y="1140" font-size="12" fill="#2C2C2A" text-anchor="start">black</text>
-<text x="640" y="1140" font-size="12" fill="#8A4B00" text-anchor="start">jumper 30-50</text>
-<text x="900" y="1140" font-size="12" fill="#2C2C2A" text-anchor="start">on the shield</text>
+<text x="78" y="1140" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Uno GND (shield header) -&gt; STAR</text>
+<text x="520" y="1140" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">black</text>
+<text x="640" y="1140" font-size="12" fill="#8A4B00" text-anchor="start" font-weight="bold">jumper 30-50</text>
+<text x="900" y="1140" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">on the shield</text>
 <line x1="24" y1="1150" x2="1476" y2="1150" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="1170" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W16</text>
-<text x="78" y="1170" font-size="12" fill="#2C2C2A" text-anchor="start">Motor + encoder: Pololu #4763 6-wire cable</text>
-<text x="520" y="1170" font-size="12" fill="#2C2C2A" text-anchor="start">6 cores</text>
-<text x="640" y="1170" font-size="12" fill="#0F6E56" text-anchor="start">300, UNCUT</text>
-<text x="900" y="1170" font-size="12" fill="#2C2C2A" text-anchor="start">route ~220-270, ~30 spare (Evan); Dupont splice at the shield if short</text>
+<text x="78" y="1170" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Motor + encoder: Pololu #4763 6-wire cable</text>
+<text x="520" y="1170" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">6 cores</text>
+<text x="640" y="1170" font-size="12" fill="#0F6E56" text-anchor="start" font-weight="bold">300, UNCUT</text>
+<text x="900" y="1170" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">route ~220-270, ~30 spare (Evan); Dupont splice at the shield if short</text>
 <line x1="24" y1="1180" x2="1476" y2="1180" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="1200" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">W17</text>
-<text x="78" y="1200" font-size="12" fill="#2C2C2A" text-anchor="start">+5V2 / DIN / GND to each strip segment</text>
-<text x="520" y="1200" font-size="12" fill="#2C2C2A" text-anchor="start">3 per seg.</text>
-<text x="640" y="1200" font-size="12" fill="#8A4B00" text-anchor="start">measure on the car</text>
-<text x="900" y="1200" font-size="12" fill="#2C2C2A" text-anchor="start">strip positions not designed yet</text>
+<text x="78" y="1200" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">+5V2 / DIN / GND to each strip segment</text>
+<text x="520" y="1200" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">3 per seg.</text>
+<text x="640" y="1200" font-size="12" fill="#8A4B00" text-anchor="start" font-weight="bold">measure on the car</text>
+<text x="900" y="1200" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">strip positions not designed yet</text>
 <line x1="24" y1="1210" x2="1476" y2="1210" stroke="#EEEEEA" stroke-width="1"/>
 <text x="24" y="1230" font-size="12" fill="#4A4A46" text-anchor="start" font-weight="bold">To buy / cut for step 2b and later (22 AWG): red ~480 mm (W8-W11), black ~560 mm (W12, W13, W15), orange ~120 mm (W14). Built so far: W1-W7 (pack), LM2596 set.</text>
 </svg>

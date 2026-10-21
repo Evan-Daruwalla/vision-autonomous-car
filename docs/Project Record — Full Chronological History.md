@@ -329,6 +329,7 @@ the dated entry, not the digest.
 - [KF - Proto shield wiring diagram (docs/shield_wiring.svg) from Evan's photos: placement, every net, meter checks](#appendix-kf---proto-shield-wiring-diagram-docsshield_wiringsvg-from-evans-photos-placement-every-net-meter-checks-2026-10-20-1902-cdt) (10-20)
 - [KG - Shield hole-by-hole layout + checker (shield_layout.json, shield_holemap.py, SHIELD_BUILD.md)](#appendix-kg---shield-hole-by-hole-layout--checker-shield_layoutjson-shield_holemappy-shield_buildmd-2026-10-20-1941-cdt) (10-20)
 - [KH - docs-sync after the tray/deck/shield work: HANDOFF current state + prompt rewritten (KA HIGH #2/#3), bins, drift check](#appendix-kh---docs-sync-after-the-traydeckshield-work-handoff-current-state--prompt-rewritten-ka-high-23-bins-drift-check-2026-10-20-2025-cdt) (10-20)
+- [KI - Diagram labels bold with zero overlaps + 3D render of the finished proto shield](#appendix-ki---diagram-labels-bold-with-zero-overlaps--3d-render-of-the-finished-proto-shield-2026-10-20-2051-cdt) (10-20)
 
 ---
 
@@ -20611,3 +20612,21 @@ unchanged), WIRING_PROTOSHIELD.md (KG link), ELECTRONICS_LAYOUT.md (KB).
 - KA's MEDs: still open, listed in the prompt.
 
 No HTML twin or record index exists.
+
+# Appendix KI - Diagram labels bold with zero overlaps + 3D render of the finished proto shield (2026-10-20, ~20:51 CDT)
+**Ask (Evan, 2026-10-20 evening):** (1) in the proto-shield, electronics-layout and pack-wiring SVGs make every letter bold and never overlapped with anything important; (2) add a 3D render to the proto-shield diagram showing the finished board.
+
+**Overlap check (new, scratch tool, not in the repo):** a Python wrapper that loads each SVG in headless Chrome and lists every text whose rendered box hits another text, a hole/pin circle, a stroked line/path, or crosses a stroked rect edge. Copper background and text on an opaque tag drawn over a wire do not count. Baseline 2026-10-20 ~20:30 CDT: shield 79, layout 13, pack 16 (182 before those two exemptions).
+
+**Fixes (plan-split: Opus spec, one Sonnet agent per generator, Opus re-ran every check and read the renders):**
+- `scripts/shield_holemap.py`: root svg bold; PITCH 34 -> 48 px (render only, no check uses it); a greedy label placer (holes, pins, wires, bridges, socket arrows, hazard X's, part edges and placed labels are obstacles; raises if no free spot); part-id text darkened to 55% of its outline colour. Check output identical to before (6 PASS, 31 WARN 7 hazards); `--self-check` PASS.
+- `scripts/electronics_layout.py`: root svg bold; part numbers that share a centre are merged ("1/3", "6/7/15") and moved off outlines; raises if no free spot. Check output identical apart from the byte count.
+- `scripts/pack_wiring_svg.py`: all text bold; labels moved by hand, XT30 divider split, deck/shield panels resized; no wire endpoint, text or colour changed. Fuse title 13 -> 12 px, brass-rivet labels 10 -> 9 px.
+- Result (re-run by Opus 2026-10-20 ~20:50 CDT): shield 0, layout 0, pack 0 overlaps; `scripts/check_artifacts.py` 40 checked, 0 drifted; `scripts/run_checks.py` 18 passed, 0 failed.
+
+**3D render (new `scripts/shield_render3d.py`):** builds an OpenSCAD model from `docs/shield_layout.json` and renders `docs/shield_3d_top.png` (front-left 3/4 view) and `docs/shield_3d_bottom.png` (from below, board flipped top-over-bottom: copper strips, 22 solder bridges, joints). Modelled: carrier on 2 x 8 headers with the PWMA dot, carrier-top bridges as flat nested U's, C1 lying flat (8 x 12.5 mm, measured) and C2 on the VMOT/GND2 tips, J1-J6 (J5 KEY pin pulled), JP1 cap on UNO5V-SERVO_V (JR), R100k flat, R10k/R2k standing, w1-w5 on the SHIELD_BUILD step-6 routes, Dupont leads with heat-shrink on D4/D7. The script exits 1 if a wire's route stops matching the layout. `shield_holemap.py` now embeds both PNGs (base64) in `docs/shield_holemap.svg` and links them from `docs/SHIELD_BUILD.md` when they sit next to the output.
+- NOT real: Uno header x positions are not in the layout, so leads leave straight along their column; board outline = hole field + 3 mm; board colour guessed; part sizes catalogue-typical except C1. It is a picture of the INTENDED build - untested against a real one.
+
+**Found, not fixed:** (1) the 2D map draws w3/w4/w5 as straight diagonals while SHIELD_BUILD step 6 routes them as L's (w4 along row P4); the 3D render follows the step text. (2) A few shield labels sit a hole from their pin ("SERVO_V", "-> D8", "-> A0"); nothing overlaps.
+
+Nothing committed.

@@ -14,13 +14,12 @@ out = []
 
 
 def t(x, y, s, size=12, color="#2C2C2A", bold=False, anchor="start"):
-    w = ' font-weight="bold"' if bold else ""
-    out.append(f'<text x="{x}" y="{y}" font-size="{size}" fill="{color}" text-anchor="{anchor}"{w}>{escape(s)}</text>')
+    out.append(f'<text x="{x}" y="{y}" font-size="{size}" fill="{color}" text-anchor="{anchor}" font-weight="bold">{escape(s)}</text>')
 
 
-def box(x, y, w, h, title, lines=(), fill="#F5F5F2", stroke="#5F5E5A"):
+def box(x, y, w, h, title, lines=(), fill="#F5F5F2", stroke="#5F5E5A", tsize=13):
     out.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="{fill}" stroke="{stroke}" stroke-width="1"/>')
-    t(x + 8, y + 18, title, 13, bold=True)
+    t(x + 8, y + 18, title, tsize, bold=True)
     for i, s in enumerate(lines):
         t(x + 8, y + 36 + 15 * i, s, 11, "#4A4A46")
 
@@ -42,12 +41,12 @@ def wire(pts, color, tag=None, at=0, dashed=False, width=2.2, dx=0, dy=-6):
         t(mx, my, tag, 11, color, bold=True, anchor="middle")
 
 
-def pin(x, y, label, side="left"):
+def pin(x, y, label, side="left", ly=4):
     out.append(f'<circle cx="{x}" cy="{y}" r="3" fill="#2C2C2A"/>')
     if side == "left":
-        t(x + 7, y + 4, label, 11)
+        t(x + 7, y + ly, label, 11)
     else:
-        t(x - 7, y + 4, label, 11, anchor="end")
+        t(x - 7, y + ly, label, 11, anchor="end")
 
 
 out.append(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="Arial, Helvetica, sans-serif">')
@@ -63,8 +62,8 @@ t(24, 72, "Every ground wire lands on the STAR = the TB6612 GND pad on the shiel
 # ---- groups (where things sit on the car) ----
 group(18, 92, 330, 380, "PACK (holder on the +y lobe)")
 group(362, 92, 222, 380, "TRAY -y LOBE")
-group(598, 92, 240, 380, "DECK -y WING (rocker hangs below it)")
-group(852, 92, 336, 548, "PROTO SHIELD on the Uno (deck, rear)")
+group(598, 92, 224, 380, "DECK -y WING (rocker hangs below it)")
+group(828, 92, 360, 548, "PROTO SHIELD on the Uno (deck, rear)")
 group(1202, 92, 280, 300, "UNDER THE FRAMES")
 group(1202, 406, 280, 234, "CAR FRONT + REAR")
 
@@ -73,9 +72,9 @@ box(40, 130, 130, 52, "Cell 1 (25R)", ["+ end at the lead end"])
 box(40, 255, 130, 52, "Cell 2 (25R)", ["- end at the lead end"])
 out.append('<line x1="105" y1="182" x2="105" y2="255" stroke="#444441" stroke-width="3"/>')
 out.append('<circle cx="105" cy="218" r="5" fill="#BA7517"/>')
-t(112, 236, "brass rivet = series node", 10, "#854F0B")
-t(112, 248, "(no-lead end, MB tap)", 10, "#854F0B")
-box(40, 392, 130, 44, "3 A fuse (violet ATO)", ["lies on the bank top"], fill="#FAEEDA", stroke="#854F0B")
+t(109, 236, "brass rivet = series node", 9, "#854F0B")
+t(109, 248, "(no-lead end, MB tap)", 9, "#854F0B")
+box(40, 392, 130, 44, "3 A fuse (violet ATO)", ["lies on the bank top"], fill="#FAEEDA", stroke="#854F0B", tsize=12)
 box(222, 120, 110, 330, "BMS", ["", "B08HLQQCQJ", "on the holder top,", "rivet end", "", "2.9 V cutoff", "(untested)"], fill="#E1F5EE", stroke="#0F6E56")
 pin(222, 218, "MB"); pin(222, 300, "B-"); pin(222, 414, "B+")
 pin(332, 150, "P+", "right"); pin(332, 430, "P-", "right")
@@ -89,7 +88,8 @@ wire([(170, 281), (196, 281), (196, 300), (222, 300)], BLK, "W2 ?", at=0, dx=6, 
 box(382, 205, 86, 150, "Charger", ["", "", "Adeept p0374", "USB-C out", "the -y side", "VIN unused"], fill="#EEEDFE", stroke="#534AB7")
 pin(382, 235, "BAT"); pin(382, 340, "GND")
 box(478, 120, 96, 330, "XT30", ["", "", "pack | car", "pack half:", "male, soldered"], fill="#F1EFE8")
-out.append('<line x1="526" y1="160" x2="526" y2="440" stroke="#9A9A94" stroke-width="1" stroke-dasharray="3 3"/>')
+out.append('<line x1="526" y1="160" x2="526" y2="172" stroke="#9A9A94" stroke-width="1" stroke-dasharray="3 3"/>')
+out.append('<line x1="526" y1="224" x2="526" y2="440" stroke="#9A9A94" stroke-width="1" stroke-dasharray="3 3"/>')
 pin(478, 150, "+"); pin(478, 430, "-")
 pin(574, 150, "+", "right"); pin(574, 430, "-", "right")
 wire([(332, 150), (478, 150)], RED, "W5 190", at=0, dx=30)
@@ -106,30 +106,30 @@ box(640, 262, 170, 150, "LM2596 buck", ["", "set 4.99 V unloaded (JE)", "turn it
 pin(640, 292, "IN+"); pin(640, 392, "IN-")
 pin(810, 292, "OUT+", "right")
 out.append('<rect x="736" y="212" width="40" height="12" rx="2" fill="#FFFFFF" stroke="#5F5E5A"/>')
-t(780, 222, "power slot", 10, "#4A4A46")
-t(780, 234, "(W9 + W12 go up)", 10, "#4A4A46")
+t(736, 208, "power slot", 10, "#4A4A46")
+t(732, 236, "(W9 + W12 go up)", 10, "#4A4A46")
 wire([(712, 162), (726, 162), (726, 245), (624, 245), (624, 292), (640, 292)], RED, "W10 100", at=2, dashed=True, dy=-6)
 
 # ---- shield: TB6612, star bar, divider, Uno ----
 box(882, 128, 172, 262, "TB6612FNG", ["", "VCC <- Uno 5V", "PWMA+B <- D11", "AIN1+BIN1 <- D8", "AIN2+BIN2 <- D12", "STBY <- D10",
                                        "470-1000 uF", " VM-GND, at board", "AO1+BO1 bridged", "AO2+BO2 bridged"], fill="#E8F0FE", stroke="#1A56B0")
-pin(882, 150, "VM")
+pin(882, 150, "VM", ly=14)
 out.append('<circle cx="1054" cy="200" r="3" fill="#2C2C2A"/><circle cx="1054" cy="240" r="3" fill="#2C2C2A"/>')
 t(1060, 196, "AO1+BO1", 10, MOT); t(1060, 236, "AO2+BO2", 10, MOT)
 out.append('<circle cx="868" cy="150" r="4" fill="#C62828"/>')
-t(862, 172, "VBAT pad", 10, RED, anchor="end")
+t(876, 124, "VBAT pad", 10, RED)
 wire([(712, 142), (868, 142), (868, 150), (882, 150)], RED, "W9 250", at=0, dashed=True, dx=-10)
 # W11 VBAT pad -> divider top, over the TB6612
 box(1086, 250, 92, 120, "Divider", ["top 100k", "bottom 12k", "(10k + 2k)", "mid -> A0"], fill="#F4F4F0")
-wire([(868, 150), (868, 112), (1132, 112), (1132, 250)], RED, "W11 40", at=1, dashed=True, dx=90)
+wire([(868, 150), (868, 112), (1132, 112), (1132, 250)], RED, "W11 40", at=2, dashed=True, dx=0, dy=-20)
 out.append('<line x1="1178" y1="320" x2="1192" y2="320" stroke="#757575" stroke-width="1.5"/>')
-t(1194, 324, "A0", 11, SIG, bold=True)
+t(1174, 316, "A0", 11, SIG, bold=True, anchor="end")
 # star bar
 out.append('<rect x="898" y="452" width="160" height="9" rx="3" fill="#111111"/>')
-t(898, 478, "STAR = TB6612 GND pad", 11, BLK, bold=True)
-t(898, 492, "one pad, every ground wire", 10, BLK)
+t(982, 508, "STAR = TB6612 GND pad", 11, BLK, bold=True)
+t(982, 522, "one pad, every ground wire", 10, BLK)
 wire([(968, 390), (968, 452)], BLK, width=3)
-t(974, 422, "TB6612 GND", 10, BLK)
+t(962, 412, "TB6612 GND", 10, BLK, anchor="end")
 wire([(574, 430), (590, 430), (590, 440), (906, 440), (906, 452)], BLK, "W12 260", at=2, dashed=True, dx=60, dy=14)
 wire([(640, 392), (626, 392), (626, 428), (926, 428), (926, 452)], BLK, "W13 220", at=2, dashed=True, dx=-100)
 wire([(1132, 370), (1132, 382), (992, 382), (992, 452)], BLK, "div. bottom", at=1, dx=0, dy=-4, width=1.6)
@@ -139,7 +139,7 @@ box(882, 530, 296, 106, "Uno R3 (shield sits on it)", ["powered by the Pi's USB 
 wire([(946, 530), (946, 510), (946, 461)], BLK, "W15 40", at=0, dashed=True, dx=0, dy=6)
 # +5V2
 out.append(f'<circle cx="868" cy="292" r="4" fill="{ORG}"/>')
-t(868, 312, "+5V2 pad", 10, ORG, anchor="middle")
+t(878, 312, "+5V2 pad", 10, ORG, anchor="end")
 wire([(810, 292), (868, 292)], ORG, "W14 120", at=0, dashed=True, dy=-8)
 
 # ---- motor + encoder ----
@@ -160,7 +160,7 @@ pin(1226, 600, "GND x2")
 wire([(1226, 600), (1196, 600), (1196, 492), (1034, 492), (1034, 461)], BLK, "W17", at=2, dashed=True, dx=40, width=1.6)
 
 # ---- legend / rules (left bottom) ----
-group(18, 486, 820, 154, "HOW TO READ IT")
+group(18, 486, 800, 154, "HOW TO READ IT")
 y0 = 510
 for color, dash, label in ((RED, False, "pack + / VBAT, soldered"), (RED, True, "VBAT, still to cut"), (BLK, False, "ground (P- side)"), (ORG, True, "+5V2 (LM2596 out, 5.0 V)"), (MOT, True, "motor (driver -> motor)")):
     wire([(32, y0), (72, y0)], color, dashed=dash)
