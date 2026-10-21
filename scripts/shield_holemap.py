@@ -46,6 +46,8 @@ from collections import defaultdict
 from pathlib import Path
 from xml.sax.saxutils import escape
 
+LEGEND_COL = 340   # px per legend column (4 across at the 1400 px page)
+
 # 3D renders of the finished board (scripts/shield_render3d.py); embedded when present
 RENDER_FILES = ("shield_3d_top.png", "shield_3d_bottom.png")
 RENDER_CAPTION = [
@@ -376,9 +378,11 @@ def analyze(data: dict) -> dict:
         return NET_PALETTE[net_list.index(net) % len(NET_PALETTE)] if net in net_list else NO_NET
 
     pin_color = {}
+    pin_net = {}
     for ref in pins:
         nn = root_nets.get(uf.find(ref))
         pin_color[ref] = net_color(nn[0]) if nn else NO_NET
+        pin_net[ref] = nn[0] if nn else None
 
     # -- 7 bridge hazards (WARN only, never changes ok) --
     def hole_net(h: str):
@@ -407,7 +411,7 @@ def analyze(data: dict) -> dict:
     return {"rows": rows, "row_idx": row_idx, "holeset": holeset, "hole_rc": hole_rc,
             "hazards": hazards,
             "results": results, "ok": all(r["status"] != "FAIL" for r in results),
-            "pins": pins, "pin_color": pin_color, "net_color": net_color,
+            "pins": pins, "pin_color": pin_color, "pin_net": pin_net, "net_color": net_color,
             "users": users}
 
 
@@ -452,6 +456,19 @@ def _seg_hits_box(x1, y1, x2, y2, b) -> bool:
     return True
 
 
+def _leader_seg(text, fs, cx, cy, hx, hy):
+    """Leader from a hole edge to the label box edge, or None if the label is close."""
+    if math.hypot(cx - hx, cy - hy) <= 0.75 * PITCH:
+        return None
+    w_, h_ = Placer.size(text, fs)
+    qx = min(max(hx, cx - w_ / 2), cx + w_ / 2)
+    qy = min(max(hy, cy - h_ / 2), cy + h_ / 2)
+    dd = math.hypot(qx - hx, qy - hy)
+    if dd <= 6:
+        return None
+    return hx + (qx - hx) * 6 / dd, hy + (qy - hy) * 6 / dd, qx, qy
+
+
 class Placer:
     """Greedy text-label placer. Boxes and segments are obstacles; a label is a box
     centred on a candidate point. Width estimate: 0.62 * font size * chars (bold Arial)."""
@@ -490,12 +507,30 @@ class Placer:
                 return False
         return True
 
-    def place(self, text, fs, cands, what):
-        """First free candidate centre wins; returns (cx, cy). Raises if none is free."""
+    def leader_clear(self, seg) -> bool:
+        """A leader may not cross a placed label box (hole/pin/dot obstacle boxes are
+        <= 14 px square and ignored; the box holding the leader's start is ignored)."""
+        sx, sy, qx, qy = seg
+        for o in self.boxes:
+            if o[2] - o[0] <= 14 and o[3] - o[1] <= 14:
+                continue
+            if o[0] <= sx <= o[2] and o[1] <= sy <= o[3]:
+                continue
+            if _seg_hits_box(sx, sy, qx, qy, o):
+                return False
+        return True
+
+    def place(self, text, fs, cands, what, src=None):
+        """First free candidate centre wins; returns (cx, cy). Raises if none is free.
+        src=(hx, hy): also require the label's leader line to be clear of other labels."""
         w, h = self.size(text, fs)
         for cx, cy in cands:
             b = (cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2)
             if self.free(b):
+                if src is not None:
+                    ld = _leader_seg(text, fs, cx, cy, src[0], src[1])
+                    if ld is not None and not self.leader_clear(ld):
+                        continue
                 self.boxes.append(b)
                 self.right = max(self.right, b[2])
                 return cx, cy
@@ -535,7 +570,10 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
     cmin, cmax = (cols_with[0], cols_with[-1]) if cols_with else (0, 0)
     title = title_of(data, A["ok"])
     left = 90
-    top = 110 + 18 * (len(title) - 1)
+    top = 110 + 18 * (len(title) - 1) + 18   # +18: underside note line
+    NOTE = ("Black dashed bars = solder bridges on the UNDERSIDE, drawn as seen through the board "
+            "from the top. Flip the board top-over-bottom (USB end stays LEFT) - the bottom 3D "
+            "render below shows that view.")
 
     def X(c):
         return left + (c - cmin) * PITCH
@@ -543,7 +581,7 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
     def Y(r):
         return top + r * PITCH
 
-    width = max(1400, X(cmax) + 90)
+    width = max(1400, X(cmax) + 90, math.ceil(0.62 * 12 * len(NOTE)) + 40)
     ybot = Y(n - 1)
     kinds: list[str] = []
     for p in data.get("parts", []) + data.get("offboard_parts", []):
@@ -580,6 +618,10 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
         path = wire_path(w)
         for a, b in zip(path, path[1:]):
             pl.seg(X(rc[a][1]), Y(rc[a][0]), X(rc[b][1]), Y(rc[b][0]), 2.5)
+    for w in wires_pl:
+        for h in (w.get("from"), w.get("to")):
+            if h in rc:
+                pl.box(X(rc[h][1]) - 5, Y(rc[h][0]) - 5, X(rc[h][1]) + 5, Y(rc[h][0]) + 5)
     for (h, _na), (n2, _nb) in A["hazards"]:
         mx = (X(rc[h][1]) + X(rc[n2][1])) / 2
         my = (Y(rc[h][0]) + Y(rc[n2][0])) / 2
@@ -587,9 +629,20 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
     socks_pl = [s_ for s_ in data.get("sockets", []) if s_.get("hole") in rc]
     for s_ in socks_pl:
         x, y = X(rc[s_["hole"]][1]), Y(rc[s_["hole"]][0])
-        up = rc[s_["hole"]][0] < (n - 1) / 2
+        up = str(s_.get("uno", "")).startswith("D")
         pl.seg(x, y + (-7 if up else 7), x, y - SOCK if up else y + SOCK, 3)
     labels: list[str] = []
+    leaders: list[str] = []
+
+    def leader(text, fs, cx, cy, hx, hy):
+        """Thin line hole edge -> label box edge when the label sits far from its hole."""
+        ld = _leader_seg(text, fs, cx, cy, hx, hy)
+        if ld is None:
+            return
+        sx, sy, qx, qy = ld
+        leaders.append(f'<line x1="{sx:.1f}" y1="{sy:.1f}" x2="{qx:.1f}" y2="{qy:.1f}" '
+                       f'stroke="#888" stroke-width="0.75"/>')
+        pl.seg(sx, sy, qx, qy, 1.5)
 
     def emit(text, fs, cx, cy, extra, anchor="middle"):
         labels.append(f'<text x="{cx:.1f}" y="{cy + 0.35 * fs:.1f}" font-size="{fs}" '
@@ -633,26 +686,34 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
     for s_ in socks_pl:
         h = s_["hole"]
         x, y = X(rc[h][1]), Y(rc[h][0])
-        up = rc[h][0] < (n - 1) / 2
-        t = f'-> {s_.get("uno")}'
+        up = str(s_.get("uno", "")).startswith("D")
+        # an analog socket's arrow points DOWN across the board; say where it goes
+        t = f'{s_.get("uno")}' if up else f'{s_.get("uno")} (bottom header)'
         w_, h_ = Placer.size(t, 10)
         ty = (y - SOCK - h_ / 2 - 2) if up else (y + SOCK + h_ / 2 + 2)
         cands = [(x, ty), (x - PITCH / 2, ty), (x + PITCH / 2, ty)] + list(_rings(x, ty, 6))
-        cx, cy = pl.place(t, 10, cands, "socket")
+        cx, cy = pl.place(t, 10, cands, "socket", (x, y))
         emit(t, 10, cx, cy, 'fill="#333"')
+        leader(t, 10, cx, cy, x, y)
     # pin labels
     for p in parts_pl:
         for pn, h in p.get("pins", {}).items():
             if h not in rc:
                 continue
             x, y = X(rc[h][1]), Y(rc[h][0])
-            w_, h_ = Placer.size(pn, 9)
+            lt = pn
+            if pn == "KEY":
+                lt = "KEY"   # the hollow ring + legend say "no pin"; a long label lands far away
+            elif len(pn) == 1 and A["pin_net"].get(p["id"] + "." + pn):
+                lt = A["pin_net"][p["id"] + "." + pn]
+            w_, h_ = Placer.size(lt, 9)
             hp = PITCH / 2
             cands = [(x, y + hp), (x, y - hp), (x + 8 + w_ / 2, y), (x - 8 - w_ / 2, y),
                      (x + hp, y + hp), (x - hp, y + hp), (x + hp, y - hp), (x - hp, y - hp)]
             cands += list(_rings(x, y, 14))
-            cx, cy = pl.place(pn, 9, cands, f'pin {p["id"]}.{pn}')
-            emit(pn, 9, cx, cy, 'fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke"')
+            cx, cy = pl.place(lt, 9, cands, f'pin {p["id"]}.{pn}', (x, y))
+            leader(lt, 9, cx, cy, x, y)
+            emit(lt, 9, cx, cy, 'fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke"')
     # wire ids
     for w in wires_pl:
         path = wire_path(w)   # the id goes beside the longest leg
@@ -729,6 +790,13 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
                    f'stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.9">'
                    f'<title>{esc(w.get("id"))}: {esc(a)} to {esc(b)} {esc(w.get("note", ""))}'
                    f'</title></polyline>')
+    # wire endpoint dots (from / to, not via corners)
+    for w in wires_pl:
+        col = A["net_color"](w["net"]) if w.get("net") else NO_NET
+        for h in (w.get("from"), w.get("to")):
+            if h in rc:
+                out.append(f'<circle cx="{X(rc[h][1])}" cy="{Y(rc[h][0])}" r="4" fill="{col}" '
+                           f'stroke="#222" stroke-width="1"/>')
     # pins
     for p in data.get("parts", []):
         for pn, h in p.get("pins", {}).items():
@@ -736,6 +804,11 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
                 continue
             x, y = X(rc[h][1]), Y(rc[h][0])
             pcol = A["pin_color"][p["id"] + "." + pn]
+            if pn == "KEY":
+                out.append(f'<circle cx="{x}" cy="{y}" r="6" fill="#fff" stroke="#999" '
+                           f'stroke-width="1.5"><title>{esc(p["id"])}.KEY (no pin) in {esc(h)}'
+                           f'</title></circle>')
+                continue
             out.append(f'<circle cx="{x}" cy="{y}" r="6" fill="{pcol}" '
                        f'stroke="#222" stroke-width="1"><title>{esc(p["id"])}.{esc(pn)} in '
                        f'{esc(h)}</title></circle>')
@@ -746,16 +819,17 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
         out.append(f'<path d="M{mx - 4},{my - 4} L{mx + 4},{my + 4} M{mx - 4},{my + 4} '
                    f'L{mx + 4},{my - 4}" stroke="#e00000" stroke-width="2" fill="none">'
                    f'<title>hazard: {esc(h)} next to {esc(n2)}</title></path>')
-    # sockets: short arrow out toward the nearer edge
+    # sockets: short arrow out (D* up, A* down)
     for s in data.get("sockets", []):
         h = s.get("hole")
         if h not in rc:
             continue
         x, y = X(rc[h][1]), Y(rc[h][0])
-        up = rc[h][0] < (n - 1) / 2
+        up = str(s.get("uno", "")).startswith("D")
         y2 = y - SOCK if up else y + SOCK
         out.append(f'<line x1="{x}" y1="{y + (-7 if up else 7)}" x2="{x}" y2="{y2}" '
                    f'stroke="#333" stroke-width="2" marker-end="url(#arr)"/>')
+    out.extend(leaders)
     # all placed text labels (grid labels, row names, col numbers, part ids, sockets,
     # pins, wire ids) go on top
     out.extend(labels)
@@ -767,21 +841,41 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
     items = []
     for k in kinds:
         items.append(("rect", kind_color(k), f"part: {k}"))
+    by_col: dict[str, list[str]] = {}
     for net in data.get("nets", {}):
-        items.append(("line", A["net_color"](net), f"net {net}"))
+        by_col.setdefault(A["net_color"](net), []).append(net)
+    for col_, names in by_col.items():
+        items.append(("line", col_, "net " + " / ".join(names)))
     items += [("copper", "#dcdcdc", "copper strip / rail"),
               ("bridge", "#222", "bottom-side solder bridge"),
               ("wire", "#888", "top-side jumper wire (net colour)"),
-              ("sock", "#333", "socket: Dupont to the Uno")]
+              ("sock", "#333", "socket: Dupont to the Uno"),
+              ("hazard", "#e00000", "red x: a bridge sits next to another net - meter these two "
+                                    "holes, must be SILENT"),
+              ("dot", "#888", "dot at a wire end: soldered there (wires are insulated everywhere else)"),
+              ("ring", "#999", "hollow ring: no pin (polarity key)")]
     x = 20
     for kind, col, text in items:
-        if x > width - 240:
+        wide = 0.62 * 11 * len(text) + 6 > LEGEND_COL - 25
+        if wide:
+            if x > 20:
+                x, ly = 20, ly + 22
+        elif x > width - LEGEND_COL:
             x, ly = 20, ly + 22
         if kind == "rect":
             out.append(f'<rect x="{x}" y="{ly - 10}" width="16" height="12" fill="{col}" '
                        f'fill-opacity="0.3" stroke="{col}" stroke-width="2"/>')
         elif kind == "copper":
             out.append(f'<rect x="{x}" y="{ly - 10}" width="16" height="12" fill="{col}"/>')
+        elif kind == "hazard":
+            out.append(f'<path d="M{x + 4},{ly - 8} L{x + 12},{ly} M{x + 4},{ly} L{x + 12},{ly - 8}" '
+                       f'stroke="{col}" stroke-width="2" fill="none"/>')
+        elif kind == "dot":
+            out.append(f'<circle cx="{x + 8}" cy="{ly - 4}" r="4" fill="{col}" stroke="#222" '
+                       f'stroke-width="1"/>')
+        elif kind == "ring":
+            out.append(f'<circle cx="{x + 8}" cy="{ly - 4}" r="6" fill="#fff" stroke="{col}" '
+                       f'stroke-width="1.5"/>')
         elif kind == "bridge":
             out.append(f'<line x1="{x}" y1="{ly - 4}" x2="{x + 16}" y2="{ly - 4}" stroke="{col}" '
                        f'stroke-width="6" stroke-dasharray="4 2"/>')
@@ -789,7 +883,7 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
             out.append(f'<line x1="{x}" y1="{ly - 4}" x2="{x + 16}" y2="{ly - 4}" stroke="{col}" '
                        f'stroke-width="3"/>')
         out.append(f'<text x="{x + 22}" y="{ly}" font-size="11" fill="#222">{esc(text)}</text>')
-        x += 230
+        x += width if wide else LEGEND_COL
     ly += 28
     notes = []
     for d in data.get("direct_uno", []):
@@ -833,6 +927,8 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
                     f'font-weight="bold" '
                     f'fill="{("#b00020" if not A["ok"] else "#111") if i == 0 else "#333"}">'
                     f'{esc(t)}</text>')
+    head.append(f'<text x="20" y="{30 + 18 * len(title)}" font-size="12" font-weight="bold" '
+                f'fill="#b00020">{esc(NOTE)}</text>')
     return "\n".join(head + out + ["</svg>"]) + "\n"
 
 

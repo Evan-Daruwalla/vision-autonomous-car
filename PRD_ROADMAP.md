@@ -201,10 +201,10 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   **Arduino Uno R3 clone (OWNED, $0) owns all real-time actuation**: motor
   PWM on Timer2, servo, ~~4 light channels~~ **2 WS2812B strip data pins (D4/D7, no PWM — 2026-09-03, Appendix CX)**, quadrature encoder on D2/D3, pack
   guard on A0, TB6612 `STBY` on D10 — **zero PWM spare, A1-A5 the only free
-  pins**; Pi↔Uno over USB with the 5 V conductor cut, binary serial protocol
+  pins**; Pi↔Uno over USB ~~with the 5 V conductor cut~~ **(a plain, uncut cable; the Pi powers the Uno - 2026-10-16, JF; struck 2026-10-21, audit KA)**, binary serial protocol
   v0.2 (7-byte command, 9-byte reply, CRC8, ARMED per frame, 150 ms
   watchdog) · power: USB bank → Pi ONLY; 2× ~~EVE 25P~~ Samsung 25R 18650 + 2S BMS board →
-  TB6612 VM and → LM2596 @ 5.2 V → servo, Uno 5V pin, LEDs, encoder; 3 A
+  TB6612 VM and → ~~LM2596 @ 5.2 V → servo, Uno 5V pin, LEDs, encoder~~ **LM2596 (~5 V; JE recorded 4.95 V) -> both strips + encoder only, NEVER the Uno 5V pin; servo V+ on the Uno 5V header via jumper JP1 (JF, JR, 2026-10-16; struck 2026-10-21, audit KA)**; 3 A
   fuse at the pack, XT30, rocker; ~~⚠️ **the 2S BMS documents NO over-discharge
   cutoff — open safety item, guarded by firmware only while the firmware is
   on**~~ **CLOSED: BMS ACEIRMC B08HLQQCQJ documents a 2.9 V/cell cutoff
@@ -625,7 +625,9 @@ transfer gap) must not block the capstone.
    first bench test drives the servo into the Lego hard stop (task 8c).
    **2026-10-16 (Appendices JH, JF): Pi 5 first boot OK (SSH, updated) but on Trixie / Python 3.13 - being re-flashed to Bookworm (Lite, Legacy 64-bit) per this task; camera arrived 2026-10-15, NOT yet tested; Uno power entry changed to the Pi's USB (JF). Done-check NOT passed.** **2026-10-16 (Appendices JJ, JK): Pi on Bookworm 12 / Python 3.11.2 / aarch64; first camera photo with `rpicam-still` - the Pi + camera half is DONE. Remaining for the done-check: TB6612 + N20 and the servo sweep through the shield.** **2026-10-16 (JQ): host_test all ok run FROM the Pi over one USB cable (Uno powered by the Pi). Done-check still NOT passed.**
 10. **Power integration.** ~~LiPo + UBEC + split rails~~ **2× 18650 + 2S BMS
-    + LM2596 @ 5.2 V for the actuator side, USB bank for the Pi, one star
+    +** ~~**LM2596 @ 5.2 V for the actuator side**~~ **LM2596 (~5 V) for the
+    strips + encoder; the Uno and the servo run from the Pi's USB (JF, JR;
+    struck 2026-10-21, audit KA)**, **USB bank for the Pi, one star
     ground** on the chassis; measure ~~5V rail~~ **both rails** under motor
     stall + Pi load. Done: no brownout/UV warning in `vcgencmd` during stall
     test; measurements recorded. *(Terms corrected 2026-09-02; the split-source

@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-20 ~22:40 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-21 ~18:06 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 296 appendices A–KJ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 297 appendices A–KK; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -598,7 +598,8 @@ Read, in order:
    (steering.md for servo work; hardware.md + decisions.md for printed
    mounts or wiring; track.md for track work).
 
-STATE (2026-10-20 ~22:40 CDT). All 24 ordered parts are in (IX).
+STATE (2026-10-21 ~18:06 CDT; shield SVG audited + corrected in KK - socket
+arrows now point to the RIGHT header, bridges marked as underside). All 24 ordered parts are in (IX).
 FIRMWARE: the Uno runs the current uno_control (SELFTEST PASS 86/86),
 re-flashed FROM THE PI with avrdude 2026-10-16 (JQ); host_test.py all ok from
 the Pi. Read the boot banner before trusting any firmware claim.
@@ -641,8 +642,10 @@ TEST SUITE: scripts/run_checks.py (19 passed on 2026-10-20 - re-run it, never
 quote it; svg_text_overlap needs Chrome, so it SKIPs on the Pi). Push state: run `git fetch` then `git status -sb`.
 
 AUDIT BACKLOG: KA (2026-10-17 daily audit, 48 findings; HIGH #1 fixed in KE,
-HIGH #2/#3 (HANDOFF staleness) fixed 2026-10-20; MEDs open incl.
-PRD_ROADMAP.md:204,207,628 cut-cable / LM2596->Uno text). HJ's HIGH:
+HIGH #2/#3 (HANDOFF staleness) fixed 2026-10-20; PRD_ROADMAP.md:204,207,628
+struck 2026-10-21 (KK); MEDs still open: WIRING_PROTOSHIELD.md:125,179
+cut-cable text, bins (hardware/architecture/LIGHTING, decisions.md:62), LM2596
+4.99 V (here + pack svg) vs 4.95 V recorded in JE). HJ's HIGH:
 ml/splits.py split stability + no corpus id in checkpoints. IM, EW, EX, FG
 open.
 
@@ -657,7 +660,7 @@ NEXT ACTIONS, highest value first:
    checks: rocker OFF = 0 V downstream; XT30 polarity +8.x V before any load.
 4. Charger board 2 no-load test (BAT lifted, USB-C in: 8.4 V OK, >= 8.6 V
    reject).
-5. Fix KA's MEDs (PRD_ROADMAP.md cut-cable text) and HJ's HIGH (ml/splits.py).
+5. Fix KA's remaining MEDs (list above) and HJ's HIGH (ml/splits.py).
 6. Small backlog: host_test.py docstring + SERIAL_PROTOCOL.md:9 say nothing is
    wired; servo_bench prompt "400-2600" (US_MAX 2800); confirm the 12-tooth
    bevel gear; measure the USB-B plug (16 x 30 x 13 allowance).

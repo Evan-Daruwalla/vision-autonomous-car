@@ -331,6 +331,7 @@ the dated entry, not the digest.
 - [KH - docs-sync after the tray/deck/shield work: HANDOFF current state + prompt rewritten (KA HIGH #2/#3), bins, drift check](#appendix-kh---docs-sync-after-the-traydeckshield-work-handoff-current-state--prompt-rewritten-ka-high-23-bins-drift-check-2026-10-20-2025-cdt) (10-20)
 - [KI - Diagram labels bold with zero overlaps + 3D render of the finished proto shield](#appendix-ki---diagram-labels-bold-with-zero-overlaps--3d-render-of-the-finished-proto-shield-2026-10-20-2051-cdt) (10-20)
 - [KJ - KI follow-ups: committed; shield wire routes from one via list; permanent SVG text-overlap check](#appendix-kj---ki-follow-ups-committed-shield-wire-routes-from-one-via-list-permanent-svg-text-overlap-check-2026-10-20-2101-cdt) (10-20)
+- [KK - Shield SVG audit: 4 wrong socket arrows, underside-bridge warning, KEY ring, clearer legend; PRD KA MEDs struck](#appendix-kk---shield-svg-audit-4-wrong-socket-arrows-underside-bridge-warning-key-ring-clearer-legend-prd-ka-meds-struck-2026-10-21-1806-cdt) (10-21)
 
 ---
 
@@ -20642,3 +20643,21 @@ Nothing committed.
 **3. `scripts/svg_text_overlap.py` (new).** The KI scratch checker, made permanent: headless Chrome measures every text in the three diagrams against other text, circles, stroked lines/paths and rect edges (copper background and opaque tags exempt). `self_check()` plants one overlap of each kind in a tiny SVG and requires each to be caught, requires a clean SVG and a text-on-white-tag SVG to pass, then requires 0 overlaps on all three real diagrams. Without Chrome/Edge it raises FileNotFoundError, which run_checks.py reports as a SKIP (the Pi has none). Known-bad test: on the pre-fix pack diagram from `953cf3b` it prints "FAIL old_pack.svg: 16 overlap(s)", the same 16 as the KI baseline; exit 1. Current diagrams: 3 x PASS, 0 overlaps, ~10 s.
 
 **Suite:** `scripts/run_checks.py` 19 passed, 0 failed, 0 skipped (was 18; the new module is discovered by its self_check).
+
+# Appendix KK - Shield SVG audit: 4 wrong socket arrows, underside-bridge warning, KEY ring, clearer legend; PRD KA MEDs struck (2026-10-21, ~18:06 CDT)
+**Ask (Evan):** audit the proto-shield SVG and make it as accurate and easy to understand as possible, then fix KA's PRD MEDs (option 3).
+
+**Audit of `docs/shield_holemap.svg` (Opus, read-only first).** Cross-checked against `docs/shield_layout.json`, `firmware/uno_control/uno_control.ino:84-97` (pin map) and hardware.md (md08a pinout). Verified CORRECT, unchanged: the Uno pin map (D11 PWM, D12 DIR2, D8 DIR1, D10 STBY, D9 servo, D4/D7 strips, A0, D2/D3 encoder), the TB6612 pin order, the divider wiring (all 17 nets pass holemap check 5), the header orientation (USB left, digital top).
+Found WRONG or unclear, and fixed (code by one Sonnet agent to an Opus spec; three follow-ups by Opus):
+1. ACCURACY - 4 of 8 socket arrows pointed to the wrong header: the code pointed each arrow to the NEARER edge, so D9 / D4 / D7 (digital, top header) pointed down and A0 (analog, bottom header) pointed up. Now digital = up, analog = down; labels "D11" ... and "A0 (bottom header)".
+2. ACCURACY - the underside solder bridges were drawn in top view with no warning; a left-right flip would mirror every bridge. A red title line now says they are on the UNDERSIDE, drawn seen through the board, flip top-over-bottom (USB stays left), matching the bottom 3D render.
+3. ACCURACY - J5's pulled KEY pin was drawn as a live pin; now a hollow ring labelled "KEY".
+4. Red x marks (31 bridge hazards) had no legend entry; added ("meter these two holes, must be SILENT").
+5. Wire ends had no marks, so w1 (VBAT) over L3/8 (GND) looked joined; wire ends now carry a dot, legend: insulated everywhere else.
+6. Resistor pins labelled "a"/"b" now show their net (VBAT, A0, DIV_MID, GND).
+7. Legend listed 17 nets in 8 colours; same-colour nets merged ("net PWM / DIR1 / DIR2 / STBY"); 4 columns of 340 px.
+8. Labels that land away from their hole get a thin leader line; a candidate whose leader would cross a label is skipped (agent's addition, accepted).
+Checks re-run by Opus 2026-10-21 ~18:05 CDT: holemap PASS/WARN output identical to before the change (diffed); `--self-check` PASS; `scripts/svg_text_overlap.py` 0 overlaps on all 3 diagrams; `scripts/run_checks.py` 19 passed.
+
+**Option 3 - KA MEDs in PRD_ROADMAP.md (dated strikethroughs, nothing deleted):** :204 "with the 5 V conductor cut" struck -> plain, uncut cable, the Pi powers the Uno (JF); :207 "LM2596 @ 5.2 V -> servo, Uno 5V pin, LEDs, encoder" struck -> LM2596 (~5 V; JE recorded 4.95 V) feeds both strips + encoder only, never the Uno 5V pin; servo V+ on the Uno 5V header via JP1 (JF, JR); :628 "LM2596 @ 5.2 V for the actuator side" struck -> strips + encoder; Uno and servo from the Pi's USB. CRLF kept.
+NOT fixed (named): KA's other MEDs - WIRING_PROTOSHIELD.md:125,179 cut-cable text, hardware/architecture/LIGHTING bins, decisions.md:62, and the LM2596 4.99 V (HANDOFF, pack svg) vs 4.95 V (JE) provenance gap.
