@@ -334,6 +334,7 @@ the dated entry, not the digest.
 - [KK - Shield SVG audit: 4 wrong socket arrows, underside-bridge warning, KEY ring, clearer legend; PRD KA MEDs struck](#appendix-kk---shield-svg-audit-4-wrong-socket-arrows-underside-bridge-warning-key-ring-clearer-legend-prd-ka-meds-struck-2026-10-21-1806-cdt) (10-21)
 - [KL - Underside 3D render: top-side parts as labelled ghost outlines](#appendix-kl---underside-3d-render-top-side-parts-as-labelled-ghost-outlines-2026-10-21-1818-cdt) (10-21)
 - [KM - Shield renders: true top-down view, readable labelled underside](#appendix-km---shield-renders-true-top-down-view-readable-labelled-underside-2026-10-21-1823-cdt) (10-21)
+- [KN - Shield renders: labelled top view, holes drawn on both faces](#appendix-kn---shield-renders-labelled-top-view-holes-drawn-on-both-faces-2026-10-21-1828-cdt) (10-21)
 
 ---
 
@@ -20681,3 +20682,13 @@ Footprint overlaps in the picture are real geometry, not label errors: C1 (lying
 - Bottom view: labels 1.5 -> 1.8 mm on a dark plate (they read over copper, drill marks and off the board); part outlines 0.3 -> 0.45 mm, wire lines 0.35 -> 0.5 mm, leaders 0.2 -> 0.3 mm; labels may sit up to 9 mm past the board edge (`OFF_BOARD`), which put J3 / J4 / J5 / J6 beside their own columns instead of mid-board on long leaders. Tried 2.0 mm first: too big for the crowded right columns, labels landed far from their parts.
 - `shield_holemap.py`: the two renders are now stacked one per row at full page width (was side by side at half width); the render caption wraps at 180 characters (its first line ran off the page - the SVG overlap check does not catch text past the canvas edge).
 Checks (2026-10-21 ~18:23 CDT): render PASS (exit 0, every label placed); holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed. Label placement inside the PNGs checked by eye.
+
+# Appendix KN - Shield renders: labelled top view, holes drawn on both faces (2026-10-21, ~18:28 CDT)
+**Ask (Evan):** label the top-down render too, and show the shield's holes.
+
+**Changes (`scripts/shield_render3d.py`):**
+- Holes: the top view showed a plain green board - OpenSCAD's preview does not render the drilled cuts in an orthographic top view. Every hole now gets a dark 1.0 mm disc on the top face as well as the bottom (the bottom already had them).
+- Labels: the bottom-view placer became one function `_place_labels()` used by both views. Top view: the same 18 labels (11 parts, C1, w1-w5) on dark plates, floating above all parts, kept off every part footprint, C1, top-side wire, Dupont lead and Dupont housing; up to 9 mm past the board edge. A leader + dot now runs to the nearest point of the part's own footprint (was: its centre), only when the label is more than 1 mm away from it. Bottom-view output is unchanged in placement.
+- `shield_holemap.py`: render caption mentions the labels and holes.
+Known weakness: the divider corner of the top view is crowded - C1, R2k, R10k, R100k labels sit together above the C1 can with leaders that cross. Readable, not elegant.
+Checks (2026-10-21 ~18:28 CDT): render PASS (all labels placed, exit 0); holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed. Labels inside the PNGs checked by eye.

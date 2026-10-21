@@ -33,7 +33,8 @@ BOARD_T = 1.6       # mm
 MARGIN = 3.0        # mm of board around the outermost holes
 IMG = (1600, 1100)
 LABEL_MM = 1.8      # text height of the part labels in the bottom view
-OFF_BOARD = 9.0     # mm a bottom-view label may sit beyond the board edge
+OFF_BOARD = 9.0     # mm a label may sit beyond the board edge
+Z_LABEL_TOP = 40.0  # top-view labels float above every part (orthographic, so height does not show)
 C_GHOST, C_GHOST_WIRE = "#9fe8ff", "#ffb0f0"   # bottom view: top-side part / wire outlines
 
 # Carrier-top bridges (step 1), drawn as flat nested U's lying on the carrier:
@@ -115,9 +116,10 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
     s.append(f'color("{C_BOARD}") difference() {{ translate([{f(bx0)},{f(by0)},{f(-BOARD_T)}]) '
              f'cube([{f(bx1 - bx0)},{f(by1 - by0)},{f(BOARD_T)}]); {drills} }}')
 
-    # the drill holes seen from below (the preview renderer does not show the cut)
+    # the drill holes seen from below and from above (the preview renderer does not show the cut)
     for h in holes:
         x, y = g.xy(h)
+        s.append(cyl(x, y, 0.0, 0.05, 1.0, "#0a0a0a", 10))
         s.append(cyl(x, y, -BOARD_T - 0.12, 0.05, 1.0, "#0a0a0a", 10))
     # bottom copper: pads + bars between ADJACENT holes of one group
     for grp in data["grid"].get("copper", []):
@@ -239,6 +241,7 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
     # the side of the Uno header they plug into (digital = top edge, analog =
     # bottom edge), ending in the male Dupont housing. Header x positions are not
     # in the layout, so each lead leaves the board straight along its own column.
+    lead_segs, housing_boxes = [], []
     for so in data.get("sockets", []):
         x, y = g.xy(so["hole"])
         used.add(so["hole"])
@@ -251,6 +254,8 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
             ym = (y + ye) / 2
             s.append(seg((x, ym - 5, zl), (x, ym + 5, zl), 3.0, "#111111"))
         s.append(box(x - 1.27, ye, zl - 1.27, x + 1.27, ye + sg * 14.0, zl + 1.27, C_PLASTIC))
+        lead_segs.append(((x, y), (x, ye)))
+        housing_boxes.append((x - 1.27, min(ye, ye + sg * 20.0), x + 1.27, max(ye, ye + sg * 20.0)))
         s.append(box(x - 0.32, ye + sg * 14.0, zl - 0.32, x + 0.32, ye + sg * 20.0, zl + 0.32, C_PIN))
 
     i_bot = len(s)
@@ -275,64 +280,93 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
                 f'difference() {{ square([{f(w)},{f(h)}]); translate([{f(t)},{f(t)}]) '
                 f'square([{f(w - 2 * t)},{f(h - 2 * t)}]); }}')
 
-    def flat(a, b, col, t=0.5):
-        return (f'color("{col}") hull() {{ translate([{f(a[0])},{f(a[1])},{f(zg)}]) cylinder(h=0.03, d={f(t)}, $fn=8); '
-                f'translate([{f(b[0])},{f(b[1])},{f(zg)}]) cylinder(h=0.03, d={f(t)}, $fn=8); }}')
+    def flat(a, b, col, t=0.5, z=zg):
+        return (f'color("{col}") hull() {{ translate([{f(a[0])},{f(a[1])},{f(z)}]) cylinder(h=0.03, d={f(t)}, $fn=8); '
+                f'translate([{f(b[0])},{f(b[1])},{f(z)}]) cylinder(h=0.03, d={f(t)}, $fn=8); }}')
 
     ghosts: list[str] = []
-    targets: list[tuple[str, float, float, str]] = []      # label, x, y, colour
+    targets: list[tuple] = []      # (label, x, y, colour, own footprint box or None)
+    part_boxes = []
     for pid, p in parts.items():
         r0, r1, c0, c1 = p["body"]["rect"]
-        ghosts.append(frame(c0 * P, -r0 * P, c1 * P, -r1 * P, C_GHOST))
-        targets.append((pid, (c0 + c1) / 2 * P, -(r0 + r1) / 2 * P, C_GHOST))
-    ghosts.append(frame(mx - dia / 2, vy + 3.0, mx + dia / 2, vy + 3.0 + ln, C_GHOST))          # C1, lying flat
-    targets.append(("C1", mx, vy + 3.0 + ln / 2, C_GHOST))
+        bxp = (c0 * P, -r1 * P, c1 * P, -r0 * P)
+        part_boxes.append(bxp)
+        ghosts.append(frame(*bxp, C_GHOST))
+        targets.append((pid, (c0 + c1) / 2 * P, -(r0 + r1) / 2 * P, C_GHOST, bxp))
+    c1box = (mx - dia / 2, vy + 3.0, mx + dia / 2, vy + 3.0 + ln)       # C1, lying flat on the carrier
+    part_boxes.append(c1box)
+    ghosts.append(frame(*c1box, C_GHOST))
+    targets.append(("C1", mx, vy + 3.0 + ln / 2, C_GHOST, c1box))
+    wire_legs = []
     for w in data.get("wires", []):
         route = [w["from"]] + list(w.get("via", [])) + [w["to"]]
         pts = [g.xy(h) for h in route]
+        wire_legs += list(zip(pts, pts[1:]))
         ghosts += [flat(a, b, C_GHOST_WIRE) for a, b in zip(pts, pts[1:])]
         a, b = max(zip(pts, pts[1:]), key=lambda ab: abs(ab[1][0] - ab[0][0]) + abs(ab[1][1] - ab[0][1]))
-        targets.append((w["id"], (a[0] + b[0]) / 2, (a[1] + b[1]) / 2, C_GHOST_WIRE))
-    obst = [(g.xy(h), 1.05) for h in used]
-    segs = [(g.xy(a), g.xy(b)) for a, b in data.get("bridges", []) if a in holes and b in holes]
-    boxes: list[tuple[float, float, float, float]] = []
-    labels = []
-    for pid, cx0, cy0, col in targets:
+        targets.append((w["id"], (a[0] + b[0]) / 2, (a[1] + b[1]) / 2, C_GHOST_WIRE, None))
+    bounds = (bx0 - OFF_BOARD, by0 - OFF_BOARD, bx1 + OFF_BOARD, by1 + OFF_BOARD)
+    bridges_xy = [(g.xy(a), g.xy(b)) for a, b in data.get("bridges", []) if a in holes and b in holes]
+    labels_bottom = _place_labels("bottom", targets, [(g.xy(h), 1.05) for h in used], bridges_xy, [],
+                                  bounds, zg, flat, errs)
+    # top view: same labels, kept off every part, wire, Dupont lead and housing
+    labels_top = _place_labels("top", targets, [], wire_legs + lead_segs, part_boxes + housing_boxes,
+                               bounds, Z_LABEL_TOP, flat, errs)
+    bottom = s[:i_top] + s[i_bot:] + ghosts + labels_bottom
+    top = s + labels_top
+    return ("\n".join(top) + "\n", "\n".join(bottom) + "\n"), errs, ((bx0 + bx1) / 2, (by0 + by1) / 2, 4.0)
+
+
+def _place_labels(view, targets, circles, segs, keep_out, bounds, z, flat, errs) -> list[str]:
+    """Labels on dark plates: each at the nearest spot (rings of 0.8 mm) that is
+    inside `bounds` and clear of `circles`, `segs` (inflated 0.8 mm), the
+    `keep_out` boxes and earlier labels; a leader + dot when it ends up more than
+    1 mm from its own footprint. `view` "bottom" mirrors the text to read from below."""
+    out, placed = [], []
+    for pid, cx0, cy0, col, own in targets:
         w, h = LABEL_MM * 0.72 * len(pid) + 0.8, LABEL_MM + 0.8     # text + its dark plate
         spot = None
-        for ring in range(0, 25):
+        for ring in range(0, 40):
             for dx, dy in ([(0, 0)] if ring == 0 else
                            [(ring * 0.8 * sx, ring * 0.8 * sy) for sx, sy in
                             ((0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, 1), (1, -1), (-1, -1))]):
                 b = (cx0 + dx - w / 2, cy0 + dy - h / 2, cx0 + dx + w / 2, cy0 + dy + h / 2)
-                # labels may sit off the board edge (their dark plate keeps them readable)
-                if (b[0] < bx0 - OFF_BOARD or b[2] > bx1 + OFF_BOARD or b[1] < by0 - OFF_BOARD or b[3] > by1 + OFF_BOARD
-                        or any(_box_hits_circle(b, c, r) for c, r in obst)
+                if (b[0] < bounds[0] or b[2] > bounds[2] or b[1] < bounds[1] or b[3] > bounds[3]
+                        or any(_box_hits_circle(b, c, r) for c, r in circles)
                         or any(_box_hits_seg(b, a, c, 0.8) for a, c in segs)
-                        or any(b[0] < o[2] and o[0] < b[2] and b[1] < o[3] and o[1] < b[3] for o in boxes)):
+                        or any(b[0] < o[2] and o[0] < b[2] and b[1] < o[3] and o[1] < b[3]
+                               for o in keep_out + placed)):
                     continue
                 spot = b
                 break
             if spot:
                 break
         if spot is None:
-            errs.append(f"bottom view: no free spot for label {pid}")
+            errs.append(f"{view} view: no free spot for label {pid}")
             continue
-        boxes.append(spot)
+        placed.append(spot)
         lx, ly = (spot[0] + spot[2]) / 2, (spot[1] + spot[3]) / 2
-        if ((lx - cx0) ** 2 + (ly - cy0) ** 2) ** 0.5 > 3.0:   # pushed away by joints: leader back to the part
-            ex, ey = max(spot[0], min(cx0, spot[2])), max(spot[1], min(cy0, spot[3]))
-            labels.append(flat((ex, ey), (cx0, cy0), col, 0.3))
-            labels.append(f'color("{col}") translate([{f(cx0)},{f(cy0)},{f(zg)}]) cylinder(h=0.03, d=1.0, $fn=12);')
-        # dark plate behind the text so it reads over copper and drill marks
-        labels.append(f'color("#0b141a") translate([{f(spot[0])},{f(spot[1])},{f(zg - 0.035)}]) '
-                      f'cube([{f(spot[2] - spot[0])},{f(spot[3] - spot[1])},0.01]);')
-        # mirror([0,1,0]) so the text reads correctly when seen from below (camera rot 180,0,0)
-        labels.append(f'color("{col}") translate([{f(lx)},{f(ly)},{f(zg - 0.02)}]) mirror([0,1,0]) '
-                      f'mirror([0,0,1]) linear_extrude(0.05) text("{pid}", size={LABEL_MM}, '
-                      f'font="Liberation Sans:style=Bold", halign="center", valign="center");')
-    bottom = s[:i_top] + s[i_bot:] + ghosts + labels
-    return ("\n".join(s) + "\n", "\n".join(bottom) + "\n"), errs, ((bx0 + bx1) / 2, (by0 + by1) / 2, 4.0)
+        # leader target: the nearest point of the part's own footprint (or the wire's midpoint)
+        o = own or (cx0, cy0, cx0, cy0)
+        tx, ty = max(o[0], min(lx, o[2])), max(o[1], min(ly, o[3]))
+        ex, ey = max(spot[0], min(tx, spot[2])), max(spot[1], min(ty, spot[3]))
+        if ((ex - tx) ** 2 + (ey - ty) ** 2) ** 0.5 > 1.0:
+            out.append(flat((ex, ey), (tx, ty), col, 0.3, z))
+            out.append(f'color("{col}") translate([{f(tx)},{f(ty)},{f(z)}]) cylinder(h=0.03, d=1.0, $fn=12);')
+        if view == "bottom":
+            # dark plate behind the text; mirror([0,1,0]) so the text reads from below (camera rot 180,0,0)
+            out.append(f'color("#0b141a") translate([{f(spot[0])},{f(spot[1])},{f(z - 0.035)}]) '
+                       f'cube([{f(spot[2] - spot[0])},{f(spot[3] - spot[1])},0.01]);')
+            out.append(f'color("{col}") translate([{f(lx)},{f(ly)},{f(z - 0.02)}]) mirror([0,1,0]) '
+                       f'mirror([0,0,1]) linear_extrude(0.05) text("{pid}", size={LABEL_MM}, '
+                       f'font="Liberation Sans:style=Bold", halign="center", valign="center");')
+        else:
+            out.append(f'color("#0b141a") translate([{f(spot[0])},{f(spot[1])},{f(z)}]) '
+                       f'cube([{f(spot[2] - spot[0])},{f(spot[3] - spot[1])},0.01]);')
+            out.append(f'color("{col}") translate([{f(lx)},{f(ly)},{f(z + 0.02)}]) linear_extrude(0.05) '
+                       f'text("{pid}", size={LABEL_MM}, font="Liberation Sans:style=Bold", '
+                       f'halign="center", valign="center");')
+    return out
 
 
 def _box_hits_circle(b, c, r) -> bool:
