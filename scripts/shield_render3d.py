@@ -32,7 +32,8 @@ P = 2.54            # mm, hole pitch
 BOARD_T = 1.6       # mm
 MARGIN = 3.0        # mm of board around the outermost holes
 IMG = (1600, 1100)
-LABEL_MM = 1.5      # text height of the part labels in the bottom view
+LABEL_MM = 1.8      # text height of the part labels in the bottom view
+OFF_BOARD = 9.0     # mm a bottom-view label may sit beyond the board edge
 C_GHOST, C_GHOST_WIRE = "#9fe8ff", "#ffb0f0"   # bottom view: top-side part / wire outlines
 
 # Carrier-top bridges (step 1), drawn as flat nested U's lying on the carrier:
@@ -268,13 +269,13 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
     # drawn on the underside) with labels placed off every joint, bridge and label
     zg = -BOARD_T - 0.2      # below the copper and drill marks, so nothing but joints hides them
 
-    def frame(x0, y0, x1, y1, col, t=0.3):
+    def frame(x0, y0, x1, y1, col, t=0.45):
         w, h = abs(x1 - x0), abs(y1 - y0)
         return (f'color("{col}") translate([{f(min(x0, x1))},{f(min(y0, y1))},{f(zg)}]) linear_extrude(0.03) '
                 f'difference() {{ square([{f(w)},{f(h)}]); translate([{f(t)},{f(t)}]) '
                 f'square([{f(w - 2 * t)},{f(h - 2 * t)}]); }}')
 
-    def flat(a, b, col, t=0.35):
+    def flat(a, b, col, t=0.5):
         return (f'color("{col}") hull() {{ translate([{f(a[0])},{f(a[1])},{f(zg)}]) cylinder(h=0.03, d={f(t)}, $fn=8); '
                 f'translate([{f(b[0])},{f(b[1])},{f(zg)}]) cylinder(h=0.03, d={f(t)}, $fn=8); }}')
 
@@ -297,14 +298,15 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
     boxes: list[tuple[float, float, float, float]] = []
     labels = []
     for pid, cx0, cy0, col in targets:
-        w, h = LABEL_MM * 0.78 * len(pid) + 0.6, LABEL_MM + 0.6
+        w, h = LABEL_MM * 0.72 * len(pid) + 0.8, LABEL_MM + 0.8     # text + its dark plate
         spot = None
         for ring in range(0, 25):
             for dx, dy in ([(0, 0)] if ring == 0 else
                            [(ring * 0.8 * sx, ring * 0.8 * sy) for sx, sy in
                             ((0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, 1), (1, -1), (-1, -1))]):
                 b = (cx0 + dx - w / 2, cy0 + dy - h / 2, cx0 + dx + w / 2, cy0 + dy + h / 2)
-                if (b[0] < bx0 or b[2] > bx1 or b[1] < by0 or b[3] > by1
+                # labels may sit off the board edge (their dark plate keeps them readable)
+                if (b[0] < bx0 - OFF_BOARD or b[2] > bx1 + OFF_BOARD or b[1] < by0 - OFF_BOARD or b[3] > by1 + OFF_BOARD
                         or any(_box_hits_circle(b, c, r) for c, r in obst)
                         or any(_box_hits_seg(b, a, c, 0.8) for a, c in segs)
                         or any(b[0] < o[2] and o[0] < b[2] and b[1] < o[3] and o[1] < b[3] for o in boxes)):
@@ -320,8 +322,11 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
         lx, ly = (spot[0] + spot[2]) / 2, (spot[1] + spot[3]) / 2
         if ((lx - cx0) ** 2 + (ly - cy0) ** 2) ** 0.5 > 3.0:   # pushed away by joints: leader back to the part
             ex, ey = max(spot[0], min(cx0, spot[2])), max(spot[1], min(cy0, spot[3]))
-            labels.append(flat((ex, ey), (cx0, cy0), col, 0.2))
-            labels.append(f'color("{col}") translate([{f(cx0)},{f(cy0)},{f(zg)}]) cylinder(h=0.03, d=0.8, $fn=12);')
+            labels.append(flat((ex, ey), (cx0, cy0), col, 0.3))
+            labels.append(f'color("{col}") translate([{f(cx0)},{f(cy0)},{f(zg)}]) cylinder(h=0.03, d=1.0, $fn=12);')
+        # dark plate behind the text so it reads over copper and drill marks
+        labels.append(f'color("#0b141a") translate([{f(spot[0])},{f(spot[1])},{f(zg - 0.035)}]) '
+                      f'cube([{f(spot[2] - spot[0])},{f(spot[3] - spot[1])},0.01]);')
         # mirror([0,1,0]) so the text reads correctly when seen from below (camera rot 180,0,0)
         labels.append(f'color("{col}") translate([{f(lx)},{f(ly)},{f(zg - 0.02)}]) mirror([0,1,0]) '
                       f'mirror([0,0,1]) linear_extrude(0.05) text("{pid}", size={LABEL_MM}, '
@@ -371,10 +376,10 @@ def main(argv=None) -> int:
     if args.scad_only:
         return 0
     with tempfile.TemporaryDirectory() as td:
-        # top: perspective from the front-left; bottom: straight up from below,
+        # top: straight down, orthographic (USB end left); bottom: straight up from below,
         # orthographic, i.e. the board flipped top-over-bottom (USB end still left),
         # with the top-side parts ghosted through a see-through board and labelled
-        for name, text, rot, dist, proj in (("top", scad_text, (45, 0, 15), 185.0, "p"),
+        for name, text, rot, dist, proj in (("top", scad_text, (0, 0, 0), 205.0, "o"),
                                             ("bottom", scad_bottom, (180, 0, 0), 150.0, "o")):
             scad = Path(td) / f"shield_{name}.scad"
             scad.write_text(text, encoding="ascii")

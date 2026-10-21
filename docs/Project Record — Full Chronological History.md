@@ -333,6 +333,7 @@ the dated entry, not the digest.
 - [KJ - KI follow-ups: committed; shield wire routes from one via list; permanent SVG text-overlap check](#appendix-kj---ki-follow-ups-committed-shield-wire-routes-from-one-via-list-permanent-svg-text-overlap-check-2026-10-20-2101-cdt) (10-20)
 - [KK - Shield SVG audit: 4 wrong socket arrows, underside-bridge warning, KEY ring, clearer legend; PRD KA MEDs struck](#appendix-kk---shield-svg-audit-4-wrong-socket-arrows-underside-bridge-warning-key-ring-clearer-legend-prd-ka-meds-struck-2026-10-21-1806-cdt) (10-21)
 - [KL - Underside 3D render: top-side parts as labelled ghost outlines](#appendix-kl---underside-3d-render-top-side-parts-as-labelled-ghost-outlines-2026-10-21-1818-cdt) (10-21)
+- [KM - Shield renders: true top-down view, readable labelled underside](#appendix-km---shield-renders-true-top-down-view-readable-labelled-underside-2026-10-21-1823-cdt) (10-21)
 
 ---
 
@@ -20671,3 +20672,12 @@ NOT fixed (named): KA's other MEDs - WIRING_PROTOSHIELD.md:125,179 cut-cable tex
 **What shipped (`scripts/shield_render3d.py`):** the bottom view is now its own model. It keeps the board, copper, drill marks, solder joints and the 22 bridges, drops the 3D top-side parts, and draws each top-side part's FOOTPRINT as a flat cyan outline (every part's body rect from `docs/shield_layout.json`, plus C1's 8 x 12.5 mm can lying on the carrier) and each top-side wire w1-w5 as a pink line along its from/via/to route, 0.2 mm below the copper so only joints and bridges cover them. Labels (part ids, C1, w1-w5; 1.5 mm Liberation Sans Bold, mirrored so they read from below) are placed by a small search that keeps them off every joint, bridge and other label; a label pushed more than 3 mm from its part gets a thin leader + dot back to it (J3, J4, J5, J6 in the crowded right columns). The script exits 1 if a label finds no free spot. The top view is byte-identical (103203 B). `shield_holemap.py`'s render caption now explains the outlines.
 Checks (2026-10-21 ~18:18 CDT): render PASS; holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed. The 3D labels are inside the PNG, so the SVG overlap check does not see them - placement was checked by eye on the render.
 Footprint overlaps in the picture are real geometry, not label errors: C1 (lying flat on the carrier) overhangs the R100k footprint in plan view; they sit at different heights.
+
+# Appendix KM - Shield renders: true top-down view, readable labelled underside (2026-10-21, ~18:23 CDT)
+**Ask (Evan):** make the underside render more readable, and make the top view truly top-down.
+
+**Changes (`scripts/shield_render3d.py`, `scripts/shield_holemap.py`):**
+- Top view: camera straight down, orthographic (`rot 0,0,0`, distance 205 so the Dupont housings past the board edges stay in frame). Was a 45-degree perspective from the front-left. Not labelled - the 2D hole map above it is the labelled top view.
+- Bottom view: labels 1.5 -> 1.8 mm on a dark plate (they read over copper, drill marks and off the board); part outlines 0.3 -> 0.45 mm, wire lines 0.35 -> 0.5 mm, leaders 0.2 -> 0.3 mm; labels may sit up to 9 mm past the board edge (`OFF_BOARD`), which put J3 / J4 / J5 / J6 beside their own columns instead of mid-board on long leaders. Tried 2.0 mm first: too big for the crowded right columns, labels landed far from their parts.
+- `shield_holemap.py`: the two renders are now stacked one per row at full page width (was side by side at half width); the render caption wraps at 180 characters (its first line ran off the page - the SVG overlap check does not catch text past the canvas edge).
+Checks (2026-10-21 ~18:23 CDT): render PASS (exit 0, every label placed); holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed. Label placement inside the PNGs checked by eye.

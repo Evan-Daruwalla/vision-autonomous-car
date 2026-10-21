@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-21 ~18:06 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-21 ~18:24 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 297 appendices A–KK; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 299 appendices A–KM; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -598,7 +598,7 @@ Read, in order:
    (steering.md for servo work; hardware.md + decisions.md for printed
    mounts or wiring; track.md for track work).
 
-STATE (2026-10-21 ~18:06 CDT; shield SVG audited + corrected in KK - socket
+STATE (2026-10-21 ~18:24 CDT; shield SVG audited + corrected in KK - socket
 arrows now point to the RIGHT header, bridges marked as underside). All 24 ordered parts are in (IX).
 FIRMWARE: the Uno runs the current uno_control (SELFTEST PASS 86/86),
 re-flashed FROM THE PI with avrdude 2026-10-16 (JQ); host_test.py all ok from
@@ -624,7 +624,8 @@ each strip's input pads. Uno links = Dupont pins into the shield sockets;
 off-board = 0.1 in male headers. NOTHING SOLDERED YET; step 0 still needs
 U1/1-U3/1 beep and V-G silent. The shield SVG + SHIELD_BUILD.md now show a 3D
 render of the INTENDED finished board (scripts/shield_render3d.py, KI; Dupont
-lead ends and board outline are schematic). Wire corners live in each wire's
+lead ends and board outline are schematic): a true top-down view, and an
+underside view with the top-side parts as labelled cyan ghost outlines (KL, KM). Wire corners live in each wire's
 "via" list (w3 L3/0, w4 P4/-1, w5 B/-2; KJ) - map, steps and render all read it.
 CAD (all UNPRINTED, UNTESTED): tray v11 + deck v13 for the 168 x 62.16 x
 22.51 bank (JU-JW, KB): velcro 3.5 mm dots under every part, deck underside

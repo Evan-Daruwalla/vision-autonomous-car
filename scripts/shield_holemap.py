@@ -51,7 +51,7 @@ LEGEND_COL = 340   # px per legend column (4 across at the 1400 px page)
 # 3D renders of the finished board (scripts/shield_render3d.py); embedded when present
 RENDER_FILES = ("shield_3d_top.png", "shield_3d_bottom.png")
 RENDER_CAPTION = [
-    "Left: from the front-left. Right: from below, the board flipped top-over-bottom (USB end still on the "
+    "Top: straight down on the finished top side. Bottom: straight up from below, the board flipped top-over-bottom (USB end still on the "
     "left, the digital-header edge now at the bottom) - the solder bridges; the top-side parts show as cyan "
     "ghost outlines and the top-side wires as pink lines, labelled (a thin line leads from a label pushed "
     "off its part).",
@@ -904,19 +904,19 @@ def render_svg(data: dict, A: dict, renders=()) -> str:
         ly += 20
         out.append(f'<text x="20" y="{ly}" font-size="13">Finished build - 3D render of this layout '
                    f'(scripts/shield_render3d.py)</text>')
-        for line in RENDER_CAPTION:
+        for line in (w for c in RENDER_CAPTION for w in textwrap.wrap(c, 180)):
             ly += 16
             out.append(f'<text x="20" y="{ly}" font-size="11" fill="#333">{esc(line)}</text>')
         ly += 10
-        iw = (width - 60) // 2
+        iw = width - 40          # one render per row, full width, so the labels stay legible
         ih = 0
         for i, (png, (pw, ph)) in enumerate(renders):
             h = round(iw * ph / pw)
             ih = max(ih, h)
             b64 = base64.b64encode(png.read_bytes()).decode("ascii")
-            out.append(f'<image x="{20 + i * (iw + 20)}" y="{ly}" width="{iw}" height="{h}" '
+            out.append(f'<image x="20" y="{ly + i * (h + 10)}" width="{iw}" height="{h}" '
                        f'href="data:image/png;base64,{b64}"/>')
-        ly += ih + 10
+        ly += len(renders) * (ih + 10)
     height = ly + 20
 
     head = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
