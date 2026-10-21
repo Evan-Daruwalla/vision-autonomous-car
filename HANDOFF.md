@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-20 ~20:23 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-20 ~22:40 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 246 appendices A–IL; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 296 appendices A–KJ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -18,7 +18,7 @@ the physical car and documented as a college-portfolio engineering artifact.
 
 ## Where the project actually is
 
-**CURRENT STATE 2026-10-20 (supersedes the older lines below wherever they disagree; fixes audit KA HIGH #2 / #3):** the Uno runs the current uno_control (SELFTEST PASS 86/86, re-flashed from the Pi 2026-10-16, JQ; host_test all ok from the Pi). The servo is wired and drives the rack; the 2S pack is built and charged (IU-JA); the Pi 5 runs Bookworm and the camera works (JK). NOT yet wired: motor, encoder, LED strips, rocker, proto shield - the shield's hole-by-hole layout is ready and checked (KG), nothing soldered. Tray v11 / deck v13 / camera mast v1 are designed and checked, UNPRINTED. The paste-ready prompt at the end is the short current summary.
+**CURRENT STATE 2026-10-20 (supersedes the older lines below wherever they disagree; fixes audit KA HIGH #2 / #3):** the Uno runs the current uno_control (SELFTEST PASS 86/86, re-flashed from the Pi 2026-10-16, JQ; host_test all ok from the Pi). The servo is wired and drives the rack; the 2S pack is built and charged (IU-JA); the Pi 5 runs Bookworm and the camera works (JK). NOT yet wired: motor, encoder, LED strips, rocker, proto shield - the shield's hole-by-hole layout is ready and checked (KG), nothing soldered. Tray v11 / deck v13 / camera mast v1 are designed and checked, UNPRINTED. **2026-10-20 evening (KI, KJ):** the shield, layout and pack diagrams are all-bold with zero text overlaps, enforced by `scripts/svg_text_overlap.py` (in run_checks, 19 pass); the shield map embeds a 3D render of the INTENDED finished board (`scripts/shield_render3d.py`, untested against a real build) and draws w3/w4/w5 as their step-6 L-routes from a `via` list in `docs/shield_layout.json`. The paste-ready prompt at the end is the short current summary.
 
 **The software lane is four milestones ahead of the hardware lane. The hardware
 lane has now STARTED — and as of 2026-09-02 the ACTUATION FIRMWARE RUNS ON THE
@@ -598,7 +598,7 @@ Read, in order:
    (steering.md for servo work; hardware.md + decisions.md for printed
    mounts or wiring; track.md for track work).
 
-STATE (2026-10-20 ~20:23 CDT). All 24 ordered parts are in (IX).
+STATE (2026-10-20 ~22:40 CDT). All 24 ordered parts are in (IX).
 FIRMWARE: the Uno runs the current uno_control (SELFTEST PASS 86/86),
 re-flashed FROM THE PI with avrdude 2026-10-16 (JQ); host_test.py all ok from
 the Pi. Read the boot banner before trusting any firmware claim.
@@ -621,7 +621,10 @@ L2/1-8, PWMA at the top-left; A/B pairs bridged on the carrier's pin tips;
 C1 470 uF + C2 0.1 uF on the carrier's VMOT/GND tips. Strips' 470 uF goes on
 each strip's input pads. Uno links = Dupont pins into the shield sockets;
 off-board = 0.1 in male headers. NOTHING SOLDERED YET; step 0 still needs
-U1/1-U3/1 beep and V-G silent.
+U1/1-U3/1 beep and V-G silent. The shield SVG + SHIELD_BUILD.md now show a 3D
+render of the INTENDED finished board (scripts/shield_render3d.py, KI; Dupont
+lead ends and board outline are schematic). Wire corners live in each wire's
+"via" list (w3 L3/0, w4 P4/-1, w5 B/-2; KJ) - map, steps and render all read it.
 CAD (all UNPRINTED, UNTESTED): tray v11 + deck v13 for the 168 x 62.16 x
 22.51 bank (JU-JW, KB): velcro 3.5 mm dots under every part, deck underside
 z 54.5, Uno behind a 40 mm USB-A zone, rocker at (100, -64) on the -y wing,
@@ -634,8 +637,8 @@ WIRES: pack side soldered and NOT to be re-soldered (P+/P- 4 x 190, fuse wire
 326, MB 55; B- length unrecorded). To cut (estimates, trim at the dry fit):
 W8 80, W9 250, W10 100, W11 jumper, W12 260, W13 220, W14 120, W15 jumper;
 encoder cable 300 uncut (~30 mm spare); servo lead needs a Dupont extension.
-TEST SUITE: scripts/run_checks.py (18 passed on 2026-10-20 - re-run it, never
-quote it). Push state: run `git fetch` then `git status -sb`.
+TEST SUITE: scripts/run_checks.py (19 passed on 2026-10-20 - re-run it, never
+quote it; svg_text_overlap needs Chrome, so it SKIPs on the Pi). Push state: run `git fetch` then `git status -sb`.
 
 AUDIT BACKLOG: KA (2026-10-17 daily audit, 48 findings; HIGH #1 fixed in KE,
 HIGH #2/#3 (HANDOFF staleness) fixed 2026-10-20; MEDs open incl.
@@ -674,7 +677,8 @@ HARD CONSTRAINTS
   re-runs checks and reads diffs).
 - Every printed part passes render_scad.py + check_artifacts; every layout
   change passes scripts/electronics_layout.py; every shield change passes
-  scripts/shield_holemap.py.
+  scripts/shield_holemap.py (then re-run scripts/shield_render3d.py); every
+  diagram change passes scripts/svg_text_overlap.py (0 overlaps).
 - Never use `sed -i` on files here (it silently changes CRLF/LF) - use a
   Python script or the Edit tool. Use ./.venv/Scripts/python.exe.
 - Never `git add -A` / `git add .` - list every path. Leave

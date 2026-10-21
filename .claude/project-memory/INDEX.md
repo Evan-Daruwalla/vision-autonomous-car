@@ -24,7 +24,7 @@ Core bins:
 Standards bins (only those the codebase actually commits to):
 - dependencies.md — planned stack (DonkeyCar 5.x plumbing + PyTorch models) + the ON-CAR inference runtime decision: export to ONNX, and why RAM was never the binding constraint (updated 2026-09-03)
 - ui.md — N/A, no frontend planned; teleop UI TBD at M2 (re-checked 2026-09-02, still N/A)
-- testing.md — the runnable done-checks + verification rules, ml AND firmware (updated 2026-09-10 -- `scripts/run_checks.py` is the suite; a self_check must fail on its own bug) [2026-10-13: uno_control flashed, SELFTEST 86/86 on the board (HU)]
+- testing.md — the runnable done-checks + verification rules, ml AND firmware (updated 2026-09-10 -- `scripts/run_checks.py` is the suite; a self_check must fail on its own bug) [2026-10-13: uno_control flashed, SELFTEST 86/86 on the board (HU)] [2026-10-20: + svg_text_overlap.py, zero-overlap diagram gate; suite 19 (KJ)]
 - data.md — THE episode data contract: npz schema, t=0 rule, both alignment gates, 3-way split rule, the SPLIT-SEED rule, the torn-preprocess guard in load_proc, + the Pi/Uno serial frame contract (updated 2026-09-03; 190 lines, over the ~150 cap)
 - tooling.md — Python 3.12.10 venv, machine facts, git -F quirk, shell/encoding traps from the gotchas split (updated 2026-09-02) [2026-10-13: + OpenSCAD asserts exit 0; COM3 busy on upload = Serial Monitor (HL, HT)]
 
