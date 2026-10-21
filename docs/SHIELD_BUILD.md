@@ -4,11 +4,13 @@ Top view, the Uno's USB end on the LEFT, digital headers at the top. Hole = ROW/
 
 ## Finished build (3D render, scripts/shield_render3d.py)
 
-Top: straight down on the finished top side, every hole shown, parts and wires labelled. Middle: isometric-style 3/4 view from the front-left (unlabelled), for heights. Bottom: straight up from below, the board flipped top-over-bottom (USB end still on the left, the digital-header edge now at the bottom) - the solder bridges; the top-side parts show as cyan ghost outlines and the top-side wires as pink lines, labelled (a thin line leads from a label pushed off its part). The INTENDED build, not a photo: catalogue part sizes, board outline = hole field + 3 mm, board colour guessed; Dupont leads leave straight along their column (Uno header positions are not in the layout).
+In order: (1) top: straight down on the finished top side, every hole shown, parts and wires labelled; (2) the same top view with no labels. (3) isometric-style 3/4 view from the front-left (unlabelled), for heights. (4) bottom: straight up from below, the board flipped top-over-bottom (USB end still on the left, the digital-header edge now at the bottom) - the solder bridges; the top-side parts show as cyan ghost outlines and the top-side wires as pink lines, labelled (a thin line leads from a label pushed off its part); (5) the same bottom view with no labels or outlines. The INTENDED build, not a photo: catalogue part sizes, board outline = hole field + 3 mm, board colour guessed; Dupont leads leave straight along their column (Uno header positions are not in the layout).
 
 ![shield_3d_top](shield_3d_top.png)
+![shield_3d_top_plain](shield_3d_top_plain.png)
 ![shield_3d_iso](shield_3d_iso.png)
 ![shield_3d_bottom](shield_3d_bottom.png)
+![shield_3d_bottom_plain](shield_3d_bottom_plain.png)
 
 ## Notes
 

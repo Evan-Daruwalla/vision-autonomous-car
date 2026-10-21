@@ -336,6 +336,7 @@ the dated entry, not the digest.
 - [KM - Shield renders: true top-down view, readable labelled underside](#appendix-km---shield-renders-true-top-down-view-readable-labelled-underside-2026-10-21-1823-cdt) (10-21)
 - [KN - Shield renders: labelled top view, holes drawn on both faces](#appendix-kn---shield-renders-labelled-top-view-holes-drawn-on-both-faces-2026-10-21-1828-cdt) (10-21)
 - [KO - Shield renders: 3/4 isometric-style view added](#appendix-ko---shield-renders-34-isometric-style-view-added-2026-10-21-1835-cdt) (10-21)
+- [KP - Shield renders: unlabelled top and bottom views added](#appendix-kp---shield-renders-unlabelled-top-and-bottom-views-added-2026-10-21-1836-cdt) (10-21)
 
 ---
 
@@ -20700,3 +20701,10 @@ Checks (2026-10-21 ~18:28 CDT): render PASS (all labels placed, exit 0); holemap
 **Change:** `scripts/shield_render3d.py` renders a third view, `docs/shield_3d_iso.png`: the full top-side model (with the new top-face hole marks) in perspective from the front-left (camera rot 55,0,25, distance 185), unlabelled so it shows heights cleanly. `scripts/shield_holemap.py` embeds it between the top-down and the underside views (RENDER_FILES now 3) and links it from SHIELD_BUILD.md; caption updated. Strictly this is a perspective 3/4 view, not a true isometric projection.
 
 Checks (2026-10-21 ~18:35 CDT): render PASS; holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed.
+
+# Appendix KP - Shield renders: unlabelled top and bottom views added (2026-10-21, ~18:36 CDT)
+**Ask (Evan):** add top and bottom views with no labels.
+
+**Change:** `scripts/shield_render3d.py` now writes 5 views: `shield_3d_top_plain.png` (same straight-down camera as the labelled top view, the bare top-side model) and `shield_3d_bottom_plain.png` (same straight-up camera as the labelled underside, board + copper + joints + bridges only, no outlines or labels). `scripts/shield_holemap.py` embeds all five in order - top labelled, top plain, 3/4 view, bottom labelled, bottom plain - and links them from SHIELD_BUILD.md; caption numbered (1)-(5). `docs/shield_holemap.svg` grows to 460834 bytes (5 base64 PNGs).
+
+Checks (2026-10-21 ~18:36 CDT): render PASS; holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed.
