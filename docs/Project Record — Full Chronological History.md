@@ -330,6 +330,7 @@ the dated entry, not the digest.
 - [KG - Shield hole-by-hole layout + checker (shield_layout.json, shield_holemap.py, SHIELD_BUILD.md)](#appendix-kg---shield-hole-by-hole-layout--checker-shield_layoutjson-shield_holemappy-shield_buildmd-2026-10-20-1941-cdt) (10-20)
 - [KH - docs-sync after the tray/deck/shield work: HANDOFF current state + prompt rewritten (KA HIGH #2/#3), bins, drift check](#appendix-kh---docs-sync-after-the-traydeckshield-work-handoff-current-state--prompt-rewritten-ka-high-23-bins-drift-check-2026-10-20-2025-cdt) (10-20)
 - [KI - Diagram labels bold with zero overlaps + 3D render of the finished proto shield](#appendix-ki---diagram-labels-bold-with-zero-overlaps--3d-render-of-the-finished-proto-shield-2026-10-20-2051-cdt) (10-20)
+- [KJ - KI follow-ups: committed; shield wire routes from one via list; permanent SVG text-overlap check](#appendix-kj---ki-follow-ups-committed-shield-wire-routes-from-one-via-list-permanent-svg-text-overlap-check-2026-10-20-2101-cdt) (10-20)
 
 ---
 
@@ -20630,3 +20631,14 @@ No HTML twin or record index exists.
 **Found, not fixed:** (1) the 2D map draws w3/w4/w5 as straight diagonals while SHIELD_BUILD step 6 routes them as L's (w4 along row P4); the 3D render follows the step text. (2) A few shield labels sit a hole from their pin ("SERVO_V", "-> D8", "-> A0"); nothing overlaps.
 
 Nothing committed.
+
+# Appendix KJ - KI follow-ups: committed; shield wire routes from one via list; permanent SVG text-overlap check (2026-10-20, ~21:01 CDT)
+**Ask (Evan, 2026-10-20):** "do 1 and 2 then 3" - (1) commit the KI work, (2) fix the w3/w4/w5 mismatch between the 2D shield map and SHIELD_BUILD step 6, (3) make the text-overlap check permanent.
+
+**1. Committed** `f38cc1a` (the 11 KI files). Two stray PNGs in the repo root, written there by an earlier render command of this session whose `--outdir` variable was empty, were deleted (never tracked).
+
+**2. Wire routes (commit `6ad84ae`).** The map drew w3/w4/w5 as straight diagonals; step 6 routes them as L's (w3 along L3 then up column 0; w4 along P4 then up to P3/-1; w5 along B then up to P3/-2), and the 3D render followed the step text from a hard-coded table. Now the corners live in ONE place: an optional `"via"` list per wire in `docs/shield_layout.json` (w3 `L3/0`, w4 `P4/-1`, w5 `B/-2`). `scripts/shield_holemap.py` draws each wire as a polyline through its vias, puts the wire id beside the longest leg, lists the full path in SHIELD_BUILD.md ("P4/7 -> P4/-1 -> P3/-1"), and check 1 now FAILS a via hole that does not exist or a leg that is not straight (new self-check case "a wire via that leaves a diagonal leg": ok). `scripts/shield_render3d.py` dropped its WIRE_ROUTES table and reads the same vias (render bytes unchanged: 103203 / 49384). Checks: holemap 6 PASS + self-check PASS; shield SVG 0 overlaps.
+
+**3. `scripts/svg_text_overlap.py` (new).** The KI scratch checker, made permanent: headless Chrome measures every text in the three diagrams against other text, circles, stroked lines/paths and rect edges (copper background and opaque tags exempt). `self_check()` plants one overlap of each kind in a tiny SVG and requires each to be caught, requires a clean SVG and a text-on-white-tag SVG to pass, then requires 0 overlaps on all three real diagrams. Without Chrome/Edge it raises FileNotFoundError, which run_checks.py reports as a SKIP (the Pi has none). Known-bad test: on the pre-fix pack diagram from `953cf3b` it prints "FAIL old_pack.svg: 16 overlap(s)", the same 16 as the KI baseline; exit 1. Current diagrams: 3 x PASS, 0 overlaps, ~10 s.
+
+**Suite:** `scripts/run_checks.py` 19 passed, 0 failed, 0 skipped (was 18; the new module is discovered by its self_check).
