@@ -332,6 +332,7 @@ the dated entry, not the digest.
 - [KI - Diagram labels bold with zero overlaps + 3D render of the finished proto shield](#appendix-ki---diagram-labels-bold-with-zero-overlaps--3d-render-of-the-finished-proto-shield-2026-10-20-2051-cdt) (10-20)
 - [KJ - KI follow-ups: committed; shield wire routes from one via list; permanent SVG text-overlap check](#appendix-kj---ki-follow-ups-committed-shield-wire-routes-from-one-via-list-permanent-svg-text-overlap-check-2026-10-20-2101-cdt) (10-20)
 - [KK - Shield SVG audit: 4 wrong socket arrows, underside-bridge warning, KEY ring, clearer legend; PRD KA MEDs struck](#appendix-kk---shield-svg-audit-4-wrong-socket-arrows-underside-bridge-warning-key-ring-clearer-legend-prd-ka-meds-struck-2026-10-21-1806-cdt) (10-21)
+- [KL - Underside 3D render: top-side parts as labelled ghost outlines](#appendix-kl---underside-3d-render-top-side-parts-as-labelled-ghost-outlines-2026-10-21-1818-cdt) (10-21)
 
 ---
 
@@ -20661,3 +20662,12 @@ Checks re-run by Opus 2026-10-21 ~18:05 CDT: holemap PASS/WARN output identical 
 
 **Option 3 - KA MEDs in PRD_ROADMAP.md (dated strikethroughs, nothing deleted):** :204 "with the 5 V conductor cut" struck -> plain, uncut cable, the Pi powers the Uno (JF); :207 "LM2596 @ 5.2 V -> servo, Uno 5V pin, LEDs, encoder" struck -> LM2596 (~5 V; JE recorded 4.95 V) feeds both strips + encoder only, never the Uno 5V pin; servo V+ on the Uno 5V header via JP1 (JF, JR); :628 "LM2596 @ 5.2 V for the actuator side" struck -> strips + encoder; Uno and servo from the Pi's USB. CRLF kept.
 NOT fixed (named): KA's other MEDs - WIRING_PROTOSHIELD.md:125,179 cut-cable text, hardware/architecture/LIGHTING bins, decisions.md:62, and the LM2596 4.99 V (HANDOFF, pack svg) vs 4.95 V (JE) provenance gap.
+
+# Appendix KL - Underside 3D render: top-side parts as labelled ghost outlines (2026-10-21, ~18:18 CDT)
+**Ask (Evan):** push KK (done: `74b0d44..7899aae`), and in the underside 3D shot show the top-side elements as ghost outlines, labelled.
+
+**First try failed, honestly:** a see-through board (alpha 0.55) with the top parts at alpha 0.22 - OpenSCAD's preview drew the board first and its depth hid everything behind it; only the labels showed. Dropped.
+
+**What shipped (`scripts/shield_render3d.py`):** the bottom view is now its own model. It keeps the board, copper, drill marks, solder joints and the 22 bridges, drops the 3D top-side parts, and draws each top-side part's FOOTPRINT as a flat cyan outline (every part's body rect from `docs/shield_layout.json`, plus C1's 8 x 12.5 mm can lying on the carrier) and each top-side wire w1-w5 as a pink line along its from/via/to route, 0.2 mm below the copper so only joints and bridges cover them. Labels (part ids, C1, w1-w5; 1.5 mm Liberation Sans Bold, mirrored so they read from below) are placed by a small search that keeps them off every joint, bridge and other label; a label pushed more than 3 mm from its part gets a thin leader + dot back to it (J3, J4, J5, J6 in the crowded right columns). The script exits 1 if a label finds no free spot. The top view is byte-identical (103203 B). `shield_holemap.py`'s render caption now explains the outlines.
+Checks (2026-10-21 ~18:18 CDT): render PASS; holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed. The 3D labels are inside the PNG, so the SVG overlap check does not see them - placement was checked by eye on the render.
+Footprint overlaps in the picture are real geometry, not label errors: C1 (lying flat on the carrier) overhangs the R100k footprint in plan view; they sit at different heights.

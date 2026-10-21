@@ -32,6 +32,8 @@ P = 2.54            # mm, hole pitch
 BOARD_T = 1.6       # mm
 MARGIN = 3.0        # mm of board around the outermost holes
 IMG = (1600, 1100)
+LABEL_MM = 1.5      # text height of the part labels in the bottom view
+C_GHOST, C_GHOST_WIRE = "#9fe8ff", "#ffb0f0"   # bottom view: top-side part / wire outlines
 
 # Carrier-top bridges (step 1), drawn as flat nested U's lying on the carrier:
 # (pin a, pin b) -> (how far the U reaches in from the pin row, mm; wire dia, mm).
@@ -130,6 +132,7 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
                     s.append(box(xa - (0 if ra == rb else 0.9), ya - (0.9 if ra == rb else 0), -BOARD_T - 0.05,
                                  xb + (0 if ra == rb else 0.9), yb + (0.9 if ra == rb else 0), -BOARD_T, C_COPPER))
 
+    i_top = len(s)      # s[i_top:i_bot] = everything on the TOP side (ghosted in the bottom view)
     used: set[str] = set()
     parts = {p["id"]: p for p in data["parts"]}
 
@@ -249,6 +252,7 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
         s.append(box(x - 1.27, ye, zl - 1.27, x + 1.27, ye + sg * 14.0, zl + 1.27, C_PLASTIC))
         s.append(box(x - 0.32, ye + sg * 14.0, zl - 0.32, x + 0.32, ye + sg * 20.0, zl + 0.32, C_PIN))
 
+    i_bot = len(s)
     # ---- bottom: solder joints on every used hole + the solder bridges (step 3)
     for h in sorted(used):
         x, y = g.xy(h)
@@ -260,7 +264,85 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
         (xa, ya), (xb, yb) = g.xy(a), g.xy(b)
         s.append(seg((xa, ya, -BOARD_T - 0.4), (xb, yb, -BOARD_T - 0.4), 1.4, C_SOLDER))
 
-    return "\n".join(s) + "\n", errs, ((bx0 + bx1) / 2, (by0 + by1) / 2, 4.0)
+    # ---- bottom view: the top-side parts as ghost OUTLINES (their footprints,
+    # drawn on the underside) with labels placed off every joint, bridge and label
+    zg = -BOARD_T - 0.2      # below the copper and drill marks, so nothing but joints hides them
+
+    def frame(x0, y0, x1, y1, col, t=0.3):
+        w, h = abs(x1 - x0), abs(y1 - y0)
+        return (f'color("{col}") translate([{f(min(x0, x1))},{f(min(y0, y1))},{f(zg)}]) linear_extrude(0.03) '
+                f'difference() {{ square([{f(w)},{f(h)}]); translate([{f(t)},{f(t)}]) '
+                f'square([{f(w - 2 * t)},{f(h - 2 * t)}]); }}')
+
+    def flat(a, b, col, t=0.35):
+        return (f'color("{col}") hull() {{ translate([{f(a[0])},{f(a[1])},{f(zg)}]) cylinder(h=0.03, d={f(t)}, $fn=8); '
+                f'translate([{f(b[0])},{f(b[1])},{f(zg)}]) cylinder(h=0.03, d={f(t)}, $fn=8); }}')
+
+    ghosts: list[str] = []
+    targets: list[tuple[str, float, float, str]] = []      # label, x, y, colour
+    for pid, p in parts.items():
+        r0, r1, c0, c1 = p["body"]["rect"]
+        ghosts.append(frame(c0 * P, -r0 * P, c1 * P, -r1 * P, C_GHOST))
+        targets.append((pid, (c0 + c1) / 2 * P, -(r0 + r1) / 2 * P, C_GHOST))
+    ghosts.append(frame(mx - dia / 2, vy + 3.0, mx + dia / 2, vy + 3.0 + ln, C_GHOST))          # C1, lying flat
+    targets.append(("C1", mx, vy + 3.0 + ln / 2, C_GHOST))
+    for w in data.get("wires", []):
+        route = [w["from"]] + list(w.get("via", [])) + [w["to"]]
+        pts = [g.xy(h) for h in route]
+        ghosts += [flat(a, b, C_GHOST_WIRE) for a, b in zip(pts, pts[1:])]
+        a, b = max(zip(pts, pts[1:]), key=lambda ab: abs(ab[1][0] - ab[0][0]) + abs(ab[1][1] - ab[0][1]))
+        targets.append((w["id"], (a[0] + b[0]) / 2, (a[1] + b[1]) / 2, C_GHOST_WIRE))
+    obst = [(g.xy(h), 1.05) for h in used]
+    segs = [(g.xy(a), g.xy(b)) for a, b in data.get("bridges", []) if a in holes and b in holes]
+    boxes: list[tuple[float, float, float, float]] = []
+    labels = []
+    for pid, cx0, cy0, col in targets:
+        w, h = LABEL_MM * 0.78 * len(pid) + 0.6, LABEL_MM + 0.6
+        spot = None
+        for ring in range(0, 25):
+            for dx, dy in ([(0, 0)] if ring == 0 else
+                           [(ring * 0.8 * sx, ring * 0.8 * sy) for sx, sy in
+                            ((0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, 1), (1, -1), (-1, -1))]):
+                b = (cx0 + dx - w / 2, cy0 + dy - h / 2, cx0 + dx + w / 2, cy0 + dy + h / 2)
+                if (b[0] < bx0 or b[2] > bx1 or b[1] < by0 or b[3] > by1
+                        or any(_box_hits_circle(b, c, r) for c, r in obst)
+                        or any(_box_hits_seg(b, a, c, 0.8) for a, c in segs)
+                        or any(b[0] < o[2] and o[0] < b[2] and b[1] < o[3] and o[1] < b[3] for o in boxes)):
+                    continue
+                spot = b
+                break
+            if spot:
+                break
+        if spot is None:
+            errs.append(f"bottom view: no free spot for label {pid}")
+            continue
+        boxes.append(spot)
+        lx, ly = (spot[0] + spot[2]) / 2, (spot[1] + spot[3]) / 2
+        if ((lx - cx0) ** 2 + (ly - cy0) ** 2) ** 0.5 > 3.0:   # pushed away by joints: leader back to the part
+            ex, ey = max(spot[0], min(cx0, spot[2])), max(spot[1], min(cy0, spot[3]))
+            labels.append(flat((ex, ey), (cx0, cy0), col, 0.2))
+            labels.append(f'color("{col}") translate([{f(cx0)},{f(cy0)},{f(zg)}]) cylinder(h=0.03, d=0.8, $fn=12);')
+        # mirror([0,1,0]) so the text reads correctly when seen from below (camera rot 180,0,0)
+        labels.append(f'color("{col}") translate([{f(lx)},{f(ly)},{f(zg - 0.02)}]) mirror([0,1,0]) '
+                      f'mirror([0,0,1]) linear_extrude(0.05) text("{pid}", size={LABEL_MM}, '
+                      f'font="Liberation Sans:style=Bold", halign="center", valign="center");')
+    bottom = s[:i_top] + s[i_bot:] + ghosts + labels
+    return ("\n".join(s) + "\n", "\n".join(bottom) + "\n"), errs, ((bx0 + bx1) / 2, (by0 + by1) / 2, 4.0)
+
+
+def _box_hits_circle(b, c, r) -> bool:
+    nx, ny = max(b[0], min(c[0], b[2])), max(b[1], min(c[1], b[3]))
+    return (nx - c[0]) ** 2 + (ny - c[1]) ** 2 < r * r
+
+
+def _box_hits_seg(b, a, c, half) -> bool:
+    """Segment a-c (inflated by `half`) against box b, by sampling."""
+    for k in range(21):
+        t = k / 20
+        x, y = a[0] + (c[0] - a[0]) * t, a[1] + (c[1] - a[1]) * t
+        if b[0] - half < x < b[2] + half and b[1] - half < y < b[3] + half:
+            return True
+    return False
 
 
 def render(scad: Path, png: Path, centre: tuple[float, float, float], rot: tuple[float, float, float],
@@ -280,7 +362,7 @@ def main(argv=None) -> int:
     ap.add_argument("--outdir", type=Path, default=ROOT / "docs")
     ap.add_argument("--scad-only", action="store_true", help="build and check the model, render nothing")
     args = ap.parse_args(argv)
-    scad_text, errs, centre = build_scad(load(args.layout))
+    (scad_text, scad_bottom), errs, centre = build_scad(load(args.layout))
     for e in errs:
         print(f"FAIL {e}")
     if errs:
@@ -289,11 +371,13 @@ def main(argv=None) -> int:
     if args.scad_only:
         return 0
     with tempfile.TemporaryDirectory() as td:
-        scad = Path(td) / "shield.scad"
-        scad.write_text(scad_text, encoding="ascii")
         # top: perspective from the front-left; bottom: straight up from below,
-        # orthographic, i.e. the board flipped top-over-bottom (USB end still left)
-        for name, rot, dist, proj in (("top", (45, 0, 15), 185.0, "p"), ("bottom", (180, 0, 0), 150.0, "o")):
+        # orthographic, i.e. the board flipped top-over-bottom (USB end still left),
+        # with the top-side parts ghosted through a see-through board and labelled
+        for name, text, rot, dist, proj in (("top", scad_text, (45, 0, 15), 185.0, "p"),
+                                            ("bottom", scad_bottom, (180, 0, 0), 150.0, "o")):
+            scad = Path(td) / f"shield_{name}.scad"
+            scad.write_text(text, encoding="ascii")
             png = args.outdir / f"shield_3d_{name}.png"
             render(scad, png, centre, rot, dist, proj)
             print(f"png: {png}  ({png.stat().st_size} bytes)")

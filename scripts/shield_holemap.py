@@ -52,7 +52,9 @@ LEGEND_COL = 340   # px per legend column (4 across at the 1400 px page)
 RENDER_FILES = ("shield_3d_top.png", "shield_3d_bottom.png")
 RENDER_CAPTION = [
     "Left: from the front-left. Right: from below, the board flipped top-over-bottom (USB end still on the "
-    "left, the digital-header edge now at the bottom) - the solder bridges.",
+    "left, the digital-header edge now at the bottom) - the solder bridges; the top-side parts show as cyan "
+    "ghost outlines and the top-side wires as pink lines, labelled (a thin line leads from a label pushed "
+    "off its part).",
     "The INTENDED build, not a photo: catalogue part sizes, board outline = hole field + 3 mm, board colour "
     "guessed; Dupont leads leave straight along their column (Uno header positions are not in the layout).",
 ]
