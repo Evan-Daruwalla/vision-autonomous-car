@@ -1,0 +1,855 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1012" viewBox="0 0 1400 1012" font-family="Arial, Helvetica, sans-serif">
+<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#333"/></marker></defs>
+<rect width="1400" height="1012" fill="#ffffff"/>
+<text x="20" y="30" font-size="20" font-weight="bold" fill="#111">Proto shield v.5 - hole-by-hole layout (2026-10-20)  [PASS]</text>
+<text x="20" y="48" font-size="12" font-weight="normal" fill="#333">Top view, the Uno's USB end on the LEFT, digital headers at the top. Hole = ROW/COL.</text>
+<g class="copper"><title>upper strip 1</title>
+<circle cx="430" cy="230" r="10" fill="#dcdcdc"/>
+<circle cx="430" cy="264" r="10" fill="#dcdcdc"/>
+<circle cx="430" cy="298" r="10" fill="#dcdcdc"/>
+<line x1="430" y1="230" x2="430" y2="264" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="430" y1="264" x2="430" y2="298" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>upper strip 2</title>
+<circle cx="464" cy="230" r="10" fill="#dcdcdc"/>
+<circle cx="464" cy="264" r="10" fill="#dcdcdc"/>
+<circle cx="464" cy="298" r="10" fill="#dcdcdc"/>
+<line x1="464" y1="230" x2="464" y2="264" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="464" y1="264" x2="464" y2="298" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>upper strip 3</title>
+<circle cx="498" cy="230" r="10" fill="#dcdcdc"/>
+<circle cx="498" cy="264" r="10" fill="#dcdcdc"/>
+<circle cx="498" cy="298" r="10" fill="#dcdcdc"/>
+<line x1="498" y1="230" x2="498" y2="264" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="498" y1="264" x2="498" y2="298" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>upper strip 4</title>
+<circle cx="532" cy="230" r="10" fill="#dcdcdc"/>
+<circle cx="532" cy="264" r="10" fill="#dcdcdc"/>
+<circle cx="532" cy="298" r="10" fill="#dcdcdc"/>
+<line x1="532" y1="230" x2="532" y2="264" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="532" y1="264" x2="532" y2="298" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>upper strip 5</title>
+<circle cx="566" cy="230" r="10" fill="#dcdcdc"/>
+<circle cx="566" cy="264" r="10" fill="#dcdcdc"/>
+<circle cx="566" cy="298" r="10" fill="#dcdcdc"/>
+<line x1="566" y1="230" x2="566" y2="264" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="566" y1="264" x2="566" y2="298" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>upper strip 6</title>
+<circle cx="600" cy="230" r="10" fill="#dcdcdc"/>
+<circle cx="600" cy="264" r="10" fill="#dcdcdc"/>
+<circle cx="600" cy="298" r="10" fill="#dcdcdc"/>
+<line x1="600" y1="230" x2="600" y2="264" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="600" y1="264" x2="600" y2="298" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>upper strip 7</title>
+<circle cx="634" cy="230" r="10" fill="#dcdcdc"/>
+<circle cx="634" cy="264" r="10" fill="#dcdcdc"/>
+<circle cx="634" cy="298" r="10" fill="#dcdcdc"/>
+<line x1="634" y1="230" x2="634" y2="264" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="634" y1="264" x2="634" y2="298" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>upper strip 8</title>
+<circle cx="668" cy="230" r="10" fill="#dcdcdc"/>
+<circle cx="668" cy="264" r="10" fill="#dcdcdc"/>
+<circle cx="668" cy="298" r="10" fill="#dcdcdc"/>
+<line x1="668" y1="230" x2="668" y2="264" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="668" y1="264" x2="668" y2="298" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>upper strip 9</title>
+<circle cx="702" cy="230" r="10" fill="#dcdcdc"/>
+<circle cx="702" cy="264" r="10" fill="#dcdcdc"/>
+<circle cx="702" cy="298" r="10" fill="#dcdcdc"/>
+<line x1="702" y1="230" x2="702" y2="264" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="702" y1="264" x2="702" y2="298" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>upper strip 10</title>
+<circle cx="736" cy="230" r="10" fill="#dcdcdc"/>
+<circle cx="736" cy="264" r="10" fill="#dcdcdc"/>
+<circle cx="736" cy="298" r="10" fill="#dcdcdc"/>
+<line x1="736" y1="230" x2="736" y2="264" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="736" y1="264" x2="736" y2="298" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>lower strip 1</title>
+<circle cx="430" cy="400" r="10" fill="#dcdcdc"/>
+<circle cx="430" cy="434" r="10" fill="#dcdcdc"/>
+<circle cx="430" cy="468" r="10" fill="#dcdcdc"/>
+<line x1="430" y1="400" x2="430" y2="434" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="430" y1="434" x2="430" y2="468" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>lower strip 2</title>
+<circle cx="464" cy="400" r="10" fill="#dcdcdc"/>
+<circle cx="464" cy="434" r="10" fill="#dcdcdc"/>
+<circle cx="464" cy="468" r="10" fill="#dcdcdc"/>
+<line x1="464" y1="400" x2="464" y2="434" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="464" y1="434" x2="464" y2="468" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>lower strip 3</title>
+<circle cx="498" cy="400" r="10" fill="#dcdcdc"/>
+<circle cx="498" cy="434" r="10" fill="#dcdcdc"/>
+<circle cx="498" cy="468" r="10" fill="#dcdcdc"/>
+<line x1="498" y1="400" x2="498" y2="434" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="498" y1="434" x2="498" y2="468" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>lower strip 4</title>
+<circle cx="532" cy="400" r="10" fill="#dcdcdc"/>
+<circle cx="532" cy="434" r="10" fill="#dcdcdc"/>
+<circle cx="532" cy="468" r="10" fill="#dcdcdc"/>
+<line x1="532" y1="400" x2="532" y2="434" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="532" y1="434" x2="532" y2="468" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>lower strip 5</title>
+<circle cx="566" cy="400" r="10" fill="#dcdcdc"/>
+<circle cx="566" cy="434" r="10" fill="#dcdcdc"/>
+<circle cx="566" cy="468" r="10" fill="#dcdcdc"/>
+<line x1="566" y1="400" x2="566" y2="434" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="566" y1="434" x2="566" y2="468" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>lower strip 6</title>
+<circle cx="600" cy="400" r="10" fill="#dcdcdc"/>
+<circle cx="600" cy="434" r="10" fill="#dcdcdc"/>
+<circle cx="600" cy="468" r="10" fill="#dcdcdc"/>
+<line x1="600" y1="400" x2="600" y2="434" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="600" y1="434" x2="600" y2="468" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>lower strip 7</title>
+<circle cx="634" cy="400" r="10" fill="#dcdcdc"/>
+<circle cx="634" cy="434" r="10" fill="#dcdcdc"/>
+<circle cx="634" cy="468" r="10" fill="#dcdcdc"/>
+<line x1="634" y1="400" x2="634" y2="434" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="634" y1="434" x2="634" y2="468" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>lower strip 8</title>
+<circle cx="668" cy="400" r="10" fill="#dcdcdc"/>
+<circle cx="668" cy="434" r="10" fill="#dcdcdc"/>
+<circle cx="668" cy="468" r="10" fill="#dcdcdc"/>
+<line x1="668" y1="400" x2="668" y2="434" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="668" y1="434" x2="668" y2="468" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>lower strip 9</title>
+<circle cx="702" cy="400" r="10" fill="#dcdcdc"/>
+<circle cx="702" cy="434" r="10" fill="#dcdcdc"/>
+<circle cx="702" cy="468" r="10" fill="#dcdcdc"/>
+<line x1="702" y1="400" x2="702" y2="434" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="702" y1="434" x2="702" y2="468" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>lower strip 10</title>
+<circle cx="736" cy="400" r="10" fill="#dcdcdc"/>
+<circle cx="736" cy="434" r="10" fill="#dcdcdc"/>
+<circle cx="736" cy="468" r="10" fill="#dcdcdc"/>
+<line x1="736" y1="400" x2="736" y2="434" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="736" y1="434" x2="736" y2="468" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>G rail (GND)</title>
+<circle cx="430" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="464" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="498" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="532" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="566" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="600" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="634" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="668" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="702" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="736" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="770" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="804" cy="332" r="10" fill="#dcdcdc"/>
+<line x1="430" y1="332" x2="464" y2="332" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="464" y1="332" x2="498" y2="332" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="498" y1="332" x2="532" y2="332" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="532" y1="332" x2="566" y2="332" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="566" y1="332" x2="600" y2="332" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="600" y1="332" x2="634" y2="332" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="634" y1="332" x2="668" y2="332" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="668" y1="332" x2="702" y2="332" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="702" y1="332" x2="736" y2="332" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="736" y1="332" x2="770" y2="332" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="770" y1="332" x2="804" y2="332" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>V rail (Uno 5V)</title>
+<circle cx="430" cy="366" r="10" fill="#dcdcdc"/>
+<circle cx="464" cy="366" r="10" fill="#dcdcdc"/>
+<circle cx="498" cy="366" r="10" fill="#dcdcdc"/>
+<circle cx="532" cy="366" r="10" fill="#dcdcdc"/>
+<circle cx="566" cy="366" r="10" fill="#dcdcdc"/>
+<circle cx="600" cy="366" r="10" fill="#dcdcdc"/>
+<circle cx="634" cy="366" r="10" fill="#dcdcdc"/>
+<circle cx="668" cy="366" r="10" fill="#dcdcdc"/>
+<circle cx="702" cy="366" r="10" fill="#dcdcdc"/>
+<circle cx="736" cy="366" r="10" fill="#dcdcdc"/>
+<circle cx="770" cy="366" r="10" fill="#dcdcdc"/>
+<circle cx="804" cy="366" r="10" fill="#dcdcdc"/>
+<line x1="430" y1="366" x2="464" y2="366" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="464" y1="366" x2="498" y2="366" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="498" y1="366" x2="532" y2="366" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="532" y1="366" x2="566" y2="366" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="566" y1="366" x2="600" y2="366" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="600" y1="366" x2="634" y2="366" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="634" y1="366" x2="668" y2="366" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="668" y1="366" x2="702" y2="366" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="702" y1="366" x2="736" y2="366" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="736" y1="366" x2="770" y2="366" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="770" y1="366" x2="804" y2="366" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>T rail = Uno 5V (metered; unused)</title>
+<circle cx="464" cy="128" r="10" fill="#dcdcdc"/>
+<circle cx="498" cy="128" r="10" fill="#dcdcdc"/>
+<circle cx="532" cy="128" r="10" fill="#dcdcdc"/>
+<circle cx="566" cy="128" r="10" fill="#dcdcdc"/>
+<circle cx="600" cy="128" r="10" fill="#dcdcdc"/>
+<circle cx="634" cy="128" r="10" fill="#dcdcdc"/>
+<circle cx="668" cy="128" r="10" fill="#dcdcdc"/>
+<circle cx="702" cy="128" r="10" fill="#dcdcdc"/>
+<circle cx="736" cy="128" r="10" fill="#dcdcdc"/>
+<circle cx="770" cy="128" r="10" fill="#dcdcdc"/>
+<circle cx="804" cy="128" r="10" fill="#dcdcdc"/>
+<circle cx="838" cy="128" r="10" fill="#dcdcdc"/>
+<line x1="464" y1="128" x2="498" y2="128" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="498" y1="128" x2="532" y2="128" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="532" y1="128" x2="566" y2="128" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="566" y1="128" x2="600" y2="128" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="600" y1="128" x2="634" y2="128" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="634" y1="128" x2="668" y2="128" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="668" y1="128" x2="702" y2="128" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="702" y1="128" x2="736" y2="128" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="736" y1="128" x2="770" y2="128" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="770" y1="128" x2="804" y2="128" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="804" y1="128" x2="838" y2="128" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>B rail (GND = STAR)</title>
+<circle cx="464" cy="570" r="10" fill="#dcdcdc"/>
+<circle cx="498" cy="570" r="10" fill="#dcdcdc"/>
+<circle cx="532" cy="570" r="10" fill="#dcdcdc"/>
+<circle cx="566" cy="570" r="10" fill="#dcdcdc"/>
+<circle cx="600" cy="570" r="10" fill="#dcdcdc"/>
+<circle cx="634" cy="570" r="10" fill="#dcdcdc"/>
+<circle cx="668" cy="570" r="10" fill="#dcdcdc"/>
+<circle cx="702" cy="570" r="10" fill="#dcdcdc"/>
+<circle cx="736" cy="570" r="10" fill="#dcdcdc"/>
+<circle cx="770" cy="570" r="10" fill="#dcdcdc"/>
+<circle cx="804" cy="570" r="10" fill="#dcdcdc"/>
+<circle cx="838" cy="570" r="10" fill="#dcdcdc"/>
+<line x1="464" y1="570" x2="498" y2="570" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="498" y1="570" x2="532" y2="570" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="532" y1="570" x2="566" y2="570" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="566" y1="570" x2="600" y2="570" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="600" y1="570" x2="634" y2="570" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="634" y1="570" x2="668" y2="570" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="668" y1="570" x2="702" y2="570" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="702" y1="570" x2="736" y2="570" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="736" y1="570" x2="770" y2="570" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="770" y1="570" x2="804" y2="570" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+<line x1="804" y1="570" x2="838" y2="570" stroke="#dcdcdc" stroke-width="20" stroke-linecap="round"/>
+</g>
+<g class="copper"><title>G and B joined by the shield's GND traces (Evan metered 2026-10-20: beep)</title>
+<circle cx="430" cy="332" r="10" fill="#dcdcdc"/>
+<circle cx="464" cy="570" r="10" fill="#dcdcdc"/>
+</g>
+<circle cx="362" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/-1</title></circle>
+<circle cx="328" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/-2</title></circle>
+<circle cx="294" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/-3</title></circle>
+<circle cx="260" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/-4</title></circle>
+<circle cx="226" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/-5</title></circle>
+<circle cx="192" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/-6</title></circle>
+<circle cx="158" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/-7</title></circle>
+<circle cx="124" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/-8</title></circle>
+<circle cx="90" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/-9</title></circle>
+<circle cx="396" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/0</title></circle>
+<circle cx="736" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/10</title></circle>
+<circle cx="770" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/11</title></circle>
+<circle cx="804" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/12</title></circle>
+<circle cx="838" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/13</title></circle>
+<circle cx="464" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/2</title></circle>
+<circle cx="498" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/3</title></circle>
+<circle cx="532" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/4</title></circle>
+<circle cx="566" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/5</title></circle>
+<circle cx="600" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/6</title></circle>
+<circle cx="634" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/7</title></circle>
+<circle cx="668" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/8</title></circle>
+<circle cx="702" cy="570" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>B/9</title></circle>
+<circle cx="362" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/-1</title></circle>
+<circle cx="328" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/-2</title></circle>
+<circle cx="294" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/-3</title></circle>
+<circle cx="396" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/0</title></circle>
+<circle cx="430" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/1</title></circle>
+<circle cx="736" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/10</title></circle>
+<circle cx="770" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/11</title></circle>
+<circle cx="804" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/12</title></circle>
+<circle cx="464" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/2</title></circle>
+<circle cx="498" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/3</title></circle>
+<circle cx="532" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/4</title></circle>
+<circle cx="566" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/5</title></circle>
+<circle cx="600" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/6</title></circle>
+<circle cx="634" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/7</title></circle>
+<circle cx="668" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/8</title></circle>
+<circle cx="702" cy="332" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>G/9</title></circle>
+<circle cx="362" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/-1</title></circle>
+<circle cx="328" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/-2</title></circle>
+<circle cx="294" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/-3</title></circle>
+<circle cx="260" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/-4</title></circle>
+<circle cx="226" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/-5</title></circle>
+<circle cx="192" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/-6</title></circle>
+<circle cx="158" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/-7</title></circle>
+<circle cx="124" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/-8</title></circle>
+<circle cx="90" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/-9</title></circle>
+<circle cx="396" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/0</title></circle>
+<circle cx="430" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/1</title></circle>
+<circle cx="736" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/10</title></circle>
+<circle cx="770" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/11</title></circle>
+<circle cx="804" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/12</title></circle>
+<circle cx="838" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/13</title></circle>
+<circle cx="464" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/2</title></circle>
+<circle cx="498" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/3</title></circle>
+<circle cx="532" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/4</title></circle>
+<circle cx="566" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/5</title></circle>
+<circle cx="600" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/6</title></circle>
+<circle cx="634" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/7</title></circle>
+<circle cx="668" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/8</title></circle>
+<circle cx="702" cy="400" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L1/9</title></circle>
+<circle cx="362" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/-1</title></circle>
+<circle cx="328" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/-2</title></circle>
+<circle cx="294" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/-3</title></circle>
+<circle cx="260" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/-4</title></circle>
+<circle cx="226" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/-5</title></circle>
+<circle cx="192" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/-6</title></circle>
+<circle cx="158" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/-7</title></circle>
+<circle cx="124" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/-8</title></circle>
+<circle cx="90" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/-9</title></circle>
+<circle cx="396" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/0</title></circle>
+<circle cx="430" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/1</title></circle>
+<circle cx="736" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/10</title></circle>
+<circle cx="770" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/11</title></circle>
+<circle cx="804" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/12</title></circle>
+<circle cx="838" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/13</title></circle>
+<circle cx="464" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/2</title></circle>
+<circle cx="498" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/3</title></circle>
+<circle cx="532" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/4</title></circle>
+<circle cx="566" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/5</title></circle>
+<circle cx="600" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/6</title></circle>
+<circle cx="634" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/7</title></circle>
+<circle cx="668" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/8</title></circle>
+<circle cx="702" cy="434" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L2/9</title></circle>
+<circle cx="362" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/-1</title></circle>
+<circle cx="328" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/-2</title></circle>
+<circle cx="294" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/-3</title></circle>
+<circle cx="260" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/-4</title></circle>
+<circle cx="226" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/-5</title></circle>
+<circle cx="192" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/-6</title></circle>
+<circle cx="158" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/-7</title></circle>
+<circle cx="124" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/-8</title></circle>
+<circle cx="90" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/-9</title></circle>
+<circle cx="396" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/0</title></circle>
+<circle cx="430" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/1</title></circle>
+<circle cx="736" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/10</title></circle>
+<circle cx="770" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/11</title></circle>
+<circle cx="804" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/12</title></circle>
+<circle cx="838" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/13</title></circle>
+<circle cx="464" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/2</title></circle>
+<circle cx="498" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/3</title></circle>
+<circle cx="532" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/4</title></circle>
+<circle cx="566" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/5</title></circle>
+<circle cx="600" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/6</title></circle>
+<circle cx="634" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/7</title></circle>
+<circle cx="668" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/8</title></circle>
+<circle cx="702" cy="468" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>L3/9</title></circle>
+<circle cx="362" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/-1</title></circle>
+<circle cx="328" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/-2</title></circle>
+<circle cx="294" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/-3</title></circle>
+<circle cx="396" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/0</title></circle>
+<circle cx="430" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/1</title></circle>
+<circle cx="736" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/10</title></circle>
+<circle cx="770" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/11</title></circle>
+<circle cx="804" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/12</title></circle>
+<circle cx="838" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/13</title></circle>
+<circle cx="464" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/2</title></circle>
+<circle cx="498" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/3</title></circle>
+<circle cx="532" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/4</title></circle>
+<circle cx="566" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/5</title></circle>
+<circle cx="600" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/6</title></circle>
+<circle cx="634" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/7</title></circle>
+<circle cx="668" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/8</title></circle>
+<circle cx="702" cy="162" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P1/9</title></circle>
+<circle cx="362" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/-1</title></circle>
+<circle cx="328" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/-2</title></circle>
+<circle cx="294" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/-3</title></circle>
+<circle cx="396" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/0</title></circle>
+<circle cx="430" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/1</title></circle>
+<circle cx="736" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/10</title></circle>
+<circle cx="770" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/11</title></circle>
+<circle cx="804" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/12</title></circle>
+<circle cx="838" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/13</title></circle>
+<circle cx="464" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/2</title></circle>
+<circle cx="498" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/3</title></circle>
+<circle cx="532" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/4</title></circle>
+<circle cx="566" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/5</title></circle>
+<circle cx="600" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/6</title></circle>
+<circle cx="634" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/7</title></circle>
+<circle cx="668" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/8</title></circle>
+<circle cx="702" cy="196" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P2/9</title></circle>
+<circle cx="362" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/-1</title></circle>
+<circle cx="328" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/-2</title></circle>
+<circle cx="294" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/-3</title></circle>
+<circle cx="260" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/-4</title></circle>
+<circle cx="226" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/-5</title></circle>
+<circle cx="192" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/-6</title></circle>
+<circle cx="158" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/-7</title></circle>
+<circle cx="124" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/-8</title></circle>
+<circle cx="90" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/-9</title></circle>
+<circle cx="396" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/0</title></circle>
+<circle cx="430" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/1</title></circle>
+<circle cx="736" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/10</title></circle>
+<circle cx="770" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/11</title></circle>
+<circle cx="804" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/12</title></circle>
+<circle cx="838" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/13</title></circle>
+<circle cx="464" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/2</title></circle>
+<circle cx="498" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/3</title></circle>
+<circle cx="532" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/4</title></circle>
+<circle cx="566" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/5</title></circle>
+<circle cx="600" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/6</title></circle>
+<circle cx="634" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/7</title></circle>
+<circle cx="668" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/8</title></circle>
+<circle cx="702" cy="502" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P3/9</title></circle>
+<circle cx="362" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/-1</title></circle>
+<circle cx="328" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/-2</title></circle>
+<circle cx="294" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/-3</title></circle>
+<circle cx="260" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/-4</title></circle>
+<circle cx="226" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/-5</title></circle>
+<circle cx="192" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/-6</title></circle>
+<circle cx="158" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/-7</title></circle>
+<circle cx="124" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/-8</title></circle>
+<circle cx="90" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/-9</title></circle>
+<circle cx="396" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/0</title></circle>
+<circle cx="430" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/1</title></circle>
+<circle cx="736" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/10</title></circle>
+<circle cx="770" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/11</title></circle>
+<circle cx="804" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/12</title></circle>
+<circle cx="838" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/13</title></circle>
+<circle cx="464" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/2</title></circle>
+<circle cx="498" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/3</title></circle>
+<circle cx="532" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/4</title></circle>
+<circle cx="566" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/5</title></circle>
+<circle cx="600" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/6</title></circle>
+<circle cx="634" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/7</title></circle>
+<circle cx="668" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/8</title></circle>
+<circle cx="702" cy="536" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>P4/9</title></circle>
+<circle cx="362" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/-1</title></circle>
+<circle cx="328" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/-2</title></circle>
+<circle cx="294" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/-3</title></circle>
+<circle cx="396" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/0</title></circle>
+<circle cx="736" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/10</title></circle>
+<circle cx="770" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/11</title></circle>
+<circle cx="804" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/12</title></circle>
+<circle cx="838" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/13</title></circle>
+<circle cx="464" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/2</title></circle>
+<circle cx="498" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/3</title></circle>
+<circle cx="532" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/4</title></circle>
+<circle cx="566" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/5</title></circle>
+<circle cx="600" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/6</title></circle>
+<circle cx="634" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/7</title></circle>
+<circle cx="668" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/8</title></circle>
+<circle cx="702" cy="128" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>T/9</title></circle>
+<circle cx="362" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/-1</title></circle>
+<circle cx="328" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/-2</title></circle>
+<circle cx="294" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/-3</title></circle>
+<circle cx="396" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/0</title></circle>
+<circle cx="430" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/1</title></circle>
+<circle cx="736" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/10</title></circle>
+<circle cx="770" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/11</title></circle>
+<circle cx="804" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/12</title></circle>
+<circle cx="838" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/13</title></circle>
+<circle cx="464" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/2</title></circle>
+<circle cx="498" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/3</title></circle>
+<circle cx="532" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/4</title></circle>
+<circle cx="566" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/5</title></circle>
+<circle cx="600" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/6</title></circle>
+<circle cx="634" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/7</title></circle>
+<circle cx="668" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/8</title></circle>
+<circle cx="702" cy="230" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U1/9</title></circle>
+<circle cx="362" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/-1</title></circle>
+<circle cx="328" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/-2</title></circle>
+<circle cx="294" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/-3</title></circle>
+<circle cx="396" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/0</title></circle>
+<circle cx="430" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/1</title></circle>
+<circle cx="736" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/10</title></circle>
+<circle cx="770" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/11</title></circle>
+<circle cx="804" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/12</title></circle>
+<circle cx="838" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/13</title></circle>
+<circle cx="464" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/2</title></circle>
+<circle cx="498" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/3</title></circle>
+<circle cx="532" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/4</title></circle>
+<circle cx="566" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/5</title></circle>
+<circle cx="600" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/6</title></circle>
+<circle cx="634" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/7</title></circle>
+<circle cx="668" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/8</title></circle>
+<circle cx="702" cy="264" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U2/9</title></circle>
+<circle cx="362" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/-1</title></circle>
+<circle cx="328" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/-2</title></circle>
+<circle cx="294" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/-3</title></circle>
+<circle cx="396" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/0</title></circle>
+<circle cx="430" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/1</title></circle>
+<circle cx="736" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/10</title></circle>
+<circle cx="770" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/11</title></circle>
+<circle cx="804" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/12</title></circle>
+<circle cx="838" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/13</title></circle>
+<circle cx="464" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/2</title></circle>
+<circle cx="498" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/3</title></circle>
+<circle cx="532" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/4</title></circle>
+<circle cx="566" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/5</title></circle>
+<circle cx="600" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/6</title></circle>
+<circle cx="634" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/7</title></circle>
+<circle cx="668" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/8</title></circle>
+<circle cx="702" cy="298" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>U3/9</title></circle>
+<circle cx="362" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/-1</title></circle>
+<circle cx="328" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/-2</title></circle>
+<circle cx="294" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/-3</title></circle>
+<circle cx="260" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/-4</title></circle>
+<circle cx="226" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/-5</title></circle>
+<circle cx="192" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/-6</title></circle>
+<circle cx="158" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/-7</title></circle>
+<circle cx="124" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/-8</title></circle>
+<circle cx="90" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/-9</title></circle>
+<circle cx="396" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/0</title></circle>
+<circle cx="430" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/1</title></circle>
+<circle cx="736" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/10</title></circle>
+<circle cx="770" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/11</title></circle>
+<circle cx="804" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/12</title></circle>
+<circle cx="464" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/2</title></circle>
+<circle cx="498" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/3</title></circle>
+<circle cx="532" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/4</title></circle>
+<circle cx="566" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/5</title></circle>
+<circle cx="600" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/6</title></circle>
+<circle cx="634" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/7</title></circle>
+<circle cx="668" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/8</title></circle>
+<circle cx="702" cy="366" r="4" fill="#fff" stroke="#777" stroke-width="1"><title>V/9</title></circle>
+<rect x="414.70000000000005" y="248.7" width="268.59999999999997" height="200.6" fill="#4e79a7" fill-opacity="0.15" stroke="#4e79a7" stroke-width="2"/>
+<text x="417.70000000000005" y="260.7" font-size="11" font-weight="bold" fill="#4e79a7">TB</text>
+<rect x="482.70000000000005" y="486.70000000000005" width="132.60000000000002" height="30.59999999999995" fill="#f28e2b" fill-opacity="0.15" stroke="#f28e2b" stroke-width="2"/>
+<text x="485.70000000000005" y="498.70000000000005" font-size="11" font-weight="bold" fill="#f28e2b">J1</text>
+<rect x="720.7" y="452.70000000000005" width="30.59999999999995" height="132.59999999999997" fill="#59a14f" fill-opacity="0.15" stroke="#59a14f" stroke-width="2"/>
+<text x="723.7" y="464.70000000000005" font-size="11" font-weight="bold" fill="#59a14f">J5</text>
+<rect x="754.7" y="554.7" width="30.59999999999995" height="30.59999999999995" fill="#b07aa1" fill-opacity="0.15" stroke="#b07aa1" stroke-width="2"/>
+<text x="757.7" y="566.7" font-size="11" font-weight="bold" fill="#b07aa1">J6</text>
+<rect x="788.7" y="486.70000000000005" width="30.59999999999995" height="98.59999999999995" fill="#edc948" fill-opacity="0.15" stroke="#edc948" stroke-width="2"/>
+<text x="791.7" y="498.70000000000005" font-size="11" font-weight="bold" fill="#edc948">J3</text>
+<rect x="822.7" y="486.70000000000005" width="30.59999999999995" height="98.59999999999995" fill="#76b7b2" fill-opacity="0.15" stroke="#76b7b2" stroke-width="2"/>
+<text x="825.7" y="498.70000000000005" font-size="11" font-weight="bold" fill="#76b7b2">J4</text>
+<rect x="346.7" y="384.7" width="30.599999999999998" height="98.59999999999998" fill="#e15759" fill-opacity="0.15" stroke="#e15759" stroke-width="2"/>
+<text x="349.7" y="396.7" font-size="11" font-weight="bold" fill="#e15759">JP1</text>
+<rect x="312.7" y="384.7" width="30.600000000000005" height="98.59999999999998" fill="#9c755f" fill-opacity="0.15" stroke="#9c755f" stroke-width="2"/>
+<text x="315.7" y="396.7" font-size="11" font-weight="bold" fill="#9c755f">J2</text>
+<rect x="688.4000000000001" y="284.4" width="27.200000000000024" height="129.20000000000002" fill="#bab0ac" fill-opacity="0.15" stroke="#bab0ac" stroke-width="2"/>
+<text x="691.4000000000001" y="296.4" font-size="11" font-weight="bold" fill="#bab0ac">R100k</text>
+<rect x="688.4000000000001" y="250.4" width="61.200000000000024" height="27.20000000000001" fill="#ff9da7" fill-opacity="0.15" stroke="#ff9da7" stroke-width="2"/>
+<text x="691.4000000000001" y="262.4" font-size="11" font-weight="bold" fill="#ff9da7">R10k</text>
+<rect x="722.4000000000001" y="284.4" width="27.200000000000024" height="61.200000000000024" fill="#4e79a7" fill-opacity="0.15" stroke="#4e79a7" stroke-width="2"/>
+<text x="725.4000000000001" y="296.4" font-size="11" font-weight="bold" fill="#4e79a7">R2k</text>
+<line x1="498" y1="468" x2="498" y2="502" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L3/3 - P3/3</title></line>
+<line x1="532" y1="468" x2="532" y2="502" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L3/4 - P3/4</title></line>
+<line x1="566" y1="502" x2="566" y2="536" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge P3/5 - P4/5</title></line>
+<line x1="566" y1="536" x2="566" y2="570" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge P4/5 - B/5</title></line>
+<line x1="600" y1="502" x2="600" y2="536" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge P3/6 - P4/6</title></line>
+<line x1="600" y1="536" x2="634" y2="536" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge P4/6 - P4/7</title></line>
+<line x1="634" y1="536" x2="668" y2="536" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge P4/7 - P4/8</title></line>
+<line x1="668" y1="536" x2="702" y2="536" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge P4/8 - P4/9</title></line>
+<line x1="702" y1="536" x2="736" y2="536" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge P4/9 - P4/10</title></line>
+<line x1="736" y1="536" x2="770" y2="536" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge P4/10 - P4/11</title></line>
+<line x1="770" y1="536" x2="804" y2="536" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge P4/11 - P4/12</title></line>
+<line x1="804" y1="536" x2="838" y2="536" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge P4/12 - P4/13</title></line>
+<line x1="702" y1="434" x2="736" y2="434" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L2/9 - L2/10</title></line>
+<line x1="804" y1="468" x2="804" y2="502" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L3/12 - P3/12</title></line>
+<line x1="838" y1="468" x2="838" y2="502" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L3/13 - P3/13</title></line>
+<line x1="430" y1="366" x2="396" y2="366" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge V/1 - V/0</title></line>
+<line x1="396" y1="366" x2="362" y2="366" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge V/0 - V/-1</title></line>
+<line x1="362" y1="366" x2="362" y2="400" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge V/-1 - L1/-1</title></line>
+<line x1="362" y1="468" x2="362" y2="502" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L3/-1 - P3/-1</title></line>
+<line x1="328" y1="434" x2="362" y2="434" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L2/-2 - L2/-1</title></line>
+<line x1="328" y1="400" x2="294" y2="400" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L1/-2 - L1/-3</title></line>
+<line x1="328" y1="468" x2="328" y2="502" stroke="#222" stroke-width="7" stroke-dasharray="5 3"><title>bottom-side solder bridge L3/-2 - P3/-2</title></line>
+<line x1="634" y1="468" x2="702" y2="468" stroke="#C62828" stroke-width="3" stroke-linecap="round" stroke-opacity="0.9"><title>w1: L3/7 to L3/9 VMOT to the VBAT strip, insulated, hops over L3/8</title></line>
+<text x="668.0" y="464.0" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w1</text>
+<line x1="668" y1="468" x2="668" y2="570" stroke="#222222" stroke-width="3" stroke-linecap="round" stroke-opacity="0.9"><title>w2: L3/8 to B/8 TB6612 GND to the star rail, hops over P3/8 and P4/8</title></line>
+<text x="668.0" y="515.0" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w2</text>
+<line x1="464" y1="468" x2="396" y2="366" stroke="#AD1457" stroke-width="3" stroke-linecap="round" stroke-opacity="0.9"><title>w3: L3/2 to V/0 TB6612 VCC to the Uno 5V - ROUTE: left along row L3, then up column 0 (never under the carrier)</title></line>
+<text x="430.0" y="413.0" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w3</text>
+<line x1="634" y1="536" x2="362" y2="502" stroke="#E07B00" stroke-width="3" stroke-linecap="round" stroke-opacity="0.9"><title>w4: P4/7 to P3/-1 +5V2 to JP1's bottom pin - ROUTE: left along row P4 under the J1 pins, then up to P3/-1</title></line>
+<text x="498.0" y="515.0" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w4</text>
+<line x1="464" y1="570" x2="328" y2="502" stroke="#222222" stroke-width="3" stroke-linecap="round" stroke-opacity="0.9"><title>w5: B/2 to P3/-2 servo GND to the star - ROUTE: left along row B, then up to P3/-2</title></line>
+<text x="396.0" y="532.0" font-size="10" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="3" paint-order="stroke">w5</text>
+<circle cx="430" cy="264" r="6" fill="#555555" stroke="#222" stroke-width="1"><title>TB.PWMA in U2/1</title></circle>
+<text x="437" y="277" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">PWMA</text>
+<circle cx="464" cy="264" r="6" fill="#555555" stroke="#222" stroke-width="1"><title>TB.AIN2 in U2/2</title></circle>
+<text x="471" y="277" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">AIN2</text>
+<circle cx="498" cy="264" r="6" fill="#555555" stroke="#222" stroke-width="1"><title>TB.AIN1 in U2/3</title></circle>
+<text x="505" y="277" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">AIN1</text>
+<circle cx="532" cy="264" r="6" fill="#555555" stroke="#222" stroke-width="1"><title>TB.STBY in U2/4</title></circle>
+<text x="539" y="277" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">STBY</text>
+<circle cx="566" cy="264" r="6" fill="#555555" stroke="#222" stroke-width="1"><title>TB.BIN1 in U2/5</title></circle>
+<text x="573" y="277" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">BIN1</text>
+<circle cx="600" cy="264" r="6" fill="#555555" stroke="#222" stroke-width="1"><title>TB.BIN2 in U2/6</title></circle>
+<text x="607" y="277" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">BIN2</text>
+<circle cx="634" cy="264" r="6" fill="#555555" stroke="#222" stroke-width="1"><title>TB.PWMB in U2/7</title></circle>
+<text x="641" y="277" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">PWMB</text>
+<circle cx="668" cy="264" r="6" fill="#222222" stroke="#222" stroke-width="1"><title>TB.GND3 in U2/8</title></circle>
+<text x="675" y="277" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND3</text>
+<circle cx="430" cy="434" r="6" fill="#222222" stroke="#222" stroke-width="1"><title>TB.GND1 in L2/1</title></circle>
+<text x="437" y="447" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND1</text>
+<circle cx="464" cy="434" r="6" fill="#AD1457" stroke="#222" stroke-width="1"><title>TB.VCC in L2/2</title></circle>
+<text x="471" y="447" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">VCC</text>
+<circle cx="498" cy="434" r="6" fill="#6A1B9A" stroke="#222" stroke-width="1"><title>TB.AO1 in L2/3</title></circle>
+<text x="505" y="447" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">AO1</text>
+<circle cx="532" cy="434" r="6" fill="#6A1B9A" stroke="#222" stroke-width="1"><title>TB.AO2 in L2/4</title></circle>
+<text x="539" y="447" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">AO2</text>
+<circle cx="566" cy="434" r="6" fill="#6A1B9A" stroke="#222" stroke-width="1"><title>TB.BO2 in L2/5</title></circle>
+<text x="573" y="447" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">BO2</text>
+<circle cx="600" cy="434" r="6" fill="#6A1B9A" stroke="#222" stroke-width="1"><title>TB.BO1 in L2/6</title></circle>
+<text x="607" y="447" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">BO1</text>
+<circle cx="634" cy="434" r="6" fill="#C62828" stroke="#222" stroke-width="1"><title>TB.VMOT in L2/7</title></circle>
+<text x="641" y="447" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">VMOT</text>
+<circle cx="668" cy="434" r="6" fill="#222222" stroke="#222" stroke-width="1"><title>TB.GND2 in L2/8</title></circle>
+<text x="675" y="447" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND2</text>
+<circle cx="498" cy="502" r="6" fill="#6A1B9A" stroke="#222" stroke-width="1"><title>J1.M1 in P3/3</title></circle>
+<text x="505" y="515" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">M1</text>
+<circle cx="532" cy="502" r="6" fill="#6A1B9A" stroke="#222" stroke-width="1"><title>J1.M2 in P3/4</title></circle>
+<text x="539" y="515" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">M2</text>
+<circle cx="566" cy="502" r="6" fill="#222222" stroke="#222" stroke-width="1"><title>J1.GND in P3/5</title></circle>
+<text x="573" y="515" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND</text>
+<circle cx="600" cy="502" r="6" fill="#E07B00" stroke="#222" stroke-width="1"><title>J1.5V2 in P3/6</title></circle>
+<text x="607" y="515" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">5V2</text>
+<circle cx="736" cy="468" r="6" fill="#C62828" stroke="#222" stroke-width="1"><title>J5.VBAT in L3/10</title></circle>
+<text x="743" y="481" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">VBAT</text>
+<circle cx="736" cy="502" r="6" fill="#999999" stroke="#222" stroke-width="1"><title>J5.KEY in P3/10</title></circle>
+<text x="743" y="515" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">KEY</text>
+<circle cx="736" cy="536" r="6" fill="#E07B00" stroke="#222" stroke-width="1"><title>J5.5V2 in P4/10</title></circle>
+<text x="743" y="549" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">5V2</text>
+<circle cx="736" cy="570" r="6" fill="#222222" stroke="#222" stroke-width="1"><title>J5.GND in B/10</title></circle>
+<text x="743" y="583" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND</text>
+<circle cx="770" cy="570" r="6" fill="#222222" stroke="#222" stroke-width="1"><title>J6.GND in B/11</title></circle>
+<text x="777" y="583" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND</text>
+<circle cx="804" cy="502" r="6" fill="#B59F00" stroke="#222" stroke-width="1"><title>J3.DIN in P3/12</title></circle>
+<text x="811" y="515" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">DIN</text>
+<circle cx="804" cy="536" r="6" fill="#E07B00" stroke="#222" stroke-width="1"><title>J3.5V2 in P4/12</title></circle>
+<text x="811" y="549" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">5V2</text>
+<circle cx="804" cy="570" r="6" fill="#222222" stroke="#222" stroke-width="1"><title>J3.GND in B/12</title></circle>
+<text x="811" y="583" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND</text>
+<circle cx="838" cy="502" r="6" fill="#B59F00" stroke="#222" stroke-width="1"><title>J4.DIN in P3/13</title></circle>
+<text x="845" y="515" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">DIN</text>
+<circle cx="838" cy="536" r="6" fill="#E07B00" stroke="#222" stroke-width="1"><title>J4.5V2 in P4/13</title></circle>
+<text x="845" y="549" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">5V2</text>
+<circle cx="838" cy="570" r="6" fill="#222222" stroke="#222" stroke-width="1"><title>J4.GND in B/13</title></circle>
+<text x="845" y="583" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND</text>
+<circle cx="362" cy="400" r="6" fill="#AD1457" stroke="#222" stroke-width="1"><title>JP1.UNO5V in L1/-1</title></circle>
+<text x="369" y="413" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">UNO5V</text>
+<circle cx="362" cy="434" r="6" fill="#2E7D32" stroke="#222" stroke-width="1"><title>JP1.SERVO_V in L2/-1</title></circle>
+<text x="369" y="447" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">SERVO_V</text>
+<circle cx="362" cy="468" r="6" fill="#E07B00" stroke="#222" stroke-width="1"><title>JP1.5V2 in L3/-1</title></circle>
+<text x="369" y="481" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">5V2</text>
+<circle cx="328" cy="400" r="6" fill="#2E7D32" stroke="#222" stroke-width="1"><title>J2.SIG in L1/-2</title></circle>
+<text x="335" y="413" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">SIG</text>
+<circle cx="328" cy="434" r="6" fill="#2E7D32" stroke="#222" stroke-width="1"><title>J2.V in L2/-2</title></circle>
+<text x="335" y="447" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">V</text>
+<circle cx="328" cy="468" r="6" fill="#222222" stroke="#222" stroke-width="1"><title>J2.GND in L3/-2</title></circle>
+<text x="335" y="481" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">GND</text>
+<circle cx="702" cy="400" r="6" fill="#C62828" stroke="#222" stroke-width="1"><title>R100k.a in L1/9</title></circle>
+<text x="709" y="413" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">a</text>
+<circle cx="702" cy="298" r="6" fill="#1A56B0" stroke="#222" stroke-width="1"><title>R100k.b in U3/9</title></circle>
+<text x="709" y="311" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">b</text>
+<circle cx="702" cy="264" r="6" fill="#1A56B0" stroke="#222" stroke-width="1"><title>R10k.a in U2/9</title></circle>
+<text x="709" y="277" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">a</text>
+<circle cx="736" cy="264" r="6" fill="#1A56B0" stroke="#222" stroke-width="1"><title>R10k.b in U2/10</title></circle>
+<text x="743" y="277" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">b</text>
+<circle cx="736" cy="298" r="6" fill="#1A56B0" stroke="#222" stroke-width="1"><title>R2k.a in U3/10</title></circle>
+<text x="743" y="311" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">a</text>
+<circle cx="736" cy="332" r="6" fill="#222222" stroke="#222" stroke-width="1"><title>R2k.b in G/10</title></circle>
+<text x="743" y="345" font-size="8" fill="#222" stroke="#fff" stroke-width="2" paint-order="stroke">b</text>
+<path d="M732.0,549.0 L740.0,557.0 M732.0,557.0 L740.0,549.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: B/10 next to P4/10</title></path>
+<path d="M766.0,549.0 L774.0,557.0 M766.0,557.0 L774.0,549.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: B/11 next to P4/11</title></path>
+<path d="M800.0,549.0 L808.0,557.0 M800.0,557.0 L808.0,549.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: B/12 next to P4/12</title></path>
+<path d="M834.0,549.0 L842.0,557.0 M834.0,557.0 L842.0,549.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: B/13 next to P4/13</title></path>
+<path d="M596.0,549.0 L604.0,557.0 M596.0,557.0 L604.0,549.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: B/6 next to P4/6</title></path>
+<path d="M630.0,549.0 L638.0,557.0 M630.0,557.0 L638.0,549.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: B/7 next to P4/7</title></path>
+<path d="M664.0,549.0 L672.0,557.0 M664.0,557.0 L672.0,549.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: B/8 next to P4/8</title></path>
+<path d="M698.0,549.0 L706.0,557.0 M698.0,557.0 L706.0,549.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: B/9 next to P4/9</title></path>
+<path d="M426.0,345.0 L434.0,353.0 M426.0,353.0 L434.0,345.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: G/1 next to V/1</title></path>
+<path d="M341.0,396.0 L349.0,404.0 M341.0,404.0 L349.0,396.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L1/-1 next to L1/-2</title></path>
+<path d="M358.0,413.0 L366.0,421.0 M358.0,421.0 L366.0,413.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L1/-1 next to L2/-1</title></path>
+<path d="M324.0,413.0 L332.0,421.0 M324.0,421.0 L332.0,413.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L1/-2 next to L2/-2</title></path>
+<path d="M426.0,379.0 L434.0,387.0 M426.0,387.0 L434.0,379.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L1/1 next to V/1</title></path>
+<path d="M358.0,447.0 L366.0,455.0 M358.0,455.0 L366.0,447.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L2/-1 next to L3/-1</title></path>
+<path d="M324.0,447.0 L332.0,455.0 M324.0,455.0 L332.0,447.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L2/-2 next to L3/-2</title></path>
+<path d="M681.0,430.0 L689.0,438.0 M681.0,438.0 L689.0,430.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L2/8 next to L2/9</title></path>
+<path d="M341.0,464.0 L349.0,472.0 M341.0,472.0 L349.0,464.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L3/-1 next to L3/-2</title></path>
+<path d="M817.0,464.0 L825.0,472.0 M817.0,472.0 L825.0,464.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L3/12 next to L3/13</title></path>
+<path d="M477.0,464.0 L485.0,472.0 M477.0,472.0 L485.0,464.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L3/2 next to L3/3</title></path>
+<path d="M511.0,464.0 L519.0,472.0 M511.0,472.0 L519.0,464.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L3/3 next to L3/4</title></path>
+<path d="M562.0,481.0 L570.0,489.0 M562.0,489.0 L570.0,481.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L3/5 next to P3/5</title></path>
+<path d="M596.0,481.0 L604.0,489.0 M596.0,489.0 L604.0,481.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: L3/6 next to P3/6</title></path>
+<path d="M341.0,498.0 L349.0,506.0 M341.0,506.0 L349.0,498.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: P3/-1 next to P3/-2</title></path>
+<path d="M732.0,515.0 L740.0,523.0 M732.0,523.0 L740.0,515.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: P3/10 next to P4/10</title></path>
+<path d="M817.0,498.0 L825.0,506.0 M817.0,506.0 L825.0,498.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: P3/12 next to P3/13</title></path>
+<path d="M800.0,515.0 L808.0,523.0 M800.0,523.0 L808.0,515.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: P3/12 next to P4/12</title></path>
+<path d="M834.0,515.0 L842.0,523.0 M834.0,523.0 L842.0,515.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: P3/13 next to P4/13</title></path>
+<path d="M511.0,498.0 L519.0,506.0 M511.0,506.0 L519.0,498.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: P3/3 next to P3/4</title></path>
+<path d="M545.0,498.0 L553.0,506.0 M545.0,506.0 L553.0,498.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: P3/4 next to P3/5</title></path>
+<path d="M579.0,498.0 L587.0,506.0 M579.0,506.0 L587.0,498.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: P3/5 next to P3/6</title></path>
+<path d="M579.0,532.0 L587.0,540.0 M579.0,540.0 L587.0,532.0" stroke="#e00000" stroke-width="2" fill="none"><title>hazard: P4/5 next to P4/6</title></path>
+<line x1="430" y1="223" x2="430" y2="206" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+<text x="430" y="202" font-size="10" text-anchor="middle" fill="#333">-&gt; D11</text>
+<line x1="464" y1="223" x2="464" y2="206" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+<text x="464" y="202" font-size="10" text-anchor="middle" fill="#333">-&gt; D12</text>
+<line x1="498" y1="223" x2="498" y2="206" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+<text x="498" y="202" font-size="10" text-anchor="middle" fill="#333">-&gt; D8</text>
+<line x1="532" y1="223" x2="532" y2="206" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+<text x="532" y="202" font-size="10" text-anchor="middle" fill="#333">-&gt; D10</text>
+<line x1="702" y1="223" x2="702" y2="206" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+<text x="702" y="202" font-size="10" text-anchor="middle" fill="#333">-&gt; A0</text>
+<line x1="294" y1="407" x2="294" y2="424" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+<text x="294" y="436" font-size="10" text-anchor="middle" fill="#333">-&gt; D9</text>
+<line x1="804" y1="475" x2="804" y2="492" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+<text x="804" y="504" font-size="10" text-anchor="middle" fill="#333">-&gt; D4</text>
+<line x1="838" y1="475" x2="838" y2="492" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+<text x="838" y="504" font-size="10" text-anchor="middle" fill="#333">-&gt; D7</text>
+<text x="498" y="107.6" font-size="11" fill="#444" text-anchor="middle">Digital headers (D13..D0) above this edge</text>
+<text x="498" y="604.0" font-size="11" fill="#444" text-anchor="middle">Power / analog headers below this edge</text>
+<text x="90" y="107.6" font-size="11" fill="#444" text-anchor="middle">&lt;- USB end</text>
+<text x="42" y="132" font-size="12" text-anchor="end" fill="#222">T</text>
+<text x="42" y="166" font-size="12" text-anchor="end" fill="#222">P1</text>
+<text x="42" y="200" font-size="12" text-anchor="end" fill="#222">P2</text>
+<text x="42" y="234" font-size="12" text-anchor="end" fill="#222">U1</text>
+<text x="42" y="268" font-size="12" text-anchor="end" fill="#222">U2</text>
+<text x="42" y="302" font-size="12" text-anchor="end" fill="#222">U3</text>
+<text x="42" y="336" font-size="12" text-anchor="end" fill="#222">G</text>
+<text x="42" y="370" font-size="12" text-anchor="end" fill="#222">V</text>
+<text x="42" y="404" font-size="12" text-anchor="end" fill="#222">L1</text>
+<text x="42" y="438" font-size="12" text-anchor="end" fill="#222">L2</text>
+<text x="42" y="472" font-size="12" text-anchor="end" fill="#222">L3</text>
+<text x="42" y="506" font-size="12" text-anchor="end" fill="#222">P3</text>
+<text x="42" y="540" font-size="12" text-anchor="end" fill="#222">P4</text>
+<text x="42" y="574" font-size="12" text-anchor="end" fill="#222">B</text>
+<text x="90" y="76" font-size="10" text-anchor="middle" fill="#555">-9</text>
+<text x="90" y="628" font-size="10" text-anchor="middle" fill="#555">-9</text>
+<text x="124" y="76" font-size="10" text-anchor="middle" fill="#555">-8</text>
+<text x="124" y="628" font-size="10" text-anchor="middle" fill="#555">-8</text>
+<text x="158" y="76" font-size="10" text-anchor="middle" fill="#555">-7</text>
+<text x="158" y="628" font-size="10" text-anchor="middle" fill="#555">-7</text>
+<text x="192" y="76" font-size="10" text-anchor="middle" fill="#555">-6</text>
+<text x="192" y="628" font-size="10" text-anchor="middle" fill="#555">-6</text>
+<text x="226" y="76" font-size="10" text-anchor="middle" fill="#555">-5</text>
+<text x="226" y="628" font-size="10" text-anchor="middle" fill="#555">-5</text>
+<text x="260" y="76" font-size="10" text-anchor="middle" fill="#555">-4</text>
+<text x="260" y="628" font-size="10" text-anchor="middle" fill="#555">-4</text>
+<text x="294" y="76" font-size="10" text-anchor="middle" fill="#555">-3</text>
+<text x="294" y="628" font-size="10" text-anchor="middle" fill="#555">-3</text>
+<text x="328" y="76" font-size="10" text-anchor="middle" fill="#555">-2</text>
+<text x="328" y="628" font-size="10" text-anchor="middle" fill="#555">-2</text>
+<text x="362" y="76" font-size="10" text-anchor="middle" fill="#555">-1</text>
+<text x="362" y="628" font-size="10" text-anchor="middle" fill="#555">-1</text>
+<text x="396" y="76" font-size="10" text-anchor="middle" fill="#555">0</text>
+<text x="396" y="628" font-size="10" text-anchor="middle" fill="#555">0</text>
+<text x="430" y="76" font-size="10" text-anchor="middle" fill="#555">1</text>
+<text x="430" y="628" font-size="10" text-anchor="middle" fill="#555">1</text>
+<text x="464" y="76" font-size="10" text-anchor="middle" fill="#555">2</text>
+<text x="464" y="628" font-size="10" text-anchor="middle" fill="#555">2</text>
+<text x="498" y="76" font-size="10" text-anchor="middle" fill="#555">3</text>
+<text x="498" y="628" font-size="10" text-anchor="middle" fill="#555">3</text>
+<text x="532" y="76" font-size="10" text-anchor="middle" fill="#555">4</text>
+<text x="532" y="628" font-size="10" text-anchor="middle" fill="#555">4</text>
+<text x="566" y="76" font-size="10" text-anchor="middle" fill="#555">5</text>
+<text x="566" y="628" font-size="10" text-anchor="middle" fill="#555">5</text>
+<text x="600" y="76" font-size="10" text-anchor="middle" fill="#555">6</text>
+<text x="600" y="628" font-size="10" text-anchor="middle" fill="#555">6</text>
+<text x="634" y="76" font-size="10" text-anchor="middle" fill="#555">7</text>
+<text x="634" y="628" font-size="10" text-anchor="middle" fill="#555">7</text>
+<text x="668" y="76" font-size="10" text-anchor="middle" fill="#555">8</text>
+<text x="668" y="628" font-size="10" text-anchor="middle" fill="#555">8</text>
+<text x="702" y="76" font-size="10" text-anchor="middle" fill="#555">9</text>
+<text x="702" y="628" font-size="10" text-anchor="middle" fill="#555">9</text>
+<text x="736" y="76" font-size="10" text-anchor="middle" fill="#555">10</text>
+<text x="736" y="628" font-size="10" text-anchor="middle" fill="#555">10</text>
+<text x="770" y="76" font-size="10" text-anchor="middle" fill="#555">11</text>
+<text x="770" y="628" font-size="10" text-anchor="middle" fill="#555">11</text>
+<text x="804" y="76" font-size="10" text-anchor="middle" fill="#555">12</text>
+<text x="804" y="628" font-size="10" text-anchor="middle" fill="#555">12</text>
+<text x="838" y="76" font-size="10" text-anchor="middle" fill="#555">13</text>
+<text x="838" y="628" font-size="10" text-anchor="middle" fill="#555">13</text>
+<text x="20" y="660" font-size="13" font-weight="bold">Legend</text>
+<rect x="20" y="672" width="16" height="12" fill="#4e79a7" fill-opacity="0.3" stroke="#4e79a7" stroke-width="2"/>
+<text x="42" y="682" font-size="11" fill="#222">part: TB6612 carrier, chip up</text>
+<rect x="250" y="672" width="16" height="12" fill="#f28e2b" fill-opacity="0.3" stroke="#f28e2b" stroke-width="2"/>
+<text x="272" y="682" font-size="11" fill="#222">part: 4-pin header: motor</text>
+<rect x="480" y="672" width="16" height="12" fill="#59a14f" fill-opacity="0.3" stroke="#59a14f" stroke-width="2"/>
+<text x="502" y="682" font-size="11" fill="#222">part: 4-pin header: power in</text>
+<rect x="710" y="672" width="16" height="12" fill="#b07aa1" fill-opacity="0.3" stroke="#b07aa1" stroke-width="2"/>
+<text x="732" y="682" font-size="11" fill="#222">part: 1-pin header: W13</text>
+<rect x="940" y="672" width="16" height="12" fill="#edc948" fill-opacity="0.3" stroke="#edc948" stroke-width="2"/>
+<text x="962" y="682" font-size="11" fill="#222">part: 3-pin header: front strip</text>
+<rect x="20" y="694" width="16" height="12" fill="#76b7b2" fill-opacity="0.3" stroke="#76b7b2" stroke-width="2"/>
+<text x="42" y="704" font-size="11" fill="#222">part: 3-pin header: rear strip</text>
+<rect x="250" y="694" width="16" height="12" fill="#e15759" fill-opacity="0.3" stroke="#e15759" stroke-width="2"/>
+<text x="272" y="704" font-size="11" fill="#222">part: 3-pin header: servo-power jumper</text>
+<rect x="480" y="694" width="16" height="12" fill="#9c755f" fill-opacity="0.3" stroke="#9c755f" stroke-width="2"/>
+<text x="502" y="704" font-size="11" fill="#222">part: 3-pin header: servo</text>
+<rect x="710" y="694" width="16" height="12" fill="#bab0ac" fill-opacity="0.3" stroke="#bab0ac" stroke-width="2"/>
+<text x="732" y="704" font-size="11" fill="#222">part: 100k, lying flat</text>
+<rect x="940" y="694" width="16" height="12" fill="#ff9da7" fill-opacity="0.3" stroke="#ff9da7" stroke-width="2"/>
+<text x="962" y="704" font-size="11" fill="#222">part: 10k, standing</text>
+<rect x="20" y="716" width="16" height="12" fill="#4e79a7" fill-opacity="0.3" stroke="#4e79a7" stroke-width="2"/>
+<text x="42" y="726" font-size="11" fill="#222">part: 2k, standing</text>
+<rect x="250" y="716" width="16" height="12" fill="#f28e2b" fill-opacity="0.3" stroke="#f28e2b" stroke-width="2"/>
+<text x="272" y="726" font-size="11" fill="#222">part: 470 uF on the carrier</text>
+<rect x="480" y="716" width="16" height="12" fill="#59a14f" fill-opacity="0.3" stroke="#59a14f" stroke-width="2"/>
+<text x="502" y="726" font-size="11" fill="#222">part: 0.1 uF on the carrier</text>
+<line x1="710" y1="722" x2="726" y2="722" stroke="#555555" stroke-width="3"/>
+<text x="732" y="726" font-size="11" fill="#222">net PWM</text>
+<line x1="940" y1="722" x2="956" y2="722" stroke="#555555" stroke-width="3"/>
+<text x="962" y="726" font-size="11" fill="#222">net DIR1</text>
+<line x1="20" y1="744" x2="36" y2="744" stroke="#555555" stroke-width="3"/>
+<text x="42" y="748" font-size="11" fill="#222">net DIR2</text>
+<line x1="250" y1="744" x2="266" y2="744" stroke="#555555" stroke-width="3"/>
+<text x="272" y="748" font-size="11" fill="#222">net STBY</text>
+<line x1="480" y1="744" x2="496" y2="744" stroke="#6A1B9A" stroke-width="3"/>
+<text x="502" y="748" font-size="11" fill="#222">net M1</text>
+<line x1="710" y1="744" x2="726" y2="744" stroke="#6A1B9A" stroke-width="3"/>
+<text x="732" y="748" font-size="11" fill="#222">net M2</text>
+<line x1="940" y1="744" x2="956" y2="744" stroke="#C62828" stroke-width="3"/>
+<text x="962" y="748" font-size="11" fill="#222">net VBAT</text>
+<line x1="20" y1="766" x2="36" y2="766" stroke="#222222" stroke-width="3"/>
+<text x="42" y="770" font-size="11" fill="#222">net GND</text>
+<line x1="250" y1="766" x2="266" y2="766" stroke="#AD1457" stroke-width="3"/>
+<text x="272" y="770" font-size="11" fill="#222">net UNO5V</text>
+<line x1="480" y1="766" x2="496" y2="766" stroke="#E07B00" stroke-width="3"/>
+<text x="502" y="770" font-size="11" fill="#222">net 5V2</text>
+<line x1="710" y1="766" x2="726" y2="766" stroke="#2E7D32" stroke-width="3"/>
+<text x="732" y="770" font-size="11" fill="#222">net SERVO_V</text>
+<line x1="940" y1="766" x2="956" y2="766" stroke="#2E7D32" stroke-width="3"/>
+<text x="962" y="770" font-size="11" fill="#222">net SERVO_SIG</text>
+<line x1="20" y1="788" x2="36" y2="788" stroke="#B59F00" stroke-width="3"/>
+<text x="42" y="792" font-size="11" fill="#222">net DIN_F</text>
+<line x1="250" y1="788" x2="266" y2="788" stroke="#B59F00" stroke-width="3"/>
+<text x="272" y="792" font-size="11" fill="#222">net DIN_R</text>
+<line x1="480" y1="788" x2="496" y2="788" stroke="#1A56B0" stroke-width="3"/>
+<text x="502" y="792" font-size="11" fill="#222">net A0</text>
+<line x1="710" y1="788" x2="726" y2="788" stroke="#1A56B0" stroke-width="3"/>
+<text x="732" y="792" font-size="11" fill="#222">net DIV_MID</text>
+<line x1="940" y1="788" x2="956" y2="788" stroke="#999999" stroke-width="3"/>
+<text x="962" y="792" font-size="11" fill="#222">net KEY</text>
+<rect x="20" y="804" width="16" height="12" fill="#dcdcdc"/>
+<text x="42" y="814" font-size="11" fill="#222">copper strip / rail</text>
+<line x1="250" y1="810" x2="266" y2="810" stroke="#222" stroke-width="6" stroke-dasharray="4 2"/>
+<text x="272" y="814" font-size="11" fill="#222">bottom-side solder bridge</text>
+<line x1="480" y1="810" x2="496" y2="810" stroke="#888" stroke-width="3"/>
+<text x="502" y="814" font-size="11" fill="#222">top-side jumper wire (net colour)</text>
+<line x1="710" y1="810" x2="726" y2="810" stroke="#333" stroke-width="3"/>
+<text x="732" y="814" font-size="11" fill="#222">socket: Dupont to the Uno</text>
+<text x="20" y="842" font-size="11" fill="#333">direct to Uno D2: encoder yellow (A) male Dupont pin on the cable end, straight into the D2 socket</text>
+<text x="20" y="857" font-size="11" fill="#333">direct to Uno D3: encoder white (B) male Dupont pin on the cable end, straight into the D3 socket</text>
+<text x="20" y="872" font-size="11" fill="#333">off-board C1 (470 uF on the carrier): +-&gt;TB.VMOT, --&gt;TB.GND2 + lead (no stripe) to the VMOT pin tip, - lead (stripe side) to the GND pin tip next to it, at the right end of the carrier's</text>
+<text x="20" y="887" font-size="11" fill="#333">bottom row.</text>
+<text x="20" y="902" font-size="11" fill="#333">off-board C2 (0.1 uF on the carrier): a-&gt;TB.VMOT, b-&gt;TB.GND2 Same two pin tips as C1; no polarity.</text>
+<text x="20" y="917" font-size="11" fill="#333">join TB.PWMA &lt;-&gt; TB.PWMB carrier-top wire bridge (logic)</text>
+<text x="20" y="932" font-size="11" fill="#333">join TB.AIN2 &lt;-&gt; TB.BIN2 carrier-top wire bridge (logic)</text>
+<text x="20" y="947" font-size="11" fill="#333">join TB.AIN1 &lt;-&gt; TB.BIN1 carrier-top wire bridge (logic)</text>
+<text x="20" y="962" font-size="11" fill="#333">join TB.AO1 &lt;-&gt; TB.BO1 carrier-top wire bridge, 22 AWG (motor current)</text>
+<text x="20" y="977" font-size="11" fill="#333">join TB.AO2 &lt;-&gt; TB.BO2 carrier-top wire bridge, 22 AWG (motor current)</text>
+</svg>

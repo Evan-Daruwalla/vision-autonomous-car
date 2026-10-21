@@ -1,0 +1,1017 @@
+{
+ "title": [
+  "Proto shield v.5 - hole-by-hole layout (2026-10-20)",
+  "Top view, the Uno's USB end on the LEFT, digital headers at the top. Hole = ROW/COL."
+ ],
+ "notes": [
+  "Grid read off Evan's photos (2026-10-20). Rows: T top rail; P1 P2 plain; U1-U3 upper 3-hole strips (cols 1-10); G GND rail; V 5V rail (= the Uno 5V = the Pi's USB); L1-L3 lower strips; P3 P4 plain; B bottom GND rail = the STAR (Evan's choice).",
+  "Cols 1-10 = the ten short strips counted from the USB end; 11-13 = plain holes right of them; 0 and negative = the plain field left of the strips.",
+  "MEASURED by Evan 2026-10-20 (shield off the Uno): T, V = 5V header pin (beep); G, B = GND header pin (beep); G-B beep; neighbouring strips silent; the Uno pins reach the shield only through their own sockets. Step 0 re-checks the two items not yet metered: U1/1-U3/1 beep (one strip) and V-G / V-B silent.",
+  "Uno connections are Dupont male pins plugged into the shield's own sockets (Evan). Off-board cables use 0.1 in male headers (Evan).",
+  "The 470 uF for the LED strips goes AT each strip's input pads (+5V / GND), not on the shield - that is where the WS2812B guidance puts it.",
+  "The TB6612 VM bulk cap C1 (470 uF) and C2 (0.1 uF) are soldered across the carrier's VMOT and GND pin tips on top of the carrier.",
+  "DIN_F / DIN_R: the D4 / D7 Dupont wires each carry 200 + 200 ohm soldered in series inside the wire (heat-shrunk). KEY = J5's pulled pin, no connection."
+ ],
+ "grid": {
+  "rows": [
+   "T",
+   "P1",
+   "P2",
+   "U1",
+   "U2",
+   "U3",
+   "G",
+   "V",
+   "L1",
+   "L2",
+   "L3",
+   "P3",
+   "P4",
+   "B"
+  ],
+  "holes": [
+   {
+    "rows": [
+     "T"
+    ],
+    "cols": [
+     2,
+     13
+    ]
+   },
+   {
+    "rows": [
+     "P1",
+     "P2",
+     "U1",
+     "U2",
+     "U3",
+     "L1",
+     "L2",
+     "L3",
+     "P3",
+     "P4"
+    ],
+    "cols": [
+     1,
+     13
+    ]
+   },
+   {
+    "rows": [
+     "G",
+     "V"
+    ],
+    "cols": [
+     1,
+     12
+    ]
+   },
+   {
+    "rows": [
+     "B"
+    ],
+    "cols": [
+     2,
+     13
+    ]
+   },
+   {
+    "rows": [
+     "T",
+     "P1",
+     "P2",
+     "U1",
+     "U2",
+     "U3",
+     "G",
+     "V",
+     "L1",
+     "L2",
+     "L3",
+     "P3",
+     "P4",
+     "B"
+    ],
+    "cols": [
+     -3,
+     0
+    ]
+   },
+   {
+    "rows": [
+     "V",
+     "L1",
+     "L2",
+     "L3",
+     "P3",
+     "P4",
+     "B"
+    ],
+    "cols": [
+     -9,
+     -4
+    ]
+   }
+  ],
+  "copper": [
+   {
+    "name": "upper strip 1",
+    "holes": [
+     "U1/1",
+     "U2/1",
+     "U3/1"
+    ]
+   },
+   {
+    "name": "upper strip 2",
+    "holes": [
+     "U1/2",
+     "U2/2",
+     "U3/2"
+    ]
+   },
+   {
+    "name": "upper strip 3",
+    "holes": [
+     "U1/3",
+     "U2/3",
+     "U3/3"
+    ]
+   },
+   {
+    "name": "upper strip 4",
+    "holes": [
+     "U1/4",
+     "U2/4",
+     "U3/4"
+    ]
+   },
+   {
+    "name": "upper strip 5",
+    "holes": [
+     "U1/5",
+     "U2/5",
+     "U3/5"
+    ]
+   },
+   {
+    "name": "upper strip 6",
+    "holes": [
+     "U1/6",
+     "U2/6",
+     "U3/6"
+    ]
+   },
+   {
+    "name": "upper strip 7",
+    "holes": [
+     "U1/7",
+     "U2/7",
+     "U3/7"
+    ]
+   },
+   {
+    "name": "upper strip 8",
+    "holes": [
+     "U1/8",
+     "U2/8",
+     "U3/8"
+    ]
+   },
+   {
+    "name": "upper strip 9",
+    "holes": [
+     "U1/9",
+     "U2/9",
+     "U3/9"
+    ]
+   },
+   {
+    "name": "upper strip 10",
+    "holes": [
+     "U1/10",
+     "U2/10",
+     "U3/10"
+    ]
+   },
+   {
+    "name": "lower strip 1",
+    "holes": [
+     "L1/1",
+     "L2/1",
+     "L3/1"
+    ]
+   },
+   {
+    "name": "lower strip 2",
+    "holes": [
+     "L1/2",
+     "L2/2",
+     "L3/2"
+    ]
+   },
+   {
+    "name": "lower strip 3",
+    "holes": [
+     "L1/3",
+     "L2/3",
+     "L3/3"
+    ]
+   },
+   {
+    "name": "lower strip 4",
+    "holes": [
+     "L1/4",
+     "L2/4",
+     "L3/4"
+    ]
+   },
+   {
+    "name": "lower strip 5",
+    "holes": [
+     "L1/5",
+     "L2/5",
+     "L3/5"
+    ]
+   },
+   {
+    "name": "lower strip 6",
+    "holes": [
+     "L1/6",
+     "L2/6",
+     "L3/6"
+    ]
+   },
+   {
+    "name": "lower strip 7",
+    "holes": [
+     "L1/7",
+     "L2/7",
+     "L3/7"
+    ]
+   },
+   {
+    "name": "lower strip 8",
+    "holes": [
+     "L1/8",
+     "L2/8",
+     "L3/8"
+    ]
+   },
+   {
+    "name": "lower strip 9",
+    "holes": [
+     "L1/9",
+     "L2/9",
+     "L3/9"
+    ]
+   },
+   {
+    "name": "lower strip 10",
+    "holes": [
+     "L1/10",
+     "L2/10",
+     "L3/10"
+    ]
+   },
+   {
+    "name": "G rail (GND)",
+    "holes": [
+     "G/1",
+     "G/2",
+     "G/3",
+     "G/4",
+     "G/5",
+     "G/6",
+     "G/7",
+     "G/8",
+     "G/9",
+     "G/10",
+     "G/11",
+     "G/12"
+    ]
+   },
+   {
+    "name": "V rail (Uno 5V)",
+    "holes": [
+     "V/1",
+     "V/2",
+     "V/3",
+     "V/4",
+     "V/5",
+     "V/6",
+     "V/7",
+     "V/8",
+     "V/9",
+     "V/10",
+     "V/11",
+     "V/12"
+    ]
+   },
+   {
+    "name": "T rail = Uno 5V (metered; unused)",
+    "holes": [
+     "T/2",
+     "T/3",
+     "T/4",
+     "T/5",
+     "T/6",
+     "T/7",
+     "T/8",
+     "T/9",
+     "T/10",
+     "T/11",
+     "T/12",
+     "T/13"
+    ]
+   },
+   {
+    "name": "B rail (GND = STAR)",
+    "holes": [
+     "B/2",
+     "B/3",
+     "B/4",
+     "B/5",
+     "B/6",
+     "B/7",
+     "B/8",
+     "B/9",
+     "B/10",
+     "B/11",
+     "B/12",
+     "B/13"
+    ]
+   },
+   {
+    "name": "G and B joined by the shield's GND traces (Evan metered 2026-10-20: beep)",
+    "holes": [
+     "G/1",
+     "B/2"
+    ]
+   }
+  ],
+  "labels": [
+   {
+    "text": "Digital headers (D13..D0) above this edge",
+    "at": [
+     -0.6,
+     3
+    ]
+   },
+   {
+    "text": "Power / analog headers below this edge",
+    "at": [
+     14.0,
+     3
+    ]
+   },
+   {
+    "text": "<- USB end",
+    "at": [
+     -0.6,
+     -9
+    ]
+   }
+  ]
+ },
+ "parts": [
+  {
+   "id": "TB",
+   "kind": "TB6612 carrier, chip up",
+   "pins": {
+    "PWMA": "U2/1",
+    "AIN2": "U2/2",
+    "AIN1": "U2/3",
+    "STBY": "U2/4",
+    "BIN1": "U2/5",
+    "BIN2": "U2/6",
+    "PWMB": "U2/7",
+    "GND3": "U2/8",
+    "GND1": "L2/1",
+    "VCC": "L2/2",
+    "AO1": "L2/3",
+    "AO2": "L2/4",
+    "BO2": "L2/5",
+    "BO1": "L2/6",
+    "VMOT": "L2/7",
+    "GND2": "L2/8"
+   },
+   "internal": [
+    [
+     "GND1",
+     "GND2",
+     "GND3"
+    ]
+   ],
+   "body": {
+    "rect": [
+     3.55,
+     9.45,
+     0.55,
+     8.45
+    ]
+   },
+   "note": "Orientation: put a marker dot on the PWMA pad (label side), flip chip-up, dot at the TOP-LEFT. Top row = control, bottom row = power."
+  },
+  {
+   "id": "J1",
+   "kind": "4-pin header: motor",
+   "pins": {
+    "M1": "P3/3",
+    "M2": "P3/4",
+    "GND": "P3/5",
+    "5V2": "P3/6"
+   },
+   "body": {
+    "rect": [
+     10.55,
+     11.45,
+     2.55,
+     6.45
+    ]
+   },
+   "note": "Encoder yellow (A) and white (B) do NOT go here: give them male Dupont pins and plug them straight into the D2 / D3 sockets."
+  },
+  {
+   "id": "J5",
+   "kind": "4-pin header: power in",
+   "pins": {
+    "VBAT": "L3/10",
+    "KEY": "P3/10",
+    "5V2": "P4/10",
+    "GND": "B/10"
+   },
+   "body": {
+    "rect": [
+     9.55,
+     13.45,
+     9.55,
+     10.45
+    ]
+   },
+   "note": "W9 VBAT, (key), W14 +5V2, W12 pack - (motor return)."
+  },
+  {
+   "id": "J6",
+   "kind": "1-pin header: W13",
+   "pins": {
+    "GND": "B/11"
+   },
+   "body": {
+    "rect": [
+     12.55,
+     13.45,
+     10.55,
+     11.45
+    ]
+   },
+   "note": "W13: LM2596 IN- / OUT-."
+  },
+  {
+   "id": "J3",
+   "kind": "3-pin header: front strip",
+   "pins": {
+    "DIN": "P3/12",
+    "5V2": "P4/12",
+    "GND": "B/12"
+   },
+   "body": {
+    "rect": [
+     10.55,
+     13.45,
+     11.55,
+     12.45
+    ]
+   },
+   "note": "Cable order: DIN, +5V, GND."
+  },
+  {
+   "id": "J4",
+   "kind": "3-pin header: rear strip",
+   "pins": {
+    "DIN": "P3/13",
+    "5V2": "P4/13",
+    "GND": "B/13"
+   },
+   "body": {
+    "rect": [
+     10.55,
+     13.45,
+     12.55,
+     13.45
+    ]
+   },
+   "note": "Cable order: DIN, +5V, GND."
+  },
+  {
+   "id": "JP1",
+   "kind": "3-pin header: servo-power jumper",
+   "pins": {
+    "UNO5V": "L1/-1",
+    "SERVO_V": "L2/-1",
+    "5V2": "L3/-1"
+   },
+   "body": {
+    "rect": [
+     7.55,
+     10.45,
+     -1.45,
+     -0.55
+    ]
+   },
+   "note": "Put the Dupont female-female jumper (or a jumper cap) on the TOP two pins (UNO5V + SERVO_V) = servo on the Uno 5V (Evan, JR). Move it to the bottom two = servo on +5V2 (fallback)."
+  },
+  {
+   "id": "J2",
+   "kind": "3-pin header: servo",
+   "pins": {
+    "SIG": "L1/-2",
+    "V": "L2/-2",
+    "GND": "L3/-2"
+   },
+   "body": {
+    "rect": [
+     7.55,
+     10.45,
+     -2.45,
+     -1.55
+    ]
+   },
+   "note": "Servo plug: orange/white = SIG at the top, red in the middle, brown/black = GND at the bottom."
+  },
+  {
+   "id": "R100k",
+   "kind": "100k, lying flat",
+   "pins": {
+    "a": "L1/9",
+    "b": "U3/9"
+   },
+   "body": {
+    "rect": [
+     4.6,
+     8.4,
+     8.6,
+     9.4
+    ]
+   },
+   "note": "Body lies over G/9 and V/9 - leads go ONLY into L1/9 and U3/9."
+  },
+  {
+   "id": "R10k",
+   "kind": "10k, standing",
+   "pins": {
+    "a": "U2/9",
+    "b": "U2/10"
+   },
+   "body": {
+    "rect": [
+     3.6,
+     4.4,
+     8.6,
+     10.4
+    ]
+   }
+  },
+  {
+   "id": "R2k",
+   "kind": "2k, standing",
+   "pins": {
+    "a": "U3/10",
+    "b": "G/10"
+   },
+   "body": {
+    "rect": [
+     4.6,
+     6.4,
+     9.6,
+     10.4
+    ]
+   }
+  }
+ ],
+ "offboard_parts": [
+  {
+   "id": "C1",
+   "kind": "470 uF on the carrier",
+   "pins": {
+    "+": "TB.VMOT",
+    "-": "TB.GND2"
+   },
+   "note": "+ lead (no stripe) to the VMOT pin tip, - lead (stripe side) to the GND pin tip next to it, at the right end of the carrier's bottom row."
+  },
+  {
+   "id": "C2",
+   "kind": "0.1 uF on the carrier",
+   "pins": {
+    "a": "TB.VMOT",
+    "b": "TB.GND2"
+   },
+   "note": "Same two pin tips as C1; no polarity."
+  }
+ ],
+ "joins": [
+  {
+   "a": "TB.PWMA",
+   "b": "TB.PWMB",
+   "note": "carrier-top wire bridge (logic)"
+  },
+  {
+   "a": "TB.AIN2",
+   "b": "TB.BIN2",
+   "note": "carrier-top wire bridge (logic)"
+  },
+  {
+   "a": "TB.AIN1",
+   "b": "TB.BIN1",
+   "note": "carrier-top wire bridge (logic)"
+  },
+  {
+   "a": "TB.AO1",
+   "b": "TB.BO1",
+   "note": "carrier-top wire bridge, 22 AWG (motor current)"
+  },
+  {
+   "a": "TB.AO2",
+   "b": "TB.BO2",
+   "note": "carrier-top wire bridge, 22 AWG (motor current)"
+  }
+ ],
+ "bridges": [
+  [
+   "L3/3",
+   "P3/3"
+  ],
+  [
+   "L3/4",
+   "P3/4"
+  ],
+  [
+   "P3/5",
+   "P4/5"
+  ],
+  [
+   "P4/5",
+   "B/5"
+  ],
+  [
+   "P3/6",
+   "P4/6"
+  ],
+  [
+   "P4/6",
+   "P4/7"
+  ],
+  [
+   "P4/7",
+   "P4/8"
+  ],
+  [
+   "P4/8",
+   "P4/9"
+  ],
+  [
+   "P4/9",
+   "P4/10"
+  ],
+  [
+   "P4/10",
+   "P4/11"
+  ],
+  [
+   "P4/11",
+   "P4/12"
+  ],
+  [
+   "P4/12",
+   "P4/13"
+  ],
+  [
+   "L2/9",
+   "L2/10"
+  ],
+  [
+   "L3/12",
+   "P3/12"
+  ],
+  [
+   "L3/13",
+   "P3/13"
+  ],
+  [
+   "V/1",
+   "V/0"
+  ],
+  [
+   "V/0",
+   "V/-1"
+  ],
+  [
+   "V/-1",
+   "L1/-1"
+  ],
+  [
+   "L3/-1",
+   "P3/-1"
+  ],
+  [
+   "L2/-2",
+   "L2/-1"
+  ],
+  [
+   "L1/-2",
+   "L1/-3"
+  ],
+  [
+   "L3/-2",
+   "P3/-2"
+  ]
+ ],
+ "wires": [
+  {
+   "id": "w1",
+   "from": "L3/7",
+   "to": "L3/9",
+   "net": "VBAT",
+   "note": "VMOT to the VBAT strip, insulated, hops over L3/8"
+  },
+  {
+   "id": "w2",
+   "from": "L3/8",
+   "to": "B/8",
+   "net": "GND",
+   "note": "TB6612 GND to the star rail, hops over P3/8 and P4/8"
+  },
+  {
+   "id": "w3",
+   "from": "L3/2",
+   "to": "V/0",
+   "net": "UNO5V",
+   "note": "TB6612 VCC to the Uno 5V - ROUTE: left along row L3, then up column 0 (never under the carrier)"
+  },
+  {
+   "id": "w4",
+   "from": "P4/7",
+   "to": "P3/-1",
+   "net": "5V2",
+   "note": "+5V2 to JP1's bottom pin - ROUTE: left along row P4 under the J1 pins, then up to P3/-1"
+  },
+  {
+   "id": "w5",
+   "from": "B/2",
+   "to": "P3/-2",
+   "net": "GND",
+   "note": "servo GND to the star - ROUTE: left along row B, then up to P3/-2"
+  }
+ ],
+ "sockets": [
+  {
+   "hole": "U1/1",
+   "uno": "D11"
+  },
+  {
+   "hole": "U1/2",
+   "uno": "D12"
+  },
+  {
+   "hole": "U1/3",
+   "uno": "D8"
+  },
+  {
+   "hole": "U1/4",
+   "uno": "D10"
+  },
+  {
+   "hole": "U1/9",
+   "uno": "A0"
+  },
+  {
+   "hole": "L1/-3",
+   "uno": "D9"
+  },
+  {
+   "hole": "L3/12",
+   "uno": "D4"
+  },
+  {
+   "hole": "L3/13",
+   "uno": "D7"
+  }
+ ],
+ "direct_uno": [
+  {
+   "from": "encoder yellow (A)",
+   "uno": "D2",
+   "note": "male Dupont pin on the cable end, straight into the D2 socket"
+  },
+  {
+   "from": "encoder white (B)",
+   "uno": "D3",
+   "note": "male Dupont pin on the cable end, straight into the D3 socket"
+  }
+ ],
+ "nets": {
+  "PWM": [
+   "TB.PWMA",
+   "TB.PWMB",
+   "uno:D11"
+  ],
+  "DIR1": [
+   "TB.AIN1",
+   "TB.BIN1",
+   "uno:D8"
+  ],
+  "DIR2": [
+   "TB.AIN2",
+   "TB.BIN2",
+   "uno:D12"
+  ],
+  "STBY": [
+   "TB.STBY",
+   "uno:D10"
+  ],
+  "M1": [
+   "TB.AO1",
+   "TB.BO1",
+   "J1.M1"
+  ],
+  "M2": [
+   "TB.AO2",
+   "TB.BO2",
+   "J1.M2"
+  ],
+  "VBAT": [
+   "TB.VMOT",
+   "C1.+",
+   "C2.a",
+   "J5.VBAT",
+   "R100k.a"
+  ],
+  "GND": [
+   "TB.GND1",
+   "TB.GND2",
+   "TB.GND3",
+   "C1.-",
+   "C2.b",
+   "J1.GND",
+   "J5.GND",
+   "J6.GND",
+   "J3.GND",
+   "J4.GND",
+   "J2.GND",
+   "R2k.b"
+  ],
+  "UNO5V": [
+   "V/12",
+   "TB.VCC",
+   "JP1.UNO5V"
+  ],
+  "5V2": [
+   "J1.5V2",
+   "J5.5V2",
+   "J3.5V2",
+   "J4.5V2",
+   "JP1.5V2"
+  ],
+  "SERVO_V": [
+   "JP1.SERVO_V",
+   "J2.V"
+  ],
+  "SERVO_SIG": [
+   "J2.SIG",
+   "uno:D9"
+  ],
+  "DIN_F": [
+   "J3.DIN",
+   "uno:D4"
+  ],
+  "DIN_R": [
+   "J4.DIN",
+   "uno:D7"
+  ],
+  "A0": [
+   "R100k.b",
+   "R10k.a",
+   "uno:A0"
+  ],
+  "DIV_MID": [
+   "R10k.b",
+   "R2k.a"
+  ],
+  "KEY": [
+   "J5.KEY"
+  ]
+ },
+ "net_colors": {
+  "PWM": "#555555",
+  "DIR1": "#555555",
+  "DIR2": "#555555",
+  "STBY": "#555555",
+  "M1": "#6A1B9A",
+  "M2": "#6A1B9A",
+  "VBAT": "#C62828",
+  "GND": "#222222",
+  "UNO5V": "#AD1457",
+  "5V2": "#E07B00",
+  "SERVO_V": "#2E7D32",
+  "SERVO_SIG": "#2E7D32",
+  "DIN_F": "#B59F00",
+  "DIN_R": "#B59F00",
+  "A0": "#1A56B0",
+  "DIV_MID": "#1A56B0",
+  "KEY": "#999999"
+ },
+ "steps": [
+  {
+   "title": "0. Remaining meter checks BEFORE any solder (shield OFF the Uno, continuity mode)",
+   "do": [
+    "Already done by Evan 2026-10-20: T and V beep to 5V; G and B beep to GND; G beeps to B; neighbouring strips silent.",
+    "0.1 U1/1 to U3/1: must BEEP (one strip, three holes)",
+    "0.2 V/12 to G/12 and V/12 to B/13: must be SILENT",
+    "If either differs, STOP and send me the result."
+   ],
+   "check": "both match"
+  },
+  {
+   "title": "1. TB6612 headers and carrier-top work (off the shield)",
+   "do": [
+    "Solder the two 8-pin headers to the carrier: SHORT ends up through the carrier, LONG ends down.",
+    "Mark PWMA (label side) with a dot.",
+    "On the carrier's top, solder insulated wire bridges between the pin tips: PWMA-PWMB, AIN2-BIN2, AIN1-BIN1 (any thin wire), AO1-BO1 and AO2-BO2 (22 AWG).",
+    "Solder C1 (470 uF): + lead to the VMOT tip, stripe (-) lead to the GND tip next to it (bottom row, right end); lay the can flat on the carrier.",
+    "Solder C2 (0.1 uF) across the same VMOT and GND tips."
+   ],
+   "check": "meter: PWMA-PWMB, AIN1-BIN1, AIN2-BIN2, AO1-BO1, AO2-BO2 each BEEP; VMOT-GND does NOT beep (C1 may chirp once)"
+  },
+  {
+   "title": "2. Carrier onto the shield",
+   "do": [
+    "Chip up, dot at the top-left: top row pins into U2/1 ... U2/8, bottom row pins into L2/1 ... L2/8.",
+    "Solder all 16 on the underside; trim the leftover pin length."
+   ],
+   "check": "U1/1 beeps to the PWMA pin; L3/7 beeps to VMOT; L3/1 beeps to L3/8 (GND through the carrier)"
+  },
+  {
+   "title": "3. Bottom-side solder bridges (each joins exactly two neighbouring holes)",
+   "do": [
+    "Motor outputs: L3/3-P3/3, L3/4-P3/4.",
+    "J1 GND: P3/5-P4/5 and P4/5-B/5.  J1 +5V2: P3/6-P4/6.",
+    "+5V2 bus along row P4: P4/6-P4/7-P4/8-P4/9-P4/10-P4/11-P4/12-P4/13.",
+    "DANGER: P4/5 (GND) and P4/6 (+5V2) are neighbours - they must NOT touch.",
+    "VBAT strips: L2/9-L2/10.  Strip data: L3/12-P3/12, L3/13-P3/13.",
+    "Uno 5V to the left field: V/1-V/0, V/0-V/-1, V/-1-L1/-1.",
+    "Servo block: L3/-1-P3/-1, L2/-2-L2/-1, L1/-2-L1/-3, L3/-2-P3/-2.",
+    "DANGER: P3/-1 (+5V2) and P3/-2 (GND) are neighbours - must NOT touch."
+   ],
+   "check": "P4/5 to P4/6 SILENT; P3/-1 to P3/-2 SILENT; P4/6 beeps to P4/13; V/12 beeps to L1/-1"
+  },
+  {
+   "title": "4. Headers",
+   "do": [
+    "J1 (4 pins) in P3/3, P3/4, P3/5, P3/6.",
+    "J5 (4 pins, pull out the 2nd pin) in L3/10, P3/10, P4/10, B/10.  J6 (1 pin) in B/11.",
+    "J3 in P3/12, P4/12, B/12.  J4 in P3/13, P4/13, B/13.",
+    "JP1 in L1/-1, L2/-1, L3/-1.  J2 in L1/-2, L2/-2, L3/-2."
+   ],
+   "check": "J5 top pin (L3/10) beeps to VMOT; J3 middle beeps to J4 middle (+5V2); J3 bottom beeps to B/8"
+  },
+  {
+   "title": "5. Divider",
+   "do": [
+    "R100k lying flat: leads into L1/9 and U3/9 only (body over G/9, V/9).",
+    "R10k standing: U2/9 and U2/10.  R2k standing: U3/10 and G/10."
+   ],
+   "check": "L1/9 to U3/9 = ~100k; U3/9 to G/10 = ~12k"
+  },
+  {
+   "title": "6. Top-side jumper wires (insulated 22 AWG)",
+   "do": [
+    "w1 L3/7 -> L3/9 (VMOT to the VBAT strip).",
+    "w2 L3/8 -> B/8 (TB6612 GND to the star).",
+    "w3 L3/2 -> V/0 (TB6612 VCC to the Uno 5V).",
+    "w4 P4/7 -> P3/-1 (+5V2 to JP1's bottom pin).",
+    "w5 B/2 -> P3/-2 (servo GND to the star)."
+   ],
+   "check": "VBAT (L3/10) to B/10 SILENT; V/0 to B/2 SILENT; P4/7 to B/2 SILENT"
+  },
+  {
+   "title": "7. Dupont wires to the Uno sockets (cut a male-male jumper, solder the cut end in the hole)",
+   "do": [
+    "U1/1 -> D11, U1/2 -> D12, U1/3 -> D8, U1/4 -> D10.",
+    "U1/9 -> A0.  L1/-3 -> D9.",
+    "L3/12 -> D4 and L3/13 -> D7, each with 200 + 200 ohm soldered in series IN the wire, heat-shrunk.",
+    "Encoder yellow -> D2 socket, white -> D3 socket (male pins on the cable, not through the shield)."
+   ],
+   "check": "with the shield on the Uno: each socket pin beeps to its hole; the Uno's 5V pin beeps to V/12"
+  },
+  {
+   "title": "8. Before the first power-up",
+   "do": [
+    "Re-run every SILENT check from steps 0, 3 and 6.",
+    "Jumper on JP1's TOP two pins (servo on the Uno 5V).",
+    "Pack OFF (rocker), Uno on the Pi's USB first; then rocker ON with nothing else plugged in and meter VBAT at J5 (~8 V) and +5V2 at J3 middle (~5.0 V)."
+   ],
+   "check": "VBAT ~ pack voltage, +5V2 ~ 5.0 V, Uno 5V ~ 5 V and NOT tied to +5V2 (V/12 to P4/13 silent with the power off)"
+  }
+ ]
+}

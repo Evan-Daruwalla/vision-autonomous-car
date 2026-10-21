@@ -1,0 +1,507 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1230" viewBox="0 0 1500 1230" font-family="Arial, Helvetica, sans-serif">
+<title>Proto shield wiring (2026-10-20)</title>
+<desc>Arduino proto shield v.5 for the autonomous car: suggested placement of the TB6612 carrier, caps, divider, strip resistors, pads and connectors (left, landmarks read off Evan's photo) and every net on the shield (right), with the meter checks to do before power. Source: docs/WIRING_PROTOSHIELD.md section 2.</desc>
+<rect x="0" y="0" width="1500" height="1230" rx="0" fill="#FFFFFF" fill-opacity="1.0" stroke="#FFFFFF" stroke-width="1"/>
+<text x="24" y="32" font-size="18" fill="#2C2C2A" text-anchor="start" font-weight="bold">Proto shield (v.5) - what goes where, and every connection on it (2026-10-20)</text>
+<text x="24" y="54" font-size="12" fill="#4A4A46" text-anchor="start">Left: the board as in your photo (USB end of the Uno on the LEFT, digital headers at the top). Shaded boxes = suggested spots. Board landmarks are read off the photo - approximate.</text>
+<text x="24" y="72" font-size="12" fill="#4A4A46" text-anchor="start">Right: every net. Wire numbers W9-W17 match docs/pack_wiring_full.svg. Lines that cross WITHOUT a dot are not connected. All wire 22 AWG.</text>
+<text x="24" y="90" font-size="12" fill="#B00020" text-anchor="start" font-weight="bold">SUPERSEDED for placement (2026-10-20): use docs/shield_holemap.svg + docs/SHIELD_BUILD.md. Since then: STAR = the printed rail B; C3 470 uF moved onto each strip's input pads.</text>
+<rect x="40" y="150" width="637.98" height="495.69" rx="8" fill="#DCE8F7" fill-opacity="1.0" stroke="#1A56B0" stroke-width="1.5"/>
+<text x="40" y="112" font-size="12" fill="#1A56B0" text-anchor="start" font-weight="bold">PROTO SHIELD v.5 - top view (68.6 x 53.3 mm); digital I/O pins used are in red</text>
+<circle cx="170.2" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="170.2" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="198.1" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="226.0" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="253.9" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="281.8" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="309.7" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="337.6" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="365.5" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="393.4" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="421.3" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="449.2" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="477.1" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="505.0" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="205.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="233.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="261.6" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="289.5" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="317.4" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="345.3" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="373.2" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="401.1" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="429.0" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="456.9" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="484.8" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="512.7" r="1.3" fill="#9DB5D8"/>
+<circle cx="532.9" cy="540.6" r="1.3" fill="#9DB5D8"/>
+<rect x="238.74" y="157.44" width="188.97600000000003" height="21.39" rx="2" fill="#222222" fill-opacity="1.0" stroke="#222222" stroke-width="1"/>
+<circle cx="250.74" cy="167.44" r="3" fill="#BBBBBB"/>
+<text x="250.74" y="151.44" font-size="9.5" fill="#777777" text-anchor="middle">REF</text>
+<circle cx="274.362" cy="167.44" r="3" fill="#BBBBBB"/>
+<text x="274.362" y="151.44" font-size="9.5" fill="#777777" text-anchor="middle">GND</text>
+<circle cx="297.98400000000004" cy="167.44" r="3" fill="#BBBBBB"/>
+<text x="297.98400000000004" y="151.44" font-size="9.5" fill="#777777" text-anchor="middle">13</text>
+<circle cx="321.606" cy="167.44" r="3" fill="#FFD54F"/>
+<text x="321.606" y="151.44" font-size="9.5" fill="#C62828" text-anchor="middle" font-weight="bold">12</text>
+<circle cx="345.228" cy="167.44" r="3" fill="#FFD54F"/>
+<text x="345.228" y="151.44" font-size="9.5" fill="#C62828" text-anchor="middle" font-weight="bold">11</text>
+<circle cx="368.85" cy="167.44" r="3" fill="#FFD54F"/>
+<text x="368.85" y="151.44" font-size="9.5" fill="#C62828" text-anchor="middle" font-weight="bold">10</text>
+<circle cx="392.47200000000004" cy="167.44" r="3" fill="#FFD54F"/>
+<text x="392.47200000000004" y="151.44" font-size="9.5" fill="#C62828" text-anchor="middle" font-weight="bold">9</text>
+<circle cx="416.09400000000005" cy="167.44" r="3" fill="#FFD54F"/>
+<text x="416.09400000000005" y="151.44" font-size="9.5" fill="#C62828" text-anchor="middle" font-weight="bold">8</text>
+<rect x="430.32" y="157.44" width="188.97600000000003" height="21.39" rx="2" fill="#222222" fill-opacity="1.0" stroke="#222222" stroke-width="1"/>
+<circle cx="442.32" cy="167.44" r="3" fill="#FFD54F"/>
+<text x="442.32" y="151.44" font-size="9.5" fill="#C62828" text-anchor="middle" font-weight="bold">7</text>
+<circle cx="465.942" cy="167.44" r="3" fill="#BBBBBB"/>
+<text x="465.942" y="151.44" font-size="9.5" fill="#777777" text-anchor="middle">6</text>
+<circle cx="489.564" cy="167.44" r="3" fill="#BBBBBB"/>
+<text x="489.564" y="151.44" font-size="9.5" fill="#777777" text-anchor="middle">5</text>
+<circle cx="513.186" cy="167.44" r="3" fill="#FFD54F"/>
+<text x="513.186" y="151.44" font-size="9.5" fill="#C62828" text-anchor="middle" font-weight="bold">4</text>
+<circle cx="536.808" cy="167.44" r="3" fill="#FFD54F"/>
+<text x="536.808" y="151.44" font-size="9.5" fill="#C62828" text-anchor="middle" font-weight="bold">3</text>
+<circle cx="560.4300000000001" cy="167.44" r="3" fill="#FFD54F"/>
+<text x="560.4300000000001" y="151.44" font-size="9.5" fill="#C62828" text-anchor="middle" font-weight="bold">2</text>
+<circle cx="584.052" cy="167.44" r="3" fill="#BBBBBB"/>
+<text x="584.052" y="151.44" font-size="9.5" fill="#777777" text-anchor="middle">1</text>
+<circle cx="607.674" cy="167.44" r="3" fill="#BBBBBB"/>
+<text x="607.674" y="151.44" font-size="9.5" fill="#777777" text-anchor="middle">0</text>
+<rect x="335.46000000000004" y="620.58" width="141.73200000000003" height="21.39" rx="2" fill="#222222" fill-opacity="1.0" stroke="#222222" stroke-width="1"/>
+<circle cx="347.46000000000004" cy="630.58" r="3" fill="#BBBBBB"/>
+<text x="347.46000000000004" y="656.58" font-size="9" fill="#777777" text-anchor="middle">RST</text>
+<circle cx="371.08200000000005" cy="630.58" r="3" fill="#BBBBBB"/>
+<text x="371.08200000000005" y="656.58" font-size="9" fill="#777777" text-anchor="middle">3V3</text>
+<circle cx="394.70400000000006" cy="630.58" r="3" fill="#FFD54F"/>
+<text x="394.70400000000006" y="656.58" font-size="9" fill="#AD1457" text-anchor="middle" font-weight="bold">5V</text>
+<circle cx="418.326" cy="630.58" r="3" fill="#FFD54F"/>
+<text x="418.326" y="656.58" font-size="9" fill="#333333" text-anchor="middle" font-weight="bold">GND</text>
+<circle cx="441.94800000000004" cy="630.58" r="3" fill="#FFD54F"/>
+<text x="441.94800000000004" y="656.58" font-size="9" fill="#333333" text-anchor="middle" font-weight="bold">GND</text>
+<circle cx="465.57000000000005" cy="630.58" r="3" fill="#FFD54F"/>
+<text x="465.57000000000005" y="656.58" font-size="9" fill="#B00020" text-anchor="middle" font-weight="bold">Vin</text>
+<rect x="501.93000000000006" y="620.58" width="141.73200000000003" height="21.39" rx="2" fill="#222222" fill-opacity="1.0" stroke="#222222" stroke-width="1"/>
+<circle cx="513.9300000000001" cy="630.58" r="3" fill="#FFD54F"/>
+<text x="513.9300000000001" y="656.58" font-size="9" fill="#C62828" text-anchor="middle" font-weight="bold">A0</text>
+<circle cx="537.552" cy="630.58" r="3" fill="#BBBBBB"/>
+<text x="537.552" y="656.58" font-size="9" fill="#777777" text-anchor="middle">A1</text>
+<circle cx="561.1740000000001" cy="630.58" r="3" fill="#BBBBBB"/>
+<text x="561.1740000000001" y="656.58" font-size="9" fill="#777777" text-anchor="middle">A2</text>
+<circle cx="584.796" cy="630.58" r="3" fill="#BBBBBB"/>
+<text x="584.796" y="656.58" font-size="9" fill="#777777" text-anchor="middle">A3</text>
+<circle cx="608.4180000000001" cy="630.58" r="3" fill="#BBBBBB"/>
+<text x="608.4180000000001" y="656.58" font-size="9" fill="#777777" text-anchor="middle">A4</text>
+<circle cx="632.0400000000001" cy="630.58" r="3" fill="#BBBBBB"/>
+<text x="632.0400000000001" y="656.58" font-size="9" fill="#777777" text-anchor="middle">A5</text>
+<text x="339.46000000000004" y="695.69" font-size="10" fill="#B00020" text-anchor="start" font-weight="bold">Vin: leave EMPTY (never VBAT)</text>
+<rect x="290.17" y="362.76" width="260.40000000000003" height="6" rx="2" fill="#333333" fill-opacity="1.0" stroke="#333333" stroke-width="1"/>
+<text x="284.17" y="369.76" font-size="9.5" fill="#333333" text-anchor="end" font-weight="bold">printed GND bus = Uno GND</text>
+<rect x="290.17" y="389.73" width="260.40000000000003" height="6" rx="2" fill="#AD1457" fill-opacity="1.0" stroke="#AD1457" stroke-width="1"/>
+<text x="284.17" y="396.73" font-size="9.5" fill="#AD1457" text-anchor="end" font-weight="bold">printed 5V bus = Uno 5V (Pi USB)</text>
+<rect x="290.17" y="542.25" width="260.40000000000003" height="6" rx="2" fill="#333333" fill-opacity="1.0" stroke="#333333" stroke-width="1"/>
+<text x="284.17" y="549.25" font-size="9.5" fill="#333333" text-anchor="end" font-weight="bold">printed GND strip = Uno GND</text>
+<rect x="137.65" y="229.05" width="55.800000000000004" height="93.0" rx="2" fill="#FFFFFF" fill-opacity="0.7" stroke="#7A8CA8" stroke-width="1"/>
+<text x="140.65" y="242.05" font-size="9.5" fill="#5A6A84" text-anchor="start">DIP-14</text>
+<rect x="53.95" y="163.95" width="55.800000000000004" height="46.5" rx="2" fill="#FFFFFF" fill-opacity="0.7" stroke="#7A8CA8" stroke-width="1"/>
+<text x="56.95" y="176.95" font-size="9.5" fill="#5A6A84" text-anchor="start">ICSP</text>
+<rect x="63.25" y="573.1500000000001" width="55.800000000000004" height="51.150000000000006" rx="2" fill="#FFFFFF" fill-opacity="0.7" stroke="#7A8CA8" stroke-width="1"/>
+<text x="66.25" y="586.1500000000001" font-size="9.5" fill="#5A6A84" text-anchor="start">RESET</text>
+<rect x="235.3" y="573.1500000000001" width="51.150000000000006" height="51.150000000000006" rx="2" fill="#FFFFFF" fill-opacity="0.7" stroke="#7A8CA8" stroke-width="1"/>
+<text x="238.3" y="586.1500000000001" font-size="9.5" fill="#5A6A84" text-anchor="start">S1</text>
+<text x="170.20000000000002" y="165.16" font-size="9" fill="#5A6A84" text-anchor="start">LED1</text>
+<text x="151.60000000000002" y="595.75" font-size="9" fill="#5A6A84" text-anchor="start">LED2</text>
+<text x="46" y="639.69" font-size="9.5" fill="#5A6A84" text-anchor="start" font-weight="bold">&lt;- USB end (Uno USB-B: faces the car's -y side)</text>
+<rect x="291.1" y="201.15" width="186.0" height="144.15" rx="4" fill="#1A56B0" fill-opacity="0.13" stroke="#1A56B0" stroke-width="1.5"/>
+<text x="295.1" y="214.15" font-size="10.5" fill="#1A56B0" text-anchor="start" font-weight="bold">TB6612 carrier</text>
+<text x="295.1" y="227.15" font-size="9" fill="#1A56B0" text-anchor="start">Pololu #713, on headers</text>
+<text x="295.1" y="238.65" font-size="9" fill="#1A56B0" text-anchor="start">control pins toward</text>
+<text x="295.1" y="250.15" font-size="9" fill="#1A56B0" text-anchor="start">D8-D12 (top)</text>
+<rect x="481.75000000000006" y="201.15" width="88.35000000000001" height="144.15" rx="4" fill="#C62828" fill-opacity="0.13" stroke="#C62828" stroke-width="1.5"/>
+<text x="485.75000000000006" y="214.15" font-size="10.5" fill="#C62828" text-anchor="start" font-weight="bold">C1 C2</text>
+<text x="485.75000000000006" y="227.15" font-size="9" fill="#C62828" text-anchor="start">470-1000uF</text>
+<text x="485.75000000000006" y="238.65" font-size="9" fill="#C62828" text-anchor="start">+ 0.1uF</text>
+<text x="485.75000000000006" y="250.15" font-size="9" fill="#C62828" text-anchor="start">VM-GND</text>
+<text x="485.75000000000006" y="261.65" font-size="9" fill="#C62828" text-anchor="start">at the carrier</text>
+<rect x="244.60000000000002" y="201.15" width="41.85" height="144.15" rx="4" fill="#333333" fill-opacity="0.13" stroke="#333333" stroke-width="1.5"/>
+<text x="248.60000000000002" y="214.15" font-size="10.5" fill="#333333" text-anchor="start" font-weight="bold">STAR</text>
+<text x="248.60000000000002" y="227.15" font-size="9" fill="#333333" text-anchor="start">strip</text>
+<text x="248.60000000000002" y="238.65" font-size="9" fill="#333333" text-anchor="start">soldered</text>
+<text x="248.60000000000002" y="250.15" font-size="9" fill="#333333" text-anchor="start">to TB6612</text>
+<text x="248.60000000000002" y="261.65" font-size="9" fill="#333333" text-anchor="start">GND pin</text>
+<rect x="291.1" y="415.05" width="120.9" height="88.35000000000001" rx="4" fill="#6B5B00" fill-opacity="0.13" stroke="#6B5B00" stroke-width="1.5"/>
+<text x="295.1" y="428.05" font-size="10.5" fill="#6B5B00" text-anchor="start" font-weight="bold">R1-R4</text>
+<text x="295.1" y="441.05" font-size="9" fill="#6B5B00" text-anchor="start">2 x 200 per strip</text>
+<text x="295.1" y="452.55" font-size="9" fill="#6B5B00" text-anchor="start">DIN (D4, D7)</text>
+<rect x="416.65000000000003" y="415.05" width="55.800000000000004" height="88.35000000000001" rx="4" fill="#E07B00" fill-opacity="0.13" stroke="#E07B00" stroke-width="1.5"/>
+<text x="420.65000000000003" y="428.05" font-size="10.5" fill="#E07B00" text-anchor="start" font-weight="bold">+5V2</text>
+<text x="420.65000000000003" y="441.05" font-size="9" fill="#E07B00" text-anchor="start">own strip</text>
+<text x="420.65000000000003" y="452.55" font-size="9" fill="#E07B00" text-anchor="start">NOT the</text>
+<text x="420.65000000000003" y="464.05" font-size="9" fill="#E07B00" text-anchor="start">5V bus</text>
+<rect x="477.1" y="415.05" width="55.800000000000004" height="88.35000000000001" rx="4" fill="#E07B00" fill-opacity="0.13" stroke="#E07B00" stroke-width="1.5"/>
+<text x="481.1" y="428.05" font-size="10.5" fill="#E07B00" text-anchor="start" font-weight="bold">C3</text>
+<text x="481.1" y="441.05" font-size="9" fill="#E07B00" text-anchor="start">470uF</text>
+<text x="481.1" y="452.55" font-size="9" fill="#E07B00" text-anchor="start">+5V2-GND</text>
+<rect x="537.55" y="466.20000000000005" width="106.95" height="120.9" rx="4" fill="#C62828" fill-opacity="0.13" stroke="#C62828" stroke-width="1.5"/>
+<text x="541.55" y="479.20000000000005" font-size="10.5" fill="#C62828" text-anchor="start" font-weight="bold">Divider</text>
+<text x="541.55" y="492.20000000000005" font-size="9" fill="#C62828" text-anchor="start">100k</text>
+<text x="541.55" y="503.70000000000005" font-size="9" fill="#C62828" text-anchor="start">10k + 2k</text>
+<text x="541.55" y="515.2" font-size="9" fill="#C62828" text-anchor="start">mid -&gt; A0</text>
+<text x="541.55" y="526.7" font-size="9" fill="#C62828" text-anchor="start">(near A0)</text>
+<rect x="574.75" y="201.15" width="88.35000000000001" height="251.10000000000002" rx="4" fill="#3E7D32" fill-opacity="0.13" stroke="#3E7D32" stroke-width="1.5"/>
+<text x="578.75" y="214.15" font-size="10.5" fill="#3E7D32" text-anchor="start" font-weight="bold">Connectors</text>
+<text x="578.75" y="227.15" font-size="9" fill="#3E7D32" text-anchor="start">J1 motor+enc</text>
+<text x="578.75" y="238.65" font-size="9" fill="#3E7D32" text-anchor="start"> (6)</text>
+<text x="578.75" y="250.15" font-size="9" fill="#3E7D32" text-anchor="start">J2 servo (3)</text>
+<text x="578.75" y="261.65" font-size="9" fill="#3E7D32" text-anchor="start">JP1 jumper (3)</text>
+<text x="578.75" y="273.15" font-size="9" fill="#3E7D32" text-anchor="start">J3 J4 strips</text>
+<text x="578.75" y="284.65" font-size="9" fill="#3E7D32" text-anchor="start"> (3 each)</text>
+<text x="578.75" y="296.15" font-size="9" fill="#3E7D32" text-anchor="start">J5 power in</text>
+<text x="578.75" y="307.65" font-size="9" fill="#3E7D32" text-anchor="start"> (4)</text>
+<text x="40" y="717.69" font-size="10.5" fill="#4A4A46" text-anchor="start">On the car the USB end faces the car's -y side (the USB-B plug), so the digital-header edge faces the deck's REAR and the</text>
+<text x="40" y="731.69" font-size="10.5" fill="#4A4A46" text-anchor="start">power/analog edge faces the Pi. The pack wires (W9, W12, W13, W14), motor/encoder and servo arrive from the front: put the</text>
+<text x="40" y="745.69" font-size="10.5" fill="#4A4A46" text-anchor="start">connectors where their leads have the shortest run. The zones are suggestions - any free strip works if the nets match.</text>
+<rect x="720" y="92" width="760" height="584" rx="10" fill="none" fill-opacity="1.0" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="730" y="110" font-size="12" fill="#6B6B66" text-anchor="start" font-weight="bold">EVERY NET ON THE SHIELD</text>
+<rect x="730" y="124" width="120" height="92" rx="6" fill="#FDE8E8" fill-opacity="1.0" stroke="#C62828" stroke-width="1"/>
+<text x="738" y="141" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">From the pack</text>
+<text x="738" y="157" font-size="10.5" fill="#4A4A46" text-anchor="start">W9  VBAT (rocker)</text>
+<text x="738" y="171" font-size="10.5" fill="#4A4A46" text-anchor="start">W12 GND (XT30 -)</text>
+<text x="738" y="185" font-size="10.5" fill="#4A4A46" text-anchor="start">W13 LM2596 -</text>
+<text x="738" y="199" font-size="10.5" fill="#4A4A46" text-anchor="start">W14 +5V2 (LM2596)</text>
+<text x="730" y="232" font-size="10" fill="#333333" text-anchor="start" font-weight="bold">W12, W13 -&gt; STAR</text>
+<rect x="870" y="124" width="100" height="40" rx="6" fill="#FFFFFF" fill-opacity="1.0" stroke="#C62828" stroke-width="1"/>
+<text x="878" y="141" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">VBAT pad</text>
+<circle cx="870" cy="152" r="3" fill="#C62828"/>
+<path d="M850 152 L870 152" fill="none" stroke="#C62828" stroke-width="2.2" stroke-dasharray="7 4"/>
+<rect x="1010" y="124" width="215" height="206" rx="6" fill="#E8F0FE" fill-opacity="1.0" stroke="#1A56B0" stroke-width="1"/>
+<text x="1018" y="141" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">TB6612FNG (Pololu #713)</text>
+<text x="1018" y="157" font-size="10.5" fill="#4A4A46" text-anchor="start"></text>
+<text x="1018" y="171" font-size="10.5" fill="#4A4A46" text-anchor="start"></text>
+<text x="1018" y="185" font-size="10.5" fill="#4A4A46" text-anchor="start"></text>
+<text x="1018" y="199" font-size="10.5" fill="#4A4A46" text-anchor="start"></text>
+<text x="1018" y="213" font-size="10.5" fill="#4A4A46" text-anchor="start"></text>
+<text x="1018" y="227" font-size="10.5" fill="#4A4A46" text-anchor="start"></text>
+<text x="1018" y="241" font-size="10.5" fill="#4A4A46" text-anchor="start"></text>
+<text x="1018" y="255" font-size="10.5" fill="#4A4A46" text-anchor="start"></text>
+<text x="1018" y="269" font-size="10.5" fill="#4A4A46" text-anchor="start">C1 470-1000 uF + C2 0.1 uF:</text>
+<text x="1018" y="283" font-size="10.5" fill="#4A4A46" text-anchor="start">  VM to GND, at the carrier</text>
+<text x="1018" y="297" font-size="10.5" fill="#4A4A46" text-anchor="start">pin order: follow the silkscreen;</text>
+<text x="1018" y="311" font-size="10.5" fill="#4A4A46" text-anchor="start">A/B paralleled (bridge each pair)</text>
+<circle cx="1010" cy="150" r="3" fill="#C62828"/>
+<text x="1018" y="154" font-size="11" fill="#C62828" text-anchor="start" font-weight="bold">VM</text>
+<circle cx="1010" cy="176" r="3" fill="#AD1457"/>
+<text x="1018" y="180" font-size="10.5" fill="#AD1457" text-anchor="start" font-weight="bold">VCC &lt;- Uno 5V bus</text>
+<path d="M970 150 L1010 150" fill="none" stroke="#C62828" stroke-width="2.2"/>
+<circle cx="1225" cy="150" r="3" fill="#555555"/>
+<text x="1217" y="154" font-size="10.5" fill="#555555" text-anchor="end">PWMA + PWMB</text>
+<path d="M1225 150 L1248 150" fill="none" stroke="#555555" stroke-width="1.5"/>
+<text x="1251" y="154" font-size="11" fill="#C62828" text-anchor="start" font-weight="bold">D11</text>
+<circle cx="1225" cy="172" r="3" fill="#555555"/>
+<text x="1217" y="176" font-size="10.5" fill="#555555" text-anchor="end">AIN1 + BIN1</text>
+<path d="M1225 172 L1248 172" fill="none" stroke="#555555" stroke-width="1.5"/>
+<text x="1251" y="176" font-size="11" fill="#C62828" text-anchor="start" font-weight="bold">D8</text>
+<circle cx="1225" cy="194" r="3" fill="#555555"/>
+<text x="1217" y="198" font-size="10.5" fill="#555555" text-anchor="end">AIN2 + BIN2</text>
+<path d="M1225 194 L1248 194" fill="none" stroke="#555555" stroke-width="1.5"/>
+<text x="1251" y="198" font-size="11" fill="#C62828" text-anchor="start" font-weight="bold">D12</text>
+<circle cx="1225" cy="216" r="3" fill="#555555"/>
+<text x="1217" y="220" font-size="10.5" fill="#555555" text-anchor="end">STBY</text>
+<path d="M1225 216 L1248 216" fill="none" stroke="#555555" stroke-width="1.5"/>
+<text x="1251" y="220" font-size="11" fill="#C62828" text-anchor="start" font-weight="bold">D10</text>
+<circle cx="1225" cy="240" r="3" fill="#6A1B9A"/>
+<text x="1217" y="244" font-size="10.5" fill="#6A1B9A" text-anchor="end">AO1 + BO1</text>
+<circle cx="1225" cy="262" r="3" fill="#6A1B9A"/>
+<text x="1217" y="266" font-size="10.5" fill="#6A1B9A" text-anchor="end">AO2 + BO2</text>
+<circle cx="1050" cy="330" r="3" fill="#333333"/>
+<text x="1058" y="326" font-size="11" fill="#333333" text-anchor="start" font-weight="bold">GND</text>
+<path d="M1050 330 L1050 356" fill="none" stroke="#333333" stroke-width="4"/>
+<rect x="1010" y="356" width="215" height="180" rx="6" fill="#ECECEC" fill-opacity="1.0" stroke="#333333" stroke-width="1"/>
+<text x="1018" y="373" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">STAR (TB6612 GND pin + star strip)</text>
+<text x="1018" y="389" font-size="10.5" fill="#4A4A46" text-anchor="start">every ground lands here on its OWN wire:</text>
+<text x="1018" y="403" font-size="10.5" fill="#4A4A46" text-anchor="start">  W12 pack - (XT30 car half)</text>
+<text x="1018" y="417" font-size="10.5" fill="#4A4A46" text-anchor="start">  W13 LM2596 IN- / OUT-</text>
+<text x="1018" y="431" font-size="10.5" fill="#4A4A46" text-anchor="start">  W15 jumper from the printed GND bus</text>
+<text x="1018" y="445" font-size="10.5" fill="#4A4A46" text-anchor="start">      (the Uno's ground, ONE point)</text>
+<text x="1018" y="459" font-size="10.5" fill="#4A4A46" text-anchor="start">  C1 / C2 -, divider bottom, C3 -</text>
+<text x="1018" y="473" font-size="10.5" fill="#4A4A46" text-anchor="start">  J1 green (encoder GND)</text>
+<text x="1018" y="487" font-size="10.5" fill="#4A4A46" text-anchor="start">  J3 / J4 strip GND (one each)</text>
+<text x="1018" y="501" font-size="10.5" fill="#4A4A46" text-anchor="start">  J2 servo GND</text>
+<text x="1018" y="515" font-size="10.5" fill="#4A4A46" text-anchor="start">  NEVER the 5V bus, NEVER B-</text>
+<rect x="870" y="214" width="120" height="98" rx="6" fill="#F4F4F0" fill-opacity="1.0" stroke="#5F5E5A" stroke-width="1"/>
+<text x="878" y="231" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Divider</text>
+<text x="878" y="247" font-size="10.5" fill="#4A4A46" text-anchor="start">top 100k (from VBAT)</text>
+<text x="878" y="261" font-size="10.5" fill="#4A4A46" text-anchor="start">mid -&gt; A0</text>
+<text x="878" y="275" font-size="10.5" fill="#4A4A46" text-anchor="start">bottom 10k + 2k</text>
+<text x="878" y="289" font-size="10.5" fill="#4A4A46" text-anchor="start">  = 12k -&gt; STAR</text>
+<text x="878" y="303" font-size="10.5" fill="#4A4A46" text-anchor="start"></text>
+<path d="M920 164 L920 214" fill="none" stroke="#C62828" stroke-width="2" stroke-dasharray="7 4"/>
+<rect x="929.1" y="183" width="29.799999999999997" height="15" rx="7" fill="#FFFFFF" fill-opacity="1.0" stroke="#C62828" stroke-width="1"/>
+<text x="944" y="194" font-size="10.5" fill="#C62828" text-anchor="middle" font-weight="bold">W11</text>
+<path d="M990 250 L1002 250" fill="none" stroke="#555555" stroke-width="1.5"/>
+<text x="992" y="244" font-size="11" fill="#C62828" text-anchor="start" font-weight="bold">A0</text>
+<rect x="870" y="336" width="120" height="52" rx="6" fill="#FFF3E0" fill-opacity="1.0" stroke="#E07B00" stroke-width="1"/>
+<text x="878" y="353" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">+5V2 pad</text>
+<text x="878" y="369" font-size="10.5" fill="#4A4A46" text-anchor="start">own strip - NEVER</text>
+<text x="878" y="383" font-size="10.5" fill="#4A4A46" text-anchor="start">the printed 5V bus</text>
+<path d="M850 205 L858 205 L858 362 L870 362" fill="none" stroke="#E07B00" stroke-width="2.2" stroke-dasharray="7 4"/>
+<rect x="843.1" y="289" width="29.799999999999997" height="15" rx="7" fill="#FFFFFF" fill-opacity="1.0" stroke="#E07B00" stroke-width="1"/>
+<text x="858" y="300" font-size="10.5" fill="#E07B00" text-anchor="middle" font-weight="bold">W14</text>
+<rect x="870" y="400" width="120" height="56" rx="6" fill="#FFFFFF" fill-opacity="1.0" stroke="#E07B00" stroke-width="1"/>
+<text x="878" y="417" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">C3 470 uF</text>
+<text x="878" y="433" font-size="10.5" fill="#4A4A46" text-anchor="start">+5V2 to GND</text>
+<text x="878" y="447" font-size="10.5" fill="#4A4A46" text-anchor="start">at the feed; - -&gt; STAR</text>
+<path d="M930 388 L930 400" fill="none" stroke="#E07B00" stroke-width="2"/>
+<rect x="730" y="560" width="150" height="70" rx="6" fill="#FCE4EC" fill-opacity="1.0" stroke="#AD1457" stroke-width="1"/>
+<text x="738" y="577" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Uno 5V bus</text>
+<text x="738" y="593" font-size="10.5" fill="#4A4A46" text-anchor="start">printed 5V strip = Uno 5V</text>
+<text x="738" y="607" font-size="10.5" fill="#4A4A46" text-anchor="start">pin = the Pi's USB 5 V</text>
+<text x="738" y="621" font-size="10.5" fill="#4A4A46" text-anchor="start">feeds: TB6612 VCC, JP1</text>
+<rect x="905" y="548" width="200" height="92" rx="6" fill="#FFFFFF" fill-opacity="1.0" stroke="#AD1457" stroke-width="1"/>
+<text x="913" y="565" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">JP1 servo-power jumper</text>
+<text x="913" y="581" font-size="10.5" fill="#4A4A46" text-anchor="start">3 pins: [Uno 5V] [servo V+] [+5V2]</text>
+<text x="913" y="595" font-size="10.5" fill="#4A4A46" text-anchor="start">cap on the LEFT pair = servo on</text>
+<text x="913" y="609" font-size="10.5" fill="#4A4A46" text-anchor="start">the Uno 5V (Evan, JR - default)</text>
+<text x="913" y="623" font-size="10.5" fill="#4A4A46" text-anchor="start">move it RIGHT = servo on +5V2</text>
+<text x="913" y="637" font-size="10.5" fill="#4A4A46" text-anchor="start">(fallback if serial bytes drop)</text>
+<path d="M880 590 L905 590" fill="none" stroke="#AD1457" stroke-width="2"/>
+<path d="M990 388 L998 388 L998 540 L1095 540 L1095 548" fill="none" stroke="#E07B00" stroke-width="1.6"/>
+<text x="1102" y="545" font-size="9.5" fill="#E07B00" text-anchor="start">+5V2 to JP1 right pin</text>
+<text x="730" y="648" font-size="10" fill="#333333" text-anchor="start" font-weight="bold">W15: ONE jumper, printed GND bus -&gt; STAR (the Uno's ground joins the star at one point)</text>
+<rect x="1290" y="124" width="180" height="150" rx="6" fill="#F3E5F5" fill-opacity="1.0" stroke="#6A1B9A" stroke-width="1"/>
+<text x="1298" y="141" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">J1 motor + encoder (W16)</text>
+<text x="1298" y="157" font-size="10.5" fill="#4A4A46" text-anchor="start">Pololu #4763 6-wire, 300 mm</text>
+<circle cx="1290" cy="168" r="3" fill="#6A1B9A"/>
+<text x="1298" y="172" font-size="10.5" fill="#6A1B9A" text-anchor="start">6 red  M1</text>
+<text x="1466" y="172" font-size="10.5" fill="#6A1B9A" text-anchor="end" font-weight="bold">AO1+BO1</text>
+<circle cx="1290" cy="186" r="3" fill="#6A1B9A"/>
+<text x="1298" y="190" font-size="10.5" fill="#6A1B9A" text-anchor="start">5 black M2</text>
+<text x="1466" y="190" font-size="10.5" fill="#6A1B9A" text-anchor="end" font-weight="bold">AO2+BO2</text>
+<circle cx="1290" cy="204" r="3" fill="#E07B00"/>
+<text x="1298" y="208" font-size="10.5" fill="#E07B00" text-anchor="start">4 blue Vcc</text>
+<text x="1466" y="208" font-size="10.5" fill="#E07B00" text-anchor="end" font-weight="bold">+5V2</text>
+<circle cx="1290" cy="222" r="3" fill="#333333"/>
+<text x="1298" y="226" font-size="10.5" fill="#333333" text-anchor="start">1 green GND</text>
+<text x="1466" y="226" font-size="10.5" fill="#333333" text-anchor="end" font-weight="bold">STAR</text>
+<circle cx="1290" cy="240" r="3" fill="#C62828"/>
+<text x="1298" y="244" font-size="10.5" fill="#C62828" text-anchor="start">3 yellow A</text>
+<text x="1466" y="244" font-size="10.5" fill="#C62828" text-anchor="end" font-weight="bold">D2</text>
+<circle cx="1290" cy="258" r="3" fill="#C62828"/>
+<text x="1298" y="262" font-size="10.5" fill="#C62828" text-anchor="start">2 white B</text>
+<text x="1466" y="262" font-size="10.5" fill="#C62828" text-anchor="end" font-weight="bold">D3</text>
+<path d="M1225 240 L1272 240 L1272 168 L1290 168" fill="none" stroke="#6A1B9A" stroke-width="2"/>
+<path d="M1225 262 L1280 262 L1280 186 L1290 186" fill="none" stroke="#6A1B9A" stroke-width="2"/>
+<rect x="1290" y="290" width="180" height="100" rx="6" fill="#FFFDE7" fill-opacity="1.0" stroke="#B59F00" stroke-width="1"/>
+<text x="1298" y="307" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">J3 / J4 strips (W17)</text>
+<text x="1298" y="323" font-size="10.5" fill="#4A4A46" text-anchor="start">3 pins each (front, rear):</text>
+<text x="1298" y="337" font-size="10.5" fill="#4A4A46" text-anchor="start">  +5V2  &lt;- +5V2 pad</text>
+<text x="1298" y="351" font-size="10.5" fill="#4A4A46" text-anchor="start">  DIN   &lt;- D4 (J3) / D7 (J4)</text>
+<text x="1298" y="365" font-size="10.5" fill="#4A4A46" text-anchor="start">        via 200 + 200 ohm</text>
+<text x="1298" y="379" font-size="10.5" fill="#4A4A46" text-anchor="start">  GND   -&gt; STAR, own wire each</text>
+<path d="M990 352 L1270 352 L1270 320 L1290 320" fill="none" stroke="#E07B00" stroke-width="2"/>
+<rect x="1290" y="404" width="180" height="70" rx="6" fill="#E8F5E9" fill-opacity="1.0" stroke="#3E7D32" stroke-width="1"/>
+<text x="1298" y="421" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">J2 servo (MG90D-270)</text>
+<text x="1298" y="437" font-size="10.5" fill="#4A4A46" text-anchor="start">signal &lt;- D9</text>
+<text x="1298" y="451" font-size="10.5" fill="#4A4A46" text-anchor="start">V+ (red) &lt;- JP1 middle</text>
+<text x="1298" y="465" font-size="10.5" fill="#4A4A46" text-anchor="start">GND -&gt; STAR</text>
+<path d="M1105 604 L1260 604 L1260 440 L1290 440" fill="none" stroke="#AD1457" stroke-width="2"/>
+<text x="1114" y="598" font-size="9.5" fill="#AD1457" text-anchor="start">JP1 middle -&gt; servo V+</text>
+<rect x="1290" y="488" width="180" height="70" rx="6" fill="#FDE8E8" fill-opacity="1.0" stroke="#C62828" stroke-width="1"/>
+<text x="1298" y="505" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">J5 power in</text>
+<text x="1298" y="521" font-size="10.5" fill="#4A4A46" text-anchor="start">VBAT (W9) -&gt; VBAT pad</text>
+<text x="1298" y="535" font-size="10.5" fill="#4A4A46" text-anchor="start">W12 + W13 -&gt; STAR</text>
+<text x="1298" y="549" font-size="10.5" fill="#4A4A46" text-anchor="start">+5V2 (W14) -&gt; +5V2 pad</text>
+<text x="24" y="790" font-size="14" fill="#2C2C2A" text-anchor="start" font-weight="bold">METER CHECKS - Uno OFF the shield, nothing plugged in, continuity (beep) mode</text>
+<text x="24" y="816" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">#</text>
+<text x="50" y="816" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Probe between</text>
+<text x="420" y="816" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Expect</text>
+<text x="560" y="816" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">Why</text>
+<text x="24" y="840" font-size="11.5" fill="#2C2C2A" text-anchor="start">1</text>
+<text x="50" y="840" font-size="11.5" fill="#2C2C2A" text-anchor="start">printed 5V bus  &lt;-&gt;  the header's 5V pin</text>
+<text x="420" y="840" font-size="11.5" fill="#0F6E56" text-anchor="start" font-weight="bold">BEEP</text>
+<text x="560" y="840" font-size="11.5" fill="#2C2C2A" text-anchor="start">proves the 5V bus IS the Uno's 5V (Pi USB) - so nothing from the pack may touch it</text>
+<text x="24" y="864" font-size="11.5" fill="#2C2C2A" text-anchor="start">2</text>
+<text x="50" y="864" font-size="11.5" fill="#2C2C2A" text-anchor="start">+5V2 pad  &lt;-&gt;  printed 5V bus</text>
+<text x="420" y="864" font-size="11.5" fill="#B00020" text-anchor="start" font-weight="bold">NO beep</text>
+<text x="560" y="864" font-size="11.5" fill="#2C2C2A" text-anchor="start">if it beeps, the LM2596 and the Pi's USB 5 V would fight on the Uno 5V pin - find the bridge first</text>
+<text x="24" y="888" font-size="11.5" fill="#2C2C2A" text-anchor="start">3</text>
+<text x="50" y="888" font-size="11.5" fill="#2C2C2A" text-anchor="start">VBAT pad  &lt;-&gt;  STAR, and VBAT pad  &lt;-&gt;  5V bus</text>
+<text x="420" y="888" font-size="11.5" fill="#B00020" text-anchor="start" font-weight="bold">NO beep</text>
+<text x="560" y="888" font-size="11.5" fill="#2C2C2A" text-anchor="start">a beep is a short across the pack or onto the Uno</text>
+<text x="24" y="912" font-size="11.5" fill="#2C2C2A" text-anchor="start">4</text>
+<text x="50" y="912" font-size="11.5" fill="#2C2C2A" text-anchor="start">header Vin pin  &lt;-&gt;  anything</text>
+<text x="420" y="912" font-size="11.5" fill="#B00020" text-anchor="start" font-weight="bold">NO beep</text>
+<text x="560" y="912" font-size="11.5" fill="#2C2C2A" text-anchor="start">Vin stays empty - VBAT on Vin would run the Uno's regulator off the pack</text>
+<text x="24" y="936" font-size="11.5" fill="#2C2C2A" text-anchor="start">5</text>
+<text x="50" y="936" font-size="11.5" fill="#2C2C2A" text-anchor="start">STAR  &lt;-&gt;  printed GND bus (after W15)</text>
+<text x="420" y="936" font-size="11.5" fill="#0F6E56" text-anchor="start" font-weight="bold">BEEP</text>
+<text x="560" y="936" font-size="11.5" fill="#2C2C2A" text-anchor="start">the Uno's ground joins the star at ONE point</text>
+<text x="24" y="960" font-size="11.5" fill="#2C2C2A" text-anchor="start">6</text>
+<text x="50" y="960" font-size="11.5" fill="#2C2C2A" text-anchor="start">TB6612 VM  &lt;-&gt;  STAR</text>
+<text x="420" y="960" font-size="11.5" fill="#B00020" text-anchor="start" font-weight="bold">NO beep (slow rise ok)</text>
+<text x="560" y="960" font-size="11.5" fill="#2C2C2A" text-anchor="start">C1 charging can chirp briefly; a steady beep is a short</text>
+<text x="24" y="1000" font-size="14" fill="#2C2C2A" text-anchor="start" font-weight="bold">PARTS ON THE SHIELD</text>
+<text x="36" y="1020" font-size="11.5" fill="#2C2C2A" text-anchor="start">- TB6612FNG carrier, Pololu #713, on 0.1 in headers (not flying leads)</text>
+<text x="36" y="1040" font-size="11.5" fill="#2C2C2A" text-anchor="start">- C1 470-1000 uF electrolytic (mind + / -) and C2 0.1 uF ceramic, VM to GND, right at the carrier</text>
+<text x="36" y="1060" font-size="11.5" fill="#2C2C2A" text-anchor="start">- C3 470 uF across +5V2 / GND at the strip feed point</text>
+<text x="36" y="1080" font-size="11.5" fill="#2C2C2A" text-anchor="start">- R1-R4: 4 x 200 ohm - two in series in each strip's DIN line (400 ohm each)</text>
+<text x="36" y="1100" font-size="11.5" fill="#2C2C2A" text-anchor="start">- Divider: 100k (top), 10k + 2k in series (bottom = 12k) - NOT 10k alone</text>
+<text x="36" y="1120" font-size="11.5" fill="#2C2C2A" text-anchor="start">- J1 6-pin (motor + encoder), J2 3-pin (servo), JP1 3-pin + jumper cap, J3 / J4 3-pin (strips), J5 4-pin (power in): screw terminals or JST</text>
+<text x="36" y="1140" font-size="11.5" fill="#2C2C2A" text-anchor="start">- OFF the shield: the LM2596 and the rocker (deck -y wing), the 0.1 uF across the motor (at the motor)</text>
+</svg>

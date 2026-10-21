@@ -91,3 +91,8 @@ level outward; Evan confirmed the frames under them are level.
 **What:** LM2596 x 10..76, rocker at (100, -64) over the XT30 / charger, Pi USB-C plug zone on the -y side at the wing's front end; Pi bracket legs removed at the USB/LAN end and at the USB-C side corner; fuse holder x 30 and the bank USB-C cable below the bank top so the charge LEDs stay readable from the side.
 **Why:** ports 4 mm from the case sides and a side-facing USB-C (Evan) collided with the brackets / LM2596; Evan prefers reading the LEDs from the side over a deck window (window weakens the plate near the rear posts and the USB cable crosses it).
 **Source:** record JW.
+## 2026-10-20 - proto shield build choices (Evan + Claude)
+**What:** star ground = the shield's printed bottom GND rail B (Evan; W15 dropped); Uno connections = Dupont male pins in the shield's own sockets (Evan); off-board cables = 0.1 in male headers (Evan); the strips' 470 uF moves from the shield to each strip's input pads (Claude); the 2 x 200 ohm DIN resistors ride in series inside the D4 / D7 wires (Claude); TB6612 A/B bridges and C1/C2 go on the carrier's pin tips (Claude - each strip has only one free hole).
+**Why:** fewer wires and holes on a crowded 0.1 in grid; the rail-B star differs from a true star by milliohms; the WS2812B cap belongs at the strip input.
+**Cost:** sockets can vibrate loose (Evan accepted); 31 solder-bridge hazard pairs to meter silent.
+**Source:** records KF, KG.
