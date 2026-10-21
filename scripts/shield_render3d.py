@@ -168,20 +168,25 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
         zw = top + 0.2 + d / 2
         col = data["net_colors"].get(next((n for n, m in data["nets"].items() if f"TB.{a}" in m), ""), "#555555")
         s += poly([(xa, ya, top), (xa, ya + inward * reach, zw), (xb, yb + inward * reach, zw), (xb, yb, top)], d, col)
-    # C1 lying flat on the carrier at the VMOT / GND2 end, C2 across the same tips (step 1)
+    # C1 standing upright on the VMOT / GND2 pin tips (Evan 2026-10-21; was lying flat),
+    # (-) stripe toward the GND tip; C2 across the same tips, bent out past the
+    # carrier's bottom edge, low, under the can's overhang (step 1)
     vx, vy = g.xy(tb["pins"]["VMOT"])
     gx, gy = g.xy(tb["pins"]["GND2"])
     mx = (vx + gx) / 2
     dia, ln = CAP_C1
-    can_z = top + 1.8 + dia / 2                # resting on the pin tips and bridge wires
-    s.append(f'color("#202a6a") translate([{f(mx)},{f(vy + 3.0)},{f(can_z)}]) rotate([-90,0,0]) cylinder(h={f(ln)}, d={f(dia)}, $fn=40);')
-    s.append(f'color("#d0d0d0") translate([{f(mx)},{f(vy + 3.0)},{f(can_z)}]) rotate([-90,0,0]) '
-             f'intersection() {{ cylinder(h={f(ln)}, d={f(dia + 0.1)}, $fn=40); translate([{f(dia / 2 - 1.6)},-5,0]) cube([3,10,{f(ln)}]); }}')  # (-) stripe, GND side
-    s += poly([(vx, vy, top), (vx, vy, can_z), (vx, vy + 3.0, can_z)], 0.6, C_SOLDER)
-    s += poly([(gx, gy, top), (gx, gy, can_z), (gx, gy + 3.0, can_z)], 0.6, C_SOLDER)
-    s.append(f'color("#e0b040") translate([{f(mx)},{f(vy - 3.2)},{f(top + 3.0)}]) rotate([90,0,0]) cylinder(h=2.0, d=4.5, $fn=24);')
-    s += poly([(vx, vy, top), (vx, vy - 2.2, top + 2.0)], 0.5, C_SOLDER)
-    s += poly([(gx, gy, top), (gx, gy - 2.2, top + 2.0)], 0.5, C_SOLDER)
+    base = top + 1.0                           # can bottom, on short leads above the tips
+    s.append(f'color("#202a6a") translate([{f(mx)},{f(vy)},{f(base)}]) cylinder(h={f(ln)}, d={f(dia)}, $fn=40);')
+    s.append(f'color("#d0d0d0") translate([{f(mx)},{f(vy)},{f(base)}]) '
+             f'intersection() {{ cylinder(h={f(ln)}, d={f(dia + 0.1)}, $fn=40); '
+             f'translate([{f(dia / 2 - 1.6)},-5,0]) cube([3,10,{f(ln)}]); }}')  # (-) stripe, GND side (+x)
+    s.append(f'color("#9aa0b0") translate([{f(mx)},{f(vy)},{f(base + ln - 0.05)}]) cylinder(h=0.1, d={f(dia - 1.0)}, $fn=40);')
+    s += poly([(vx, vy, top), (mx - 1.75, vy, base)], 0.6, C_SOLDER)
+    s += poly([(gx, gy, top), (mx + 1.75, gy, base)], 0.6, C_SOLDER)
+    c2y = vy - dia / 2 - 1.8                   # just past the can's edge, -y side
+    s.append(f'color("#e0b040") translate([{f(mx)},{f(c2y)},{f(top + 2.6)}]) rotate([90,0,0]) cylinder(h=2.0, d=4.5, $fn=24);')
+    s += poly([(vx, vy, top), (vx, vy, top + 0.3), (vx, c2y, top + 0.3), (mx - 1.0, c2y, top + 1.5)], 0.5, C_SOLDER)
+    s += poly([(gx, gy, top), (gx, gy, top + 0.3), (gx, c2y, top + 0.3), (mx + 1.0, c2y, top + 1.5)], 0.5, C_SOLDER)
 
     # ---- pin headers (step 4)
     for pid, p in parts.items():
@@ -246,7 +251,7 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
         x, y = g.xy(so["hole"])
         used.add(so["hole"])
         analog = so["uno"].startswith("A")
-        zl = 14.0 if analog else 7.0               # A0 crosses the divider and C1
+        zl = 21.0 if analog else 7.0               # A0 crosses the divider and over the upright C1 (top ~18.8)
         ye = (by0 - 1.0) if analog else (by1 + 1.0)
         sg = -1.0 if analog else 1.0
         s += poly([(x, y, 0), (x, y, zl), (x, ye, zl)], 1.5, "#8e44ad" if analog else "#e67e22")
@@ -293,10 +298,10 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
         part_boxes.append(bxp)
         ghosts.append(frame(*bxp, C_GHOST))
         targets.append((pid, (c0 + c1) / 2 * P, -(r0 + r1) / 2 * P, C_GHOST, bxp))
-    c1box = (mx - dia / 2, vy + 3.0, mx + dia / 2, vy + 3.0 + ln)       # C1, lying flat on the carrier
+    c1box = (mx - dia / 2, vy - dia / 2, mx + dia / 2, vy + dia / 2)    # C1, standing on the carrier
     part_boxes.append(c1box)
     ghosts.append(frame(*c1box, C_GHOST))
-    targets.append(("C1", mx, vy + 3.0 + ln / 2, C_GHOST, c1box))
+    targets.append(("C1", mx, vy, C_GHOST, c1box))
     wire_legs = []
     for w in data.get("wires", []):
         route = [w["from"]] + list(w.get("via", [])) + [w["to"]]

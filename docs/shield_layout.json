@@ -941,7 +941,7 @@
     "Solder the two 8-pin headers to the carrier: SHORT ends up through the carrier, LONG ends down.",
     "Mark PWMA (label side) with a dot.",
     "On the carrier's top, solder insulated wire bridges between the pin tips: PWMA-PWMB, AIN2-BIN2, AIN1-BIN1 (any thin wire), AO1-BO1 and AO2-BO2 (22 AWG).",
-    "Solder C1 (470 uF): + lead to the VMOT tip, stripe (-) lead to the GND tip next to it (bottom row, right end); lay the can flat on the carrier.",
+    "Solder C1 (470 uF): + lead to the VMOT tip, stripe (-) lead to the GND tip next to it (bottom row, right end); stand the can UPRIGHT on the two tips, leads short (Evan 2026-10-21; was: lay it flat). Bend C2's leads out past the carrier's bottom edge, low, so C2 sits beside the can, not under it.",
     "Solder C2 (0.1 uF) across the same VMOT and GND tips."
    ],
    "check": "meter: PWMA-PWMB, AIN1-BIN1, AIN2-BIN2, AO1-BO1, AO2-BO2 each BEEP; VMOT-GND does NOT beep (C1 may chirp once)"

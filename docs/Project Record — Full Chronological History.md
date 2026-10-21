@@ -337,6 +337,7 @@ the dated entry, not the digest.
 - [KN - Shield renders: labelled top view, holes drawn on both faces](#appendix-kn---shield-renders-labelled-top-view-holes-drawn-on-both-faces-2026-10-21-1828-cdt) (10-21)
 - [KO - Shield renders: 3/4 isometric-style view added](#appendix-ko---shield-renders-34-isometric-style-view-added-2026-10-21-1835-cdt) (10-21)
 - [KP - Shield renders: unlabelled top and bottom views added](#appendix-kp---shield-renders-unlabelled-top-and-bottom-views-added-2026-10-21-1836-cdt) (10-21)
+- [KQ - C1 stands upright (build step 1 changed, render updated)](#appendix-kq---c1-stands-upright-build-step-1-changed-render-updated-2026-10-21-1841-cdt) (10-21)
 
 ---
 
@@ -20708,3 +20709,14 @@ Checks (2026-10-21 ~18:35 CDT): render PASS; holemap all checks passed + self-ch
 **Change:** `scripts/shield_render3d.py` now writes 5 views: `shield_3d_top_plain.png` (same straight-down camera as the labelled top view, the bare top-side model) and `shield_3d_bottom_plain.png` (same straight-up camera as the labelled underside, board + copper + joints + bridges only, no outlines or labels). `scripts/shield_holemap.py` embeds all five in order - top labelled, top plain, 3/4 view, bottom labelled, bottom plain - and links them from SHIELD_BUILD.md; caption numbered (1)-(5). `docs/shield_holemap.svg` grows to 460834 bytes (5 base64 PNGs).
 
 Checks (2026-10-21 ~18:36 CDT): render PASS; holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed.
+
+# Appendix KQ - C1 stands upright (build step 1 changed, render updated) (2026-10-21, ~18:41 CDT)
+**Ask (Evan):** have the big cap (C1, 470 uF 25 V, 8 x 12.5 mm) point straight up in the render.
+
+**This is a BUILD change, not only a picture change** - SHIELD_BUILD step 1 said "lay the can flat on the carrier". Now `docs/shield_layout.json` step 1 reads: stand the can UPRIGHT on the two tips (VMOT / GND2), leads short (Evan 2026-10-21; was: lay it flat); bend C2's leads out past the carrier's bottom edge, low, so C2 sits beside the can, not under it. SHIELD_BUILD.md regenerated from it.
+
+**Render (`scripts/shield_render3d.py`):** C1 stands on short leads 1 mm above the tips, centred between VMOT and GND2, (-) stripe toward GND, top at ~18.8 mm above the shield; C2 moved to just past the can's -y edge with low leads. The upright can sat in the path of the A0 Dupont lead (drawn straight along column 9 at 14 mm), so that lead is now drawn at 21 mm. C1's footprint for the ghost outline / label keep-out is now the 8 mm circle's box.
+
+**Unchecked:** headroom above the shield - no ceiling is modelled over the Uno in the layout checker, so ~18.8 mm above the shield board (plus the shield's own height on the Uno) is NOT verified against the deck / camera mast. Overhang: the can extends ~2.9 mm past the carrier's bottom edge, over row L3 (above w1's hop, which tops out at 2.4 mm).
+
+Checks (2026-10-21 ~18:40 CDT): render PASS; holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed.
