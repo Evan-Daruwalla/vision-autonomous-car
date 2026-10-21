@@ -592,7 +592,8 @@ Read, in order:
 2. PRD_ROADMAP.md (tasks 5-10 carry dated notes)
 3. Before ANY wiring: docs/WIRING_PROTOSHIELD.md (section 2 nets, section 5
    build order), docs/pack_wiring_full.svg (W1-W17 + cut list),
-   docs/SHIELD_BUILD.md + docs/shield_holemap.svg (hole-by-hole shield).
+   docs/SHIELD_BUILD.md + docs/shield_holemap.svg (hole-by-hole shield);
+   at the bench, docs/SHIELD_SOLDER_GUIDE.md (step-by-step, with checks).
    Before ANY tray/deck/mast work: docs/ELECTRONICS_LAYOUT.md.
 4. .claude/project-memory/INDEX.md, then ONLY the bins your task touches
    (steering.md for servo work; hardware.md + decisions.md for printed

@@ -338,6 +338,7 @@ the dated entry, not the digest.
 - [KO - Shield renders: 3/4 isometric-style view added](#appendix-ko---shield-renders-34-isometric-style-view-added-2026-10-21-1835-cdt) (10-21)
 - [KP - Shield renders: unlabelled top and bottom views added](#appendix-kp---shield-renders-unlabelled-top-and-bottom-views-added-2026-10-21-1836-cdt) (10-21)
 - [KQ - C1 stands upright (build step 1 changed, render updated)](#appendix-kq---c1-stands-upright-build-step-1-changed-render-updated-2026-10-21-1841-cdt) (10-21)
+- [KR - Proto shield step-by-step soldering guide](#appendix-kr---proto-shield-step-by-step-soldering-guide-2026-10-21-1853-cdt) (10-21)
 
 ---
 
@@ -20720,3 +20721,10 @@ Checks (2026-10-21 ~18:36 CDT): render PASS; holemap all checks passed + self-ch
 **Unchecked:** headroom above the shield - no ceiling is modelled over the Uno in the layout checker, so ~18.8 mm above the shield board (plus the shield's own height on the Uno) is NOT verified against the deck / camera mast. Overhang: the can extends ~2.9 mm past the carrier's bottom edge, over row L3 (above w1's hop, which tops out at 2.4 mm).
 
 Checks (2026-10-21 ~18:40 CDT): render PASS; holemap all checks passed + self-check PASS; `svg_text_overlap.py` 0 overlaps x 3; `run_checks.py` 19 passed.
+
+# Appendix KR - Proto shield step-by-step soldering guide (2026-10-21, ~18:53 CDT)
+**Ask (Evan):** create a step-by-step guide for soldering the proto shield.
+
+**Made:** `docs/SHIELD_SOLDER_GUIDE.md` - a bench guide that follows the 9 build steps of `docs/shield_layout.json` (0 meter checks, 1 carrier off-board, 2 carrier onto the shield, 3 underside bridges, 4 headers, 5 divider, 6 top-side wires, 7 Dupont wires, 8 before first power-up) and adds tools, typical iron temperatures (labelled as typical, solder type not recorded), joint technique, the board's rules (one lead per hole; red-x danger pairs; bridges on the underside - flip top-over-bottom, never left-right; meter unpowered; STOP on a failed check), per-step checkboxes, the bare-wire-offcut bridge method, the C2-across-C1's-legs alternative Evan asked about, and each step's own meter check. A photo checkpoint after step 2. HANDOFF's read list points to it.
+
+**Verified (scratch script, 2026-10-21 ~18:53 CDT):** for each of the 9 steps the set of hole names in the guide equals the set in the layout file's step text + check (step 6 additionally names the 3 wire 'via' corners, expected); every hole name in the guide exists on the grid; 0 non-ASCII characters. The guide is hand-written, so it can drift if the layout changes - the layout file wins (stated at the top of the guide). Nothing in it is tested on the real board yet.
