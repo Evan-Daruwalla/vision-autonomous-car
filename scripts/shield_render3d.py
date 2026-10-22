@@ -37,6 +37,7 @@ LABEL_MM = 1.8      # text height of the part labels in the bottom view
 OFF_BOARD = 9.0     # mm a label may sit beyond the board edge
 Z_LABEL_TOP = 40.0  # top-view labels float above every part (orthographic, so height does not show)
 C_GHOST, C_GHOST_WIRE = "#9fe8ff", "#ffb0f0"   # bottom view: top-side part / wire outlines
+RAIL_GND, RAIL_5V = "#111111", "#e53935"         # build-guide rail markers
 
 # Carrier-top bridges (step 1), drawn as flat nested U's lying on the carrier:
 # (pin a, pin b) -> (how far the U reaches in from the pin row, mm; wire dia, mm).
@@ -342,8 +343,28 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
     top = s + labels_top
     plain_bottom = s[:i_top] + s[i_bot:]
     assert len(tags) == len(s), (len(tags), len(s))
+    # build-guide rail markers: a coloured band along each GND / 5V rail (top face, under the
+    # drill dots so the holes stay visible; on the underside view, over the copper), run out
+    # to the board's right edge, with the rail's name just past the edge
+    rails_top, rails_bottom = [], []
+    for grp in data["grid"].get("copper", []):
+        name = grp.get("name", "")
+        hs = [h for h in grp["holes"] if h in holes]
+        rows = {g.rc(h)[0] for h in hs}
+        if "rail" not in name or len(rows) != 1:      # skips the strips and the G-B join note
+            continue
+        gnd = "GND" in name
+        col = RAIL_GND if gnd else RAIL_5V
+        row = g.rows[rows.pop()]
+        text = f"{row} " + ("GND star" if "STAR" in name else "GND" if gnd else "5V")
+        xs = [g.xy(h)[0] for h in hs]
+        y = g.xy(hs[0])[1]
+        for z, out, mirror in ((0.0, rails_top, ""), (-BOARD_T - 0.08, rails_bottom, "mirror([0,1,0]) mirror([0,0,1]) ")):
+            out.append(box(min(xs) - 1.0, y - 0.7, z, bx1, y + 0.7, z + 0.03, col))
+            out.append(f'color("{col}") translate([{f(bx1 + 1.5)},{f(y)},{f(z)}]) {mirror}linear_extrude(0.05) '
+                       f'text("{text}", size=1.8, font="Liberation Sans:style=Bold", valign="center");')
     steps_info = {"items": list(s), "tags": tags, "probes": (g.xy("U1/1"), g.xy("U3/1")),
-                  "carrier_centre": (cx, cy, 4.0)}
+                  "carrier_centre": (cx, cy, 4.0), "rails_top": rails_top, "rails_bottom": rails_bottom}
     return ("\n".join(top) + "\n", "\n".join(bottom) + "\n", "\n".join(s) + "\n",
             "\n".join(plain_bottom) + "\n", steps_info), errs, ((bx0 + bx1) / 2, (by0 + by1) / 2, 4.0)
 
@@ -435,6 +456,8 @@ def step_model(info: dict, k: int) -> str:
     else:
         new = (1, 2) if k == 2 else (k,)    # step 2 places the step-1 carrier: show it in colour
         out = [it if t == 0 or t in new else _grey(it) for it, t in zip(items, tags) if t <= k]
+    if k != 1:                               # step 1 is the carrier alone, no board
+        out += info["rails_bottom"] if k == 3 else info["rails_top"]
     return "\n".join(out) + "\n"
 
 
@@ -485,9 +508,9 @@ def main(argv=None) -> int:
                 if k == 1:
                     cen, rot, dist, proj = steps_info["carrier_centre"], (55, 0, 25), 75.0, "p"
                 elif k == 3:
-                    cen, rot, dist, proj = centre, (180, 0, 0), 150.0, "o"
+                    cen, rot, dist, proj = centre, (180, 0, 0), 165.0, "o"   # wider: rail names past the edge
                 else:
-                    cen, rot, dist, proj = centre, (55, 0, 25), 185.0, "p"
+                    cen, rot, dist, proj = centre, (55, 0, 25), 200.0, "p"
                 scad = Path(td) / f"step_{k}.scad"
                 scad.write_text(step_model(steps_info, k), encoding="ascii")
                 png = gdir / f"step_{k}.png"

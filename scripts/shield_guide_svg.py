@@ -175,7 +175,9 @@ def build(pngdir: Path) -> tuple[str, list[tuple[str, float, float]]]:
     o.text(MARGIN, 20 + 24, "Proto shield v.5 - build guide", 24, PAGE_W - 2 * MARGIN)
     intro = ("One panel per step. New parts in each picture are in colour; parts from earlier "
              "steps are grey. Hole = ROW/COL, as on docs/shield_holemap.svg. Pictures are "
-             "renders of the INTENDED build, not photos.")
+             "renders of the INTENDED build, not photos. Rails: BLACK band = GND (G, and B = the "
+             "ground star), RED band = 5V (V and T = the Uno's 5V, from the Pi's USB); the bands "
+             "are drawn on to show the rails - the real board's rail copper is on the underside.")
     y = 20 + 24 + 22
     for ln in wrap(intro, PAGE_W - 2 * MARGIN, 12):
         o.text(MARGIN, y, ln, 12, PAGE_W - 2 * MARGIN)

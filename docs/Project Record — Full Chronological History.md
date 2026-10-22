@@ -340,6 +340,7 @@ the dated entry, not the digest.
 - [KQ - C1 stands upright (build step 1 changed, render updated)](#appendix-kq---c1-stands-upright-build-step-1-changed-render-updated-2026-10-21-1841-cdt) (10-21)
 - [KR - Proto shield step-by-step soldering guide](#appendix-kr---proto-shield-step-by-step-soldering-guide-2026-10-21-1853-cdt) (10-21)
 - [KS - LEGO-style picture build guide for the proto shield](#appendix-ks---lego-style-picture-build-guide-for-the-proto-shield-2026-10-21-1901-cdt) (10-21)
+- [KT - Build guide: GND and 5V rails shown](#appendix-kt---build-guide-gnd-and-5v-rails-shown-2026-10-21-2005-cdt) (10-21)
 
 ---
 
@@ -20740,3 +20741,10 @@ Checks (2026-10-21 ~18:40 CDT): render PASS; holemap all checks passed + self-ch
 - `svg_text_overlap.py` also gates the guide SVG. SHIELD_SOLDER_GUIDE.md and HANDOFF point to it; testing bin updated.
 
 Checks (2026-10-21 ~19:01 CDT): `svg_text_overlap.py` 4 x PASS 0 overlaps; `run_checks.py` 20 passed, 0 failed, 0 skipped; all 9 panels viewed in a headless-Chrome screenshot. Renders show the INTENDED build, untested against a real board.
+
+# Appendix KT - Build guide: GND and 5V rails shown (2026-10-21, ~20:05 CDT)
+**Ask (Evan):** push (done, `7e81a30..c58de80`), and have the GND and 5V rails show up on the build guide.
+
+**Change:** `scripts/shield_render3d.py --steps` draws a band along each rail found in the layout file's copper groups whose name says 'rail' (one row each): BLACK for GND (G; B = the ground star), RED for 5V (V; T - both the Uno's 5V). On top-side step views the band sits on the board face UNDER the drill dots (holes stay visible); on the underside view (step 3) it sits over the rail copper. Each band runs to the board's right edge and carries its name just past it ('T 5V', 'G GND', 'V 5V', 'B GND star', 1.8 mm). Step-view cameras pulled back (3/4: 185 -> 200; underside: 150 -> 165) so the names are not cut off. `scripts/shield_guide_svg.py` header explains the colours and says the bands are drawn on - the real rail copper is on the underside. The 5 standard views are byte-identical (sha256 -c: 5 OK).
+
+Checks (2026-10-21 ~20:05 CDT): `svg_text_overlap.py` 4 x 0 overlaps; `run_checks.py` 20 passed; steps 0, 3, 6 and the header viewed. On the 3/4 view the 'G GND' and 'V 5V' names sit close (adjacent rows, 2.54 mm) but do not overlap.
