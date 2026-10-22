@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -101,7 +102,7 @@ def cyl(x, y, z, h, d, col, fn=24) -> str:
     return f'color("{col}") translate([{f(x)},{f(y)},{f(z)}]) cylinder(h={f(h)}, d={f(d)}, $fn={fn});'
 
 
-def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
+def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]]:
     g = Geo(data)
     errs: list[str] = []
     holes = all_holes(data, g)
@@ -109,6 +110,11 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
     ys = [g.xy(h)[1] for h in holes]
     bx0, bx1, by0, by1 = min(xs) - MARGIN, max(xs) + MARGIN, min(ys) - MARGIN, max(ys) + MARGIN
     s: list[str] = []
+    tags: list[int] = []     # build step of each entry of s (--steps mode)
+    hole_step: dict[str, int] = {}
+
+    def mark(n: int) -> None:
+        tags.extend([n] * (len(s) - len(tags)))
 
     # board with drilled holes
     drills = " ".join(f"translate([{f(g.xy(h)[0])},{f(g.xy(h)[1])},-1]) cylinder(h={f(BOARD_T + 2)}, d=1.0, $fn=10);"
@@ -135,6 +141,7 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
                     s.append(box(xa - (0 if ra == rb else 0.9), ya - (0.9 if ra == rb else 0), -BOARD_T - 0.05,
                                  xb + (0 if ra == rb else 0.9), yb + (0.9 if ra == rb else 0), -BOARD_T, C_COPPER))
 
+    mark(0)
     i_top = len(s)      # s[i_top:i_bot] = everything on the TOP side (ghosted in the bottom view)
     used: set[str] = set()
     parts = {p["id"]: p for p in data["parts"]}
@@ -147,6 +154,7 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
     for pn, h in tb["pins"].items():
         x, y = g.xy(h)
         used.add(h)
+        hole_step[h] = 2
         s.append(box(x - 1.27, y - 1.27, 0, x + 1.27, y + 1.27, zc, C_PLASTIC))
         s.append(box(x - 0.32, y - 0.32, -BOARD_T - 1.5, x + 0.32, y + 0.32, zc + 1.6 + 1.2, C_PIN))
         s.append(cyl(x, y, zc + 1.6, 0.6, 1.6, C_SOLDER, 12))
@@ -188,6 +196,7 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
     s += poly([(vx, vy, top), (vx, vy, top + 0.3), (vx, c2y, top + 0.3), (mx - 1.0, c2y, top + 1.5)], 0.5, C_SOLDER)
     s += poly([(gx, gy, top), (gx, gy, top + 0.3), (gx, c2y, top + 0.3), (mx + 1.0, c2y, top + 1.5)], 0.5, C_SOLDER)
 
+    mark(1)
     # ---- pin headers (step 4)
     for pid, p in parts.items():
         if not pid.startswith("J"):
@@ -195,13 +204,17 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
         for pn, h in p["pins"].items():
             x, y = g.xy(h)
             used.add(h)
+            hole_step[h] = 4
             s.append(box(x - 1.27, y - 1.27, 0, x + 1.27, y + 1.27, 2.5, C_PLASTIC))
             if pn == "KEY":          # J5: the 2nd pin is pulled out as a polarity key
                 continue
             s.append(box(x - 0.32, y - 0.32, -BOARD_T - 1.5, x + 0.32, y + 0.32, 8.5, C_PIN))
         if pid == "JP1":            # jumper cap over two pins
+            mark(4)
             (xa, ya), (xb, yb) = g.xy(p["pins"][JP1_CAP[0]]), g.xy(p["pins"][JP1_CAP[1]])
             s.append(box(min(xa, xb) - 1.25, min(ya, yb) - 1.25, 3.0, max(xa, xb) + 1.25, max(ya, yb) + 1.25, 9.0, "#1565c0"))
+            mark(8)
+        mark(4)
 
     # ---- divider (step 5)
     def resistor_flat(a, b, col):
@@ -225,6 +238,8 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
     s += resistor_standing(parts["R2k"]["pins"]["b"], parts["R2k"]["pins"]["a"], "#7fb0d8")
     for pid in ("R100k", "R10k", "R2k"):
         used |= set(parts[pid]["pins"].values())
+        hole_step.update({h: 5 for h in parts[pid]["pins"].values()})
+    mark(5)
 
     # ---- top-side jumper wires (step 6)
     for w in data.get("wires", []):
@@ -241,6 +256,8 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
             pts = [(xa, ya, 0), (xa, ya, 2.4), (xb, yb, 2.4), (xb, yb, 0)]
         s += poly(pts, 1.5, col)
         used |= {route[0], route[-1]}
+        hole_step[route[0]] = hole_step[route[-1]] = 6
+    mark(6)
 
     # ---- Dupont leads to the Uno sockets (step 7): up, then off the board edge on
     # the side of the Uno header they plug into (digital = top edge, analog =
@@ -250,6 +267,7 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
     for so in data.get("sockets", []):
         x, y = g.xy(so["hole"])
         used.add(so["hole"])
+        hole_step[so["hole"]] = 7
         analog = so["uno"].startswith("A")
         zl = 21.0 if analog else 7.0               # A0 crosses the divider and over the upright C1 (top ~18.8)
         ye = (by0 - 1.0) if analog else (by1 + 1.0)
@@ -263,17 +281,20 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
         housing_boxes.append((x - 1.27, min(ye, ye + sg * 20.0), x + 1.27, max(ye, ye + sg * 20.0)))
         s.append(box(x - 0.32, ye + sg * 14.0, zl - 0.32, x + 0.32, ye + sg * 20.0, zl + 0.32, C_PIN))
 
+    mark(7)
     i_bot = len(s)
     # ---- bottom: solder joints on every used hole + the solder bridges (step 3)
     for h in sorted(used):
         x, y = g.xy(h)
         s.append(f'color("{C_SOLDER}") translate([{f(x)},{f(y)},{f(-BOARD_T)}]) scale([1,1,0.6]) sphere(d=1.9, $fn=14);')
+        mark(hole_step[h])
     for a, b in data.get("bridges", []):
         if a not in holes or b not in holes:
             errs.append(f"bridge {a}-{b} uses a hole not in the grid")
             continue
         (xa, ya), (xb, yb) = g.xy(a), g.xy(b)
         s.append(seg((xa, ya, -BOARD_T - 0.4), (xb, yb, -BOARD_T - 0.4), 1.4, C_SOLDER))
+        mark(3)
 
     # ---- bottom view: the top-side parts as ghost OUTLINES (their footprints,
     # drawn on the underside) with labels placed off every joint, bridge and label
@@ -320,8 +341,11 @@ def build_scad(data: dict) -> tuple[str, list[str], tuple[float, float, float]]:
     bottom = s[:i_top] + s[i_bot:] + ghosts + labels_bottom
     top = s + labels_top
     plain_bottom = s[:i_top] + s[i_bot:]
+    assert len(tags) == len(s), (len(tags), len(s))
+    steps_info = {"items": list(s), "tags": tags, "probes": (g.xy("U1/1"), g.xy("U3/1")),
+                  "carrier_centre": (cx, cy, 4.0)}
     return ("\n".join(top) + "\n", "\n".join(bottom) + "\n", "\n".join(s) + "\n",
-            "\n".join(plain_bottom) + "\n"), errs, ((bx0 + bx1) / 2, (by0 + by1) / 2, 4.0)
+            "\n".join(plain_bottom) + "\n", steps_info), errs, ((bx0 + bx1) / 2, (by0 + by1) / 2, 4.0)
 
 
 def _place_labels(view, targets, circles, segs, keep_out, bounds, z, flat, errs) -> list[str]:
@@ -391,6 +415,42 @@ def _box_hits_seg(b, a, c, half) -> bool:
     return False
 
 
+def _grey(item: str) -> str:
+    """Grey out an item: mix 0.35*colour + 0.65*#c8c8c8 per channel in every color("#rrggbb"[, a])."""
+    def mix(m):
+        h = m.group(1)
+        out = "".join(f"{round(0.35 * int(h[i:i + 2], 16) + 0.65 * 200):02x}" for i in (0, 2, 4))
+        return f'color("#{out}"'
+    return re.sub(r'color\("#([0-9a-fA-F]{6})"', mix, item)
+
+
+def step_model(info: dict, k: int) -> str:
+    items, tags = info["items"], info["tags"]
+    if k == 0:
+        out = [it for it, t in zip(items, tags) if t == 0]
+        for (x, y), col in zip(info["probes"], ("#e00000", "#111111")):
+            out.append(f'color("{col}") translate([{f(x)},{f(y)},0]) cylinder(h=8, r1=0.25, r2=1.3, $fn=16);')
+    elif k == 1:
+        out = [it for it, t in zip(items, tags) if t == 1]
+    else:
+        new = (1, 2) if k == 2 else (k,)    # step 2 places the step-1 carrier: show it in colour
+        out = [it if t == 0 or t in new else _grey(it) for it, t in zip(items, tags) if t <= k]
+    return "\n".join(out) + "\n"
+
+
+def _crop_to_content(png: Path, margin: int = 24) -> None:
+    """Trim the empty background around a step render so it fills its guide panel.
+    Pillow is already in the venv (matplotlib's dependency); only --steps uses it."""
+    from PIL import Image, ImageChops
+    im = Image.open(png).convert("RGB")
+    bg = Image.new("RGB", im.size, im.getpixel((0, 0)))
+    box = ImageChops.difference(im, bg).convert("L").point(lambda v: 255 if v > 12 else 0).getbbox()
+    if box:
+        x0, y0, x1, y1 = box
+        im.crop((max(0, x0 - margin), max(0, y0 - margin),
+                 min(im.width, x1 + margin), min(im.height, y1 + margin))).save(png)
+
+
 def render(scad: Path, png: Path, centre: tuple[float, float, float], rot: tuple[float, float, float],
            dist: float, proj: str) -> None:
     cx, cy, cz = centre
@@ -406,15 +466,34 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--layout", type=Path, default=ROOT / "docs" / "shield_layout.json")
     ap.add_argument("--outdir", type=Path, default=ROOT / "docs")
+    ap.add_argument("--steps", action="store_true", help="render one image per build step into <outdir>/guide/")
     ap.add_argument("--scad-only", action="store_true", help="build and check the model, render nothing")
     args = ap.parse_args(argv)
-    (scad_text, scad_bottom, scad_iso, scad_bottom_plain), errs, centre = build_scad(load(args.layout))
+    (scad_text, scad_bottom, scad_iso, scad_bottom_plain, steps_info), errs, centre = build_scad(load(args.layout))
     for e in errs:
         print(f"FAIL {e}")
     if errs:
         return 1
     print(f"PASS model: {scad_text.count(chr(10))} primitives, every wire/join/bridge placed")
     if args.scad_only:
+        return 0
+    if args.steps:
+        gdir = args.outdir / "guide"
+        gdir.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory() as td:
+            for k in range(9):
+                if k == 1:
+                    cen, rot, dist, proj = steps_info["carrier_centre"], (55, 0, 25), 75.0, "p"
+                elif k == 3:
+                    cen, rot, dist, proj = centre, (180, 0, 0), 150.0, "o"
+                else:
+                    cen, rot, dist, proj = centre, (55, 0, 25), 185.0, "p"
+                scad = Path(td) / f"step_{k}.scad"
+                scad.write_text(step_model(steps_info, k), encoding="ascii")
+                png = gdir / f"step_{k}.png"
+                render(scad, png, cen, rot, dist, proj)
+                _crop_to_content(png)
+                print(f"png: {png}  ({png.stat().st_size} bytes)")
         return 0
     with tempfile.TemporaryDirectory() as td:
         # top: straight down, orthographic (USB end left); bottom: straight up from below,

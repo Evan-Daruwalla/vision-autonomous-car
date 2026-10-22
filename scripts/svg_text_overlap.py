@@ -34,7 +34,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TARGETS = ["docs/shield_holemap.svg", "docs/electronics_layout.svg", "docs/pack_wiring_full.svg"]
+TARGETS = ["docs/shield_holemap.svg", "docs/electronics_layout.svg", "docs/pack_wiring_full.svg",
+           "docs/shield_build_guide.svg"]
 WIN_PATHS = [r"C:\Program Files\Google\Chrome\Application\chrome.exe",
              r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
              r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"]
@@ -77,6 +78,8 @@ for (const c of svg.querySelectorAll('circle, ellipse')) { if (bg(c)) continue; 
   const R = (b[2] - b[0]) / 2, cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2;
   const outline = R >= 15 && (c.getAttribute('fill') === 'none' || +(c.getAttribute('fill-opacity') ?? 1) < 0.5);
   for (let i = 0; i < texts.length; i++) { const t = tb[i]; if (!hit(b, t) || covered(i, c)) continue;
+    const inside = [[t[0],t[1]],[t[2],t[1]],[t[0],t[3]],[t[2],t[3]]].every(([x, y]) => Math.hypot(x - cx, y - cy) < R);
+    if (!outline && inside && ord(c) < ord(texts[i])) continue;  // a filled badge circle with its text drawn on top
     if (outline) {
       if ([[t[0],t[1]],[t[2],t[1]],[t[0],t[3]],[t[2],t[3]]].every(([x, y]) => Math.hypot(x - cx, y - cy) < R)) continue;  // inside the ring
       const nx = Math.max(t[0], Math.min(cx, t[2])), ny = Math.max(t[1], Math.min(cy, t[3]));
@@ -143,6 +146,9 @@ def self_check() -> None:
     tag = head + ('<line x1="0" y1="45" x2="300" y2="45" stroke="#000"/>'
                   '<rect x="5" y="35" width="60" height="20" fill="#fff"/><text x="10" y="50">TAG</text></svg>')
     assert overlaps(tag, chrome) == [], "text on an opaque tag was flagged"
+    # a number drawn on its own filled badge circle (the build guide's step numbers) is clean
+    badge = head + '<circle cx="60" cy="60" r="26" fill="#1f4e79"/><text x="60" y="70" font-size="30" text-anchor="middle">5</text></svg>'
+    assert overlaps(badge, chrome) == [], "text on its own filled badge circle was flagged"
     # the real diagrams
     for t in TARGETS:
         res = overlaps((ROOT / t).read_text(encoding="utf-8"), chrome)

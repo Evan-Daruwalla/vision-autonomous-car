@@ -339,6 +339,7 @@ the dated entry, not the digest.
 - [KP - Shield renders: unlabelled top and bottom views added](#appendix-kp---shield-renders-unlabelled-top-and-bottom-views-added-2026-10-21-1836-cdt) (10-21)
 - [KQ - C1 stands upright (build step 1 changed, render updated)](#appendix-kq---c1-stands-upright-build-step-1-changed-render-updated-2026-10-21-1841-cdt) (10-21)
 - [KR - Proto shield step-by-step soldering guide](#appendix-kr---proto-shield-step-by-step-soldering-guide-2026-10-21-1853-cdt) (10-21)
+- [KS - LEGO-style picture build guide for the proto shield](#appendix-ks---lego-style-picture-build-guide-for-the-proto-shield-2026-10-21-1901-cdt) (10-21)
 
 ---
 
@@ -20728,3 +20729,14 @@ Checks (2026-10-21 ~18:40 CDT): render PASS; holemap all checks passed + self-ch
 **Made:** `docs/SHIELD_SOLDER_GUIDE.md` - a bench guide that follows the 9 build steps of `docs/shield_layout.json` (0 meter checks, 1 carrier off-board, 2 carrier onto the shield, 3 underside bridges, 4 headers, 5 divider, 6 top-side wires, 7 Dupont wires, 8 before first power-up) and adds tools, typical iron temperatures (labelled as typical, solder type not recorded), joint technique, the board's rules (one lead per hole; red-x danger pairs; bridges on the underside - flip top-over-bottom, never left-right; meter unpowered; STOP on a failed check), per-step checkboxes, the bare-wire-offcut bridge method, the C2-across-C1's-legs alternative Evan asked about, and each step's own meter check. A photo checkpoint after step 2. HANDOFF's read list points to it.
 
 **Verified (scratch script, 2026-10-21 ~18:53 CDT):** for each of the 9 steps the set of hole names in the guide equals the set in the layout file's step text + check (step 6 additionally names the 3 wire 'via' corners, expected); every hole name in the guide exists on the grid; 0 non-ASCII characters. The guide is hand-written, so it can drift if the layout changes - the layout file wins (stated at the top of the guide). Nothing in it is tested on the real board yet.
+
+# Appendix KS - LEGO-style picture build guide for the proto shield (2026-10-21, ~19:01 CDT)
+**Ask (Evan):** make the soldering guide into an SVG with images, like LEGO instructions.
+
+**Made (plan-split: Opus design, two Sonnet agents on disjoint files, Opus review + fixes):**
+- `scripts/shield_render3d.py --steps` -> `docs/guide/step_0..8.png`: one render per build step of `docs/shield_layout.json`. Each primitive carries a step tag (base, carrier, carrier joints, bridges, headers, divider, wires, Dupont leads, JP1 cap; underside joints take the step of the lead in that hole). A step image shows everything up to that step; that step's parts in full colour, earlier ones greyed. Step 0 = bare board with red/black probe cones at U1/1 and U3/1; step 1 = the carrier alone; step 3 = the underside; others = the 3/4 view. Images are cropped to content (Pillow, already in the venv). The default 5 views are byte-identical to before (sha256 -c: 5 OK).
+- `scripts/shield_guide_svg.py` -> `docs/shield_build_guide.svg` (435 KB): header + STOP rule, 9 panels in 2 columns - big step-number badge, title, parts callout (bridge / wire / socket counts from the JSON), the step image, the step's lines and its CHECK box, all text from the JSON. self_check: 9 panels, every title and check present, no over-wide line.
+- Opus fixes on review: (1) step 2 greyed the carrier it was placing - step 2 now shows tags 1-2 in colour; (2) the page agent had hidden a same-colour square under each step number to get past the overlap checker - removed; the checker itself now treats a number fully inside its own filled circle, drawn before it, as clean (new self-check case), so a real hole-under-label is still caught; (3) step images cropped (they sat small in big white panels).
+- `svg_text_overlap.py` also gates the guide SVG. SHIELD_SOLDER_GUIDE.md and HANDOFF point to it; testing bin updated.
+
+Checks (2026-10-21 ~19:01 CDT): `svg_text_overlap.py` 4 x PASS 0 overlaps; `run_checks.py` 20 passed, 0 failed, 0 skipped; all 9 panels viewed in a headless-Chrome screenshot. Renders show the INTENDED build, untested against a real board.

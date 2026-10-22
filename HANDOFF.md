@@ -593,7 +593,8 @@ Read, in order:
 3. Before ANY wiring: docs/WIRING_PROTOSHIELD.md (section 2 nets, section 5
    build order), docs/pack_wiring_full.svg (W1-W17 + cut list),
    docs/SHIELD_BUILD.md + docs/shield_holemap.svg (hole-by-hole shield);
-   at the bench, docs/SHIELD_SOLDER_GUIDE.md (step-by-step, with checks).
+   at the bench, docs/SHIELD_SOLDER_GUIDE.md (step-by-step, with checks) or its
+   LEGO-style picture version docs/shield_build_guide.svg.
    Before ANY tray/deck/mast work: docs/ELECTRONICS_LAYOUT.md.
 4. .claude/project-memory/INDEX.md, then ONLY the bins your task touches
    (steering.md for servo work; hardware.md + decisions.md for printed
@@ -640,7 +641,7 @@ WIRES: pack side soldered and NOT to be re-soldered (P+/P- 4 x 190, fuse wire
 326, MB 55; B- length unrecorded). To cut (estimates, trim at the dry fit):
 W8 80, W9 250, W10 100, W11 jumper, W12 260, W13 220, W14 120, W15 jumper;
 encoder cable 300 uncut (~30 mm spare); servo lead needs a Dupont extension.
-TEST SUITE: scripts/run_checks.py (19 passed on 2026-10-20 - re-run it, never
+TEST SUITE: scripts/run_checks.py (20 passed on 2026-10-21 - re-run it, never
 quote it; svg_text_overlap needs Chrome, so it SKIPs on the Pi). Push state: run `git fetch` then `git status -sb`.
 
 AUDIT BACKLOG: KA (2026-10-17 daily audit, 48 findings; HIGH #1 fixed in KE,

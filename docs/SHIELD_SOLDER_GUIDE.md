@@ -7,6 +7,10 @@ check that closes each step. Hole names are ROW/COL as on
 `docs/shield_holemap.svg`. If this guide and the layout file ever disagree,
 the layout file wins - re-run `scripts/shield_holemap.py` and tell Claude.
 
+**Picture version (LEGO-style, one panel per step, new parts in colour):
+`docs/shield_build_guide.svg`** - generated from the same layout file by
+`scripts/shield_guide_svg.py`, step renders by `scripts/shield_render3d.py --steps`.
+
 Pictures of the intended result: `docs/shield_3d_top.png` (labelled, from
 above), `docs/shield_3d_iso.png` (3/4 view), `docs/shield_3d_bottom.png`
 (underside, labelled). They show the INTENDED build, not a photo.
