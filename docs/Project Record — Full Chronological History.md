@@ -345,6 +345,7 @@ the dated entry, not the digest.
 - [KV - Animated 'how it works' diagram of the shield (block-diagram version)](#appendix-kv---animated-how-it-works-diagram-of-the-shield-block-diagram-version-2026-10-22-1940-cdt) (10-22)
 - [KW - How-it-works page rebuilt as build-guide panels with per-net 3D renders](#appendix-kw---how-it-works-page-rebuilt-as-build-guide-panels-with-per-net-3d-renders-2026-10-22-1953-cdt) (10-22)
 - [KX - Strip naming fixed: D4 = left, D7 = right (audit KU Med #1)](#appendix-kx---strip-naming-fixed-d4--left-d7--right-audit-ku-med-1-2026-10-22-2002-cdt) (10-22)
+- [KY - docs-sync: HANDOFF, bins and prompt brought up to KX](#appendix-ky---docs-sync-handoff-bins-and-prompt-brought-up-to-kx-2026-10-22-2003-cdt) (10-22)
 
 ---
 
@@ -20878,3 +20879,14 @@ Checks (2026-10-22 ~19:53 CDT): the 14 earlier renders byte-identical (5 views +
 Checks (2026-10-22 ~20:01 CDT): holemap all checks passed; `svg_text_overlap.py` 5 x 0; `run_checks.py` 21 passed.
 
 **Found, not fixed:** `docs/shield_wiring.svg` (not in the overlap gate) has 36 text overlaps - the same 36 before this change. KU Med #2 (the step-4 check 'J5 top pin beeps to VMOT' cannot pass until w1 in step 6) is still open.
+
+# Appendix KY - docs-sync: HANDOFF, bins and prompt brought up to KX (2026-10-22, ~20:03 CDT)
+**Ask (Evan):** /docs-sync (full pass), then push.
+
+**Session span covered:** commits f38cc1a .. 9259cbd (19 commits, 2026-10-20 evening to 2026-10-22), records KI-KX - every change already has its own record entry; this entry covers only the doc sync.
+
+**Done:**
+- HANDOFF.md: Last updated 2026-10-22 ~20:05 CDT; appendix count 310 (A-KX); current-state paragraph + paste-ready prompt now carry C1 upright (headroom unchecked), J3 = left (D4) / J4 = right (D7), the three bench guides, suite 21, and audit KU (Med #1 fixed in KX; Med #2 - the step-4 VMOT check cannot pass before w1 - and Med #3 open; shield_wiring.svg's 36 ungated overlaps). Next actions renumbered: new #2 = fix KU Med #2 before Evan reaches step 4 + add the upright C1 as a height entry in electronics_layout.py.
+- Bins: hardware.md (shield facts: C1 upright, strips by side, JP1 positions, socket headers, underside view convention, isolated pads), testing.md (suite 21, the gated SVGs, render-mode byte-identity rule), tooling.md (headless Chrome freezes CSS animation; the browser pane animates but refused the 728 KB file); INDEX.md lines.
+
+**Skipped, with reason:** HTML twin and record index - the project has neither; PRD_ROADMAP.md - no task's done-check passed this session (nothing soldered, printed or flashed); auto-memory - no new cross-session working rule, the facts went to the bins; performance/security/ui bins flagged stale by pm-cadence - no performance, security or UI work happened, nothing to record.

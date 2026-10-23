@@ -54,3 +54,5 @@
 
 - **OpenSCAD 2021.01 asserts exit 0 (2026-10-13, record HL):** a failed `assert()` prints "ERROR: Assertion ... failed" but `openscad.com` still exits 0 (seen in echo mode). render_scad.py does not rely on the exit code - a failed assert leaves no valid mesh, so its manifold/probe gate fails.
 - **COM3 "Access is denied" on upload (2026-10-13, record HT):** another program holds the Uno's port - usually the Arduino IDE Serial Monitor. Close it; `arduino-cli upload -p COM3 --fqbn arduino:avr:uno <sketch>` then works (HU). Reading the boot banner = open COM3 at 115200 with pyserial (opening resets the board).
+
+- 2026-10-22 (KV, KW): headless Chrome (--screenshot / --dump-dom, even with --virtual-time-budget) does NOT advance CSS animations - every capture shows t=0, so it cannot verify an animated SVG. The desktop app's browser pane does animate, but only for files inside the project folder, and it refused to open the 728 KB docs/shield_how_it_works.svg; verify animation there on a smaller file or read the keyframes.

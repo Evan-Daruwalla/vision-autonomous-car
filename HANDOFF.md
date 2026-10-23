@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-21 ~18:24 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-22 ~20:05 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 302 appendices A–KP; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 311 appendices A–KY; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -18,7 +18,7 @@ the physical car and documented as a college-portfolio engineering artifact.
 
 ## Where the project actually is
 
-**CURRENT STATE 2026-10-20 (supersedes the older lines below wherever they disagree; fixes audit KA HIGH #2 / #3):** the Uno runs the current uno_control (SELFTEST PASS 86/86, re-flashed from the Pi 2026-10-16, JQ; host_test all ok from the Pi). The servo is wired and drives the rack; the 2S pack is built and charged (IU-JA); the Pi 5 runs Bookworm and the camera works (JK). NOT yet wired: motor, encoder, LED strips, rocker, proto shield - the shield's hole-by-hole layout is ready and checked (KG), nothing soldered. Tray v11 / deck v13 / camera mast v1 are designed and checked, UNPRINTED. **2026-10-20 evening (KI, KJ):** the shield, layout and pack diagrams are all-bold with zero text overlaps, enforced by `scripts/svg_text_overlap.py` (in run_checks, 19 pass); the shield map embeds a 3D render of the INTENDED finished board (`scripts/shield_render3d.py`, untested against a real build) and draws w3/w4/w5 as their step-6 L-routes from a `via` list in `docs/shield_layout.json`. The paste-ready prompt at the end is the short current summary.
+**CURRENT STATE 2026-10-20 (supersedes the older lines below wherever they disagree; fixes audit KA HIGH #2 / #3):** the Uno runs the current uno_control (SELFTEST PASS 86/86, re-flashed from the Pi 2026-10-16, JQ; host_test all ok from the Pi). The servo is wired and drives the rack; the 2S pack is built and charged (IU-JA); the Pi 5 runs Bookworm and the camera works (JK). NOT yet wired: motor, encoder, LED strips, rocker, proto shield - the shield's hole-by-hole layout is ready and checked (KG), nothing soldered. Tray v11 / deck v13 / camera mast v1 are designed and checked, UNPRINTED. **2026-10-20 evening (KI, KJ):** the shield, layout and pack diagrams are all-bold with zero text overlaps, enforced by `scripts/svg_text_overlap.py` (in run_checks, 19 pass); the shield map embeds a 3D render of the INTENDED finished board (`scripts/shield_render3d.py`, untested against a real build) and draws w3/w4/w5 as their step-6 L-routes from a `via` list in `docs/shield_layout.json`. **2026-10-21/22 (KK-KX):** shield SVG audited (4 of 8 socket arrows pointed to the wrong Uno header - fixed); C1 now stands UPRIGHT (build-step change, KQ); bench guides added - docs/SHIELD_SOLDER_GUIDE.md, docs/shield_build_guide.svg (LEGO-style), docs/shield_how_it_works.svg (current paths); strips named left (D4) / right (D7) like the firmware (KX). Still nothing soldered. The paste-ready prompt at the end is the short current summary.
 
 **The software lane is four milestones ahead of the hardware lane. The hardware
 lane has now STARTED — and as of 2026-09-02 the ACTUATION FIRMWARE RUNS ON THE
@@ -594,14 +594,15 @@ Read, in order:
    build order), docs/pack_wiring_full.svg (W1-W17 + cut list),
    docs/SHIELD_BUILD.md + docs/shield_holemap.svg (hole-by-hole shield);
    at the bench, docs/SHIELD_SOLDER_GUIDE.md (step-by-step, with checks) or its
-   LEGO-style picture version docs/shield_build_guide.svg.
+   LEGO-style picture version docs/shield_build_guide.svg; what each part does
+   and how the current flows: docs/shield_how_it_works.svg.
    Before ANY tray/deck/mast work: docs/ELECTRONICS_LAYOUT.md.
 4. .claude/project-memory/INDEX.md, then ONLY the bins your task touches
    (steering.md for servo work; hardware.md + decisions.md for printed
    mounts or wiring; track.md for track work).
 
-STATE (2026-10-21 ~18:24 CDT; shield SVG audited + corrected in KK - socket
-arrows now point to the RIGHT header, bridges marked as underside). All 24 ordered parts are in (IX).
+STATE (2026-10-22 ~20:05 CDT). Shield docs since 2026-10-20: SVG audited +
+corrected (KK), bench guides added (KR-KT, KW), strips named by side (KX). All 24 ordered parts are in (IX).
 FIRMWARE: the Uno runs the current uno_control (SELFTEST PASS 86/86),
 re-flashed FROM THE PI with avrdude 2026-10-16 (JQ); host_test.py all ok from
 the Pi. Read the boot banner before trusting any firmware claim.
@@ -621,13 +622,19 @@ docs/shield_layout.json, checked by scripts/shield_holemap.py (one lead per
 hole, no body clashes, 17 nets joined, none shorted; 31 solder-bridge hazards
 listed as meter-silent checks). TB6612 (Pololu md08a) chip UP in U2/1-8 +
 L2/1-8, PWMA at the top-left; A/B pairs bridged on the carrier's pin tips;
-C1 470 uF + C2 0.1 uF on the carrier's VMOT/GND tips. Strips' 470 uF goes on
+C1 470 uF STANDS UPRIGHT on the carrier's VMOT/GND tips (KQ; top ~18.8 mm
+above the shield - headroom over the Uno UNCHECKED) + C2 0.1 uF on the same
+tips (may be soldered across C1's legs at the tips). J3 = LEFT strip (D4),
+J4 = RIGHT strip (D7), net DIN_L / DIN_R (KX). Strips' 470 uF goes on
 each strip's input pads. Uno links = Dupont pins into the shield sockets;
 off-board = 0.1 in male headers. NOTHING SOLDERED YET; step 0 still needs
 U1/1-U3/1 beep and V-G silent. The shield SVG + SHIELD_BUILD.md now show a 3D
 render of the INTENDED finished board (scripts/shield_render3d.py, KI; Dupont
 lead ends and board outline are schematic): a labelled true top-down view with every hole, and an
-underside view with the top-side parts as labelled cyan ghost outlines, a 3/4 view, and unlabelled top + bottom views (KL-KP). Wire corners live in each wire's
+underside view with the top-side parts as labelled cyan ghost outlines, a 3/4 view, and unlabelled top + bottom views (KL-KP).
+Bench guides (all generated from shield_layout.json): docs/SHIELD_SOLDER_GUIDE.md (text,
+KR), docs/shield_build_guide.svg (LEGO-style steps 0-8, rails marked, KS/KT),
+docs/shield_how_it_works.svg (6 current paths, per-net 3D renders, KW). Wire corners live in each wire's
 "via" list (w3 L3/0, w4 P4/-1, w5 B/-2; KJ) - map, steps and render all read it.
 CAD (all UNPRINTED, UNTESTED): tray v11 + deck v13 for the 168 x 62.16 x
 22.51 bank (JU-JW, KB): velcro 3.5 mm dots under every part, deck underside
@@ -641,7 +648,7 @@ WIRES: pack side soldered and NOT to be re-soldered (P+/P- 4 x 190, fuse wire
 326, MB 55; B- length unrecorded). To cut (estimates, trim at the dry fit):
 W8 80, W9 250, W10 100, W11 jumper, W12 260, W13 220, W14 120, W15 jumper;
 encoder cable 300 uncut (~30 mm spare); servo lead needs a Dupont extension.
-TEST SUITE: scripts/run_checks.py (20 passed on 2026-10-21 - re-run it, never
+TEST SUITE: scripts/run_checks.py (21 passed on 2026-10-22 - re-run it, never
 quote it; svg_text_overlap needs Chrome, so it SKIPs on the Pi). Push state: run `git fetch` then `git status -sb`.
 
 AUDIT BACKLOG: KA (2026-10-17 daily audit, 48 findings; HIGH #1 fixed in KE,
@@ -651,23 +658,32 @@ cut-cable text, bins (hardware/architecture/LIGHTING, decisions.md:62), LM2596
 4.99 V (here + pack svg) vs 4.95 V recorded in JE). HJ's HIGH:
 ml/splits.py split stability + no corpus id in checkpoints. IM, EW, EX, FG
 open.
+KU (2026-10-22 daily audit, 36 findings, 0 crit/high): Med #1 strip naming
+FIXED (KX). Med #2 OPEN: the step-4 check 'J5 top pin (L3/10) beeps to VMOT'
+cannot pass until w1 (step 6) - fix before Evan reaches step 4. Med #3 OPEN:
+superseded power text in BOM.md:51, WIRING_PROTOSHIELD.md:129,183,
+hardware.md:242, LIGHTING_SPEC.md:113; README says nothing is bought.
+docs/shield_wiring.svg has 36 text overlaps (not in the overlap gate).
 
 NEXT ACTIONS, highest value first:
 1. Evan: shield step 0 (2 meter checks), then SHIELD_BUILD.md steps 1-2
    (carrier headers, carrier-top bridges + C1/C2, carrier onto the shield);
    send a photo after step 2 before the bridges.
-2. Print tray v11 + deck v13 (supports OFF); fit report + printer settings in
+2. Fix KU Med #2 (the step-4 VMOT check) before Evan gets to step 4; add the
+   upright C1 (~18.8 mm) as a height entry over the Uno in
+   scripts/electronics_layout.py (headroom vs deck / mast).
+3. Print tray v11 + deck v13 (supports OFF); fit report + printer settings in
    the record. Watch: post flex (54.5 mm posts; rear posts on the floor's
    unsupported rear 12 mm).
-3. Build step 2b: XT30 car half -> rocker (2-pin SPST, + line only) -> VBAT;
+4. Build step 2b: XT30 car half -> rocker (2-pin SPST, + line only) -> VBAT;
    checks: rocker OFF = 0 V downstream; XT30 polarity +8.x V before any load.
-4. Charger board 2 no-load test (BAT lifted, USB-C in: 8.4 V OK, >= 8.6 V
+5. Charger board 2 no-load test (BAT lifted, USB-C in: 8.4 V OK, >= 8.6 V
    reject).
-5. Fix KA's remaining MEDs (list above) and HJ's HIGH (ml/splits.py).
-6. Small backlog: host_test.py docstring + SERIAL_PROTOCOL.md:9 say nothing is
+6. Fix KA's and KU's remaining MEDs (list above) and HJ's HIGH (ml/splits.py).
+7. Small backlog: host_test.py docstring + SERIAL_PROTOCOL.md:9 say nothing is
    wired; servo_bench prompt "400-2600" (US_MAX 2800); confirm the 12-tooth
    bevel gear; measure the USB-B plug (16 x 30 x 13 allowance).
-7. Evan's call: 98 tracked files carry the local path D:\ClaudeCode\... on the
+8. Evan's call: 98 tracked files carry the local path D:\ClaudeCode\... on the
    PUBLIC remote; 2 HOME-path occurrences in the record.
 
 HARD CONSTRAINTS
