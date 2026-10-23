@@ -35,7 +35,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TARGETS = ["docs/shield_holemap.svg", "docs/electronics_layout.svg", "docs/pack_wiring_full.svg",
-           "docs/shield_build_guide.svg"]
+           "docs/shield_build_guide.svg", "docs/shield_how_it_works.svg"]
 WIN_PATHS = [r"C:\Program Files\Google\Chrome\Application\chrome.exe",
              r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
              r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"]

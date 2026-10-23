@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1036" viewBox="0 0 1400 1036" font-family="Arial, Helvetica, sans-serif" font-weight="bold">
+<style>.flow{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:10 8;animation:dash 0.9s linear infinite}@keyframes dash{to{stroke-dashoffset:-18}}.p1{opacity:.18;animation:dash 0.9s linear infinite,ph1 30s linear infinite}.c1{opacity:0;animation:ph1c 30s linear infinite}@keyframes ph1{0%,0.00%{opacity:.18}0.00%,16.17%{opacity:1}16.67%,100%{opacity:.18}}@keyframes ph1c{0%,0.00%{opacity:0}0.00%,16.17%{opacity:1}16.67%,100%{opacity:0}}.p2{opacity:.18;animation:dash 0.9s linear infinite,ph2 30s linear infinite}.c2{opacity:0;animation:ph2c 30s linear infinite}@keyframes ph2{0%,16.66%{opacity:.18}16.67%,32.83%{opacity:1}33.33%,100%{opacity:.18}}@keyframes ph2c{0%,16.66%{opacity:0}16.67%,32.83%{opacity:1}33.33%,100%{opacity:0}}.p3{opacity:.18;animation:dash 0.9s linear infinite,ph3 30s linear infinite}.c3{opacity:0;animation:ph3c 30s linear infinite}@keyframes ph3{0%,33.32%{opacity:.18}33.33%,49.50%{opacity:1}50.00%,100%{opacity:.18}}@keyframes ph3c{0%,33.32%{opacity:0}33.33%,49.50%{opacity:1}50.00%,100%{opacity:0}}.p4{opacity:.18;animation:dash 0.9s linear infinite,ph4 30s linear infinite}.c4{opacity:0;animation:ph4c 30s linear infinite}@keyframes ph4{0%,49.99%{opacity:.18}50.00%,66.17%{opacity:1}66.67%,100%{opacity:.18}}@keyframes ph4c{0%,49.99%{opacity:0}50.00%,66.17%{opacity:1}66.67%,100%{opacity:0}}.p5{opacity:.18;animation:dash 0.9s linear infinite,ph5 30s linear infinite}.c5{opacity:0;animation:ph5c 30s linear infinite}@keyframes ph5{0%,66.66%{opacity:.18}66.67%,82.83%{opacity:1}83.33%,100%{opacity:.18}}@keyframes ph5c{0%,66.66%{opacity:0}66.67%,82.83%{opacity:1}83.33%,100%{opacity:0}}.p6{opacity:.18;animation:dash 0.9s linear infinite,ph6 30s linear infinite}.c6{opacity:0;animation:ph6c 30s linear infinite}@keyframes ph6{0%,83.32%{opacity:.18}83.33%,99.50%{opacity:1}100.00%,100%{opacity:.18}}@keyframes ph6c{0%,83.32%{opacity:0}83.33%,99.50%{opacity:1}100.00%,100%{opacity:0}}@media (prefers-reduced-motion: reduce){.flow,.p1,.p2,.p3,.p4,.p5,.p6{animation:none;opacity:1}}</style>
+<rect width="1400" height="1036" fill="#ffffff"/>
+<text x="30" y="34" font-size="22" fill="#111">Proto shield - what each part does, and how the current flows</text>
+<text x="30" y="54" font-size="12" fill="#444">Block diagram (not hole-level). Moving dashes = current, coloured by net; the six phases below light up in turn (30 s loop). Built from docs/shield_layout.json.</text>
+<rect x="290" y="78" width="790" height="760" rx="12" fill="none" stroke="#9aa5b1" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="300" y="854" font-size="12" fill="#5c6b7a">PROTO SHIELD (sits on the Uno)</text>
+<polyline class="flow p1" points="260,120 320,120" stroke="#C62828"/>
+<polyline class="flow p1" points="490,120 560,120" stroke="#C62828"/>
+<polyline class="flow p1" points="405,180 405,220" stroke="#C62828"/>
+<polyline class="flow p1" points="405,290 405,330" stroke="#C62828"/>
+<polyline class="flow p1" points="145,180 145,250" stroke="#C62828"/>
+<polyline class="flow p2" points="260,300 300,300 300,165 320,165" stroke="#E07B00"/>
+<polyline class="flow p2" points="490,165 530,165 530,70 950,70 950,90" stroke="#E07B00"/>
+<polyline class="flow p2" points="820,70 820,525 850,525" stroke="#E07B00"/>
+<polyline class="flow p2" points="820,300 850,300" stroke="#E07B00"/>
+<polyline class="flow p3" points="260,600 420,600" stroke="#AD1457"/>
+<polyline class="flow p3" points="600,520 600,270" stroke="#AD1457"/>
+<polyline class="flow p3" points="790,545 805,545 805,255 850,255" stroke="#AD1457"/>
+<polyline class="flow p3" points="950,320 950,360" stroke="#2E7D32"/>
+<polyline class="flow p4" points="700,520 700,270" stroke="#555555"/>
+<polyline class="flow p4" points="790,610 835,610 835,410 850,410" stroke="#2E7D32"/>
+<polyline class="flow p4" points="1050,400 1120,400" stroke="#2E7D32"/>
+<polyline class="flow p4" points="790,640 843,640 843,555 850,555" stroke="#B59F00"/>
+<polyline class="flow p4" points="1050,525 1120,525" stroke="#B59F00"/>
+<polyline class="flow p4" points="405,420 405,645 420,645" stroke="#1A56B0"/>
+<polyline class="flow p4" points="1245,180 1245,720 700,720 700,670" stroke="#00838F"/>
+<polyline class="flow p5" points="790,135 850,135" stroke="#6A1B9A"/>
+<polyline class="flow p5" points="1050,135 1120,135" stroke="#6A1B9A"/>
+<polyline class="flow p6" points="320,175 310,175 310,806" stroke="#222222"/>
+<polyline class="flow p6" points="260,325 310,325" stroke="#222222"/>
+<polyline class="flow p6" points="320,410 310,410" stroke="#222222"/>
+<polyline class="flow p6" points="760,270 760,350 1065,350" stroke="#222222"/>
+<polyline class="flow p6" points="1050,170 1065,170 1065,806" stroke="#222222"/>
+<polyline class="flow p6" points="1050,430 1065,430" stroke="#222222"/>
+<polyline class="flow p6" points="1050,560 1065,560" stroke="#222222"/>
+<polyline class="flow p6" points="790,660 1065,660" stroke="#222222"/>
+<polyline class="flow p6" points="310,806 1065,806" stroke="#222222"/>
+<rect x="306" y="801" width="764" height="10" rx="3" fill="#222222"/>
+<text x="700" y="828" font-size="12" fill="#222" text-anchor="middle">Rail B = GND star - every ground meets here</text>
+<rect x="30" y="70" width="230" height="110" rx="8" fill="#ffffff" stroke="#C62828" stroke-width="2.5"/>
+<text x="40" y="90" font-size="13" fill="#C62828">Battery pack (2S 18650)</text>
+<text x="40" y="110" font-size="11" fill="#333">7.2-8.4 V</text>
+<text x="40" y="126" font-size="11" fill="#333">3 A fuse + BMS cutoff</text>
+<text x="40" y="142" font-size="11" fill="#333">rocker switch, XT30</text>
+<rect x="30" y="250" width="230" height="80" rx="8" fill="#ffffff" stroke="#E07B00" stroke-width="2.5"/>
+<text x="40" y="270" font-size="13" fill="#E07B00">LM2596 buck (on the deck)</text>
+<text x="40" y="290" font-size="11" fill="#333">VBAT -&gt; +5V2 (~5 V)</text>
+<rect x="30" y="560" width="230" height="80" rx="8" fill="#ffffff" stroke="#AD1457" stroke-width="2.5"/>
+<text x="40" y="580" font-size="13" fill="#AD1457">Raspberry Pi 5</text>
+<text x="40" y="600" font-size="11" fill="#333">USB: powers the Uno and</text>
+<text x="40" y="616" font-size="11" fill="#333">sends drive commands</text>
+<rect x="320" y="90" width="170" height="90" rx="8" fill="#ffffff" stroke="#2E7D32" stroke-width="2.5"/>
+<text x="330" y="110" font-size="13" fill="#2E7D32">J5 power in</text>
+<text x="330" y="130" font-size="11" fill="#333">VBAT, +5V2, GND</text>
+<text x="330" y="146" font-size="11" fill="#333">(KEY pin pulled out)</text>
+<rect x="320" y="220" width="170" height="70" rx="8" fill="#ffffff" stroke="#6A1B9A" stroke-width="2.5"/>
+<text x="330" y="240" font-size="13" fill="#6A1B9A">C1 470 uF + C2 0.1 uF</text>
+<text x="330" y="260" font-size="11" fill="#333">steady VBAT at VM</text>
+<rect x="320" y="330" width="170" height="90" rx="8" fill="#ffffff" stroke="#1A56B0" stroke-width="2.5"/>
+<text x="330" y="350" font-size="13" fill="#1A56B0">Divider 100k / 12k</text>
+<text x="330" y="370" font-size="11" fill="#333">VBAT / 9.33 -&gt; A0</text>
+<text x="330" y="386" font-size="11" fill="#333">(pack voltage)</text>
+<rect x="560" y="90" width="230" height="180" rx="8" fill="#ffffff" stroke="#1f4e79" stroke-width="2.5"/>
+<text x="570" y="110" font-size="13" fill="#1f4e79">TB6612 motor driver</text>
+<text x="570" y="130" font-size="11" fill="#333">VM = VBAT (motor power)</text>
+<text x="570" y="146" font-size="11" fill="#333">VCC = Uno 5V (logic)</text>
+<text x="570" y="162" font-size="11" fill="#333">PWM D11, DIR D8 + D12,</text>
+<text x="570" y="178" font-size="11" fill="#333">enable STBY D10;</text>
+<text x="570" y="194" font-size="11" fill="#333">A + B channels paralleled</text>
+<rect x="850" y="90" width="200" height="90" rx="8" fill="#ffffff" stroke="#6A1B9A" stroke-width="2.5"/>
+<text x="860" y="110" font-size="13" fill="#6A1B9A">J1 motor + encoder</text>
+<text x="860" y="130" font-size="11" fill="#333">M1, M2 (motor)</text>
+<text x="860" y="146" font-size="11" fill="#333">+5V2, GND (encoder)</text>
+<rect x="850" y="230" width="200" height="90" rx="8" fill="#ffffff" stroke="#2E7D32" stroke-width="2.5"/>
+<text x="860" y="250" font-size="13" fill="#2E7D32">JP1 servo-power jumper</text>
+<text x="860" y="270" font-size="11" fill="#333">cap on TOP pins = Uno 5V</text>
+<text x="860" y="286" font-size="11" fill="#333">cap on BOTTOM = +5V2</text>
+<rect x="850" y="360" width="200" height="80" rx="8" fill="#ffffff" stroke="#2E7D32" stroke-width="2.5"/>
+<text x="860" y="380" font-size="13" fill="#2E7D32">J2 servo</text>
+<text x="860" y="400" font-size="11" fill="#333">SIG = D9, V+, GND</text>
+<rect x="850" y="480" width="200" height="90" rx="8" fill="#ffffff" stroke="#B59F00" stroke-width="2.5"/>
+<text x="860" y="500" font-size="13" fill="#B59F00">J3 / J4 LED strips</text>
+<text x="860" y="520" font-size="11" fill="#333">DIN = D4 / D7 via 400 ohm</text>
+<text x="860" y="536" font-size="11" fill="#333">+5V2, GND</text>
+<rect x="420" y="520" width="370" height="150" rx="8" fill="#ffffff" stroke="#00838F" stroke-width="2.5"/>
+<text x="430" y="540" font-size="13" fill="#00838F">Arduino Uno (under the shield)</text>
+<text x="430" y="560" font-size="11" fill="#333">runs uno_control: reads the Pi's commands,</text>
+<text x="430" y="576" font-size="11" fill="#333">drives the pins, guards the pack (A0),</text>
+<text x="430" y="592" font-size="11" fill="#333">5V pin = rail V, fed by the Pi's USB</text>
+<rect x="1120" y="90" width="250" height="90" rx="8" fill="#ffffff" stroke="#6A1B9A" stroke-width="2.5"/>
+<text x="1130" y="110" font-size="13" fill="#6A1B9A">N20 motor + encoder</text>
+<text x="1130" y="130" font-size="11" fill="#333">Pololu #5159</text>
+<text x="1130" y="146" font-size="11" fill="#333">encoder A/B -&gt; D2/D3</text>
+<rect x="1120" y="360" width="250" height="80" rx="8" fill="#ffffff" stroke="#2E7D32" stroke-width="2.5"/>
+<text x="1130" y="380" font-size="13" fill="#2E7D32">Servo (MG90D)</text>
+<text x="1130" y="400" font-size="11" fill="#333">steers the rack</text>
+<rect x="1120" y="480" width="250" height="90" rx="8" fill="#ffffff" stroke="#B59F00" stroke-width="2.5"/>
+<text x="1130" y="500" font-size="13" fill="#B59F00">WS2812B strips</text>
+<text x="1130" y="520" font-size="11" fill="#333">front + rear lights</text>
+<rect x="267" y="101" width="35" height="15" rx="3" fill="#ffffff"/>
+<text x="270" y="112" font-size="11" fill="#C62828">VBAT</text>
+<rect x="509" y="101" width="22" height="15" rx="3" fill="#ffffff"/>
+<text x="512" y="112" font-size="11" fill="#C62828">VM</text>
+<rect x="149" y="209" width="35" height="15" rx="3" fill="#ffffff"/>
+<text x="152" y="220" font-size="11" fill="#C62828">VBAT</text>
+<rect x="263" y="281" width="35" height="15" rx="3" fill="#ffffff"/>
+<text x="266" y="292" font-size="11" fill="#E07B00">+5V2</text>
+<rect x="823" y="194" width="35" height="15" rx="3" fill="#ffffff"/>
+<text x="826" y="205" font-size="11" fill="#E07B00">+5V2</text>
+<rect x="297" y="581" width="56" height="15" rx="3" fill="#ffffff"/>
+<text x="300" y="592" font-size="11" fill="#AD1457">USB 5 V</text>
+<rect x="604" y="289" width="28" height="15" rx="3" fill="#ffffff"/>
+<text x="607" y="300" font-size="11" fill="#AD1457">VCC</text>
+<rect x="954" y="323" width="63" height="15" rx="3" fill="#ffffff"/>
+<text x="957" y="334" font-size="11" fill="#2E7D32">servo V+</text>
+<rect x="704" y="459" width="103" height="15" rx="3" fill="#ffffff"/>
+<text x="707" y="470" font-size="11" fill="#555555">D11 D8 D12 D10</text>
+<rect x="839" y="421" width="22" height="15" rx="3" fill="#ffffff"/>
+<text x="842" y="432" font-size="11" fill="#2E7D32">D9</text>
+<rect x="797" y="621" width="42" height="15" rx="3" fill="#ffffff"/>
+<text x="800" y="632" font-size="11" fill="#B59F00">D4 D7</text>
+<rect x="1059" y="506" width="35" height="15" rx="3" fill="#ffffff"/>
+<text x="1062" y="517" font-size="11" fill="#B59F00">data</text>
+<rect x="409" y="489" width="22" height="15" rx="3" fill="#ffffff"/>
+<text x="412" y="500" font-size="11" fill="#1A56B0">A0</text>
+<rect x="867" y="701" width="301" height="15" rx="3" fill="#ffffff"/>
+<text x="870" y="712" font-size="11" fill="#00838F">encoder A/B -&gt; D2, D3 (straight to the Uno)</text>
+<rect x="797" y="116" width="42" height="15" rx="3" fill="#ffffff"/>
+<text x="800" y="127" font-size="11" fill="#6A1B9A">M1 M2</text>
+<rect x="1059" y="116" width="42" height="15" rx="3" fill="#ffffff"/>
+<text x="1062" y="127" font-size="11" fill="#6A1B9A">motor</text>
+<rect class="c1" x="24" y="867" width="1352" height="17" rx="4" fill="#fff3c4"/>
+<text x="30" y="880" font-size="11" fill="#222">1  Battery power: the 2S pack (7.2-8.4 V) feeds VBAT through the fuse, BMS and rocker into J5. VBAT powers the motor driver (VM; C1 + C2 steady it), the divider, and the LM2596.</text>
+<rect class="c2" x="24" y="887" width="1352" height="17" rx="4" fill="#fff3c4"/>
+<text x="30" y="900" font-size="11" fill="#222">2  +5V2: the LM2596 steps VBAT down to ~5 V for the LED strips and the encoder - and for the servo only if JP1's cap is moved to the bottom pins.</text>
+<rect class="c3" x="24" y="907" width="1352" height="17" rx="4" fill="#fff3c4"/>
+<text x="30" y="920" font-size="11" fill="#222">3  Logic 5V: the Pi's USB powers the Uno; the Uno's 5V (rail V) feeds the TB6612's logic (VCC) and, through JP1's top two pins (the current setting), the servo.</text>
+<rect class="c4" x="24" y="927" width="1352" height="33" rx="4" fill="#fff3c4"/>
+<text x="30" y="940" font-size="11" fill="#222">4  Signals: the Uno sends speed (PWM D11), direction (D8, D12) and enable (D10) to the TB6612, the servo angle on D9 and LED data on D4 / D7; it reads the encoder (D2, D3) and the pack voltage</text>
+<text x="30" y="956" font-size="11" fill="#222">   (A0, via the divider).</text>
+<rect class="c5" x="24" y="963" width="1352" height="17" rx="4" fill="#fff3c4"/>
+<text x="30" y="976" font-size="11" fill="#222">5  Motor current: the TB6612 switches VBAT through its paralleled A + B outputs into J1's M1 / M2 and the N20 motor.</text>
+<rect class="c6" x="24" y="983" width="1352" height="17" rx="4" fill="#fff3c4"/>
+<text x="30" y="996" font-size="11" fill="#222">6  Ground return: every ground meets at one point, rail B (the star), by design - the drawing's black lines.</text>
+</svg>

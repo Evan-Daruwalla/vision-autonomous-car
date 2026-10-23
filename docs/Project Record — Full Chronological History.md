@@ -341,6 +341,8 @@ the dated entry, not the digest.
 - [KR - Proto shield step-by-step soldering guide](#appendix-kr---proto-shield-step-by-step-soldering-guide-2026-10-21-1853-cdt) (10-21)
 - [KS - LEGO-style picture build guide for the proto shield](#appendix-ks---lego-style-picture-build-guide-for-the-proto-shield-2026-10-21-1901-cdt) (10-21)
 - [KT - Build guide: GND and 5V rails shown](#appendix-kt---build-guide-gnd-and-5v-rails-shown-2026-10-21-2005-cdt) (10-21)
+- [KU - Scheduled daily-audit: 36 findings, 0 crit/high - the shield docs call the D4/D7 strips front/rear while firmware says left/right, the step-4 continuity check cannot pass until step 6, and the public README still says nothing is bought](#appendix-ku---scheduled-daily-audit-36-findings-0-crithigh---the-shield-docs-call-the-d4d7-strips-frontrear-while-firmware-says-leftright-the-step-4-continuity-check-cannot-pass-until-step-6-and-the-public-readme-still-says-nothing-is-bought-2026-10-22-0750-cdt) (10-22)
+- [KV - Animated 'how it works' diagram of the shield (block-diagram version)](#appendix-kv---animated-how-it-works-diagram-of-the-shield-block-diagram-version-2026-10-22-1940-cdt) (10-22)
 
 ---
 
@@ -20748,3 +20750,108 @@ Checks (2026-10-21 ~19:01 CDT): `svg_text_overlap.py` 4 x PASS 0 overlaps; `run_
 **Change:** `scripts/shield_render3d.py --steps` draws a band along each rail found in the layout file's copper groups whose name says 'rail' (one row each): BLACK for GND (G; B = the ground star), RED for 5V (V; T - both the Uno's 5V). On top-side step views the band sits on the board face UNDER the drill dots (holes stay visible); on the underside view (step 3) it sits over the rail copper. Each band runs to the board's right edge and carries its name just past it ('T 5V', 'G GND', 'V 5V', 'B GND star', 1.8 mm). Step-view cameras pulled back (3/4: 185 -> 200; underside: 150 -> 165) so the names are not cut off. `scripts/shield_guide_svg.py` header explains the colours and says the bands are drawn on - the real rail copper is on the underside. The 5 standard views are byte-identical (sha256 -c: 5 OK).
 
 Checks (2026-10-21 ~20:05 CDT): `svg_text_overlap.py` 4 x 0 overlaps; `run_checks.py` 20 passed; steps 0, 3, 6 and the header viewed. On the 3/4 view the 'G GND' and 'V 5V' names sit close (adjacent rows, 2.54 mm) but do not overlap.
+
+# Appendix KU - Scheduled daily-audit: 36 findings, 0 crit/high - the shield docs call the D4/D7 strips front/rear while firmware says left/right, the step-4 continuity check cannot pass until step 6, and the public README still says nothing is bought (2026-10-22, ~07:50 CDT)
+Scheduled `daily-audit` run (read-only; nothing fixed, nothing committed). Classified ACTIVE
+by churn: audit KA (2026-10-17 07:38, committed in b962e3f) is inside the 7-day window but
+18 non-audit commits landed after it. HEAD 6620196 = origin/main (fetched). Repo is PUBLIC
+(`gh api` -> private false).
+
+Method: /audit by 3 cold Sonnet workers (code M1-M4/M7-M9/M12/M13/M15 + G1-G4; docs D1-D8 incl.
+a netlist simulation of the shield guide; cross X-series + public leak), then /landing-check
+on record KT by 1 more worker. No crit or high, so no session-model reproduction was required.
+Disclosure: the code worker ran `pack_wiring_svg.py -h` / `shield_wiring_svg.py -h`, which
+wrote a file named `-h` into the repo root; it confirmed the file untracked and self-created,
+then deleted it; `git status --short` returned to the same 5 entries.
+
+## Result: 36 findings - 0 crit, 0 high, 11 med, 25 low
+
+### Med
+1. Strip header labels disagree: docs/shield_layout.json:473,491 (J3 "front strip"/J4 "rear
+   strip", nets DIN_F/DIN_R), docs/SHIELD_BUILD.md:23,31,32,169-178, shield_holemap.svg vs
+   firmware/uno_control/uno_control.ino:86-87 (PIN_STRIP_L = 4 LEFT, PIN_STRIP_R = 7 RIGHT),
+   SERIAL_PROTOCOL.md:29,32, WIRING_PROTOSHIELD.md:124-125, BOM.md:301-302, LIGHTING_SPEC.md:12,55.
+   Pin numbers agree; a builder following front/rear plugs each strip into the wrong side.
+2. docs/SHIELD_SOLDER_GUIDE.md:137 (and SHIELD_BUILD.md:126, shield_layout.json:979, the guide
+   SVG) step-4 check "J5 top pin (L3/10) beeps to VMOT" cannot pass until wire w1 (step 6):
+   union-find netlist of steps 0-5 -> False; with w1 -> True.
+3. Superseded 2026-10-16 power design still stated unstruck: BOM.md:51 (self-contradictory "USB 5V
+   wire must be cut"), WIRING_PROTOSHIELD.md:129 (Mermaid "5 V wire CUT"), :183, hardware.md:242,
+   LIGHTING_SPEC.md:113 (partly known: HANDOFF:648-649 cites drifted lines 125/179).
+4. Public README.md:8-10, :117-118 "Status as of 2026-09-09 ... not built ... No parts have been
+   ordered ... Nothing is bought"; parts arrived 2026-10-10, servo wired, Pi up, Uno 86/86
+   (HANDOFF.md:21, :41); Layout omits firmware/ and sim/.
+5. Firmware docs understate state: firmware/README.md:75 "No control firmware exists", :4 "four
+   light channels", :67; SERIAL_PROTOCOL.md:5-10 "SELFTEST 49/49 ... ACTUATORS ARE UNWIRED";
+   uno_control.ino:11-16 "NOT VERIFIED ON HARDWARE". A fresh arduino-cli compile is
+   byte-identical to the flashed build hex.
+6. firmware/uno_control/build/ (5 files, 189K) untracked with NO ignore rule; the .elf embeds
+   `C:\Users\evan.EVANFREDY\...` and `D:\ClaudeCode\...` paths (2 matches); one `git add
+   firmware/` from the public repo. Same for .claude/drift-check.stamp and pm-cadence .tmp files.
+7. scripts/svg_text_overlap.py:37 gates 4 of 6 docs SVGs; the 2 embedded in
+   WIRING_PROTOSHIELD.md:33,:151 FAIL: shield_wiring.svg 36 overlaps, bms_wiring.svg 2 (no
+   generator). HANDOFF.md:686-687 says every diagram passes.
+8. scripts/check_artifacts.py:272-273 `--staged` only rechecks an entry whose ARTIFACT is staged;
+   staging just a generator/.scad passes "nothing to do"; :206 compares the working-tree file,
+   not the staged blob (audit IM #4, still open).
+9. scripts/render_scad.py:369,407-408: an empty or typo'd probe file prints "probes : 0/0 PASS",
+   "OVERALL : PASS" and writes the STL (reproduced on servo_mount.scad; IM #5, still open).
+10. ml/provenance.py write_result dumps vars(args): 95 public ml/runs JSON files carry
+    `D:\ClaudeCode\Autonomous Car Project\...` (98 files repo-wide; IM #1, still open).
+11. Cache keys narrower than inputs: {split}_mu.npy keyed on the encoder only, train_cte.npy on
+    existence only; preprocess.py never invalidates them; uuid4 episode names reorder on top-up
+    (ml/train_mdnrnn.py:60-61, splits.py:80-92, exp_recovery.py:75-77, train_cte_probe.py:54-56).
+
+### Low (one line each)
+12. HANDOFF.md:5 "302 appendices A-KP"; disk 306 A-KT; :3 "Last updated ~18:24" predates KP-KT.
+13. BOM.md:3,9,218, LIGHTING_SPEC.md:3,209, budget.md:1 still "nothing ordered / unbought".
+14. HANDOFF.md:402 track layouts "NOT committed" (both since 2026-09-01); :159 "27 artifacts" (40); :21 "19 pass" vs 20.
+15. docs/ELECTRONICS_LAYOUT.md:1,53,155 say deck v12; scad and HANDOFF are v13.
+16. hardware.md:200 cites docs/PRD_ROADMAP.md (root file); WIRING:82,113 cite ino:82-95 (now 84-97).
+17. WIRING_PROTOSHIELD.md:46 "zero flying Dupont jumpers" vs the layout's Dupont pins (unstruck).
+18. HANDOFF.md:5 corrections list incomplete (omits EQ and others; includes EL/EN/EO).
+19. Record heading times run backwards at :1943 (Q/P), :7846 (BM/BL), :17760 (GR/GQ); forward note only.
+20. Shield/guide/pack artifacts unregistered in check_artifacts (no drift today; PNGs need pixel compare).
+21. .claude/project-memory/INDEX.md:15 line counts stale (548 vs 561).
+22. cad/rescale_reference_xodr.py:284 accepts --scale nan / -1 (writes length="nan"), 0 -> ZeroDivisionError.
+23. cad/track_layout_v2.py:522,535 accepts --radius 0 / -3 (negative street lines).
+24. pack_wiring_svg.py:216, shield_wiring_svg.py:240 no argparse: `-h` becomes an output filename.
+25. uno_control.ino:791-794 drives the servo to 1600 us on every reset; SERIAL_PROTOCOL.md:152 says inert.
+26. uno_control.ino:184-185 SERVO_US_MAX_SAFE 2600 is above the Servo library clamp 2400 (guard cannot fire).
+27. .mcp.json runs unpinned `npx -y 3dstreet-mcp`.
+28. ml/splits.py:166-172 a one-episode track goes wholly to val, breaking "every track in both halves".
+29. scripts/run_checks.py:57,100,102 FileNotFoundError -> SKIP; SystemExit escapes without a summary (IM #8).
+30. scripts/shield_render3d.py (10 commits since 10-15) has no self_check in the suite.
+31. 33 unused imports (22 excluding gym_donkeycar side-effect imports).
+32. 26 torch.load sites without explicit weights_only.
+33. No LICENSE; cad/reference/figure8.xodr origin unknown.
+34. Record has 3 username/home-path lines (:5949, :6668, :13667); HANDOFF:670-671 says 2; LAN host `ed@ed-pi5.local` at HANDOFF.md:613.
+35. Nothing mechanically ties firmware PIN_* to shield_layout.json sockets (match by hand today).
+36. docs/guide/step_8.png re-renders 1 pixel different (OpenSCAD nondeterminism; byte-compare would false-drift).
+
+## Landing-check of record KT: SAFE (already committed and pushed as 6620196)
+KT's claims re-derive: rail bands one row each with the stated names, cameras 185->200 and
+150->165, 5 standard views byte-identical on re-render, 4 SVGs 0 overlaps, run_checks 20/20,
+TOC row and anchor correct; step_1 deliberately not re-rendered. Only collateral: finding 12.
+
+## Verified true
+`run_checks.py` (.venv) -> "20 passed, 0 failed, 0 skipped (of 20)"; `check_artifacts.py` ->
+"40 artifacts checked, 0 drifted, 0 errored, 2 uncheckable"; shield_holemap "all checks
+passed" (17 nets none shorted, 22 bridges, 31 hazard WARNs disclosed); electronics_layout "35
+entries, 0 checks failed"; pin map identical across firmware, layout and 6 docs; every simulated
+guide check except finding 2 holds; record 306 headings A..KT unique and ordered, 0 CRLF, 0
+deletions in 187 commits; pm-secretscan --history clean; 319 internal links, 0 broken.
+
+## Not swept
+Physical truths (carrier row spacing, hole coordinates vs the real board, polarity, wire colours);
+BOM prices; hardware/serial/ssh; CVEs (no tool); most of cad/ and ml/ read only by AST pass or
+regeneration; PRD body semantics.
+
+Cost: 4 Sonnet workers, ~741K subagent tokens (97,126 + 223,017 + 180,742 + 240,030).
+
+# Appendix KV - Animated 'how it works' diagram of the shield (block-diagram version) (2026-10-22, ~19:40 CDT)
+**Ask (Evan):** an animated visual of what everything on the shield does and how the electricity flows.
+
+**Made:** `scripts/shield_flow_svg.py` -> `docs/shield_how_it_works.svg`: a block diagram (not hole-level) of the pack, LM2596, Pi, every shield part (J5, C1/C2, divider, TB6612, J1, JP1, J2, J3/J4, the Uno) and the off-board loads, each with a one-line 'what it does'. Current = dashes moving along the wires, coloured by net; six phases light up in turn on a 30 s CSS loop (1 battery power / VBAT, 2 +5V2, 3 logic 5V from the Pi's USB, 4 signals, 5 motor current, 6 ground return to the star), with a caption list whose active line is highlighted. Every drawn connection names its net and members; the script FAILS if docs/shield_layout.json lacks them (self_check plants a removed member and requires the failure). Respects prefers-reduced-motion. Done by Opus directly (diagram layout is judgment work), not plan-split.
+
+Checks (2026-10-22 ~19:39 CDT): `svg_text_overlap.py` 5 x 0 overlaps (the new SVG is now a target); `run_checks.py` 21 passed. The self-check caught one real defect during the build (a caption wider than the page) - captions now wrap. Animation verified in the live browser pane: ~10 s in, phase 3's caption and magenta paths were the bright ones (headless Chrome freezes CSS animation, so it cannot verify this). Evan then asked for it to look like the build guide - follow-up pending.
