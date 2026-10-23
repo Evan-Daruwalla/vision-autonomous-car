@@ -976,7 +976,7 @@
     "J3 in P3/12, P4/12, B/12.  J4 in P3/13, P4/13, B/13.",
     "JP1 in L1/-1, L2/-1, L3/-1.  J2 in L1/-2, L2/-2, L3/-2."
    ],
-   "check": "J5 top pin (L3/10) beeps to VMOT; J3 middle beeps to J4 middle (+5V2); J3 bottom beeps to B/8"
+   "check": "J5 top pin (L3/10) beeps to L1/9 (the VBAT strip; VMOT joins it only with w1 in step 6); J3 middle beeps to J4 middle (+5V2); J3 bottom beeps to B/8"
   },
   {
    "title": "5. Divider",
@@ -995,7 +995,7 @@
     "w4 P4/7 -> P3/-1 (+5V2 to JP1's bottom pin).",
     "w5 B/2 -> P3/-2 (servo GND to the star)."
    ],
-   "check": "VBAT (L3/10) to B/10 SILENT; V/0 to B/2 SILENT; P4/7 to B/2 SILENT"
+   "check": "J5 top pin (L3/10) now beeps to VMOT (through w1); VBAT (L3/10) to B/10 SILENT; V/0 to B/2 SILENT; P4/7 to B/2 SILENT"
   },
   {
    "title": "7. Dupont wires to the Uno sockets (cut a male-male jumper, solder the cut end in the hole)",

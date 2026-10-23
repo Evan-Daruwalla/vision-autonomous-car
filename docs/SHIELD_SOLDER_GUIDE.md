@@ -138,7 +138,8 @@ straight, then the rest.
 - [ ] J3 in P3/12, P4/12, B/12. J4 in P3/13, P4/13, B/13.
 - [ ] JP1 in L1/-1, L2/-1, L3/-1. J2 in L1/-2, L2/-2, L3/-2.
 
-**Check:** J5 top pin (L3/10) beeps to VMOT; J3 middle beeps to J4 middle
+**Check:** J5 top pin (L3/10) beeps to L1/9 (the VBAT strip; VMOT joins it
+only with w1 in step 6); J3 middle beeps to J4 middle
 (+5V2); J3 bottom beeps to B/8.
 
 ## Step 5 - divider (pack-voltage sense for A0)
@@ -168,7 +169,8 @@ L3/8).
 - [ ] w5 B/2 -> B/-2 -> P3/-2 (servo GND to the star): left along row B, then
       up.
 
-**Check:** VBAT (L3/10) to B/10 SILENT; V/0 to B/2 SILENT; P4/7 to B/2 SILENT.
+**Check:** J5 top pin (L3/10) now beeps to VMOT (through w1); VBAT (L3/10) to
+B/10 SILENT; V/0 to B/2 SILENT; P4/7 to B/2 SILENT.
 
 ## Step 7 - Dupont wires to the Uno sockets
 

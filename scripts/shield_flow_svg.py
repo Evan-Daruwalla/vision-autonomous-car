@@ -168,16 +168,19 @@ def draw_panel(o: Out, x0: float, y0: float, h: float, k: int, imgs, measure: bo
         py += 14
     y += pbh + 10
 
-    # 3. two images side by side
-    row_h = 0.0
-    for j, (png, size) in enumerate(imgs):
-        ih = IMG_W * size[1] / size[0]
-        b64 = base64.b64encode(png.read_bytes()).decode("ascii")
-        ix = PAD + j * (IMG_W + 10)
-        body.append(f'<image x="{x0 + ix:.1f}" y="{y0 + y:.1f}" width="{IMG_W:.1f}" height="{ih:.1f}" '
-                    f'href="data:image/png;base64,{b64}"/>')
-        row_h = max(row_h, ih)
-    y += row_h + 10
+    # 3. images two per row (3/4 view, straight down; then the underside, centred)
+    for r in range(0, len(imgs), 2):
+        row = imgs[r:r + 2]
+        x_first = PAD if len(row) == 2 else PAD + (IMG_W + 10) / 2
+        row_h = 0.0
+        for j, (png, size) in enumerate(row):
+            ih = IMG_W * size[1] / size[0]
+            b64 = base64.b64encode(png.read_bytes()).decode("ascii")
+            ix = x_first + j * (IMG_W + 10)
+            body.append(f'<image x="{x0 + ix:.1f}" y="{y0 + y:.1f}" width="{IMG_W:.1f}" height="{ih:.1f}" '
+                        f'href="data:image/png;base64,{b64}"/>')
+            row_h = max(row_h, ih)
+        y += row_h + 10
 
     # 4. explanation
     for ln in wrap(text, inner, 12):
@@ -201,7 +204,7 @@ def build(pngdir: Path) -> tuple[str, list[tuple[str, float, float]]]:
     pngs = []
     for k in range(1, N_PHASE + 1):
         pair = []
-        for side in ("top", "bottom"):
+        for side in ("top", "plan", "bottom"):
             p = pngdir / f"flow_{k}_{side}.png"
             if not p.exists():
                 raise FileNotFoundError(f"missing {p} - run scripts/shield_render3d.py --flow")
@@ -212,8 +215,8 @@ def build(pngdir: Path) -> tuple[str, list[tuple[str, float, float]]]:
     o.text(MARGIN, 20 + 24, "Proto shield - what each part does, and how the current flows", 24,
            PAGE_W - 2 * MARGIN)
     intro = ("Six panels, one per path the current takes. In each picture only that path's parts "
-             "and wires are in colour; everything else is grey. Left: the top side; right: the "
-             "underside (flipped top-over-bottom, USB end still left). The panels light up one "
+             "and wires are in colour; everything else is grey. Top row: a 3/4 view and the view "
+             "straight down; below: the underside (flipped top-over-bottom, USB end still left). The panels light up one "
              "after another (30 s loop). Pictures are renders of the INTENDED build, not photos.")
     y = 20 + 24 + 22
     for ln in wrap(intro, PAGE_W - 2 * MARGIN, 12):

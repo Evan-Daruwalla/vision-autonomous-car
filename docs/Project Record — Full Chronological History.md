@@ -346,6 +346,7 @@ the dated entry, not the digest.
 - [KW - How-it-works page rebuilt as build-guide panels with per-net 3D renders](#appendix-kw---how-it-works-page-rebuilt-as-build-guide-panels-with-per-net-3d-renders-2026-10-22-1953-cdt) (10-22)
 - [KX - Strip naming fixed: D4 = left, D7 = right (audit KU Med #1)](#appendix-kx---strip-naming-fixed-d4--left-d7--right-audit-ku-med-1-2026-10-22-2002-cdt) (10-22)
 - [KY - docs-sync: HANDOFF, bins and prompt brought up to KX](#appendix-ky---docs-sync-handoff-bins-and-prompt-brought-up-to-kx-2026-10-22-2003-cdt) (10-22)
+- [KZ - Step-4 VMOT check moved to step 6 (audit KU Med #2); top-down views in both picture guides](#appendix-kz---step-4-vmot-check-moved-to-step-6-audit-ku-med-2-top-down-views-in-both-picture-guides-2026-10-22-2013-cdt) (10-22)
 
 ---
 
@@ -20890,3 +20891,12 @@ Checks (2026-10-22 ~20:01 CDT): holemap all checks passed; `svg_text_overlap.py`
 - Bins: hardware.md (shield facts: C1 upright, strips by side, JP1 positions, socket headers, underside view convention, isolated pads), testing.md (suite 21, the gated SVGs, render-mode byte-identity rule), tooling.md (headless Chrome freezes CSS animation; the browser pane animates but refused the 728 KB file); INDEX.md lines.
 
 **Skipped, with reason:** HTML twin and record index - the project has neither; PRD_ROADMAP.md - no task's done-check passed this session (nothing soldered, printed or flashed); auto-memory - no new cross-session working rule, the facts went to the bins; performance/security/ui bins flagged stale by pm-cadence - no performance, security or UI work happened, nothing to record.
+
+# Appendix KZ - Step-4 VMOT check moved to step 6 (audit KU Med #2); top-down views in both picture guides (2026-10-22, ~20:13 CDT)
+**Ask (Evan):** do option 1 (audit KU Med #2) and add a top-down view.
+
+**1. KU Med #2 fixed.** Step 4's check said 'J5 top pin (L3/10) beeps to VMOT', which cannot pass until w1 (step 6): a union-find over the copper strips + bridges gave L3/10~VMOT = False after step 3 and True only once the wires are in; L3/10~L1/9 = True after step 3. `docs/shield_layout.json` step 4 now checks 'J5 top pin (L3/10) beeps to L1/9 (the VBAT strip; VMOT joins it only with w1 in step 6)', and step 6's check gained 'J5 top pin (L3/10) now beeps to VMOT (through w1)'. Same text in `docs/SHIELD_SOLDER_GUIDE.md`; SHIELD_BUILD.md, the hole map and both picture guides regenerated. Guide-vs-layout hole check: all 9 steps match.
+
+**2. Top-down views.** `scripts/shield_render3d.py` --steps also writes `docs/guide/step_{k}_plan.png` (straight down, orthographic; not for step 3, already a straight underside view; step 1 framed on the carrier) and --flow writes `flow_{k}_plan.png`. `scripts/shield_guide_svg.py`: each step panel shows the 3/4 view and the top-down view side by side (step 3 alone). `scripts/shield_flow_svg.py`: each panel shows the 3/4 view and the top-down view in one row, the underside centred below; intro texts updated. All 26 earlier images byte-identical (sha256 -c 26 OK); +14 new images. Page sizes: build guide 675 KB, how-it-works 920 KB.
+
+Checks (2026-10-22 ~20:13 CDT): holemap all checks passed; `svg_text_overlap.py` 5 x 0; `run_checks.py` 21 passed; both pages viewed (steps 2-5, panels 1-2).

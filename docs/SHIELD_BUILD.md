@@ -123,7 +123,7 @@ In order: (1) top: straight down on the finished top side, every hole shown, par
    - J5 (4 pins, pull out the 2nd pin) in L3/10, P3/10, P4/10, B/10.  J6 (1 pin) in B/11.
    - J3 in P3/12, P4/12, B/12.  J4 in P3/13, P4/13, B/13.
    - JP1 in L1/-1, L2/-1, L3/-1.  J2 in L1/-2, L2/-2, L3/-2.
-   - Check: J5 top pin (L3/10) beeps to VMOT; J3 middle beeps to J4 middle (+5V2); J3 bottom beeps to B/8
+   - Check: J5 top pin (L3/10) beeps to L1/9 (the VBAT strip; VMOT joins it only with w1 in step 6); J3 middle beeps to J4 middle (+5V2); J3 bottom beeps to B/8
 6. **5. Divider**
    - R100k lying flat: leads into L1/9 and U3/9 only (body over G/9, V/9).
    - R10k standing: U2/9 and U2/10.  R2k standing: U3/10 and G/10.
@@ -134,7 +134,7 @@ In order: (1) top: straight down on the finished top side, every hole shown, par
    - w3 L3/2 -> V/0 (TB6612 VCC to the Uno 5V).
    - w4 P4/7 -> P3/-1 (+5V2 to JP1's bottom pin).
    - w5 B/2 -> P3/-2 (servo GND to the star).
-   - Check: VBAT (L3/10) to B/10 SILENT; V/0 to B/2 SILENT; P4/7 to B/2 SILENT
+   - Check: J5 top pin (L3/10) now beeps to VMOT (through w1); VBAT (L3/10) to B/10 SILENT; V/0 to B/2 SILENT; P4/7 to B/2 SILENT
 8. **7. Dupont wires to the Uno sockets (cut a male-male jumper, solder the cut end in the hole)**
    - U1/1 -> D11, U1/2 -> D12, U1/3 -> D8, U1/4 -> D10.
    - U1/9 -> A0.  L1/-3 -> D9.

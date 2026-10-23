@@ -2,7 +2,7 @@
 
 **Last updated: 2026-10-22 ~20:05 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, 311 appendices A–KY; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, 312 appendices A–KZ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -659,8 +659,7 @@ cut-cable text, bins (hardware/architecture/LIGHTING, decisions.md:62), LM2596
 ml/splits.py split stability + no corpus id in checkpoints. IM, EW, EX, FG
 open.
 KU (2026-10-22 daily audit, 36 findings, 0 crit/high): Med #1 strip naming
-FIXED (KX). Med #2 OPEN: the step-4 check 'J5 top pin (L3/10) beeps to VMOT'
-cannot pass until w1 (step 6) - fix before Evan reaches step 4. Med #3 OPEN:
+FIXED (KX). Med #2 FIXED (KZ: the VMOT check moved to step 6). Med #3 OPEN:
 superseded power text in BOM.md:51, WIRING_PROTOSHIELD.md:129,183,
 hardware.md:242, LIGHTING_SPEC.md:113; README says nothing is bought.
 docs/shield_wiring.svg has 36 text overlaps (not in the overlap gate).
@@ -669,7 +668,7 @@ NEXT ACTIONS, highest value first:
 1. Evan: shield step 0 (2 meter checks), then SHIELD_BUILD.md steps 1-2
    (carrier headers, carrier-top bridges + C1/C2, carrier onto the shield);
    send a photo after step 2 before the bridges.
-2. Fix KU Med #2 (the step-4 VMOT check) before Evan gets to step 4; add the
+2. Add the
    upright C1 (~18.8 mm) as a height entry over the Uno in
    scripts/electronics_layout.py (headroom vs deck / mast).
 3. Print tray v11 + deck v13 (supports OFF); fit report + printer settings in

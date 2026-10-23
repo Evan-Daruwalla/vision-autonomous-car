@@ -560,7 +560,8 @@ def main(argv=None) -> int:
         gdir.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory() as td:
             for k in sorted(FLOW_PHASES):
-                for side, rot, dist, proj in (("top", (55, 0, 25), 200.0, "p"), ("bottom", (180, 0, 0), 165.0, "o")):
+                for side, rot, dist, proj in (("top", (55, 0, 25), 200.0, "p"), ("bottom", (180, 0, 0), 165.0, "o"),
+                                              ("plan", (0, 0, 0), 165.0, "o")):    # plan = straight down
                     scad = Path(td) / f"flow_{k}_{side}.scad"
                     scad.write_text(flow_model(steps_info, k, side == "bottom"), encoding="ascii")
                     png = gdir / f"flow_{k}_{side}.png"
@@ -585,6 +586,11 @@ def main(argv=None) -> int:
                 render(scad, png, cen, rot, dist, proj)
                 _crop_to_content(png)
                 print(f"png: {png}  ({png.stat().st_size} bytes)")
+                if k != 3:                       # step 3 is already a straight (underside) view
+                    plan = gdir / f"step_{k}_plan.png"
+                    render(scad, plan, cen, (0, 0, 0), 70.0 if k == 1 else 165.0, "o")
+                    _crop_to_content(plan)
+                    print(f"png: {plan}  ({plan.stat().st_size} bytes)")
         return 0
     with tempfile.TemporaryDirectory() as td:
         # top: straight down, orthographic (USB end left); bottom: straight up from below,
