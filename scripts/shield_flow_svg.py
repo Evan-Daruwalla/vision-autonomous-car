@@ -50,7 +50,7 @@ PHASES = [
      "The Pi's USB powers the Uno; the Uno's 5V pin is rail V. w3 takes it to the TB6612's logic "
      "supply (VCC), and JP1's cap on the top two pins passes it to the servo's V+ on J2."),
     ("Signals (the Uno's pins)",
-     ["PWM", "DIR1", "DIR2", "STBY", "SERVO_SIG", "DIN_F", "DIN_R", "A0", "DIV_MID"],
+     ["PWM", "DIR1", "DIR2", "STBY", "SERVO_SIG", "DIN_L", "DIN_R", "A0", "DIV_MID"],
      ["D11 PWM, D8 + D12 direction, D10 enable -> TB6612", "D9 -> servo signal (J2)",
       "D4 / D7 -> LED data (J3, J4), 400 ohm in each wire",
       "A0 <- divider (R100k over R10k + R2k)", "D2 / D3 <- encoder (straight to the Uno)"],
@@ -80,7 +80,7 @@ REQUIRED = {
     "SERVO_V": ["J2.V"],
     "PWM": ["uno:D11"],
     "SERVO_SIG": ["uno:D9"],
-    "DIN_F": ["uno:D4"],
+    "DIN_L": ["uno:D4"],
     "DIN_R": ["uno:D7"],
     "A0": ["uno:A0", "R100k.b"],
     "M1": ["TB.AO1", "J1.M1"],

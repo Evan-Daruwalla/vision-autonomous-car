@@ -65,7 +65,7 @@ group(362, 92, 222, 380, "TRAY -y LOBE")
 group(598, 92, 224, 380, "DECK -y WING (rocker hangs below it)")
 group(828, 92, 360, 548, "PROTO SHIELD on the Uno (deck, rear)")
 group(1202, 92, 280, 300, "UNDER THE FRAMES")
-group(1202, 406, 280, 234, "CAR FRONT + REAR")
+group(1202, 406, 280, 234, "CAR LIGHTS (L + R)")
 
 # ---- pack ----
 box(40, 130, 130, 52, "Cell 1 (25R)", ["+ end at the lead end"])
@@ -153,7 +153,7 @@ pin(1226, 362, "green (enc GND) -> STAR", "left")
 wire([(1226, 362), (1196, 362), (1196, 444), (1012, 444), (1012, 452)], BLK, "W16 green", at=2, dx=40, width=1.6)
 
 # ---- strips ----
-box(1226, 430, 236, 196, "WS2812B strips x2", ["front and rear segment, each:", "+5V2 <- +5V2 pad (W17)", "DIN <- D4 (left) / D7 (right)",
+box(1226, 430, 236, 196, "WS2812B strips x2", ["left + right strip, each:", "+5V2 <- +5V2 pad (W17)", "DIN <- D4 (left) / D7 (right)",
                                                "  via 400 ohm (2 x 200)", "GND -> STAR, own wire (W17)", "470 uF +5V2-GND at the feed", "",
                                                "W17 lengths: measure on the car", "(strip positions not designed)"], fill="#FFFDE7", stroke="#B59F00")
 pin(1226, 600, "GND x2")

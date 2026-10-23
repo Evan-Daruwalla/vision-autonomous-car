@@ -10,7 +10,7 @@
   "Uno connections are Dupont male pins plugged into the shield's own sockets (Evan). Off-board cables use 0.1 in male headers (Evan).",
   "The 470 uF for the LED strips goes AT each strip's input pads (+5V / GND), not on the shield - that is where the WS2812B guidance puts it.",
   "The TB6612 VM bulk cap C1 (470 uF) and C2 (0.1 uF) are soldered across the carrier's VMOT and GND pin tips on top of the carrier.",
-  "DIN_F / DIN_R: the D4 / D7 Dupont wires each carry 200 + 200 ohm soldered in series inside the wire (heat-shrunk). KEY = J5's pulled pin, no connection."
+  "DIN_L / DIN_R: the D4 (left strip) / D7 (right strip) Dupont wires each carry 200 + 200 ohm soldered in series inside the wire (heat-shrunk). KEY = J5's pulled pin, no connection."
  ],
  "grid": {
   "rows": [
@@ -470,7 +470,7 @@
   },
   {
    "id": "J3",
-   "kind": "3-pin header: front strip",
+   "kind": "3-pin header: left strip (D4)",
    "pins": {
     "DIN": "P3/12",
     "5V2": "P4/12",
@@ -488,7 +488,7 @@
   },
   {
    "id": "J4",
-   "kind": "3-pin header: rear strip",
+   "kind": "3-pin header: right strip (D7)",
    "pins": {
     "DIN": "P3/13",
     "5V2": "P4/13",
@@ -884,7 +884,7 @@
    "J2.SIG",
    "uno:D9"
   ],
-  "DIN_F": [
+  "DIN_L": [
    "J3.DIN",
    "uno:D4"
   ],
@@ -918,7 +918,7 @@
   "5V2": "#E07B00",
   "SERVO_V": "#2E7D32",
   "SERVO_SIG": "#2E7D32",
-  "DIN_F": "#B59F00",
+  "DIN_L": "#B59F00",
   "DIN_R": "#B59F00",
   "A0": "#1A56B0",
   "DIV_MID": "#1A56B0",

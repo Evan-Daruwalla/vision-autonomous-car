@@ -344,6 +344,7 @@ the dated entry, not the digest.
 - [KU - Scheduled daily-audit: 36 findings, 0 crit/high - the shield docs call the D4/D7 strips front/rear while firmware says left/right, the step-4 continuity check cannot pass until step 6, and the public README still says nothing is bought](#appendix-ku---scheduled-daily-audit-36-findings-0-crithigh---the-shield-docs-call-the-d4d7-strips-frontrear-while-firmware-says-leftright-the-step-4-continuity-check-cannot-pass-until-step-6-and-the-public-readme-still-says-nothing-is-bought-2026-10-22-0750-cdt) (10-22)
 - [KV - Animated 'how it works' diagram of the shield (block-diagram version)](#appendix-kv---animated-how-it-works-diagram-of-the-shield-block-diagram-version-2026-10-22-1940-cdt) (10-22)
 - [KW - How-it-works page rebuilt as build-guide panels with per-net 3D renders](#appendix-kw---how-it-works-page-rebuilt-as-build-guide-panels-with-per-net-3d-renders-2026-10-22-1953-cdt) (10-22)
+- [KX - Strip naming fixed: D4 = left, D7 = right (audit KU Med #1)](#appendix-kx---strip-naming-fixed-d4--left-d7--right-audit-ku-med-1-2026-10-22-2002-cdt) (10-22)
 
 ---
 
@@ -20866,3 +20867,14 @@ Checks (2026-10-22 ~19:39 CDT): `svg_text_overlap.py` 5 x 0 overlaps (the new SV
 - `scripts/shield_flow_svg.py` rewritten (replacing the block-diagram version of KV, still in history at a8904f0): `docs/shield_how_it_works.svg` in the build guide's visual system (imports its helpers) - 6 panels, badge, title, 'Involved' box, top + underside image, explanation text written by Opus; CSS lights the panels one after another (30 s, gold border + badge; reduced-motion respected). Layout check: each phase's nets + listed members must exist in shield_layout.json (planted-removal self-check). Strips named only 'D4 / D7' (front/rear vs left/right is open audit item KU).
 
 Checks (2026-10-22 ~19:53 CDT): the 14 earlier renders byte-identical (5 views + 9 steps, sha256 -c); holemap output unchanged + self-check PASS; `svg_text_overlap.py` 5 x 0; `run_checks.py` 21 passed. Page viewed in headless Chrome (panel 1 lit). NOT verified on screen: the panel cycling - the live browser pane would not open the 728 KB file; the keyframes were read and are correct (panel k on from (k-1)/6 to k/6 of the loop), and the same CSS mechanism did animate in the pane for KV.
+
+# Appendix KX - Strip naming fixed: D4 = left, D7 = right (audit KU Med #1) (2026-10-22, ~20:02 CDT)
+**Ask (Evan):** fix the strip naming (audit KU Med #1).
+
+**Truth:** firmware `uno_control.ino:86-87` (PIN_STRIP_L = 4, PIN_STRIP_R = 7) and LIGHTING_SPEC.md: D4 = LEFT strip, D7 = RIGHT strip, each with a front head pixel, a front indicator and a rear tail pixel. The shield docs called J3/J4 the 'front' / 'rear' strip - a builder following them would plug each strip into the wrong side.
+
+**Fixed:** `docs/shield_layout.json` - J3 '3-pin header: left strip (D4)', J4 'right strip (D7)', net DIN_F renamed DIN_L (DIN_R now reads as 'right'), the note names D4 left / D7 right; `scripts/shield_flow_svg.py` and `scripts/shield_render3d.py` follow the net rename; `scripts/pack_wiring_svg.py` group 'CAR LIGHTS (L + R)' and 'left + right strip, each:' (was 'CAR FRONT + REAR', 'front and rear segment'); `scripts/shield_wiring_svg.py` '3 pins each (left, right):'. Regenerated: shield_holemap.svg + SHIELD_BUILD.md, pack_wiring_full.svg, shield_wiring.svg; all 3D renders and the guide / how-it-works pages came out identical (no strip text in them). Repo grep: 'front strip', 'rear strip', 'DIN_F' now appear only in the append-only record.
+
+Checks (2026-10-22 ~20:01 CDT): holemap all checks passed; `svg_text_overlap.py` 5 x 0; `run_checks.py` 21 passed.
+
+**Found, not fixed:** `docs/shield_wiring.svg` (not in the overlap gate) has 36 text overlaps - the same 36 before this change. KU Med #2 (the step-4 check 'J5 top pin beeps to VMOT' cannot pass until w1 in step 6) is still open.

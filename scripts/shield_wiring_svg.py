@@ -194,7 +194,7 @@ for name, y, c, net in j1:
     t(CX + 176, y + 4, net, 10.5, c, bold=True, anchor="end")
 line([(TX + 215, 240), (TX + 262, 240), (TX + 262, 168), (CX, 168)], MOT, 2)
 line([(TX + 215, 262), (TX + 270, 262), (TX + 270, 186), (CX, 186)], MOT, 2)
-box(CX, 290, 180, 100, "J3 / J4 strips (W17)", ["3 pins each (front, rear):", "  +5V2  <- +5V2 pad", "  DIN   <- D4 (J3) / D7 (J4)", "        via 200 + 200 ohm", "  GND   -> STAR, own wire each"], fill="#FFFDE7", stroke="#B59F00")
+box(CX, 290, 180, 100, "J3 / J4 strips (W17)", ["3 pins each (left, right):", "  +5V2  <- +5V2 pad", "  DIN   <- D4 (J3) / D7 (J4)", "        via 200 + 200 ohm", "  GND   -> STAR, own wire each"], fill="#FFFDE7", stroke="#B59F00")
 line([(X0 + 260, 352), (CX - 20, 352), (CX - 20, 320), (CX, 320)], ORG, 2)
 box(CX, 404, 180, 70, "J2 servo (MG90D-270)", ["signal <- D9", "V+ (red) <- JP1 middle", "GND -> STAR"], fill="#E8F5E9", stroke="#3E7D32")
 line([(X0 + 375, 604), (CX - 30, 604), (CX - 30, 440), (CX, 440)], MAG, 2)

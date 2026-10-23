@@ -495,7 +495,7 @@ def step_model(info: dict, k: int) -> str:
 
 
 FLOW_PHASES = {1: {"VBAT"}, 2: {"5V2"}, 3: {"UNO5V", "SERVO_V"},
-               4: {"PWM", "DIR1", "DIR2", "STBY", "SERVO_SIG", "DIN_F", "DIN_R", "A0", "DIV_MID"},
+               4: {"PWM", "DIR1", "DIR2", "STBY", "SERVO_SIG", "DIN_L", "DIN_R", "A0", "DIV_MID"},
                5: {"M1", "M2"}, 6: {"GND"}}
 
 

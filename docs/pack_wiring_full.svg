@@ -16,7 +16,7 @@
 <rect x="1202" y="92" width="280" height="300" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
 <text x="1212" y="108" font-size="11" fill="#6B6B66" text-anchor="start" font-weight="bold">UNDER THE FRAMES</text>
 <rect x="1202" y="406" width="280" height="234" rx="10" fill="none" stroke="#9E9E9E" stroke-width="1" stroke-dasharray="5 4"/>
-<text x="1212" y="422" font-size="11" fill="#6B6B66" text-anchor="start" font-weight="bold">CAR FRONT + REAR</text>
+<text x="1212" y="422" font-size="11" fill="#6B6B66" text-anchor="start" font-weight="bold">CAR LIGHTS (L + R)</text>
 <rect x="40" y="130" width="130" height="52" rx="6" fill="#F5F5F2" stroke="#5F5E5A" stroke-width="1"/>
 <text x="48" y="148" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">Cell 1 (25R)</text>
 <text x="48" y="166" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">+ end at the lead end</text>
@@ -223,7 +223,7 @@
 <text x="1144.0" y="438.0" font-size="11" fill="#333333" text-anchor="middle" font-weight="bold">W16 green</text>
 <rect x="1226" y="430" width="236" height="196" rx="6" fill="#FFFDE7" stroke="#B59F00" stroke-width="1"/>
 <text x="1234" y="448" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">WS2812B strips x2</text>
-<text x="1234" y="466" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">front and rear segment, each:</text>
+<text x="1234" y="466" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">left + right strip, each:</text>
 <text x="1234" y="481" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">+5V2 &lt;- +5V2 pad (W17)</text>
 <text x="1234" y="496" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">DIN &lt;- D4 (left) / D7 (right)</text>
 <text x="1234" y="511" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">  via 400 ohm (2 x 200)</text>

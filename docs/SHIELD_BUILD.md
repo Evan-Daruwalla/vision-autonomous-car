@@ -20,7 +20,7 @@ In order: (1) top: straight down on the finished top side, every hole shown, par
 - Uno connections are Dupont male pins plugged into the shield's own sockets (Evan). Off-board cables use 0.1 in male headers (Evan).
 - The 470 uF for the LED strips goes AT each strip's input pads (+5V / GND), not on the shield - that is where the WS2812B guidance puts it.
 - The TB6612 VM bulk cap C1 (470 uF) and C2 (0.1 uF) are soldered across the carrier's VMOT and GND pin tips on top of the carrier.
-- DIN_F / DIN_R: the D4 / D7 Dupont wires each carry 200 + 200 ohm soldered in series inside the wire (heat-shrunk). KEY = J5's pulled pin, no connection.
+- DIN_L / DIN_R: the D4 (left strip) / D7 (right strip) Dupont wires each carry 200 + 200 ohm soldered in series inside the wire (heat-shrunk). KEY = J5's pulled pin, no connection.
 
 ## Parts
 
@@ -28,8 +28,8 @@ In order: (1) top: straight down on the finished top side, every hole shown, par
 - **J1** (4-pin header: motor): M1 = P3/3, M2 = P3/4, GND = P3/5, 5V2 = P3/6 - Encoder yellow (A) and white (B) do NOT go here: give them male Dupont pins and plug them straight into the D2 / D3 sockets.
 - **J5** (4-pin header: power in): VBAT = L3/10, KEY = P3/10, 5V2 = P4/10, GND = B/10 - W9 VBAT, (key), W14 +5V2, W12 pack - (motor return).
 - **J6** (1-pin header: W13): GND = B/11 - W13: LM2596 IN- / OUT-.
-- **J3** (3-pin header: front strip): DIN = P3/12, 5V2 = P4/12, GND = B/12 - Cable order: DIN, +5V, GND.
-- **J4** (3-pin header: rear strip): DIN = P3/13, 5V2 = P4/13, GND = B/13 - Cable order: DIN, +5V, GND.
+- **J3** (3-pin header: left strip (D4)): DIN = P3/12, 5V2 = P4/12, GND = B/12 - Cable order: DIN, +5V, GND.
+- **J4** (3-pin header: right strip (D7)): DIN = P3/13, 5V2 = P4/13, GND = B/13 - Cable order: DIN, +5V, GND.
 - **JP1** (3-pin header: servo-power jumper): UNO5V = L1/-1, SERVO_V = L2/-1, 5V2 = L3/-1 - Put the Dupont female-female jumper (or a jumper cap) on the TOP two pins (UNO5V + SERVO_V) = servo on the Uno 5V (Evan, JR). Move it to the bottom two = servo on +5V2 (fallback).
 - **J2** (3-pin header: servo): SIG = L1/-2, V = L2/-2, GND = L3/-2 - Servo plug: orange/white = SIG at the top, red in the middle, brown/black = GND at the bottom.
 - **R100k** (100k, lying flat): a = L1/9, b = U3/9 - Body lies over G/9 and V/9 - leads go ONLY into L1/9 and U3/9.
@@ -166,15 +166,15 @@ In order: (1) top: straight down on the finished top side, every hole shown, par
 - [ ] L2/-2 (SERVO_V) - L3/-2 (GND): silent
 - [ ] L2/8 (GND) - L2/9 (VBAT): silent
 - [ ] L3/-1 (5V2) - L3/-2 (GND): silent
-- [ ] L3/12 (DIN_F) - L3/13 (DIN_R): silent
+- [ ] L3/12 (DIN_L) - L3/13 (DIN_R): silent
 - [ ] L3/2 (UNO5V) - L3/3 (M1): silent
 - [ ] L3/3 (M1) - L3/4 (M2): silent
 - [ ] L3/5 (M2) - P3/5 (GND): silent
 - [ ] L3/6 (M1) - P3/6 (5V2): silent
 - [ ] P3/-1 (5V2) - P3/-2 (GND): silent
 - [ ] P3/10 (KEY) - P4/10 (5V2): silent
-- [ ] P3/12 (DIN_F) - P3/13 (DIN_R): silent
-- [ ] P3/12 (DIN_F) - P4/12 (5V2): silent
+- [ ] P3/12 (DIN_L) - P3/13 (DIN_R): silent
+- [ ] P3/12 (DIN_L) - P4/12 (5V2): silent
 - [ ] P3/13 (DIN_R) - P4/13 (5V2): silent
 - [ ] P3/3 (M1) - P3/4 (M2): silent
 - [ ] P3/4 (M2) - P3/5 (GND): silent
