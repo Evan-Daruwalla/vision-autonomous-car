@@ -347,6 +347,7 @@ the dated entry, not the digest.
 - [KX - Strip naming fixed: D4 = left, D7 = right (audit KU Med #1)](#appendix-kx---strip-naming-fixed-d4--left-d7--right-audit-ku-med-1-2026-10-22-2002-cdt) (10-22)
 - [KY - docs-sync: HANDOFF, bins and prompt brought up to KX](#appendix-ky---docs-sync-handoff-bins-and-prompt-brought-up-to-kx-2026-10-22-2003-cdt) (10-22)
 - [KZ - Step-4 VMOT check moved to step 6 (audit KU Med #2); top-down views in both picture guides](#appendix-kz---step-4-vmot-check-moved-to-step-6-audit-ku-med-2-top-down-views-in-both-picture-guides-2026-10-22-2013-cdt) (10-22)
+- [LA - See-through close-up of the pack-voltage divider](#appendix-la---see-through-close-up-of-the-pack-voltage-divider-2026-10-22-2200-cdt) (10-22)
 
 ---
 
@@ -20900,3 +20901,10 @@ Checks (2026-10-22 ~20:01 CDT): holemap all checks passed; `svg_text_overlap.py`
 **2. Top-down views.** `scripts/shield_render3d.py` --steps also writes `docs/guide/step_{k}_plan.png` (straight down, orthographic; not for step 3, already a straight underside view; step 1 framed on the carrier) and --flow writes `flow_{k}_plan.png`. `scripts/shield_guide_svg.py`: each step panel shows the 3/4 view and the top-down view side by side (step 3 alone). `scripts/shield_flow_svg.py`: each panel shows the 3/4 view and the top-down view in one row, the underside centred below; intro texts updated. All 26 earlier images byte-identical (sha256 -c 26 OK); +14 new images. Page sizes: build guide 675 KB, how-it-works 920 KB.
 
 Checks (2026-10-22 ~20:13 CDT): holemap all checks passed; `svg_text_overlap.py` 5 x 0; `run_checks.py` 21 passed; both pages viewed (steps 2-5, panels 1-2).
+
+# Appendix LA - See-through close-up of the pack-voltage divider (2026-10-22, ~22:00 CDT)
+**Ask (Evan):** pushed (`59881fa..59c4c99`); then, after asking what the red joint under the bridge in the battery-power underside view is (answer: L1/9, R100k's VBAT-end lead on lower strip 9), 'show me how the resistor connects using a visual with the main board see through'.
+
+**Made:** `scripts/shield_divider_xray.py` -> `docs/shield_divider_xray.svg` with `docs/guide/divider_xray.png` (3/4 view) and `divider_xray_plan.png` (straight down): a close-up of columns 8-11, rows U1-L3, with the board drawn LAST at 30% opacity so OpenSCAD's preview shows the copper strips, leads through the holes, solder joints and the L2/9-L2/10 bridge through it (the KL failure - board drawn first hid everything behind it - was the draw order). Parts: R100k flat L1/9 -> U3/9, R10k standing U2/9 -> U2/10, R2k standing G/10 -> U3/10, the A0 Dupont lead at U1/9, J5's VBAT pin at L3/10, w1's end at L3/9. Nine numbered badges (flat in the plan view, camera-facing in the 3/4 view) + a legend + the arithmetic: A0 = VBAT x 12k / 112k = VBAT / 9.33 (8.4 V -> 0.90 V, 7.2 V -> 0.77 V). The script FAILS if the layout moves any of those holes or drops the A0 socket or the bridge.
+
+First try used 3D text labels: far too big, overlapping, cut off - replaced by badges; badge spots tuned by eye on both views. Checks (2026-10-22 ~22:00 CDT): script exit 0, layout assertions pass; `svg_text_overlap.py` on the page: 0 overlaps; both renders viewed. Picture of the INTENDED build, not a photo.
