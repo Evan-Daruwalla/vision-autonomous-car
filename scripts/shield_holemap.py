@@ -415,7 +415,7 @@ def analyze(data: dict) -> dict:
             "hazards": hazards,
             "results": results, "ok": all(r["status"] != "FAIL" for r in results),
             "pins": pins, "pin_color": pin_color, "pin_net": pin_net, "net_color": net_color,
-            "users": users}
+            "users": users, "hole_net": hole_net}
 
 
 def print_results(A: dict) -> None:

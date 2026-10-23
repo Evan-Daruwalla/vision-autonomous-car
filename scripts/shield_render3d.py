@@ -28,6 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_scad import find_openscad  # noqa: E402
+from shield_holemap import analyze  # noqa: E402
 
 P = 2.54            # mm, hole pitch
 BOARD_T = 1.6       # mm
@@ -113,9 +114,19 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
     s: list[str] = []
     tags: list[int] = []     # build step of each entry of s (--steps mode)
     hole_step: dict[str, int] = {}
+    nets: list[set] = []     # net names of each entry of s (--flow mode); empty set = base, never greyed
+    net_of = {m: n for n, ms in data["nets"].items() for m in ms}
+    hole_net = analyze(data)["hole_net"]
+    DRIVER = ("PWM", "DIR1", "DIR2", "STBY", "M1", "M2")
 
     def mark(n: int) -> None:
         tags.extend([n] * (len(s) - len(tags)))
+
+    def nmark(*ns: str) -> None:
+        nets.extend([set(ns)] * (len(s) - len(nets)))
+
+    def pnet(ref: str) -> str:
+        return net_of.get(ref, "?")      # "?" = on no net: never in colour in --flow
 
     # board with drilled holes
     drills = " ".join(f"translate([{f(g.xy(h)[0])},{f(g.xy(h)[1])},-1]) cylinder(h={f(BOARD_T + 2)}, d=1.0, $fn=10);"
@@ -143,6 +154,7 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
                                  xb + (0 if ra == rb else 0.9), yb + (0.9 if ra == rb else 0), -BOARD_T, C_COPPER))
 
     mark(0)
+    nmark()
     i_top = len(s)      # s[i_top:i_bot] = everything on the TOP side (ghosted in the bottom view)
     used: set[str] = set()
     parts = {p["id"]: p for p in data["parts"]}
@@ -152,6 +164,7 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
     r0, r1, c0, c1 = tb["body"]["rect"]
     zc = 2.5            # header spacer height
     s.append(box(c0 * P, -r0 * P, zc, c1 * P, -r1 * P, zc + 1.6, C_CARRIER))
+    nmark(*DRIVER)
     for pn, h in tb["pins"].items():
         x, y = g.xy(h)
         used.add(h)
@@ -159,11 +172,13 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
         s.append(box(x - 1.27, y - 1.27, 0, x + 1.27, y + 1.27, zc, C_PLASTIC))
         s.append(box(x - 0.32, y - 0.32, -BOARD_T - 1.5, x + 0.32, y + 0.32, zc + 1.6 + 1.2, C_PIN))
         s.append(cyl(x, y, zc + 1.6, 0.6, 1.6, C_SOLDER, 12))
+        nmark(pnet(f"TB.{pn}"))
     cx, cy = (c0 + c1) / 2 * P, -(r0 + r1) / 2 * P
     s.append(box(cx - 3.9, cy - 4.0, zc + 1.6, cx + 3.9, cy + 4.0, zc + 1.6 + 1.4, C_CHIP))
     # marker dot on PWMA (step 1)
     px, py = g.xy(tb["pins"]["PWMA"])
     s.append(cyl(px + 1.4, py - 2.0, zc + 1.6, 0.1, 1.2, "#ffffff", 16))
+    nmark(*DRIVER)
     top = zc + 1.6 + 1.2
     for j in data.get("joins", []):
         a, b = j["a"].split(".")[1], j["b"].split(".")[1]
@@ -177,6 +192,7 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
         zw = top + 0.2 + d / 2
         col = data["net_colors"].get(next((n for n, m in data["nets"].items() if f"TB.{a}" in m), ""), "#555555")
         s += poly([(xa, ya, top), (xa, ya + inward * reach, zw), (xb, yb + inward * reach, zw), (xb, yb, top)], d, col)
+        nmark(pnet(f"TB.{a}"))
     # C1 standing upright on the VMOT / GND2 pin tips (Evan 2026-10-21; was lying flat),
     # (-) stripe toward the GND tip; C2 across the same tips, bent out past the
     # carrier's bottom edge, low, under the can's overhang (step 1)
@@ -197,6 +213,7 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
     s += poly([(vx, vy, top), (vx, vy, top + 0.3), (vx, c2y, top + 0.3), (mx - 1.0, c2y, top + 1.5)], 0.5, C_SOLDER)
     s += poly([(gx, gy, top), (gx, gy, top + 0.3), (gx, c2y, top + 0.3), (mx + 1.0, c2y, top + 1.5)], 0.5, C_SOLDER)
 
+    nmark("VBAT")
     mark(1)
     # ---- pin headers (step 4)
     for pid, p in parts.items():
@@ -208,12 +225,15 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
             hole_step[h] = 4
             s.append(box(x - 1.27, y - 1.27, 0, x + 1.27, y + 1.27, 2.5, C_PLASTIC))
             if pn == "KEY":          # J5: the 2nd pin is pulled out as a polarity key
+                nmark(pnet(f"{pid}.{pn}"))
                 continue
             s.append(box(x - 0.32, y - 0.32, -BOARD_T - 1.5, x + 0.32, y + 0.32, 8.5, C_PIN))
+            nmark(pnet(f"{pid}.{pn}"))
         if pid == "JP1":            # jumper cap over two pins
             mark(4)
             (xa, ya), (xb, yb) = g.xy(p["pins"][JP1_CAP[0]]), g.xy(p["pins"][JP1_CAP[1]])
             s.append(box(min(xa, xb) - 1.25, min(ya, yb) - 1.25, 3.0, max(xa, xb) + 1.25, max(ya, yb) + 1.25, 9.0, "#1565c0"))
+            nmark(*JP1_CAP)
             mark(8)
         mark(4)
 
@@ -235,8 +255,11 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
         return out
 
     s += resistor_flat(parts["R100k"]["pins"]["a"], parts["R100k"]["pins"]["b"], "#d9c08a")
+    nmark("VBAT", "A0")
     s += resistor_standing(parts["R10k"]["pins"]["a"], parts["R10k"]["pins"]["b"], "#7fb0d8")
+    nmark("A0", "DIV_MID")
     s += resistor_standing(parts["R2k"]["pins"]["b"], parts["R2k"]["pins"]["a"], "#7fb0d8")
+    nmark("DIV_MID", "GND")
     for pid in ("R100k", "R10k", "R2k"):
         used |= set(parts[pid]["pins"].values())
         hole_step.update({h: 5 for h in parts[pid]["pins"].values()})
@@ -256,6 +279,7 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
             (xa, ya), (xb, yb) = g.xy(route[0]), g.xy(route[-1])
             pts = [(xa, ya, 0), (xa, ya, 2.4), (xb, yb, 2.4), (xb, yb, 0)]
         s += poly(pts, 1.5, col)
+        nmark(w["net"])
         used |= {route[0], route[-1]}
         hole_step[route[0]] = hole_step[route[-1]] = 6
     mark(6)
@@ -274,6 +298,7 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
         ye = (by0 - 1.0) if analog else (by1 + 1.0)
         sg = -1.0 if analog else 1.0
         s += poly([(x, y, 0), (x, y, zl), (x, ye, zl)], 1.5, "#8e44ad" if analog else "#e67e22")
+        unet = pnet("uno:" + so["uno"])
         if so["uno"] in ("D4", "D7"):              # 200 + 200 ohm in the wire, heat-shrunk
             ym = (y + ye) / 2
             s.append(seg((x, ym - 5, zl), (x, ym + 5, zl), 3.0, "#111111"))
@@ -281,6 +306,7 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
         lead_segs.append(((x, y), (x, ye)))
         housing_boxes.append((x - 1.27, min(ye, ye + sg * 20.0), x + 1.27, max(ye, ye + sg * 20.0)))
         s.append(box(x - 0.32, ye + sg * 14.0, zl - 0.32, x + 0.32, ye + sg * 20.0, zl + 0.32, C_PIN))
+        nmark(unet)
 
     mark(7)
     i_bot = len(s)
@@ -289,6 +315,7 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
         x, y = g.xy(h)
         s.append(f'color("{C_SOLDER}") translate([{f(x)},{f(y)},{f(-BOARD_T)}]) scale([1,1,0.6]) sphere(d=1.9, $fn=14);')
         mark(hole_step[h])
+        nmark(hole_net(h) or "?")
     for a, b in data.get("bridges", []):
         if a not in holes or b not in holes:
             errs.append(f"bridge {a}-{b} uses a hole not in the grid")
@@ -296,6 +323,7 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
         (xa, ya), (xb, yb) = g.xy(a), g.xy(b)
         s.append(seg((xa, ya, -BOARD_T - 0.4), (xb, yb, -BOARD_T - 0.4), 1.4, C_SOLDER))
         mark(3)
+        nmark(*(({hole_net(a), hole_net(b)} - {None}) or {"?"}))
 
     # ---- bottom view: the top-side parts as ghost OUTLINES (their footprints,
     # drawn on the underside) with labels placed off every joint, bridge and label
@@ -342,11 +370,12 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
     bottom = s[:i_top] + s[i_bot:] + ghosts + labels_bottom
     top = s + labels_top
     plain_bottom = s[:i_top] + s[i_bot:]
-    assert len(tags) == len(s), (len(tags), len(s))
+    assert len(tags) == len(s) == len(nets), (len(tags), len(s), len(nets))
     # build-guide rail markers: a coloured band along each GND / 5V rail (top face, under the
     # drill dots so the holes stay visible; on the underside view, over the copper), run out
     # to the board's right edge, with the rail's name just past the edge
     rails_top, rails_bottom = [], []
+    rails_top_nets, rails_bottom_nets = [], []     # net (GND / UNO5V) of each entry, parallel
     for grp in data["grid"].get("copper", []):
         name = grp.get("name", "")
         hs = [h for h in grp["holes"] if h in holes]
@@ -360,11 +389,15 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
         xs = [g.xy(h)[0] for h in hs]
         y = g.xy(hs[0])[1]
         for z, out, mirror in ((0.0, rails_top, ""), (-BOARD_T - 0.08, rails_bottom, "mirror([0,1,0]) mirror([0,0,1]) ")):
+            onets = rails_top_nets if out is rails_top else rails_bottom_nets
             out.append(box(min(xs) - 1.0, y - 0.7, z, bx1, y + 0.7, z + 0.03, col))
             out.append(f'color("{col}") translate([{f(bx1 + 1.5)},{f(y)},{f(z)}]) {mirror}linear_extrude(0.05) '
                        f'text("{text}", size=1.8, font="Liberation Sans:style=Bold", valign="center");')
+            onets += ["GND" if gnd else "UNO5V"] * 2
     steps_info = {"items": list(s), "tags": tags, "probes": (g.xy("U1/1"), g.xy("U3/1")),
-                  "carrier_centre": (cx, cy, 4.0), "rails_top": rails_top, "rails_bottom": rails_bottom}
+                  "carrier_centre": (cx, cy, 4.0), "rails_top": rails_top, "rails_bottom": rails_bottom,
+                  "nets": nets, "rails_top_nets": rails_top_nets, "rails_bottom_nets": rails_bottom_nets,
+                  "net_colors": data.get("net_colors", {})}
     return ("\n".join(top) + "\n", "\n".join(bottom) + "\n", "\n".join(s) + "\n",
             "\n".join(plain_bottom) + "\n", steps_info), errs, ((bx0 + bx1) / 2, (by0 + by1) / 2, 4.0)
 
@@ -436,11 +469,11 @@ def _box_hits_seg(b, a, c, half) -> bool:
     return False
 
 
-def _grey(item: str) -> str:
-    """Grey out an item: mix 0.35*colour + 0.65*#c8c8c8 per channel in every color("#rrggbb"[, a])."""
+def _grey(item: str, keep: float = 0.35) -> str:
+    """Grey out an item: mix keep*colour + (1-keep)*#c8c8c8 per channel in every color("#rrggbb"[, a])."""
     def mix(m):
         h = m.group(1)
-        out = "".join(f"{round(0.35 * int(h[i:i + 2], 16) + 0.65 * 200):02x}" for i in (0, 2, 4))
+        out = "".join(f"{round(keep * int(h[i:i + 2], 16) + (1 - keep) * 200):02x}" for i in (0, 2, 4))
         return f'color("#{out}"'
     return re.sub(r'color\("#([0-9a-fA-F]{6})"', mix, item)
 
@@ -458,6 +491,27 @@ def step_model(info: dict, k: int) -> str:
         out = [it if t == 0 or t in new else _grey(it) for it, t in zip(items, tags) if t <= k]
     if k != 1:                               # step 1 is the carrier alone, no board
         out += info["rails_bottom"] if k == 3 else info["rails_top"]
+    return "\n".join(out) + "\n"
+
+
+FLOW_PHASES = {1: {"VBAT"}, 2: {"5V2"}, 3: {"UNO5V", "SERVO_V"},
+               4: {"PWM", "DIR1", "DIR2", "STBY", "SERVO_SIG", "DIN_F", "DIN_R", "A0", "DIV_MID"},
+               5: {"M1", "M2"}, 6: {"GND"}}
+
+
+def flow_model(info: dict, k: int, bottom: bool) -> str:
+    """The finished shield with only phase k's nets in colour; base items stay coloured, the rest go grey."""
+    want = FLOW_PHASES[k]
+    # solder (joints, bridges, pin-tip solder) on this phase's nets takes the net's colour, so the
+    # path shows on the underside; everything off the phase is greyed harder than in the build steps
+    def lit(it, ns):
+        col = info["net_colors"].get(sorted(ns & want)[0])
+        return it.replace(f'color("{C_SOLDER}")', f'color("{col}")') if col else it
+    out = [it if not ns else lit(it, ns) if ns & want else _grey(it, 0.12)
+           for it, ns in zip(info["items"], info["nets"])]
+    rails, rnets = ((info["rails_bottom"], info["rails_bottom_nets"]) if bottom
+                    else (info["rails_top"], info["rails_top_nets"]))
+    out += [it for it, n in zip(rails, rnets) if n in want]
     return "\n".join(out) + "\n"
 
 
@@ -490,6 +544,7 @@ def main(argv=None) -> int:
     ap.add_argument("--layout", type=Path, default=ROOT / "docs" / "shield_layout.json")
     ap.add_argument("--outdir", type=Path, default=ROOT / "docs")
     ap.add_argument("--steps", action="store_true", help="render one image per build step into <outdir>/guide/")
+    ap.add_argument("--flow", action="store_true", help="render 12 phase images (top+bottom) into <outdir>/guide/")
     ap.add_argument("--scad-only", action="store_true", help="build and check the model, render nothing")
     args = ap.parse_args(argv)
     (scad_text, scad_bottom, scad_iso, scad_bottom_plain, steps_info), errs, centre = build_scad(load(args.layout))
@@ -499,6 +554,19 @@ def main(argv=None) -> int:
         return 1
     print(f"PASS model: {scad_text.count(chr(10))} primitives, every wire/join/bridge placed")
     if args.scad_only:
+        return 0
+    if args.flow:
+        gdir = args.outdir / "guide"
+        gdir.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory() as td:
+            for k in sorted(FLOW_PHASES):
+                for side, rot, dist, proj in (("top", (55, 0, 25), 200.0, "p"), ("bottom", (180, 0, 0), 165.0, "o")):
+                    scad = Path(td) / f"flow_{k}_{side}.scad"
+                    scad.write_text(flow_model(steps_info, k, side == "bottom"), encoding="ascii")
+                    png = gdir / f"flow_{k}_{side}.png"
+                    render(scad, png, centre, rot, dist, proj)
+                    _crop_to_content(png)
+                    print(f"png: {png}  ({png.stat().st_size} bytes)")
         return 0
     if args.steps:
         gdir = args.outdir / "guide"
