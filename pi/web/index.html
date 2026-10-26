@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Car teleop</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #14161a; color: #d8dce2; font: 14px/1.4 system-ui, sans-serif; }
+  #bar { display: flex; gap: 18px; padding: 8px 14px; background: #1d2026; border-bottom: 1px solid #2c313a; flex-wrap: wrap; }
+  #secure { display: none; background: #8b1a1a; color: #fff; padding: 8px 14px; }
+  #secure code { background: #00000055; padding: 1px 5px; }
+  #main { display: flex; gap: 16px; padding: 14px; flex-wrap: wrap; }
+  canvas { background: #000; border: 1px solid #2c313a; width: 640px; max-width: 100%; height: auto; }
+  #side { min-width: 300px; }
+  #armed { font-size: 40px; font-weight: bold; padding: 6px 14px; border-radius: 6px; text-align: center; margin-bottom: 8px; }
+  .on { background: #1f7a3a; color: #fff; }
+  .off { background: #8b1a1a; color: #fff; }
+  #rec { font-size: 18px; margin-bottom: 8px; }
+  button { font: inherit; padding: 8px 14px; margin: 0 6px 8px 0; background: #2c313a; color: #d8dce2; border: 1px solid #444b57; border-radius: 4px; cursor: pointer; }
+  button:hover { background: #3a414d; }
+  table { border-collapse: collapse; width: 100%; }
+  td { border-bottom: 1px solid #2c313a; padding: 2px 6px; font-family: ui-monospace, Consolas, monospace; }
+  td:first-child { color: #8a93a2; width: 40%; }
+  .ok { color: #5fd17f; } .bad { color: #ff6b6b; }
+</style>
+</head>
+<body>
+<div id="secure">Gamepad API needs a secure context: open via the SSH tunnel<br>
+  <code>ssh -L 8000:localhost:8000 -L 8765:localhost:8765 ed@ed-pi5.local</code>
+  then open <code>http://localhost:8000</code></div>
+<div id="bar">
+  <span>Link: <b id="conn" class="bad">disconnected</b></span>
+  <span>Gamepad: <b id="pad" class="bad">no pad - press any button</b></span>
+  <span>Secure context: <b id="sec"></b></span>
+</div>
+<div id="main">
+  <canvas id="view" width="640" height="480"></canvas>
+  <div id="side">
+    <div id="armed" class="off">DISARMED</div>
+    <div id="rec">REC: off</div>
+    <div>
+      <button id="bArm">ARM</button>
+      <button id="bDisarm">DISARM</button>
+      <button id="bRec">REC</button>
+      <button id="bCrash">CRASH</button>
+    </div>
+    <div style="color:#8a93a2;margin-bottom:6px">Keys: Space = disarm (emergency), Enter = arm, R = rec toggle.
+      Pad: A arm, B disarm, X rec, Y crash; stick = steer, RT/LT = throttle.</div>
+    <table id="telem"></table>
+  </div>
+</div>
+<script>
+"use strict";
+var WS_URL = "ws://" + location.hostname + ":8765";
+var ws = null;
+var connEl = document.getElementById("conn");
+var padEl = document.getElementById("pad");
+var ctx = document.getElementById("view").getContext("2d");
+var lastBtn = [];
+
+document.getElementById("sec").textContent = window.isSecureContext ? "yes" : "NO";
+document.getElementById("sec").className = window.isSecureContext ? "ok" : "bad";
+if (!window.isSecureContext) document.getElementById("secure").style.display = "block";
+
+function send(obj) {
+  if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj));
+}
+function cmd(name) { send({type: "cmd", name: name}); }
+
+function connect() {
+  ws = new WebSocket(WS_URL);
+  ws.binaryType = "blob";
+  ws.onopen = function () { connEl.textContent = "connected"; connEl.className = "ok"; };
+  ws.onclose = function () {
+    connEl.textContent = "disconnected"; connEl.className = "bad";
+    setTimeout(connect, 1000);
+  };
+  ws.onerror = function () { try { ws.close(); } catch (e) {} };
+  ws.onmessage = function (ev) {
+    if (typeof ev.data === "string") {
+      var m;
+      try { m = JSON.parse(ev.data); } catch (e) { return; }
+      if (m.type === "telem") showTelem(m);
+    } else {
+      createImageBitmap(ev.data).then(function (bmp) {
+        ctx.drawImage(bmp, 0, 0, 640, 480);
+        if (bmp.close) bmp.close();
+      }).catch(function () {});
+    }
+  };
+}
+
+function showTelem(m) {
+  var a = document.getElementById("armed");
+  a.textContent = m.armed ? "ARMED" : "DISARMED";
+  a.className = m.armed ? "on" : "off";
+  document.getElementById("rec").textContent =
+    "REC: " + (m.recording ? "ON  " + m.steps + " steps" : "off");
+  var html = "";
+  Object.keys(m).forEach(function (k) {
+    if (k === "type") return;
+    var v = m[k];
+    if (Array.isArray(v)) v = v.join(", ");
+    html += "<tr><td>" + k + "</td><td></td></tr>";
+  });
+  var t = document.getElementById("telem");
+  t.innerHTML = html;
+  var rows = t.rows, i = 0;
+  Object.keys(m).forEach(function (k) {
+    if (k === "type") return;
+    var v = m[k];
+    rows[i++].cells[1].textContent = Array.isArray(v) ? v.join(", ") : String(v);
+  });
+}
+
+function firstPad() {
+  var pads = navigator.getGamepads ? navigator.getGamepads() : [];
+  for (var i = 0; i < pads.length; i++) if (pads[i]) return pads[i];
+  return null;
+}
+
+var EDGE = {0: "arm", 1: "disarm", 2: "rec_toggle", 3: "crash"};
+
+setInterval(function () {
+  var p = firstPad();
+  if (!p) {
+    padEl.textContent = "no pad - press any button"; padEl.className = "bad";
+    lastBtn = [];
+    return;                         // no pad -> no input -> Pi deadman disarms
+  }
+  padEl.textContent = p.id; padEl.className = "ok";
+  var steer = p.axes[0] || 0;
+  var rt = p.buttons[7] ? p.buttons[7].value : 0;
+  var lt = p.buttons[6] ? p.buttons[6].value : 0;
+  send({type: "input", steer: steer, throttle: rt - lt});
+  Object.keys(EDGE).forEach(function (i) {
+    var down = !!(p.buttons[i] && p.buttons[i].pressed);
+    if (down && !lastBtn[i]) cmd(EDGE[i]);
+    lastBtn[i] = down;
+  });
+}, 20);
+
+document.getElementById("bArm").onclick = function () { cmd("arm"); };
+document.getElementById("bDisarm").onclick = function () { cmd("disarm"); };
+document.getElementById("bRec").onclick = function () { cmd("rec_toggle"); };
+document.getElementById("bCrash").onclick = function () { cmd("crash"); };
+document.addEventListener("keydown", function (e) {
+  if (e.repeat) return;
+  if (e.code === "Space") { e.preventDefault(); cmd("disarm"); }
+  else if (e.code === "Enter") { cmd("arm"); }
+  else if (e.code === "KeyR") { cmd("rec_toggle"); }
+});
+
+connect();
+</script>
+</body>
+</html>

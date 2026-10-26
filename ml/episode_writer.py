@@ -140,8 +140,14 @@ class EpisodeWriter:
     def __len__(self) -> int:
         return len(self._steps)
 
-    def save(self, meta: dict | None = None) -> Path:
-        """Write the episode. Returns the path. Resets the buffer."""
+    def save(self, meta: dict | None = None,
+             frame_logs: dict | None = None) -> Path:
+        """Write the episode. Returns the path. Resets the buffer.
+
+        `frame_logs` maps `log_*` keys to per-frame arrays (length T), for
+        telemetry that varies frame to frame (unlike `meta`, one constant per
+        episode). Validated before anything is written.
+        """
         if len(self._steps) < 2:
             raise RuntimeError(f"refusing to save a {len(self._steps)}-step episode")
 
@@ -168,6 +174,30 @@ class EpisodeWriter:
                 # dreamerv3-torch filters keys containing "log_" out of the
                 # training tensors, so provenance rides along harmlessly.
                 episode[f"log_{key}"] = np.array(value)
+
+        if frame_logs:
+            # Validate everything before writing. A failure here still clears
+            # the buffer, matching the write-failure behaviour below.
+            try:
+                T = len(episode["reward"])
+                checked = {}
+                for key, value in frame_logs.items():
+                    if not str(key).startswith("log_"):
+                        raise ValueError(
+                            f"frame_logs key {key!r} must start with 'log_'")
+                    if key in episode or key in checked:
+                        raise ValueError(
+                            f"frame_logs key {key!r} already exists in the episode")
+                    arr = np.asarray(value)
+                    if arr.ndim == 0 or len(arr) != T:
+                        raise ValueError(
+                            f"frame_logs key {key!r} has length "
+                            f"{len(arr) if arr.ndim else 'scalar'}, expected {T}")
+                    checked[key] = arr
+            except ValueError:
+                self._steps = []
+                raise
+            episode.update(checked)
 
         length = len(episode["reward"])
         stem = f"{self.prefix}{uuid.uuid4().hex}"
@@ -243,6 +273,29 @@ def self_check() -> None:
     # ... and the three valid ones must pass
     for good in (INDICATOR_OFF, INDICATOR_LEFT, INDICATOR_RIGHT):
         assert int(_check_indicator(good)) == good
+
+    # per-frame telemetry channels (frame_logs)
+    T = len(want)
+    with tempfile.TemporaryDirectory() as td:
+        def fresh() -> EpisodeWriter:
+            w = EpisodeWriter(td, prefix="selfcheck")
+            w.add_reset(img(), action_dim=2)
+            for _ in range(T - 1):
+                w.add_step(img(), np.zeros(2, np.float32), 0.0, False, False)
+            return w
+
+        ticks = np.arange(T, dtype=np.int32)
+        ep2 = load_episode(fresh().save(frame_logs={"log_ticks": ticks}))
+        assert np.array_equal(ep2["log_ticks"], ticks)
+        assert ep2["log_ticks"].dtype == np.int32
+        for bad_logs in ({"log_ticks": np.arange(T + 1)},
+                         {"ticks": np.arange(T)}):
+            try:
+                fresh().save(frame_logs=bad_logs)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError(f"accepted bad frame_logs {bad_logs!r}")
 
     print("episode_writer self_check: PASS")
 

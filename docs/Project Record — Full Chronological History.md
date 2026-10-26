@@ -348,6 +348,9 @@ the dated entry, not the digest.
 - [KY - docs-sync: HANDOFF, bins and prompt brought up to KX](#appendix-ky---docs-sync-handoff-bins-and-prompt-brought-up-to-kx-2026-10-22-2003-cdt) (10-22)
 - [KZ - Step-4 VMOT check moved to step 6 (audit KU Med #2); top-down views in both picture guides](#appendix-kz---step-4-vmot-check-moved-to-step-6-audit-ku-med-2-top-down-views-in-both-picture-guides-2026-10-22-2013-cdt) (10-22)
 - [LA - See-through close-up of the pack-voltage divider](#appendix-la---see-through-close-up-of-the-pack-voltage-divider-2026-10-22-2200-cdt) (10-22)
+- [LB - Proto shield wiring finished (untested); photo review: L2/9-L2/10 bridge not seen, C1/C2 not on the carrier](#appendix-lb---proto-shield-wiring-finished-untested-photo-review-l29-l210-bridge-not-seen-c1c2-not-on-the-carrier-2026-10-22-2338-cdt) (10-22)
+- [LC - Shield follow-up: L2/9-L2/10 bridged, C1 dangling, servo signal path incomplete (jumper on J2.SIG); as-built layout edit reverted](#appendix-lc---shield-follow-up-l29-l210-bridged-c1-dangling-servo-signal-path-incomplete-jumper-on-j2sig-as-built-layout-edit-reverted-2026-10-24-1530-cdt) (10-24)
+- [LD - Teleop + recording stack built (custom Python, pi/): fake-hardware verified, suite 26; nothing run on the Pi yet](#appendix-ld---teleop--recording-stack-built-custom-python-pi-fake-hardware-verified-suite-26-nothing-run-on-the-pi-yet-2026-10-25-1917-cdt) (10-25)
 
 ---
 
@@ -20908,3 +20911,73 @@ Checks (2026-10-22 ~20:13 CDT): holemap all checks passed; `svg_text_overlap.py`
 **Made:** `scripts/shield_divider_xray.py` -> `docs/shield_divider_xray.svg` with `docs/guide/divider_xray.png` (3/4 view) and `divider_xray_plan.png` (straight down): a close-up of columns 8-11, rows U1-L3, with the board drawn LAST at 30% opacity so OpenSCAD's preview shows the copper strips, leads through the holes, solder joints and the L2/9-L2/10 bridge through it (the KL failure - board drawn first hid everything behind it - was the draw order). Parts: R100k flat L1/9 -> U3/9, R10k standing U2/9 -> U2/10, R2k standing G/10 -> U3/10, the A0 Dupont lead at U1/9, J5's VBAT pin at L3/10, w1's end at L3/9. Nine numbered badges (flat in the plan view, camera-facing in the 3/4 view) + a legend + the arithmetic: A0 = VBAT x 12k / 112k = VBAT / 9.33 (8.4 V -> 0.90 V, 7.2 V -> 0.77 V). The script FAILS if the layout moves any of those holes or drops the A0 socket or the bridge.
 
 First try used 3D text labels: far too big, overlapping, cut off - replaced by badges; badge spots tuned by eye on both views. Checks (2026-10-22 ~22:00 CDT): script exit 0, layout assertions pass; `svg_text_overlap.py` on the page: 0 overlaps; both renders viewed. Picture of the INTENDED build, not a photo.
+
+# Appendix LB - Proto shield wiring finished (untested); photo review: L2/9-L2/10 bridge not seen, C1/C2 not on the carrier (2026-10-22 23:38 CDT)
+**2026-10-22 ~23:40 CDT.** Evan reports the proto shield wiring is FINISHED and UNTESTED (no meter check, no power-up). He sent 9 photos (IMG_0275-0283, top and underside) and a video (IMG_0284.mov, not reviewed).
+
+## Photo review against docs/shield_layout.json (Claude, read from photos only)
+The underside photo is the board flipped LEFT-RIGHT (USB end on the right), so col 1 is on the photo's right. Every bridge in the layout's `bridges` list was looked for:
+
+| Bridge | Seen in photo |
+|---|---|
+| L3/3-P3/3, L3/4-P3/4, P3/5-P4/5-B/5, P3/6-P4/6, P4/6..P4/13 chain | yes |
+| L3/12-P3/12, L3/13-P3/13 | yes |
+| V/1-V/0-V/-1-L1/-1 | yes |
+| L3/-1-P3/-1, L2/-2-L2/-1, L3/-2-P3/-2 | yes |
+| **L2/9-L2/10** (J5's VBAT pin to the VBAT strip) | **NOT seen** - blue gap between the two strips at row L2 |
+| **L1/-2-L1/-3** (servo signal J2.SIG to the D9 socket) | **unclear** - possible gap |
+
+Other observations, all unverified until metered:
+- C1 (470 uF) and C2 (0.1 uF) appear to be lying on the desk, assembled together, NOT on the carrier's VMOT/GND2 tips.
+- Extra solder on unused holes (P2/9, U2/11) and a blob at the bottom of strip col 10 that may touch U3/11. Evan says some blobs connect to nothing; an unused hole joined to a strip is harmless as long as nothing else is in it.
+- The A0 (purple) lead and one orange lead were not yet plugged in at photo time.
+
+## Next
+Run the layout's own step checks 1-8 with the meter, shield OFF the Uno and nothing powered, before any power-up. The two specific tests: J5 top pin (L3/10) to L1/9 must BEEP (step 4); the D9 socket hole L1/-3 to J2's signal pin L1/-2 must BEEP. No power until every check in step 8 passes. The build stays "untested" until then.
+
+# Appendix LC - Shield follow-up: L2/9-L2/10 bridged, C1 dangling, servo signal path incomplete (jumper on J2.SIG); as-built layout edit reverted (2026-10-24 15:30 CDT)
+**2026-10-24 ~15:30 CDT.** Follow-up to LB, from two new photos and Evan's answers.
+
+- **L2/9-L2/10 bridge: now soldered** (H-shaped blob at the right end of the strips, row L2). Still to be metered: L3/10 to L1/9 must BEEP.
+- **C1 + C2: now on the carrier's VMOT/GND2 tips, but C1 hangs off the board edge on ~25 mm of bare legs** over the Analog-in header. Told Evan: stand it upright (step 1) or lay it flat with sleeved legs, glue the can; stripe (-) to GND2. Polarity not readable in the photo.
+- **Servo signal path is NOT complete.** Evan: the only thing at L1/-2 is the orange female-to-male Dupont jumper, female end on J2's SIG pin, male end in the Uno's D9 socket. No lead at L1/-3, no L1/-2-L1/-3 bridge. This takes J2's SIG pin, so the servo's 3-pin plug has nowhere to go. Advised the layout's plan as built: a header pin at L1/-3, the L1/-2-L1/-3 bridge underneath, the jumper moved to the L1/-3 pin, the servo plug on J2.
+- **Layout edit reverted.** I had changed docs/shield_layout.json to "D9 socket at L1/-2, no bridge" on a misread of Evan's description. shield_holemap.py check 2 (one lead per hole) failed on it ("L1/-2 carries 2 leads: J2.SIG, socket D9"), which exposed the misread. All four files were restored with git checkout; nothing was committed.
+
+The board is still UNTESTED: no meter checks or power-up yet.
+
+# Appendix LD - Teleop + recording stack built (custom Python, pi/): fake-hardware verified, suite 26; nothing run on the Pi yet (2026-10-25 19:17 CDT)
+**2026-10-25 ~19:17 CDT.** Stage 5 of the hours estimate (PRD task 11, teleop + logging) built on the PC. **Sim-only / fake-hardware only: nothing has run on the Pi or the car.** The Pi was unreachable from the PC (`ssh ed@ed-pi5.local`: "Could not resolve hostname").
+
+## Decisions (Evan)
+- **Custom Python stack, not DonkeyCar** (PRD task 11 assumed DonkeyCar + a serial part). Why: episodes land directly in the npz contract ml/ already reads (a tub converter would be a second place for the action/frame off-by-one); no TF/Keras or RPi.GPIO (broken on the Pi 5) install risk; every safety rule is ours and tested.
+- **Xbox pad on the laptop, read by the browser Gamepad API (option A).** The Gamepad API needs a secure context, so the page is opened through an SSH tunnel at http://localhost:8000 (localhost counts as secure).
+- **Steering + throttle only;** lights / indicator (task 11b) postponed until after next weekend. Laps recorded before 11b lands cannot train the indicator head.
+
+## What was built (plan-split: Opus planned, 3 Sonnet agents coded disjoint files, Opus re-ran every check and read the code)
+| File | Role |
+|---|---|
+| pi/protocol.py | SERIAL_PROTOCOL v0.2 codec + resyncing reply parser; self_check pins crc8/command against firmware/host_test.py |
+| pi/uno_link.py | UnoLink (banner + SELFTEST PASS gate, seq-matched exchange, link_ok after 3 misses) + FakeUno |
+| pi/camera.py | PiCamera (picamera2, 160x120, full-FOV squash, 20 fps) + FakeCamera + encode_jpeg |
+| pi/recorder.py | Recorder: shifts commands so action[k] = cmd_{k-1}/100, logs log_cmd_next + telemetry, background save |
+| pi/teleop.py | Controller (pure safety logic) + TeleopApp (20 Hz control thread, websocket, HTTP) |
+| pi/web/index.html | video, telemetry, ARM/DISARM/REC/CRASH, Gamepad API loop |
+| pi/README.md, pi/requirements.txt | deploy + on-Pi bench checklist |
+| ml/episode_writer.py | + `save(frame_logs=...)` per-frame log channels |
+| scripts/run_checks.py | + pi/ in the walk; modules registered in sys.modules before exec |
+
+Data contract written into data.md: action = [steer/100, throttle/100] of the int8 commands SENT, +steer = right (physical sign UNVERIFIED), image at tick k then command k.
+
+## Bugs and fixes found during review
+- **Background save:** Recorder.stop() compresses synchronously (seconds for a long episode); on the control thread it would stall the 20 Hz stream past the Uno's 150 ms watchdog. Added stop_background(); teleop never calls the blocking stop.
+- **Arm rules tightened (Opus):** arming is refused while the throttle trigger is held (> 5%), and refused when no Uno reply has been seen yet (pack unknown).
+- **run_checks crashed on any @dataclass module** (`'NoneType' object has no attribute '__dict__'`): it exec'd modules without registering them in sys.modules. Fixed at the chokepoint in run_checks.py.
+- Agent stop: recorder self_check first used 30 frames, below verify_corpus's MIN_EPISODE_STEPS=150; changed to 150 unpaced frames, check unweakened. Note: real episodes shorter than 150 steps will FAIL check_structure.
+
+## Verification (real output)
+- `scripts/run_checks.py`: **26 passed, 0 failed, 0 skipped** (was 21).
+- teleop --self-check: Controller rules + an in-process websocket end-to-end run producing an npz with action[-1] = [0.46, 0.15].
+- Browser pane, `teleop.py --fake --bench`: page loads, secure context yes, video draws, fps 20.3; with a JS-injected fake pad: A arms (bench), X records 32 steps and saves the npz, removing the pad trips the deadman (armed false, steer held at 46).
+
+## Not verified (on-Pi checklist in pi/README.md)
+Real UnoLink against the board; picamera2 config, B,G,R channel order and full-FOV crop; 20 Hz on the Pi 5; a real Xbox pad in a real browser; steer sign; the deadman with a real laptop. simplejpeg path untested (PC used Pillow). Motor unwired: never pass --max-throttle until it is wired and the car is on a stand.

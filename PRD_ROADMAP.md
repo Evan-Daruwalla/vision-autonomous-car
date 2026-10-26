@@ -656,6 +656,12 @@ transfer gap) must not block the capstone.
       is the seed of that part. Also: `donkeycar[pi]` pulls in `RPi.GPIO`,
       which does not work on the Pi 5 — use `rpi-lgpio`.)*
 
+    - *(**AMENDED 2026-10-25 (Appendix LD): DonkeyCar dropped (Evan) - a custom
+      Python stack in `pi/` does the camera, web UI, Xbox-pad input (laptop browser,
+      Gamepad API, via SSH tunnel) and an npz recorder in the ml/ episode format.** Built
+      and verified on fake hardware only (suite 26); the on-Pi checklist is in
+      `pi/README.md`. Done-check NOT passed: nothing has run on the Pi or the car.)*
+
 11b. **Indicator state in the logger — GATES TASK 12** (appended 2026-09-01,
     Appendix AY / `docs/LIGHTING_SPEC.md` §5). Task 11's done-check names two
     logged channels, "images + steering/throttle synced". Evan's lighting

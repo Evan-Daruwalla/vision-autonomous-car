@@ -13,8 +13,8 @@ This runs all of them, in one process, and prints a result for each.
 
 DISCOVERY IS A WALK, NOT A LIST. A hardcoded registry would go stale the first
 time someone adds a module -- which is the exact failure mode this session
-spent its day fixing. The walk finds `def self_check` under cad/, ml/ and
-scripts/, skipping .venv/ and ml/vendor/ (third-party, not ours to test).
+spent its day fixing. The walk finds `def self_check` under cad/, ml/,
+scripts/ and pi/ (the car-side teleop, added 2026-10-25), skipping .venv/ and ml/vendor/ (third-party, not ours to test).
 
 THE THREE STATES, and why SKIP is not a pass
 --------------------------------------------
@@ -49,7 +49,7 @@ import traceback
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-SEARCH_DIRS = ("cad", "ml", "scripts")
+SEARCH_DIRS = ("cad", "ml", "scripts", "pi")
 EXCLUDE_PARTS = {".venv", "vendor", "__pycache__", "site-packages"}
 
 # Exceptions that mean "this machine cannot run the check", not "the code is
@@ -85,6 +85,10 @@ def run_one(path: Path, verbose: bool) -> tuple[str, str, str]:
     try:
         spec = importlib.util.spec_from_file_location(name, path)
         module = importlib.util.module_from_spec(spec)
+        # Registered before exec, as importlib's own recipe does: @dataclass
+        # looks its module up in sys.modules and crashes on None without this
+        # (first hit 2026-10-25 by pi/protocol.py's Reply).
+        sys.modules[name] = module
         # Import and call both run with stdout captured: a self_check that
         # prints its own banner should not shred this report's formatting.
         with contextlib.redirect_stdout(buf):

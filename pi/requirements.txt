@@ -1,0 +1,2 @@
+# picamera2, numpy, pyserial and simplejpeg come from Raspberry Pi OS apt packages.
+websockets==13.1

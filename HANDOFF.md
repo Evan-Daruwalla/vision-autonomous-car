@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-22 ~20:05 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-25 ~19:20 CDT** — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, 312 appendices A–KZ; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -19,6 +19,8 @@ the physical car and documented as a college-portfolio engineering artifact.
 ## Where the project actually is
 
 **CURRENT STATE 2026-10-20 (supersedes the older lines below wherever they disagree; fixes audit KA HIGH #2 / #3):** the Uno runs the current uno_control (SELFTEST PASS 86/86, re-flashed from the Pi 2026-10-16, JQ; host_test all ok from the Pi). The servo is wired and drives the rack; the 2S pack is built and charged (IU-JA); the Pi 5 runs Bookworm and the camera works (JK). NOT yet wired: motor, encoder, LED strips, rocker, proto shield - the shield's hole-by-hole layout is ready and checked (KG), nothing soldered. Tray v11 / deck v13 / camera mast v1 are designed and checked, UNPRINTED. **2026-10-20 evening (KI, KJ):** the shield, layout and pack diagrams are all-bold with zero text overlaps, enforced by `scripts/svg_text_overlap.py` (in run_checks, 19 pass); the shield map embeds a 3D render of the INTENDED finished board (`scripts/shield_render3d.py`, untested against a real build) and draws w3/w4/w5 as their step-6 L-routes from a `via` list in `docs/shield_layout.json`. **2026-10-21/22 (KK-KX):** shield SVG audited (4 of 8 socket arrows pointed to the wrong Uno header - fixed); C1 now stands UPRIGHT (build-step change, KQ); bench guides added - docs/SHIELD_SOLDER_GUIDE.md, docs/shield_build_guide.svg (LEGO-style), docs/shield_how_it_works.svg (current paths); strips named left (D4) / right (D7) like the firmware (KX). Still nothing soldered. The paste-ready prompt at the end is the short current summary.
+
+**2026-10-22..25 (LB-LD):** Evan SOLDERED the shield (all wiring done, UNTESTED - no meter checks or power yet): L2/9-L2/10 bridge added after photo review; C1 hangs on long bare legs (re-seat upright or sleeve + glue); servo signal path incomplete - the orange female-male jumper sits on J2's SIG pin, so either fit a pin at L1/-3 + the L1/-2-L1/-3 bridge, or (bench) wire the servo plug with 3 jumpers (signal male-male to D9, V and GND male-female to J2 middle/bottom). **Teleop + recording stack BUILT (LD):** custom Python in `pi/` (DonkeyCar dropped), Xbox pad in the laptop browser via SSH tunnel, npz recorder in the ml/ format; suite 26 pass; verified on fake hardware + browser only - NOTHING run on the Pi yet (Pi was unreachable from the PC). Lights postponed until after next weekend.
 
 **The software lane is four milestones ahead of the hardware lane. The hardware
 lane has now STARTED — and as of 2026-09-02 the ACTUATION FIRMWARE RUNS ON THE
@@ -665,9 +667,12 @@ hardware.md:242, LIGHTING_SPEC.md:113; README says nothing is bought.
 docs/shield_wiring.svg has 36 text overlaps (not in the overlap gate).
 
 NEXT ACTIONS, highest value first:
-1. Evan: shield step 0 (2 meter checks), then SHIELD_BUILD.md steps 1-2
-   (carrier headers, carrier-top bridges + C1/C2, carrier onto the shield);
-   send a photo after step 2 before the bridges.
+0. (2026-10-25, LD) Shield is soldered but UNTESTED: fix the servo signal path
+   and C1 (record LC), run the meter checks of steps 1-8 in docs/shield_layout.json,
+   then bench-run teleop on the Pi per pi/README.md's checklist (--bench, no
+   --max-throttle until the motor is wired and the car is on a stand).
+1. ~~Evan: shield step 0 (2 meter checks), then SHIELD_BUILD.md steps 1-2~~
+   (superseded 2026-10-25: the shield is fully soldered; see item 0).
 2. Add the
    upright C1 (~18.8 mm) as a height entry over the Uno in
    scripts/electronics_layout.py (headroom vs deck / mast).

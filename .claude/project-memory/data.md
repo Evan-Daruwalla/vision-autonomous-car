@@ -188,3 +188,24 @@ sim's float [-1, 1]. That conversion is not written down anywhere yet.
   own with `--val-frac 0.2` against `VAL_FRACTION = 0.15`, stratified by
   recovery-vs-original rather than by track, on a different corpus. Not wrong,
   but not this contract.
+
+## Real-car episodes: action units and alignment (added 2026-10-25, stage-5 teleop plan)
+
+Closes the gap noted above ("that conversion is not written down anywhere yet").
+
+- **`action` = [steer_cmd/100, throttle_cmd/100] float32**, where the *_cmd are the int8
+  percentages actually SENT in the serial command. Sign: **+steer = turn RIGHT** (the sim's
+  convention); the physical sign is UNVERIFIED until the bench check, and `pi/teleop.py
+  --steer-invert` flips it at the pad mapping, never in the recorded data.
+- **Alignment:** at control tick k the loop captures image_k, THEN sends cmd_k. So
+  action[0] = zeros and action[k] = cmd_{k-1}/100. The command sent after the last frame is
+  not in `action`.
+- **`log_cmd_next` (T,2) int8 = cmd_k**, the command sent right after image_k - the BC target
+  for image_k, stored so training never has to re-shift. Invariant: action[k] ==
+  log_cmd_next[k-1]/100 (pi/recorder.py's self_check asserts it).
+- Other per-frame logs: log_ticks int32, log_status uint8, log_t_frame_ns int64 (sensor
+  timestamp), log_t_cmd_ns int64, log_loop_dt uint8 (Uno loop time, 100 us units).
+- Images 160x120 RGB, full sensor FOV squashed to 4:3 (research 2026-10-12 F3). Channel order
+  and crop UNVERIFIED on the Pi until the red-object check.
+- verify_corpus.py's alignment gates are SIM-ONLY (they re-derive actions from logged CTE);
+  on real episodes only check_structure applies.
