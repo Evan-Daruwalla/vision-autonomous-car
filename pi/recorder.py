@@ -34,6 +34,9 @@ if str(EP) not in sys.path:
 from episode_writer import EpisodeWriter  # noqa: E402
 
 _TELEM_KEYS = ("ticks", "status", "t_frame_ns", "t_cmd_ns", "loop_dt")
+# optional per-frame keys and their default: mode 0 = manual, 1 = autopilot
+# (added 2026-10-29 so autopilot laps can be relabelled later, DAgger-style)
+_OPTIONAL_KEYS = {"mode": 0}
 
 
 class Recorder:
@@ -80,7 +83,9 @@ class Recorder:
             raise ValueError(f"telem missing keys: {missing}")
         self._images.append(image)
         self._cmds.append((int(cmd_sent[0]), int(cmd_sent[1])))
-        self._telem.append({k: int(telem[k]) for k in _TELEM_KEYS})
+        row = {k: int(telem[k]) for k in _TELEM_KEYS}
+        row.update({k: int(telem.get(k, d)) for k, d in _OPTIONAL_KEYS.items()})
+        self._telem.append(row)
 
     def stop(self, crash: bool = False) -> Path | None:
         if not self._recording:
@@ -112,6 +117,7 @@ class Recorder:
                 "log_t_frame_ns": col("t_frame_ns", np.int64),
                 "log_t_cmd_ns": col("t_cmd_ns", np.int64),
                 "log_loop_dt": col("loop_dt", np.uint8),
+                "log_mode": col("mode", np.uint8),
             }
             return w.save(meta=meta, frame_logs=frame_logs)
         finally:
@@ -183,6 +189,7 @@ def self_check() -> None:
         assert not ep["is_terminal"].any()
         assert np.all(ep["discount"] == 1.0)
         assert ep["log_ticks"].dtype == np.int32
+        assert ep["log_mode"].dtype == np.uint8 and not ep["log_mode"].any()  # default manual
         failures: list = []
         verify_corpus.check_structure(ep, path, failures)
         assert failures == [], failures

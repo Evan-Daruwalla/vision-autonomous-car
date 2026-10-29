@@ -7,6 +7,8 @@ Status: sim-only (FakeUno/FakeCamera) until the on-Pi checklist below is done.
 - `uno_link.py` - serial link to the Uno (banner + SELFTEST gate) and `FakeUno`.
 - `camera.py` - `PiCamera` (picamera2), `FakeCamera`, JPEG encode.
 - `recorder.py` - buffers one episode, writes an npz via `ml/episode_writer.py`.
+- `preprocess_frame.py` - the one frame -> model-input function (64x64 float32 CHW), shared with training.
+- `autopilot.py` - `Autopilot` (ONNX via onnxruntime) and `StubAutopilot`.
 - `teleop.py` - control loop (20 Hz), websocket (8765), page server (8000).
 - `web/index.html` - video, telemetry, pad input (browser Gamepad API).
 
@@ -32,7 +34,9 @@ On the laptop (the Gamepad API needs a secure context; localhost via the tunnel 
 then open http://localhost:8000 and press a pad button.
 
 Other flags: `--steer-invert`, `--rotate180`, `--max-throttle N` (0..100, default 0),
-`--data-dir`, `--port`, `--fake` (no hardware; pack reads FAULT, so use `--bench` to arm).
+`--data-dir`, `--port`, `--http-port N` (page, default 8000), `--ws-port N` (websocket, default 8765;
+if you change either, change the ssh tunnel and the page URL to match), `--model <path.onnx>`,
+`--fake` (no hardware; pack reads FAULT, so use `--bench` to arm; uses a stub autopilot unless `--model` is given).
 
 ## Pad mapping (browser "standard" mapping)
 | Control | Action |
@@ -43,8 +47,22 @@ Other flags: `--steer-invert`, `--rotate180`, `--max-throttle N` (0..100, defaul
 | B | disarm |
 | X | toggle recording (only while armed) |
 | Y | end episode as crash + disarm |
+| Back/View (buttons[8]) | toggle AUTO |
 
-Keyboard: Space = disarm, Enter = arm, R = rec toggle.
+Keyboard: Space = disarm, Enter = arm, R = rec toggle, A = auto toggle.
+
+## AUTO mode (model drives)
+Start with `--model <path.onnx>` (needs `requirements-autopilot.txt`; input tensor named `image`,
+64x64 float32 via `preprocess_frame.py`). Without `--model` AUTO is unavailable
+(`auto_unavailable`); with `--fake` and no model a stub that outputs steer 0.3, throttle 0.5 is used.
+- Back/View or the A key (or the AUTO button) toggles AUTO. Manual -> auto only while armed
+  (else `auto_refused_not_armed`); auto -> manual always. The page shows MODE large.
+- Override: in AUTO, pad steer beyond 0.15 or pad throttle beyond 0.05 drops to MANUAL at once
+  (`auto_override`) and that tick uses the pad. Any disarm (deadman, link, pack, button) also returns to MANUAL.
+- Pad input must stay fresh in AUTO: the deadman still applies. steer = model steer x 100
+  (`--steer-invert` affects the pad only); throttle = model throttle x `--max-throttle`; `--bench` forces 0.
+- Recorded episodes carry `log_mode` (0 manual, 1 auto) per frame.
+- Never pass `--max-throttle` with a model until the motor is wired and the car is on a stand.
 
 ## Data
 Episodes land in `~/car_data/<session>/` (session = start time). Copy back:

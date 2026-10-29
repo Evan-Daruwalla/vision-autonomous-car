@@ -42,6 +42,8 @@ from uno_link import FakeUno, UnoLink
 
 BAD_PACK = (protocol.PACK_CUTOFF, protocol.PACK_FAULT)
 DISARM_EVENTS = ("deadman", "link_lost")
+AUTO_STEER_OVERRIDE = 0.15      # pad steer magnitude that hands control back
+AUTO_THROTTLE_OVERRIDE = 0.05   # pad throttle magnitude that hands control back
 
 
 def _is_disarm_event(ev: str) -> bool:
@@ -61,6 +63,8 @@ class Controller:
         self.deadman_s = deadman_s
         self.deadzone = deadzone
         self.armed = False
+        self.mode = "manual"                  # "manual" | "auto"
+        self.autopilot_output: tuple[float, float] | None = None
         self.last_steer_cmd = 0
         self.input: tuple[float, float, float | None] = (0.0, 0.0, None)
         self._now = 0.0                       # latest time seen (set_input / tick)
@@ -87,13 +91,27 @@ class Controller:
             return ["armed"]
         if name == "disarm":
             self.armed = False
-            return ["disarmed"]
+            return ["disarmed"] + self._leave_auto()
         if name == "rec_toggle":
             return ["rec_toggle"]
         if name == "crash":
             self.armed = False
-            return ["crash", "disarmed"]
+            return ["crash", "disarmed"] + self._leave_auto()
+        if name == "auto_toggle":
+            if self.mode == "auto":
+                self.mode = "manual"
+                return ["auto_off"]
+            if not self.armed:
+                return ["auto_refused_not_armed"]
+            self.mode = "auto"
+            return ["auto_on"]
         raise ValueError(f"unknown command {name!r}")
+
+    def _leave_auto(self) -> list[str]:
+        if self.mode == "auto":
+            self.mode = "manual"
+            return ["auto_off"]
+        return []
 
     def _steer(self) -> int:
         s = self.input[0]
@@ -117,6 +135,23 @@ class Controller:
         if self.armed and pack in BAD_PACK and not self.bench:
             self.armed = False
             events.append("pack_" + protocol.PACK_NAMES[pack])
+        if not self.armed:
+            events.extend(self._leave_auto())
+        if self.mode == "auto" and fresh and (
+                abs(self.input[0]) > AUTO_STEER_OVERRIDE
+                or abs(self.input[1]) > AUTO_THROTTLE_OVERRIDE):
+            self.mode = "manual"              # pad touched: the human wins this tick
+            events.append("auto_override")
+        if self.mode == "auto" and fresh:
+            m_steer, m_thr = self.autopilot_output or (None, None)
+            if m_steer is not None:
+                self.last_steer_cmd = max(-100, min(100, int(round(m_steer * 100))))
+            steer_cmd = self.last_steer_cmd
+            if m_thr is not None and not self.bench:
+                thr_cmd = max(-100, min(100, int(round(m_thr * self.max_throttle))))
+            else:
+                thr_cmd = 0
+            return steer_cmd, thr_cmd, self.armed, events
         if fresh:
             self.last_steer_cmd = self._steer()
         steer_cmd = self.last_steer_cmd       # stale: HELD, like the firmware watchdog
@@ -135,7 +170,8 @@ class _QuietHandler(SimpleHTTPRequestHandler):
 class TeleopApp:
     def __init__(self, uno, cam, recorder: Recorder, controller: Controller,
                  http_port: int, ws_port: int, web_dir: str | Path,
-                 host: str = "0.0.0.0") -> None:
+                 host: str = "0.0.0.0", autopilot=None) -> None:
+        self.autopilot = autopilot            # None = AUTO feature off
         self.uno = uno
         self.cam = cam
         self.recorder = recorder
@@ -192,8 +228,30 @@ class TeleopApp:
                 break
             now = time.monotonic()
             with self.lock:
+                want_auto = self.autopilot is not None and self.controller.mode == "auto"
+            ap_out = None
+            ap_err = None
+            if want_auto:                     # inference outside the lock
+                try:
+                    ap_out = self.autopilot.predict(frame)
+                except Exception as e:
+                    ap_err = e
+            with self.lock:
+                if (ap_out is None and ap_err is None and self.autopilot is not None
+                        and self.controller.mode == "auto"):
+                    try:                      # AUTO engaged since the check above
+                        ap_out = self.autopilot.predict(frame)
+                    except Exception as e:
+                        ap_err = e
+                if ap_err is not None:        # no model output -> stop safely
+                    self.controller.armed = False
+                    self.events.append(f"autopilot_error {ap_err}")
+                    if self.recorder.recording:
+                        self._stop_recording(crash=False)
+                self.controller.autopilot_output = ap_out
                 steer, thr, armed, ev = self.controller.tick(
                     now, self.last_pack, self.uno.link_ok)
+                mode = self.controller.mode
                 t_cmd = time.monotonic_ns()
                 reply = self.uno.exchange(steer, thr, armed)
                 if reply is not None:
@@ -204,7 +262,8 @@ class TeleopApp:
                         "ticks": self.last_ticks,
                         "status": reply.status if reply else 0,
                         "t_frame_ns": t_frame, "t_cmd_ns": t_cmd,
-                        "loop_dt": reply.dt if reply else 0})
+                        "loop_dt": reply.dt if reply else 0,
+                        "mode": 1 if mode == "auto" else 0})
                 if any(_is_disarm_event(e) for e in ev) and self.recorder.recording:
                     self._stop_recording(crash=False)
                 self.events.extend(ev)
@@ -218,6 +277,7 @@ class TeleopApp:
                 st = reply.status if reply else 0
                 self.telem = {
                     "armed": armed,
+                    "mode": mode,
                     "recording": self.recorder.recording,
                     "steps": self.recorder.steps,
                     "steer_cmd": steer, "thr_cmd": thr,
@@ -240,6 +300,9 @@ class TeleopApp:
     # ---- commands ----
     def handle_command(self, name: str) -> None:
         with self.lock:
+            if name == "auto_toggle" and self.autopilot is None:
+                self.events.append("auto_unavailable")
+                return
             events = self.controller.command(name, self.last_pack)
             self.events.extend(events)
             if name == "rec_toggle":
@@ -398,6 +461,60 @@ def _free_port() -> int:
     return port
 
 
+def _check_auto(ctl) -> None:
+    ok = protocol.PACK_OK
+
+    def armed_auto(**kw) -> Controller:
+        c = ctl(max_throttle=30, **kw)
+        c.set_input(0.0, 0.0, 0.0)
+        pack = protocol.PACK_FAULT if kw.get("bench") else ok
+        assert c.command("arm", pack) == ["armed"]
+        assert c.command("auto_toggle", pack) == ["auto_on"] and c.mode == "auto"
+        c.autopilot_output = (0.3, 0.5)
+        return c
+
+    c = ctl(max_throttle=30)                  # refused while disarmed
+    c.set_input(0.0, 0.0, 0.0)
+    assert c.command("auto_toggle", ok) == ["auto_refused_not_armed"]
+    assert c.mode == "manual"
+
+    c = armed_auto()                          # engages, uses model output
+    assert c.tick(0.05, ok, True)[:3] == (30, 15, True) and c.mode == "auto"
+    c.set_input(0.0, 0.0, 0.06)               # steer_invert never touches the model
+    assert c.tick(0.07, ok, True)[:2] == (30, 15)
+    assert c.command("auto_toggle", ok) == ["auto_off"] and c.mode == "manual"
+    c.set_input(0.0, 0.0, 0.08)
+    assert c.tick(0.09, ok, True)[:3] == (0, 0, True)   # manual again, pad at rest
+    c = armed_auto(steer_invert=True)
+    assert c.tick(0.05, ok, True)[0] == 30
+
+    c = armed_auto()                          # pad steer 0.2 overrides
+    c.set_input(0.2, 0.0, 0.05)
+    s, t, a, ev = c.tick(0.06, ok, True)
+    assert c.mode == "manual" and "auto_override" in ev and a
+    assert s == round(100 * (0.12 / 0.92)) and t == 0, (s, t)
+    c = armed_auto()                          # small steer / throttle noise below limits
+    c.set_input(0.1, 0.04, 0.05)
+    assert c.tick(0.06, ok, True)[:2] == (30, 15) and c.mode == "auto"
+    c.set_input(0.0, 0.2, 0.07)               # pad throttle overrides
+    s, t, a, ev = c.tick(0.08, ok, True)
+    assert c.mode == "manual" and "auto_override" in ev and t == round(0.2 * 30)
+
+    c = armed_auto(bench=True)                # bench forces throttle 0
+    assert c.tick(0.05, protocol.PACK_FAULT, True)[:3] == (30, 0, True)
+
+    c = armed_auto()                          # deadman in auto: disarm + manual
+    s, t, a, ev = c.tick(0.5, ok, True)
+    assert (s, t, a) == (0, 0, False), (s, t, a)
+    assert c.mode == "manual" and "deadman" in ev and "auto_off" in ev, ev
+    c = armed_auto()
+    c.tick(0.05, ok, True)
+    assert c.command("disarm", ok) == ["disarmed", "auto_off"] and c.mode == "manual"
+    c = armed_auto()
+    ev = c.tick(0.05, protocol.PACK_CUTOFF, True)[3]
+    assert c.mode == "manual" and "auto_off" in ev, ev
+
+
 def _check_controller() -> None:
     def ctl(**kw) -> Controller:
         args = dict(max_throttle=0, bench=False, steer_invert=False)
@@ -466,6 +583,8 @@ def _check_controller() -> None:
     s, t, a, ev = c.tick(0.05, protocol.PACK_OK, False)
     assert not a and "link_lost" in ev
 
+    _check_auto(ctl)
+
     c = ctl(max_throttle=30)
     c.set_input(0.0, 0.0, 0.0)
     c.command("arm", protocol.PACK_OK)
@@ -521,6 +640,91 @@ async def _client_session(ws_port: int) -> tuple[list[dict], list[bytes]]:
     return telems, blobs
 
 
+async def _auto_session(ws_port: int) -> tuple[list[dict], dict]:
+    """Arm, record, go AUTO, record a second, override with the pad."""
+    telems: list[dict] = []
+    marks: dict = {}
+    async with websockets.connect(f"ws://127.0.0.1:{ws_port}") as ws:
+        sending = True
+        steer = 0.0                            # pad at rest: no override
+
+        async def reader() -> None:
+            async for m in ws:
+                if not isinstance(m, bytes):
+                    telems.append(json.loads(m))
+
+        async def sender() -> None:
+            while sending:
+                await ws.send(json.dumps({"type": "input", "steer": steer,
+                                          "throttle": 0.0}))
+                await asyncio.sleep(0.02)
+
+        async def cmd(name: str) -> None:
+            await ws.send(json.dumps({"type": "cmd", "name": name}))
+
+        rtask = asyncio.ensure_future(reader())
+        stask = asyncio.ensure_future(sender())
+        await asyncio.sleep(0.1)
+        await cmd("auto_toggle")               # disarmed: refused
+        await asyncio.sleep(0.3)
+        marks["refused"] = list(telems[-1]["events"]) if telems else []
+        await cmd("arm")
+        await cmd("rec_toggle")
+        await asyncio.sleep(0.5)               # some manual frames
+        await cmd("auto_toggle")
+        await asyncio.sleep(1.5)
+        marks["auto"] = dict(telems[-1])
+        await cmd("rec_toggle")
+        await asyncio.sleep(0.5)
+        steer = 0.5                            # pad override
+        await asyncio.sleep(0.5)
+        marks["manual"] = dict(telems[-1])
+        sending = False
+        await stask
+        await asyncio.sleep(0.5)
+        rtask.cancel()
+    return telems, marks
+
+
+def _check_auto_end_to_end() -> None:
+    import tempfile
+    import numpy as np
+    from autopilot import StubAutopilot
+    from episode_writer import load_episode
+
+    with tempfile.TemporaryDirectory() as td:
+        rec = Recorder(td, session="sc", meta={"fake": True})
+        ctl = Controller(max_throttle=30, bench=False, steer_invert=False)
+        app = TeleopApp(FakeUno(pack=protocol.PACK_OK), FakeCamera(), rec, ctl,
+                        _free_port(), _free_port(),
+                        Path(__file__).resolve().parent / "web", host="127.0.0.1",
+                        autopilot=StubAutopilot())
+        app.start_background()
+        try:
+            telems, marks = asyncio.run(_auto_session(app.ws_port))
+        finally:
+            app.shutdown()
+        assert "auto_refused_not_armed" in marks["refused"], marks["refused"]
+        a = marks["auto"]
+        assert a["mode"] == "auto" and a["steer_cmd"] == 30 and a["thr_cmd"] == 15, a
+        m = marks["manual"]
+        assert m["mode"] == "manual" and m["steer_cmd"] == 46, m
+        assert any("auto_override" in t["events"] for t in telems)
+        npzs = list(Path(td).rglob("*.npz"))
+        assert len(npzs) == 1, npzs
+        ep = load_episode(npzs[0])
+        lm = ep["log_mode"]
+        assert lm.dtype == np.uint8 and lm[0] == 0 and (lm == 1).sum() >= 10, lm
+        assert (lm == 0).sum() >= 5, lm
+        assert not (np.diff(lm.astype(int)) < 0).any(), lm   # manual -> auto, once
+        assert (ep["log_cmd_next"][lm == 1] == [30, 15]).all()
+
+    app2 = TeleopApp(FakeUno(), FakeCamera(), Recorder("unused"),     # feature off
+                     Controller(30, False, False), 0, 0, ".")
+    app2.handle_command("auto_toggle")
+    assert "auto_unavailable" in app2.events and app2.controller.mode == "manual"
+
+
 def _check_end_to_end() -> None:
     import tempfile
     import numpy as np
@@ -559,7 +763,8 @@ def self_check() -> None:
     t0 = time.monotonic()
     _check_controller()
     _check_end_to_end()
-    assert time.monotonic() - t0 < 20.0
+    _check_auto_end_to_end()
+    assert time.monotonic() - t0 < 30.0
     print("teleop self_check: PASS")
 
 
@@ -583,6 +788,8 @@ def main() -> int:
     ap.add_argument("--data-dir", default="~/car_data")
     ap.add_argument("--http-port", type=int, default=8000)
     ap.add_argument("--ws-port", type=int, default=8765)
+    ap.add_argument("--model", default=None,
+                    help="ONNX policy file; enables AUTO mode (Back/View or A key)")
     ap.add_argument("--self-check", action="store_true")
     args = ap.parse_args()
 
@@ -601,11 +808,19 @@ def main() -> int:
 
     meta = {"max_throttle": args.max_throttle, "bench": args.bench,
             "steer_invert": args.steer_invert, "camera": cam.config,
-            "banner": " | ".join(banner), "protocol": "v0.2", "fake": args.fake}
+            "banner": " | ".join(banner), "protocol": "v0.2", "fake": args.fake,
+            "model": args.model or ""}
     rec = Recorder(args.data_dir, meta=meta)
     ctl = Controller(args.max_throttle, args.bench, args.steer_invert)
+    autopilot = None
+    if args.model:
+        from autopilot import Autopilot
+        autopilot = Autopilot(args.model)
+    elif args.fake:
+        from autopilot import StubAutopilot
+        autopilot = StubAutopilot()
     app = TeleopApp(uno, cam, rec, ctl, args.http_port, args.ws_port,
-                    Path(__file__).resolve().parent / "web")
+                    Path(__file__).resolve().parent / "web", autopilot=autopilot)
     if args.max_throttle > 0 and args.bench:
         print("NOTE: --bench forces throttle 0 (max-throttle ignored).")
     print(f"Data dir: {rec.directory}")

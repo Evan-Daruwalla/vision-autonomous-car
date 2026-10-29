@@ -17,6 +17,8 @@
   .on { background: #1f7a3a; color: #fff; }
   .off { background: #8b1a1a; color: #fff; }
   #rec { font-size: 18px; margin-bottom: 8px; }
+  #mode { font-size: 40px; font-weight: bold; padding: 6px 14px; border-radius: 6px; text-align: center; margin-bottom: 8px; background: #2c313a; color: #d8dce2; }
+  #mode.auto { background: #1f5fa8; color: #fff; }
   button { font: inherit; padding: 8px 14px; margin: 0 6px 8px 0; background: #2c313a; color: #d8dce2; border: 1px solid #444b57; border-radius: 4px; cursor: pointer; }
   button:hover { background: #3a414d; }
   table { border-collapse: collapse; width: 100%; }
@@ -38,15 +40,17 @@
   <canvas id="view" width="640" height="480"></canvas>
   <div id="side">
     <div id="armed" class="off">DISARMED</div>
+    <div id="mode">MODE: MANUAL</div>
     <div id="rec">REC: off</div>
     <div>
       <button id="bArm">ARM</button>
       <button id="bDisarm">DISARM</button>
+      <button id="bAuto">AUTO</button>
       <button id="bRec">REC</button>
       <button id="bCrash">CRASH</button>
     </div>
-    <div style="color:#8a93a2;margin-bottom:6px">Keys: Space = disarm (emergency), Enter = arm, R = rec toggle.
-      Pad: A arm, B disarm, X rec, Y crash; stick = steer, RT/LT = throttle.</div>
+    <div style="color:#8a93a2;margin-bottom:6px">Keys: Space = disarm (emergency), Enter = arm, R = rec toggle, A = auto toggle.
+      Pad: A arm, B disarm, X rec, Y crash, Back/View auto toggle (touch the stick or trigger to take over); stick = steer, RT/LT = throttle.</div>
     <table id="telem"></table>
   </div>
 </div>
@@ -95,6 +99,9 @@ function showTelem(m) {
   var a = document.getElementById("armed");
   a.textContent = m.armed ? "ARMED" : "DISARMED";
   a.className = m.armed ? "on" : "off";
+  var md = document.getElementById("mode");
+  md.textContent = "MODE: " + (m.mode === "auto" ? "AUTO" : "MANUAL");
+  md.className = m.mode === "auto" ? "auto" : "";
   document.getElementById("rec").textContent =
     "REC: " + (m.recording ? "ON  " + m.steps + " steps" : "off");
   var html = "";
@@ -120,7 +127,7 @@ function firstPad() {
   return null;
 }
 
-var EDGE = {0: "arm", 1: "disarm", 2: "rec_toggle", 3: "crash"};
+var EDGE = {0: "arm", 1: "disarm", 2: "rec_toggle", 3: "crash", 8: "auto_toggle"};
 
 setInterval(function () {
   var p = firstPad();
@@ -143,6 +150,7 @@ setInterval(function () {
 
 document.getElementById("bArm").onclick = function () { cmd("arm"); };
 document.getElementById("bDisarm").onclick = function () { cmd("disarm"); };
+document.getElementById("bAuto").onclick = function () { cmd("auto_toggle"); };
 document.getElementById("bRec").onclick = function () { cmd("rec_toggle"); };
 document.getElementById("bCrash").onclick = function () { cmd("crash"); };
 document.addEventListener("keydown", function (e) {
@@ -150,6 +158,7 @@ document.addEventListener("keydown", function (e) {
   if (e.code === "Space") { e.preventDefault(); cmd("disarm"); }
   else if (e.code === "Enter") { cmd("arm"); }
   else if (e.code === "KeyR") { cmd("rec_toggle"); }
+  else if (e.code === "KeyA") { cmd("auto_toggle"); }
 });
 
 connect();
