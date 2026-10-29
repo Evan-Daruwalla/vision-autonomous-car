@@ -101,28 +101,43 @@ class PiCamera:
 
         dur = int(1e6 / self.fps)
         cam = Picamera2()
+        # fps= is passed too: create_video_configuration defaults fps=30 and
+        # picamera2 maps it onto FrameDurationLimits (docs checked 2026-10-29,
+        # record LH). sensor output_size pins the 2304x1296 binned mode.
         cfg = cam.create_video_configuration(
             main={"size": (self.width, self.height), "format": "RGB888"},
             raw={"size": self.RAW_SIZE},
+            sensor={"output_size": self.RAW_SIZE},
+            fps=self.fps,
             controls={"FrameDurationLimits": (dur, dur)},
             transform=libcamera.Transform(hflip=self.rotate180,
                                           vflip=self.rotate180))
         cam.configure(cfg)
         cam.start()
         full = cam.camera_properties.get("ScalerCropMaximum")
+        if full is None and "ScalerCrop" in cam.camera_controls:
+            full = cam.camera_controls["ScalerCrop"][1]     # (min, max, default)
         if full is not None:
             cam.set_controls({"ScalerCrop": full})
         self._cam = cam
+        self._reported = False
 
     def read(self) -> tuple[np.ndarray, int]:
-        # UNVERIFIED on the Pi: the BGR->RGB channel order and the full-FOV
-        # ScalerCrop are assumptions until the red-object bench check.
+        # picamera2 "RGB888" is B,G,R in memory (its own request.py maps
+        # RGB888 -> "BGR"; checked 2026-10-29), hence the flip below. The
+        # full-FOV crop is UNVERIFIED until the bench run: the first frame
+        # prints the ScalerCrop the camera actually used.
         request = self._cam.capture_request()
         try:
             arr = request.make_array("main")
             md = request.get_metadata()
         finally:
             request.release()
+        if not self._reported:
+            self._reported = True
+            print(f"camera: ScalerCrop={md.get('ScalerCrop')} "
+                  f"SensorTimestamp={'yes' if 'SensorTimestamp' in md else 'NO'} "
+                  f"array={arr.shape}")
         frame = np.ascontiguousarray(arr[..., ::-1])
         t_ns = int(md.get("SensorTimestamp", time.monotonic_ns()))
         return np.ascontiguousarray(frame[:, :, :3], dtype=np.uint8), t_ns

@@ -354,6 +354,7 @@ the dated entry, not the digest.
 - [LE - docs-sync after LB-LD: HANDOFF state + prompt, DonkeyCar superseded in bins, as-built shield in hardware.md](#appendix-le---docs-sync-after-lb-ld-handoff-state--prompt-donkeycar-superseded-in-bins-as-built-shield-in-hardwaremd-2026-10-25-2058-cdt) (10-25)
 - [LF - Landing-check over LB-LE: code landed; docs fixes (uncited jumper advice, C1 contradiction, DonkeyCar markers, car_data ignore, websockets dep)](#appendix-lf---landing-check-over-lb-le-code-landed-docs-fixes-uncited-jumper-advice-c1-contradiction-donkeycar-markers-car_data-ignore-websockets-dep-2026-10-29-0720-cdt) (10-29)
 - [LG - docs-sync after LF; correction: LF heading time is 00:40, not 07:20](#appendix-lg---docs-sync-after-lf-correction-lf-heading-time-is-0040-not-0720-2026-10-29-0041-cdt) (10-29)
+- [LH - picamera2 facts checked against official docs: BGR order confirmed, fps=30 default bug fixed, sensor mode pinned, crop printed at first frame](#appendix-lh---picamera2-facts-checked-against-official-docs-bgr-order-confirmed-fps30-default-bug-fixed-sensor-mode-pinned-crop-printed-at-first-frame-2026-10-29-0045-cdt) (10-29)
 
 ---
 
@@ -21027,3 +21028,15 @@ Real UnoLink against the board; picamera2 config, B,G,R channel order and full-F
 **Changed in this pass:** HANDOFF Last updated 2026-10-29 ~00:41 CDT; appendix count 319 A-LG. Everything else LF required was done in LF itself (HANDOFF, PRD, INDEX, ui.md, hardware.md, tooling.md, README, .gitignore, ml/requirements.txt).
 
 **Checked:** `scripts/run_checks.py` -> 26 passed, 0 failed, 0 skipped (of 26). important.md: no critical fact changed. PRD milestones: none moved (M2 done-check not passed). Auto-memory: no new durable fact (the timestamp slip is already covered by the date-before-timestamp memory). Stub bins (performance, security) untouched: nothing in them changed.
+
+# Appendix LH - picamera2 facts checked against official docs: BGR order confirmed, fps=30 default bug fixed, sensor mode pinned, crop printed at first frame (2026-10-29 00:45 CDT)
+**Plan step B1 (plan of 2026-10-28):** pi/camera.py checked against the official picamera2 docs (context7, library /raspberrypi/picamera2).
+
+| Fact | Source | Effect on pi/camera.py |
+|---|---|---|
+| "RGB888" arrays are B,G,R in memory | picamera2 request.py: `mode_lookup = {"RGB888": "BGR", ...}` and `FORMAT_TABLE` the same | the existing `arr[..., ::-1]` flip is RIGHT; comment updated to cite it |
+| `create_video_configuration(..., fps=30)` has an fps argument defaulting to 30; picamera2 maps a frame rate onto FrameDurationLimits | _autodocs api-reference picamera2.md (signature) and controls.md (virtual FrameRate) | **bug**: we passed only controls={"FrameDurationLimits"}; the fps default could have held the camera at 30. Now passes fps=self.fps as well |
+| `sensor={"output_size": ..., "bit_depth": ...}` selects the sensor mode | configuration.md SensorConfiguration | now passes sensor output_size 2304x1296 (the binned mode) explicitly |
+| ScalerCrop default when the output aspect differs from the sensor | not stated in the docs reached | stays UNVERIFIED; ScalerCropMaximum falls back to camera_controls["ScalerCrop"][1]; the first frame now PRINTS the ScalerCrop actually used, SensorTimestamp presence and the array shape, so the bench run settles it |
+
+Not run on a Pi (no picamera2 on the PC); `pi/camera.py --self-check` PASS covers the fake camera and that PiCamera constructs without picamera2.
