@@ -68,10 +68,27 @@ def P(mx, my):
 
 rect(BX, BY, BW, BH, "#DCE8F7", BLU, 8, sw=1.5)
 t(BX, 112, "PROTO SHIELD v.5 - top view (68.6 x 53.3 mm); digital I/O pins used are in red", 12, BLU, bold=True)
-# hole grid hint
+# suggested placement zones (mm on the board)
+zones = [
+    (27, 5.5, 20, 15.5, "#1A56B0", "TB6612 carrier", ["Pololu #713, on headers", "control pins toward", "D8-D12 (top)"]),
+    (47.5, 5.5, 9.5, 15.5, RED, "C1 C2", ["470-1000uF", "+ 0.1uF", "VM-GND", "at the carrier"]),
+    (22, 5.5, 4.5, 15.5, BLK, "STAR", ["strip", "soldered", "to", "TB6612", "GND pin"]),
+    (27, 28.5, 13, 9.5, "#6B5B00", "R1-R4", ["2 x 200 per strip", "DIN (D4, D7)"]),
+    (40.5, 28.5, 6, 9.5, ORG, "+5V2", ["own strip", "NOT the", "5V bus"]),
+    (47, 28.5, 6, 9.5, ORG, "C3", ["470uF", "+5V2-GND"]),
+    (53.5, 34, 11.5, 13, RED, "Divider", ["100k", "10k + 2k", "mid -> A0", "(near A0)"]),
+    (57.5, 5.5, 9.5, 27, "#3E7D32", "Connectors", ["J1 motor+enc", " (6)", "J2 servo (3)", "JP1 jumper (3)", "J3 J4 strips", " (3 each)", "J5 power in", " (4)"]),
+]
+# hole grid hint (dots are left out where a zone's text sits, so no label is drawn over a hole)
+text_boxes = []
+for (mx, my, w, h, col, title, lines) in zones:
+    xa, ya = P(mx, my)
+    text_boxes.append((xa, ya, xa + w * S, ya + 28 + 11.5 * len(lines)))
 for gx in range(14, 56, 3):
     for gy in range(6, 44, 3):
         x, y = P(gx, gy)
+        if any(a - 3 <= x <= c + 3 and b - 3 <= y <= d + 3 for a, b, c, d in text_boxes):
+            continue
         out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="1.3" fill="#9DB5D8"/>')
 # digital headers (top edge): AREF GND 13..8 | 7..0  (8 + 8, pre-R3 layout as photographed)
 dl = ["REF", "GND", "13", "12", "11", "10", "9", "8"]
@@ -83,7 +100,7 @@ for blk, x0 in ((dl, 21.8), (dr, 42.4)):
     for i, name in enumerate(blk):
         x = xa + 2.54 * S * i + 8
         dot(x, ya + 10, "#FFD54F" if name in used else "#BBBBBB", 3)
-        t(x, ya - 6, name, 9.5, RED if name in used else "#777777", bold=name in used, anchor="middle")
+        t(x, ya + 36, name, 9.5, RED if name in used else "#777777", bold=True, anchor="middle")
 # power + analog headers (bottom edge)
 pw = ["RST", "3V3", "5V", "GND", "GND", "Vin"]
 an = ["A0", "A1", "A2", "A3", "A4", "A5"]
@@ -110,17 +127,6 @@ t(P(14, 1.2)[0], P(14, 1.2)[1] + 4, "LED1", 9, "#5A6A84")
 t(P(12, 47.5)[0], P(12, 47.5)[1] + 4, "LED2", 9, "#5A6A84")
 t(BX + 6, BY + BH - 6, "<- USB end (Uno USB-B: faces the car's -y side)", 9.5, "#5A6A84", bold=True)
 
-# suggested placement zones (mm on the board)
-zones = [
-    (27, 5.5, 20, 15.5, "#1A56B0", "TB6612 carrier", ["Pololu #713, on headers", "control pins toward", "D8-D12 (top)"]),
-    (47.5, 5.5, 9.5, 15.5, RED, "C1 C2", ["470-1000uF", "+ 0.1uF", "VM-GND", "at the carrier"]),
-    (22, 5.5, 4.5, 15.5, BLK, "STAR", ["strip", "soldered", "to TB6612", "GND pin"]),
-    (27, 28.5, 13, 9.5, "#6B5B00", "R1-R4", ["2 x 200 per strip", "DIN (D4, D7)"]),
-    (40.5, 28.5, 6, 9.5, ORG, "+5V2", ["own strip", "NOT the", "5V bus"]),
-    (47, 28.5, 6, 9.5, ORG, "C3", ["470uF", "+5V2-GND"]),
-    (53.5, 34, 11.5, 13, RED, "Divider", ["100k", "10k + 2k", "mid -> A0", "(near A0)"]),
-    (57.5, 5.5, 9.5, 27, "#3E7D32", "Connectors", ["J1 motor+enc", " (6)", "J2 servo (3)", "JP1 jumper (3)", "J3 J4 strips", " (3 each)", "J5 power in", " (4)"]),
-]
 for (mx, my, w, h, col, title, lines) in zones:
     xa, ya = P(mx, my)
     rect(xa, ya, w * S, h * S, col, col, 4, op=0.13, sw=1.5)

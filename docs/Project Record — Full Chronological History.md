@@ -355,6 +355,7 @@ the dated entry, not the digest.
 - [LF - Landing-check over LB-LE: code landed; docs fixes (uncited jumper advice, C1 contradiction, DonkeyCar markers, car_data ignore, websockets dep)](#appendix-lf---landing-check-over-lb-le-code-landed-docs-fixes-uncited-jumper-advice-c1-contradiction-donkeycar-markers-car_data-ignore-websockets-dep-2026-10-29-0720-cdt) (10-29)
 - [LG - docs-sync after LF; correction: LF heading time is 00:40, not 07:20](#appendix-lg---docs-sync-after-lf-correction-lf-heading-time-is-0040-not-0720-2026-10-29-0041-cdt) (10-29)
 - [LH - picamera2 facts checked against official docs: BGR order confirmed, fps=30 default bug fixed, sensor mode pinned, crop printed at first frame](#appendix-lh---picamera2-facts-checked-against-official-docs-bgr-order-confirmed-fps30-default-bug-fixed-sensor-mode-pinned-crop-printed-at-first-frame-2026-10-29-0045-cdt) (10-29)
+- [LI - Wave 1 accepted: ONNX export (A2), stable hash split + corpus id (C2, audit HJ), shield_wiring.svg 0 overlaps (C5); LH time correction](#appendix-li---wave-1-accepted-onnx-export-a2-stable-hash-split--corpus-id-c2-audit-hj-shield_wiringsvg-0-overlaps-c5-lh-time-correction-2026-10-29-0045-cdt) (10-29)
 
 ---
 
@@ -21040,3 +21041,14 @@ Real UnoLink against the board; picamera2 config, B,G,R channel order and full-F
 | ScalerCrop default when the output aspect differs from the sensor | not stated in the docs reached | stays UNVERIFIED; ScalerCropMaximum falls back to camera_controls["ScalerCrop"][1]; the first frame now PRINTS the ScalerCrop actually used, SensorTimestamp presence and the array shape, so the bench run settles it |
 
 Not run on a Pi (no picamera2 on the PC); `pi/camera.py --self-check` PASS covers the fake camera and that PiCamera constructs without picamera2.
+
+# Appendix LI - Wave 1 accepted: ONNX export (A2), stable hash split + corpus id (C2, audit HJ), shield_wiring.svg 0 overlaps (C5); LH time correction (2026-10-29 00:45 CDT)
+**2026-10-29 ~00:45 CDT.** Wave 1 of the 2026-10-28 plan, first three items accepted (each re-run by Opus, diffs read). Also a timestamp correction: LH's heading says 00:45 but its `date` printed 00:42:08 - the time was typed before the output was read, a second slip in the same hour (LG corrected LF's). From here `date` runs in its own call before any entry.
+
+| Item | What | Opus re-run |
+|---|---|---|
+| A2 `ml/export_onnx.py` | export(model) via torch.onnx legacy exporter (dynamo=False, opset 17, input "image", output "action", dynamic batch); parity() torch vs onnxruntime; time_cpu(); CLI for a BCNet checkpoint (untested until BCNet exists). onnxruntime 1.31.1 + onnx 1.23.2 installed in the PC venv (Evan approved) and pinned in ml/requirements.txt; pi/requirements-autopilot.txt pins onnxruntime for the Pi | self_check OK, parity 2.24e-08, mean 0.057 ms on the PC CPU (Pi timing unknown). torch prints a DeprecationWarning for the legacy exporter: a later torch may remove it |
+| C2 stable split (audit HJ HIGH) | preprocess.py writes `{split}_ids.npy` (file stems); splits.py `load_ids`, `corpus_id`, and `fit_val_episodes(ids=...)` = per-track hash rule sha256(seed:id) < val_fraction, >= 1 val per track; legacy positional split kept (with a warning) when ids are missing; the 3 train scripts pass ids and store `corpus_id` in every checkpoint | splits self_check PASS, incl. inserting an id at each of 79 positions moves 0 existing episodes. NOTE: the existing proc arrays have no ids, so training stays on the legacy split until `ml/preprocess.py` is re-run; nothing was retrained |
+| C5 shield_wiring.svg | 36 text overlaps -> 0 (grid dots skipped under zone text, header-pin labels moved under the pins, STAR text wrapped); added to the overlap gate's TARGETS | all 6 targets PASS 0 overlaps; render inspected by eye. Zone text stays 9 px (pre-existing size, not shrunk) |
+
+Also in wave 1 so far: pi/recorder.py gained an optional per-frame `mode` key -> `log_mode` uint8 (0 manual, 1 autopilot) after the autopilot agent correctly STOPPED: the recorder silently dropped unknown telem keys, so a mode channel would have recorded nothing. Committed with the autopilot work.
