@@ -33,7 +33,8 @@ from PIL import Image
 
 from models import ConvVAE, count_params, vae_loss
 from provenance import write_result
-from splits import describe, fit_val_episodes, frame_indices, load_proc
+from splits import (corpus_id, describe, fit_val_episodes, frame_indices,
+                    load_ids, load_proc)
 
 REPO = Path(__file__).resolve().parent.parent
 RUNS = REPO / "ml" / "runs"
@@ -103,7 +104,11 @@ def main():
     train_imgs, _, train_eps, train_tracks = load_proc("train")
     hold_imgs, _, hold_eps, hold_tracks = load_proc("holdout")
 
-    fit_eps, val_eps = fit_val_episodes(train_tracks, seed=args.seed)
+    train_ids = load_ids("train")
+    fit_eps, val_eps = fit_val_episodes(train_tracks, seed=args.seed,
+                                        ids=train_ids)
+    corpus = ({"corpus_id": corpus_id(train_ids)}
+              if train_ids is not None else {})
     fit_frames = frame_indices(train_eps, fit_eps)
     val_frames = frame_indices(train_eps, val_eps)
     hold_frames = np.arange(len(hold_imgs))
@@ -163,10 +168,10 @@ def main():
             best = va_rec
             torch.save({"model": model.state_dict(), "epoch": epoch,
                         "val_indomain_rec": va_rec, "holdout_rec": ho_rec,
-                        "args": vars(args)}, out / "vae_best.pt")
+                        "args": vars(args), **corpus}, out / "vae_best.pt")
 
     torch.save({"model": model.state_dict(), "epoch": args.epochs,
-                "args": vars(args)}, out / "vae_last.pt")
+                "args": vars(args), **corpus}, out / "vae_last.pt")
 
     # reload the selected checkpoint so the saved images match the checkpoint
     model.load_state_dict(torch.load(out / "vae_best.pt")["model"])

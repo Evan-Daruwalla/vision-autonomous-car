@@ -157,14 +157,63 @@ def load_proc(split: str, proc: Path = PROC):
     return imgs, actions, episodes, tracks
 
 
+def load_ids(split: str, proc: Path = PROC) -> np.ndarray | None:
+    """Per-episode ids (file stems) written by preprocess.py, or None if the
+    corpus predates `{split}_ids.npy`. A length mismatch against
+    `{split}_episodes.npy` is a torn preprocess and raises (audit HJ).
+    """
+    p = proc / f"{split}_ids.npy"
+    if not p.exists():
+        return None
+    ids = np.load(p)
+    episodes = np.load(proc / f"{split}_episodes.npy", mmap_mode="r")
+    if len(ids) != len(episodes):
+        raise ValueError(
+            f"{split}: {len(ids)} ids vs {len(episodes)} episodes -- "
+            f"{split}_ids.npy is from a different run than "
+            f"{split}_episodes.npy. Re-run: python ml/preprocess.py")
+    return ids
+
+
+def corpus_id(ids) -> str:
+    """Order-independent 16-hex fingerprint of the set of episode ids."""
+    return hashlib.sha256(
+        "\n".join(sorted(str(i) for i in ids)).encode("utf-8")).hexdigest()[:16]
+
+
+def _id_hash(seed: int, ep_id) -> float:
+    h = hashlib.sha256(f"{seed}:{ep_id}".encode("utf-8")).hexdigest()[:12]
+    return int(h, 16) / 16 ** 12
+
+
 def fit_val_episodes(tracks: np.ndarray, seed: int = 0,
-                     val_fraction: float = VAL_FRACTION):
+                     val_fraction: float = VAL_FRACTION, ids=None):
     """Split episode INDICES into (fit, val), stratified by track.
 
     Stratified so every track stays represented in both halves -- an
     unstratified random split can drop a whole track out of training, which
     looks like overfitting in the curves and is actually a broken split.
+
+    With `ids` (preprocess.py's `{split}_ids.npy`) an episode is val when a
+    hash of (seed, id) falls under val_fraction, so topping up the corpus never
+    moves an existing episode between fit and val. Without ids the legacy
+    position-based shuffle is used (audit HJ).
     """
+    if ids is not None:
+        if len(ids) != len(tracks):
+            raise ValueError(f"{len(ids)} ids vs {len(tracks)} tracks")
+        fit, val = [], []
+        for name in sorted(np.unique(tracks)):
+            idx = np.flatnonzero(tracks == name)
+            hv = {int(i): _id_hash(seed, ids[i]) for i in idx}
+            tv = [i for i in hv if hv[i] < val_fraction]
+            if not tv:
+                tv = [min(hv, key=hv.get)]
+            val.extend(tv)
+            fit.extend(i for i in hv if i not in set(tv))
+        return np.array(sorted(fit)), np.array(sorted(val))
+    print("  warning: fit/val split is position-based and unstable under "
+          "corpus top-ups (no episode ids; re-run preprocess to get them)")
     rng = np.random.default_rng(seed)
     fit, val = [], []
     for name in sorted(np.unique(tracks)):
@@ -251,6 +300,47 @@ def self_check() -> None:
         # 4. sidecar present and DIFFERENT -> stale, None
         write_cache_key("train", "deadbeef0000", proc=d)
         assert load_cached_mu("train", ck, proc=d) is None, "mismatched key accepted"
+
+    # Hash split keyed on episode id (audit HJ): inserting an id anywhere must
+    # not move any EXISTING episode between fit and val.
+    base_ids = [f"a-{i:03d}" for i in range(39)] + [f"b-{i:03d}" for i in range(39)]
+    base_tr = np.array(["a"] * 39 + ["b"] * 39)
+    f0, v0 = fit_val_episodes(base_tr, seed=0, ids=np.array(base_ids))
+    side0 = {base_ids[i]: "val" for i in v0.tolist()}
+    side0.update({base_ids[i]: "fit" for i in f0.tolist()})
+    assert len(side0) == 78 and len(v0) + len(f0) == 78
+    for pos in range(79):
+        ids2 = base_ids[:pos] + ["a-new"] + base_ids[pos:]
+        tr2 = base_tr.tolist()[:pos] + ["a"] + base_tr.tolist()[pos:]
+        f2, v2 = fit_val_episodes(np.array(tr2), seed=0, ids=np.array(ids2))
+        side2 = {ids2[i]: "val" for i in v2.tolist()}
+        side2.update({ids2[i]: "fit" for i in f2.tolist()})
+        for k, v in side0.items():
+            assert side2[k] == v, f"insert at {pos} moved {k}"
+        assert set(tr2[i] for i in v2) == {"a", "b"}, "track without val"
+    assert set(base_tr[v0]) == {"a", "b"}, "every track needs >=1 val"
+    # a tiny track with no hash under the threshold still gets one val episode
+    f3, v3 = fit_val_episodes(np.array(["z"] * 2), seed=0,
+                              ids=np.array(["z-1", "z-2"]), val_fraction=0.0)
+    assert len(v3) == 1 and len(f3) == 1, (f3, v3)
+    # corpus_id: order-independent, changes when an id is added
+    assert corpus_id(["x", "y", "z"]) == corpus_id(["z", "x", "y"])
+    assert corpus_id(["x", "y", "z"]) != corpus_id(["x", "y", "z", "w"])
+    assert len(corpus_id(["x"])) == 16
+    # load_ids: None when missing, ValueError on a length mismatch
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        assert load_ids("train", proc=d) is None, "missing ids != None"
+        np.save(d / "train_episodes.npy", np.zeros((3, 2), np.int64))
+        np.save(d / "train_ids.npy", np.array(["a", "b", "c"], dtype="<U80"))
+        assert load_ids("train", proc=d).tolist() == ["a", "b", "c"]
+        np.save(d / "train_ids.npy", np.array(["a", "b"], dtype="<U80"))
+        try:
+            load_ids("train", proc=d)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("length mismatch not rejected")
 
     print(f"fit={fit.tolist()}")
     print(f"val={val.tolist()}")

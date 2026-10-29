@@ -8,6 +8,8 @@ memmap-able arrays:
     <out>/{split}_actions.npy   (N, 2)         float32
     <out>/{split}_episodes.npy  (E, 2)         int64   [start, length] per episode
     <out>/{split}_tracks.npy    (E,)           <U40    track name per episode
+    <out>/{split}_ids.npy       (E,)           <U80    episode file stem (no .npz),
+                                                       same order as _episodes.npy
 
 64x64 because that is what Ha & Schmidhuber used and what DreamerV3 expects,
 so P3 and P4 consume the identical tensor and any comparison between them is
@@ -101,7 +103,7 @@ def process_split(split: str, out: Path, device: str, chunk: int = 256,
     # has been topped up twice), so it is a live path, not a hypothetical.
     # (Cold audit E1, 2026-08-06; mirrors episode_writer.py's tmp+os.replace.)
     tmp = {k: out / f"{split}_{k}.npy.tmp"
-           for k in ("images", "actions", "episodes", "tracks")}
+           for k in ("images", "actions", "episodes", "tracks", "ids")}
     images = np.lib.format.open_memmap(
         tmp["images"], mode="w+", dtype=np.uint8,
         shape=(total, SIZE, SIZE, 3))
@@ -111,6 +113,9 @@ def process_split(split: str, out: Path, device: str, chunk: int = 256,
     # track: without it, holding out episodes could silently remove an entire
     # layout from training and the loss curve would look like overfitting.
     tracks = np.array([f.stem.rsplit("-", 2)[0] for f in files], dtype="<U40")
+    # Stable per-episode identity (the file stem), so the fit/val split can key
+    # on WHICH episode it is rather than its position (audit HJ).
+    ids = np.array([f.stem for f in files], dtype="<U80")
 
     pos = 0
     for i, f in enumerate(files):
@@ -138,10 +143,10 @@ def process_split(split: str, out: Path, device: str, chunk: int = 256,
     # Written through a file object, not a path: np.save appends ".npy" to any
     # path that does not already end in it, so np.save(".../x.npy.tmp") would
     # silently create ".../x.npy.tmp.npy" and the rename below would fail.
-    for key in ("actions", "episodes", "tracks"):
+    for key in ("actions", "episodes", "tracks", "ids"):
         with open(tmp[key], "wb") as f:
             np.save(f, {"actions": actions, "episodes": episodes,
-                        "tracks": tracks}[key])
+                        "tracks": tracks, "ids": ids}[key])
     # Only now does any of it become visible under its real name.
     for k, src in tmp.items():
         os.replace(src, out / f"{split}_{k}.npy")

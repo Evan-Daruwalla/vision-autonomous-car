@@ -32,8 +32,8 @@ import torch
 
 from models import MDNRNN, ConvVAE, count_params, mdn_loss
 from provenance import write_result
-from splits import (cache_key_matches, encoder_fingerprint,
-                    fit_val_episodes, load_proc, split_seed_of,
+from splits import (cache_key_matches, corpus_id, encoder_fingerprint,
+                    fit_val_episodes, load_ids, load_proc, split_seed_of,
                     write_cache_key)
 
 REPO = Path(__file__).resolve().parent.parent
@@ -175,7 +175,10 @@ def main():
     # rebuilt the seed-0 split from the VAE and scored val_indomain on
     # episodes this model had trained on. Exactly the P5 >=3-seed workflow.
     split_seed = split_seed_of(vae_ckpt, Path(args.vae).name)
-    fit_eps, val_eps = fit_val_episodes(tr_tracks, seed=split_seed)
+    tr_ids = load_ids("train")
+    fit_eps, val_eps = fit_val_episodes(tr_tracks, seed=split_seed, ids=tr_ids)
+    corpus = ({"corpus_id": corpus_id(tr_ids)}
+              if tr_ids is not None else {})
     if split_seed != args.seed:
         print(f"note: training seed {args.seed}, but the split is rebuilt with "
               f"seed {split_seed} (the VAE's) so val_indomain stays genuinely "
@@ -226,7 +229,7 @@ def main():
             # against the same split, rather than merely note a mismatch.
             torch.save({"model": model.state_dict(), "epoch": epoch,
                         "val_indomain_nll": va_nll, "args": vars(args),
-                        "split_seed": split_seed},
+                        "split_seed": split_seed, **corpus},
                        out / "mdnrnn_best.pt")
 
     write_result(out / "history.json", {"args": vars(args), "history": history})

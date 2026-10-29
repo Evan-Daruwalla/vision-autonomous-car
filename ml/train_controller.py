@@ -52,8 +52,8 @@ import torch.nn as nn
 
 from models import ACTION_DIM, HIDDEN, MDNRNN, Z_DIM, ConvVAE, count_params
 from provenance import write_result
-from splits import (encoder_fingerprint, fit_val_episodes, load_cached_mu,
-                    load_proc, split_seed_of)
+from splits import (corpus_id, encoder_fingerprint, fit_val_episodes,
+                    load_cached_mu, load_ids, load_proc, split_seed_of)
 
 REPO = Path(__file__).resolve().parent.parent
 PROC = REPO / "ml" / "data" / "proc"
@@ -402,7 +402,10 @@ def main() -> int:
     # never from --seed. --seed varies this controller's init and batch order
     # so P5 can report >=3 seeds, and must not move the data split underneath.
     split_seed = split_seed_of(vae_ckpt)
-    fit_eps, val_eps = fit_val_episodes(tracks, seed=split_seed)
+    train_ids = load_ids("train", proc=proc)
+    fit_eps, val_eps = fit_val_episodes(tracks, seed=split_seed, ids=train_ids)
+    corpus = ({"corpus_id": corpus_id(train_ids)}
+              if train_ids is not None else {})
     assert not (set(fit_eps.tolist()) & set(val_eps.tolist())), "fit/val overlap"
 
     print(f"building RNN states for {len(fit_eps)} fit + {len(val_eps)} val episodes...")
@@ -492,7 +495,8 @@ def main() -> int:
                         # CHECKS these yet - eval_in_sim / eval_paired /
                         # plan_cem verifying them is the open follow-up.
                         "vae_fingerprint": encoder_fingerprint(args.vae),
-                        "rnn_fingerprint": encoder_fingerprint(args.rnn)},
+                        "rnn_fingerprint": encoder_fingerprint(args.rnn),
+                        **corpus},
                        out / f"controller_{args.arch}_seed{args.seed}.pt")
 
     write_result(out / f"history_{args.arch}_seed{args.seed}.json", {"args": vars(args), "history": history})
