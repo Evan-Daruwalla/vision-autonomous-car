@@ -351,6 +351,9 @@ the dated entry, not the digest.
 - [LB - Proto shield wiring finished (untested); photo review: L2/9-L2/10 bridge not seen, C1/C2 not on the carrier](#appendix-lb---proto-shield-wiring-finished-untested-photo-review-l29-l210-bridge-not-seen-c1c2-not-on-the-carrier-2026-10-22-2338-cdt) (10-22)
 - [LC - Shield follow-up: L2/9-L2/10 bridged, C1 dangling, servo signal path incomplete (jumper on J2.SIG); as-built layout edit reverted](#appendix-lc---shield-follow-up-l29-l210-bridged-c1-dangling-servo-signal-path-incomplete-jumper-on-j2sig-as-built-layout-edit-reverted-2026-10-24-1530-cdt) (10-24)
 - [LD - Teleop + recording stack built (custom Python, pi/): fake-hardware verified, suite 26; nothing run on the Pi yet](#appendix-ld---teleop--recording-stack-built-custom-python-pi-fake-hardware-verified-suite-26-nothing-run-on-the-pi-yet-2026-10-25-1917-cdt) (10-25)
+- [LE - docs-sync after LB-LD: HANDOFF state + prompt, DonkeyCar superseded in bins, as-built shield in hardware.md](#appendix-le---docs-sync-after-lb-ld-handoff-state--prompt-donkeycar-superseded-in-bins-as-built-shield-in-hardwaremd-2026-10-25-2058-cdt) (10-25)
+- [LF - Landing-check over LB-LE: code landed; docs fixes (uncited jumper advice, C1 contradiction, DonkeyCar markers, car_data ignore, websockets dep)](#appendix-lf---landing-check-over-lb-le-code-landed-docs-fixes-uncited-jumper-advice-c1-contradiction-donkeycar-markers-car_data-ignore-websockets-dep-2026-10-29-0720-cdt) (10-29)
+- [LG - docs-sync after LF; correction: LF heading time is 00:40, not 07:20](#appendix-lg---docs-sync-after-lf-correction-lf-heading-time-is-0040-not-0720-2026-10-29-0041-cdt) (10-29)
 
 ---
 
@@ -20981,3 +20984,46 @@ Data contract written into data.md: action = [steer/100, throttle/100] of the in
 
 ## Not verified (on-Pi checklist in pi/README.md)
 Real UnoLink against the board; picamera2 config, B,G,R channel order and full-FOV crop; 20 Hz on the Pi 5; a real Xbox pad in a real browser; steer sign; the deadman with a real laptop. simplejpeg path untested (PC used Pillow). Motor unwired: never pass --max-throttle until it is wired and the car is on a stand.
+
+# Appendix LE - docs-sync after LB-LD: HANDOFF state + prompt, DonkeyCar superseded in bins, as-built shield in hardware.md (2026-10-25 20:58 CDT)
+**2026-10-25 ~20:58 CDT.** /docs-sync pass after LB-LD (commit b21cbe3).
+
+**Changed:**
+- HANDOFF.md: a dated 2026-10-25 lead on the CURRENT STATE paragraph (shield soldered but untested; teleop built, fake-hardware only); paste-ready prompt STATE rewritten (shield soldered, servo path incomplete per LC, teleop stack and SSH-tunnel use, lights after 2026-11-01); NOT WIRED line; "NOTHING SOLDERED YET" struck; suite 21 -> 26; Last updated stamped.
+- Bins: dependencies.md and architecture.md mark DonkeyCar superseded by the custom `pi/` stack (dated, not deleted); hardware.md gets the as-built shield facts from LB/LC.
+
+**Already current (done in LD):** data.md (real-car action contract), testing.md + INDEX (suite 26), PRD task 11 amendment.
+
+**Checked, no change:** important.md (no critical fact changed; #3 firmware divergence still holds); PRD milestone rows (M2 done-check NOT passed, so nothing moves); auto-memory (no new durable convention). No HTML twin or record index exists. The age-stale stub bins (performance, security, ui, ...) are untouched: nothing in them changed.
+
+# Appendix LF - Landing-check over LB-LE: code landed; docs fixes (uncited jumper advice, C1 contradiction, DonkeyCar markers, car_data ignore, websockets dep) (2026-10-29 07:20 CDT)
+**2026-10-29 ~ (see heading).** /landing-check over LB-LE + commits b92edcc, b21cbe3 and the uncommitted docs-sync, run by a fresh agent given only the artifacts. Probe canary `CANARY PASS 23/23`; census: pre-commit hook live at scripts/git-hooks, 0 changed-file twins.
+
+**Verdict: FIX FIRST (docs only).** Every code file LANDED: run_checks discovers and passes all 5 pi/ checks (26 passed, 0 failed, 0 skipped; 21 at b92edcc re-derived from a git archive); each safety control (deadman, arm refusals, throttle cap, bench throttle 0, banner gate) has a test that plants the positive and sees it fire; data.md's six log dtypes and the action shift match pi/recorder.py; the banner strings match uno_control.ino. Publication sweep: 0 hits for home paths, Downloads, scratchpad, emails; `ed@ed-pi5.local` was inherited (already public before LD) and LD copied it into 7 more places - left as is (low sensitivity, Evan's call); no photo files committed (LB names IMG_0275-0284 only).
+
+**Findings fixed here:**
+| Finding | Fix |
+|---|---|
+| HANDOFF + prompt + hardware.md cite "3 jumpers" as a fix "in LC"; no record entry contained it | It is real advice given in session on 2026-10-24: bench option = signal male-male jumper from the servo plug to the Uno D9 socket, V and GND male-female jumpers onto J2's middle and bottom pins; loose single jumpers must be glued/taped before driving; the soldered fix (pin at L1/-3 + L1/-2-L1/-3 bridge) is preferred for driving. Recorded here; HANDOFF now cites LF |
+| HANDOFF:5 "312 appendices A-KZ" | struck, 318 A-LF |
+| Prompt said "C1 STANDS UPRIGHT" while its own STATE says it hangs (LC) | reworded: designed upright, as built hangs, re-seat; NEXT ACTIONS C1 headroom item conditioned on the re-seat |
+| hardware.md "extra solder is harmless" dropped LB's condition | condition restored (only while nothing else is in those holes; col-10 blob may touch U3/11) |
+| INDEX lines for architecture / dependencies / ui stale; ui.md still "N/A" | updated; ui.md gets a dated entry for pi/web/index.html |
+| DonkeyCar still read as the plan: HANDOFF stack line, PRD stack lines + task 13, hardware.md, tooling.md | dated superseded markers (struck / bracketed, nothing deleted) |
+| README layout block had no pi/ | added |
+| HANDOFF "after next weekend" (relative) | 2026-11-01 |
+| car_data/ not ignored - README's `scp -r ...:~/car_data .` from the repo root would drop real camera frames into the public repo's tree | .gitignore + `car_data/` |
+| websockets used by pi/teleop.py but undeclared for the PC venv (a fresh venv would SKIP the teleop check) | ml/requirements.txt + websockets==13.1 |
+
+**Deferred to planned work (2026-10-28 plan):** SERIAL_PROTOCOL.md still names host_test.py as the only Pi client, and its rule 3 (2 consecutive bad CRCs = link fault) is not implemented in pi/ -> C4 (text) and B3 (code: rule 3, arm checks link_ok, save-thread errors surfaced to the UI). protocol/recorder self_checks fail in the Pi deploy layout (they need firmware/host_test.py and ml/verify_corpus.py; runtime imports are fine) -> B2 deploy script copies them or the checks skip there. data.md line count in INDEX, HANDOFF "Immediate next actions" table (stale since 2026-09-07, inherited) -> final docs-sync. shield_divider_xray.py has no self_check -> backlog.
+
+**Unverified as stated (no artifact):** LD's browser numbers (fps 20.3, 32 steps, steer held 46) came from a live browser run; they are reproducible by re-running `pi/teleop.py --fake --bench` with an injected pad, not from a file.
+
+# Appendix LG - docs-sync after LF; correction: LF heading time is 00:40, not 07:20 (2026-10-29 00:41 CDT)
+**2026-10-29 ~00:41 CDT.** /docs-sync after the landing-check fixes (LF).
+
+**Correction to LF: its heading time "07:20 CDT" is WRONG.** The `date` call in the same command printed `Thu Oct 29 00:40:28 CDT 2026`; the time was typed before that output was read (the exact failure the date-before-timestamp memory warns about). LF was written at ~00:40 CDT.
+
+**Changed in this pass:** HANDOFF Last updated 2026-10-29 ~00:41 CDT; appendix count 319 A-LG. Everything else LF required was done in LF itself (HANDOFF, PRD, INDEX, ui.md, hardware.md, tooling.md, README, .gitignore, ml/requirements.txt).
+
+**Checked:** `scripts/run_checks.py` -> 26 passed, 0 failed, 0 skipped (of 26). important.md: no critical fact changed. PRD milestones: none moved (M2 done-check not passed). Auto-memory: no new durable fact (the timestamp slip is already covered by the date-before-timestamp memory). Stub bins (performance, security) untouched: nothing in them changed.

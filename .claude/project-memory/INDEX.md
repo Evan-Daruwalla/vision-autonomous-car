@@ -7,7 +7,7 @@ New standard bins (2026-09-30; first line STATUS: = stub, see that line): decisi
 Core bins:
 - security.md — empty, no attack surface yet; live at M2 teleop (updated 2026-07-23)
 - performance.md — empty, no perf work yet; live at M3 inference loop (updated 2026-07-23)
-- architecture.md — planned system shape + staged AI pipeline (updated 2026-07-23)
+- architecture.md — planned system shape + staged AI pipeline (updated 2026-07-23) [2026-10-25: DonkeyCar struck, custom pi/ teleop (LE)]
 - features.md — inventory of the 34 ml/ scripts by pipeline stage (updated 2026-09-03)
 - conventions.md — general code style across ml/, counts re-derived to 34 files, + the provenance.write_result rule (updated 2026-09-03; 39 lines)
 - gotchas.md — **SPLIT 2026-09-02, now a 24-line ROUTER only.** Kept because CLAUDE.md/HANDOFF reference it by name; follow its pointers
@@ -22,8 +22,8 @@ Core bins:
   in `train_controller.py`/`diag_copycat.py` (updated 2026-09-10 -- DART invariant pinned by train_controller's self_check, Appendix EV)
 
 Standards bins (only those the codebase actually commits to):
-- dependencies.md — planned stack (DonkeyCar 5.x plumbing + PyTorch models) + the ON-CAR inference runtime decision: export to ONNX, and why RAM was never the binding constraint (updated 2026-09-03)
-- ui.md — N/A, no frontend planned; teleop UI TBD at M2 (re-checked 2026-09-02, still N/A)
+- dependencies.md — planned stack (~~DonkeyCar 5.x plumbing~~ custom pi/ stack since 2026-10-25, LD + PyTorch models) + the ON-CAR inference runtime decision: export to ONNX, and why RAM was never the binding constraint (updated 2026-09-03)
+- ui.md — ~~N/A, no frontend planned~~ teleop web page exists since 2026-10-25 (pi/web/index.html, LD); 2026-10-29 note added
 - testing.md — the runnable done-checks + verification rules, ml AND firmware (updated 2026-09-10 -- `scripts/run_checks.py` is the suite; a self_check must fail on its own bug) [2026-10-13: uno_control flashed, SELFTEST 86/86 on the board (HU)] [2026-10-20: + svg_text_overlap.py, zero-overlap diagram gate; suite 19 (KJ)] [2026-10-22: suite 21, flow/guide pages gated (KS-KX)] [2026-10-25: suite 26, pi/ teleop checks (LD)]
 - data.md — THE episode data contract: npz schema, t=0 rule, both alignment gates, 3-way split rule, the SPLIT-SEED rule, the torn-preprocess guard in load_proc, + the Pi/Uno serial frame contract (updated 2026-09-03; 190 lines, over the ~150 cap)
 - tooling.md — Python 3.12.10 venv, machine facts, git -F quirk, shell/encoding traps from the gotchas split (updated 2026-09-02) [2026-10-13: + OpenSCAD asserts exit 0; COM3 busy on upload = Serial Monitor (HL, HT)]

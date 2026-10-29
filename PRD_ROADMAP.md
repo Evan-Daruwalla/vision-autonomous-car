@@ -171,7 +171,7 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   Pi 5 (4GB or 8GB per M1.1) · Camera Module 3 Wide · owned PF L/XL drive
   motor + TB6612FNG · MG90S servo (MG996R fallback; mount takes both) ·
   2S LiPo + 5V/5A-class UBEC into GPIO, split rails, shared ground ·
-  DonkeyCar 5.x (64-bit Bookworm, Py 3.11) for plumbing + custom PyTorch
+  DonkeyCar 5.x (64-bit Bookworm, Py 3.11) for plumbing **[superseded 2026-10-25, record LD: DonkeyCar dropped; custom `pi/` stack]** + custom PyTorch
   models · training on Evan's desktop GPU.~~ (amended 2026-07-23 ~17:21 CDT
   — Pi size resolved; owned-PF-motor assumption void, he owns no Lego
   motors)
@@ -181,7 +181,7 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   demands it) · MG90S servo (MG996R fallback; mount takes both) · **power
   system TBD — M1.1c** (the 2S LiPo + 5V UBEC plan assumed equipment Evan
   doesn't own; chemistry, charger and whether the Pi can run off a 5V/3A
-  source are all under research as of 2026-07-23 ~17:32 CDT) · DonkeyCar 5.x
+  source are all under research as of 2026-07-23 ~17:32 CDT) · **[superseded 2026-10-25, record LD: DonkeyCar dropped; custom `pi/` stack]** DonkeyCar 5.x
   (64-bit Bookworm, Py 3.11) for plumbing + custom PyTorch models ·
   training on **RTX 3060 Ti, 8GB VRAM** — a real constraint on M4, see
   below.
@@ -210,7 +210,7 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   on**~~ **CLOSED: BMS ACEIRMC B08HLQQCQJ documents a 2.9 V/cell cutoff
   (Appendix CK, re-verified live 2026-10-04), and the wiring doc routes the
   pack through it since 2026-10-10 (Appendix FE). Cells are Samsung 25R, not
-  EVE 25P (sold out 2026-09-03).** · DonkeyCar 5.x for Pi-side plumbing **minus its actuator backend,
+  EVE 25P (sold out 2026-09-03).** · **[superseded 2026-10-25, record LD: DonkeyCar dropped; custom `pi/` stack]** DonkeyCar 5.x for Pi-side plumbing **minus its actuator backend,
   which cannot drive the Uno** (task 11 amendment); `rpi-lgpio` not
   `RPi.GPIO` on the Pi 5 · custom PyTorch models · training on RTX 3060 Ti
   8 GB with Sysmem Fallback still ON (capped in code, not in the driver).
@@ -700,7 +700,7 @@ transfer gap) must not block the capstone.
       then found that recovery data mildly HURT closed-loop driving in sim**
       (negative in 4/4 launches, n.s.). So: collect it, and evaluate it as a
       separate arm. Do not assume it helps.)*
-13. **Baseline train + deploy.** DonkeyCar's stock trainer as baseline;
+13. **Baseline train + deploy.** DonkeyCar's stock trainer as baseline; **[superseded 2026-10-25, record LD: DonkeyCar dropped; custom `pi/` stack]** (baseline = ml/bc_real.py, planned 2026-10-28);
     deploy; measure. Done: autonomous attempt logged (laps, interventions).
 14. **Custom PyTorch model.** Swap PyTorch CNN into the inference path;
     train on same data; A/B against baseline. Done: eval table both models.

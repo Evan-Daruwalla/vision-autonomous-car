@@ -23,6 +23,9 @@ Remaining planned stack from the 2026-07-23 research brief:
 - **DonkeyCar 5.x** (latest 5.3.0, 2026-03-29) — teleop, tub data recorder,
   drive loop. Requires 64-bit Raspberry Pi OS Bookworm + Python 3.11.
   Chosen for plumbing only; its TF/Keras trainer is NOT the model path.
+  **SUPERSEDED 2026-10-25 (record LD): DonkeyCar dropped (Evan).** The car side is
+  a custom stack in `pi/` - picamera2 + pyserial + websockets 13.1 (the only pip
+  dependency, pi/requirements.txt); episodes go straight to the ml/ npz format.
 - **PyTorch** (desktop training + on-Pi inference) — the custom BC model and
   everything downstream. Portfolio reason: the project's ML story is
   PyTorch, not Keras.

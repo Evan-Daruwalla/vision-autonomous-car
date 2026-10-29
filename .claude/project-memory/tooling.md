@@ -6,7 +6,7 @@
   `.venv/pyvenv.cfg` says so, and 3.11 is not installed on this machine. The
   intent was 3.11; what got built is 3.12.10, and it works. The
   "one version serves desktop and Pi" reasoning is therefore VOID: the Pi
-  will run 3.11 for DonkeyCar and the desktop runs 3.12.10, so anything
+  will run 3.11 for DonkeyCar **[superseded 2026-10-25, record LD: DonkeyCar dropped; custom `pi/` stack]** and the desktop runs 3.12.10, so anything
   shared between them must not depend on version parity.
 - System Python is 3.14.4 — too new to assume PyTorch/gym wheel coverage, so
   ML work stays in the venv. Wheel availability was verified by SIM-POC P1's

@@ -144,6 +144,7 @@ drifts across a five-hole span, has not been run.
 
 ```
 ml/            world-model pipeline: collection, verification, training, eval
+pi/            car-side teleop + recorder for the Pi 5 (added 2026-10-25, untested on the Pi)
 cad/           tolerance coupons v1+v2 (printed and tested 2026-09-05), servo coupler STL
 scripts/       parametric STL generation
 docs/          research briefs, BOM, and the append-only project record

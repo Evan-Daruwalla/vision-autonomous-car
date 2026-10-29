@@ -55,3 +55,5 @@ ml/runs/**/images.npy
 # clone of this PUBLIC repo inherits. Without this rule a fresh clone is one
 # `git add -A` away from publishing it.
 .claude/settings.local.json
+# real-car driving data copied back from the Pi (camera frames; never commit) - 2026-10-29
+car_data/

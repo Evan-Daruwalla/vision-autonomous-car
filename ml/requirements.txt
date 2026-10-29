@@ -50,3 +50,5 @@ tensorboard==2.21.0  # tools.py's SummaryWriter
 # GOTCHA: ruamel.yaml >=0.19 REMOVED `yaml.safe_load`, which the vendored
 # dreamer.py `__main__` calls — so `python dreamer.py ...` cannot run here.
 # ml/run_dreamer_p4.py is the entry point and uses the current API instead.
+# pi/ teleop server, tested on the PC (2026-10-25, record LD)
+websockets==13.1

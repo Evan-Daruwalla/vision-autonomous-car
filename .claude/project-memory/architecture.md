@@ -46,7 +46,10 @@
     8GB VRAM** (confirmed 2026-07-23; the "16GB shared" is host-RAM
     spillover, not usable VRAM). This holds for every AI stage, including
     the world model (deployment is always a small encoder+actor policy).
-  - Software: DonkeyCar 5.x supplies teleop, the data recorder, and the
+  - ~~Software: DonkeyCar 5.x supplies teleop, the data recorder, and the~~
+    **(superseded 2026-10-25, record LD: custom `pi/teleop.py` - 20 Hz control thread
+    paced by the camera, websocket UI, Xbox pad read in the laptop browser - replaces
+    DonkeyCar; recorder writes the ml/ episode npz directly)**
     drive loop (20 Hz cap); custom PyTorch models replace its Keras models
     at the inference/training boundary.
 - **Staged AI pipeline** (amended 2026-07-23, pending Evan's ratification):
