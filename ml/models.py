@@ -160,6 +160,34 @@ def count_params(m: nn.Module) -> int:
     return sum(p.numel() for p in m.parameters())
 
 
+class BCNet(nn.Module):
+    """Behavioural-cloning policy: (N,3,64,64) in [0,1] -> (N,2) = (steer, throttle) in [-1,1].
+
+    PilotNet-scale conv stack, ONNX-friendly ops only (Conv/ELU/Gemm/Tanh).
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(3, 24, 5, stride=2), nn.ELU(),
+            nn.Conv2d(24, 36, 5, stride=2), nn.ELU(),
+            nn.Conv2d(36, 48, 3, stride=2), nn.ELU(),
+            nn.Conv2d(48, 64, 3, stride=1), nn.ELU(),
+            nn.Conv2d(64, 64, 3, stride=1), nn.ELU(),
+            nn.Flatten(),
+        )
+        with torch.no_grad():
+            n_flat = self.conv(torch.zeros(1, 3, 64, 64)).shape[1]
+        self.head = nn.Sequential(
+            nn.Linear(n_flat, 100), nn.ELU(),
+            nn.Linear(100, 50), nn.ELU(),
+            nn.Linear(50, 2), nn.Tanh(),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.head(self.conv(x))
+
+
 def self_check() -> None:
     """Runnable check: shapes flow, and the VAE matches the published count."""
     torch.manual_seed(0)
@@ -197,6 +225,14 @@ def self_check() -> None:
     print(f"          which used a 3-dim action; this uses 2, so a smaller")
     print(f"          count is expected -- not claimed as a match)")
     print(f"total   : {n_vae + n_rnn:,} params")
+
+    bc = BCNet()
+    y = bc(torch.rand(5, 3, 64, 64))
+    assert y.shape == (5, 2), y.shape
+    assert y.abs().max() <= 1.0
+    n_bc = count_params(bc)
+    assert 100_000 < n_bc < 1_000_000, n_bc
+    print(f"BCNet   : {n_bc:,} params, output {tuple(y.shape)}")
     print("self_check: PASS")
 
 
