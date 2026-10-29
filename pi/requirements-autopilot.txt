@@ -1,0 +1,2 @@
+# for pi/autopilot.py; numpy and Pillow come from Raspberry Pi OS apt
+onnxruntime==1.31.1
