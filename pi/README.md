@@ -12,15 +12,39 @@ Status: sim-only (FakeUno/FakeCamera) until the on-Pi checklist below is done.
 - `teleop.py` - control loop (20 Hz), websocket (8765), page server (8000).
 - `web/index.html` - video, telemetry, pad input (browser Gamepad API).
 
-## Deploy (from the laptop)
-    ssh ed@ed-pi5.local 'mkdir -p ~/car/ml'
-    scp -r pi ed@ed-pi5.local:~/car/
-    scp ml/episode_writer.py ed@ed-pi5.local:~/car/ml/
+## Deploy (from the laptop, repo root)
+    bash pi/deploy.sh --dry-run           # prints the commands, runs nothing
+    bash pi/deploy.sh [user@host]         # default ed@ed-pi5.local
 
-On the Pi, once:
+It does `mkdir -p`, `scp` of `pi/*.py pi/web pi/requirements*.txt` plus the `ml/`
+files the recorder and `verify_corpus.py` import (`episode_writer`, `verify_corpus`,
+`collect_sim_data`, `collect_recovery`, `sim_conf`; gym is imported lazily there so
+none needs it on the Pi) and `firmware/host_test.py`, then creates `~/car/venv`
+(`--system-site-packages`) if missing and `pip install -r requirements.txt`.
+It deletes nothing on the Pi. It prints the next commands when done.
 
-    python3 -m venv --system-site-packages ~/car/venv
-    ~/car/venv/bin/pip install -r ~/car/pi/requirements.txt
+## Preflight (on the Pi, before teleop)
+    ~/car/venv/bin/python ~/car/pi/preflight.py
+
+One PASS/FAIL/WARN line per check, exit 1 on any FAIL: python version; numpy,
+serial, websockets, PIL, picamera2 imports (onnxruntime optional: WARN means
+autopilot unavailable); a `/dev/ttyACM*` device; >= 2 GB free under `~`; one
+120x160x3 camera frame; Uno banner + SELFTEST PASS (opening the port resets the
+Uno). `--fake` swaps in FakeCamera/FakeUno and drops the picamera2 and device
+requirements so it runs on the PC (sim-only: proves nothing about the Pi).
+
+## Link faults and reconnect
+`link_ok` goes False on 3 missed replies in a row OR 2 consecutive replies with
+the CRC-bad status bit (SERIAL_PROTOCOL rule 3). Only replies whose seq matches
+the command are counted; a bad-CRC reply with a garbled seq shows up as a miss.
+While the link is down the car is disarmed (`link_lost`) and `arm` is refused
+(`arm_refused_link`). The control loop then calls `UnoLink.reopen()` at most once
+every 2.0 s, after the tick that disarmed, with the app lock released; opening
+the port resets the Uno (~2.2 s plus banner), so no commands go out meanwhile.
+Events `reconnect_ok` / `reconnect_failed`. A successful reconnect does NOT
+re-arm: a new arm command is needed. A background save that raises surfaces as
+event `save_failed <error>` (the traceback also prints on the Pi console).
+Tested with FakeUno only (`disconnect()`, `corrupt`); not tried on a real cable pull.
 
 ## Run
 Bench mode (servo only, throttle forced 0; the pack reads FAULT while unwired):

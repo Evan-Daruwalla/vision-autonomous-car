@@ -44,6 +44,7 @@ BAD_PACK = (protocol.PACK_CUTOFF, protocol.PACK_FAULT)
 DISARM_EVENTS = ("deadman", "link_lost")
 AUTO_STEER_OVERRIDE = 0.15      # pad steer magnitude that hands control back
 AUTO_THROTTLE_OVERRIDE = 0.05   # pad throttle magnitude that hands control back
+REOPEN_INTERVAL_S = 2.0         # min gap between serial reopen attempts
 
 
 def _is_disarm_event(ev: str) -> bool:
@@ -78,8 +79,10 @@ class Controller:
         t = self.input[2]
         return t is not None and now - t <= self.deadman_s
 
-    def command(self, name: str, pack: int | None) -> list[str]:
+    def command(self, name: str, pack: int | None, link_ok: bool = True) -> list[str]:
         if name == "arm":
+            if not link_ok:                   # only "arm" looks at it
+                return ["arm_refused_link"]
             # pack None = no reply seen yet: unknown is refused like a bad pack
             if (pack is None or pack in BAD_PACK) and not self.bench:
                 return ["arm_refused_pack"]
@@ -194,6 +197,10 @@ class TeleopApp:
         self._clients: set = set()
         self.malformed = 0
         self._save_threads: list[threading.Thread] = []
+        self._save_errors: dict[threading.Thread, BaseException] = {}
+        self._prev_excepthook = None
+        self._last_reopen = -1e9              # monotonic time of the last reopen attempt
+        self._reopen_lock = threading.Lock()  # held while the port is being reopened
         # shared state (under lock)
         self.last_pack: int | None = None
         self.last_ticks = 0
@@ -212,8 +219,32 @@ class TeleopApp:
             with self.lock:
                 self.last_saved = str(path) if path else None
                 self.events.append("saved " + (path.name if path else "none (too short)"))
-        self._save_threads.append(
-            self.recorder.stop_background(crash=crash, on_saved=on_saved))
+        saved = threading.Event()
+
+        def on_saved_flag(path: Path | None) -> None:
+            saved.set()
+            on_saved(path)
+        t = self.recorder.stop_background(crash=crash, on_saved=on_saved_flag)
+        self._save_threads.append(t)
+        # recorder.py calls on_saved only after job.stop() succeeds; if stop()
+        # raises the thread just dies. This watcher turns that into an event.
+        threading.Thread(target=self._watch_save, args=(t, saved), daemon=True).start()
+
+    def _watch_save(self, t: threading.Thread, saved: threading.Event) -> None:
+        t.join()
+        if saved.is_set():
+            return
+        err = self._save_errors.pop(t, None)
+        msg = f"save_failed {err!r}" if err is not None else "save_failed (unknown error)"
+        print(msg)
+        with self.lock:
+            self.events.append(msg)
+
+    def _save_excepthook(self, args) -> None:
+        # unconditional: the save thread can die before stop_background() returns
+        self._save_errors[args.thread] = args.exc_value
+        if self._prev_excepthook is not None:
+            self._prev_excepthook(args)
 
     # ---- control thread ----
     def _control_loop(self) -> None:
@@ -249,8 +280,9 @@ class TeleopApp:
                     if self.recorder.recording:
                         self._stop_recording(crash=False)
                 self.controller.autopilot_output = ap_out
+                link_ok_tick = self.uno.link_ok
                 steer, thr, armed, ev = self.controller.tick(
-                    now, self.last_pack, self.uno.link_ok)
+                    now, self.last_pack, link_ok_tick)
                 mode = self.controller.mode
                 t_cmd = time.monotonic_ns()
                 reply = self.uno.exchange(steer, thr, armed)
@@ -296,6 +328,20 @@ class TeleopApp:
                     "max_throttle": self.controller.max_throttle,
                     "bench": self.controller.bench,
                 }
+            # Reopen only AFTER a tick has seen the link down (so link_lost has
+            # already disarmed), outside the lock, at most once per 2.0 s.
+            # Opening the real port resets the Uno (2.2 s + banner), so no
+            # exchange happens meanwhile; re-arming needs a new arm command.
+            if (not link_ok_tick and not self._stop.is_set()
+                    and time.monotonic() - self._last_reopen >= REOPEN_INTERVAL_S):
+                with self._reopen_lock:
+                    try:
+                        ok = bool(self.uno.reopen())
+                    except Exception:
+                        ok = False
+                self._last_reopen = time.monotonic()
+                with self.lock:
+                    self.events.append("reconnect_ok" if ok else "reconnect_failed")
 
     # ---- commands ----
     def handle_command(self, name: str) -> None:
@@ -303,7 +349,7 @@ class TeleopApp:
             if name == "auto_toggle" and self.autopilot is None:
                 self.events.append("auto_unavailable")
                 return
-            events = self.controller.command(name, self.last_pack)
+            events = self.controller.command(name, self.last_pack, self.uno.link_ok)
             self.events.extend(events)
             if name == "rec_toggle":
                 if self.recorder.recording:
@@ -403,6 +449,8 @@ class TeleopApp:
             raise RuntimeError("websocket server did not start")
         if self._ws_error is not None:
             raise RuntimeError(f"websocket server failed: {self._ws_error!r}")
+        self._prev_excepthook = threading.excepthook
+        threading.excepthook = self._save_excepthook
         self._ctl_thread = threading.Thread(target=self._control_loop, daemon=True)
         self._ctl_thread.start()
 
@@ -423,6 +471,8 @@ class TeleopApp:
         self._stop.set()
         if self._ctl_thread is not None:
             self._ctl_thread.join(timeout=2.0)
+        if self._reopen_lock.acquire(timeout=5.0):   # let a reopen in progress finish
+            self._reopen_lock.release()
         with self.lock:
             self.controller.armed = False
             for _ in range(5):                # disarmed frames, steer held, thr 0
@@ -437,6 +487,8 @@ class TeleopApp:
                     print(f"recording save failed on shutdown: {e}")
         for t in list(self._save_threads):   # outside the lock: on_saved takes it
             t.join(timeout=30.0)
+        if self._prev_excepthook is not None:
+            threading.excepthook = self._prev_excepthook
         for closer in (self.cam.stop, self.uno.close):
             try:
                 closer()
@@ -759,12 +811,99 @@ def _check_end_to_end() -> None:
         assert not ep["is_terminal"].any()
 
 
+def _check_link_robustness() -> None:
+    import tempfile
+
+    c = Controller(max_throttle=30, bench=False, steer_invert=False)
+    c.set_input(0.0, 0.0, 0.0)
+    assert c.command("arm", protocol.PACK_OK, False) == ["arm_refused_link"]
+    assert not c.armed
+    assert c.command("arm", protocol.PACK_OK, True) == ["armed"]
+
+    web = Path(__file__).resolve().parent / "web"
+    with tempfile.TemporaryDirectory() as td:
+        uno = FakeUno(pack=protocol.PACK_OK)
+        app = TeleopApp(uno, FakeCamera(), Recorder(td, session="lk", meta={}),
+                        Controller(30, False, False), _free_port(), _free_port(),
+                        web, host="127.0.0.1")
+        seen: set[str] = set()
+        run = threading.Event()
+        run.set()
+
+        def feeder() -> None:              # pad input + event log (deque keeps only 5)
+            while run.is_set():
+                with app.lock:
+                    app.controller.set_input(0.0, 0.0, time.monotonic())
+                    seen.update(app.events)
+                time.sleep(0.01)
+
+        def wait(cond, what: str, timeout: float = 5.0) -> None:
+            end = time.monotonic() + timeout
+            while time.monotonic() < end:
+                with app.lock:
+                    if cond():
+                        return
+                time.sleep(0.01)
+            raise AssertionError(f"timeout waiting for {what}; seen={sorted(seen)}")
+
+        ft = threading.Thread(target=feeder, daemon=True)
+        app.start_background()
+        ft.start()
+        real_stop = Recorder.stop
+        try:
+            wait(lambda: app.last_pack is not None, "first reply")
+            app.handle_command("arm")
+            wait(lambda: app.controller.armed, "armed")
+            # unplug -> link_lost + disarm -> reopen -> reconnect_ok, still disarmed
+            uno.disconnect()
+            wait(lambda: "reconnect_ok" in seen, "reconnect_ok")
+            assert "link_lost" in seen and not app.controller.armed
+            assert uno.link_ok
+            app.handle_command("arm")
+            wait(lambda: app.controller.armed, "re-armed after reconnect")
+            app.handle_command("disarm")
+
+            # reopen keeps failing: arm refused, retries rate-limited to 1 / 2 s
+            calls: list[float] = []
+
+            def bad_reopen() -> bool:
+                calls.append(time.monotonic())
+                return False
+            uno.reopen = bad_reopen
+            uno.disconnect()
+            wait(lambda: "reconnect_failed" in seen, "reconnect_failed")
+            time.sleep(0.5)
+            assert len(calls) == 1, calls
+            app.handle_command("arm")
+            assert "arm_refused_link" in app.events and not app.controller.armed
+            del uno.reopen
+            wait(lambda: uno.connected and uno.link_ok, "reconnect after failure", 4.0)
+
+            # a failing background save is surfaced as an event
+            def boom(self, crash=False):
+                raise OSError("disk full")
+            app.handle_command("arm")
+            wait(lambda: app.controller.armed, "armed for save test")
+            app.handle_command("rec_toggle")
+            time.sleep(0.3)
+            Recorder.stop = boom
+            app.handle_command("rec_toggle")
+            wait(lambda: any(e.startswith("save_failed") for e in seen | set(app.events)),
+                 "save_failed")
+        finally:
+            Recorder.stop = real_stop
+            run.clear()
+            app.shutdown()
+        assert any("disk full" in e for e in seen | set(app.events)), sorted(seen)
+
+
 def self_check() -> None:
     t0 = time.monotonic()
     _check_controller()
+    _check_link_robustness()
     _check_end_to_end()
     _check_auto_end_to_end()
-    assert time.monotonic() - t0 < 30.0
+    assert time.monotonic() - t0 < 40.0
     print("teleop self_check: PASS")
 
 

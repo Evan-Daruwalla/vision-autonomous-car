@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import time
 
 import protocol
-from protocol import Reply, ReplyParser
+from protocol import Reply, ReplyParser, ST_CRC_BAD
 
 
 def check_banner(lines: list[str]) -> None:
@@ -36,6 +36,7 @@ class UnoLink:
         self.reply_timeout = reply_timeout
         self.banner: list[str] = []
         self.missed_in_row = 0
+        self.crc_bad_in_row = 0
         self._seq = 0
         self._ser = None
 
@@ -57,25 +58,45 @@ class UnoLink:
         self._ser.timeout = 0.005
         return banner
 
+    def reopen(self) -> bool:
+        """Close and open again (resets the Uno; same banner gate). False on any failure."""
+        try:
+            self.close()
+            self.open()
+        except Exception:
+            self.close()
+            return False
+        self.missed_in_row = 0
+        self.crc_bad_in_row = 0
+        return True
+
     def exchange(self, steer: int, throttle: int, armed: bool) -> Reply | None:
         self._seq = (self._seq + 1) & 0xFF
         seq = self._seq
-        self._ser.write(protocol.encode_command(seq, steer, throttle, armed))
-        parser = ReplyParser()
-        deadline = time.monotonic() + self.reply_timeout
-        while time.monotonic() < deadline:
-            n = self._ser.in_waiting
-            data = self._ser.read(n if n else 1)
-            for r in parser.feed(data):
-                if r.seq == seq:
-                    self.missed_in_row = 0
-                    return r
+        if self._ser is None:                # closed / failed reopen: a miss
+            self.missed_in_row += 1
+            return None
+        try:
+            self._ser.write(protocol.encode_command(seq, steer, throttle, armed))
+            parser = ReplyParser()
+            deadline = time.monotonic() + self.reply_timeout
+            while time.monotonic() < deadline:
+                n = self._ser.in_waiting
+                data = self._ser.read(n if n else 1)
+                for r in parser.feed(data):
+                    if r.seq == seq:
+                        self.missed_in_row = 0
+                        self.crc_bad_in_row = self.crc_bad_in_row + 1 if r.crc_bad else 0
+                        return r
+        except Exception:                    # unplugged / port error: a miss
+            pass
         self.missed_in_row += 1
         return None
 
     @property
     def link_ok(self) -> bool:
-        return self.missed_in_row < 3
+        # SERIAL_PROTOCOL rule 3: 3 missed replies or 2 consecutive bad-CRC replies
+        return self.missed_in_row < 3 and self.crc_bad_in_row < 2
 
     def close(self) -> None:
         if self._ser is not None:
@@ -86,11 +107,15 @@ class UnoLink:
 class FakeUno:
     """Same public interface as UnoLink, no serial. Sim-only."""
 
-    def __init__(self, pack: int = protocol.PACK_FAULT, drop: set[int] | None = None) -> None:
+    def __init__(self, pack: int = protocol.PACK_FAULT, drop: set[int] | None = None,
+                 corrupt: set[int] | None = None) -> None:
         self.pack = pack
         self.drop = drop or set()
+        self.corrupt = corrupt or set()      # call numbers whose reply has ST_CRC_BAD
+        self.connected = True
         self.banner: list[str] = []
         self.missed_in_row = 0
+        self.crc_bad_in_row = 0
         self.sent: list[tuple[int, int, bool]] = []
         self._calls = 0
         self._seq = 0
@@ -104,6 +129,9 @@ class FakeUno:
 
     def exchange(self, steer: int, throttle: int, armed: bool) -> Reply | None:
         self._calls += 1
+        if not self.connected:
+            self.missed_in_row += 1
+            return None
         self.sent.append((steer, throttle, armed))
         now = time.monotonic()
         watchdog = self._last is not None and (now - self._last) > 0.150
@@ -116,15 +144,28 @@ class FakeUno:
             self._ticks += 2 * throttle
         status = ((protocol.ST_ARMED if armed else 0)
                   | (protocol.ST_WATCHDOG if watchdog else 0)
+                  | (ST_CRC_BAD if self._calls in self.corrupt else 0)
                   | (self.pack << 4))
         frame = protocol.encode_reply(self._seq, self._ticks, status, 12)
         (reply,) = ReplyParser().feed(frame)
         self.missed_in_row = 0
+        self.crc_bad_in_row = self.crc_bad_in_row + 1 if reply.crc_bad else 0
         return reply
 
     @property
     def link_ok(self) -> bool:
-        return self.missed_in_row < 3
+        return self.missed_in_row < 3 and self.crc_bad_in_row < 2
+
+    def disconnect(self) -> None:
+        """Simulate an unplugged cable: exchanges return None until reopen()."""
+        self.connected = False
+
+    def reopen(self) -> bool:
+        self.connected = True
+        self.missed_in_row = 0
+        self.crc_bad_in_row = 0
+        self._last = None
+        return True
 
     def close(self) -> None:
         pass
@@ -164,8 +205,28 @@ def self_check() -> None:
     assert not f.link_ok
     assert f.exchange(0, 0, True) is not None and f.link_ok
 
+    # rule 3: two consecutive CRC-bad replies -> link fault; a clean reply clears it
+    f = FakeUno(pack=protocol.PACK_OK, corrupt={2, 3, 5})
+    assert f.exchange(0, 0, True).crc_bad is False and f.link_ok
+    assert f.exchange(0, 0, True).crc_bad is True and f.link_ok      # one bad: ok
+    assert f.exchange(0, 0, True).crc_bad is True and not f.link_ok  # two in a row
+    assert f.exchange(0, 0, True).crc_bad is False and f.link_ok     # clean clears
+    assert f.exchange(0, 0, True).crc_bad is True and f.link_ok      # isolated bad
+    assert f.exchange(0, 0, True).crc_bad is False and f.link_ok
+
+    # disconnect / reopen
+    f = FakeUno(pack=protocol.PACK_OK)
+    f.disconnect()
+    for _ in range(3):
+        assert f.exchange(0, 0, True) is None
+    assert not f.link_ok
+    assert f.reopen() is True and f.link_ok
+    assert f.exchange(0, 0, True) is not None
+
     link = UnoLink("COM_X")
     assert link._ser is None and link.link_ok
+    assert link.exchange(0, 0, False) is None and link.missed_in_row == 1  # no port: a miss
+    assert link.reopen() is False                                          # no such port
     print("uno_link self_check: PASS")
 
 

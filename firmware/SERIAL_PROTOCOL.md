@@ -168,8 +168,11 @@ visible in driving, which it should not be.*
    corruption. No Pi-side client implements that rule yet; when one does,
    count bad replies per time window, not strictly per frame.
    (2026-10-29, record LD: `pi/uno_link.py` and `pi/teleop.py` now exist and
-   still do NOT implement this rule - it is planned. Their link fault is 3
-   missed replies in a row, not 2 bad CRCs.)
+   ~~still do NOT implement this rule - it is planned. Their link fault is 3
+   missed replies in a row, not 2 bad CRCs.~~ **(later 2026-10-29, record LK:
+   implemented - `UnoLink.link_ok` is False after 2 consecutive CRC_BAD replies
+   OR 3 missed replies; counted per frame with a matching seq, not per time
+   window; a garbled-seq reply counts as a miss. Fake-hardware tested only.)**)
 4. **`STBY` is dropped on every safe state, after the brake.** Disarm,
    watchdog trip, latched pack cutoff and boot all end with D10 LOW. Re-arming
    requires a valid ARMED frame; a latched cutoff ~~cannot be re-armed at all
