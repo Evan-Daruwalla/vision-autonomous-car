@@ -160,6 +160,37 @@ def make_entries(parts: list, layer: int, scad: Path) -> list[dict]:
     return out
 
 
+# Proto-shield capacitor C1 (record KQ, 2026-10-21): 470 uF electrolytic can, 8 mm
+# diameter x 12.5 mm tall, UPRIGHT on the TB6612 carrier's VMOT / GND2 pin tips,
+# top ~18.8 mm above the shield's top surface. As built (2026-10-24, record LC) it
+# hangs on bare legs and is to be re-seated upright. The SCAD has no carrier
+# position, so the can is centred on the Uno + shield footprint (xy). z: the Uno +
+# shield LAYOUT box (53.7 x 70 x 24) IS the shield top surface at its top face, so
+# C1 top = that top + 18.8; the can bottom = top - 12.5 (pin tips + carrier below
+# it are not modelled). Kind "clearance": the carrier under it is not a box, so the
+# support check (which skips clearances) must not fire; overlap + material still do.
+C1_NAME = "C1 470 uF can (upright on VMOT/GND2, record KQ/LC)"
+C1_DIAM, C1_CAN_H, C1_TOP_ABOVE_SHIELD = 8.0, 12.5, 18.8
+UNO_PREFIX = "Arduino Uno R3"
+
+
+def add_c1(layer2: list[dict]) -> list[dict]:
+    """layer-2 entries + the C1 box (appended last, so no index shifts). RuntimeError
+    if the Uno + shield entry is missing."""
+    uno = next((e for e in layer2 if e["name"].startswith(UNO_PREFIX)), None)
+    if uno is None:
+        raise RuntimeError(f"no layer-2 entry named '{UNO_PREFIX}...': cannot place C1")
+    top = uno["pos"][2] + uno["size"][2] + C1_TOP_ABOVE_SHIELD
+    cx = uno["pos"][0] + uno["size"][0] / 2.0     # carrier position unmodelled: Uno centre
+    cy = uno["pos"][1] + uno["size"][1] / 2.0
+    c1 = {"name": C1_NAME, "size": [C1_DIAM, C1_DIAM, C1_CAN_H],
+          "pos": [cx - C1_DIAM / 2.0, cy - C1_DIAM / 2.0, top - C1_CAN_H],
+          "kind": "clearance", "held_by": "VMOT/GND2 pin tips (re-seat upright)", "ports": "",
+          "inside": "Uno shield wiring",
+          "layer": 2, "idx": len(layer2) + 1}
+    return layer2 + [c1]
+
+
 def bodies(entries: list[dict]) -> list[dict]:
     """Entries that occupy volume (kind part, zone or clearance)."""
     return [e for e in entries if e["kind"] in ("part", "zone", "clearance")]
@@ -222,10 +253,36 @@ def check_overlap(entries: list[dict]) -> list[tuple[bool, str]]:
     fails = []
     for i, a in enumerate(body):
         for b in body[i + 1:]:
+            if a.get("inside") == b["name"] or b.get("inside") == a["name"]:
+                continue                  # declared to sit INSIDE that clearance: check_inside
             if all(min(a["pos"][k] + a["size"][k], b["pos"][k] + b["size"][k])
                    - max(a["pos"][k], b["pos"][k]) > OVERLAP_EPS for k in range(3)):
                 fails.append((False, f"overlap: {a['name']} (layer {a['layer']}) overlaps {b['name']} (layer {b['layer']})"))
     return fails or [(True, f"overlap: no two of {len(body)} boxes overlap")]
+
+
+def check_inside(entries: list[dict]) -> list[tuple[bool, str]]:
+    """An entry with "inside": <name> must lie wholly within that clearance box.
+
+    C1 (2026-10-29, record LJ): the "Uno shield wiring" clearance reserves the
+    20 mm over the shield for exactly the things that stand on it, so the can
+    overlapping it is intended; what must hold is that it stays INSIDE it."""
+    by_name = {e["name"]: e for e in entries}
+    out = []
+    for e in entries:
+        host_name = e.get("inside")
+        if not host_name:
+            continue
+        h = by_name.get(host_name)
+        if h is None:
+            out.append((False, f"inside: {e['name']}: no entry named {host_name!r}"))
+            continue
+        lo = min(e["pos"][k] - h["pos"][k] for k in range(3))
+        hi = min(h["pos"][k] + h["size"][k] - e["pos"][k] - e["size"][k] for k in range(3))
+        margin = min(lo, hi)
+        out.append((margin >= 0, f"inside: {e['name']} within {host_name}, "
+                                 f"tightest margin {margin:+.1f} mm"))
+    return out
 
 
 def check_support(entries: list[dict], stls: list[np.ndarray]) -> list[tuple[bool, str]]:
@@ -564,6 +621,24 @@ def self_check(stls: list[np.ndarray] | None = None) -> None:
     in_mast = dict(solid, name="fake in mast", size=[4.0, 4.0, 4.0], pos=[ox + 29.3, -2.0, oz + 1.0])
     caught_e = any(not ok for ok, _ in check_material([in_mast], [load_mast()], []))
     print(f"self-check (e) box planted inside the camera mast is caught: {'ok' if caught_e else 'NOT CAUGHT'}")
+    # (f) C1 is added above the shield, is a checked body, and a clash with it is caught
+    fake_uno = dict(solid, name="Arduino Uno R3 fake", size=[50.0, 60.0, 24.0], pos=[0.0, 0.0, 100.0], layer=2, idx=1)
+    c1 = add_c1([fake_uno])[-1]
+    c1_ok = (c1["name"] == C1_NAME and c1 in bodies([c1])
+             and abs(c1["pos"][2] + c1["size"][2] - (124.0 + C1_TOP_ABOVE_SHIELD)) < 1e-9
+             and abs(c1["pos"][0] + C1_DIAM / 2 - 25.0) < 1e-9)
+    ceiling = dict(solid, name="fake ceiling", size=[50.0, 60.0, 5.0], pos=[0.0, 0.0, 140.0], kind="clearance", layer=2, idx=3)
+    c1_clash = any(not ok for ok, _ in check_overlap([fake_uno, c1, ceiling]))
+    # containment: fits a 20 mm wiring box on the shield, fails a 15 mm one
+    wiring = dict(solid, name="Uno shield wiring", size=[50.0, 60.0, 20.0], pos=[0.0, 0.0, 124.0], kind="clearance", layer=2, idx=2)
+    fits = all(ok for ok, _ in check_inside([c1, wiring])) and not any(not ok for ok, _ in check_overlap([c1, wiring]))
+    low = dict(wiring, size=[50.0, 60.0, 15.0])
+    caught_tall = any(not ok for ok, _ in check_inside([c1, low]))
+    print(f"self-check (f) C1 inside a 20 mm wiring box passes, a 15 mm one fails: {'ok' if fits and caught_tall else 'WRONG'}")
+    c1_clash = c1_clash and fits and caught_tall
+    print(f"self-check (f) C1 entry exists, top = shield top + {C1_TOP_ABOVE_SHIELD}: {'ok' if c1_ok else 'WRONG'}")
+    print(f"self-check (f) a box in C1's space is caught by the overlap check: {'ok' if c1_clash else 'NOT CAUGHT'}")
+    assert c1_ok and c1_clash, "C1 entry missing or not checked (see the lines above)"
     assert caught_a and caught_b and clean and caught_c and rests and skipped and caught_e, \
         "a planted bug was not caught (see the lines above)"
 
@@ -589,6 +664,7 @@ def main(argv=None) -> int:
         parts1, _ = load_layout(TRAY_SCAD)
         parts2, pegs = load_layout(DECK_SCAD)
         l1, l2 = make_entries(parts1, 1, TRAY_SCAD), make_entries(parts2, 2, DECK_SCAD)
+        l2 = add_c1(l2)
     except (FileNotFoundError, RuntimeError, subprocess.SubprocessError) as e:
         print(f"layout: FAIL: {e}", file=sys.stderr)
         print(f"layout: FAIL: {e}")
@@ -601,6 +677,7 @@ def main(argv=None) -> int:
     results = []
     for res in (check_material(entries, [tray, deck, mast], pegs),
                 check_overlap(entries),
+                check_inside(entries),
                 check_support(entries, [tray, deck])):
         for ok, text in res:
             results.append(ok)
