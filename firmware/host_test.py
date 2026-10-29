@@ -5,8 +5,12 @@ on any failure, so it is a GATE, not a demo (testing.md's rule).
 
     .venv/Scripts/python.exe firmware/host_test.py --port COM3
 
-WHAT IT CANNOT TELL YOU. Nothing is wired to the board: no motor, servo,
-encoder, LED or pack exists. This verifies the LINK and the STATE MACHINE only.
+WHAT IT CANNOT TELL YOU. ~~Nothing is wired to the board: no motor, servo,
+encoder, LED or pack exists.~~ (2026-10-29) The servo is wired on the car
+(record HY); the proto shield is soldered but UNTESTED (records LB, LC); motor,
+encoder and LED strips are NOT wired. This script is the bench exerciser; the
+driving client is pi/uno_link.py + pi/teleop.py (record LD). This verifies the
+LINK and the STATE MACHINE only.
 Every actuator assertion here is about what the firmware DECIDED, never about
 anything physically moving.
 

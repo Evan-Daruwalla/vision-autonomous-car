@@ -1,6 +1,6 @@
 # Vehicle lighting — spec and consequences
 
-**Status: SPEC ONLY. Nothing ordered, nothing wired, nothing built.**
+**Status: SPEC ONLY. ~~Nothing ordered, nothing wired, nothing built.~~** **(2026-10-29) Everything ordered has arrived (records FI-FL, IX); the LED strips are NOT wired and nothing lighting-related is built; the proto shield is soldered but UNTESTED (records LB, LC).**
 Requested by Evan 2026-09-01: headlights, tail lights, daytime running lights,
 and turn signals.
 
@@ -105,12 +105,12 @@ owned, nothing bench-verified:**
 | + worst-case strip | 1200 mA — ~~**1.8 A margin**~~ **0.80 A margin** (2 A rating, corrected 2026-10-11) |
 
 Either figure leaves comfortable headroom. Feed from the **LM2596 5 V rail**
-that already supplies the servo, not from the Pi — unchanged reasoning: the
+~~that already supplies the servo~~ **(2026-10-29) that now supplies only the strips + encoder (the servo is on the Uno 5V header, record JR)**, not from the Pi — unchanged reasoning: the
 Pi 5 runs on a 5 V/3 A bank with a 600 mA cap on USB peripherals and a
 measured CNN draw of 1.40 A (`docs/research/2026-07-23_power-system.md`), so
 strip current belongs on the actuator rail regardless of how small it is,
 and it keeps the one-shared-ground star topology unchanged. The USB link to
-the Pi is data-only with its 5 V conductor cut, so no strip current can reach
+the Pi is ~~data-only with its 5 V conductor cut,~~ **(2026-10-29) a plain cable that carries the Uno's 5 V (not cut, record JF); `+5V2` never touches it or the Uno 5V pin,** so no strip current can reach
 the Pi's bank even by accident.
 
 **No per-LED series resistor.** One data-line resistor (~330-470 Ω) protects
@@ -206,7 +206,7 @@ defensible. Passing a rule off as a learned behaviour is not.
 - ~~PCA9685/discrete-LED procurement and channel-fit history~~ **all
   superseded 2026-09-03 by the WS2812B swap (Appendices CX/CY/DA)** — kept
   in §2/§3 for the trail, not repeated here.
-- **Nothing is ordered.** BOM row 18: BTF-LIGHTING WS2812B, 1m/144px,
+- ~~**Nothing is ordered.**~~ **(2026-10-29) Arrived (records FI-FL, IX).** BOM row 18: BTF-LIGHTING WS2812B, 1m/144px,
   $11.99, part of the ~~**$411.45**~~ **$422.25** (2026-10-04) total (`docs/BOM.md`). BLOCKED-ON-EVAN
   with the rest of the order.
 - **Firmware: written, not hardware-verified.** `firmware/uno_control/`

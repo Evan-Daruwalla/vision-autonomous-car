@@ -1,14 +1,14 @@
 # Pi ↔ Uno serial protocol — DRAFT v0.1 (2026-09-02)
 
 **Status: IMPLEMENTED 2026-09-02 (Appendix BO) — `firmware/uno_control/`, with
-`firmware/host_test.py` as the Pi-side exerciser. Verified ON THE REAL BOARD:
+`firmware/host_test.py` as the Pi-side exerciser (2026-10-29, record LD: the driving Pi-side client is now `pi/uno_link.py` + `pi/teleop.py`, with `pi/protocol.py` as the codec - fake-hardware verified only, nothing run on the Pi yet; host_test.py stays the bench exerciser). Verified ON THE REAL BOARD:
 firmware ~~SELFTEST 39/39~~ **SELFTEST 49/49** (count struck 2026-09-09: it was pinned at the pre-watchdog-fix build), host_test 13/13, exit 0 (2026-09-02 ~19:55 CDT, after
 the watchdog fix: the daily-audit, Appendix BY, found `loop()` taking two
 `millis()` samples per iteration so the watchdog tripped in the same iteration
 as every good frame — invisible in any reply byte; fixed and re-verified in
-Appendix CA). ACTUATORS ARE UNWIRED — the
+Appendix CA). ~~ACTUATORS ARE UNWIRED — the
 link and the state machine are tested; no motor, servo, encoder, LED or pack
-exists. Bumped to v0.2 by the status-bit extension in §2.**
+exists.~~ (2026-10-29: the servo is wired on the car, record HY; the proto shield is soldered but UNTESTED, records LB, LC; motor, encoder and LED strips are NOT wired.) Bumped to v0.2 by the status-bit extension in §2.**
 ~~Status: DESIGN ONLY. No firmware implements this yet.~~ Drafted after the link
 was measured (Appendix BF: p50 0.869 ms, p99 1.069 ms round trip at 20 Hz), so
 the sizing below is against real numbers rather than guesses.
@@ -167,6 +167,9 @@ visible in driving, which it should not be.*
    real sync is reached - so "two consecutive bad frames" can come from ONE
    corruption. No Pi-side client implements that rule yet; when one does,
    count bad replies per time window, not strictly per frame.
+   (2026-10-29, record LD: `pi/uno_link.py` and `pi/teleop.py` now exist and
+   still do NOT implement this rule - it is planned. Their link fault is 3
+   missed replies in a row, not 2 bad CRCs.)
 4. **`STBY` is dropped on every safe state, after the brake.** Disarm,
    watchdog trip, latched pack cutoff and boot all end with D10 LOW. Re-arming
    requires a valid ARMED frame; a latched cutoff ~~cannot be re-armed at all
@@ -212,15 +215,15 @@ section 3 - could run them. Now `T` and `B` are refused while ARMED; `?` is
 always honoured (it only prints, and `host_test.py` probes `armed` with it).
 A stray `?` mid-drive costs one status line of serial output. `host_test.py`'s
 reply parser skips it because it resyncs on `0x5A`; any future Pi client must
-do the same (no Pi client exists yet).
+do the same (~~no Pi client exists yet~~ 2026-10-29, record LD: `pi/protocol.py`'s reply parser resyncs on `0x5A`; `pi/uno_link.py` and `pi/teleop.py` are the driving client).
 
 ---
 
 ## 6. Open
 
 - ~~**Not implemented.** No firmware, no Pi-side client.~~ **Both exist as of
-  2026-09-02** — `firmware/uno_control/` and `firmware/host_test.py`.
-- **Nothing is wired.** The link and state machine are verified on the board;
+  2026-09-02** — `firmware/uno_control/` and `firmware/host_test.py` **(2026-10-29: plus the driving client `pi/uno_link.py` + `pi/teleop.py`, record LD)**.
+- ~~**Nothing is wired.**~~ **(2026-10-29) The servo is wired (record HY); the shield is soldered, UNTESTED (LB, LC); motor, encoder and LED strips are NOT wired.** The link and state machine are verified on the board;
   every actuator path is verified only as a DECISION the firmware made.
 - **The encoder SIGN is unresolved.** `ENCODER_SIGN` in `uno_control.ino` is a
   convention, not a measurement — flip it when the car rolls forward and

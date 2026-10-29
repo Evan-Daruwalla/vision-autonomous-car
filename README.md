@@ -114,7 +114,7 @@ record is append-only; earlier entries are never edited to look smarter.
 
 ## The hardware, which is two printed parts and a shopping list
 
-Design decisions are settled and costed. Nothing is bought. Two printed parts
+Design decisions are settled and costed. ~~Nothing is bought.~~ **(2026-10-29) Everything ordered has arrived (records FI-FL, IX).** Two printed parts
 now exist; everything else is a drawing and a price.
 
 - **Compute:** Raspberry Pi 5 (4 GB), Camera Module 3 Wide. Inference only.

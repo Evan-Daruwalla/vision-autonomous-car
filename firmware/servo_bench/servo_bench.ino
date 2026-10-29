@@ -3,10 +3,10 @@
  * NOT the car firmware. Re-flash uno_control afterwards.
  *
  * Serial Monitor at 115200, line ending "Newline": type a pulse width in
- * microseconds (400-2600) and Enter; 'c' re-centres to 1500. The sketch echoes
+ * microseconds (400-2800, = US_MIN..US_MAX below) and Enter; 'c' re-centres to 1500. The sketch echoes
  * what it commanded.
  *
- * attach() gets explicit 400-2600 limits ON PURPOSE: with no limits the Servo
+ * attach() gets explicit 400-2800 limits ON PURPOSE: with no limits the Servo
  * library clamps every pulse to 544-2400 us, which would hide both ends of a
  * 500-2500 us servo (record Appendix FI) -- the very thing being measured.
  *
@@ -33,7 +33,7 @@ void go(int us) {
 void setup() {
   Serial.begin(115200);
   servo.attach(PIN_SERVO, US_MIN, US_MAX);
-  Serial.println(F("== SERVO BENCH == type us (400-2600) + Enter, c = centre"));
+  Serial.println(F("== SERVO BENCH == type us (400-2800) + Enter, c = centre"));
   go(1500);
 }
 
