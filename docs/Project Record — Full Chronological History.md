@@ -357,6 +357,7 @@ the dated entry, not the digest.
 - [LH - picamera2 facts checked against official docs: BGR order confirmed, fps=30 default bug fixed, sensor mode pinned, crop printed at first frame](#appendix-lh---picamera2-facts-checked-against-official-docs-bgr-order-confirmed-fps30-default-bug-fixed-sensor-mode-pinned-crop-printed-at-first-frame-2026-10-29-0045-cdt) (10-29)
 - [LI - Wave 1 accepted: ONNX export (A2), stable hash split + corpus id (C2, audit HJ), shield_wiring.svg 0 overlaps (C5); LH time correction](#appendix-li---wave-1-accepted-onnx-export-a2-stable-hash-split--corpus-id-c2-audit-hj-shield_wiringsvg-0-overlaps-c5-lh-time-correction-2026-10-29-0045-cdt) (10-29)
 - [LJ - M3 software on synthetic data: BC trainer + BCNet, ONNX parity 1.8e-07, autopilot mode, verify_real, data-collection protocol; C1 headroom +1.2 mm; LM2596 4.95 vs 4.99 V left open](#appendix-lj---m3-software-on-synthetic-data-bc-trainer--bcnet-onnx-parity-18e-07-autopilot-mode-verify_real-data-collection-protocol-c1-headroom-12-mm-lm2596-495-vs-499-v-left-open-2026-10-29-0052-cdt) (10-29)
+- [LK - Pi de-risk (deploy, preflight, rule 3, reconnect) + final docs-sync; the 2026-10-28 plan is complete; suite 32](#appendix-lk---pi-de-risk-deploy-preflight-rule-3-reconnect--final-docs-sync-the-2026-10-28-plan-is-complete-suite-32-2026-10-29-0055-cdt) (10-29)
 
 ---
 
@@ -21066,3 +21067,30 @@ Also in wave 1 so far: pi/recorder.py gained an optional per-frame `mode` key ->
 | A1 `ml/bc_real.py` + `BCNet` | BC trainer for pi/recorder episodes: targets log_cmd_next/100, inputs via pi/preprocess_frame, hash split per session (fit/val/test), flip ALWAYS negates steer, early stop, checkpoint with split seed + corpus id; BCNet 134,552 params | self_check (synthetic bar-position -> steer, CPU): train loss 0.3918 -> 0.0354, val steer MAE 0.0397 (< 0.15), 10.8 s; exported through ml/export_onnx.py: parity 1.788e-07, 0.19 ms per frame on the PC CPU (Pi unknown) |
 | A4 `ml/verify_real.py` (Opus) | real-episode checker: structure minus the sim length rule, log_cmd_next shift, command range, timestamps increasing, dropped frames > 75 ms, steer saturation, per-session summary; REAL_MIN_STEPS imported from bc_real (single source) | self_check PASS: catches an off-by-one shift, warns on short episodes and 100 ms gaps |
 | A5 `docs/DATA_COLLECTION.md` (Opus) | session protocol: checks before, 20-90 s episodes, >= 7 episodes per session (the per-session split holds out >= 1 val + 1 test), 5+ clean laps each way, 10-20 recovery clips, Y on crashes, copy data OUTSIDE the repo, verify_real before training | doc only |
+
+# Appendix LK - Pi de-risk (deploy, preflight, rule 3, reconnect) + final docs-sync; the 2026-10-28 plan is complete; suite 32 (2026-10-29 00:55 CDT)
+**2026-10-29 ~00:55 CDT.** Last wave of the 2026-10-28 plan + the final docs-sync.
+
+**B2+B3 (committed bfebaf3), fake hardware only:**
+- `pi/deploy.sh` (`--dry-run` prints the commands; the real run was not possible, the Pi is unreachable from the PC) copies pi/ plus ml/episode_writer.py, verify_corpus.py, collect_sim_data.py, collect_recovery.py, sim_conf.py (all import without gym) and firmware/host_test.py, then makes ~/car/venv and pip installs.
+- `pi/preflight.py` checks python, imports, a /dev/ttyACM* device, free disk, one camera frame, and the Uno banner + SELFTEST. `--fake` passes on the PC.
+- SERIAL_PROTOCOL rule 3 is now implemented in UnoLink/FakeUno: link_ok is False after 2 consecutive CRC_BAD replies or 3 misses. The protocol note was updated (it said "not implemented").
+- Reconnect: the control thread retries `reopen()` every 2.0 s, outside the app lock, and only after `link_lost` has disarmed. The car stays disarmed and needs a new arm.
+- Arming is refused on a dead link.
+- A failed background save shows up as `save_failed <error>`. To capture that error the agent added a process-global threading.excepthook, installed in start_background and restored in shutdown. That is a deliberate shortcut to avoid editing recorder.py; if it ever causes trouble, the fix is for Recorder.stop_background to report errors through its callback.
+
+**Suite:** `scripts/run_checks.py` -> 32 passed, 0 failed, 0 skipped (of 32).
+
+**Docs synced:**
+- HANDOFF: Last updated, appendix count, a dated 2026-10-29 state paragraph, suite 32, and new next action 0a (first Pi session: deploy -> preflight -> bench checklist -> meter the LM2596 -> laps -> verify_real -> bc_real -> export_onnx).
+- PRD task 13: baseline code built, done-check NOT passed.
+- Bins: data.md (log_mode, verify_real, REAL_MIN_STEPS, at least 7 episodes per session) and testing.md (suite 32), with INDEX updated.
+
+**Plan status:** every item done (Step 0, B1, A1-A5, B2, B3, C1-C6). Commits since the push 88aa4d1: 6c32286, 57e48db, d126af1, 8dda946, a1156be, 815f4a7, 3d9abcb, 6c2bd39, 7deb873, 206c5ae, bfebaf3, plus this docs commit. **Not pushed:** later pushes need Evan's word, per the plan.
+
+**Still open, needs Evan:**
+- Bench checks and power-up.
+- The servo jumper and the C1 re-seat. The 1.2 mm margin assumes nothing stacks on top of the can.
+- Metering the LM2596.
+- onnxruntime on the Pi.
+- Everything with real laps.

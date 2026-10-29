@@ -209,3 +209,4 @@ Closes the gap noted above ("that conversion is not written down anywhere yet").
   and crop UNVERIFIED on the Pi until the red-object check.
 - verify_corpus.py's alignment gates are SIM-ONLY (they re-derive actions from logged CTE);
   on real episodes only check_structure applies.
+- 2026-10-29 (records LJ, LK): per-frame `log_mode` uint8 (0 manual, 1 autopilot) added by pi/recorder.py (optional telem key, default 0) so autopilot laps can be relabelled. Real episodes are checked by `ml/verify_real.py` (shift, command range, timestamps, dropped frames > 75 ms, saturation); the trainer `ml/bc_real.py` skips episodes under REAL_MIN_STEPS = 40 (2 s) - verify_real imports that constant. Train/val/test split by episode id within each session (= folder); keep >= 7 episodes per session.

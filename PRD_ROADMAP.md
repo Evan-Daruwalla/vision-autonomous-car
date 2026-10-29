@@ -700,7 +700,7 @@ transfer gap) must not block the capstone.
       then found that recovery data mildly HURT closed-loop driving in sim**
       (negative in 4/4 launches, n.s.). So: collect it, and evaluate it as a
       separate arm. Do not assume it helps.)*
-13. **Baseline train + deploy.** DonkeyCar's stock trainer as baseline; **[superseded 2026-10-25, record LD: DonkeyCar dropped; custom `pi/` stack]** (baseline = ml/bc_real.py, planned 2026-10-28);
+13. **Baseline train + deploy.** DonkeyCar's stock trainer as baseline; **[superseded 2026-10-25, record LD: DonkeyCar dropped; custom `pi/` stack]** (baseline = ml/bc_real.py, BUILT 2026-10-29 and tested on synthetic data only, record LJ; ONNX export ml/export_onnx.py; autopilot pi/autopilot.py - done-check NOT passed: no real laps yet);
     deploy; measure. Done: autonomous attempt logged (laps, interventions).
 14. **Custom PyTorch model.** Swap PyTorch CNN into the inference path;
     train on same data; A/B against baseline. Done: eval table both models.
