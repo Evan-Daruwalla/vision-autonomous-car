@@ -361,6 +361,7 @@ the dated entry, not the digest.
 - [LL - Scheduled daily-audit: 58 findings, 4 high - teleop binds 0.0.0.0 unauthenticated, NaN model output becomes full lock, AUTO throttle scaled twice, evaluators split without ids](#appendix-ll---scheduled-daily-audit-58-findings-4-high---teleop-binds-0000-unauthenticated-nan-model-output-becomes-full-lock-auto-throttle-scaled-twice-evaluators-split-without-ids-2026-10-29-0729-cdt) (10-29)
 - [LM - HANDOFF trim: stale 'Immediate next actions' block (138 lines) moved here verbatim; paste-ready NEXT ACTIONS is the one live list](#appendix-lm---handoff-trim-stale-immediate-next-actions-block-138-lines-moved-here-verbatim-paste-ready-next-actions-is-the-one-live-list-2026-10-30-1058-cdt) (10-30)
 - [LN - Audit LL highs fixed (open bind, NaN full lock, double throttle cap, id-less evaluators); re-preprocess byte-identical but ids held back; push blocked on a history rewrite](#appendix-ln---audit-ll-highs-fixed-open-bind-nan-full-lock-double-throttle-cap-id-less-evaluators-re-preprocess-byte-identical-but-ids-held-back-push-blocked-on-a-history-rewrite-2026-10-30-1105-cdt) (10-30)
+- [LO - Push done: unpushed history squashed by Evan (private path removed), 19 commits pushed, backup branch deleted](#appendix-lo---push-done-unpushed-history-squashed-by-evan-private-path-removed-19-commits-pushed-backup-branch-deleted-2026-10-30-1316-cdt) (10-30)
 
 ---
 
@@ -21330,3 +21331,40 @@ file clearing the crash as isolating the boundary, which it does not.
 - Nothing changed in git (main unchanged, 19 ahead). Needs Evan's decision.
 
 **Suite:** 33 passed, 0 failed, 0 skipped (of 33).
+
+# Appendix LO - Push done: unpushed history squashed by Evan (private path removed), 19 commits pushed, backup branch deleted (2026-10-30 ~13:16 CDT)
+**2026-10-30 ~13:16 CDT.** Closes the push item that record LN left blocked.
+
+**What:** the 20 unpushed commits on `main` were rewritten to 19 and pushed:
+`88aa4d1..caf049a main -> main`. `main` now equals `origin/main`.
+
+**Why a rewrite first:** unpushed commit 7deb873 (BC trainer, `ml/bc_real.py`)
+carried a hard-coded private home path. The working-tree fix sat in a separate
+`fixup!` commit (117e4b0), so pushing as-is would have published the path in
+the repo's permanent public history. My own attempts to squash it were denied
+by the session's permission rules (LN), so Evan ran the rewrite himself.
+
+**How (Evan, PowerShell):**
+1. `git branch -f backup-pre-squash HEAD` (safety copy).
+2. First attempt `GIT_SEQUENCE_EDITOR=: git rebase ...` failed: PowerShell has
+   no bash-style `VAR=value command` prefix. Nothing changed.
+3. `git -c sequence.editor=: rebase -i --autosquash --autostash 88aa4d1` ->
+   "Successfully rebased"; the autostash held the modified
+   `.claude/pm-cadence.json` and re-applied it.
+4. `(git log -p origin/main..HEAD | Select-String -SimpleMatch "evan~1").Count`
+   -> `0`.
+
+**Checks before push (Claude):** `git diff --stat backup-pre-squash HEAD`
+empty (exit 0), so the files are byte-identical and only history changed; 19
+commits ahead; 0 `fixup!` commits left. Then `git push origin main`, exit 0.
+Afterwards the local `backup-pre-squash` branch was deleted on Evan's word
+(never pushed; nothing references it).
+
+**Commit ids changed:** every commit after 88aa4d1 has a new id. Ids cited in
+earlier entries (LN cites 7deb873 and 117e4b0; LI-LN cite others) refer to the
+pre-rewrite history and no longer resolve on `main`. Match them by commit
+message instead.
+
+**Still open (Evan's call, unchanged from LL):** 2 occurrences of a home path
+in OLDER, already-public record history - this rewrite did not touch them; no
+LICENSE on the public repo.

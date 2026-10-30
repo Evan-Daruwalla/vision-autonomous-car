@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-29 ~00:55 CDT** — this file is the ONLY live snapshot.
+**Last updated: 2026-10-30 ~13:16 CDT** (record LO: all commits pushed, `main` = `origin/main`) — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, ~~312 appendices A–KZ~~ 323 appendices A-LK as of 2026-10-29; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ 327 appendices A-LO as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
