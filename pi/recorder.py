@@ -123,14 +123,18 @@ class Recorder:
         finally:
             self._clear()
 
-    def stop_background(self, crash: bool = False, on_saved=None) -> threading.Thread:
+    def stop_background(self, crash: bool = False, on_saved=None,
+                        on_error=None) -> threading.Thread:
         """End the episode NOW, write it on a worker thread.
 
         WHY: savez_compressed of a few-minute episode takes seconds; done on the
         20 Hz control thread (or under teleop's lock) it stalls the command
         stream past the Uno's 150 ms watchdog. The buffers are handed to a
         detached Recorder, so this one can start() again at once.
-        on_saved(path_or_None) is called from the worker thread.
+        on_saved(path_or_None) is called from the worker thread. If the save
+        raises, on_error(exc) is called from the worker thread instead (on_saved
+        is not called); with no on_error the exception propagates and the
+        thread dies, as before.
         """
         if not self._recording:
             raise RuntimeError("stop() while not recording")
@@ -141,7 +145,13 @@ class Recorder:
         self._images, self._cmds, self._telem = [], [], []
 
         def work() -> None:
-            path = job.stop(crash=crash)
+            try:
+                path = job.stop(crash=crash)
+            except Exception as e:
+                if on_error is None:
+                    raise
+                on_error(e)
+                return
             if on_saved is not None:
                 on_saved(path)
 
@@ -221,6 +231,27 @@ def self_check() -> None:
         assert len(got) == 1 and got[0] is not None and got[0].exists(), got
         assert len(load_episode(got[0])["reward"]) == 150
         assert rec.steps == 1
+
+        # forced save failure -> on_error(exc), never on_saved
+        # (rec is still recording the 1-step episode started above)
+        for k in range(5):
+            rec.add(fake_frame(k), (0, 0), {"ticks": k, "status": 1,
+                                            "t_frame_ns": k, "t_cmd_ns": k,
+                                            "loop_dt": 50})
+        saved_calls: list = []
+        errs: list = []
+        real_stop = Recorder.stop
+
+        def boom(self, crash=False):
+            raise OSError("disk full")
+        Recorder.stop = boom
+        try:
+            th = rec.stop_background(on_saved=saved_calls.append, on_error=errs.append)
+            th.join(timeout=30)
+        finally:
+            Recorder.stop = real_stop
+        assert not saved_calls, saved_calls
+        assert len(errs) == 1 and isinstance(errs[0], OSError), errs
     print("recorder self_check: PASS")
 
 

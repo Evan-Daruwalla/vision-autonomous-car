@@ -31,6 +31,7 @@ import math
 import socket
 import threading
 import time
+import traceback
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 import websockets
@@ -151,7 +152,10 @@ class Controller:
                 self.last_steer_cmd = max(-100, min(100, int(round(m_steer * 100))))
             steer_cmd = self.last_steer_cmd
             if m_thr is not None and not self.bench:
-                thr_cmd = max(-100, min(100, int(round(m_thr * self.max_throttle))))
+                # labels are cmd/100 and cmd already includes the cap, so the
+                # model output is a raw percent; the cap only bounds it
+                cap = self.max_throttle
+                thr_cmd = max(-cap, min(cap, int(round(m_thr * 100))))
             else:
                 thr_cmd = 0
             return steer_cmd, thr_cmd, self.armed, events
@@ -173,7 +177,7 @@ class _QuietHandler(SimpleHTTPRequestHandler):
 class TeleopApp:
     def __init__(self, uno, cam, recorder: Recorder, controller: Controller,
                  http_port: int, ws_port: int, web_dir: str | Path,
-                 host: str = "0.0.0.0", autopilot=None) -> None:
+                 host: str = "127.0.0.1", autopilot=None) -> None:
         self.autopilot = autopilot            # None = AUTO feature off
         self.uno = uno
         self.cam = cam
@@ -197,8 +201,6 @@ class TeleopApp:
         self._clients: set = set()
         self.malformed = 0
         self._save_threads: list[threading.Thread] = []
-        self._save_errors: dict[threading.Thread, BaseException] = {}
-        self._prev_excepthook = None
         self._last_reopen = -1e9              # monotonic time of the last reopen attempt
         self._reopen_lock = threading.Lock()  # held while the port is being reopened
         # shared state (under lock)
@@ -219,32 +221,15 @@ class TeleopApp:
             with self.lock:
                 self.last_saved = str(path) if path else None
                 self.events.append("saved " + (path.name if path else "none (too short)"))
-        saved = threading.Event()
 
-        def on_saved_flag(path: Path | None) -> None:
-            saved.set()
-            on_saved(path)
-        t = self.recorder.stop_background(crash=crash, on_saved=on_saved_flag)
+        def on_error(exc: BaseException) -> None:
+            msg = f"save_failed {exc!r}"
+            print(msg)
+            with self.lock:
+                self.events.append(msg)
+        t = self.recorder.stop_background(crash=crash, on_saved=on_saved,
+                                          on_error=on_error)
         self._save_threads.append(t)
-        # recorder.py calls on_saved only after job.stop() succeeds; if stop()
-        # raises the thread just dies. This watcher turns that into an event.
-        threading.Thread(target=self._watch_save, args=(t, saved), daemon=True).start()
-
-    def _watch_save(self, t: threading.Thread, saved: threading.Event) -> None:
-        t.join()
-        if saved.is_set():
-            return
-        err = self._save_errors.pop(t, None)
-        msg = f"save_failed {err!r}" if err is not None else "save_failed (unknown error)"
-        print(msg)
-        with self.lock:
-            self.events.append(msg)
-
-    def _save_excepthook(self, args) -> None:
-        # unconditional: the save thread can die before stop_background() returns
-        self._save_errors[args.thread] = args.exc_value
-        if self._prev_excepthook is not None:
-            self._prev_excepthook(args)
 
     # ---- control thread ----
     def _control_loop(self) -> None:
@@ -257,91 +242,106 @@ class TeleopApp:
                     self.events.append(f"camera_error {e}")
                 self._stop.set()
                 break
-            now = time.monotonic()
-            with self.lock:
-                want_auto = self.autopilot is not None and self.controller.mode == "auto"
-            ap_out = None
-            ap_err = None
-            if want_auto:                     # inference outside the lock
-                try:
+            try:
+                self._control_step(frame, t_frame)
+            except Exception:                 # keep the loop alive: disarm and say so
+                tb = traceback.format_exc()
+                print(tb)
+                with self.lock:
+                    self.controller.armed = False
+                    self.controller._leave_auto()
+                    self.events.append(
+                        "control_error " + tb.strip().splitlines()[-1])
+                    if self.recorder.recording:
+                        self._stop_recording(crash=False)
+                time.sleep(0.5)
+
+    def _control_step(self, frame, t_frame) -> None:
+        now = time.monotonic()
+        with self.lock:
+            want_auto = self.autopilot is not None and self.controller.mode == "auto"
+        ap_out = None
+        ap_err = None
+        if want_auto:                     # inference outside the lock
+            try:
+                ap_out = self.autopilot.predict(frame)
+            except Exception as e:
+                ap_err = e
+        with self.lock:
+            if (ap_out is None and ap_err is None and self.autopilot is not None
+                    and self.controller.mode == "auto"):
+                try:                      # AUTO engaged since the check above
                     ap_out = self.autopilot.predict(frame)
                 except Exception as e:
                     ap_err = e
-            with self.lock:
-                if (ap_out is None and ap_err is None and self.autopilot is not None
-                        and self.controller.mode == "auto"):
-                    try:                      # AUTO engaged since the check above
-                        ap_out = self.autopilot.predict(frame)
-                    except Exception as e:
-                        ap_err = e
-                if ap_err is not None:        # no model output -> stop safely
-                    self.controller.armed = False
-                    self.events.append(f"autopilot_error {ap_err}")
-                    if self.recorder.recording:
-                        self._stop_recording(crash=False)
-                self.controller.autopilot_output = ap_out
-                link_ok_tick = self.uno.link_ok
-                steer, thr, armed, ev = self.controller.tick(
-                    now, self.last_pack, link_ok_tick)
-                mode = self.controller.mode
-                t_cmd = time.monotonic_ns()
-                reply = self.uno.exchange(steer, thr, armed)
-                if reply is not None:
-                    self.last_pack = reply.pack
-                    self.last_ticks = reply.ticks
+            if ap_err is not None:        # no model output -> stop safely
+                self.controller.armed = False
+                self.events.append(f"autopilot_error {ap_err}")
                 if self.recorder.recording:
-                    self.recorder.add(frame, (steer, thr), {
-                        "ticks": self.last_ticks,
-                        "status": reply.status if reply else 0,
-                        "t_frame_ns": t_frame, "t_cmd_ns": t_cmd,
-                        "loop_dt": reply.dt if reply else 0,
-                        "mode": 1 if mode == "auto" else 0})
-                if any(_is_disarm_event(e) for e in ev) and self.recorder.recording:
                     self._stop_recording(crash=False)
-                self.events.extend(ev)
-                self._frame_n += 1
-                if self._frame_n % 2 == 0:
-                    self.latest_jpeg = encode_jpeg(frame)
-                    self.jpeg_seq += 1
-                self._frame_times.append(now)
-                ft = self._frame_times
-                fps = (len(ft) - 1) / (ft[-1] - ft[0]) if len(ft) > 1 and ft[-1] > ft[0] else 0.0
-                st = reply.status if reply else 0
-                self.telem = {
-                    "armed": armed,
-                    "mode": mode,
-                    "recording": self.recorder.recording,
-                    "steps": self.recorder.steps,
-                    "steer_cmd": steer, "thr_cmd": thr,
+            self.controller.autopilot_output = ap_out
+            link_ok_tick = self.uno.link_ok
+            steer, thr, armed, ev = self.controller.tick(
+                now, self.last_pack, link_ok_tick)
+            mode = self.controller.mode
+            t_cmd = time.monotonic_ns()
+            reply = self.uno.exchange(steer, thr, armed)
+            if reply is not None:
+                self.last_pack = reply.pack
+                self.last_ticks = reply.ticks
+            if self.recorder.recording:
+                self.recorder.add(frame, (steer, thr), {
                     "ticks": self.last_ticks,
-                    "status": st,
-                    "watchdog": bool(st & protocol.ST_WATCHDOG),
-                    "crc_bad": bool(st & protocol.ST_CRC_BAD),
-                    "dropped": bool(st & protocol.ST_DROPPED),
-                    "pack_name": (protocol.PACK_NAMES[self.last_pack]
-                                  if self.last_pack is not None else "?"),
-                    "link_ok": self.uno.link_ok,
-                    "loop_dt_ms": (reply.dt / 10.0) if reply else 0.0,
-                    "fps": round(fps, 1),
-                    "last_saved": self.last_saved,
-                    "events": list(self.events),
-                    "max_throttle": self.controller.max_throttle,
-                    "bench": self.controller.bench,
-                }
-            # Reopen only AFTER a tick has seen the link down (so link_lost has
-            # already disarmed), outside the lock, at most once per 2.0 s.
-            # Opening the real port resets the Uno (2.2 s + banner), so no
-            # exchange happens meanwhile; re-arming needs a new arm command.
-            if (not link_ok_tick and not self._stop.is_set()
-                    and time.monotonic() - self._last_reopen >= REOPEN_INTERVAL_S):
-                with self._reopen_lock:
-                    try:
-                        ok = bool(self.uno.reopen())
-                    except Exception:
-                        ok = False
-                self._last_reopen = time.monotonic()
-                with self.lock:
-                    self.events.append("reconnect_ok" if ok else "reconnect_failed")
+                    "status": reply.status if reply else 0,
+                    "t_frame_ns": t_frame, "t_cmd_ns": t_cmd,
+                    "loop_dt": reply.dt if reply else 0,
+                    "mode": 1 if mode == "auto" else 0})
+            if any(_is_disarm_event(e) for e in ev) and self.recorder.recording:
+                self._stop_recording(crash=False)
+            self.events.extend(ev)
+            self._frame_n += 1
+            if self._frame_n % 2 == 0:
+                self.latest_jpeg = encode_jpeg(frame)
+                self.jpeg_seq += 1
+            self._frame_times.append(now)
+            ft = self._frame_times
+            fps = (len(ft) - 1) / (ft[-1] - ft[0]) if len(ft) > 1 and ft[-1] > ft[0] else 0.0
+            st = reply.status if reply else 0
+            self.telem = {
+                "armed": armed,
+                "mode": mode,
+                "recording": self.recorder.recording,
+                "steps": self.recorder.steps,
+                "steer_cmd": steer, "thr_cmd": thr,
+                "ticks": self.last_ticks,
+                "status": st,
+                "watchdog": bool(st & protocol.ST_WATCHDOG),
+                "crc_bad": bool(st & protocol.ST_CRC_BAD),
+                "dropped": bool(st & protocol.ST_DROPPED),
+                "pack_name": (protocol.PACK_NAMES[self.last_pack]
+                              if self.last_pack is not None else "?"),
+                "link_ok": self.uno.link_ok,
+                "loop_dt_ms": (reply.dt / 10.0) if reply else 0.0,
+                "fps": round(fps, 1),
+                "last_saved": self.last_saved,
+                "events": list(self.events),
+                "max_throttle": self.controller.max_throttle,
+                "bench": self.controller.bench,
+            }
+        # Reopen only AFTER a tick has seen the link down (so link_lost has
+        # already disarmed), outside the lock, at most once per 2.0 s.
+        # Opening the real port resets the Uno (2.2 s + banner), so no
+        # exchange happens meanwhile; re-arming needs a new arm command.
+        if (not link_ok_tick and not self._stop.is_set()
+                and time.monotonic() - self._last_reopen >= REOPEN_INTERVAL_S):
+            with self._reopen_lock:
+                try:
+                    ok = bool(self.uno.reopen())
+                except Exception:
+                    ok = False
+            self._last_reopen = time.monotonic()
+            with self.lock:
+                self.events.append("reconnect_ok" if ok else "reconnect_failed")
 
     # ---- commands ----
     def handle_command(self, name: str) -> None:
@@ -415,7 +415,11 @@ class TeleopApp:
     async def _ws_main(self) -> None:
         self._ws_stop = asyncio.Event()
         try:
-            server = await websockets.serve(self._handler, self.host, self.ws_port)
+            # browsers send Origin; None keeps non-browser clients (self-check) working
+            origins = [None, f"http://localhost:{self.http_port}",
+                       f"http://127.0.0.1:{self.http_port}"]
+            server = await websockets.serve(self._handler, self.host, self.ws_port,
+                                            origins=origins)
         except BaseException as e:
             self._ws_error = e
             self._ws_ready.set()
@@ -449,8 +453,6 @@ class TeleopApp:
             raise RuntimeError("websocket server did not start")
         if self._ws_error is not None:
             raise RuntimeError(f"websocket server failed: {self._ws_error!r}")
-        self._prev_excepthook = threading.excepthook
-        threading.excepthook = self._save_excepthook
         self._ctl_thread = threading.Thread(target=self._control_loop, daemon=True)
         self._ctl_thread.start()
 
@@ -487,8 +489,6 @@ class TeleopApp:
                     print(f"recording save failed on shutdown: {e}")
         for t in list(self._save_threads):   # outside the lock: on_saved takes it
             t.join(timeout=30.0)
-        if self._prev_excepthook is not None:
-            threading.excepthook = self._prev_excepthook
         for closer in (self.cam.stop, self.uno.close):
             try:
                 closer()
@@ -522,7 +522,7 @@ def _check_auto(ctl) -> None:
         pack = protocol.PACK_FAULT if kw.get("bench") else ok
         assert c.command("arm", pack) == ["armed"]
         assert c.command("auto_toggle", pack) == ["auto_on"] and c.mode == "auto"
-        c.autopilot_output = (0.3, 0.5)
+        c.autopilot_output = (0.3, 0.15)
         return c
 
     c = ctl(max_throttle=30)                  # refused while disarmed
@@ -551,6 +551,15 @@ def _check_auto(ctl) -> None:
     c.set_input(0.0, 0.2, 0.07)               # pad throttle overrides
     s, t, a, ev = c.tick(0.08, ok, True)
     assert c.mode == "manual" and "auto_override" in ev and t == round(0.2 * 30)
+
+    c = armed_auto()                          # model throttle is a raw percent, cap bounds it
+    c.autopilot_output = (0.3, 0.5)
+    assert c.tick(0.05, ok, True)[:2] == (30, 30)
+    c.autopilot_output = (0.3, -0.9)
+    assert c.tick(0.06, ok, True)[:2] == (30, -30)
+    c = armed_auto()
+    c.max_throttle = 0
+    assert c.tick(0.05, ok, True)[:2] == (30, 0)
 
     c = armed_auto(bench=True)                # bench forces throttle 0
     assert c.tick(0.05, protocol.PACK_FAULT, True)[:3] == (30, 0, True)
@@ -750,7 +759,7 @@ def _check_auto_end_to_end() -> None:
         app = TeleopApp(FakeUno(pack=protocol.PACK_OK), FakeCamera(), rec, ctl,
                         _free_port(), _free_port(),
                         Path(__file__).resolve().parent / "web", host="127.0.0.1",
-                        autopilot=StubAutopilot())
+                        autopilot=StubAutopilot(throttle=0.15))
         app.start_background()
         try:
             telems, marks = asyncio.run(_auto_session(app.ws_port))
@@ -897,12 +906,141 @@ def _check_link_robustness() -> None:
         assert any("disk full" in e for e in seen | set(app.events)), sorted(seen)
 
 
+def _wait_helpers(app, seen):
+    def feeder_loop(run) -> None:
+        while run.is_set():
+            with app.lock:
+                app.controller.set_input(0.0, 0.0, time.monotonic())
+                seen.update(app.events)
+            time.sleep(0.01)
+
+    def wait(cond, what: str, timeout: float = 5.0) -> None:
+        end = time.monotonic() + timeout
+        while time.monotonic() < end:
+            with app.lock:
+                if cond():
+                    return
+            time.sleep(0.01)
+        raise AssertionError(f"timeout waiting for {what}; seen={sorted(seen)}")
+    return feeder_loop, wait
+
+
+def _check_autopilot_nan() -> None:
+    import tempfile
+    from autopilot import StubAutopilot
+
+    with tempfile.TemporaryDirectory() as td:
+        ap = StubAutopilot()
+        app = TeleopApp(FakeUno(pack=protocol.PACK_OK), FakeCamera(),
+                        Recorder(td, session="nan", meta={}),
+                        Controller(30, False, False), _free_port(), _free_port(),
+                        Path(__file__).resolve().parent / "web", autopilot=ap)
+        seen: set[str] = set()
+        run = threading.Event()
+        run.set()
+        feeder_loop, wait = _wait_helpers(app, seen)
+        app.start_background()
+        threading.Thread(target=feeder_loop, args=(run,), daemon=True).start()
+        try:
+            wait(lambda: app.last_pack is not None, "first reply")
+            app.handle_command("arm")
+            wait(lambda: app.controller.armed, "armed")
+            app.handle_command("auto_toggle")
+            wait(lambda: app.telem.get("mode") == "auto" and app.telem.get("steer_cmd") == 30,
+                 "auto engaged")
+            ap.steer = float("nan")           # model goes bad
+            wait(lambda: any(e.startswith("autopilot_error") for e in seen),
+                 "autopilot_error")
+            assert any("non-finite" in e for e in seen), sorted(seen)
+            wait(lambda: not app.controller.armed and app.controller.mode == "manual",
+                 "disarmed + manual")
+            wait(lambda: app.telem["armed"] is False, "telemetry shows disarmed")
+            assert app.telem["steer_cmd"] != 100, app.telem
+        finally:
+            run.clear()
+            app.shutdown()
+
+
+def _check_control_error() -> None:
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as td:
+        uno = FakeUno(pack=protocol.PACK_OK)
+        app = TeleopApp(uno, FakeCamera(), Recorder(td, session="ce", meta={}),
+                        Controller(30, False, False), _free_port(), _free_port(),
+                        Path(__file__).resolve().parent / "web")
+        seen: set[str] = set()
+        run = threading.Event()
+        run.set()
+        real_exchange = uno.exchange
+        boom = threading.Event()
+
+        def flaky(*a, **kw):
+            if boom.is_set():
+                boom.clear()
+                raise RuntimeError("injected exchange failure")
+            return real_exchange(*a, **kw)
+        uno.exchange = flaky
+        feeder_loop, wait = _wait_helpers(app, seen)
+        app.start_background()
+        threading.Thread(target=feeder_loop, args=(run,), daemon=True).start()
+        try:
+            wait(lambda: app.last_pack is not None, "first reply")
+            app.handle_command("arm")
+            wait(lambda: app.controller.armed, "armed")
+            boom.set()
+            wait(lambda: any(e.startswith("control_error") for e in seen), "control_error")
+            assert any("injected exchange failure" in e for e in seen), sorted(seen)
+            assert not app.controller.armed
+            n0 = app._frame_n
+            wait(lambda: app._frame_n > n0 + 3, "loop still running", 5.0)
+            assert app._ctl_thread.is_alive()
+        finally:
+            run.clear()
+            app.shutdown()
+
+
+async def _origin_check(http_port: int, ws_port: int) -> None:
+    url = f"ws://127.0.0.1:{ws_port}"
+    for origin in (f"http://localhost:{http_port}", f"http://127.0.0.1:{http_port}"):
+        async with websockets.connect(url, origin=origin):
+            pass
+    for origin in ("http://evil.example", f"http://localhost:{http_port + 1}"):
+        try:
+            async with websockets.connect(url, origin=origin):
+                pass
+        except (websockets.InvalidStatus, websockets.InvalidStatusCode,
+                websockets.InvalidHandshake):
+            pass
+        else:
+            raise AssertionError(f"origin {origin} accepted")
+
+
+def _check_origin_and_host() -> None:
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as td:
+        app = TeleopApp(FakeUno(), FakeCamera(), Recorder(td, session="or", meta={}),
+                        Controller(30, False, False), _free_port(), _free_port(),
+                        Path(__file__).resolve().parent / "web")
+        assert app.host == "127.0.0.1"
+        app.start_background()
+        try:
+            asyncio.run(_origin_check(app.http_port, app.ws_port))
+            assert app._http.server_address[0] == "127.0.0.1"
+        finally:
+            app.shutdown()
+
+
 def self_check() -> None:
     t0 = time.monotonic()
     _check_controller()
     _check_link_robustness()
     _check_end_to_end()
     _check_auto_end_to_end()
+    _check_autopilot_nan()
+    _check_control_error()
+    _check_origin_and_host()
     assert time.monotonic() - t0 < 40.0
     print("teleop self_check: PASS")
 
@@ -925,6 +1063,10 @@ def main() -> int:
     ap.add_argument("--steer-invert", action="store_true")
     ap.add_argument("--rotate180", action="store_true")
     ap.add_argument("--data-dir", default="~/car_data")
+    ap.add_argument("--host", default="127.0.0.1",
+                    help="bind address for HTTP + websocket (default 127.0.0.1; "
+                         "reach it through the SSH tunnel). There is NO login: "
+                         "0.0.0.0 lets anyone on the network drive the car.")
     ap.add_argument("--http-port", type=int, default=8000)
     ap.add_argument("--ws-port", type=int, default=8765)
     ap.add_argument("--model", default=None,
@@ -959,14 +1101,20 @@ def main() -> int:
         from autopilot import StubAutopilot
         autopilot = StubAutopilot()
     app = TeleopApp(uno, cam, rec, ctl, args.http_port, args.ws_port,
-                    Path(__file__).resolve().parent / "web", autopilot=autopilot)
+                    Path(__file__).resolve().parent / "web", host=args.host,
+                    autopilot=autopilot)
     if args.max_throttle > 0 and args.bench:
         print("NOTE: --bench forces throttle 0 (max-throttle ignored).")
     print(f"Data dir: {rec.directory}")
-    print(f"HTTP :{args.http_port}  WS :{args.ws_port}")
+    print(f"HTTP {args.host}:{args.http_port}  WS {args.host}:{args.ws_port}")
+    if args.host in ("0.0.0.0", "::", ""):
+        print(f"WARNING: --host {args.host!r} exposes an UNAUTHENTICATED drive "
+              "endpoint: anyone on the network can drive the car. "
+              "Use the SSH tunnel with the default 127.0.0.1 instead.")
     print(f"From the laptop: ssh -L {args.http_port}:localhost:{args.http_port} "
           f"-L {args.ws_port}:localhost:{args.ws_port} ed@ed-pi5.local")
-    print(f"then open http://localhost:{args.http_port}")
+    print(f"then open http://localhost:{args.http_port} (the tunnel's local port "
+          f"must equal --http-port: the websocket only accepts that Origin)")
     app.run()
     return 0
 

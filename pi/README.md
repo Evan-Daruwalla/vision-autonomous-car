@@ -57,8 +57,13 @@ On the laptop (the Gamepad API needs a secure context; localhost via the tunnel 
 
 then open http://localhost:8000 and press a pad button.
 
+The server binds `127.0.0.1` by default (`--host`), so only the SSH tunnel can reach it; there is
+NO login. `--host 0.0.0.0` prints a warning because anyone on the network could then drive the car.
+The websocket also rejects any browser Origin other than `http://localhost:<http-port>` /
+`http://127.0.0.1:<http-port>`, so the tunnel's local port must equal `--http-port`.
+
 Other flags: `--steer-invert`, `--rotate180`, `--max-throttle N` (0..100, default 0),
-`--data-dir`, `--port`, `--http-port N` (page, default 8000), `--ws-port N` (websocket, default 8765;
+`--host` (bind address, default 127.0.0.1), `--data-dir`, `--port`, `--http-port N` (page, default 8000), `--ws-port N` (websocket, default 8765;
 if you change either, change the ssh tunnel and the page URL to match), `--model <path.onnx>`,
 `--fake` (no hardware; pack reads FAULT, so use `--bench` to arm; uses a stub autopilot unless `--model` is given).
 
@@ -84,7 +89,9 @@ Start with `--model <path.onnx>` (needs `requirements-autopilot.txt`; input tens
 - Override: in AUTO, pad steer beyond 0.15 or pad throttle beyond 0.05 drops to MANUAL at once
   (`auto_override`) and that tick uses the pad. Any disarm (deadman, link, pack, button) also returns to MANUAL.
 - Pad input must stay fresh in AUTO: the deadman still applies. steer = model steer x 100
-  (`--steer-invert` affects the pad only); throttle = model throttle x `--max-throttle`; `--bench` forces 0.
+  (`--steer-invert` affects the pad only); throttle = round(model throttle x 100), clipped to +/-`--max-throttle` (training labels are cmd/100 and
+  already include the cap, so it is not scaled again); `--bench` forces 0. A non-finite model output raises
+  `autopilot_error` and disarms.
 - Recorded episodes carry `log_mode` (0 manual, 1 auto) per frame.
 - Never pass `--max-throttle` with a model until the motor is wired and the car is on a stand.
 

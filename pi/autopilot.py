@@ -8,6 +8,7 @@ imports on a PC without it). `StubAutopilot` returns fixed values for tests and
 """
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 
@@ -18,6 +19,13 @@ import preprocess_frame
 
 def _clip(v: float) -> float:
     return max(-1.0, min(1.0, float(v)))
+
+
+def _clip_pair(a: float, b: float) -> tuple[float, float]:
+    # NaN survives max/min clipping and would round() to a full-lock command
+    if not (math.isfinite(a) and math.isfinite(b)):
+        raise ValueError("non-finite model output")
+    return _clip(a), _clip(b)
 
 
 class Autopilot:
@@ -31,7 +39,7 @@ class Autopilot:
         x = preprocess_frame.to_model_input(frame_rgb)
         out = self.session.run(None, {self.input_name: x})[0]
         flat = out.reshape(-1)
-        return _clip(flat[0]), _clip(flat[1])
+        return _clip_pair(flat[0], flat[1])
 
 
 class StubAutopilot:
@@ -40,12 +48,20 @@ class StubAutopilot:
         self.throttle = throttle
 
     def predict(self, frame_rgb=None) -> tuple[float, float]:
-        return _clip(self.steer), _clip(self.throttle)
+        return _clip_pair(self.steer, self.throttle)
 
 
 def self_check() -> None:
     assert StubAutopilot().predict() == (0.3, 0.5)
     assert StubAutopilot(2.0, -3.0).predict() == (1.0, -1.0)
+    for bad in (float("nan"), float("inf"), float("-inf")):
+        for args in ((bad, 0.1), (0.1, bad)):
+            try:
+                StubAutopilot(*args).predict()
+            except ValueError as e:
+                assert "non-finite" in str(e)
+            else:
+                raise AssertionError(f"non-finite {args} accepted")
     assert callable(Autopilot.predict)        # importable, constructor not called
     print("autopilot self_check: PASS")
 
