@@ -359,6 +359,7 @@ the dated entry, not the digest.
 - [LJ - M3 software on synthetic data: BC trainer + BCNet, ONNX parity 1.8e-07, autopilot mode, verify_real, data-collection protocol; C1 headroom +1.2 mm; LM2596 4.95 vs 4.99 V left open](#appendix-lj---m3-software-on-synthetic-data-bc-trainer--bcnet-onnx-parity-18e-07-autopilot-mode-verify_real-data-collection-protocol-c1-headroom-12-mm-lm2596-495-vs-499-v-left-open-2026-10-29-0052-cdt) (10-29)
 - [LK - Pi de-risk (deploy, preflight, rule 3, reconnect) + final docs-sync; the 2026-10-28 plan is complete; suite 32](#appendix-lk---pi-de-risk-deploy-preflight-rule-3-reconnect--final-docs-sync-the-2026-10-28-plan-is-complete-suite-32-2026-10-29-0055-cdt) (10-29)
 - [LL - Scheduled daily-audit: 58 findings, 4 high - teleop binds 0.0.0.0 unauthenticated, NaN model output becomes full lock, AUTO throttle scaled twice, evaluators split without ids](#appendix-ll---scheduled-daily-audit-58-findings-4-high---teleop-binds-0000-unauthenticated-nan-model-output-becomes-full-lock-auto-throttle-scaled-twice-evaluators-split-without-ids-2026-10-29-0729-cdt) (10-29)
+- [LM - HANDOFF trim: stale 'Immediate next actions' block (138 lines) moved here verbatim; paste-ready NEXT ACTIONS is the one live list](#appendix-lm---handoff-trim-stale-immediate-next-actions-block-138-lines-moved-here-verbatim-paste-ready-next-actions-is-the-one-live-list-2026-10-30-1058-cdt) (10-30)
 
 ---
 
@@ -21148,3 +21149,147 @@ Policy (Evan's call): no LICENSE on a public repo; private identifiers in public
 - CVEs (no network).
 
 The full report with the fix prompt is in the scheduled-run transcript of 2026-10-29.
+
+# Appendix LM - HANDOFF trim: stale 'Immediate next actions' block (138 lines) moved here verbatim; paste-ready NEXT ACTIONS is the one live list (2026-10-30 10:58 CDT)
+**2026-10-30.** HANDOFF.md trim (owner's list item 2). The section below was HANDOFF's "Immediate next actions" (last rewritten 2026-09-06/07, partly superseded by the 2026-10-04 cart review and everything since). It disagreed with the paste-ready NEXT ACTIONS and was ~140 lines of mostly closed rows. It is moved here VERBATIM as a snapshot (transliterated to ASCII for the record: dashes, arrows, symbols), and HANDOFF now points to the paste-ready prompt's NEXT ACTIONS as the single live list.
+
+### Snapshot: HANDOFF.md "Immediate next actions" as of 2026-10-30 (superseded)
+
+#### Immediate next actions (snapshot)
+
+*(Rewritten 2026-09-06. The old table had become a graveyard of closed rows -
+every one of them is in the record, Appendices DI-DQ. This lists only what is
+actually open, cheapest-first.)*
+
+**Runnable NOW - no parts, no purchase:**
+
+*(Table rewritten 2026-09-07. Rows closed since the 2026-09-06 rewrite are in
+the record - DS the floor-fit, DV/DZ the 3DStreet scene, DU the dash ratio.
+This lists only what is actually open, cheapest first.)*
+
+| # | Action | Why it matters |
+|---|---|---|
+| ~~1~~ | ~~**Decide the dash density**~~ **DECIDED 2026-09-09 (Evan): ACCEPT 18.7.** `TARGET_DASH_CYCLES` is retired; `cad/marking_specs.py` now asserts a max-blind-gap criterion instead (1.8 control steps against a 2.0 limit at 1.401 m/s / 20 Hz). Dash geometry unchanged at 62.6 / 125.2 mm. Appendix EU | ~~One word.~~ Closed. The cycle count was never the quantity that mattered |
+| ~~2~~ | ~~**Decide the cornering clearance**~~ **DECIDED 2026-09-09 (Evan): ACCEPT 29.6 mm/side.** `MIN_SIDE_CLEARANCE` re-pointed at the ROAD edge (154.6 mm/side at the measured 185.95 mm wheelbase) and now genuinely ASSERTED in `vehicle_envelope.py`'s self_check. Appendix EU | ~~One word.~~ Closed. **Accepted cost: 29.6 mm is 24% of the half-lane, so the policy will clip the centreline in corners** |
+| 3 | **Pitch-row scale check on the printed coupons.** Lego beam across holes 1-2, then 1-5 (nominal 32.00 mm span). If it binds across 5 but not 2, caliper the real span - that ratio is the printer's dimensional scaling error and it applies to every chassis part. | Last unclosed piece of M1.3. Needs only the coupons already printed + real Lego |
+| 4 | **Caliper the coupons.** Every fit verdict so far (pin 4.80 mm, axle 5.00 mm) is fit-by-feel, not a measured diameter. | Turns two working numbers into a measured offset that transfers to CAD |
+| 5 | **Confirm a 12-tooth bevel gear is in the parts bin.** Evan: "prob have one and if not i can print one" - not a confirmation. A bevel's meshing tooth profile is a harder print than a coupon. | Last unconfirmed pre-order check (PRD A1) |
+
+**2026-10-04 CART REVIEW (side chat; Appendices EZ, FA, FB, FC) - nothing bought:**
+
+- ~~**BLOCKER - the BMS.**~~ **RESOLVED 2026-10-04: Evan is ordering the vetted
+  `B08HLQQCQJ`** (8PCS, $9.59), re-verified live - the description still states
+  "Overdischarge detection voltage: 2.9V+/-0.05V." The `B08CV2VS8G` in his cart
+  documented no set point. Read the DESCRIPTION, not the bullets: both parts'
+  bullets say only "Over-discharge protection".
+- **NEW SAFETY GAP: `docs/WIRING_PROTOSHIELD.md` never included the BMS.** Its
+  net list still runs `PACK+` holder -> fuse, so wiring from it bypasses the
+  over-discharge cutoff. Pack -> B+/B-/MB, everything else (charger too) ->
+  P+/P-. MB needs the cell midpoint, which the 2-lead holder does not expose.
+  A dated warning sits in that doc; ~~the net redraw is OPEN~~ **REDRAWN
+  2026-10-10:** cells -> 3 A fuse -> BMS B+ / MB / B-, charger and everything
+  else on P+ / P-, plus three Mermaid diagrams (power, signals, ground) in
+  section 2.0, every Uno pin checked against `uno_control.ino`.
+- **DIANN holder: SERIES per its listing** ("Output Voltage: 7.4V", Evan pasted
+  it 2026-10-04). Meter it on arrival - ~7.4-8.4 V across red/black is series;
+  ~3.7-4.2 V means parallel, reject it.
+- **Resistor kit (KSOPUERT), checked 2026-10-04:** 100k present; NO 12k - build
+  it as 10k + 2k in series (12.0k, same 0.10714 ratio; never 10k alone, which
+  under-reads the pack 15%); nothing in 330-470 ohm - 2 x 200 ohm in series
+  (400 ohm) per strip segment.
+- **Coupler (2026-10-04):** no #4252 was ever on hand - the 2026-09-03 build
+  was a PRINT of v1, whose axle socket was too loose. ~~Print v2~~ v2 fitted
+  2026-10-10; print v3 (`cad/servo_lego_coupler_v3.stl`, Appendix FM). Untested.
+- **UNVERIFIED, Evan's hands:** the Vilros kit's 120 mm camera cable pin count; coupler fit on
+  the MG90D-270.
+- **Decided by Evan:** 22 AWG for every net (26 AWG dropped); PRINT
+  `cad/servo_lego_coupler_v2.stl` (v1 printed too loose) instead of buying #4252 (row 22 not retired
+  until a coupler survives a load test).
+- **In NO cart yet:** 2x Samsung 25R $9.98 at imrbatteries (row 9 - sales
+  FINAL, USPS caps 8 cells/package); Adeept p0374 charger $7.99 (row 11).
+- **Low stock when reviewed:** resistor kit 3 left, 0.1 uF caps 6, LM2596 6,
+  470 uF caps 13, Pi kit 19.
+- **Total $422.25 before shipping**, re-derived two ways (row table and order
+  sheet agree). The review's own "approx $423" omitted row 22's -$0.75.
+
+**OPEN FROM THE 2026-09-09 DAILY-AUDIT (Appendix ES) - not worked, Evan
+cancelled the sweep; the doc half was repaired 2026-09-09 in Appendix ET:**
+
+[x] **RESOLVED 2026-09-09 (Appendix EU).** The dirty artifacts were the
+CORRECT freshly-generated output; the committed versions were the stale ones.
+Regenerated and committed. **The guard that stops this recurring now exists:**
+`scripts/check_artifacts.py` regenerates all 27 tracked artifacts into a temp
+dir and diffs them, and `scripts/git-hooks/pre-commit` runs it with `--staged`.
+Its FIRST run found **four more** stale files the audit had missed.
+
+**`scripts/run_checks.py` is now the test suite** `CLAUDE.md` requires:
+`15 passed, 0 failed, 0 skipped (of 15)`, exit 0 - the 15th added 2026-09-10,
+`ml/train_controller.py`, which now pins the DART invariant (Appendix EV).
+
+| sev | finding | one-line fix |
+|---|---|---|
+| ~~CRIT~~ **DONE** | regenerated. The guard then found the same drift in `_model`, `_lmlanes` and `_sim` too - four files, not one |
+| ~~CRIT~~ **DONE** | regenerated, and `1122.xodr` vendored into `cad/reference/` so it is reproducible on any clone |
+| ~~CRIT~~ **DONE** | status block rewritten to 2026-09-09, scale corrected to ~1:14.63, MG90S -> MG90D-270. Voice-checked, in band on all 4 metrics |
+| ~~HIGH~~ **DONE** | `scripts/check_artifacts.py` + pre-commit `--staged`. Blocking PROVEN by staging a staled file: commit refused, HEAD unchanged |
+| ~~HIGH~~ **DONE** | `scripts/run_checks.py`, 14/14 pass, exit 0. (Audit's 28-of-43 was wrong: 37 argparse modules, 14 define one.) ~~`train_controller.py` still has none - open~~ **closed 2026-09-10 (Appendix EV)**: its self_check pins the DART invariant and kills a replay of the 2026-09-07 bug. `diag_copycat.py` still makes the same choice inline, unguarded |
+| ~~HIGH~~ **DONE** | now **100755** |
+| ~~HIGH~~ **DONE 2026-09-09** | SELFTEST was pinned at a stale **39/39** in ~~four~~ **three** unstruck places (the fourth, `PRD_ROADMAP.md:477`, had already been struck by Appendix ET -- the audit miscounted). All three now point at the board banner rather than carrying a number | struck; `uno_control.ino:10-16` remains the rule |
+| ~~MED~~ **DONE** | `TARGET_DASH_CYCLES` retired for a max-blind-gap criterion (1.8 steps vs a 2.0 limit), asserted. Dash geometry unchanged |
+| ~~MED~~ **DONE** | re-pointed at the ROAD edge (154.6 mm/side) and now ASSERTED; the accepted 29.6 mm lane shortfall is pinned by a second assert |
+| ~~MED~~ **DONE, source only** | cleared at the true top, BEFORE `:529` sets it - the audit's "mirroring :532" would have wiped the bit just set. Compiles 9694 B. **NOT FLASHED** |
+| ~~MED~~ **DONE** | now at `.gitignore:57` |
+
+~~Two load-bearing files live OUTSIDE the repo with nothing preserving them.~~
+**DONE 2026-09-09: both vendored into `cad/reference/`** as `1122.xodr` and
+`figure8.xodr` (space dropped - LaneMaker's Qt dialogs choke on it), with
+SHA256s in the record. `rescale_reference_xodr.py:72` repointed, so that
+script now runs on a bare clone instead of only on Evan's machine.
+
+**LaneMaker / OpenDRIVE - CLOSED AS A NEGATIVE, DO NOT RE-OPEN
+(2026-09-07, Appendices EK-ER):**
+
+`cad/export_xodr.py` emits the figure-8 (`--`), the grid (`--grid`), the grid
+with junctions (`--junctions`) and a crash-bisection ladder (`--probe`).
+**Everything LOADS and RENDERS. Simulation crashes, and seven hypotheses have
+now failed to fix it:** self-link (EC), self-intersection (EC), median
+required (EC, re-killed against SIMULATION in EP), U-turns (EH),
+roads-too-short (EO/EP), missing `<junction><boundary>` - built, verified and
+still crashing (EQ) - and missing `<signalPhase>` - added to 68 of 68
+connections, still crashing (ER).
+
+**RESOLUTION: use `~/Downloads/figure 8.xodr` if a simulation visual is ever
+wanted.** It is a working figure-8 through a 4-way junction, authored by
+LaneMaker itself - our track's exact topology, already simulating. Nothing
+needs to be generated for that purpose.
+
+**Continuing would mean** bisecting `figure 8.xodr` toward our generated file
+one element at a time, ~6-10 more manual LaneMaker sessions, against a
+closed-source Qt binary, for a tool that is off the critical path. **Not
+recommended.** The physical track is defined by `cad/track_layout_v2.py` and
+`cad/marking_layout.py`, both complete and self-checked, and neither depends
+on any of this.
+
+**What the thread DID produce - four pieces of an undocumented vendor format,
+derived and verified, reusable if this is ever revisited** (details in
+`.claude/project-memory/track.md`): the `side` rule (38/38 segments across
+both reference files); the counterclockwise joint->lane boundary walk where
+each lane segment is the right-turn kerb return between adjacent arms;
+`signalPhase` = one id per arm, 0-based; and straight-through trim =
+`connector_length / 24`, machine-precision on 5/5. WARNING: Turn-connector trims
+(0.37-0.49 x lane, never symmetric) were never solved - the exporter uses
+0.45 x lane as a marked shortcut.
+
+WARNING: **Appendix EL's "side is underivable" and Appendix EN's "the boundary is
+the cause" are both RETRACTED** (EQ). EL hunted positional patterns when the
+rule is per-segment semantic; EN read a rescaled copy of Evan's own working
+file clearing the crash as isolating the boundary, which it does not.
+
+**Blocked on the order:**
+
+| # | Action | Blocked on |
+|---|---|---|
+| 6 | **Place the order** (`docs/BOM.md`, ~~**$411.45 + shipping ~ $424-439**~~ **$422.25 before shipping (2026-10-04 cart review); shipping not re-estimated. BMS confirmed 2026-10-04 (B08HLQQCQJ, re-verified live)**). All six BOM Verify items closed; only #3 above is unconfirmed. | **Evan** |
+| 7 | **Bench-measure the real wheel angle with a servo attached** - the sharpened task from Appendices DL/DN/DO. Measure the WHEEL directly at the servo's own limit; do not compute it from the bare-linkage 58 deg/270 deg figures. Then re-derive `SERVO_US_SPAN`, whose 10% margin was sized against the OLD rack's hard stops. | parts (servo) |
+| 8 | **Confirm the MG90D-270 deg physically fits the MG90S-sized mount** - one body dimension differs (22.4x12.1x22.8 vs ~22.8x12.2x31 mm). | parts (servo) |
+| 9 | **Task 8e: flash and verify the WS2812B firmware.** `uno_control.ino` compiles clean (9680 B, 58 SELFTEST checks) but has never run. Done-check needs both strip segments addressing independently, the LAST pixel of each lit, and `ticks` counting cleanly with indicators blinking. | parts (strip) |
