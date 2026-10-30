@@ -72,7 +72,7 @@ supplement to a hardware protection board or protected cells, not a replacement.
 
 ## Not done
 
-- **No control firmware exists.** The serial protocol is designed on paper only.
+- ~~**No control firmware exists.** The serial protocol is designed on paper only.~~ **(2026-10-30) `firmware/uno_control/` exists and is flashed: SELFTEST PASS 86/86 on the board (record HU); host_test all ok from the Pi over one USB cable (record JQ). The protocol is in `SERIAL_PROTOCOL.md`.**
 - ~~The FTDI latency timer (default 16 ms) is UNMEASURED~~ **MEASURED
   2026-09-02 (Appendix BF): it does NOT threaten the loop.** Registry
   `LatencyTimer` is indeed 16, but the real round trip at the actual control

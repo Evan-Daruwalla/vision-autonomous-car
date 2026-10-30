@@ -1,12 +1,12 @@
 # Bill of Materials — v1 (2026-07-23)
 
-> **➡️ TO PLACE THE ORDER, READ [ORDER SHEET](#order-sheet--grouped-by-vendor-2026-09-03) BELOW.**
+> **➡️ ~~TO PLACE THE ORDER, READ [ORDER SHEET](#order-sheet--grouped-by-vendor-2026-09-03) BELOW.~~** **(2026-10-30) ALREADY ORDERED: all 24 items arrived (records FI-FL, IX). The order sheet below is history.**
 > The row table is the reasoning and the dated history; the order sheet is the
 > shopping list, grouped by vendor with SKUs and live stock. ~~Three things block~~
 > **One thing blocks it today** (2026-09-03: the Pi and the CAD fuse holder both
 > resolved) — it is listed there.
 
-**Status: FINAL pending Evan's order.** Every choice traces to a dated
+**Status: ~~FINAL pending Evan's order.~~** **(2026-10-30) ORDERED; all 24 items arrived (records FI-FL, IX).** Every choice traces to a dated
 research brief in `docs/research/`. Prices are 2026-07-23 and were volatile
 this year (Pi RAM shortage) — **re-verify at checkout.**
 
@@ -107,7 +107,7 @@ with** the $15–25 shipping estimate.)*
 Pi**, which now lands at **$181–189 before shipping, ≈$196–214 with**. The
 bottom of that range clears $200; the top does not. On the 4GB Pi every path is
 still over.~~ **SUPERSEDED 2026-09-02 ~17:45 CDT — see the row-5 correction
-below.** Evan's call, and nothing is ordered.)*
+below.** Evan's call, and ~~nothing is ordered.~~ **(2026-10-30) everything is ordered and has arrived (FI-FL, IX).**)*
 
 *(**TOTAL raised 2026-09-02 ~17:45 CDT from ≈$226–234 to ≈$235–243** (Appendix
 BO), by two changes that are drift repair rather than new scope: **row 5**
@@ -135,7 +135,7 @@ Struck rather than edited — a landing-check found it live and unstruck four
 lines under its own replacement (Appendix CG).** The 2GB path was the last one whose low end cleared the ceiling and it no
 longer does. **This is not a cost overrun from adding features**: both increments
 are parts the existing design already required and the BOM had failed to list.
-Evan decides whether the ceiling moves; nothing is ordered.)*
+Evan decides whether the ceiling moves; ~~nothing is ordered.~~ **(2026-10-30) everything is ordered and has arrived (FI-FL, IX).**)*
 
 **⚠️ RE-PRICED 2026-08-08 ~23:03 CDT against live vendor pages — the total rose
 ≈$44 and the BOM's Pi price was already stale when this file was written.**
@@ -215,7 +215,7 @@ paralleled TB6612 is enough).
 
 **This is the section to buy from.** The row table below is the reasoning and
 the history; this is the shopping list. Every price and stock string here was
-checked on a live page on 2026-09-03. **Nothing is ordered.**
+checked on a live page on 2026-09-03. ~~**Nothing is ordered.**~~ **(2026-10-30) Everything is ordered and has arrived (FI-FL, IX).**
 
 ### ⚠️ One thing blocks placing it today
 

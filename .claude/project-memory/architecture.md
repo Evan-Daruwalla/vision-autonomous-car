@@ -32,7 +32,7 @@
     ~16:17 "single 2S LiPo + 5V UBEC" plan). **Battery A** = USB power bank
     (5V/3A) → Pi 5 only, short thick cable, nothing else on it. **Battery B**
     = 2× 18650 in series (7.4V) + USB-C 2S BMS/charge board → TB6612FNG VM
-    (motor) and → LM2596 @5.2V → MG90S servo. **One shared node only:** Pi
+    (motor) and ~~→ LM2596 @5.2V → MG90S servo.~~ **(2026-10-30, records JE/JF/JR: the LM2596 is ~5.0 V (set 4.95 V) and feeds only the strips + encoder; the servo is on the Uno 5V header; the Uno runs on the Pi's USB, so Battery A also powers it.)** **One shared node only:** Pi
     GND ↔ TB6612 GND, star-grounded at the driver. Inline 3A fuse + rocker
     switch on Battery B. Rationale is safety-first (the only path where the
     household lithium is a UL/ETL-listed consumer product on a phone
@@ -95,8 +95,8 @@
     was written to prevent. **The Uno supplies LOGIC; LED current comes off the
     LM2596 rail.** Powering the Uno from the 7.4V pack instead has its own
     failure: the pack sags under motor stall and the AMS1117 drops out,
-    browning out the Uno mid-drive. Preferred: feed its 5V pin from the LM2596
-    rail and use a **data-only USB cable** so nothing back-feeds.
+    browning out the Uno mid-drive. ~~Preferred: feed its 5V pin from the LM2596
+    rail and use a **data-only USB cable** so nothing back-feeds.~~ **(2026-10-30, record JF; audit KA) SUPERSEDED: the Uno runs on a plain Pi USB cable (power + data); the LM2596 never touches the Uno 5V pin; no cut cable.**
   - **Pin budget update 2026-09-02 (Appendix BJ): A0 is now the pack-sense
     divider input** (100k/12k, internal 1.1 V reference), so the free analog
     pins are **A1-A5**, not A0-A5. Firmware: `firmware/uno_packguard/`.

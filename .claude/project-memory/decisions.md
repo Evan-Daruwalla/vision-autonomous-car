@@ -59,7 +59,7 @@ level outward; Evan confirmed the frames under them are level.
 **Source:** record IK.
 
 ## 2026-10-16 - the Uno is powered by the Pi's USB, not the LM2596 (Evan)
-**What:** plain USB cable Pi -> Uno for power + data; the LM2596 `+5V2` rail feeds only the servo, both strips and the encoder; `+5V2` never touches the Uno 5V pin; servo V+ on `+5V2`, never the Uno 5V header.
+**What:** plain USB cable Pi -> Uno for power + data; the LM2596 `+5V2` rail feeds only ~~the servo, both strips and the encoder~~ **both strips and the encoder (2026-10-30, record JR: not the servo)**; `+5V2` never touches the Uno 5V pin; ~~servo V+ on `+5V2`, never the Uno 5V header.~~ **(2026-10-30) SUPERSEDED by record JR (entry below): servo V+ is on the Uno 5V header; `+5V2` feeds only the strips + encoder.**
 **Why:** no cut-5V cable (and no FT232RL risk); the Uno survives a dead pack / blown fuse / rocker OFF and reports PACK_FAULT instead of going dark.
 **Rejected:** the 2026-09/10 design (Uno 5V pin on `+5V2`, USB 5 V conductor cut).
 **Source:** record JF.

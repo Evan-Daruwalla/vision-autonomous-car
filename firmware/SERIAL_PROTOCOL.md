@@ -165,8 +165,8 @@ visible in driving, which it should not be.*
    so the next frame was lost too and its payload was parsed as idle bytes.
    A false `0xA5` inside a payload yields one EXTRA bad-CRC reply before the
    real sync is reached - so "two consecutive bad frames" can come from ONE
-   corruption. No Pi-side client implements that rule yet; when one does,
-   count bad replies per time window, not strictly per frame.
+   corruption. ~~No Pi-side client implements that rule yet; when one does,
+   count bad replies per time window, not strictly per frame.~~ **(2026-10-30, audit LL) STALE: the rule is implemented, per frame, not per time window (record LK; see the note below).**
    (2026-10-29, record LD: `pi/uno_link.py` and `pi/teleop.py` now exist and
    ~~still do NOT implement this rule - it is planned. Their link fault is 3
    missed replies in a row, not 2 bad CRCs.~~ **(later 2026-10-29, record LK:

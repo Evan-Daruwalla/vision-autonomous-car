@@ -7,7 +7,7 @@ its own driving logs.
 
 **Status as of 2026-09-09: the software is real and measured. The car is not
 built.** Printing has started: two tolerance coupons are printed and tested.
-No parts have been ordered, and nothing has driven. Every result below is in
+~~No parts have been ordered,~~ **(2026-10-30) all 24 ordered items have arrived (records FI-FL, IX); the servo is wired, the pack is built and the camera works (audit KA); the Uno control firmware is flashed, SELFTEST 86/86 (HU), host_test all ok from the Pi (JQ);** and nothing has driven. Every result below is in
 simulation, and this README says so everywhere it matters.
 
 ---
