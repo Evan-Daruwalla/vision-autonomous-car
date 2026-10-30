@@ -365,6 +365,7 @@ the dated entry, not the digest.
 - [LP - Docs-sync: security/performance/conventions/tooling bins refreshed; HANDOFF drift (suite 33, preprocess ids) fixed](#appendix-lp---docs-sync-securityperformanceconventionstooling-bins-refreshed-handoff-drift-suite-33-preprocess-ids-fixed-2026-10-30-1409-cdt) (10-30)
 - [LQ - Off-car Pi session software: teleop --fake-uno, preflight --no-uno, fake-hardware training guard, Pi latency bench; landing check SAFE](#appendix-lq---off-car-pi-session-software-teleop---fake-uno-preflight---no-uno-fake-hardware-training-guard-pi-latency-bench-landing-check-safe-2026-10-30-1419-cdt) (10-30)
 - [LR - First code run ON the Pi (off-car): re-flash with key-only SSH, preflight PASS after 2 real fixes, camera 20 fps full FOV, autopilot p95 1.40 ms, fake guard proven on Pi data](#appendix-lr---first-code-run-on-the-pi-off-car-re-flash-with-key-only-ssh-preflight-pass-after-2-real-fixes-camera-20-fps-full-fov-autopilot-p95-140-ms-fake-guard-proven-on-pi-data-2026-10-30-1536-cdt) (10-30)
+- [LS - Pi power: Anker A1275 bank sags to 4.52 V under full load (under-voltage + throttling live); cable vs bank not yet separated](#appendix-ls---pi-power-anker-a1275-bank-sags-to-452-v-under-full-load-under-voltage--throttling-live-cable-vs-bank-not-yet-separated-2026-10-30-1544-cdt) (10-30)
 
 ---
 
@@ -21550,3 +21551,42 @@ stick input; that part rests on Evan's eyes.
 - a longer recording to measure the frame-gap % over minutes;
 - everything that needs the Uno (record LC fixes and meter checks first);
 - camera orientation (needs the mount).
+
+# Appendix LS - Pi power: Anker A1275 bank sags to 4.52 V under full load (under-voltage + throttling live); cable vs bank not yet separated (2026-10-30 ~15:44 CDT)
+**2026-10-30 ~15:44 CDT.** Follows LR's open power flag (`get_throttled` 0x50000).
+
+**Supply (Evan):** Anker PowerCore Speed 20000 PD, model A1275, into the Pi 5's
+USB-C. The cable used is not recorded. Web specs for its USB-C port: PD up to 22.5 W
+(one source says 24 W); every source gives 5 V / 3 A as the 5 V step. The Pi does
+not use the 9 / 15 V steps. Sources: techadvisor.com review (spec list),
+pc.watch.impress.co.jp; the A1275 model number itself was not confirmed by any
+source found.
+
+**Measured on the Pi** (`vcgencmd pmic_read_adc EXT5V_V` = the Pi 5's own input
+voltage reading; `get_throttled`):
+- Rebooted (uptime then "up 1 minute"). Right after boot: 0x50000 and EXT5V 4.906 V.
+  So the "under-voltage occurred" flag was set again during boot itself.
+- Load test, 60 s: 4 busy-loop Python processes (all cores) + `autopilot.py --bench`.
+  Readings every 5 s, EXT5V in V:
+  4.529, 4.891, 4.918, 4.561, 4.587, 4.565, 4.927, 4.599, 4.604, 4.868, 4.520, 4.986.
+- 7 of 12 readings were 4.52-4.60 V, each with `throttled=0x50005` = under-voltage
+  NOW + throttled NOW (the CPU clock is capped while it lasts). Temperature rose
+  49.4 -> 69.7 C (below the thermal limit; the throttle is voltage, not heat).
+- `usb_max_current_enable=0`, i.e. the Pi runs in its 3 A-supply mode.
+
+**Reading:**
+- The power bin's 2026-07-23 claim "a USB power bank IS viable" holds for the
+  rating (3 A >= the measured 1.40 A inference draw).
+- It FAILS on rail stiffness: this bank-plus-cable sags to ~4.52 V under a
+  sustained multi-core load. That is exactly the bin's own second entry ("transient
+  rail stiffness, not amperage").
+- The full 4-core load is harsher than the driving loop. Whether the real teleop
+  load sags too is NOT measured.
+- Bank vs cable is NOT separated: one test with a short (<= 1 m), 3 A+ rated USB-C
+  cable would split them.
+
+**Open (Evan):**
+1. Re-run this test with a different short USB-C cable.
+2. If it still sags, the car's Pi supply needs a decision. Options: a stiffer 5 V
+   source (e.g. a 5 V / 5 A buck off the pack into the GPIO 5 V pins, with bulk
+   capacitance), or a different bank. Any purchase is Evan's go.
