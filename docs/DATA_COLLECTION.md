@@ -48,7 +48,9 @@ Every rule below exists because the training side needs it; the reason is next t
    frames must never be committed; `car_data/` is git-ignored as a backstop):
    `scp -r ed@ed-pi5.local:~/car_data/<session> <somewhere outside the repo>`
 2. Run the checker (added with this protocol): `./.venv/Scripts/python.exe ml/verify_real.py
-   <dir>`. It must exit 0. It reports dropped frames, steer saturation and short episodes.
+   <dir>`. It must exit 0. It reports dropped frames, steer saturation and short episodes,
+   and FAILs any episode recorded with fake hardware (`--fake` / `--fake-uno`; added
+   2026-10-30) - those are bench tests, never training data.
 3. Write a record entry: session id, date/time (from `date`), laps and recovery clips
    recorded, throttle cap, pack voltage start/end, lighting, camera mount state, anything
    odd (link drops, crashes), and the verify_real summary.

@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-30 ~13:16 CDT** (record LO: all commits pushed, `main` = `origin/main`) — this file is the ONLY live snapshot.
+**Last updated: 2026-10-30 ~14:19 CDT** (records LO-LQ; push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ ~~327 appendices A-LO~~ 328 appendices A-LP as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ ~~327 appendices A-LO~~ ~~328 appendices A-LP~~ 329 appendices A-LQ as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -19,6 +19,8 @@ the physical car and documented as a college-portfolio engineering artifact.
 ## Where the project actually is
 
 **2026-10-25 UPDATE (LB-LD) wins over this paragraph where they differ: the proto shield is SOLDERED (untested), and the teleop/recording software is built in `pi/` (fake-hardware verified only) - see the next paragraph.** **CURRENT STATE 2026-10-20 (supersedes the older lines below wherever they disagree; fixes audit KA HIGH #2 / #3):** the Uno runs the current uno_control (SELFTEST PASS 86/86, re-flashed from the Pi 2026-10-16, JQ; host_test all ok from the Pi). The servo is wired and drives the rack; the 2S pack is built and charged (IU-JA); the Pi 5 runs Bookworm and the camera works (JK). NOT yet wired: motor, encoder, LED strips, rocker, proto shield - the shield's hole-by-hole layout is ready and checked (KG), nothing soldered. Tray v11 / deck v13 / camera mast v1 are designed and checked, UNPRINTED. **2026-10-20 evening (KI, KJ):** the shield, layout and pack diagrams are all-bold with zero text overlaps, enforced by `scripts/svg_text_overlap.py` (in run_checks, 19 pass); the shield map embeds a 3D render of the INTENDED finished board (`scripts/shield_render3d.py`, untested against a real build) and draws w3/w4/w5 as their step-6 L-routes from a `via` list in `docs/shield_layout.json`. **2026-10-21/22 (KK-KX):** shield SVG audited (4 of 8 socket arrows pointed to the wrong Uno header - fixed); C1 now stands UPRIGHT (build-step change, KQ); bench guides added - docs/SHIELD_SOLDER_GUIDE.md, docs/shield_build_guide.svg (LEGO-style), docs/shield_how_it_works.svg (current paths); strips named left (D4) / right (D7) like the firmware (KX). Still nothing soldered. The paste-ready prompt at the end is the short current summary.
+
+**2026-10-30 (LQ, PC-side, nothing on the Pi yet):** off-car Pi session software ready: `teleop.py --fake-uno` (real camera, fake Uno), `preflight.py --no-uno`, `autopilot.py --bench` + `export_onnx.py --untrained` (Pi latency), and a guard so episodes recorded on fake hardware are FAILed by verify_real and skipped by bc_real. Next: Evan runs pi/README.md "Off-car session" (HANDOFF item 0a-off). Suite 33/33.
 
 **2026-10-29 (LF-LK, all PC-side, nothing on the Pi):** M3 software exists and is tested on synthetic data only: `ml/bc_real.py` (BC trainer for pi/recorder episodes; BCNet 134,552 params), `ml/export_onnx.py` (parity 1.8e-07), AUTO mode in teleop (`pi/autopilot.py`, pad override wins), `ml/verify_real.py` (run before training), `docs/DATA_COLLECTION.md` (session protocol), `pi/deploy.sh` + `pi/preflight.py` (first Pi session), protocol rule 3 + Uno reconnect. Stable train/val split by episode id (audit HJ HIGH closed in code; ~~re-run ml/preprocess.py to use it~~ 2026-10-30 drift fix: the re-run was done in LN and is byte-identical plus ids, but the *_ids.npy are NOT installed - existing checkpoints were trained on the legacy split, so install them only with a retrain or an evaluator legacy fallback). C1 upright clears the wiring space by only +1.2 mm (layout check). LM2596: measured 4.95 V (JE) vs 4.99 V restated (JF/JR) - meter it to settle. Suite ~~32/32~~ 33/33 (LN).
 
@@ -548,10 +550,16 @@ KU (2026-10-22 daily audit, 36 findings, 0 crit/high): Med #1 strip naming
 FIXED (KX). Med #2 FIXED (KZ: the VMOT check moved to step 6). Med #3 OPEN:
 superseded power text in BOM.md:51, WIRING_PROTOSHIELD.md:129,183,
 hardware.md:242, LIGHTING_SPEC.md:113; README says nothing is bought.
-docs/shield_wiring.svg has 36 text overlaps (not in the overlap gate).
+~~docs/shield_wiring.svg has 36 text overlaps (not in the overlap gate).~~ (2026-10-30: fixed to 0 and gated by svg_text_overlap since LK.)
 
 NEXT ACTIONS, highest value first:
-0a. (2026-10-29, LJ/LK) First Pi session: `bash pi/deploy.sh` from the PC, then
+0a-off. (2026-10-30, LQ) OFF-CAR Pi session, Uno NOT attached - do this first:
+   pi/README.md "Off-car session" steps 1-5 (deploy + `preflight.py --no-uno`,
+   teleop `--fake --bench` with the Xbox pad, `--fake-uno --bench` for the real
+   camera, verify_real on the test episodes, onnxruntime + `autopilot.py --bench`).
+   Paste every output back to be recorded. Never plug the car's Uno into the Pi
+   until item 0 is done.
+0a. (2026-10-29, LJ/LK) ON-CAR Pi session (after item 0): `bash pi/deploy.sh` from the PC, then
    `~/car/venv/bin/python ~/car/pi/preflight.py` on the Pi (it must PASS), then the
    pi/README.md bench checklist; meter the LM2596 (4.95 vs 4.99 V). Then laps per
    docs/DATA_COLLECTION.md -> ml/verify_real.py -> ml/bc_real.py -> ml/export_onnx.py.

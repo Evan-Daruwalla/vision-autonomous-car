@@ -363,6 +363,7 @@ the dated entry, not the digest.
 - [LN - Audit LL highs fixed (open bind, NaN full lock, double throttle cap, id-less evaluators); re-preprocess byte-identical but ids held back; push blocked on a history rewrite](#appendix-ln---audit-ll-highs-fixed-open-bind-nan-full-lock-double-throttle-cap-id-less-evaluators-re-preprocess-byte-identical-but-ids-held-back-push-blocked-on-a-history-rewrite-2026-10-30-1105-cdt) (10-30)
 - [LO - Push done: unpushed history squashed by Evan (private path removed), 19 commits pushed, backup branch deleted](#appendix-lo---push-done-unpushed-history-squashed-by-evan-private-path-removed-19-commits-pushed-backup-branch-deleted-2026-10-30-1316-cdt) (10-30)
 - [LP - Docs-sync: security/performance/conventions/tooling bins refreshed; HANDOFF drift (suite 33, preprocess ids) fixed](#appendix-lp---docs-sync-securityperformanceconventionstooling-bins-refreshed-handoff-drift-suite-33-preprocess-ids-fixed-2026-10-30-1409-cdt) (10-30)
+- [LQ - Off-car Pi session software: teleop --fake-uno, preflight --no-uno, fake-hardware training guard, Pi latency bench; landing check SAFE](#appendix-lq---off-car-pi-session-software-teleop---fake-uno-preflight---no-uno-fake-hardware-training-guard-pi-latency-bench-landing-check-safe-2026-10-30-1419-cdt) (10-30)
 
 ---
 
@@ -21402,3 +21403,64 @@ commit and push first).
 **In flight, not yet committed (next entry):** off-car Pi session code - teleop
 `--fake-uno`, preflight `--no-uno`, fake-hardware guard in verify_real/bc_real,
 `export_onnx.py --untrained`, `autopilot.py --bench`.
+
+# Appendix LQ - Off-car Pi session software: teleop --fake-uno, preflight --no-uno, fake-hardware training guard, Pi latency bench; landing check SAFE (2026-10-30 ~14:19 CDT)
+**2026-10-30 ~14:19 CDT.** Software for an OFF-CAR Pi session (Pi on the desk, Uno
+NOT attached), so the later on-car session only has servo sign, camera orientation
+and the meter checks left. All PC-side; nothing has run on the Pi yet.
+
+**Why:** Evan asked what the Pi can do off the car. Three things blocked it:
+`teleop.py --fake` faked camera AND Uno together (no real-camera mode without the
+Uno, which exits 2 at the banner gate); `preflight.py` had the same all-or-nothing
+`--fake`; and there was no way to time the autopilot on the Pi (export needs a
+trained checkpoint and torch, which the Pi does not have).
+
+**Gap found while planning (factual):** episodes recorded with `--fake` carry
+`log_fake` in their meta, but neither `ml/verify_real.py` nor `ml/bc_real.py` read
+it. A fake-Uno episode has REAL camera frames and invented ticks/status, so it
+would have passed both and could have been trained on.
+
+**What was built (plan-split: Opus planned, 2 Sonnet agents coded disjoint files,
+Opus re-ran every check and read the diffs):**
+- 5b6670c: `teleop.py --fake-uno` (FakeUno + real PiCamera; `_pick_hw` helper;
+  meta `fake_uno`; prints a NOTE); `preflight.py --no-uno` (serial device + Uno
+  banner print SKIP, final line "preflight: PASS (Uno not checked)");
+  pi/README.md "Off-car session" (5 steps).
+- c8b8e14: fake-hardware guard - verify_real FAILs and bc_real skips any episode
+  with `log_fake` or `log_fake_uno` true; `export_onnx.py --untrained` (seed-0
+  BCNet, result JSON `"weights": "untrained (latency only)"`, `"ckpt": null`);
+  `autopilot.py --bench MODEL` (end-to-end predict = preprocess + onnxruntime on
+  fake frames, 5 warmup + 200 timed, PASS if p95 < 50 ms).
+- ad22296 (landing-check fixes): `*.onnx` / `*.onnx.json` git-ignored (README step 5
+  would have written an export into the repo root); preflight self_check now also
+  covers the real-Pi `--no-uno` path (both Uno checks are the SKIP stub);
+  export_onnx usage lines incl. `--untrained`.
+
+**Measured (PC only, untrained net - says NOTHING about the Pi):** untrained export
+parity 4.470e-08 (< 1e-4); `autopilot.py --bench` mean 0.31 ms, p95 0.35 ms over 200
+iters. Suite: `33 passed, 0 failed, 0 skipped (of 33)` (count unchanged - no new
+files; the new cases live in existing self_checks).
+
+**Landing check (fresh agent): SAFE.** It planted episodes through the real
+`pi/recorder.Recorder`: meta fake_uno True -> verify_real exit 1 with only the fake
+FAIL, load_real skipped it; fake_uno False -> exit 0, loaded; old-style `fake` True
+with no fake_uno key -> FAIL + skipped. The meta arrives as a 0-d bool array and
+the guard reads it correctly. deploy.sh already copies every file the new Pi
+commands need; README flags match the argparse code; no private identifiers in the
+diff. Collateral it listed was fixed in this docs-sync (DATA_COLLECTION.md, bins
+testing/data/ui/conventions, HANDOFF next actions, the stale "36 overlaps" line in
+the paste-ready prompt).
+
+**Weak choice, flagged:** `--bench` says PASS at p95 < 50 ms, but the 50 ms tick must
+also cover the camera frame, JPEG encode and the serial exchange. A Pi result near
+50 ms means too slow even though it prints PASS; judge the number, not the word.
+
+**Slip:** during the LP docs-sync I used `sed -i` on HANDOFF.md (against Evan's
+standing rule); it rewrote the working copy with LF line endings. Committed content
+was unaffected (git showed only the 3 intended lines) and the CRLF copy was restored
+from git.
+
+**Open / next:** Evan runs the off-car session (HANDOFF item 0a-off, pi/README.md
+steps 1-5) and pastes outputs; onnxruntime on the Pi is a pip download - if no
+aarch64 wheel exists for its Python, stop and report, do not build from source.
+On-car items (servo jumper + C1 per LC, meter checks, LM2596 4.95 vs 4.99 V) unchanged.

@@ -46,3 +46,4 @@ tooling.md; don't duplicate those here.
   style: `__future__` 8/8, pathlib 7/8, docstring 8/8, self_check 8/8, logging
   0/8, argparse 2/8 (teleop, preflight - the rest are imported modules). Every
   pi/ and most ml/ self_checks are run by scripts/run_checks.py (testing.md).
+- 2026-10-30 correction (landing check after LP): pi/ argparse is now **3/8** - c8b8e14 added it to pi/autopilot.py (`--bench`). The other pi/ counts above are unchanged.
