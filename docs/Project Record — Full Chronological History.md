@@ -362,6 +362,7 @@ the dated entry, not the digest.
 - [LM - HANDOFF trim: stale 'Immediate next actions' block (138 lines) moved here verbatim; paste-ready NEXT ACTIONS is the one live list](#appendix-lm---handoff-trim-stale-immediate-next-actions-block-138-lines-moved-here-verbatim-paste-ready-next-actions-is-the-one-live-list-2026-10-30-1058-cdt) (10-30)
 - [LN - Audit LL highs fixed (open bind, NaN full lock, double throttle cap, id-less evaluators); re-preprocess byte-identical but ids held back; push blocked on a history rewrite](#appendix-ln---audit-ll-highs-fixed-open-bind-nan-full-lock-double-throttle-cap-id-less-evaluators-re-preprocess-byte-identical-but-ids-held-back-push-blocked-on-a-history-rewrite-2026-10-30-1105-cdt) (10-30)
 - [LO - Push done: unpushed history squashed by Evan (private path removed), 19 commits pushed, backup branch deleted](#appendix-lo---push-done-unpushed-history-squashed-by-evan-private-path-removed-19-commits-pushed-backup-branch-deleted-2026-10-30-1316-cdt) (10-30)
+- [LP - Docs-sync: security/performance/conventions/tooling bins refreshed; HANDOFF drift (suite 33, preprocess ids) fixed](#appendix-lp---docs-sync-securityperformanceconventionstooling-bins-refreshed-handoff-drift-suite-33-preprocess-ids-fixed-2026-10-30-1409-cdt) (10-30)
 
 ---
 
@@ -21368,3 +21369,36 @@ message instead.
 **Still open (Evan's call, unchanged from LL):** 2 occurrences of a home path
 in OLDER, already-public record history - this rewrite did not touch them; no
 LICENSE on the public repo.
+
+# Appendix LP - Docs-sync: security/performance/conventions/tooling bins refreshed; HANDOFF drift (suite 33, preprocess ids) fixed (2026-10-30 ~14:09 CDT)
+**2026-10-30 ~14:09 CDT.** Docs-sync before the off-car Pi work (Evan: docs-sync,
+commit and push first).
+
+**Bins (pm-cadence flagged them 54-57 days stale):**
+- security.md: the network surface it said "becomes live at M2" now exists
+  (pi/teleop.py, no login). Recorded the mitigations as they are in code: 127.0.0.1
+  bind by default + SSH tunnel as the auth, websocket Origin allow-list
+  (localhost / 127.0.0.1 on the HTTP port, or no Origin header - so it stops a
+  hostile web page, not a local script), the 0.0.0.0 warning. Serial surface moved
+  from PC COM3 to the Pi's /dev/ttyACM0.
+- performance.md: the M3 budget (50 ms per 20 Hz tick) and an explicit list of what
+  is NOT measured on the Pi yet (camera fps, end-to-end autopilot predict, frame-gap
+  %). Recorder RAM ~1.15 MB/s marked computed, not measured.
+- conventions.md: counts re-derived by the same greps - ml/ is 37 files (was 34),
+  self_check in 11/37 (was 3/34); pi/ (8 files) follows the same style.
+- tooling.md: the PowerShell `VAR=value command` trap from LO and the
+  `git -c sequence.editor=:` form that works in every shell.
+- gotchas.md and sim-harness.md were also flagged: nothing this session changed
+  their facts, left as is.
+
+**Drift check of HANDOFF (cheap claims only):**
+- DRIFT: suite count said 32 in two places; LN measured 33. Fixed by strikethrough.
+- DRIFT: "re-run ml/preprocess.py to use it" (stable split) was stale - LN did the
+  re-run and deliberately did NOT install the *_ids.npy (existing checkpoints were
+  trained on the legacy split). Fixed by strikethrough + the reason.
+- MATCH: 327 appendices; 8 files in pi/.
+- Stamp `.claude/drift-check.stamp` = 2026-10-30.
+
+**In flight, not yet committed (next entry):** off-car Pi session code - teleop
+`--fake-uno`, preflight `--no-uno`, fake-hardware guard in verify_real/bc_real,
+`export_onnx.py --untrained`, `autopilot.py --bench`.

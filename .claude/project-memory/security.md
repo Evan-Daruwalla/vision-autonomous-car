@@ -14,3 +14,17 @@
   on the port, which would simply keep sending valid commands.
 - Still no network attack surface. Teleop over WiFi (M2) remains the first real
   one, and the note above about auth on the control endpoint still stands.
+
+- **2026-10-30 (records LD, LL, LN): the network surface now EXISTS - pi/teleop.py.**
+  It serves an HTTP page + a websocket that can arm the car and send steer/throttle,
+  with NO login. Mitigations in code: binds 127.0.0.1 by default (reach it only
+  through `ssh -L 8000:localhost:8000 -L 8765:localhost:8765 ed@ed-pi5.local`, so
+  SSH is the auth); the websocket accepts only Origin
+  http://localhost:<http-port>, http://127.0.0.1:<http-port>, or NO Origin header
+  (non-browser clients - so the Origin check stops a hostile web page, not a
+  local script); `--host 0.0.0.0` prints a WARNING that anyone on
+  the network can drive the car. The 0.0.0.0 default was audit LL's top HIGH,
+  fixed in LN. The "auth on the control endpoint" note above is answered by the
+  tunnel, not by an in-app login - do not add a LAN-facing mode without one.
+- The serial actuator surface moved from the PC's COM3 to the Pi's /dev/ttyACM0
+  (anything on the Pi that can open it can drive the car; same reasoning as above).

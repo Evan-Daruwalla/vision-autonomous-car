@@ -21,3 +21,15 @@
   on a different host or driver either. If it ever does bite, lowering
   `HKLM\SYSTEM\CurrentControlSet\Enum\FTDIBUS\...\Device Parameters\LatencyTimer`
   is the known lever, and the firmware watchdog covers the failure anyway.
+
+- **2026-10-30: M3 control-loop budget, what is measured and what is not.**
+  Budget: 50 ms per 20 Hz tick (camera-paced loop in pi/teleop.py). Measured: the
+  serial round trip above (PC host, 2026-09-02). NOT yet measured on the Pi: camera
+  fps (Camera Module 3 Wide at 160x120 via picamera2), the end-to-end autopilot
+  predict() time (preprocess + onnxruntime), and the frame-gap % of a recorded
+  episode. All three are steps of the planned off-car Pi session
+  (pi/autopilot.py --bench, ml/verify_real.py gap %); quote nothing until then.
+- Recorder RAM, computed not measured: 160x120x3 bytes x 20 Hz = ~1.15 MB/s
+  (~70 MB/min); episodes are buffered in RAM and written once, on a worker thread
+  (Recorder.stop_background) so the save never blocks the tick past the Uno's
+  150 ms watchdog.

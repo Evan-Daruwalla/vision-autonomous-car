@@ -37,3 +37,12 @@ tooling.md; don't duplicate those here.
   payload must be a dict; three call sites used to write bare lists and are now
   `{"history": ...}` / `{"rows": ...}`. The 108 result files written before this
   carry no commit and **cannot be retrofitted** -- say so when citing them.
+
+- **Re-derived 2026-10-30 by the same greps** (counts at that date, before the
+  off-car-session edits): `ml/` now has **37** files - `__future__` 35/37,
+  pathlib 34/37, module docstring 37/37, argparse 30/37, `--seed` 17/37,
+  `logging` 0/37, print 36/37, `def self_check` **11/37** (was 3/34), return
+  type hints 36/37. `pi/` (new since 2026-10-25, 8 files) follows the same
+  style: `__future__` 8/8, pathlib 7/8, docstring 8/8, self_check 8/8, logging
+  0/8, argparse 2/8 (teleop, preflight - the rest are imported modules). Every
+  pi/ and most ml/ self_checks are run by scripts/run_checks.py (testing.md).
