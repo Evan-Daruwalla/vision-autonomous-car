@@ -358,6 +358,7 @@ the dated entry, not the digest.
 - [LI - Wave 1 accepted: ONNX export (A2), stable hash split + corpus id (C2, audit HJ), shield_wiring.svg 0 overlaps (C5); LH time correction](#appendix-li---wave-1-accepted-onnx-export-a2-stable-hash-split--corpus-id-c2-audit-hj-shield_wiringsvg-0-overlaps-c5-lh-time-correction-2026-10-29-0045-cdt) (10-29)
 - [LJ - M3 software on synthetic data: BC trainer + BCNet, ONNX parity 1.8e-07, autopilot mode, verify_real, data-collection protocol; C1 headroom +1.2 mm; LM2596 4.95 vs 4.99 V left open](#appendix-lj---m3-software-on-synthetic-data-bc-trainer--bcnet-onnx-parity-18e-07-autopilot-mode-verify_real-data-collection-protocol-c1-headroom-12-mm-lm2596-495-vs-499-v-left-open-2026-10-29-0052-cdt) (10-29)
 - [LK - Pi de-risk (deploy, preflight, rule 3, reconnect) + final docs-sync; the 2026-10-28 plan is complete; suite 32](#appendix-lk---pi-de-risk-deploy-preflight-rule-3-reconnect--final-docs-sync-the-2026-10-28-plan-is-complete-suite-32-2026-10-29-0055-cdt) (10-29)
+- [LL - Scheduled daily-audit: 58 findings, 4 high - teleop binds 0.0.0.0 unauthenticated, NaN model output becomes full lock, AUTO throttle scaled twice, evaluators split without ids](#appendix-ll---scheduled-daily-audit-58-findings-4-high---teleop-binds-0000-unauthenticated-nan-model-output-becomes-full-lock-auto-throttle-scaled-twice-evaluators-split-without-ids-2026-10-29-0729-cdt) (10-29)
 
 ---
 
@@ -21094,3 +21095,56 @@ Also in wave 1 so far: pi/recorder.py gained an optional per-frame `mode` key ->
 - Metering the LM2596.
 - onnxruntime on the Pi.
 - Everything with real laps.
+
+# Appendix LL - Scheduled daily-audit: 58 findings, 4 high - teleop binds 0.0.0.0 unauthenticated, NaN model output becomes full lock, AUTO throttle scaled twice, evaluators split without ids (2026-10-29, ~07:29 CDT)
+Scheduled daily-audit run (task `daily-audit`), 2026-10-29 07:09-07:29 CDT. Findings only: no code, doc, HANDOFF or bin was changed, nothing committed. This entry is the one write the task allows.
+
+**Why this project was audited:** last audit KU (2026-10-22) had 13 non-audit commits after it (a8904f0..HEAD), over the 10-commit churn limit.
+
+**Method:** /audit with 4 cold Sonnet workers (ml code; pi/firmware/scripts code; docs D1-D8; deps/secrets + cross-domain), then /landing-check on record LK (1 Sonnet agent). The session re-ran every high itself.
+
+**Re-derived TRUE:**
+- `scripts/run_checks.py`: 32 passed, 0 failed, 0 skipped (of 32), exit 0. This matches LK.
+- `scripts/check_artifacts.py`: 40 artifacts checked, 0 drifted, 0 errored, 2 uncheckable.
+- Record structure: 323 appendices, TOC balanced, 0 CRLF.
+- Secret scan (history + worktree): 0 findings.
+- Rule 3 and arm-refused-on-dead-link both fire on planted inputs.
+- deploy.sh --dry-run makes 0 ssh/scp calls.
+
+**Result: 58 findings (4 high, 16 med, 38 low) + 2 policy items for Evan.**
+
+High (all CONFIRMED by the session):
+1. `pi/teleop.py:176,961` - teleop HTTP/WS servers bind 0.0.0.0 with no auth or Origin check. Anyone on the LAN can arm and steer.
+2. `pi/autopilot.py:19-20` - `_clip(nan)` returns 1.0. A NaN model output becomes full right lock at the throttle cap, with no disarm.
+3. `pi/teleop.py:154` vs `ml/bc_real.py:77` - AUTO applies max_throttle twice. The labels are already cmd/100, so a cap-20 policy drives at 4%.
+4. `ml/splits.py:189` - 7 evaluators/probes call fit_val_episodes without ids. After the re-run of preprocess.py that the warning itself asks for, they score val on trained episodes. Latent: 0 *_ids.npy on disk today.
+
+Top med: `ml/bc_real.py:44` commits a private scratchpad path (Windows user + session UUID). It is unpushed (ahead 12), so fix it before the next push.
+
+Other meds:
+- The control thread can die silently: `pi/teleop.py` _control_loop.
+- bc_real ignores is_terminal and log_mode, so crash lead-ins and AUTO frames are imitated.
+- corpus_id is written but never read.
+- The hash split moves existing episodes when a group is small.
+- `verify_real.py ""` exits 0.
+- firmware/uno_control/build/ (its .elf holds a private path) and the .claude tmp files are not ignored.
+- pyserial is undeclared in ml/requirements.txt.
+- .mcp.json runs an unpinned npx package.
+- SIGHUP or a failed save loses the episode.
+- Stale public docs: README.md:8-11 ("No parts have been ordered"), firmware/README.md:75 ("No control firmware exists"), docs/BOM.md:3-9, HANDOFF.md:234-237/:34-36.
+- features.md ml count (34 vs 37).
+
+Policy (Evan's call): no LICENSE on a public repo; private identifiers in public history (ed@ed-pi5.local, D:\ClaudeCode in 98 tracked files, C:\Users path at record lines 5966/6685/13684).
+
+**Landing-check on LK: FIX FIRST (small).**
+- All 4 changed code files LANDED on the PC copy. The Pi copies are UNVERIFIABLE (Pi unreachable).
+- firmware/SERIAL_PROTOCOL.md:168-169 still says "No Pi-side client implements that rule yet" and recommends per-time-window counting. The struck note below it says the rule is implemented per frame.
+
+**Not swept:**
+- Anything on the Pi or the Uno (no hardware).
+- The 25 older ml scripts beyond grep.
+- The scad/svg generator bodies.
+- Record entries before LF.
+- CVEs (no network).
+
+The full report with the fix prompt is in the scheduled-run transcript of 2026-10-29.
