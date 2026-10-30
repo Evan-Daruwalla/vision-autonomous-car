@@ -1,2 +1,6 @@
-# picamera2, numpy, pyserial and simplejpeg come from Raspberry Pi OS apt packages.
+# picamera2, numpy and simplejpeg come from Raspberry Pi OS apt packages
+# (sudo apt install python3-picamera2; the venv uses --system-site-packages).
+# pyserial is pip-installed: Raspberry Pi OS Lite does not ship python3-serial
+# (preflight FAIL on a fresh Lite image, 2026-10-30).
 websockets==13.1
+pyserial==3.5

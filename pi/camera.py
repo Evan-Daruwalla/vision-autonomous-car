@@ -101,14 +101,14 @@ class PiCamera:
 
         dur = int(1e6 / self.fps)
         cam = Picamera2()
-        # fps= is passed too: create_video_configuration defaults fps=30 and
-        # picamera2 maps it onto FrameDurationLimits (docs checked 2026-10-29,
-        # record LH). sensor output_size pins the 2304x1296 binned mode.
+        # The frame rate is set ONLY through FrameDurationLimits: the fps=
+        # keyword in newer picamera2 docs (record LH) does not exist in the
+        # Pi's apt picamera2 0.3.31 (TypeError on the Pi, 2026-10-30).
+        # sensor output_size pins the 2304x1296 binned mode.
         cfg = cam.create_video_configuration(
             main={"size": (self.width, self.height), "format": "RGB888"},
             raw={"size": self.RAW_SIZE},
             sensor={"output_size": self.RAW_SIZE},
-            fps=self.fps,
             controls={"FrameDurationLimits": (dur, dur)},
             transform=libcamera.Transform(hflip=self.rotate180,
                                           vflip=self.rotate180))
