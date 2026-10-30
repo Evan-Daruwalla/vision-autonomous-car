@@ -187,7 +187,7 @@ def _id_hash(seed: int, ep_id) -> float:
 
 
 def fit_val_episodes(tracks: np.ndarray, seed: int = 0,
-                     val_fraction: float = VAL_FRACTION, ids=None):
+                     val_fraction: float = VAL_FRACTION, *, ids):
     """Split episode INDICES into (fit, val), stratified by track.
 
     Stratified so every track stays represented in both halves -- an
@@ -198,6 +198,15 @@ def fit_val_episodes(tracks: np.ndarray, seed: int = 0,
     hash of (seed, id) falls under val_fraction, so topping up the corpus never
     moves an existing episode between fit and val. Without ids the legacy
     position-based shuffle is used (audit HJ).
+
+    `ids` is a REQUIRED keyword so a caller cannot silently forget it and get
+    a split that differs from the trainers'. Pass `ids=load_ids(split, proc)`
+    for the split you loaded; ids=None is the explicit legacy path.
+
+    Caveat: the forced minimum-1-val rule (a track whose hashes are all >=
+    val_fraction still gets its smallest-hash episode as val) can MOVE that
+    one forced episode when a new episode with a smaller hash joins a tiny
+    group. The plain threshold rule never moves an existing episode.
     """
     if ids is not None:
         if len(ids) != len(tracks):
@@ -246,7 +255,7 @@ def describe(tracks, episodes, fit, val) -> str:
 def self_check() -> None:
     """Runnable check: the split is disjoint, exhaustive, and reproducible."""
     tracks = np.array(["a"] * 10 + ["b"] * 6)
-    fit, val = fit_val_episodes(tracks, seed=0)
+    fit, val = fit_val_episodes(tracks, seed=0, ids=None)
 
     assert len(set(fit) & set(val)) == 0, "fit and val overlap"
     assert sorted(fit.tolist() + val.tolist()) == list(range(16)), "not exhaustive"
@@ -254,10 +263,10 @@ def self_check() -> None:
     assert set(tracks[fit]) == {"a", "b"}, tracks[fit]
     assert set(tracks[val]) == {"a", "b"}, tracks[val]
     # reproducible
-    f2, v2 = fit_val_episodes(tracks, seed=0)
+    f2, v2 = fit_val_episodes(tracks, seed=0, ids=None)
     assert np.array_equal(fit, f2) and np.array_equal(val, v2), "not deterministic"
     # a different seed gives a different split (otherwise the seed is ignored)
-    f3, _ = fit_val_episodes(tracks, seed=1)
+    f3, _ = fit_val_episodes(tracks, seed=1, ids=None)
     assert not np.array_equal(fit, f3), "seed has no effect"
 
     # split_seed_of: the three states, and the LEAK it prevents.
@@ -266,14 +275,14 @@ def self_check() -> None:
     assert split_seed_of({"args": {}}) == 0, "args without seed -> 0"
     # Two consumers handed the same checkpoint must build the SAME split.
     ck = {"args": {"seed": 3}}
-    a_fit, a_val = fit_val_episodes(tracks, seed=split_seed_of(ck))
-    b_fit, b_val = fit_val_episodes(tracks, seed=split_seed_of(ck))
+    a_fit, a_val = fit_val_episodes(tracks, seed=split_seed_of(ck), ids=None)
+    b_fit, b_val = fit_val_episodes(tracks, seed=split_seed_of(ck), ids=None)
     assert np.array_equal(a_val, b_val), "same checkpoint, different split"
     # THE LEAK, concretely: a consumer that used its own --seed 0 against a
     # seed-3 checkpoint would score episodes 9 and 15 -- which that checkpoint
     # TRAINED on -- as held-out val_indomain. This is the failure A2 fixes,
     # and it is why the helper exists rather than seven copies of one line.
-    leaked = sorted(set(a_val.tolist()) & set(fit_val_episodes(tracks, seed=0)[0].tolist()))
+    leaked = sorted(set(a_val.tolist()) & set(fit_val_episodes(tracks, seed=0, ids=None)[0].tolist()))
     assert leaked == [9, 15], f"expected the seed-3/seed-0 leak on [9, 15], got {leaked}"
 
     eps = np.array([[0, 5], [5, 7], [12, 3]])

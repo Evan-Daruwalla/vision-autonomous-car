@@ -108,7 +108,8 @@ def main() -> None:
     # Identical derivation to preprocess.py, so episode index i means the same
     # episode in both -- that is what makes the seed-0 split reproducible here.
     tracks = np.array([f.stem.rsplit("-", 2)[0] for f in files], dtype="<U40")
-    fit, val = fit_val_episodes(tracks, seed=args.seed)
+    ids = np.array([f.stem for f in files], dtype="<U80")   # = preprocess.py's ids
+    fit, val = fit_val_episodes(tracks, seed=args.seed, ids=ids)
     print(f"{len(files)} source episodes -> fit {len(fit)}, val_indomain {len(val)}")
 
     for name, idx in (("train", fit), ("eval", val)):

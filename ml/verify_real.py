@@ -85,6 +85,9 @@ def check_episode(ep: dict, path: Path) -> tuple[list[str], list[str], dict]:
 
 
 def verify_dir(root: Path) -> int:
+    if not str(root).strip() or not root.is_dir():
+        print(f"verify_real: error: {str(root)!r} is not an existing directory")
+        return 2
     files = sorted(root.rglob("*.npz"))
     if not files:
         print(f"verify_real: no .npz under {root}")
@@ -147,15 +150,20 @@ def self_check() -> None:
         p = write(slow, 60, gaps_ms=100.0)            # every gap 100 ms: dropped frames
         _, w, st = check_episode(load_episode(p), p)
         assert st["gap_pct"] == 100.0 and any("frame gaps" in x for x in w), (st, w)
+        assert verify_dir(Path(td) / "does_not_exist") == 2, "missing root must exit 2"
+        assert main([""]) == 2, "empty root arg must exit 2"
     print("verify_real self_check: PASS")
 
 
-def main() -> int:
+def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("root", nargs="?")
     ap.add_argument("--self-check", action="store_true")
-    a = ap.parse_args()
-    if a.self_check or not a.root:
+    a = ap.parse_args(argv)
+    if a.root == "":
+        print("verify_real: error: empty root path")
+        return 2
+    if a.self_check or a.root is None:
         self_check()
         return 0
     return verify_dir(Path(a.root))

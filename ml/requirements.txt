@@ -56,3 +56,5 @@ websockets==13.1
 # BC export to ONNX (2026-10-29)
 onnxruntime==1.31.1
 onnx==1.23.2
+# pyserial: pi/uno_link.py + firmware/host_test.py, tested on the PC (2026-10-30, audit LL)
+pyserial==3.5

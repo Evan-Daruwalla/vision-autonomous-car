@@ -57,7 +57,7 @@ from compare_encoders import cone_mask
 from models import Z_DIM, ConvVAE, vae_loss
 from probe_cone import auc, scan_cones
 from provenance import write_result
-from splits import fit_val_episodes, frame_indices, load_proc
+from splits import fit_val_episodes, frame_indices, load_ids, load_proc
 
 REPO = Path(__file__).resolve().parent.parent
 RUNS = REPO / "ml" / "runs"
@@ -304,7 +304,8 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
 
     imgs, _, eps, tracks = load_proc("train")
-    fit_eps, val_eps = fit_val_episodes(tracks, seed=args.seed)
+    fit_eps, val_eps = fit_val_episodes(tracks, seed=args.seed,
+                                       ids=load_ids("train"))
     fit_i, val_i = frame_indices(eps, fit_eps), frame_indices(eps, val_eps)
 
     print(f"dropping frames that contain REAL cones (they would leak track "

@@ -45,7 +45,7 @@ import torch
 
 from models import MDNRNN, ConvVAE, Z_DIM
 from provenance import write_result
-from splits import (fit_val_episodes, load_cached_mu, load_proc,
+from splits import (fit_val_episodes, load_cached_mu, load_ids, load_proc,
                     split_seed_of)
 from train_controller import Controller, rnn_states
 
@@ -116,7 +116,8 @@ def main() -> int:
         del imgs
 
     split_seed = split_seed_of(vae_ckpt)
-    _, val_eps = fit_val_episodes(tracks, seed=split_seed)
+    _, val_eps = fit_val_episodes(tracks, seed=split_seed,
+                                  ids=load_ids("train", proc=proc))
     val_i, val_h = rnn_states(rnn, mu, act, eps, val_eps, args.device)
 
     # a[t-1], built per EPISODE so no frame is paired with the last action of

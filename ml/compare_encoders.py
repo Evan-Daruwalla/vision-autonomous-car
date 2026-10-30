@@ -40,7 +40,7 @@ import torch
 
 from models import ConvVAE
 from provenance import write_result
-from splits import fit_val_episodes, load_proc, split_seed_of
+from splits import fit_val_episodes, load_ids, load_proc, split_seed_of
 
 REPO = Path(__file__).resolve().parent.parent
 PROC = REPO / "ml" / "data" / "proc"
@@ -165,7 +165,8 @@ def main() -> int:
     # train_controller.py.
     vae_ckpt = torch.load(args.vae, map_location=args.device)
     split_seed = split_seed_of(vae_ckpt)
-    _, val_eps = fit_val_episodes(tracks, seed=split_seed)
+    _, val_eps = fit_val_episodes(tracks, seed=split_seed,
+                                  ids=load_ids("train"))
     # Held-out episodes only: reconstructing training frames would flatter both
     # models and say nothing about what either one generalises.
     pool = np.concatenate([np.arange(s, s + n) for s, n in eps[val_eps]])
