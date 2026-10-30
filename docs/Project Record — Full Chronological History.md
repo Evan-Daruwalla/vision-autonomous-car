@@ -370,6 +370,7 @@ the dated entry, not the digest.
 - [LU - Pi supply re-test: battery backup without the USB-C extension - sag reduced (4/12 vs 7/12 readings) but not gone; backup regulation likely](#appendix-lu---pi-supply-re-test-battery-backup-without-the-usb-c-extension---sag-reduced-412-vs-712-readings-but-not-gone-backup-regulation-likely-2026-10-30-1548-cdt) (10-30)
 - [LV - Pi on a wall charger: 5.11-5.15 V and throttled 0x0 under full load - the battery backup was the cause; new heat flag 77.9 C](#appendix-lv---pi-on-a-wall-charger-511-515-v-and-throttled-0x0-under-full-load---the-battery-backup-was-the-cause-new-heat-flag-779-c-2026-10-30-1555-cdt) (10-30)
 - [LW - Pi has no cooling (bare board); the LV charger negotiates 5 A (likely the kit's 27 W PSU); the kit's fan case is the fix, no purchase](#appendix-lw---pi-has-no-cooling-bare-board-the-lv-charger-negotiates-5-a-likely-the-kits-27-w-psu-the-kits-fan-case-is-the-fix-no-purchase-2026-10-30-1558-cdt) (10-30)
+- [LX - Anker A1275 bank (the car's planned Pi supply) also sags: 5/12 readings, low 4.539 V, 3 A mode; cable confound not separated](#appendix-lx---anker-a1275-bank-the-cars-planned-pi-supply-also-sags-512-readings-low-4539-v-3-a-mode-cable-confound-not-separated-2026-10-30-1608-cdt) (10-30)
 
 ---
 
@@ -21708,3 +21709,42 @@ the Vilros case with the fan on top (hardware-print-mounts.md, record JV).
 - Evan to confirm the charger identity;
 - fit the case and re-test the temperature;
 - the car's own Pi supply (off the pack) is still open.
+
+# Appendix LX - Anker A1275 bank (the car's planned Pi supply) also sags: 5/12 readings, low 4.539 V, 3 A mode; cable confound not separated (2026-10-30 ~16:08 CDT)
+**2026-10-30 ~16:08 CDT.** The car's planned Pi supply, the Anker PowerCore Speed
+20000 PD (A1275), tested for the first time (records JF/JR plan: bank -> Pi only).
+One cable, no extension; which cable is not recorded.
+
+**Same 60 s test** (4 busy-loop processes + `autopilot.py --bench`), fresh boot:
+- `usb_max_current_enable=0`, max_current 3000 mA: the bank does not offer 5 V / 5 A,
+  so the Pi runs in 3 A mode, which caps USB peripherals at 600 mA total.
+- Idle 4.939 V, 0x50000 (the under-voltage flag tripped during boot).
+- Load, EXT5V in V: 4.849, 4.882, 4.624, 4.626, 4.892, 4.872, 4.578, 4.539, 4.864,
+  4.851, 4.584, 4.920. That is 5 of 12 readings at 0x50005; low 4.539 V; peak temp
+  68.6 C.
+
+**Comparison** (same test):
+
+| Run | Readings at 0x50005 | Low |
+|---|---|---|
+| Battery backup, no extension (LU) | 4 / 12 | 4.535 V |
+| Bank (this entry) | 5 / 12 | 4.539 V |
+| Wall charger, 5 A mode (LV) | 0 / 12 | 5.111 V |
+
+**Confound, stated:** the bank and backup runs may have used the SAME USB-C cable,
+while the wall charger used its own. If so, the cable is a suspect shared by both
+sagging runs. The near-identical dip depth (4.53-4.62 V) and pattern fit a shared
+cause. Not separated.
+
+**Consequence for the car:** as tested, the bank + cable sags under a full all-core
+load, so the car's Pi supply is NOT proven.
+- Still unmeasured: the lighter driving-loop load, and a different cable on the bank.
+- The 600 mA USB cap in 3 A mode also matters: the Uno, the TB6612 logic and the
+  servo all draw through the Pi's USB (JF/JR). JO saw no reset during servo swings,
+  but on an unrecorded supply.
+
+**Open:**
+- which cable(s) were used (Evan);
+- a bank re-test with a different short cable;
+- if it still sags: the car's Pi needs a stiffer 5 V source (e.g. a 5 V / 5 A buck
+  off the pack into the GPIO 5 V pins) - a purchase, Evan's call.
