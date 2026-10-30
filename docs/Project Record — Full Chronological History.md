@@ -368,6 +368,7 @@ the dated entry, not the digest.
 - [LS - Pi power: Anker A1275 bank sags to 4.52 V under full load (under-voltage + throttling live); cable vs bank not yet separated](#appendix-ls---pi-power-anker-a1275-bank-sags-to-452-v-under-full-load-under-voltage--throttling-live-cable-vs-bank-not-yet-separated-2026-10-30-1544-cdt) (10-30)
 - [LT - Correction to LS: the Pi was NOT on the Anker bank - the sag is real, its source is unknown](#appendix-lt---correction-to-ls-the-pi-was-not-on-the-anker-bank---the-sag-is-real-its-source-is-unknown-2026-10-30-1545-cdt) (10-30)
 - [LU - Pi supply re-test: battery backup without the USB-C extension - sag reduced (4/12 vs 7/12 readings) but not gone; backup regulation likely](#appendix-lu---pi-supply-re-test-battery-backup-without-the-usb-c-extension---sag-reduced-412-vs-712-readings-but-not-gone-backup-regulation-likely-2026-10-30-1548-cdt) (10-30)
+- [LV - Pi on a wall charger: 5.11-5.15 V and throttled 0x0 under full load - the battery backup was the cause; new heat flag 77.9 C](#appendix-lv---pi-on-a-wall-charger-511-515-v-and-throttled-0x0-under-full-load---the-battery-backup-was-the-cause-new-heat-flag-779-c-2026-10-30-1555-cdt) (10-30)
 
 ---
 
@@ -21643,3 +21644,36 @@ idle 4.890 V, 0x50000 (the flag tripped during boot again).
 - a comparison run on a known-good supply (the official 27 W Pi 5 PSU, or a quality
   PD wall charger) to split supply vs cable;
 - the car's Pi supply decision.
+
+# Appendix LV - Pi on a wall charger: 5.11-5.15 V and throttled 0x0 under full load - the battery backup was the cause; new heat flag 77.9 C (2026-10-30 ~15:55 CDT)
+**2026-10-30 ~15:55 CDT.** Supply comparison (follows LU): the Pi moved from the
+battery backup to another USB-C wall charger Evan already owns. Its make, model,
+label and the cable are NOT recorded.
+
+**Same 60 s test** (4 busy-loop processes + `autopilot.py --bench`; EXT5V +
+`get_throttled` every 5 s), fresh boot ("up 0 minutes"):
+- idle: 5.139 V, `throttled=0x0` - the under-voltage flag did NOT trip during boot,
+  unlike every boot on the backup.
+- under load, in V: 5.135, 5.111, 5.111, 5.123, 5.135, 5.127, 5.115, 5.130, 5.134,
+  5.130, 5.132, 5.146. So 5.11-5.15 V, `0x0` at every reading and after.
+- temperature 49.4 -> 77.9 C peak (74.7 C at 60 s).
+
+**Reading:** the battery backup's 5 V output was the cause of LR-LU's under-voltage
+(4.52-4.60 V, 0x50005). This charger holds 5.1 V with ~0.03 V spread under the same
+load. So the Pi's draw and its own input path are fine; the cable used here is
+unrecorded, so the cable is not fully excluded for the backup run.
+
+**New flag - heat:** with no voltage throttle capping the clock, the all-core test
+reached 77.9 C in 60 s. The Pi 5 starts thermal throttling at 80 C. No heatsink or
+fan state is recorded. The driving loop is lighter than this test, but sustained
+driving plus a warm enclosure could reach the limit. A heatsink or the Active
+Cooler on the car is worth deciding (purchase = Evan's go if not on hand).
+
+**Consequence for earlier numbers:** the LR autopilot latency (p95 1.40 ms) was
+measured on the backup, while a throttle may have been active. On this supply it
+can only be equal or faster. 1.40 ms stands as an upper bound for the bench Pi.
+
+**Open:**
+- the charger's identity (Evan);
+- the heatsink / cooler decision;
+- the car's own Pi supply (off the pack) is still a separate, open design item.

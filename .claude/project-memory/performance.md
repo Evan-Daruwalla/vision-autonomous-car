@@ -34,3 +34,4 @@
   (Recorder.stop_background) so the save never blocks the tick past the Uno's
   150 ms watchdog.
 - **2026-10-30 MEASURED ON THE PI (record LR)** - supersedes "NOT yet measured" above for these two: camera at 160x120 runs 20 fps on the teleop page (loop_dt_ms 1.2), and recorded frame gaps were exactly 50.0 ms - but over only 25 frames, so the long-run frame-gap % is still unmeasured. End-to-end autopilot predict (preprocess + onnxruntime, BCNet-size, untrained weights): p95 1.40 ms, mean 0.82 ms over 3 x 500 iters = ~3% of the 50 ms tick.
+- 2026-10-30 (record LV): the LR autopilot latency (p95 1.40 ms) was measured on a supply that under-volted and throttled under load; on a clean supply it can only be equal or faster, so treat 1.40 ms as an upper bound. All-core load reaches 77.9 C in 60 s with no recorded cooling (throttle at 80 C).
