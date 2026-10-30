@@ -371,6 +371,7 @@ the dated entry, not the digest.
 - [LV - Pi on a wall charger: 5.11-5.15 V and throttled 0x0 under full load - the battery backup was the cause; new heat flag 77.9 C](#appendix-lv---pi-on-a-wall-charger-511-515-v-and-throttled-0x0-under-full-load---the-battery-backup-was-the-cause-new-heat-flag-779-c-2026-10-30-1555-cdt) (10-30)
 - [LW - Pi has no cooling (bare board); the LV charger negotiates 5 A (likely the kit's 27 W PSU); the kit's fan case is the fix, no purchase](#appendix-lw---pi-has-no-cooling-bare-board-the-lv-charger-negotiates-5-a-likely-the-kits-27-w-psu-the-kits-fan-case-is-the-fix-no-purchase-2026-10-30-1558-cdt) (10-30)
 - [LX - Anker A1275 bank (the car's planned Pi supply) also sags: 5/12 readings, low 4.539 V, 3 A mode; cable confound not separated](#appendix-lx---anker-a1275-bank-the-cars-planned-pi-supply-also-sags-512-readings-low-4539-v-3-a-mode-cable-confound-not-separated-2026-10-30-1608-cdt) (10-30)
+- [LY - Bank passes with a new cable (4.97-5.08 V, 0x0): the OLD USB-C cable was the cause; corrects LU/LV; heat 79.6 C bare](#appendix-ly---bank-passes-with-a-new-cable-497-508-v-0x0-the-old-usb-c-cable-was-the-cause-corrects-lulv-heat-796-c-bare-2026-10-30-1613-cdt) (10-30)
 
 ---
 
@@ -21748,3 +21749,40 @@ load, so the car's Pi supply is NOT proven.
 - a bank re-test with a different short cable;
 - if it still sags: the car's Pi needs a stiffer 5 V source (e.g. a 5 V / 5 A buck
   off the pack into the GPIO 5 V pins) - a purchase, Evan's call.
+
+# Appendix LY - Bank passes with a new cable (4.97-5.08 V, 0x0): the OLD USB-C cable was the cause; corrects LU/LV; heat 79.6 C bare (2026-10-30 ~16:13 CDT)
+**2026-10-30 ~16:13 CDT.** Anker A1275 bank re-tested with a DIFFERENT USB-C cable
+(Evan swapped it; which cable is not recorded). Resolves LX's cable confound.
+
+**Same 60 s test**, fresh boot:
+- `usb_max_current_enable=0`, max_current 3000 mA (3 A mode, as in LX).
+- Idle 4.973 V, `throttled=0x0`: no boot flag, unlike every run on the old cable.
+- Load, EXT5V in V: 5.057, 5.022, 5.077, 5.079, 5.033, 5.010, 5.040, 5.004, 5.068,
+  5.068, 5.071, 4.974. So 4.97-5.08 V, `0x0` at every reading and after.
+- Temperature 50.5 -> 79.6 C peak (the Pi 5 throttles at 80 C; bare board).
+
+**Conclusion:** the OLD USB-C cable caused the under-voltage. Same bank, new cable:
+5/12 readings at 0x50005 (LX) -> 0/12.
+
+**Correction to LU and LV (append-only; they stay as written):**
+- LU said "the backup's own 5 V regulation is the likely main cause".
+- LV said "the battery backup's 5 V output was the cause".
+- Both were inferences from a comparison in which the cable ALSO changed - the wall
+  charger used its own cable. The battery backup, after the extension was removed,
+  most likely ran on the same old cable that has now failed on the bank too.
+- So the backup is most likely fine too, but it has NOT been re-tested with a good
+  cable. LS-LV's measured numbers all stand.
+
+**Consequence for the car:**
+- The planned Pi supply (bank -> Pi only, JF/JR) holds 5 V under a full all-core
+  load with a good cable.
+- The 600 mA USB cap of 3 A mode (Uno + TB6612 logic + servo via the Pi's USB)
+  remains an untested risk until the Uno is connected.
+- The car needs a short, known-good USB-C cable. The old one should be marked and
+  not used for the Pi.
+- Heat: 79.6 C bare under all-core load - the kit's fan case is required.
+
+**Open:**
+- mark / retire the old cable;
+- fit the fan case and re-run the test;
+- the servo-through-USB check once the Uno is wired.
