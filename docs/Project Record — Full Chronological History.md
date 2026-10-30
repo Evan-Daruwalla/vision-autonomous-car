@@ -369,6 +369,7 @@ the dated entry, not the digest.
 - [LT - Correction to LS: the Pi was NOT on the Anker bank - the sag is real, its source is unknown](#appendix-lt---correction-to-ls-the-pi-was-not-on-the-anker-bank---the-sag-is-real-its-source-is-unknown-2026-10-30-1545-cdt) (10-30)
 - [LU - Pi supply re-test: battery backup without the USB-C extension - sag reduced (4/12 vs 7/12 readings) but not gone; backup regulation likely](#appendix-lu---pi-supply-re-test-battery-backup-without-the-usb-c-extension---sag-reduced-412-vs-712-readings-but-not-gone-backup-regulation-likely-2026-10-30-1548-cdt) (10-30)
 - [LV - Pi on a wall charger: 5.11-5.15 V and throttled 0x0 under full load - the battery backup was the cause; new heat flag 77.9 C](#appendix-lv---pi-on-a-wall-charger-511-515-v-and-throttled-0x0-under-full-load---the-battery-backup-was-the-cause-new-heat-flag-779-c-2026-10-30-1555-cdt) (10-30)
+- [LW - Pi has no cooling (bare board); the LV charger negotiates 5 A (likely the kit's 27 W PSU); the kit's fan case is the fix, no purchase](#appendix-lw---pi-has-no-cooling-bare-board-the-lv-charger-negotiates-5-a-likely-the-kits-27-w-psu-the-kits-fan-case-is-the-fix-no-purchase-2026-10-30-1558-cdt) (10-30)
 
 ---
 
@@ -21677,3 +21678,33 @@ can only be equal or faster. 1.40 ms stands as an upper bound for the bench Pi.
 - the charger's identity (Evan);
 - the heatsink / cooler decision;
 - the car's own Pi supply (off the pack) is still a separate, open design item.
+
+# Appendix LW - Pi has no cooling (bare board); the LV charger negotiates 5 A (likely the kit's 27 W PSU); the kit's fan case is the fix, no purchase (2026-10-30 ~15:58 CDT)
+**2026-10-30 ~15:58 CDT.** Follow-up to LV (supply identity, cooling).
+
+**Cooling (Evan):** the bench Pi has NO heatsink, fan or case - the 77.9 C peak in
+LV was a bare board.
+
+**The LV charger offers 5 A (measured):**
+- `vcgencmd get_config usb_max_current_enable` = 1;
+- `/proc/device-tree/chosen/power/max_current` = 5000 (mA).
+
+The Pi only sets these when the supply advertises 5 V / 5 A over USB-PD. Claude
+thinks it is the Vilros 27 W 5V/5A PSU that came in the starter kit (BOM row 1),
+but Evan has not confirmed the identity.
+
+**Already owned, per BOM row 1 (Vilros Basic Starter Kit):**
+- a metal case with passive + active (fan) cooling - the reason the separate Active
+  Cooler row was struck on 2026-09-03;
+- the 27 W PSU, which BOM row 1 called "unused capacity" for the split-source power
+  design. That holds for the CAR (the Pi runs off the pack there), but it is the
+  right BENCH supply.
+
+**Recommendation:** run the Pi in the kit case for all bench work and re-run the 60 s
+test to check the temperature. No purchase needed. The car layout already assumes
+the Vilros case with the fan on top (hardware-print-mounts.md, record JV).
+
+**Open:**
+- Evan to confirm the charger identity;
+- fit the case and re-test the temperature;
+- the car's own Pi supply (off the pack) is still open.
