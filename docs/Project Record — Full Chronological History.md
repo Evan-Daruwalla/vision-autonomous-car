@@ -367,6 +367,7 @@ the dated entry, not the digest.
 - [LR - First code run ON the Pi (off-car): re-flash with key-only SSH, preflight PASS after 2 real fixes, camera 20 fps full FOV, autopilot p95 1.40 ms, fake guard proven on Pi data](#appendix-lr---first-code-run-on-the-pi-off-car-re-flash-with-key-only-ssh-preflight-pass-after-2-real-fixes-camera-20-fps-full-fov-autopilot-p95-140-ms-fake-guard-proven-on-pi-data-2026-10-30-1536-cdt) (10-30)
 - [LS - Pi power: Anker A1275 bank sags to 4.52 V under full load (under-voltage + throttling live); cable vs bank not yet separated](#appendix-ls---pi-power-anker-a1275-bank-sags-to-452-v-under-full-load-under-voltage--throttling-live-cable-vs-bank-not-yet-separated-2026-10-30-1544-cdt) (10-30)
 - [LT - Correction to LS: the Pi was NOT on the Anker bank - the sag is real, its source is unknown](#appendix-lt---correction-to-ls-the-pi-was-not-on-the-anker-bank---the-sag-is-real-its-source-is-unknown-2026-10-30-1545-cdt) (10-30)
+- [LU - Pi supply re-test: battery backup without the USB-C extension - sag reduced (4/12 vs 7/12 readings) but not gone; backup regulation likely](#appendix-lu---pi-supply-re-test-battery-backup-without-the-usb-c-extension---sag-reduced-412-vs-712-readings-but-not-gone-backup-regulation-likely-2026-10-30-1548-cdt) (10-30)
 
 ---
 
@@ -21614,3 +21615,31 @@ risky assumption, not a measurement.
 
 **Open:** what supply and cable the Pi was on (Evan to say); re-test after any
 change.
+
+# Appendix LU - Pi supply re-test: battery backup without the USB-C extension - sag reduced (4/12 vs 7/12 readings) but not gone; backup regulation likely (2026-10-30 ~15:48 CDT)
+**2026-10-30 ~15:48 CDT.** Pi supply identified and re-tested (follows LT).
+
+**Supply (Evan):** a "battery backup" (make, model and port rating NOT recorded).
+For LR/LS the Pi was fed through one regular USB-C cable PLUS a USB-C extension
+cable. For this re-test the extension was removed (one regular cable).
+
+**Same test as LS** (60 s: 4 busy-loop processes + `autopilot.py --bench`; EXT5V and
+`get_throttled` every 5 s). The Pi had just booted after the swap ("up 0 minutes");
+idle 4.890 V, 0x50000 (the flag tripped during boot again).
+- EXT5V in V:
+  4.864, 4.856, 4.647, 4.904, 4.535, 5.063, 4.647, 4.588, 5.069, 4.872, 4.851, 4.919.
+- 4 of 12 readings at 0x50005 (live under-voltage + throttling), versus 7 of 12 with
+  the extension in LS. Lowest 4.535 V (LS: 4.520 V).
+
+**Reading:**
+- Removing the extension helped but did not fix it.
+- Under a near-constant load the voltage swings 4.53 <-> 5.07 V. A cable on its own
+  would give a steadier drop, so the backup's own 5 V regulation is the likely main
+  cause. That is inference, not proven - no second supply was tried.
+- The driving-loop load (lighter than all-core) is still not measured.
+
+**Open:**
+- the backup's USB-C port rating (Evan);
+- a comparison run on a known-good supply (the official 27 W Pi 5 PSU, or a quality
+  PD wall charger) to split supply vs cable;
+- the car's Pi supply decision.
