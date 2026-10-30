@@ -364,6 +364,7 @@ the dated entry, not the digest.
 - [LO - Push done: unpushed history squashed by Evan (private path removed), 19 commits pushed, backup branch deleted](#appendix-lo---push-done-unpushed-history-squashed-by-evan-private-path-removed-19-commits-pushed-backup-branch-deleted-2026-10-30-1316-cdt) (10-30)
 - [LP - Docs-sync: security/performance/conventions/tooling bins refreshed; HANDOFF drift (suite 33, preprocess ids) fixed](#appendix-lp---docs-sync-securityperformanceconventionstooling-bins-refreshed-handoff-drift-suite-33-preprocess-ids-fixed-2026-10-30-1409-cdt) (10-30)
 - [LQ - Off-car Pi session software: teleop --fake-uno, preflight --no-uno, fake-hardware training guard, Pi latency bench; landing check SAFE](#appendix-lq---off-car-pi-session-software-teleop---fake-uno-preflight---no-uno-fake-hardware-training-guard-pi-latency-bench-landing-check-safe-2026-10-30-1419-cdt) (10-30)
+- [LR - First code run ON the Pi (off-car): re-flash with key-only SSH, preflight PASS after 2 real fixes, camera 20 fps full FOV, autopilot p95 1.40 ms, fake guard proven on Pi data](#appendix-lr---first-code-run-on-the-pi-off-car-re-flash-with-key-only-ssh-preflight-pass-after-2-real-fixes-camera-20-fps-full-fov-autopilot-p95-140-ms-fake-guard-proven-on-pi-data-2026-10-30-1536-cdt) (10-30)
 
 ---
 
@@ -21464,3 +21465,88 @@ from git.
 steps 1-5) and pastes outputs; onnxruntime on the Pi is a pip download - if no
 aarch64 wheel exists for its Python, stop and report, do not build from source.
 On-car items (servo jumper + C1 per LC, meter checks, LM2596 4.95 vs 4.99 V) unchanged.
+
+# Appendix LR - First code run ON the Pi (off-car): re-flash with key-only SSH, preflight PASS after 2 real fixes, camera 20 fps full FOV, autopilot p95 1.40 ms, fake guard proven on Pi data (2026-10-30 ~15:36 CDT)
+**2026-10-30 ~15:36 CDT.** First run of the project's code ON the Pi (off-car session,
+HANDOFF item 0a-off; Uno NOT attached). Everything below is measured on the real Pi
+unless marked otherwise.
+
+**Pi re-flashed, key-only SSH.** Claude could not log in: SSH wanted a password,
+the PC had no key, and Evan no longer had the Pi password. Claude made no attempt to
+get around it. Evan created a key on the PC (`ssh-keygen -t ed25519`, comment
+`pc-to-ed-pi5`). `ssh-copy-id` failed on the Windows path ("c/Users..." with no
+leading slash), so Evan re-flashed with Raspberry Pi Imager: Raspberry Pi OS Lite
+(Legacy, 64-bit), hostname `ed-pi5`, user `ed`, SSH public-key-only with that key.
+Three attempts:
+- 1st: the Pi booted, but its stored key was not this one (`Permission denied (publickey)`;
+  the server only offered publickey). Also, the newer Imager has a "Remote access" page,
+  not the "Services" tab Claude described.
+- 2nd: the Pi never joined the network; the LED blinked 7 short = "kernel image not
+  found" (wrong OS variant or an incomplete write - which one is not known).
+- 3rd: OK.
+
+Result: Debian 12 (bookworm), Python 3.11.2, aarch64, Raspberry Pi 5 Model B Rev 1.1,
+4 GB, 26 GB free. `rpicam-hello --list-cameras`: imx708_wide. Passwordless sudo.
+The Pi's new password is Evan's (never in any file).
+
+**Setup on the Pi:** `apt update && full-upgrade`, then `apt install python3-picamera2
+python3-venv` (picamera2 0.3.31 - Lite does not ship it); `bash pi/deploy.sh` (venv,
+websockets 13.1).
+
+**Preflight `--no-uno`, first run: FAIL (2), two real bugs nothing on the PC could
+catch:**
+1. `import serial` missing - pi/requirements.txt said pyserial "comes from apt", but
+   Lite has no python3-serial. Fix: `pyserial==3.5` pip-installed via
+   pi/requirements.txt.
+2. Camera: `TypeError: create_video_configuration() got an unexpected keyword argument
+   'fps'`. Record LH took `fps=` from newer picamera2 docs; the installed 0.3.31's
+   signature has no `fps`. Fix: drop it; the frame rate is set by FrameDurationLimits
+   alone (pi/camera.py).
+
+Commit af65689. Re-run: `preflight: PASS (Uno not checked)`. Camera line:
+`ScalerCrop=(0, 0, 4608, 2592) SensorTimestamp=yes array=(120, 160, 3)` = the full
+sensor (full FOV, as the data contract assumes).
+
+**Autopilot latency (step 5):** onnxruntime 1.31.1 pip-installed on the Pi (aarch64
+wheel exists; numpy 1.24.2 from apt kept). An untrained seed-0 BCNet export (parity
+4.470e-08) gave, with `autopilot.py --bench --iters 500` x3: mean 0.81 / 0.82 / 0.83 ms,
+p50 0.60 / 0.59 / 0.60, **p95 1.41 / 1.40 / 1.40 ms**, max 2.59 / 1.42 / 1.42. That is
+end-to-end predict (resize + normalise + inference), ~3% of the 50 ms tick. Latency
+depends on the architecture, not the weights, so it carries over to a trained BCNet.
+Pi temp 54.9 C.
+
+**Power flag:** `vcgencmd get_throttled` = `0x50000` = under-voltage HAS occurred and
+throttling HAS occurred since boot (not at the time of reading). Most likely during
+the apt upgrade. Which supply powers the Pi is not recorded; the Pi 5 wants 5 V / 5 A.
+OPEN.
+
+**Teleop, real camera + fake Uno (steps 2-3, run as one):** `teleop.py --fake-uno
+--bench --data-dir ~/car_data_test` on the Pi, SSH tunnel from the PC.
+- Measured by Claude (page text): link connected, secure context yes, fps 20,
+  loop_dt_ms 1.2, pack FAULT (FakeUno), bench true.
+- Evan, by eye: colour OK; Xbox pad seen; arm / steer readout / disarm work; deadman
+  works (pad unplugged -> disarmed); recording saved. He called the image "low
+  quality". That is by design: frames are 160x120 (the data contract) and the page
+  scales them up; the model sees 64x64.
+- Step 2 (full `--fake`) was skipped: step 3 covers the same page and pad checks with
+  the real camera.
+
+**Recorded episode (step 4):** copied outside the repo, then `ml/verify_real.py` -> exit 1:
+`FAIL ... recorded with fake hardware (log_fake/log_fake_uno) - never train on it`,
+plus `WARN 25 steps < REAL_MIN_STEPS=40`. So the guard works on real Pi data.
+Inspection:
+- 25 frames, 120x160x3 uint8;
+- frame gaps min / median / max = 50.0 / 50.0 / 50.0 ms;
+- mode 0; steer and throttle 0 for every frame;
+- fake_uno True; mean RGB (102.4, 102.8, 99.4).
+
+Honest limits: 25 frames (1.25 s) is far short of the planned ~30 s - I think it
+ended when the deadman disarm stopped the recording. So it says nothing about
+dropped frames over a long run. Steer was 0 throughout, so the file does not show
+stick input; that part rests on Evan's eyes.
+
+**Not done / open:**
+- the PSU check (0x50000);
+- a longer recording to measure the frame-gap % over minutes;
+- everything that needs the Uno (record LC fixes and meter checks first);
+- camera orientation (needs the mount).

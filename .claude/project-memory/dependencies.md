@@ -89,3 +89,4 @@ Remaining planned stack from the 2026-07-23 research brief:
   installs `tflite-runtime`, NOT TensorFlow; and a 512 MB Pi Zero 2 W already
   drives autonomously end-to-end. **4 GB bought 2026-09-03 because the 2 GB was
   sold out, not because 2 GB was insufficient.**
+- 2026-10-30 (record LR), ON THE PI: picamera2 0.3.31 + numpy 1.24.2 + PIL 9.4.0 + simplejpeg 1.8.1 from apt (system site-packages); websockets 13.1, pyserial 3.5 and onnxruntime 1.31.1 (aarch64 wheel exists) pip-installed in ~/car/venv. picamera2 0.3.31 has NO `fps=` keyword on create_video_configuration (newer docs do) - set the rate with FrameDurationLimits only.
