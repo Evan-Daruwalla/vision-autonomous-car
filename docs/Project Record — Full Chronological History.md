@@ -373,6 +373,7 @@ the dated entry, not the digest.
 - [LX - Anker A1275 bank (the car's planned Pi supply) also sags: 5/12 readings, low 4.539 V, 3 A mode; cable confound not separated](#appendix-lx---anker-a1275-bank-the-cars-planned-pi-supply-also-sags-512-readings-low-4539-v-3-a-mode-cable-confound-not-separated-2026-10-30-1608-cdt) (10-30)
 - [LY - Bank passes with a new cable (4.97-5.08 V, 0x0): the OLD USB-C cable was the cause; corrects LU/LV; heat 79.6 C bare](#appendix-ly---bank-passes-with-a-new-cable-497-508-v-0x0-the-old-usb-c-cable-was-the-cause-corrects-lulv-heat-796-c-bare-2026-10-30-1613-cdt) (10-30)
 - [LZ - Vilros case slot fits the PCIe connector, not the camera: case OR camera until Evan modifies it; bench runs bare](#appendix-lz---vilros-case-slot-fits-the-pcie-connector-not-the-camera-case-or-camera-until-evan-modifies-it-bench-runs-bare-2026-10-30-1615-cdt) (10-30)
+- [MA - Bare-board heat under real teleop: plateau 45-47 C (peak 47.2 C, 5 min, throttled 0x0) - bench without the case is fine](#appendix-ma---bare-board-heat-under-real-teleop-plateau-45-47-c-peak-472-c-5-min-throttled-0x0---bench-without-the-case-is-fine-2026-10-30-1639-cdt) (10-30)
 
 ---
 
@@ -21815,3 +21816,38 @@ layout's clearance boxes once the modification is done (fit report + photos in
 the record, per project rules).
 
 **Done in passing:** the LR-LY commits were pushed (7978bfc..41aa5df).
+
+# Appendix MA - Bare-board heat under real teleop: plateau 45-47 C (peak 47.2 C, 5 min, throttled 0x0) - bench without the case is fine (2026-10-30 ~16:39 CDT)
+**2026-10-30 ~16:39 CDT.** Bare-board temperature under the REAL teleop load
+(follows LZ's interim "bench runs bare" rule, which rested on an estimate).
+
+**Setup:**
+- Pi 5 bare: no case, no base, no heatsink (Evan). Camera attached.
+- Supply: max_current 3000 mA = 3 A mode (most likely the Anker bank with the good
+  cable; not confirmed); idle 5.012 V, `0x0`.
+- Before the run SSH reset every connection at the handshake for ~15 min
+  (`kex_exchange_identification: Connection reset by peer`) while ping worked.
+  Claude's 3 s reconnect loop may have added to it. Evan power-cycled the Pi and it
+  came back normally. The root cause was not determined.
+
+**Run:**
+- `teleop.py --fake-uno --bench` (real camera, fake Uno), SSH tunnel, with the
+  page open in the desktop app's browser pane so frames were really encoded and
+  streamed: link connected, fps 20, loop_dt_ms 1.2.
+- Samples every 15 s for 300 s (`vcgencmd`).
+
+**Result:**
+- Temperature 41.7 C at start; 42.2 -> 47.2 C peak; plateau 45-47 C from about
+  t=105 s.
+- `throttled=0x0` at every sample. EXT5V 4.970-5.026 V.
+- Teleop exited cleanly on SIGINT; the camera line again showed full FOV
+  `ScalerCrop=(0, 0, 4608, 2592)`.
+
+**Reading:**
+- The real teleop load holds the bare board at ~47 C, about 33 C under the 80 C
+  throttle. Bench work without the case is fine (LZ's interim rule now rests on a
+  measurement).
+- The 77.9 / 79.6 C peaks (LV, LY) belong to the synthetic all-core test only.
+- Not measured: AUTO mode (adds an ~0.8 ms predict per frame, LR); a warm enclosure
+  on the car; the motor and Uno running. The car case/cooling decision stays open.
+- The single-sample `top` CPU idle readings were too noisy to quote and are left out.
