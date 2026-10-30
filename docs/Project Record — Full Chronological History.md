@@ -372,6 +372,7 @@ the dated entry, not the digest.
 - [LW - Pi has no cooling (bare board); the LV charger negotiates 5 A (likely the kit's 27 W PSU); the kit's fan case is the fix, no purchase](#appendix-lw---pi-has-no-cooling-bare-board-the-lv-charger-negotiates-5-a-likely-the-kits-27-w-psu-the-kits-fan-case-is-the-fix-no-purchase-2026-10-30-1558-cdt) (10-30)
 - [LX - Anker A1275 bank (the car's planned Pi supply) also sags: 5/12 readings, low 4.539 V, 3 A mode; cable confound not separated](#appendix-lx---anker-a1275-bank-the-cars-planned-pi-supply-also-sags-512-readings-low-4539-v-3-a-mode-cable-confound-not-separated-2026-10-30-1608-cdt) (10-30)
 - [LY - Bank passes with a new cable (4.97-5.08 V, 0x0): the OLD USB-C cable was the cause; corrects LU/LV; heat 79.6 C bare](#appendix-ly---bank-passes-with-a-new-cable-497-508-v-0x0-the-old-usb-c-cable-was-the-cause-corrects-lulv-heat-796-c-bare-2026-10-30-1613-cdt) (10-30)
+- [LZ - Vilros case slot fits the PCIe connector, not the camera: case OR camera until Evan modifies it; bench runs bare](#appendix-lz---vilros-case-slot-fits-the-pcie-connector-not-the-camera-case-or-camera-until-evan-modifies-it-bench-runs-bare-2026-10-30-1615-cdt) (10-30)
 
 ---
 
@@ -21786,3 +21787,31 @@ load, so the car's Pi supply is NOT proven.
 - mark / retire the old cable;
 - fit the fan case and re-run the test;
 - the servo-through-USB check once the Uno is wired.
+
+# Appendix LZ - Vilros case slot fits the PCIe connector, not the camera: case OR camera until Evan modifies it; bench runs bare (2026-10-30 ~16:15 CDT)
+**2026-10-30 ~16:15 CDT.** Vilros kit case vs the camera (Evan, physical check).
+
+**Finding (Evan):** the Vilros starter-kit metal case's ribbon slot lines up with the
+Pi 5's PCIe FPC connector, NOT with the camera (CAM/DISP) connectors. So the camera
+ribbon cannot be attached with the case closed. Until the case is modified it is
+EITHER the case (fan cooling) OR the camera.
+
+**Plan (Evan):** modify the case so the camera ribbon passes through it. How, and
+where the cut goes, are not decided yet.
+
+**Interim rule (Claude):**
+- Bench work with the camera runs on the bare board.
+- The 79.6 C / 77.9 C peaks (LV, LY) came from the worst-case 60 s all-core test.
+  The teleop loop measured 1.2 ms of work per 50 ms frame (LR), far lighter.
+- The Pi throttles itself at 80 C, and `get_throttled` shows it, so a bare bench
+  session cannot silently damage it. The bare-board temperature during real teleop
+  is NOT measured.
+- The case (or other cooling) is a CAR requirement, not a bench one.
+
+**Layout consequence:** the car layout assumed the stock Vilros case works with the
+camera ("camera the other end", record JV). That holds only after the
+modification. The cut's position and the ribbon's route out of the case join the
+layout's clearance boxes once the modification is done (fit report + photos in
+the record, per project rules).
+
+**Done in passing:** the LR-LY commits were pushed (7978bfc..41aa5df).
