@@ -55,7 +55,7 @@ def load_real(data_dir) -> tuple[list[dict], list[dict]]:
     an episode that ends in a crash (is_terminal[-1]) the last CRASH_TRIM
     frames are dropped -- the lead-in to a crash is what not to imitate.
     n_auto / n_crash count the dropped frames (disjoint). Episodes without
-    log_mode keep every frame.
+    log_mode keep every frame. Episodes recorded with fake hardware are skipped.
     """
     eps, skipped = [], []
     for p in sorted(Path(data_dir).rglob("*.npz")):
@@ -67,6 +67,11 @@ def load_real(data_dir) -> tuple[list[dict], list[dict]]:
         if "log_cmd_next" not in ep or "image" not in ep:
             skipped.append({"path": str(p),
                             "reason": "no log_cmd_next/image (not a real-car episode)"})
+            continue
+        if (bool(np.asarray(ep.get("log_fake", False)))
+                or bool(np.asarray(ep.get("log_fake_uno", False)))):
+            skipped.append({"path": str(p),
+                            "reason": "fake hardware (log_fake/log_fake_uno)"})
             continue
         T = len(ep["image"])
         if T < REAL_MIN_STEPS:
@@ -243,7 +248,7 @@ def run(data, out, epochs: int = 50, seed: int = 0, cpu: bool = False,
 def _write_synth(root: Path, rng: np.random.Generator, extras: bool = False) -> None:
     """4 sessions x 3 episodes x 60 frames, plus one 30-frame episode."""
     def episode(session: str, T: int, auto_half: bool = False,
-                crash: bool = False) -> None:
+                crash: bool = False, meta: dict | None = None) -> None:
         w = EpisodeWriter(root / session)
         ps = rng.integers(0, 160, T)
         steer = np.rint(((ps / 159.0) * 2 - 1) * 100).astype(np.int8)
@@ -260,7 +265,7 @@ def _write_synth(root: Path, rng: np.random.Generator, extras: bool = False) -> 
         logs = {"log_cmd_next": cmd}
         if auto_half:
             logs["log_mode"] = (np.arange(T) >= T // 2).astype(np.uint8)
-        w.save(frame_logs=logs)
+        w.save(meta=meta, frame_logs=logs)
     for s in range(4):
         for _ in range(3):
             episode(f"sess{s}", 60)
@@ -268,6 +273,7 @@ def _write_synth(root: Path, rng: np.random.Generator, extras: bool = False) -> 
     if extras:
         episode("auto", 60, auto_half=True)
         episode("crash", 60, crash=True)
+        episode("fake", 60, meta={"fake_uno": True})
 
 
 def self_check() -> None:
@@ -320,8 +326,11 @@ def self_check() -> None:
         # frame selection: autopilot frames and the crash lead-in are not imitated
         d2 = Path(td) / "data2"
         _write_synth(d2, np.random.default_rng(1), extras=True)
-        e2, _ = load_real(d2)
+        e2, sk2 = load_real(d2)
         by = {e["track"]: e for e in e2}
+        assert "fake" not in by, "fake-hardware episode was loaded"
+        assert any("fake hardware" in s["reason"] and "fake" in Path(s["path"]).parent.name
+                   for s in sk2), sk2
         assert len(by["auto"]["x"]) == 30 and by["auto"]["n_auto"] == 30, by["auto"]["n_auto"]
         assert len(by["crash"]["x"]) == 60 - CRASH_TRIM and by["crash"]["n_crash"] == CRASH_TRIM
         assert len(by["sess0"]["x"]) == 60 and by["sess0"]["n_auto"] == 0

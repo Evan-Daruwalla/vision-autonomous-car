@@ -14,6 +14,7 @@ episodes"):
         shape/dtype) other than the sim length rule
   FAIL  missing log_cmd_next, or action[k] != log_cmd_next[k-1]/100 (the shift)
   FAIL  steer/throttle commands outside -100..100
+  FAIL  recorded with fake hardware (log_fake or log_fake_uno true in meta)
   WARN  shorter than REAL_MIN_STEPS (the trainer skips these)
   WARN  frame gaps > GAP_MS in log_t_frame_ns (dropped frames), reported as %
   WARN  steer saturated (|cmd| >= 95) on more than SAT_WARN of frames
@@ -52,6 +53,10 @@ def check_episode(ep: dict, path: Path) -> tuple[list[str], list[str], dict]:
     T = len(ep.get("reward", []))
     stats = {"T": T, "gap_pct": 0.0, "sat_pct": 0.0}
     name = path.name
+    if (bool(np.asarray(ep.get("log_fake", False)))
+            or bool(np.asarray(ep.get("log_fake_uno", False)))):
+        fails.append(f"{name}: recorded with fake hardware (log_fake/log_fake_uno) "
+                     "- never train on it")
     if "log_cmd_next" not in ep:
         fails.append(f"{name}: no log_cmd_next - not a pi/recorder.py episode")
         return fails, warns, stats
@@ -121,7 +126,8 @@ def self_check() -> None:
     import tempfile
     from episode_writer import EpisodeWriter
 
-    def write(d: Path, n: int, shift_ok: bool = True, gaps_ms: float = 50.0) -> Path:
+    def write(d: Path, n: int, shift_ok: bool = True, gaps_ms: float = 50.0,
+              meta: dict | None = None) -> Path:
         w = EpisodeWriter(d)
         rng = np.random.default_rng(n)
         cmds = np.stack([rng.integers(-60, 61, n), np.full(n, 20)], 1).astype(np.int8)
@@ -131,7 +137,7 @@ def self_check() -> None:
             a = cmds[k - 1] / 100.0 if shift_ok else cmds[k] / 100.0
             w.add_step(img(), a, 0.0, False, k == n - 1)
         t = (np.arange(n) * gaps_ms * 1e6).astype(np.int64)
-        return w.save(frame_logs={"log_cmd_next": cmds, "log_t_frame_ns": t})
+        return w.save(meta=meta, frame_logs={"log_cmd_next": cmds, "log_t_frame_ns": t})
 
     with tempfile.TemporaryDirectory() as td:
         good = Path(td) / "s1"
@@ -150,6 +156,12 @@ def self_check() -> None:
         p = write(slow, 60, gaps_ms=100.0)            # every gap 100 ms: dropped frames
         _, w, st = check_episode(load_episode(p), p)
         assert st["gap_pct"] == 100.0 and any("frame gaps" in x for x in w), (st, w)
+        p = write(Path(td) / "s5", 60, meta={"fake_uno": True})   # fake hardware: FAIL
+        f, _, _ = check_episode(load_episode(p), p)
+        assert any("fake hardware" in x for x in f), f
+        assert verify_dir(Path(td) / "s5") == 1
+        write(Path(td) / "s6", 60, meta={"fake": False, "fake_uno": False})
+        assert verify_dir(Path(td) / "s6") == 0, "real-hardware flags falsely failed"
         assert verify_dir(Path(td) / "does_not_exist") == 2, "missing root must exit 2"
         assert main([""]) == 2, "empty root arg must exit 2"
     print("verify_real self_check: PASS")

@@ -101,27 +101,38 @@ def main() -> int:
     ap.add_argument("--self-check", action="store_true")
     ap.add_argument("--ckpt")
     ap.add_argument("--out")
+    ap.add_argument("--untrained", action="store_true",
+                    help="export a seed-0 UNTRAINED BCNet (latency measurement only; no --ckpt)")
     a = ap.parse_args()
     if a.self_check:
         self_check()
         return 0
-    if not (a.ckpt and a.out):
-        ap.error("--ckpt and --out are required (or use --self-check)")
+    if a.ckpt and a.untrained:
+        ap.error("--ckpt and --untrained are mutually exclusive")
+    if not a.out or not (a.ckpt or a.untrained):
+        ap.error("--out and one of --ckpt / --untrained are required (or use --self-check)")
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from models import BCNet            # not defined until the BC step lands
     import provenance
     shape = (1, 3, 64, 64)
-    model = BCNet()
-    ck = torch.load(a.ckpt, map_location="cpu")
-    model.load_state_dict(ck["model"])
+    if a.untrained:
+        torch.manual_seed(0)
+        model = BCNet()
+    else:
+        model = BCNet()
+        ck = torch.load(a.ckpt, map_location="cpu")
+        model.load_state_dict(ck["model"])
     out = export(model, a.out, shape)
     err = parity(model, out, input_shape=shape)
     timing = time_cpu(out, input_shape=shape)
-    print(f"parity max abs diff {err:.3e}; timing {timing}")
+    prefix = "UNTRAINED (latency only): " if a.untrained else ""
+    print(f"{prefix}parity max abs diff {err:.3e}; timing {timing}")
     provenance.write_result(
         str(out) + ".json",
         {"parity": err, "timing": timing, "opset": OPSET,
-         "input_shape": list(shape), "ckpt": str(a.ckpt)})
+         "input_shape": list(shape),
+         "ckpt": None if a.untrained else str(a.ckpt),
+         "weights": "untrained (latency only)" if a.untrained else "trained"})
     if err > PARITY_TOL:
         print(f"FAIL: parity {err:.3e} > {PARITY_TOL}")
         return 1
