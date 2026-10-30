@@ -65,7 +65,8 @@ The websocket also rejects any browser Origin other than `http://localhost:<http
 Other flags: `--steer-invert`, `--rotate180`, `--max-throttle N` (0..100, default 0),
 `--host` (bind address, default 127.0.0.1), `--data-dir`, `--port`, `--http-port N` (page, default 8000), `--ws-port N` (websocket, default 8765;
 if you change either, change the ssh tunnel and the page URL to match), `--model <path.onnx>`,
-`--fake` (no hardware; pack reads FAULT, so use `--bench` to arm; uses a stub autopilot unless `--model` is given).
+`--fake` (no hardware; pack reads FAULT, so use `--bench` to arm; uses a stub autopilot unless `--model` is given),
+`--fake-uno` (FakeUno + real PiCamera, for the Pi off the car; episodes are flagged `fake_uno` and rejected by verify_real/bc_real).
 
 ## Pad mapping (browser "standard" mapping)
 | Control | Action |
@@ -99,6 +100,29 @@ Start with `--model <path.onnx>` (needs `requirements-autopilot.txt`; input tens
 Episodes land in `~/car_data/<session>/` (session = start time). Copy back:
 
     scp -r ed@ed-pi5.local:~/car_data .
+
+## Off-car session (Pi on the desk, Uno NOT attached)
+1. PC: `bash pi/deploy.sh`, then on the Pi `~/car/venv/bin/python ~/car/pi/preflight.py --no-uno` - must
+   end "preflight: PASS (Uno not checked)". Proves deploy, venv, imports and the real camera.
+2. Full fake: Pi `~/car/venv/bin/python ~/car/pi/teleop.py --fake --bench --data-dir ~/car_data_test`;
+   PC `ssh -L 8000:localhost:8000 -L 8765:localhost:8765 ed@ed-pi5.local`, open http://localhost:8000,
+   plug in the Xbox pad. Check: A arms, B disarms, sticks move the steer readout, unplug the pad ->
+   armed false within ~0.3 s, X records ~30 s.
+3. Real camera, fake Uno: same but `--fake-uno` instead of `--fake`. Check: a red object looks red, fps
+   ~20, note the first-frame ScalerCrop line printed in the Pi terminal. Do NOT judge orientation here
+   (it depends on the camera mount on the car).
+4. PC: `scp -r ed@ed-pi5.local:~/car_data_test <a folder OUTSIDE the repo>` then
+   `./.venv/Scripts/python.exe ml/verify_real.py <that folder>` - expect exit 1 with only "recorded with
+   fake hardware" FAILs (that proves the guard works); read the frame-gap % (real Pi timing).
+5. Autopilot latency: Pi `~/car/venv/bin/pip install -r ~/car/pi/requirements-autopilot.txt` (if pip
+   finds no wheel for the Pi's Python, stop - do not build from source); PC
+   `./.venv/Scripts/python.exe ml/export_onnx.py --untrained --out bcnet_untrained.onnx`,
+   `scp bcnet_untrained.onnx ed@ed-pi5.local:~/car/`; Pi
+   `~/car/venv/bin/python ~/car/pi/autopilot.py --bench ~/car/bcnet_untrained.onnx`. The weights are
+   random: the timing is real, the outputs mean nothing. Budget: 50 ms per 20 Hz tick.
+
+Never plug the car's Uno into the Pi until the shield fixes (record LC) and meter checks are done; never
+pass --max-throttle off the car.
 
 ## On-Pi bench checklist (UNVERIFIED until done)
 - [ ] Banner printed and SELFTEST PASS gate holds (teleop exits 2 otherwise).

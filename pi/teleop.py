@@ -14,6 +14,7 @@ recording. A FakeUno/FakeCamera pass is sim-only: it proves nothing about the
 real car, servo sign, camera colour or the browser Gamepad API.
 
     ./.venv/Scripts/python.exe pi/teleop.py --fake
+    ./.venv/Scripts/python.exe pi/teleop.py --fake-uno --bench   (on the Pi: real camera, no Uno)
     ./.venv/Scripts/python.exe pi/teleop.py --self-check
 """
 from __future__ import annotations
@@ -1041,6 +1042,10 @@ def self_check() -> None:
     _check_autopilot_nan()
     _check_control_error()
     _check_origin_and_host()
+    assert _pick_hw(False, False) == ("real", "real")
+    assert _pick_hw(True, False) == ("fake", "fake")
+    assert _pick_hw(False, True) == ("fake", "real")
+    assert _pick_hw(True, True) == ("fake", "fake")
     assert time.monotonic() - t0 < 40.0
     print("teleop self_check: PASS")
 
@@ -1054,10 +1059,17 @@ def _max_throttle(v: str) -> int:
     return n
 
 
+def _pick_hw(fake: bool, fake_uno: bool) -> tuple[str, str]:
+    """(uno_kind, cam_kind): --fake = both fake, --fake-uno = FakeUno + real PiCamera."""
+    return ("fake" if fake or fake_uno else "real"), ("fake" if fake else "real")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--port", default="/dev/ttyACM0")
     ap.add_argument("--fake", action="store_true", help="FakeUno + FakeCamera")
+    ap.add_argument("--fake-uno", action="store_true",
+                    help="FakeUno + real PiCamera (Pi off the car, no Uno attached)")
     ap.add_argument("--max-throttle", type=_max_throttle, default=0)
     ap.add_argument("--bench", action="store_true")
     ap.add_argument("--steer-invert", action="store_true")
@@ -1078,18 +1090,22 @@ def main() -> int:
         self_check()
         return 0
 
+    uno_kind, cam_kind = _pick_hw(args.fake, args.fake_uno)
+    if args.fake_uno:
+        print("NOTE: fake Uno - episodes are flagged fake_uno and rejected by verify_real/bc_real.")
     try:
-        uno = FakeUno() if args.fake else UnoLink(args.port)
+        uno = FakeUno() if uno_kind == "fake" else UnoLink(args.port)
         banner = uno.open()
     except Exception as e:
         print(f"Uno open failed: {e!r}")
         return 2
     print("Uno banner:", " | ".join(banner))
-    cam = FakeCamera() if args.fake else PiCamera(rotate180=args.rotate180)
+    cam = FakeCamera() if cam_kind == "fake" else PiCamera(rotate180=args.rotate180)
 
     meta = {"max_throttle": args.max_throttle, "bench": args.bench,
             "steer_invert": args.steer_invert, "camera": cam.config,
             "banner": " | ".join(banner), "protocol": "v0.2", "fake": args.fake,
+            "fake_uno": args.fake_uno,
             "model": args.model or ""}
     rec = Recorder(args.data_dir, meta=meta)
     ctl = Controller(args.max_throttle, args.bench, args.steer_invert)
