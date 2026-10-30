@@ -145,6 +145,11 @@ def self_check() -> None:
         assert run_preflight(fake=True, no_uno=True) == 0
     assert "SKIP  uno banner + SELFTEST" in buf.getvalue()
     assert "PASS (Uno not checked)" in buf.getvalue()
+    # real-Pi path (fake=False): both Uno checks must be the SKIP stub; the list is
+    # only built, never run, so no camera or serial port is touched here
+    real = dict(build_checks(fake=False, port="/dev/ttyACM0", no_uno=True))
+    assert real["serial device"] is skip_uno and real["uno banner + SELFTEST"] is skip_uno
+    assert dict(build_checks(fake=False, port="/dev/ttyACM0"))["serial device"] is check_serial_device
     print("preflight self_check: PASS")
 
 

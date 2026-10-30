@@ -11,6 +11,11 @@ for plain conv nets and needs no extra dependency.
 
 BCNet lives in ml/models.py and is imported only inside the CLI branch, so
 this module imports (and self-checks) without it.
+
+    ./.venv/Scripts/python.exe ml/export_onnx.py --ckpt <run>/bc_best.pt --out <dir>/bc.onnx
+    ./.venv/Scripts/python.exe ml/export_onnx.py --untrained --out <dir>/bcnet_untrained.onnx
+--untrained exports a seed-0 BCNet with random weights: for timing on the Pi
+(pi/autopilot.py --bench) only, never for driving.
 """
 from __future__ import annotations
 

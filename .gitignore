@@ -63,3 +63,6 @@ car_data/
 firmware/uno_control/build/
 # local cadence stamp written by the docs tooling (2026-10-30)
 .claude/drift-check.stamp
+# ONNX exports (export_onnx.py output; models are rebuilt from checkpoints, 2026-10-30)
+*.onnx
+*.onnx.json
