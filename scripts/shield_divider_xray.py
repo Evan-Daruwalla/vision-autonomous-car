@@ -8,7 +8,7 @@ Holes and parts come from docs/shield_layout.json (R100k, R10k, R2k, the A0
 socket, J5's VBAT pin, w1's end, the L2/9-L2/10 bridge); the script fails if
 any of them moved. Geometry helpers are shared with scripts/shield_render3d.py.
 
-Usage: python scripts/shield_divider_xray.py
+Usage: python scripts/shield_divider_xray.py [--self-check]
 """
 from __future__ import annotations
 
@@ -57,7 +57,8 @@ def badge(x, y, z, n, plan=False, d=2.6, size=1.5):
             f'font="Liberation Sans:style=Bold", halign="center", valign="center"); }}')
 
 
-def build(data: dict, plan: bool = False) -> str:
+def check_layout(data: dict) -> None:
+    """What the picture claims, checked against the layout dict. Raises SystemExit on a mismatch."""
     parts = {p["id"]: p for p in data["parts"]}
     for pid, pins in EXPECT.items():
         if parts.get(pid, {}).get("pins") != pins:
@@ -66,6 +67,10 @@ def build(data: dict, plan: bool = False) -> str:
         raise SystemExit("FAIL the A0 socket is no longer at U1/9")
     if ["L2/9", "L2/10"] not in data["bridges"]:
         raise SystemExit("FAIL the L2/9-L2/10 bridge is gone")
+
+
+def build(data: dict, plan: bool = False) -> str:
+    check_layout(data)
     g = Geo(data)
     xy = g.xy
     s: list[str] = []
@@ -164,10 +169,32 @@ def page(imgs) -> str:
             + "\n".join(o) + "\n</svg>\n")
 
 
+def self_check() -> None:
+    """Layout assertions only: renders nothing, writes no file."""
+    import copy
+    data = json.loads((ROOT / "docs" / "shield_layout.json").read_text(encoding="utf-8"))
+    check_layout(data)
+    print("self-check divider holes match the layout: ok")
+    bad = copy.deepcopy(data)
+    for p in bad["parts"]:
+        if p["id"] == "R100k":
+            p["pins"] = {"a": "L1/10", "b": "U3/9"}     # planted: R100k's pin moved
+    try:
+        check_layout(bad)
+    except SystemExit:
+        print("self-check planted R100k pin move caught: ok")
+    else:
+        raise AssertionError("planted R100k pin move was NOT caught")
+
+
 def main(argv=None) -> int:
-    from shield_guide_svg import read_png_size
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.parse_args(argv)
+    ap.add_argument("--self-check", action="store_true", help="run the layout assertions only (no render, no writes)")
+    args = ap.parse_args(argv)
+    if args.self_check:
+        self_check()
+        return 0
+    from shield_guide_svg import read_png_size
     data = json.loads((ROOT / "docs" / "shield_layout.json").read_text(encoding="utf-8"))
     gdir = ROOT / "docs" / "guide"
     outs = [(gdir / "divider_xray.png", (55, 0, 25), 75.0, "p"), (gdir / "divider_xray_plan.png", (0, 0, 0), 60.0, "o")]
