@@ -366,6 +366,7 @@ the dated entry, not the digest.
 - [LQ - Off-car Pi session software: teleop --fake-uno, preflight --no-uno, fake-hardware training guard, Pi latency bench; landing check SAFE](#appendix-lq---off-car-pi-session-software-teleop---fake-uno-preflight---no-uno-fake-hardware-training-guard-pi-latency-bench-landing-check-safe-2026-10-30-1419-cdt) (10-30)
 - [LR - First code run ON the Pi (off-car): re-flash with key-only SSH, preflight PASS after 2 real fixes, camera 20 fps full FOV, autopilot p95 1.40 ms, fake guard proven on Pi data](#appendix-lr---first-code-run-on-the-pi-off-car-re-flash-with-key-only-ssh-preflight-pass-after-2-real-fixes-camera-20-fps-full-fov-autopilot-p95-140-ms-fake-guard-proven-on-pi-data-2026-10-30-1536-cdt) (10-30)
 - [LS - Pi power: Anker A1275 bank sags to 4.52 V under full load (under-voltage + throttling live); cable vs bank not yet separated](#appendix-ls---pi-power-anker-a1275-bank-sags-to-452-v-under-full-load-under-voltage--throttling-live-cable-vs-bank-not-yet-separated-2026-10-30-1544-cdt) (10-30)
+- [LT - Correction to LS: the Pi was NOT on the Anker bank - the sag is real, its source is unknown](#appendix-lt---correction-to-ls-the-pi-was-not-on-the-anker-bank---the-sag-is-real-its-source-is-unknown-2026-10-30-1545-cdt) (10-30)
 
 ---
 
@@ -21590,3 +21591,26 @@ voltage reading; `get_throttled`):
 2. If it still sags, the car's Pi supply needs a decision. Options: a stiffer 5 V
    source (e.g. a 5 V / 5 A buck off the pack into the GPIO 5 V pins, with bulk
    capacitance), or a different bank. Any purchase is Evan's go.
+
+# Appendix LT - Correction to LS: the Pi was NOT on the Anker bank - the sag is real, its source is unknown (2026-10-30 ~15:45 CDT)
+**2026-10-30 ~15:45 CDT. Correction to LS (append-only; LS stays as written).**
+
+**LS is wrong about the supply.** Evan named the Anker PowerCore Speed 20000 PD
+(A1275) when asked "which supply is it on?", and Claude recorded the sag as that
+bank's. Evan then clarified that the Pi was NOT on the bank during the LR/LS
+measurements. Claude never asked what the Pi was actually plugged into - a
+risky assumption, not a measurement.
+
+**What still stands from LS:**
+- Every number: EXT5V 4.906 V idle after reboot; 4.52-4.60 V on 7 of 12 readings
+  under 60 s of all-core load + inference, with `throttled=0x50005`.
+- The flag trips during boot.
+- `usb_max_current_enable=0`.
+
+**What is withdrawn:**
+- "the Anker A1275 bank sags" - the source of the sag is UNKNOWN.
+- The A1275 web specs stay in LS as background on the bank, but they say
+  nothing about these readings.
+
+**Open:** what supply and cable the Pi was on (Evan to say); re-test after any
+change.
