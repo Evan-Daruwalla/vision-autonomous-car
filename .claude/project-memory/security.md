@@ -26,6 +26,6 @@
   the network can drive the car. The 0.0.0.0 default was audit LL's top HIGH,
   fixed in LN. The "auth on the control endpoint" note above is answered by the
   tunnel, not by an in-app login - do not add a LAN-facing mode without one.
-- The serial actuator surface moved from the PC's COM3 to the Pi's /dev/ttyACM0
+- The serial actuator surface moved from the PC's COM3 to the Pi's /dev/ttyACM0 (or /dev/ttyUSB0 for this clone; teleop auto-detects since 2026-10-31)
   (anything on the Pi that can open it can drive the car; same reasoning as above).
 - 2026-10-30 (record LR): the Pi's SSH is now public-key only (no password login over SSH); the private key lives only on the PC (`~/.ssh/id_ed25519`, no passphrase - anyone with that file can log in to the Pi).

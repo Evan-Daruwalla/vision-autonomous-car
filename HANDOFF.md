@@ -165,8 +165,8 @@ follow-up (BeagleY-AI, x86, phone, off-board WiFi):
 
 ## Track layout — IN PROGRESS, and the geometry is frozen
 
-Evan is designing the street layout in **3dstreet.app**; `.mcp.json` wires the
-`3dstreet-mcp` server (project scope). ~~**The `claude` CLI is not on PATH
+Evan is designing the street layout in **3dstreet.app**; ~~`.mcp.json` wires the
+`3dstreet-mcp` server (project scope).~~ (2026-10-31: entry removed from `.mcp.json` - audit MB, Evan.) ~~**The `claude` CLI is not on PATH
 here**, so `claude mcp add` must be run by Evan.~~ **CLI INSTALLED 2026-09-01**
 (`~/.local/bin/claude.exe`, 2.1.258, OAuth; still no `ANTHROPIC_API_KEY`).
 
@@ -512,8 +512,8 @@ listed as meter-silent checks). TB6612 (Pololu md08a) chip UP in U2/1-8 +
 L2/1-8, PWMA at the top-left; A/B pairs bridged on the carrier's pin tips;
 C1 470 uF is DESIGNED to stand upright on the carrier's VMOT/GND tips (as built it hangs on bare legs, LC - re-seat) (KQ; top ~18.8 mm
 above the shield - headroom over the Uno UNCHECKED) + C2 0.1 uF on the same
-tips (may be soldered across C1's legs at the tips). J3 = LEFT strip (D4),
-J4 = RIGHT strip (D7), net DIN_L / DIN_R (KX). Strips' 470 uF goes on
+tips (may be soldered across C1's legs at the tips). J3 = LEFT strip (~~D4~~ D6, 2026-10-31 ME),
+J4 = RIGHT strip (~~D7~~ D5), net DIN_L / DIN_R (KX). Strips' 470 uF goes on
 each strip's input pads. Uno links = Dupont pins into the shield sockets;
 off-board = 0.1 in male headers. ~~NOTHING SOLDERED YET~~ SOLDERED 2026-10-22..24
 (LB, LC), meter checks of steps 1-8 NOT yet run. The shield SVG + SHIELD_BUILD.md now show a 3D
@@ -585,7 +585,7 @@ NEXT ACTIONS, highest value first:
    wired; servo_bench prompt "400-2600" (US_MAX 2800); confirm the 12-tooth
    bevel gear; measure the USB-B plug (16 x 30 x 13 allowance).
 8. Evan's call: 98 tracked files carry the local path D:\ClaudeCode\... on the
-   PUBLIC remote; ~~2~~ 3 HOME-path occurrences in the record (lines 5982, 6701, 13700 per audit MB).
+   PUBLIC remote; ~~2~~ ~~3~~ 5 home-path / username strings in the record (2026-10-31 landing check: lines 5986, 6705, 13704, 20824, and 21370 = `evan~1` that Claude wrote into LO; line numbers shift as the record grows).
 
 HARD CONSTRAINTS
 - Start every reply with "Evan". Commit only when asked; push only when told;

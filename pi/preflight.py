@@ -5,7 +5,7 @@ cheaper to find here than mid-session. --fake swaps the camera and Uno for
 FakeCamera/FakeUno and drops the picamera2 and serial-device requirements so the
 logic can be tested on a PC; a --fake pass says nothing about the real Pi.
 
-    ~/car/venv/bin/python ~/car/pi/preflight.py [--port /dev/ttyACM0]
+    ~/car/venv/bin/python ~/car/pi/preflight.py [--port /dev/ttyUSB0]   (default: auto-detect)
     ~/car/venv/bin/python ~/car/pi/preflight.py --no-uno     (Pi off the car)
     ./.venv/Scripts/python.exe pi/preflight.py --fake
     ./.venv/Scripts/python.exe pi/preflight.py --self-check

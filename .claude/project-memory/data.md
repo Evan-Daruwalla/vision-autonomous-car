@@ -142,7 +142,7 @@ round trip at 20 Hz, ~2% of the 50 ms budget).
   cumulative quadrature · `status` u8 (armed / watchdog tripped / bad CRC /
   frame dropped) · `loop_dt` u8 in 100 us units, saturating · `crc8`.
 - **ARMED is opt-in EVERY frame**, not a latched mode. Actuators are inert on
-  boot, after reset, and after any watchdog trip, so stray bytes on a serial
+  boot, after reset, and after any watchdog trip (2026-10-31, audit MB: the FIRMWARE resumes on the first ARMED frame after a trip; the latch is on the Pi - teleop disarms on ST_WATCHDOG), so stray bytes on a serial
   port cannot start the car.
 - **Watchdog 150 ms** = three missed frames at 20 Hz. On expiry: throttle to
   zero, *hold* last steering angle, hazards. Throttle-zero is the safety

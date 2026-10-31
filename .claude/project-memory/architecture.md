@@ -76,7 +76,7 @@
   - **Channel budget, checked:** the Servo library claims Timer1, killing PWM
     on pins 9/10 and leaving PWM on **3, 5, 6, 11**. ⚠️ **Stale 2026-09-03
     (Appendix CX): lighting is now two WS2812B strips on D4/D7, needing NO PWM
-    at all — D5 and D6 are FREE, the first PWM headroom this design has had.**
+    at all — D5 and D6 are FREE, the first PWM headroom this design has had.** (2026-10-31, record ME: SUPERSEDED - strips now on D6 (left) / D5 (right), servo on D7, D4 and D9 spare, no spare PWM pin left.)
     Superseded: ~~motor + headlights
     + tail = 3 PWM, servo on its own library, and the two indicators are on/off
     so plain digital pins serve. **Fits with ZERO PWM spare.** (Corrected 2026-09-02, Appendix BH — the D3 pin fix put the encoder on D3, so usable PWM is {5, 6, 11} and all three are used. There is NO headroom: another PWM channel needs a pin freed or a timer reconfigured.)

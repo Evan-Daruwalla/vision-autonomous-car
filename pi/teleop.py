@@ -469,13 +469,15 @@ class TeleopApp:
         self._ctl_thread.start()
 
     def _on_signal(self, signum: int, frame=None) -> None:
-        """SIGTERM/SIGHUP: disarm, save any recording, then let run() fall into shutdown()."""
-        with self.lock:
-            self.controller.armed = False
-            self.controller._leave_auto()
-            if self.recorder.recording:
-                self._stop_recording(crash=False)
-            self.events.append(f"signal_{signum}")
+        """SIGTERM/SIGHUP: disarm now, then let run() fall into shutdown(), which
+        sends disarmed frames and saves any recording.
+
+        No self.lock here: the handler runs on the main thread, and shutdown()
+        holds that (non-reentrant) lock on the same thread - taking it here would
+        deadlock a signal that lands during shutdown (landing check, 2026-10-31).
+        A bool store is atomic, so the control thread sees the disarm at once."""
+        self.controller.armed = False
+        self.events.append(f"signal_{signum}")
         self._stop.set()
 
     def run(self) -> None:
@@ -1033,8 +1035,11 @@ def _check_signal_shutdown() -> None:
         assert app.controller.armed and app.recorder.recording
         app._on_signal(signal.SIGTERM)                   # direct call, no real signal
         assert not app.controller.armed and app._stop.is_set()
-        for t in app._save_threads:
-            t.join(timeout=10.0)
+        with app.lock:                                   # a signal during shutdown(): must not block
+            t0 = time.monotonic()
+            app._on_signal(signal.SIGTERM)
+            assert time.monotonic() - t0 < 1.0
+        app.shutdown()                                   # what run() does after the handler
         assert len(list(Path(td).rglob("*.npz"))) == 1   # episode saved, not lost
 
 

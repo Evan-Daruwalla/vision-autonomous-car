@@ -27,11 +27,11 @@ The map below is the corrected one. **`docs/BOM.md`'s diagram used to double-boo
 | D2 | encoder A | INT0 — one of only two hardware interrupts |
 | D3 | encoder B | INT1 — **the other one; nothing else may use D3** |
 | D4 | ~~LED strip, LEFT segment `DIN`~~ **FREE** since 2026-10-31 (strip moved to D6, as built, record MD) | plain digital — NeoPixel bit-bangs its own timing, so a PWM-capable pin would be wasted here. Changed 2026-09-03 (Appendix DA); was "left indicator" |
-| D5 | ~~FREE~~ **LED strip, RIGHT segment `DIN`** since 2026-10-31 (as built, record MD; was on D7) | ~~headlights (PWM), Timer0~~ — released 2026-09-03 when the 8 discrete LEDs became two WS2812B strips (Appendix CX). **First spare PWM this design has ever had** |
-| D6 | ~~FREE~~ **LED strip, LEFT segment `DIN`** since 2026-10-31 (as built, record MD; was on D4) | ~~tail lights (PWM), Timer0~~ — released 2026-09-03, same change. Timer0 PWM, frequency-locked to `millis()` |
-| D7 | ~~LED strip, RIGHT segment `DIN`~~ **steering servo** since 2026-10-31 (as built, record MD; was on D9). Servo library, claims Timer1 on any pin | plain digital. Two pins, not one: WS2812B data is `DIN`→`DOUT` only, so a cut strip's two halves cannot share a feed (Appendix CY) |
+| D5 | ~~FREE~~ **LED strip, RIGHT segment `DIN`** since 2026-10-31 (as built, record MD; was on D7) | ~~headlights (PWM), Timer0~~ — released 2026-09-03 when the 8 discrete LEDs became two WS2812B strips (Appendix CX). ~~**First spare PWM this design has ever had**~~ (spent on the strip 2026-10-31) |
+| D6 | ~~FREE~~ **LED strip, LEFT segment `DIN`** since 2026-10-31 (as built, record MD; was on D4) | ~~tail lights (PWM), Timer0~~ — released 2026-09-03, same change. Timer0 PWM, frequency-locked to `millis()`; now spent on the strip (2026-10-31) |
+| D7 | ~~LED strip, RIGHT segment `DIN`~~ **steering servo** since 2026-10-31 (as built, record MD; was on D9). Servo library, claims Timer1 on any pin | ~~plain digital. Two pins, not one: WS2812B data is `DIN`→`DOUT` only, so a cut strip's two halves cannot share a feed (Appendix CY)~~ (that note belonged to the right strip, now on D5) |
 | D8 | motor DIR A | → TB6612 AIN1 **and BIN1, bridged** (both channels paralleled; added 2026-10-11) |
-| D9 | ~~steering servo~~ **FREE** since 2026-10-31 (servo moved to D7, record MD) | Servo library, **claims Timer1** |
+| D9 | ~~steering servo~~ **FREE** since 2026-10-31 (servo moved to D7, record MD) | plain digital spare; its PWM stays dead while Servo owns Timer1 |
 | D10 | **TB6612 `STBY`** — master driver enable | added 2026-09-02, Appendix BL. Its PWM is already dead (Servo owns Timer1), so it is the cheapest free pin; spending it here keeps A1–A5 for future analog (motor current sense) |
 | D11 | motor PWM | **Timer2** — see below. Drives PWMA **and PWMB, bridged** |
 | D12 | motor DIR B | → TB6612 AIN2 **and BIN2, bridged** |
@@ -50,7 +50,7 @@ Free after this: ~~A0–A5~~ **A1–A5** ~~and D10~~ **plus D5 and D6**, and D0/
 (the USB UART — **do not use**). **D10 became `STBY` on 2026-09-02**, so ~~the
 only free pins left are the five analog ones~~ **the free pins are A1–A5 plus
 D5/D6 as of 2026-09-03** — the LED-strip swap handed back two Timer0 PWM pins,
-the first PWM headroom this pin map has ever had. **A0 is the pack-sense divider input** as of 2026-09-02
+the first PWM headroom this pin map has ever had. (2026-10-31, record ME: SUPERSEDED - D5/D6 now carry the strips, D4 and D9 are the spare pins, and no spare PWM pin is left.) **A0 is the pack-sense divider input** as of 2026-09-02
 (`firmware/uno_packguard/`, Appendix BJ) — corrected in BK.
 
 ### 1a. `STBY` — the gap this map had until 2026-09-02

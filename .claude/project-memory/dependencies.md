@@ -60,7 +60,7 @@ Remaining planned stack from the 2026-07-23 research brief:
   vendor or pin beyond the core version above. *(Corrected 2026-09-02, Appendix
   BH: the earlier wording claimed the bundled `Servo` library was in use. It is
   NOT — no `.ino` includes `Servo.h` yet. `Servo` is PLANNED for the steering
-  servo on D9 per `firmware/SERIAL_PROTOCOL.md`, and it matters because Servo
+  servo on D9 (2026-10-31: Servo is used in uno_control and the servo is on D7 - record ME) per `firmware/SERIAL_PROTOCOL.md`, and it matters because Servo
   claims Timer1 and thereby sets the whole PWM budget.)*
 - The firmware toolchain is entirely separate from the Python venv; nothing in
   `ml/requirements.txt` touches the board.
