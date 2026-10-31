@@ -378,6 +378,7 @@ the dated entry, not the digest.
 - [MC - Shield-to-Uno as built: servo on D6, strip data on D2 (encoder INT0) and D1 (serial TX) - 2 clashes; test card + bottom-grid map made](#appendix-mc---shield-to-uno-as-built-servo-on-d6-strip-data-on-d2-encoder-int0-and-d1-serial-tx---2-clashes-test-card--bottom-grid-map-made-2026-10-31-1404-cdt) (10-31)
 - [MD - Correction to MC: wires are on D7 (servo), D6, D5 (strips) - no clashes, only firmware pin constants differ](#appendix-md---correction-to-mc-wires-are-on-d7-servo-d6-d5-strips---no-clashes-only-firmware-pin-constants-differ-2026-10-31-1428-cdt) (10-31)
 - [ME - Option B done: firmware + docs on the as-built pins (servo D7, strips D6/D5); compiled, NOT flashed; no spare PWM pin left](#appendix-me---option-b-done-firmware--docs-on-the-as-built-pins-servo-d7-strips-d6d5-compiled-not-flashed-no-spare-pwm-pin-left-2026-10-31-1450-cdt) (10-31)
+- [MF - Audit MB fixes (high + listed meds) + landing check: legacy split restored, corpus guard, port auto-detect, Pi watchdog latch, signal-handler deadlock caught](#appendix-mf---audit-mb-fixes-high--listed-meds--landing-check-legacy-split-restored-corpus-guard-port-auto-detect-pi-watchdog-latch-signal-handler-deadlock-caught-2026-10-31-1514-cdt) (10-31)
 
 ---
 
@@ -22000,3 +22001,75 @@ Claude flashes and reads the banner + SELFTEST. important.md #3 updated.
 
 **Also:** docs/shield_bottom_grid.jpg labels re-rendered to D7 / D6 / D5 (still
 uncommitted, pending Evan's public-repo choice).
+
+# Appendix MF - Audit MB fixes (high + listed meds) + landing check: legacy split restored, corpus guard, port auto-detect, Pi watchdog latch, signal-handler deadlock caught (2026-10-31 ~15:14 CDT)
+**2026-10-31 ~15:14 CDT.** Audit MB fixes (the high + the listed meds) and a landing
+check. Plan-split: 2 Sonnet agents (ml/ and pi/, disjoint), Opus reviewed on disk.
+Commits ac3d282, cf237dc, a9a981e, ef2a360.
+
+**Scope note:** MB recorded the high and its "top" meds only - about 10 of the 14.
+The other meds were never written down, so they were not fixed and are not guessed
+at here.
+
+**Fixes:**
+1. HIGH - `ml/prep_dreamer_corpus.py` uses `ids = load_ids("train")` (None while ids
+   are uninstalled -> the legacy split P3 trained on). Re-derived by Opus on the live
+   corpus: 78 episodes, val 12, identical to the 12 files in `ml/data/dreamer/eval`.
+   The old stem-id code gave val 7.
+2. `ml/splits.check_corpus(ckpt_corpus_id, ids)`: refuses a legacy-trained (or
+   mismatched) checkpoint when ids are given; ids None passes. It is called in the 5
+   evaluators that load a checkpoint AND split: compare_encoders, diag_copycat,
+   probe_cone, rollout_eval, train_cte_probe. Not added (latent, low): the trainers
+   train_controller / train_mdnrnn, which load an upstream VAE and split.
+3. `ml/bc_real.py`: a clear SystemExit on an empty fit set, instead of
+   ZeroDivisionError at :201. `ml/verify_real.py`: a missing `action` is a FAIL line,
+   not a KeyError.
+4. `pi/uno_link.find_port()`: first /dev/ttyACM*, then /dev/ttyUSB* (this clone
+   enumerates as ttyUSB0). teleop and preflight default to auto.
+5. Watchdog: teleop disarms on a reply with ST_WATCHDOG while armed (event
+   `watchdog_disarm`; re-arm with A). SERIAL_PROTOCOL.md rule 1 corrected.
+   - The firmware sets the bit while frames are >150 ms apart and clears it on the
+     first loop after frames resume (uno_control.ino:836-847). So only the first
+     reply after an outage carries it, and re-arming works.
+   - Residual, not fixed: that first ARMED frame after a trip drives for one
+     ~50 ms frame before the Pi disarms.
+6. `exclusive=True` on the serial open (POSIX only). SIGTERM/SIGHUP handler.
+7. `.mcp.json`: the unpinned 3dstreet server removed (Evan's choice).
+8. `batch_valid: false` + a note added to the 10 `ml/runs/**/p5_eval.json` whose expert
+   batch fails eval_in_sim.py:333's criterion. Re-derived:
+   - 38 files; 19 lacked the key; exactly 10 fail; no other value changed.
+   - 4 more already carried false from their writer.
+   - The 9 passing files still have no key, so "valid" and "never checked" look the
+     same.
+9. HANDOFF/PRD stale rows struck with dates:
+   - M2 / M3 status;
+   - the Pi price rows (the kit was bought, $179.99);
+   - 114.75 mm -> the 155 mm front track governs (Appendix DM);
+   - "nothing run on the Pi" (LR ran it);
+   - a1156be-fixed MEDs and next-action items 6-7;
+   - layout checker 36.
+
+**Landing check (fresh agent): FIX FIRST, docs only.**
+- All code landed. Every new guard fired on a planted positive and stayed quiet on a
+  negative.
+- Compiles re-derived: 11658 B / 3140 B. Suite 34/34. No leak introduced.
+- Fixed in ef2a360:
+  - stale pin / 3dstreet / watchdog / port text in SERIAL_PROTOCOL.md (the free-pin
+    paragraph and the notes column), HANDOFF:515-516 and :168, and the bins
+    architecture, dependencies, services, data and security;
+  - my HANDOFF home-path count was FALSE (3) - there are 5 strings (record lines
+    5986, 6705, 13704, 20824, 21370). 21370 is "evan~1", which I wrote into LO;
+  - REAL BUG: the new SIGTERM handler took the non-reentrant `self.lock`, which
+    `shutdown()` holds on the same thread, so a signal during shutdown would
+    deadlock. The handler now only sets armed=False and stops the loop, and
+    `shutdown()` saves the recording. The self-check now calls the handler while
+    holding the lock and asserts it returns within 1 s.
+- Wording correction to ME: until re-flashed, the old build drives NeoPixel data on
+  D7, so the servo may TWITCH on junk pulses rather than "not respond".
+
+**Open (Evan's calls):**
+- check_corpus in the two trainers;
+- `batch_valid: true` on the 9 passing files;
+- the re-flash (HANDOFF 0b);
+- `docs/shield_bottom_grid.jpg` public or local;
+- the 5 home-path strings in public history.
