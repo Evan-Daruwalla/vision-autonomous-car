@@ -383,6 +383,7 @@ the dated entry, not the digest.
 - [MH - End-of-session docs-sync: 2026-11-01 soft milestone (M3) NOT met - flagged; HANDOFF prompt replaced (old one kept here)](#appendix-mh---end-of-session-docs-sync-2026-11-01-soft-milestone-m3-not-met---flagged-handoff-prompt-replaced-old-one-kept-here-2026-10-31-1543-cdt) (10-31)
 - [MI - Servo and strip data wired straight to Uno D7 / D6 / D5 (J2 SIG path abandoned); C1 fixed; strip DIN resistors found never built](#appendix-mi---servo-and-strip-data-wired-straight-to-uno-d7--d6--d5-j2-sig-path-abandoned-c1-fixed-strip-din-resistors-found-never-built-2026-10-31-1606-cdt) (10-31)
 - [MJ - Shield docs to the as-built direct-to-pin wiring (layout, test card, guides, renders); meter checks A-D PASS per Evan](#appendix-mj---shield-docs-to-the-as-built-direct-to-pin-wiring-layout-test-card-guides-renders-meter-checks-a-d-pass-per-evan-2026-10-31-1629-cdt) (10-31)
+- [MK - Rocker switch rating read: 6A 250V / 10A 125V (AC marking); judged adequate behind the 3 A fuse](#appendix-mk---rocker-switch-rating-read-6a-250v--10a-125v-ac-marking-judged-adequate-behind-the-3-a-fuse-2026-10-31-1753-cdt) (10-31)
 
 ---
 
@@ -22314,3 +22315,12 @@ HARD CONSTRAINTS
 - Card PNG and shield_3d_top.png viewed by eye: 5 leads drawn (4 digital, A0), no resistor lump.
 
 **Also given (chat, not yet done):** step lists for build step 2b (W8-W14 after the rocker: LM2596 output metered alone before W14 reaches J5; rocker OFF = 0 V; XT30 polarity) and step 5 (motor + encoder on J1, yellow / white straight to D2 / D3, blue to J1 +5V2 never VBAT; host_test --wired on a stand). Rocker DC rating still unrecorded - Evan to read it first.
+
+# Appendix MK - Rocker switch rating read: 6A 250V / 10A 125V (AC marking); judged adequate behind the 3 A fuse (2026-10-31, ~17:53 CDT)
+**Ask (Evan):** "rocker is 6A 250V or 10A 125V" - the rating step 2b asked him to read before wiring the power path.
+
+**Fact recorded:** the rocker (DaierTek KCD1, BOM row 14) is marked 6A 250V / 10A 125V. That is the standard KCD1 AC marking; no DC rating is printed. The BOM listing claimed "12V DC" with no amp figure (WIRING_PROTOSHIELD.md "Ratings not recorded" list).
+
+**Judgement (Claude, not tested):** adequate for this car. The 3 A ATO fuse sits upstream at the pack, so the switch cannot carry more than ~3 A for long; the worst-case estimate is 2.6-2.8 A (audit 2026-10-11 budget). The pack is at most 8.4 V DC. A DC contact rating is normally lower than the AC one because a DC arc does not self-extinguish at a zero crossing, but at 8.4 V and ~3 A the arc energy is small and 3 A is half the 6 A AC figure. Not a DC rating; nothing measured. Watch for: switch body warm after a run, or cut-outs when bumped. Inrush at switch-on (470 uF bulk caps) is brief and only wears the contacts.
+
+**Updated:** docs/WIRING_PROTOSHIELD.md (the "Ratings not recorded" line), .claude/project-memory/hardware-power.md. Step 2b (W8-W14) is unblocked; the shield is still never powered.

@@ -497,7 +497,7 @@ measurements — this table is portfolio material, not ceremony.
   2026-09-03 — it had been contradicting §4.3 in the same file until then.
 - **Charger drain on the pack** with no USB plugged in - the charger is permanently wired to P+ / P- (2026-10-10), and its idle current is unmeasured. Meter it on arrival.
 - **TB6612 parallel pin pairing** unverified against Toshiba, §2.2.
-- **Ratings not recorded in this repo** (audit 2026-10-11): the MG90D-270's supply range, the WS2812B's, and the rocker switch's DC amp rating (BOM says "12V DC" only; it carries ~2.6-2.8 A worst case). Read them off the listings; never assume.
+- **Ratings not recorded in this repo** (audit 2026-10-11): the MG90D-270's supply range, the WS2812B's, and the rocker switch's DC amp rating (BOM says "12V DC" only; it carries ~2.6-2.8 A worst case). Read them off the listings; never assume. **2026-10-31 (Evan, record MK): the rocker is marked 6A 250V / 10A 125V - the standard KCD1 AC marking; no DC rating is printed on it. The 3 A fuse upstream limits it to ~3 A, half the 6 A figure, at only 8.4 V DC - judged adequate, but it is not a DC rating and nothing is tested.**
 - ~~**LM2596 module current rating** unverified for the specific Addicore
   part~~ ~~**RESOLVED 2026-09-03: rated 3 A**, per Addicore's own listing.~~ **CORRECTED 2026-10-11 (audit): the module bought is the EPLZON (BOM row 12), rated 2 A - so the margin is 0.80-1.08 A (2 - 1.20 and 2 - 0.92), not 1.8-2.1 A.** §2
   loads sum to ≈840 mA peak, plus ~80 mA for both strips at working
