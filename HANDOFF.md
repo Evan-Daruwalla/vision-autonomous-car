@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-30 ~16:39 CDT** (records LO-MA; push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
+**Last updated: 2026-10-31 ~14:04 CDT** (records LO-MB; MB: strip wires on D2/D1 CLASH with encoder/serial TX - move to D4/D7 before power-up; push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ ~~327 appendices A-LO~~ ~~328 appendices A-LP~~ ~~329 appendices A-LQ~~ ~~330 appendices A-LR~~ ~~331 appendices A-LS~~ ~~332 appendices A-LT~~ ~~333 appendices A-LU~~ ~~334 appendices A-LV~~ ~~335 appendices A-LW~~ ~~336 appendices A-LX~~ ~~337 appendices A-LY~~ ~~338 appendices A-LZ~~ 339 appendices A-MA as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ ~~327 appendices A-LO~~ ~~328 appendices A-LP~~ ~~329 appendices A-LQ~~ ~~330 appendices A-LR~~ ~~331 appendices A-LS~~ ~~332 appendices A-LT~~ ~~333 appendices A-LU~~ ~~334 appendices A-LV~~ ~~335 appendices A-LW~~ ~~336 appendices A-LX~~ ~~337 appendices A-LY~~ ~~338 appendices A-LZ~~ ~~339 appendices A-MA~~ 340 appendices A-MB as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal

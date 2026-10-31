@@ -374,6 +374,8 @@ the dated entry, not the digest.
 - [LY - Bank passes with a new cable (4.97-5.08 V, 0x0): the OLD USB-C cable was the cause; corrects LU/LV; heat 79.6 C bare](#appendix-ly---bank-passes-with-a-new-cable-497-508-v-0x0-the-old-usb-c-cable-was-the-cause-corrects-lulv-heat-796-c-bare-2026-10-30-1613-cdt) (10-30)
 - [LZ - Vilros case slot fits the PCIe connector, not the camera: case OR camera until Evan modifies it; bench runs bare](#appendix-lz---vilros-case-slot-fits-the-pcie-connector-not-the-camera-case-or-camera-until-evan-modifies-it-bench-runs-bare-2026-10-30-1615-cdt) (10-30)
 - [MA - Bare-board heat under real teleop: plateau 45-47 C (peak 47.2 C, 5 min, throttled 0x0) - bench without the case is fine](#appendix-ma---bare-board-heat-under-real-teleop-plateau-45-47-c-peak-472-c-5-min-throttled-0x0---bench-without-the-case-is-fine-2026-10-30-1639-cdt) (10-30)
+- [MB - Scheduled daily-audit: 60 findings, 1 high - prep_dreamer_corpus now splits by id while every other script uses the legacy split, so a re-run writes a P4 eval set P3 trained on](#appendix-mb---scheduled-daily-audit-60-findings-1-high---prep_dreamer_corpus-now-splits-by-id-while-every-other-script-uses-the-legacy-split-so-a-re-run-writes-a-p4-eval-set-p3-trained-on-2026-10-31-0731-cdt) (10-31)
+- [MC - Shield-to-Uno as built: servo on D6, strip data on D2 (encoder INT0) and D1 (serial TX) - 2 clashes; test card + bottom-grid map made](#appendix-mc---shield-to-uno-as-built-servo-on-d6-strip-data-on-d2-encoder-int0-and-d1-serial-tx---2-clashes-test-card--bottom-grid-map-made-2026-10-31-1404-cdt) (10-31)
 
 ---
 
@@ -21851,3 +21853,73 @@ the record, per project rules).
 - Not measured: AUTO mode (adds an ~0.8 ms predict per frame, LR); a warm enclosure
   on the car; the motor and Uno running. The car case/cooling decision stays open.
 - The single-sample `top` CPU idle readings were too noisy to quote and are left out.
+
+# Appendix MB - Scheduled daily-audit: 60 findings, 1 high - prep_dreamer_corpus now splits by id while every other script uses the legacy split, so a re-run writes a P4 eval set P3 trained on (2026-10-31, ~07:31 CDT)
+Scheduled daily-audit run (task `daily-audit`), 2026-10-31 07:09-07:31 CDT. Findings only: no code, doc, HANDOFF or bin was changed, nothing committed. This entry is the one write the task allows.
+
+**Why this project was audited:** last audit LL (2026-10-29, commit 7d454d3) had 18 non-audit commits after it, over the 10-commit churn limit.
+
+**Method:** /audit with 4 cold Sonnet workers on disjoint shards of the 392 tracked files (pi+firmware+scripts 38; ml code 39; ml/runs+cad+.claude+root config 241; docs+root docs 74; 38+39+241+74 = 392 = `git ls-files` count, re-enumerated by the session), then /landing-check on record MA (1 Sonnet agent). The session re-ran the high and the top meds itself.
+
+**Result: 60 findings - 0 crit, 1 high, 14 med, 45 low (plus 8 edge cases).**
+
+**High (session re-ran):**
+1. `ml/prep_dreamer_corpus.py:111` now always passes file-stem ids to `fit_val_episodes` (commit 92de82f, the fix for LL high 4), while no `ml/data/proc/*_ids.npy` exists, so every other script still uses the legacy position split. Re-derived on the 78-episode corpus: legacy val 12, hash val 7, overlap 0, and all 7 hash-val episodes are in the legacy FIT set; `ml/data/dreamer/eval` holds 12 files (the legacy val). A re-run of prep_dreamer_corpus would write a P4 eval set made of episodes P3 trained on. The docstring at :15 ("byte for byte the split P3 trained on") is now false. Fix: `ids = load_ids("train")` (None while ids are uninstalled), like the other evaluators.
+
+**Med (top):**
+- `corpus_id` is written by bc_real/train_controller/train_mdnrnn/train_vae and compared by no evaluator (grep), so installing ids later silently re-splits legacy checkpoints (downgraded high -> med: latent, HANDOFF:25 warns in prose).
+- `pi/teleop.py:1069` and `pi/preflight.py:49,158` default to /dev/ttyACM*, but record line 19843 says this Uno clone enumerates as /dev/ttyUSB0: first on-car preflight FAILs and teleop exits 2.
+- `firmware/uno_control/uno_control.ino:744-749`: the first ARMED frame after a watchdog trip returns to OUT_DRIVE; SERIAL_PROTOCOL.md:152 says actuators are inert after any watchdog trip; the Pi never reacts to ST_WATCHDOG (teleop.py:319 telemetry only).
+- `pi/uno_link.py:45` opens the port without `exclusive`, so preflight or a second teleop resets a driving Uno; no SIGHUP/SIGTERM handler in teleop (episode lost on ssh drop).
+- `ml/bc_real.py:201` ZeroDivisionError when every frame is log_mode 1; `ml/verify_real.py:69` KeyError aborts the run on an episode with no `action`.
+- `.mcp.json:3` runs `npx -y 3dstreet-mcp` unpinned every session for a CLOSED thread.
+- 10 ml/runs p5_eval.json with an invalid expert batch carry no `batch_valid:false`.
+- HANDOFF stale rows: :268-269 (M2/M3 "Not started"), :546-552 + items 6-7 (fixed items still open, a1156be), :481-488 and PRD:663 ("nothing run on the Pi", LR did), :156/:289 (Pi 2GB $65 / 4GB $70 vs bought kit $179.99), :285/:372-374 (114.75 mm car vs 155 mm on disk).
+
+**Re-derived TRUE:** `.venv` run_checks 33 passed 0 failed 0 skipped (system python: 21/1/11 - preflight FAILs instead of SKIPs); check_artifacts 40 checked 0 drifted; BCNet 134,552 params; record 339 headings = 339 TOC lines, LQ..MA ASCII-clean; protocol bytes agree across SERIAL_PROTOCOL.md, uno_control.ino and pi/protocol.py; all 126 shard JSON parse with 0 NaN; no tracked secret; no tracked file over 5 MB.
+
+**Landing-check on MA:** UNVERIFIABLE - text, TOC line and 339 count are right, but every Pi number (45-47 C, peak 47.2 C, 0x0, EXT5V 4.970-5.026 V) has no raw log in the repo. `.claude/project-memory/hardware-power.md:171,173` still says the fan case is the fix / required, with no MA qualifier.
+
+**Corrections:** HANDOFF.md:587 "2 HOME-path occurrences in the record" is 3 (record lines 5982, 6701, 13700). HANDOFF "layout checker 35 entries" is now 36.
+
+**Side effects:** none in this repo (`git status` shows only the pre-existing ` M .claude/pm-cadence.json`).
+
+# Appendix MC - Shield-to-Uno as built: servo on D6, strip data on D2 (encoder INT0) and D1 (serial TX) - 2 clashes; test card + bottom-grid map made (2026-10-31 ~14:04 CDT)
+**2026-10-31 ~14:04 CDT.** Shield-to-Uno wiring: as-built report differs from the
+design for 3 wires. Also: two new reference images.
+
+**New images (both generated from docs/shield_layout.json):**
+- `docs/shield_test_card.png` / `.svg`, made by `scripts/shield_test_card_svg.py`
+  (commit c87dce9). It gathers every meter check from steps 0-8 in test order:
+  A shorts, B connections, C to the Uno, D divider, E first power-up. Its
+  self_check cross-checks all 30 cited holes against the layout; the suite is now
+  34/34. The first render had section headers half-covered; this was caught by
+  eye and fixed before sending. The text-overlap gate did not catch it.
+- `docs/shield_bottom_grid.jpg`: the ROW/COL grid drawn over Evan's 2026-10-24
+  bottom-side photo (IMG_0288), with all 50 part pins and Dupont wire ends
+  labelled part / pin / hole.
+  - The grid was fitted by hand and confirmed against 6 solder bridges whose
+    positions the layout fixes (P4/6-13 bus; col-5 GND run B-P3;
+    V/1-V/0-V/-1-L1/-1; the servo-block bridges; L3/3-4 and L3/12-13 to P3;
+    L2/9-10).
+  - Mismatch found: the board has MORE holes in cols -9..-4 than the layout's grid
+    lists (the file says rows V-B only; the photo shows them in G, U3 and below).
+    Unused area, layout not changed.
+  - The image is uncommitted, pending Evan's choice (public repo).
+
+**As-built wiring (Evan) vs design (firmware/uno_control/uno_control.ino:84-97):**
+
+| Shield hole | Design pin | As built | Verdict |
+|---|---|---|---|
+| L1/-2 (J2 SIG, servo) | D9 | D6 | Works electrically: the firmware lists D6 as free and Servo runs on any pin. Needs either the wire moved to D9 or PIN_SERVO = 6 + re-flash. |
+| L3/12 (left strip data, via 200+200 ohm) | D4 | D2 | CLASH: D2 = encoder A, INT0. The Uno's only interrupt pins are D2/D3 and the encoder needs both; the encoder's yellow lead is also planned for the D2 socket. |
+| L3/13 (right strip data, via 200+200 ohm) | D7 | D1 | CLASH: D1 = serial TX, the Uno's reply line to the Pi. A stub + 400 ohm on the protocol link. |
+
+**Recommendation given:**
+- Move the strip wires to D4/D7 (no firmware change).
+- For the servo, prefer moving the wire to D9 over changing the firmware.
+- First, confirm against the Uno silkscreen.
+
+Until the wires move, test card section C and the grid map's "wire->D4 / D7 / D9"
+labels describe the DESIGN, not this board. Nothing has been powered, and no
+firmware was changed.
