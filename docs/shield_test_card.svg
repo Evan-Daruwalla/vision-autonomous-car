@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1540" viewBox="0 0 1100 1540" font-family="Segoe UI, Arial, sans-serif">
+<rect width="1100" height="1540" fill="#ffffff"/>
+<text x="24" y="44" font-size="26" font-weight="700" fill="#111">Proto shield meter test card</text>
+<text x="24" y="74" font-size="15" fill="#444">Source: docs/shield_layout.json steps 0-8. Do A to E in order; tick each box. Hole names = row/column on the shield grid.</text>
+<rect x="16" y="104" width="1068" height="32" rx="6" fill="#c62828"/>
+<text x="24" y="126" font-size="16" font-weight="700" fill="#fff">A. SHORTS - power OFF, continuity mode. Do these FIRST. Any steady beep = STOP, send it to me.</text>
+<rect x="16" y="140" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="147" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="160" font-size="15" font-weight="600" fill="#111">V/12</text>
+<text x="210" y="160" font-size="15" font-weight="600" fill="#111">G/12</text>
+<text x="460" y="160" font-size="15" font-weight="700" fill="#c62828">SILENT</text>
+<text x="640" y="160" font-size="13" fill="#555">Uno 5V vs GND (step 0.2)</text>
+<rect x="22" y="177" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="190" font-size="15" font-weight="600" fill="#111">V/12</text>
+<text x="210" y="190" font-size="15" font-weight="600" fill="#111">B/13</text>
+<text x="460" y="190" font-size="15" font-weight="700" fill="#c62828">SILENT</text>
+<text x="640" y="190" font-size="13" fill="#555">Uno 5V vs GND (step 0.2)</text>
+<rect x="16" y="200" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="207" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="220" font-size="15" font-weight="600" fill="#111">P4/5</text>
+<text x="210" y="220" font-size="15" font-weight="600" fill="#111">P4/6</text>
+<text x="460" y="220" font-size="15" font-weight="700" fill="#c62828">SILENT</text>
+<text x="640" y="220" font-size="13" fill="#555">GND vs +5V2 - neighbours (step 3)</text>
+<rect x="22" y="237" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="250" font-size="15" font-weight="600" fill="#111">P3/-1</text>
+<text x="210" y="250" font-size="15" font-weight="600" fill="#111">P3/-2</text>
+<text x="460" y="250" font-size="15" font-weight="700" fill="#c62828">SILENT</text>
+<text x="640" y="250" font-size="13" fill="#555">+5V2 vs GND - neighbours (step 3)</text>
+<rect x="16" y="260" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="267" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="280" font-size="15" font-weight="600" fill="#111">L3/10</text>
+<text x="210" y="280" font-size="15" font-weight="600" fill="#111">B/10</text>
+<text x="460" y="280" font-size="15" font-weight="700" fill="#c62828">SILENT</text>
+<text x="640" y="280" font-size="13" fill="#555">VBAT vs GND (step 6)</text>
+<rect x="22" y="297" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="310" font-size="15" font-weight="600" fill="#111">V/0</text>
+<text x="210" y="310" font-size="15" font-weight="600" fill="#111">B/2</text>
+<text x="460" y="310" font-size="15" font-weight="700" fill="#c62828">SILENT</text>
+<text x="640" y="310" font-size="13" fill="#555">Uno 5V vs GND (step 6)</text>
+<rect x="16" y="320" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="327" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="340" font-size="15" font-weight="600" fill="#111">P4/7</text>
+<text x="210" y="340" font-size="15" font-weight="600" fill="#111">B/2</text>
+<text x="460" y="340" font-size="15" font-weight="700" fill="#c62828">SILENT</text>
+<text x="640" y="340" font-size="13" fill="#555">+5V2 vs GND (step 6)</text>
+<rect x="22" y="357" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="370" font-size="15" font-weight="600" fill="#111">V/12</text>
+<text x="210" y="370" font-size="15" font-weight="600" fill="#111">P4/13</text>
+<text x="460" y="370" font-size="15" font-weight="700" fill="#c62828">SILENT</text>
+<text x="640" y="370" font-size="13" fill="#555">Uno 5V must NOT be tied to +5V2 (step 8)</text>
+<rect x="16" y="380" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="387" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="400" font-size="15" font-weight="600" fill="#111">L3/7</text>
+<text x="210" y="400" font-size="15" font-weight="600" fill="#111">L3/8</text>
+<text x="460" y="400" font-size="15" font-weight="700" fill="#c62828">no steady beep</text>
+<text x="640" y="400" font-size="13" fill="#555">VMOT vs GND - C1 may chirp once (step 1)</text>
+<rect x="16" y="444" width="1068" height="32" rx="6" fill="#2e7d32"/>
+<text x="24" y="466" font-size="16" font-weight="700" fill="#fff">B. CONNECTIONS - power OFF, continuity mode. Each must BEEP.</text>
+<rect x="16" y="480" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="487" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="500" font-size="15" font-weight="600" fill="#111">U1/1</text>
+<text x="210" y="500" font-size="15" font-weight="600" fill="#111">U3/1</text>
+<text x="460" y="500" font-size="15" font-weight="700" fill="#2e7d32">BEEP</text>
+<text x="640" y="500" font-size="13" fill="#555">one strip (step 0.1)</text>
+<rect x="22" y="517" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="530" font-size="15" font-weight="600" fill="#111">U1/1</text>
+<text x="210" y="530" font-size="15" font-weight="600" fill="#111">PWMA pin</text>
+<text x="460" y="530" font-size="15" font-weight="700" fill="#2e7d32">BEEP</text>
+<text x="640" y="530" font-size="13" fill="#555">carrier seated (step 2)</text>
+<rect x="16" y="540" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="547" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="560" font-size="15" font-weight="600" fill="#111">L3/7</text>
+<text x="210" y="560" font-size="15" font-weight="600" fill="#111">VMOT pin</text>
+<text x="460" y="560" font-size="15" font-weight="700" fill="#2e7d32">BEEP</text>
+<text x="640" y="560" font-size="13" fill="#555">carrier seated (step 2)</text>
+<rect x="22" y="577" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="590" font-size="15" font-weight="600" fill="#111">L3/1</text>
+<text x="210" y="590" font-size="15" font-weight="600" fill="#111">L3/8</text>
+<text x="460" y="590" font-size="15" font-weight="700" fill="#2e7d32">BEEP</text>
+<text x="640" y="590" font-size="13" fill="#555">GND through the carrier (step 2)</text>
+<rect x="16" y="600" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="607" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="620" font-size="15" font-weight="600" fill="#111">P4/6</text>
+<text x="210" y="620" font-size="15" font-weight="600" fill="#111">P4/13</text>
+<text x="460" y="620" font-size="15" font-weight="700" fill="#2e7d32">BEEP</text>
+<text x="640" y="620" font-size="13" fill="#555">+5V2 bus (step 3)</text>
+<rect x="22" y="637" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="650" font-size="15" font-weight="600" fill="#111">V/12</text>
+<text x="210" y="650" font-size="15" font-weight="600" fill="#111">L1/-1</text>
+<text x="460" y="650" font-size="15" font-weight="700" fill="#2e7d32">BEEP</text>
+<text x="640" y="650" font-size="13" fill="#555">Uno 5V to the left field (step 3)</text>
+<rect x="16" y="660" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="667" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="680" font-size="15" font-weight="600" fill="#111">L3/10</text>
+<text x="210" y="680" font-size="15" font-weight="600" fill="#111">VMOT pin</text>
+<text x="460" y="680" font-size="15" font-weight="700" fill="#2e7d32">BEEP</text>
+<text x="640" y="680" font-size="13" fill="#555">J5 top pin, through w1 (step 6)</text>
+<rect x="22" y="697" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="710" font-size="15" font-weight="600" fill="#111">J3 middle</text>
+<text x="210" y="710" font-size="15" font-weight="600" fill="#111">J4 middle</text>
+<text x="460" y="710" font-size="15" font-weight="700" fill="#2e7d32">BEEP</text>
+<text x="640" y="710" font-size="13" fill="#555">+5V2 (step 4)</text>
+<rect x="16" y="720" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="727" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="740" font-size="15" font-weight="600" fill="#111">J3 bottom</text>
+<text x="210" y="740" font-size="15" font-weight="600" fill="#111">B/8</text>
+<text x="460" y="740" font-size="15" font-weight="700" fill="#2e7d32">BEEP</text>
+<text x="640" y="740" font-size="13" fill="#555">GND star (step 4)</text>
+<rect x="16" y="784" width="1068" height="32" rx="6" fill="#1565c0"/>
+<text x="24" y="806" font-size="16" font-weight="700" fill="#fff">C. TO THE UNO - shield ON the Uno, power OFF.</text>
+<rect x="16" y="820" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="827" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="840" font-size="15" font-weight="600" fill="#111">U1/1</text>
+<text x="210" y="840" font-size="15" font-weight="600" fill="#111">D11</text>
+<text x="460" y="840" font-size="15" font-weight="700" fill="#1565c0">BEEP</text>
+<text x="640" y="840" font-size="13" fill="#555">(step 7)</text>
+<rect x="22" y="857" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="870" font-size="15" font-weight="600" fill="#111">U1/2</text>
+<text x="210" y="870" font-size="15" font-weight="600" fill="#111">D12</text>
+<text x="460" y="870" font-size="15" font-weight="700" fill="#1565c0">BEEP</text>
+<text x="640" y="870" font-size="13" fill="#555">(step 7)</text>
+<rect x="16" y="880" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="887" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="900" font-size="15" font-weight="600" fill="#111">U1/3</text>
+<text x="210" y="900" font-size="15" font-weight="600" fill="#111">D8</text>
+<text x="460" y="900" font-size="15" font-weight="700" fill="#1565c0">BEEP</text>
+<text x="640" y="900" font-size="13" fill="#555">(step 7)</text>
+<rect x="22" y="917" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="930" font-size="15" font-weight="600" fill="#111">U1/4</text>
+<text x="210" y="930" font-size="15" font-weight="600" fill="#111">D10</text>
+<text x="460" y="930" font-size="15" font-weight="700" fill="#1565c0">BEEP</text>
+<text x="640" y="930" font-size="13" fill="#555">(step 7)</text>
+<rect x="16" y="940" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="947" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="960" font-size="15" font-weight="600" fill="#111">U1/9</text>
+<text x="210" y="960" font-size="15" font-weight="600" fill="#111">A0</text>
+<text x="460" y="960" font-size="15" font-weight="700" fill="#1565c0">BEEP</text>
+<text x="640" y="960" font-size="13" fill="#555">battery divider (step 7)</text>
+<rect x="22" y="977" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="990" font-size="15" font-weight="600" fill="#111">D9</text>
+<text x="210" y="990" font-size="15" font-weight="600" fill="#111">J2 top pin (L1/-2)</text>
+<text x="460" y="990" font-size="15" font-weight="700" fill="#1565c0">BEEP</text>
+<text x="640" y="990" font-size="13" fill="#555">servo signal - after the record LC fix</text>
+<rect x="16" y="1000" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="1007" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="1020" font-size="15" font-weight="600" fill="#111">L3/12</text>
+<text x="210" y="1020" font-size="15" font-weight="600" fill="#111">D4</text>
+<text x="460" y="1020" font-size="15" font-weight="700" fill="#1565c0">~400 ohm</text>
+<text x="640" y="1020" font-size="13" fill="#555">200 + 200 in the wire - use ohms mode (step 7)</text>
+<rect x="22" y="1037" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="1050" font-size="15" font-weight="600" fill="#111">L3/13</text>
+<text x="210" y="1050" font-size="15" font-weight="600" fill="#111">D7</text>
+<text x="460" y="1050" font-size="15" font-weight="700" fill="#1565c0">~400 ohm</text>
+<text x="640" y="1050" font-size="13" fill="#555">200 + 200 in the wire - use ohms mode (step 7)</text>
+<rect x="16" y="1060" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="1067" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="1080" font-size="15" font-weight="600" fill="#111">Uno 5V pin</text>
+<text x="210" y="1080" font-size="15" font-weight="600" fill="#111">V/12</text>
+<text x="460" y="1080" font-size="15" font-weight="700" fill="#1565c0">BEEP</text>
+<text x="640" y="1080" font-size="13" fill="#555">(step 7)</text>
+<rect x="16" y="1124" width="1068" height="32" rx="6" fill="#6a1b9a"/>
+<text x="24" y="1146" font-size="16" font-weight="700" fill="#fff">D. DIVIDER - ohms mode, power OFF.</text>
+<rect x="16" y="1160" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="1167" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="1180" font-size="15" font-weight="600" fill="#111">L1/9</text>
+<text x="210" y="1180" font-size="15" font-weight="600" fill="#111">U3/9</text>
+<text x="460" y="1180" font-size="15" font-weight="700" fill="#6a1b9a">~100k</text>
+<text x="640" y="1180" font-size="13" fill="#555">R100k (step 5)</text>
+<rect x="22" y="1197" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="1210" font-size="15" font-weight="600" fill="#111">U3/9</text>
+<text x="210" y="1210" font-size="15" font-weight="600" fill="#111">G/10</text>
+<text x="460" y="1210" font-size="15" font-weight="700" fill="#6a1b9a">~12k</text>
+<text x="640" y="1210" font-size="13" fill="#555">R10k + R2k (step 5)</text>
+<rect x="16" y="1254" width="1068" height="32" rx="6" fill="#e65100"/>
+<text x="24" y="1276" font-size="16" font-weight="700" fill="#fff">E. FIRST POWER-UP - only after A-D all pass. DC volts mode.</text>
+<rect x="16" y="1290" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="1297" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="1310" font-size="15" font-weight="600" fill="#111">JP1</text>
+<text x="210" y="1310" font-size="15" font-weight="600" fill="#111">top two pins</text>
+<text x="460" y="1310" font-size="15" font-weight="700" fill="#e65100">jumper ON</text>
+<text x="640" y="1310" font-size="13" fill="#555">servo on the Uno 5V (step 8)</text>
+<rect x="22" y="1327" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="1340" font-size="15" font-weight="600" fill="#111">Pack</text>
+<text x="210" y="1340" font-size="15" font-weight="600" fill="#111">rocker OFF</text>
+<text x="460" y="1340" font-size="15" font-weight="700" fill="#e65100">then Uno on Pi USB</text>
+<text x="640" y="1340" font-size="13" fill="#555">Uno first, nothing else plugged (step 8)</text>
+<rect x="16" y="1350" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="1357" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="1370" font-size="15" font-weight="600" fill="#111">J5 top pin</text>
+<text x="210" y="1370" font-size="15" font-weight="600" fill="#111">GND</text>
+<text x="460" y="1370" font-size="15" font-weight="700" fill="#e65100">~8 V (pack)</text>
+<text x="640" y="1370" font-size="13" fill="#555">VBAT - rocker ON now (step 8)</text>
+<rect x="22" y="1387" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="1400" font-size="15" font-weight="600" fill="#111">J3 middle</text>
+<text x="210" y="1400" font-size="15" font-weight="600" fill="#111">GND</text>
+<text x="460" y="1400" font-size="15" font-weight="700" fill="#e65100">~5.0 V</text>
+<text x="640" y="1400" font-size="13" fill="#555">+5V2 from the LM2596 - WRITE IT DOWN (4.95 vs 4.99, JE/JF)</text>
+<rect x="16" y="1410" width="1068" height="30" fill="#f3f3f3"/>
+<rect x="22" y="1417" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
+<text x="46" y="1430" font-size="15" font-weight="600" fill="#111">Uno 5V pin</text>
+<text x="210" y="1430" font-size="15" font-weight="600" fill="#111">GND</text>
+<text x="460" y="1430" font-size="15" font-weight="700" fill="#e65100">~5 V</text>
+<text x="640" y="1430" font-size="13" fill="#555">from the Pi&#x27;s USB (step 8)</text>
+<text x="24" y="1488" font-size="13" fill="#444">Any result that differs: STOP and send it. Untested until every box is ticked (no power before A-D pass).</text>
+</svg>
