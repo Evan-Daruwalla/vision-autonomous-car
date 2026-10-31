@@ -100,3 +100,4 @@ Board/electrical facts (pin budget, current limits, the pack) stay in
 - Compiled 2026-10-10 (10668 B / 379 B), **never flashed**; SELFTEST count
   for this build is unknown until it is.
 - **.ino prototype trap (2026-10-13, record HR):** the Arduino preprocessor inserts function prototypes above the FIRST function, so a struct used in a function signature must be declared before any function (else "was not declared in this scope").
+- 2026-10-31 (record ME): pin map changed to the as-built wiring - servo D7, strips D6 (left) / D5 (right); D9 and D4 spare. Compiled (11658 B), NOT flashed: the board runs the old D9/D4/D7 build until re-flashed. Flash with the shield OFF the Uno (the shield is untested; USB would power it). No spare PWM pin remains.

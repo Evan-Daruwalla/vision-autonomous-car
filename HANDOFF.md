@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-31 ~14:28 CDT** (records LO-MD; MD (corrects MC): Uno wires are on D7 servo / D6 / D5 strips - no clash, but firmware expects D9 / D4 / D7: re-plug, or change 3 pin constants + re-flash - Evan's choice pending; push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
+**Last updated: 2026-10-31 ~14:50 CDT** (records LO-ME; ME: firmware + docs moved to the as-built pins servo D7 / strips D6, D5 - compiled, NOT flashed (item 0b); push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ ~~327 appendices A-LO~~ ~~328 appendices A-LP~~ ~~329 appendices A-LQ~~ ~~330 appendices A-LR~~ ~~331 appendices A-LS~~ ~~332 appendices A-LT~~ ~~333 appendices A-LU~~ ~~334 appendices A-LV~~ ~~335 appendices A-LW~~ ~~336 appendices A-LX~~ ~~337 appendices A-LY~~ ~~338 appendices A-LZ~~ ~~339 appendices A-MA~~ ~~341 appendices A-MC~~ 342 appendices A-MD (MB = the 2026-10-31 scheduled audit) as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ ~~327 appendices A-LO~~ ~~328 appendices A-LP~~ ~~329 appendices A-LQ~~ ~~330 appendices A-LR~~ ~~331 appendices A-LS~~ ~~332 appendices A-LT~~ ~~333 appendices A-LU~~ ~~334 appendices A-LV~~ ~~335 appendices A-LW~~ ~~336 appendices A-LX~~ ~~337 appendices A-LY~~ ~~338 appendices A-LZ~~ ~~339 appendices A-MA~~ ~~341 appendices A-MC~~ ~~342 appendices A-MD~~ 343 appendices A-ME (MB = the 2026-10-31 scheduled audit) as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -536,7 +536,7 @@ WIRES: pack side soldered and NOT to be re-soldered (P+/P- 4 x 190, fuse wire
 326, MB 55; B- length unrecorded). To cut (estimates, trim at the dry fit):
 W8 80, W9 250, W10 100, W11 jumper, W12 260, W13 220, W14 120, W15 jumper;
 encoder cable 300 uncut (~30 mm spare); servo lead needs a Dupont extension.
-TEST SUITE: scripts/run_checks.py (~~32 passed on 2026-10-29~~ 33 passed in LN, 2026-10-29, walks pi/ - re-run it, never
+TEST SUITE: scripts/run_checks.py (~~32 passed on 2026-10-29~~ ~~33 passed in LN~~ 34 passed 2026-10-31 (ME; + shield_test_card), walks pi/ - re-run it, never
 quote it; svg_text_overlap needs Chrome, so it SKIPs on the Pi). Push state: run `git fetch` then `git status -sb`.
 
 AUDIT BACKLOG: KA (2026-10-17 daily audit, 48 findings; HIGH #1 fixed in KE,
@@ -559,6 +559,7 @@ NEXT ACTIONS, highest value first:
    camera, verify_real on the test episodes, onnxruntime + `autopilot.py --bench`).
    Paste every output back to be recorded. Never plug the car's Uno into the Pi
    until item 0 is done.
+0b. (2026-10-31, ME) RE-FLASH uno_control: firmware now uses servo D7 / strips D6, D5 (as built) but the board runs the old D9/D4/D7 build. Evan: pull the shield OFF the Uno, plug the bare Uno into the PC; Claude flashes over COM3 and reads the banner + SELFTEST. Do it before any servo test.
 0a. (2026-10-29, LJ/LK) ON-CAR Pi session (after item 0): `bash pi/deploy.sh` from the PC, then
    `~/car/venv/bin/python ~/car/pi/preflight.py` on the Pi (it must PASS), then the
    pi/README.md bench checklist; meter the LM2596 (4.95 vs 4.99 V). Then laps per

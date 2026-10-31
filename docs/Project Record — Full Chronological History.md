@@ -377,6 +377,7 @@ the dated entry, not the digest.
 - [MB - Scheduled daily-audit: 60 findings, 1 high - prep_dreamer_corpus now splits by id while every other script uses the legacy split, so a re-run writes a P4 eval set P3 trained on](#appendix-mb---scheduled-daily-audit-60-findings-1-high---prep_dreamer_corpus-now-splits-by-id-while-every-other-script-uses-the-legacy-split-so-a-re-run-writes-a-p4-eval-set-p3-trained-on-2026-10-31-0731-cdt) (10-31)
 - [MC - Shield-to-Uno as built: servo on D6, strip data on D2 (encoder INT0) and D1 (serial TX) - 2 clashes; test card + bottom-grid map made](#appendix-mc---shield-to-uno-as-built-servo-on-d6-strip-data-on-d2-encoder-int0-and-d1-serial-tx---2-clashes-test-card--bottom-grid-map-made-2026-10-31-1404-cdt) (10-31)
 - [MD - Correction to MC: wires are on D7 (servo), D6, D5 (strips) - no clashes, only firmware pin constants differ](#appendix-md---correction-to-mc-wires-are-on-d7-servo-d6-d5-strips---no-clashes-only-firmware-pin-constants-differ-2026-10-31-1428-cdt) (10-31)
+- [ME - Option B done: firmware + docs on the as-built pins (servo D7, strips D6/D5); compiled, NOT flashed; no spare PWM pin left](#appendix-me---option-b-done-firmware--docs-on-the-as-built-pins-servo-d7-strips-d6d5-compiled-not-flashed-no-spare-pwm-pin-left-2026-10-31-1450-cdt) (10-31)
 
 ---
 
@@ -21951,3 +21952,51 @@ the firmware's pin constants: the servo is on the firmware's right-strip pin D7.
 
 Evan's choice is pending. Until then, test card section C and the grid map's
 "->D9 / D4 / D7" labels are the design, not this board. Nothing has been powered.
+
+# Appendix ME - Option B done: firmware + docs on the as-built pins (servo D7, strips D6/D5); compiled, NOT flashed; no spare PWM pin left (2026-10-31 ~14:50 CDT)
+**2026-10-31 ~14:50 CDT.** Evan chose option B from MD: firmware and every doc now
+follow the as-built Uno wiring. Plan-split run: 3 Sonnet agents on disjoint files
+(firmware / layout + generators / prose), Opus reviewed on disk.
+
+**Pins (firmware/uno_control/uno_control.ino:86-93, firmware/servo_bench/servo_bench.ino:19):**
+- servo signal D9 -> D7;
+- left strip DIN D4 -> D6;
+- right strip DIN D7 -> D5.
+
+D9 and D4 are now spare plain-digital pins. Encoder D2/D3, serial D0/D1, motor
+D8/D10/D11/D12 and A0 are unchanged. Servo (Timer1) and NeoPixel (bit-bang) work on
+any digital pin.
+
+**Consequence noted (docs/WIRING_PROTOSHIELD.md):** the car now has NO spare PWM pin.
+- D5/D6 carry the strips, D3 is the encoder, D11 is the motor, and Servo's Timer1
+  kills PWM on D9/D10.
+- The 2026-09-03 rationale "keep D5/D6 as the last Timer0 PWM pins" is kept as
+  history under a dated note.
+
+**Changed (commits 18b4574 firmware, 6275b4e docs):**
+- Firmware: SERIAL_PROTOCOL.md pin table, rewritten with a per-pin dated strike so
+  it stays in pin order (D4 free, D5 right strip, D6 left strip, D7 servo, D9 free).
+- docs/shield_layout.json: sockets, nets, step 7, plus an as-built note. The servo
+  jumper's female end sits on J2's SIG pin, so the servo-plug fix from record LC is
+  still open.
+- Generators: test card, flow, wiring, pack wiring, render3d. All of their SVG/PNGs
+  were regenerated.
+- Prose (dated strikes): WIRING_PROTOSHIELD, SHIELD_BUILD, SHIELD_SOLDER_GUIDE,
+  LIGHTING_SPEC, BOM (note only - its ASCII diagrams were already stale), PRD,
+  decisions and hardware-shield-wiring bins.
+
+**Checks:**
+- arduino-cli compile: uno_control 11658 B (36%); servo_bench 3140 B (9%).
+- No SELFTEST or host_test code asserts a pin number (agent read; Opus grep).
+- Suite `34 passed, 0 failed, 0 skipped (of 34)`.
+- check_artifacts: 40 checked, 0 drifted.
+- svg_text_overlap: 0 on all targets.
+- Every edited generator's self_check passes.
+
+**NOT FLASHED.** The Uno still runs the old D9/D4/D7 build (record JQ). Until it is
+re-flashed, the servo will not respond on D7. Plan: Evan takes the shield OFF the
+Uno, so the untested shield gets no USB power, plugs the bare Uno into the PC, and
+Claude flashes and reads the banner + SELFTEST. important.md #3 updated.
+
+**Also:** docs/shield_bottom_grid.jpg labels re-rendered to D7 / D6 / D5 (still
+uncommitted, pending Evan's public-repo choice).
