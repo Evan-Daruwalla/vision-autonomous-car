@@ -1,7 +1,7 @@
 /* uno_control — the actuation firmware. Implements firmware/SERIAL_PROTOCOL.md.
  *
  * LIGHTING REWRITTEN FOR WS2812B 2026-09-03 (PRD task 8e). applyLights() now
- * drives two Adafruit_NeoPixel strip objects on D4/D7 (3 pixels each: white
+ * drives two Adafruit_NeoPixel strip objects on D6/D5 (was D4/D7 until 2026-10-31) (3 pixels each: white
  * front / red rear / amber indicator, cut-to-pixel-count per Appendix DA)
  * instead of the superseded 4-channel discrete-LED scheme this file used to
  * carry on D4-D7. Decisions this rewrite depended on, both made by Evan
@@ -83,14 +83,14 @@
 // ---- pin map: firmware/SERIAL_PROTOCOL.md section 1 ------------------------
 const uint8_t PIN_ENC_A   = 2;    // INT0
 const uint8_t PIN_ENC_B   = 3;    // INT1 — nothing else may use D3
-const uint8_t PIN_STRIP_L = 4;    // LEFT strip DIN (Appendix DA). D5/D6 are FREE.
-const uint8_t PIN_STRIP_R = 7;    // RIGHT strip DIN — its own pin: WS2812B data
+const uint8_t PIN_STRIP_L = 6;    // LEFT strip DIN (Appendix DA). Was D4 until 2026-10-31 (as-built wiring, record MD); D4 and D9 are now FREE.
+const uint8_t PIN_STRIP_R = 5;    // RIGHT strip DIN (was D7 until 2026-10-31) — its own pin: WS2812B data
                                   // is DIN->DOUT only, a cut segment cannot
                                   // share a feed (Appendix CY)
 const uint8_t PIN_DIR_A  = 8;    // TB6612 AIN1+BIN1 (bridged; the "zero spare
                                  // PWM" reason died 2026-09-03 — one motor, two
                                  // channels, paralleled for the 2 A rating)
-const uint8_t PIN_SERVO  = 9;    // Servo claims Timer1
+const uint8_t PIN_SERVO  = 7;    // Servo claims Timer1 (any pin works); was D9 until 2026-10-31
 const uint8_t PIN_STBY   = 10;   // TB6612 STBY — master enable
 const uint8_t PIN_MOTOR  = 11;   // Timer2 PWM
 const uint8_t PIN_DIR_B  = 12;   // TB6612 AIN2+BIN2

@@ -26,12 +26,12 @@ The map below is the corrected one. **`docs/BOM.md`'s diagram used to double-boo
 |---|---|---|
 | D2 | encoder A | INT0 — one of only two hardware interrupts |
 | D3 | encoder B | INT1 — **the other one; nothing else may use D3** |
-| D4 | **LED strip, LEFT segment `DIN`** | plain digital — NeoPixel bit-bangs its own timing, so a PWM-capable pin would be wasted here. Changed 2026-09-03 (Appendix DA); was "left indicator" |
-| D5 | **FREE** | ~~headlights (PWM), Timer0~~ — released 2026-09-03 when the 8 discrete LEDs became two WS2812B strips (Appendix CX). **First spare PWM this design has ever had** |
-| D6 | **FREE** | ~~tail lights (PWM), Timer0~~ — released 2026-09-03, same change. Timer0 PWM, frequency-locked to `millis()` |
-| D7 | **LED strip, RIGHT segment `DIN`** | plain digital. Two pins, not one: WS2812B data is `DIN`→`DOUT` only, so a cut strip's two halves cannot share a feed (Appendix CY) |
+| D4 | ~~LED strip, LEFT segment `DIN`~~ **FREE** since 2026-10-31 (strip moved to D6, as built, record MD) | plain digital — NeoPixel bit-bangs its own timing, so a PWM-capable pin would be wasted here. Changed 2026-09-03 (Appendix DA); was "left indicator" |
+| D5 | ~~FREE~~ **LED strip, RIGHT segment `DIN`** since 2026-10-31 (as built, record MD; was on D7) | ~~headlights (PWM), Timer0~~ — released 2026-09-03 when the 8 discrete LEDs became two WS2812B strips (Appendix CX). **First spare PWM this design has ever had** |
+| D6 | ~~FREE~~ **LED strip, LEFT segment `DIN`** since 2026-10-31 (as built, record MD; was on D4) | ~~tail lights (PWM), Timer0~~ — released 2026-09-03, same change. Timer0 PWM, frequency-locked to `millis()` |
+| D7 | ~~LED strip, RIGHT segment `DIN`~~ **steering servo** since 2026-10-31 (as built, record MD; was on D9). Servo library, claims Timer1 on any pin | plain digital. Two pins, not one: WS2812B data is `DIN`→`DOUT` only, so a cut strip's two halves cannot share a feed (Appendix CY) |
 | D8 | motor DIR A | → TB6612 AIN1 **and BIN1, bridged** (both channels paralleled; added 2026-10-11) |
-| D9 | steering servo | Servo library, **claims Timer1** |
+| D9 | ~~steering servo~~ **FREE** since 2026-10-31 (servo moved to D7, record MD) | Servo library, **claims Timer1** |
 | D10 | **TB6612 `STBY`** — master driver enable | added 2026-09-02, Appendix BL. Its PWM is already dead (Servo owns Timer1), so it is the cheapest free pin; spending it here keeps A1–A5 for future analog (motor current sense) |
 | D11 | motor PWM | **Timer2** — see below. Drives PWMA **and PWMB, bridged** |
 | D12 | motor DIR B | → TB6612 AIN2 **and BIN2, bridged** |

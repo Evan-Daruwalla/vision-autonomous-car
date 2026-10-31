@@ -10,13 +10,13 @@
  * library clamps every pulse to 544-2400 us, which would hide both ends of a
  * 500-2500 us servo (record Appendix FI) -- the very thing being measured.
  *
- * Wiring: signal D9, V+ to the Uno 5V pin, GND to GND. UNLOADED servo only
+ * Wiring: signal D7 (was D9 until 2026-10-31), V+ to the Uno 5V pin, GND to GND. UNLOADED servo only
  * (horn free, not on the rack): the Uno's USB 5 V rail sits behind a 500 mA
  * polyfuse and is not sized for a stalled servo.
  */
 #include <Servo.h>
 
-const uint8_t PIN_SERVO = 9;
+const uint8_t PIN_SERVO = 7;  // (as-built wiring 2026-10-31, record MD)
 const int US_MIN = 400, US_MAX = 2800;
 
 Servo servo;
