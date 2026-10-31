@@ -153,7 +153,7 @@ reproduce a default it cannot express. Measured geometrically instead
   horizon lands on **row 42 of a 120-row frame (35% down)** at 90° vertical
   FOV. Spirit level plus one test photo.
 
-**Compute:** recommend the **Pi 5 2GB at $65**, not the 4GB at $110 — identical
+**Compute:** *(SUPERSEDED 2026-09-03: the Vilros 4 GB starter kit was bought, $179.99, BOM row 1; audit MB)* recommend the **Pi 5 2GB at $65**, not the 4GB at $110 — identical
 silicon, and DonkeyCar's "4GB minimum" is an unjustified recommendation (its
 `pi` extra installs tflite-runtime, not TensorFlow; a 512 MB Zero 2 W already
 drives autonomously). Full brief:
@@ -265,8 +265,8 @@ original floor and the pre-2026-08-12 scale decision.)*
 | Chassis CAD + print | M1 | **Started** | M1.3's two headline numbers closed 2026-09-05 (Appendices DI/DK): pin 4.80mm, axle 5.00mm — pitch-row scale check still open |
 | Tolerance coupon | M1.3 | **Pin + axle offsets both closed; pitch check open** | `cad/tolerance_coupon_v1.stl` (pin row PASS @ 4.80mm; axle row FAIL, all 6 too loose) + `cad/tolerance_coupon_v2.stl` (axle sweep 4.80-5.30mm, PASS @ 5.00mm — "3rd smallest is best") + `cad/README.md`. No caliper data on either coupon (fit-by-feel only), pitch-row scale check (beam across holes 1-2, then 1-5) never run |
 | Steering coupler (printed) | 8c(ii) | ~~**STL generated, never printed**~~ **v1 PRINTED (by 2026-09-03), axle socket TOO LOOSE (Evan, 2026-10-04); v2 generated, untested** | 2026-09-03, Appendix DG. `cad/servo_lego_coupler_v1.stl` + `scripts/gen_servo_lego_coupler.py` (manifold PASS, volume PASS 1.05e-14, 1152 tris, Ø10 × 16 mm). MG90S Ø4.65 bore → female 5.00 × 2.00 Lego cross socket. Prints NO cross profile (obeys Appendix BV); 20T spline deliberately not modelled (sub-nozzle pitch). ⚠️ **No torque margin claimed** — friction + spline bite, never loaded. Four constants unmeasured; `SOCKET_CLEAR` wanted the M1.3 coupon's data, now printed (2026-09-05) — but the coupon's AXLE row is a free-SPIN fit and the coupler's socket wants a firm GRIP, closer to the coupon's PIN row (4.80mm) in spirit; not yet reconciled, flagged rather than silently reused. PETG not PLA |
-| Electronics + teleop | M2 | **Not started** | purchase list is task 8 |
-| Behavioral cloning | M3 | **Not started** | |
+| Electronics + teleop | M2 | ~~**Not started**~~ **In progress (2026-10-31, audit MB)** | everything bought; shield soldered, UNTESTED; teleop stack built and run on the Pi off-car (LD, LR); firmware re-flash pending (ME) |
+| Behavioral cloning | M3 | ~~**Not started**~~ **Software built, no real data (2026-10-31, audit MB)** | bc_real / export_onnx / autopilot exist, tested on synthetic data (LJ-LK); Pi latency p95 1.40 ms (LR); no laps recorded |
 | M4 architecture gate | M4.16a | **Done** | 2026-07-23: feasible w/ constraints; docs/research/2026-07-23_world-model-8gb-vram.md |
 | Offline world model | M4 | **Not started** | tasks 16-20 now concrete (two architectures, one dataset) |
 | Sim-RL (optional) | M5 | **Not started** | never blocks M4 |
@@ -286,7 +286,7 @@ original floor and the pre-2026-08-12 scale decision.)*
 
 ## Hardware & stack facts (from the 2026-07-23 brief — re-verify prices at purchase)
 
-- Pi 5 **4GB, $70** (chosen 2026-07-23 ~20:46, down from 8GB for budget;
+- Pi 5 **4GB, $70** *(bought 2026-09-03 as the Vilros 4 GB kit, $179.99, BOM row 1; audit MB)* (chosen 2026-07-23 ~20:46, down from 8GB for budget;
   4GB is DonkeyCar's minimum and the board only ever runs inference).
 - Camera Module 3 Wide $35 (120° diagonal, rolling shutter — fine at 1-3 m/s)
   **+ a Standard-Mini camera cable (~$2-5)** — the module ships with a
@@ -370,7 +370,7 @@ original floor and the pre-2026-08-12 scale decision.)*
   (500–670 mm) at either car width. A 130 mm car at 300 mm lanes gives
   a figure-8 bbox of 1.30 × 2.30 m (R=500) to 1.64 × 2.98 m (R=670).
 - ~~**Car width: measure, don't choose.**~~ **ANSWERED 2026-09-02: 114.75 mm
-  MEASURED** (rear tire track). Lane width follows at 229.5 mm; track v2 spare
+  MEASURED** (rear tire track). *(SUPERSEDED 2026-09-05: the front track is 155 mm and governs - Appendix DM, cad/vehicle_envelope.py:68; audit MB)* Lane width follows at 229.5 mm; track v2 spare
   went 140 → 171 mm. ~~**Still open: WHEELBASE**~~ **A geometric estimate exists
   2026-09-03: ≈185.95 mm, from Evan's 9.25 in overall wheel-to-wheel length
   minus the front (42.25 mm) and rear (55.75 mm) tire radii — not a direct
@@ -486,7 +486,7 @@ TELEOP (LD): custom Python stack in pi/ (DonkeyCar dropped): protocol, uno_link,
 camera, recorder (npz, action = cmd/100 shifted one tick, log_cmd_next), teleop
 (websocket + web page; Xbox pad read in the LAPTOP browser through an SSH
 tunnel, http://localhost:8000). Fake-hardware + browser verified ONLY; nothing
-run on the Pi (unreachable from the PC on 2026-10-25). On-Pi checklist:
+run on the Pi (unreachable from the PC on 2026-10-25). *(2026-10-30: superseded - the code ran on the Pi off-car, record LR; audit MB)* On-Pi checklist:
 pi/README.md. Lights / indicator (task 11b) postponed until after 2026-11-01.
 Shield docs since 2026-10-20: SVG audited +
 corrected (KK), bench guides added (KR-KT, KW), strips named by side (KX). All 24 ordered parts are in (IX).
@@ -527,7 +527,7 @@ docs/shield_how_it_works.svg (6 current paths, per-net 3D renders, KW). Wire cor
 CAD (all UNPRINTED, UNTESTED): tray v11 + deck v13 for the 168 x 62.16 x
 22.51 bank (JU-JW, KB): velcro 3.5 mm dots under every part, deck underside
 z 54.5, Uno behind a 40 mm USB-A zone, rocker at (100, -64) on the -y wing,
-LM2596 x 10..76 / y -74..-38; layout checker 35 entries, 0 failed (now also
+LM2596 x 10..76 / y -74..-38; layout checker ~~35~~ 36 entries (audit MB), 0 failed (now also
 fails parts touching material at a side). Camera mast v1 (paint supports under
 the 2 side members), 9.0 mm worst-case gap to the ribbon zone (JX). Servo
 mount v7, motor mount v6. PETG Translucent, 250/70 C, 0.15 mm, 2 walls,
@@ -541,13 +541,13 @@ quote it; svg_text_overlap needs Chrome, so it SKIPs on the Pi). Push state: run
 
 AUDIT BACKLOG: KA (2026-10-17 daily audit, 48 findings; HIGH #1 fixed in KE,
 HIGH #2/#3 (HANDOFF staleness) fixed 2026-10-20; PRD_ROADMAP.md:204,207,628
-struck 2026-10-21 (KK); MEDs still open: WIRING_PROTOSHIELD.md:125,179
+struck 2026-10-21 (KK); MEDs ~~still open~~ (FIXED 2026-10-29, commit a1156be; audit MB): WIRING_PROTOSHIELD.md:125,179
 cut-cable text, bins (hardware/architecture/LIGHTING, decisions.md:62), LM2596
 4.99 V (here + pack svg) vs 4.95 V recorded in JE). HJ's HIGH:
 ml/splits.py split stability + no corpus id in checkpoints. IM, EW, EX, FG
 open.
 KU (2026-10-22 daily audit, 36 findings, 0 crit/high): Med #1 strip naming
-FIXED (KX). Med #2 FIXED (KZ: the VMOT check moved to step 6). Med #3 OPEN:
+FIXED (KX). Med #2 FIXED (KZ: the VMOT check moved to step 6). Med #3 ~~OPEN~~ FIXED 2026-10-29 (a1156be; audit MB):
 superseded power text in BOM.md:51, WIRING_PROTOSHIELD.md:129,183,
 hardware.md:242, LIGHTING_SPEC.md:113; README says nothing is bought.
 ~~docs/shield_wiring.svg has 36 text overlaps (not in the overlap gate).~~ (2026-10-30: fixed to 0 and gated by svg_text_overlap since LK.)
@@ -580,12 +580,12 @@ NEXT ACTIONS, highest value first:
    checks: rocker OFF = 0 V downstream; XT30 polarity +8.x V before any load.
 5. Charger board 2 no-load test (BAT lifted, USB-C in: 8.4 V OK, >= 8.6 V
    reject).
-6. Fix KA's and KU's remaining MEDs (list above) and HJ's HIGH (ml/splits.py).
-7. Small backlog: host_test.py docstring + SERIAL_PROTOCOL.md:9 say nothing is
+6. ~~Fix KA's and KU's remaining MEDs (list above) and HJ's HIGH (ml/splits.py).~~ DONE: MEDs in a1156be (2026-10-29); HJ's HIGH in code (LN) - the ids install waits for a retrain (audit MB).
+7. Small backlog: ~~host_test.py docstring + SERIAL_PROTOCOL.md:9 say nothing is~~ (those two and the servo_bench prompt are FIXED - a1156be, 400-2800; audit MB) remaining:
    wired; servo_bench prompt "400-2600" (US_MAX 2800); confirm the 12-tooth
    bevel gear; measure the USB-B plug (16 x 30 x 13 allowance).
 8. Evan's call: 98 tracked files carry the local path D:\ClaudeCode\... on the
-   PUBLIC remote; 2 HOME-path occurrences in the record.
+   PUBLIC remote; ~~2~~ 3 HOME-path occurrences in the record (lines 5982, 6701, 13700 per audit MB).
 
 HARD CONSTRAINTS
 - Start every reply with "Evan". Commit only when asked; push only when told;

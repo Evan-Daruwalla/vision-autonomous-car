@@ -244,5 +244,7 @@
       "survived": 0
     }
   },
-  "no_transfer_claim": "Simulated only. These numbers say nothing about the physical car; the controller has never seen real hardware. The expert is a behavioural-cloning CEILING, not a rival."
+  "no_transfer_claim": "Simulated only. These numbers say nothing about the physical car; the controller has never seen real hardware. The expert is a behavioural-cloning CEILING, not a rival.",
+  "batch_valid": false,
+  "batch_valid_note": "added 2026-10-31 by the eval_in_sim.py:333 criterion (audit record MB); no other value changed"
 }

@@ -660,7 +660,7 @@ transfer gap) must not block the capstone.
       Python stack in `pi/` does the camera, web UI, Xbox-pad input (laptop browser,
       Gamepad API, via SSH tunnel) and an npz recorder in the ml/ episode format.** Built
       and verified on fake hardware only (suite 26); the on-Pi checklist is in
-      `pi/README.md`. Done-check NOT passed: nothing has run on the Pi or the car.)*
+      `pi/README.md`. Done-check NOT passed: nothing has run on the Pi or the car.)* *(2026-10-30: the code ran on the Pi off-car - record LR; still nothing on the car; audit MB)*
 
 11b. **Indicator state in the logger — GATES TASK 12** (appended 2026-09-01,
     Appendix AY / `docs/LIGHTING_SPEC.md` §5). Task 11's done-check names two
