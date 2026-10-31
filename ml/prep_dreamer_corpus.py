@@ -16,6 +16,8 @@ change before Dreamer can consume it:
 byte the split P3 trained on.** Episode order comes from the same
 `sorted(glob("*.npz"))` that `preprocess.py` uses, so the episode indices mean
 the same thing in both scripts. Change either and P3/P4 stop being comparable.
+ids come from load_ids('train'): None (legacy split) until *_ids.npy is
+installed together with a retrain (record MB).
 
 `holdout` (waveshare) is deliberately NOT written here. P4's done-check is
 about whether DreamerV3 trains inside 8 GB, and P3 already measured what the
@@ -38,7 +40,7 @@ import torch
 
 from episode_writer import load_episode
 from preprocess import resize_batch, frames_in
-from splits import fit_val_episodes
+from splits import fit_val_episodes, load_ids
 
 REPO = Path(__file__).resolve().parent.parent
 SRC = REPO / "ml" / "data" / "sim" / "train"
@@ -108,7 +110,10 @@ def main() -> None:
     # Identical derivation to preprocess.py, so episode index i means the same
     # episode in both -- that is what makes the seed-0 split reproducible here.
     tracks = np.array([f.stem.rsplit("-", 2)[0] for f in files], dtype="<U40")
-    ids = np.array([f.stem for f in files], dtype="<U80")   # = preprocess.py's ids
+    # ids come from load_ids('train'): None (legacy split) until *_ids.npy is
+    # installed together with a retrain (record MB). Building ids from the file
+    # stems here used the HASH split while every checkpoint trained on legacy.
+    ids = load_ids("train")
     fit, val = fit_val_episodes(tracks, seed=args.seed, ids=ids)
     print(f"{len(files)} source episodes -> fit {len(fit)}, val_indomain {len(val)}")
 

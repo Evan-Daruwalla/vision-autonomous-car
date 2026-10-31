@@ -37,7 +37,7 @@ from PIL import Image
 
 from models import ConvVAE, MDNRNN, mdn_sample
 from provenance import write_result
-from splits import (cache_key_matches, encoder_fingerprint,
+from splits import (cache_key_matches, check_corpus, encoder_fingerprint,
                     fit_val_episodes, load_ids, load_proc, split_seed_of)
 
 REPO = Path(__file__).resolve().parent.parent
@@ -214,8 +214,10 @@ def main():
     # >=3 seeds for its comparative claim, so this was one flag away from
     # publishing train-on-test numbers.
     split_seed = split_seed_of(vae_ckpt, Path(args.vae).name)
-    fit_eps, val_eps = fit_val_episodes(tr_tracks, seed=split_seed,
-                                       ids=load_ids("train"))
+    ids = load_ids("train")
+    check_corpus(vae_ckpt.get("corpus_id"), ids)
+    check_corpus(rnn_ckpt.get("corpus_id"), ids)
+    fit_eps, val_eps = fit_val_episodes(tr_tracks, seed=split_seed, ids=ids)
     if split_seed != args.seed:
         print(f"note: sampling seed {args.seed}, but the split is rebuilt with "
               f"seed {split_seed} (the checkpoint's) so val_indomain stays "

@@ -66,6 +66,9 @@ def check_episode(ep: dict, path: Path) -> tuple[list[str], list[str], dict]:
         return fails, warns, stats
     if np.abs(cmd).max(initial=0) > 100:
         fails.append(f"{name}: a command is outside -100..100")
+    if "action" not in ep:
+        fails.append(f"{name}: no action array")
+        return fails, warns, stats
     act = ep["action"]
     if T and not np.allclose(act[0], 0.0):
         fails.append(f"{name}: action[0] is not zeros")
@@ -164,6 +167,12 @@ def self_check() -> None:
         assert verify_dir(Path(td) / "s6") == 0, "real-hardware flags falsely failed"
         assert verify_dir(Path(td) / "does_not_exist") == 2, "missing root must exit 2"
         assert main([""]) == 2, "empty root arg must exit 2"
+        # an episode without "action" must FAIL cleanly, not KeyError
+        p = write(Path(td) / "s7", 60)
+        ep7 = dict(load_episode(p))
+        ep7.pop("action")
+        f, _, _ = check_episode(ep7, p)
+        assert any("no action array" in x for x in f), f
     print("verify_real self_check: PASS")
 
 

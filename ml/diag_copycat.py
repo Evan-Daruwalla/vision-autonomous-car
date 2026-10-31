@@ -45,7 +45,7 @@ import torch
 
 from models import MDNRNN, ConvVAE, Z_DIM
 from provenance import write_result
-from splits import (fit_val_episodes, load_cached_mu, load_ids, load_proc,
+from splits import (check_corpus, fit_val_episodes, load_cached_mu, load_ids, load_proc,
                     split_seed_of)
 from train_controller import Controller, rnn_states
 
@@ -79,7 +79,8 @@ def main() -> int:
 
     vae_ckpt = torch.load(args.vae, map_location=args.device)
     rnn = MDNRNN().to(args.device)
-    rnn.load_state_dict(torch.load(args.rnn, map_location=args.device)["model"])
+    rnn_ckpt = torch.load(args.rnn, map_location=args.device)
+    rnn.load_state_dict(rnn_ckpt["model"])
     rnn.eval()
 
     _, act, eps, tracks = load_proc("train", proc=proc)
@@ -116,8 +117,10 @@ def main() -> int:
         del imgs
 
     split_seed = split_seed_of(vae_ckpt)
-    _, val_eps = fit_val_episodes(tracks, seed=split_seed,
-                                  ids=load_ids("train", proc=proc))
+    ids = load_ids("train", proc=proc)
+    for _ck in (ck, vae_ckpt, rnn_ckpt):
+        check_corpus(_ck.get("corpus_id"), ids)
+    _, val_eps = fit_val_episodes(tracks, seed=split_seed, ids=ids)
     val_i, val_h = rnn_states(rnn, mu, act, eps, val_eps, args.device)
 
     # a[t-1], built per EPISODE so no frame is paired with the last action of

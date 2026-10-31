@@ -181,6 +181,20 @@ def corpus_id(ids) -> str:
         "\n".join(sorted(str(i) for i in ids)).encode("utf-8")).hexdigest()[:16]
 
 
+def check_corpus(ckpt_corpus_id, ids) -> None:
+    """Refuse to evaluate a checkpoint on a different split than it trained on."""
+    if ids is None:
+        return                      # legacy split; fine for every checkpoint
+    if ckpt_corpus_id is None:
+        raise ValueError(
+            "checkpoint was trained on the legacy split (no corpus_id); "
+            "evaluating it on the hash split would score it on training "
+            "episodes - retrain first (record MB)")
+    if ckpt_corpus_id != corpus_id(ids):
+        raise ValueError(f"checkpoint corpus_id {ckpt_corpus_id} != current "
+                         f"corpus {corpus_id(ids)}")
+
+
 def _id_hash(seed: int, ep_id) -> float:
     h = hashlib.sha256(f"{seed}:{ep_id}".encode("utf-8")).hexdigest()[:12]
     return int(h, 16) / 16 ** 12
@@ -336,6 +350,17 @@ def self_check() -> None:
     assert corpus_id(["x", "y", "z"]) == corpus_id(["z", "x", "y"])
     assert corpus_id(["x", "y", "z"]) != corpus_id(["x", "y", "z", "w"])
     assert len(corpus_id(["x"])) == 16
+    # check_corpus: legacy ids=None passes; hash split needs a matching id
+    check_corpus(None, None)
+    check_corpus("anything", None)
+    check_corpus(corpus_id(["x", "y"]), ["y", "x"])
+    for bad in (None, "0123456789abcdef"):
+        try:
+            check_corpus(bad, ["x", "y"])
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"check_corpus accepted {bad!r}")
     # load_ids: None when missing, ValueError on a length mismatch
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)

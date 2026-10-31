@@ -179,6 +179,9 @@ def run(data, out, epochs: int = 50, seed: int = 0, cpu: bool = False,
     xf, yf = _cat(eps, fit_i)
     xv, yv = _cat(eps, val_i)
     xt, yt = _cat(eps, test_i)
+    if len(xf) == 0:
+        raise SystemExit("no trainable frames: every fit-episode frame was "
+                         "dropped (autopilot log_mode=1 or crash trim)")
 
     model = BCNet().to(dev)
     opt = torch.optim.Adam(model.parameters(), lr=LR)
@@ -245,10 +248,12 @@ def run(data, out, epochs: int = 50, seed: int = 0, cpu: bool = False,
 
 # --------------------------------------------------------------- self-check
 
-def _write_synth(root: Path, rng: np.random.Generator, extras: bool = False) -> None:
+def _write_synth(root: Path, rng: np.random.Generator, extras: bool = False,
+                 all_auto: bool = False) -> None:
     """4 sessions x 3 episodes x 60 frames, plus one 30-frame episode."""
     def episode(session: str, T: int, auto_half: bool = False,
-                crash: bool = False, meta: dict | None = None) -> None:
+                crash: bool = False, meta: dict | None = None,
+                auto_all: bool = False) -> None:
         w = EpisodeWriter(root / session)
         ps = rng.integers(0, 160, T)
         steer = np.rint(((ps / 159.0) * 2 - 1) * 100).astype(np.int8)
@@ -265,10 +270,12 @@ def _write_synth(root: Path, rng: np.random.Generator, extras: bool = False) -> 
         logs = {"log_cmd_next": cmd}
         if auto_half:
             logs["log_mode"] = (np.arange(T) >= T // 2).astype(np.uint8)
+        if auto_all:
+            logs["log_mode"] = np.ones(T, np.uint8)
         w.save(meta=meta, frame_logs=logs)
     for s in range(4):
         for _ in range(3):
-            episode(f"sess{s}", 60)
+            episode(f"sess{s}", 60, auto_all=all_auto)
     episode("short", 30)
     if extras:
         episode("auto", 60, auto_half=True)
@@ -334,6 +341,15 @@ def self_check() -> None:
         assert len(by["auto"]["x"]) == 30 and by["auto"]["n_auto"] == 30, by["auto"]["n_auto"]
         assert len(by["crash"]["x"]) == 60 - CRASH_TRIM and by["crash"]["n_crash"] == CRASH_TRIM
         assert len(by["sess0"]["x"]) == 60 and by["sess0"]["n_auto"] == 0
+        # every frame autopilot (log_mode=1): clear SystemExit, not ZeroDivisionError
+        d3 = Path(td) / "data3"
+        _write_synth(d3, np.random.default_rng(2), all_auto=True)
+        try:
+            run(d3, Path(td) / "out3", epochs=1, seed=0, cpu=True)
+        except SystemExit as e:
+            assert "no trainable frames" in str(e), e
+        else:
+            raise AssertionError("empty fit set did not raise SystemExit")
     dt = time.time() - t0
     assert dt < 90, f"self_check took {dt:.1f}s"
     print(f"bc_real self_check: PASS (train loss {first:.4f} -> {last:.4f}, "

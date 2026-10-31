@@ -49,7 +49,8 @@ import torch.nn as nn
 from compare_encoders import cone_mask
 from models import Z_DIM, ConvVAE
 from provenance import write_result
-from splits import fit_val_episodes, load_ids, load_proc, split_seed_of
+from splits import (check_corpus, fit_val_episodes, load_ids, load_proc,
+                    split_seed_of)
 
 REPO = Path(__file__).resolve().parent.parent
 RUNS = REPO / "ml" / "runs"
@@ -176,8 +177,9 @@ def main() -> int:
     # same rule as rollout_eval.py/train_controller.py.
     vae_ckpt = torch.load(args.vae, map_location=args.device)
     split_seed = split_seed_of(vae_ckpt)
-    fit_eps, val_eps = fit_val_episodes(tracks, seed=split_seed,
-                                       ids=load_ids("train"))
+    ids = load_ids("train")
+    check_corpus(vae_ckpt.get("corpus_id"), ids)
+    fit_eps, val_eps = fit_val_episodes(tracks, seed=split_seed, ids=ids)
 
     print(f"scanning {len(imgs):,} frames for cones ...")
     counts = scan_cones(imgs)
