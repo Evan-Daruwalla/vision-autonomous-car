@@ -1,8 +1,8 @@
 # Handoff
 
-**Last updated: 2026-10-31 ~15:37 CDT** (records LO-MG; MG: Uno re-flashed with the D7/D6/D5 build; MF: audit MB high + listed meds fixed, landing check caught a SIGTERM deadlock (fixed); ME: firmware + docs moved to the as-built pins servo D7 / strips D6, D5 - compiled, NOT flashed (item 0b); push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
+**Last updated: 2026-10-31 ~15:43 CDT** (records LO-MH; MH: 2026-11-01 soft milestone (M3) NOT met - flagged; paste-ready prompt rewritten; MG: Uno re-flashed with the D7/D6/D5 build; MF: audit MB high + listed meds fixed, landing check caught a SIGTERM deadlock (fixed); ME: firmware + docs moved to the as-built pins servo D7 / strips D6, D5 - compiled, NOT flashed (item 0b); push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
-(append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ ~~327 appendices A-LO~~ ~~328 appendices A-LP~~ ~~329 appendices A-LQ~~ ~~330 appendices A-LR~~ ~~331 appendices A-LS~~ ~~332 appendices A-LT~~ ~~333 appendices A-LU~~ ~~334 appendices A-LV~~ ~~335 appendices A-LW~~ ~~336 appendices A-LX~~ ~~337 appendices A-LY~~ ~~338 appendices A-LZ~~ ~~339 appendices A-MA~~ ~~341 appendices A-MC~~ ~~342 appendices A-MD~~ ~~343 appendices A-ME~~ ~~344 appendices A-MF~~ 345 appendices A-MG (MB = the 2026-10-31 scheduled audit) as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
+(append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ ~~327 appendices A-LO~~ ~~328 appendices A-LP~~ ~~329 appendices A-LQ~~ ~~330 appendices A-LR~~ ~~331 appendices A-LS~~ ~~332 appendices A-LT~~ ~~333 appendices A-LU~~ ~~334 appendices A-LV~~ ~~335 appendices A-LW~~ ~~336 appendices A-LX~~ ~~337 appendices A-LY~~ ~~338 appendices A-LZ~~ ~~339 appendices A-MA~~ ~~341 appendices A-MC~~ ~~342 appendices A-MD~~ ~~343 appendices A-ME~~ ~~344 appendices A-MF~~ ~~345 appendices A-MG~~ 346 appendices A-MH (MB = the 2026-10-31 scheduled audit) as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
 
 ## Goal
@@ -465,127 +465,72 @@ original floor and the pre-2026-08-12 scale decision.)*
 
 ```
 Read, in order:
-1. D:\ClaudeCode\Autonomous Car Project\HANDOFF.md  (ONLY live snapshot)
-2. PRD_ROADMAP.md (tasks 5-10 carry dated notes)
-3. Before ANY wiring: docs/WIRING_PROTOSHIELD.md (section 2 nets, section 5
-   build order), docs/pack_wiring_full.svg (W1-W17 + cut list),
-   docs/SHIELD_BUILD.md + docs/shield_holemap.svg (hole-by-hole shield);
-   at the bench, docs/SHIELD_SOLDER_GUIDE.md (step-by-step, with checks) or its
-   LEGO-style picture version docs/shield_build_guide.svg; what each part does
-   and how the current flows: docs/shield_how_it_works.svg.
+1. D:\ClaudeCode\Autonomous Car Project\HANDOFF.md  (ONLY live snapshot; this prompt is its end)
+2. PRD_ROADMAP.md (M2/M3 rows; tasks 9-12 carry dated notes)
+3. Before ANY shield work: docs/shield_test_card.png (meter checks A-E, in order),
+   docs/shield_layout.json (holes, pins, steps 0-8), docs/WIRING_PROTOSHIELD.md.
+   Before ANY Pi work: pi/README.md ("Off-car session" + "On-Pi bench checklist").
    Before ANY tray/deck/mast work: docs/ELECTRONICS_LAYOUT.md.
-4. .claude/project-memory/INDEX.md, then ONLY the bins your task touches
-   (steering.md for servo work; hardware.md + decisions.md for printed
-   mounts or wiring; track.md for track work).
+4. .claude/project-memory/important.md, INDEX.md, then ONLY the bins your task
+   touches (hardware-shield-wiring.md, firmware-traps.md, hardware-power.md,
+   data.md, testing.md ...).
 
-STATE (2026-10-25 ~20:58 CDT). NEW since 2026-10-22: Evan SOLDERED the proto
-shield - UNTESTED, no meter checks or power yet (LB, LC): L2/9-L2/10 added after
-photo review; C1 hangs on bare legs (re-seat); the servo signal path is NOT
-complete (D9 jumper sits on J2's SIG pin - see LC for the two fixes).
-TELEOP (LD): custom Python stack in pi/ (DonkeyCar dropped): protocol, uno_link,
-camera, recorder (npz, action = cmd/100 shifted one tick, log_cmd_next), teleop
-(websocket + web page; Xbox pad read in the LAPTOP browser through an SSH
-tunnel, http://localhost:8000). Fake-hardware + browser verified ONLY; nothing
-run on the Pi (unreachable from the PC on 2026-10-25). *(2026-10-30: superseded - the code ran on the Pi off-car, record LR; audit MB)* On-Pi checklist:
-pi/README.md. Lights / indicator (task 11b) postponed until after 2026-11-01.
-Shield docs since 2026-10-20: SVG audited +
-corrected (KK), bench guides added (KR-KT, KW), strips named by side (KX). All 24 ordered parts are in (IX).
-FIRMWARE: the Uno runs the current uno_control (SELFTEST PASS 86/86),
-re-flashed FROM THE PI with avrdude 2026-10-16 (JQ); host_test.py all ok from
-the Pi. Read the boot banner before trusting any firmware claim.
-WIRED / BUILT: servo on the car (drives the rack; left stop ~450 us = rack
-stop, safe limit 550; right ~2600 us); 2S pack BUILT + CHARGED (IU-JA: BMS
-B08HLQQCQJ on B- / MB (holder rivet) / 3 A fuse -> B+; charger + XT30 on
-P+ / P-; charger board 1 retired, board 2 stops at 8.29 V; its no-load test is
-NOT done; BMS cutoff UNTESTED); LM2596 set to 4.99 V (JE); Pi 5 on Bookworm
-(`ssh ed@ed-pi5.local`), camera works (JK).
-NOT WIRED: motor, encoder, LED strips, rocker. The proto shield is soldered
-but untested and not yet on the car.
-POWER: the Uno runs on the Pi's USB (plain cable, JF); `+5V2` (LM2596) feeds
-only the strips + encoder and NEVER touches the Uno 5V pin; servo V+ on the
-Uno 5V via a 3-pin jumper JP1 (JR). BOM wiring section fixed (KE).
-SHIELD (KG): proto shield v.5, rails METERED by Evan (T, V = 5V; G, B = GND;
-G-B joined; strips separate). Star = printed rail B. Hole-by-hole layout in
-docs/shield_layout.json, checked by scripts/shield_holemap.py (one lead per
-hole, no body clashes, 17 nets joined, none shorted; 31 solder-bridge hazards
-listed as meter-silent checks). TB6612 (Pololu md08a) chip UP in U2/1-8 +
-L2/1-8, PWMA at the top-left; A/B pairs bridged on the carrier's pin tips;
-C1 470 uF is DESIGNED to stand upright on the carrier's VMOT/GND tips (as built it hangs on bare legs, LC - re-seat) (KQ; top ~18.8 mm
-above the shield - headroom over the Uno UNCHECKED) + C2 0.1 uF on the same
-tips (may be soldered across C1's legs at the tips). J3 = LEFT strip (~~D4~~ D6, 2026-10-31 ME),
-J4 = RIGHT strip (~~D7~~ D5), net DIN_L / DIN_R (KX). Strips' 470 uF goes on
-each strip's input pads. Uno links = Dupont pins into the shield sockets;
-off-board = 0.1 in male headers. ~~NOTHING SOLDERED YET~~ SOLDERED 2026-10-22..24
-(LB, LC), meter checks of steps 1-8 NOT yet run. The shield SVG + SHIELD_BUILD.md now show a 3D
-render of the INTENDED finished board (scripts/shield_render3d.py, KI; Dupont
-lead ends and board outline are schematic): a labelled true top-down view with every hole, and an
-underside view with the top-side parts as labelled cyan ghost outlines, a 3/4 view, and unlabelled top + bottom views (KL-KP).
-Bench guides (all generated from shield_layout.json): docs/SHIELD_SOLDER_GUIDE.md (text,
-KR), docs/shield_build_guide.svg (LEGO-style steps 0-8, rails marked, KS/KT),
-docs/shield_how_it_works.svg (6 current paths, per-net 3D renders, KW). Wire corners live in each wire's
-"via" list (w3 L3/0, w4 P4/-1, w5 B/-2; KJ) - map, steps and render all read it.
-CAD (all UNPRINTED, UNTESTED): tray v11 + deck v13 for the 168 x 62.16 x
-22.51 bank (JU-JW, KB): velcro 3.5 mm dots under every part, deck underside
-z 54.5, Uno behind a 40 mm USB-A zone, rocker at (100, -64) on the -y wing,
-LM2596 x 10..76 / y -74..-38; layout checker ~~35~~ 36 entries (audit MB), 0 failed (now also
-fails parts touching material at a side). Camera mast v1 (paint supports under
-the 2 side members), 9.0 mm worst-case gap to the ribbon zone (JX). Servo
-mount v7, motor mount v6. PETG Translucent, 250/70 C, 0.15 mm, 2 walls,
-supports OFF for tray + deck.
-WIRES: pack side soldered and NOT to be re-soldered (P+/P- 4 x 190, fuse wire
-326, MB 55; B- length unrecorded). To cut (estimates, trim at the dry fit):
-W8 80, W9 250, W10 100, W11 jumper, W12 260, W13 220, W14 120, W15 jumper;
-encoder cable 300 uncut (~30 mm spare); servo lead needs a Dupont extension.
-TEST SUITE: scripts/run_checks.py (~~32 passed on 2026-10-29~~ ~~33 passed in LN~~ 34 passed 2026-10-31 (ME; + shield_test_card), walks pi/ - re-run it, never
-quote it; svg_text_overlap needs Chrome, so it SKIPs on the Pi). Push state: run `git fetch` then `git status -sb`.
+STATE (2026-10-31 ~15:43 CDT; record entries LO-MG cover 2026-10-30..31):
+- UNO: re-flashed 2026-10-31 with uno_control at the AS-BUILT pin map - servo D7,
+  left strip D6, right strip D5 (D4, D9 spare; NO spare PWM pin left). 11658 B,
+  read-back verified, banner + SELFTEST PASS 86/86 (MG). Encoder D2/D3, motor
+  D8/D10/D11/D12, pack sense A0 unchanged. Read the banner before trusting firmware.
+- SHIELD: soldered, UNTESTED (no meter checks, never powered). Two known fixes
+  before any power (record LC): (1) the servo jumper's female end sits on J2's SIG
+  pin, so the servo has nowhere to plug - fix the signal path; (2) C1 hangs on bare
+  legs - re-seat it upright. The shield should be OFF the Uno (the flash procedure took it off -
+  confirm). Wiring as built: shield->Uno Dupont wires on D7 / D6 / D5 (MD).
+- PI 5: re-flashed 2026-10-30 (old password lost): Raspberry Pi OS Lite Bookworm,
+  Python 3.11.2, `ssh ed@ed-pi5.local` with PUBLIC-KEY ONLY (PC key
+  ~/.ssh/id_ed25519). apt python3-picamera2 (0.3.31) + python3-venv installed;
+  `bash pi/deploy.sh` done; onnxruntime 1.31.1 in ~/car/venv. A re-flash wipes all
+  of that. MEASURED ON THE PI (LR-MA): preflight --no-uno PASS; camera 20 fps,
+  full FOV (ScalerCrop 4608x2592); autopilot predict p95 1.40 ms (untrained BCNet,
+  upper bound); pad, arm/disarm and deadman work (Evan, by eye); real teleop on the
+  BARE board plateaus 45-47 C.
+- POWER (LS-LY): every under-voltage seen was a bad USB-C cable, not the supplies.
+  The Anker A1275 bank (the car's planned Pi supply, 3 A mode) holds 4.97-5.08 V
+  under full load on a good cable. The old cable must never be used on the Pi.
+  In 3 A mode the Pi caps USB peripherals at 600 mA total - the Uno + TB6612 logic
+  + servo all draw through it (JF/JR); UNTESTED until the Uno is connected.
+- COOLING: the Vilros kit fan case's ribbon slot fits the PCIe connector, not the
+  camera - Evan will cut the case. Bench runs bare (fine, MA); the car needs cooling.
+- SOFTWARE (all PC-side, synthetic data unless stated): teleop (fake/real camera,
+  --fake-uno, auto port detect ttyACM*/ttyUSB*, disarms on ST_WATCHDOG, SIGTERM
+  saves the episode), recorder, verify_real (FAILs fake-hardware episodes),
+  bc_real, export_onnx, autopilot --bench. Audit MB's high + listed meds fixed
+  (MF); the train/val split stays LEGACY until *_ids.npy is installed together
+  with a retrain - check_corpus refuses mismatches.
+- NOT WIRED / NOT DONE: motor, encoder, LED strips, rocker; no meter checks; no
+  laps; no trained real-car model. M2 in progress, M3 software-only.
+- DEADLINE: the 2026-11-01 soft milestone (SIM-POC + M3) is NOT met - M3 needs real
+  laps. Hard deadline: Regular Decision ~2027-01-01..15.
+- UNCOMMITTED BY CHOICE: docs/shield_bottom_grid.jpg (board photo with the ROW/COL
+  grid + pin labels; Evan has not said public or local).
+TEST SUITE: scripts/run_checks.py (34 on 2026-10-31) - re-run it, never quote it.
+Push state: `git fetch` then `git status -sb`.
 
-AUDIT BACKLOG: KA (2026-10-17 daily audit, 48 findings; HIGH #1 fixed in KE,
-HIGH #2/#3 (HANDOFF staleness) fixed 2026-10-20; PRD_ROADMAP.md:204,207,628
-struck 2026-10-21 (KK); MEDs ~~still open~~ (FIXED 2026-10-29, commit a1156be; audit MB): WIRING_PROTOSHIELD.md:125,179
-cut-cable text, bins (hardware/architecture/LIGHTING, decisions.md:62), LM2596
-4.99 V (here + pack svg) vs 4.95 V recorded in JE). HJ's HIGH:
-ml/splits.py split stability + no corpus id in checkpoints. IM, EW, EX, FG
-open.
-KU (2026-10-22 daily audit, 36 findings, 0 crit/high): Med #1 strip naming
-FIXED (KX). Med #2 FIXED (KZ: the VMOT check moved to step 6). Med #3 ~~OPEN~~ FIXED 2026-10-29 (a1156be; audit MB):
-superseded power text in BOM.md:51, WIRING_PROTOSHIELD.md:129,183,
-hardware.md:242, LIGHTING_SPEC.md:113; README says nothing is bought.
-~~docs/shield_wiring.svg has 36 text overlaps (not in the overlap gate).~~ (2026-10-30: fixed to 0 and gated by svg_text_overlap since LK.)
-
-NEXT ACTIONS, highest value first:
-0a-off. ~~(2026-10-30, LQ) OFF-CAR Pi session, Uno NOT attached - do this first:~~ DONE 2026-10-30 (LR); left open: check the Pi power supply (0x50000) and record a 30 s+ episode for the frame-gap %.
-   pi/README.md "Off-car session" steps 1-5 (deploy + `preflight.py --no-uno`,
-   teleop `--fake --bench` with the Xbox pad, `--fake-uno --bench` for the real
-   camera, verify_real on the test episodes, onnxruntime + `autopilot.py --bench`).
-   Paste every output back to be recorded. Never plug the car's Uno into the Pi
-   until item 0 is done.
-0b. ~~(2026-10-31, ME) RE-FLASH uno_control:~~ DONE 2026-10-31 (MG: 11658 B verified, SELFTEST 86/86). firmware now uses servo D7 / strips D6, D5 (as built) but the board runs the old D9/D4/D7 build. Evan: pull the shield OFF the Uno, plug the bare Uno into the PC; Claude flashes over COM3 and reads the banner + SELFTEST. Do it before any servo test.
-0a. (2026-10-29, LJ/LK) ON-CAR Pi session (after item 0): `bash pi/deploy.sh` from the PC, then
-   `~/car/venv/bin/python ~/car/pi/preflight.py` on the Pi (it must PASS), then the
-   pi/README.md bench checklist; meter the LM2596 (4.95 vs 4.99 V). Then laps per
-   docs/DATA_COLLECTION.md -> ml/verify_real.py -> ml/bc_real.py -> ml/export_onnx.py.
-0. (2026-10-25, LD) Shield is soldered but UNTESTED: fix the servo signal path
-   and C1 (record LC), run the meter checks of steps 1-8 in docs/shield_layout.json,
-   then bench-run teleop on the Pi per pi/README.md's checklist (--bench, no
-   --max-throttle until the motor is wired and the car is on a stand).
-1. ~~Evan: shield step 0 (2 meter checks), then SHIELD_BUILD.md steps 1-2~~
-   (superseded 2026-10-25: the shield is fully soldered; see item 0).
-2. Add the
-   upright C1 (~18.8 mm, once re-seated per LC) as a height entry over the Uno in
-   scripts/electronics_layout.py (headroom vs deck / mast).
-3. Print tray v11 + deck v13 (supports OFF); fit report + printer settings in
-   the record. Watch: post flex (54.5 mm posts; rear posts on the floor's
-   unsupported rear 12 mm).
-4. Build step 2b: XT30 car half -> rocker (2-pin SPST, + line only) -> VBAT;
-   checks: rocker OFF = 0 V downstream; XT30 polarity +8.x V before any load.
-5. Charger board 2 no-load test (BAT lifted, USB-C in: 8.4 V OK, >= 8.6 V
-   reject).
-6. ~~Fix KA's and KU's remaining MEDs (list above) and HJ's HIGH (ml/splits.py).~~ DONE: MEDs in a1156be (2026-10-29); HJ's HIGH in code (LN) - the ids install waits for a retrain (audit MB).
-7. Small backlog: ~~host_test.py docstring + SERIAL_PROTOCOL.md:9 say nothing is~~ (those two and the servo_bench prompt are FIXED - a1156be, 400-2800; audit MB) remaining:
-   wired; servo_bench prompt "400-2600" (US_MAX 2800); confirm the 12-tooth
-   bevel gear; measure the USB-B plug (16 x 30 x 13 allowance).
-8. ~~Evan's call~~ DECIDED 2026-10-31 (Evan): LEAVE the home-path / username strings in public history - no rewrite, no force push. Was: 98 tracked files carry the local path D:\ClaudeCode\... on the
-   PUBLIC remote; ~~2~~ ~~3~~ 5 home-path / username strings in the record (2026-10-31 landing check: lines 5986, 6705, 13704, 20824, and 21370 = `evan~1` that Claude wrote into LO; line numbers shift as the record grows).
+NEXT ACTIONS, highest value first (all need Evan at the bench):
+1. Fix the servo signal path + re-seat C1 (record LC).
+2. Meter test card sections A-D (power OFF), then E (first power-up; write down
+   the J3 voltage - settles LM2596 4.95 vs 4.99 V).
+3. Power build checks: XT30 -> rocker -> VBAT (rocker OFF = 0 V; polarity +8.x V);
+   charger board 2 no-load test (8.4 V OK, >= 8.6 V reject).
+4. Shield back on the Uno, Uno on the Pi's USB, then the on-car session:
+   deploy -> preflight (must PASS) -> pi/README.md bench checklist (servo sign,
+   camera orientation, deadman with the real Uno; --bench, NO --max-throttle until
+   the motor is wired and the car is on a stand). Watch the 600 mA USB cap.
+5. Laps per docs/DATA_COLLECTION.md -> verify_real -> bc_real -> export_onnx ->
+   AUTO on the stand (M3 done-check).
+Alongside: print tray v11 + deck v13 (fit report + printer settings in the
+record); cut the case slot (photo + slot size); 12-tooth bevel gear; USB-B plug
+size. Claude, once unblocked: C1 height in scripts/electronics_layout.py; a 30 s+
+episode for the long-run frame-gap %.
 
 HARD CONSTRAINTS
 - Start every reply with "Evan". Commit only when asked; push only when told;
@@ -595,7 +540,9 @@ HARD CONSTRAINTS
 - No hardware purchase without Evan's explicit go.
 - The record is append-only: run `date` first, append via
   ~/.claude/skills/project-memory/append-record-entry.js, never pre-cite a letter.
-- Physical claims stay honest: unprinted/unfitted = "untested".
+- Physical claims stay honest: unprinted/unfitted/unpowered = "untested".
+- Never power the shield (USB or pack) before the meter checks pass; flash the Uno
+  with the shield OFF.
 - Plan-split rule for long tasks (Opus specs and decides, Sonnet codes, Opus
   re-runs checks and reads diffs).
 - Every printed part passes render_scad.py + check_artifacts; every layout
@@ -607,5 +554,6 @@ HARD CONSTRAINTS
 - Never `git add -A` / `git add .` - list every path. Leave
   .claude/pm-cadence.json, drift-check.stamp, the *.tmp files and
   firmware/uno_control/build/ out.
+- Flash with `arduino-cli upload -t` (read-back verify); the plain upload does not verify.
 - ASCII-only text in any .md you write.
 ```

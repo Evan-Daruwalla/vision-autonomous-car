@@ -514,3 +514,4 @@ distinguish "simulator degraded" from "track harder than the expert's tuning".
 - **A config that spills is worse than one that OOMs** — it wastes hours
   looking like it works. Always run with `--cap-gb` so over-budget configs
   fail in seconds instead of hanging for 20+ minutes.
+- 2026-10-31 (records MF, MG): the train/val split stays LEGACY (position-based) until ml/data/proc/*_ids.npy is installed TOGETHER with a retrain; prep_dreamer_corpus was put back on it (its 12 val episodes = ml/data/dreamer/eval). splits.check_corpus refuses a checkpoint whose corpus_id does not match the split in use - wired into 5 evaluators and train_controller / train_mdnrnn. Every ml/runs/**/p5_eval.json now carries batch_valid (eval_in_sim.py:333 criterion).
