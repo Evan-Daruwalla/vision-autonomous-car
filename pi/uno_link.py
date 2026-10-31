@@ -17,10 +17,19 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import glob
+import os
 import time
 
 import protocol
 from protocol import Reply, ReplyParser, ST_CRC_BAD
+
+
+def find_port(globber=glob.glob) -> str | None:
+    """First /dev/ttyACM* (sorted), else first /dev/ttyUSB* (Uno clones with a CH340 show up there)."""
+    for dev in sorted(globber("/dev/ttyACM*")) + sorted(globber("/dev/ttyUSB*")):
+        return dev
+    return None
 
 
 def check_banner(lines: list[str]) -> None:
@@ -42,7 +51,9 @@ class UnoLink:
 
     def open(self) -> list[str]:
         import serial  # here so the module imports without pyserial
-        self._ser = serial.Serial(self.port, self.baud, timeout=0.2)
+        # exclusive=True (POSIX only): a second process cannot open the same tty
+        extra = {"exclusive": True} if os.name == "posix" else {}
+        self._ser = serial.Serial(self.port, self.baud, timeout=0.2, **extra)
         time.sleep(2.2)                      # bootloader + setup()
         banner: list[str] = []
         deadline = time.monotonic() + 3.0
@@ -108,10 +119,12 @@ class FakeUno:
     """Same public interface as UnoLink, no serial. Sim-only."""
 
     def __init__(self, pack: int = protocol.PACK_FAULT, drop: set[int] | None = None,
-                 corrupt: set[int] | None = None) -> None:
+                 corrupt: set[int] | None = None,
+                 watchdog: set[int] | None = None) -> None:
         self.pack = pack
         self.drop = drop or set()
         self.corrupt = corrupt or set()      # call numbers whose reply has ST_CRC_BAD
+        self.inject_watchdog = watchdog or set()  # call numbers whose reply has ST_WATCHDOG
         self.connected = True
         self.banner: list[str] = []
         self.missed_in_row = 0
@@ -134,7 +147,8 @@ class FakeUno:
             return None
         self.sent.append((steer, throttle, armed))
         now = time.monotonic()
-        watchdog = self._last is not None and (now - self._last) > 0.150
+        watchdog = ((self._last is not None and (now - self._last) > 0.150)
+                    or self._calls in self.inject_watchdog)
         self._last = now
         if self._calls in self.drop:
             self.missed_in_row += 1
@@ -222,6 +236,18 @@ def self_check() -> None:
     assert not f.link_ok
     assert f.reopen() is True and f.link_ok
     assert f.exchange(0, 0, True) is not None
+
+    # find_port: ACM wins over USB; USB alone is found; nothing -> None
+    def fake_glob(devs):
+        return lambda pat: [d for d in devs if d.startswith(pat[:-1])]
+    assert find_port(fake_glob(["/dev/ttyUSB0", "/dev/ttyACM1", "/dev/ttyACM0"])) == "/dev/ttyACM0"
+    assert find_port(fake_glob(["/dev/ttyUSB1", "/dev/ttyUSB0"])) == "/dev/ttyUSB0"
+    assert find_port(fake_glob([])) is None
+
+    f = FakeUno(pack=protocol.PACK_OK, watchdog={2})
+    assert f.exchange(0, 0, True).watchdog is False
+    assert f.exchange(0, 0, True).watchdog is True
+    assert f.exchange(0, 0, True).watchdog is False
 
     link = UnoLink("COM_X")
     assert link._ser is None and link.link_ok

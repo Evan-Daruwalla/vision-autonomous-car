@@ -29,6 +29,7 @@ import collections
 import functools
 import json
 import math
+import signal
 import socket
 import threading
 import time
@@ -40,10 +41,10 @@ import websockets
 import protocol
 from camera import FakeCamera, PiCamera, encode_jpeg
 from recorder import Recorder
-from uno_link import FakeUno, UnoLink
+from uno_link import FakeUno, UnoLink, find_port
 
 BAD_PACK = (protocol.PACK_CUTOFF, protocol.PACK_FAULT)
-DISARM_EVENTS = ("deadman", "link_lost")
+DISARM_EVENTS = ("deadman", "link_lost", "watchdog_disarm")
 AUTO_STEER_OVERRIDE = 0.15      # pad steer magnitude that hands control back
 AUTO_THROTTLE_OVERRIDE = 0.05   # pad throttle magnitude that hands control back
 REOPEN_INTERVAL_S = 2.0         # min gap between serial reopen attempts
@@ -111,6 +112,14 @@ class Controller:
             self.mode = "auto"
             return ["auto_on"]
         raise ValueError(f"unknown command {name!r}")
+
+    def watchdog_trip(self) -> list[str]:
+        """Uno reported ST_WATCHDOG while armed: the firmware resumes on the next
+        ARMED frame, so the latch is here - disarm; a fresh arm is needed."""
+        if not self.armed:
+            return []
+        self.armed = False
+        return ["watchdog_disarm"] + self._leave_auto()
 
     def _leave_auto(self) -> list[str]:
         if self.mode == "auto":
@@ -290,6 +299,8 @@ class TeleopApp:
             if reply is not None:
                 self.last_pack = reply.pack
                 self.last_ticks = reply.ticks
+                if reply.watchdog:
+                    ev.extend(self.controller.watchdog_trip())
             if self.recorder.recording:
                 self.recorder.add(frame, (steer, thr), {
                     "ticks": self.last_ticks,
@@ -457,7 +468,20 @@ class TeleopApp:
         self._ctl_thread = threading.Thread(target=self._control_loop, daemon=True)
         self._ctl_thread.start()
 
+    def _on_signal(self, signum: int, frame=None) -> None:
+        """SIGTERM/SIGHUP: disarm, save any recording, then let run() fall into shutdown()."""
+        with self.lock:
+            self.controller.armed = False
+            self.controller._leave_auto()
+            if self.recorder.recording:
+                self._stop_recording(crash=False)
+            self.events.append(f"signal_{signum}")
+        self._stop.set()
+
     def run(self) -> None:
+        signal.signal(signal.SIGTERM, self._on_signal)
+        if hasattr(signal, "SIGHUP"):
+            signal.signal(signal.SIGHUP, self._on_signal)
         self.start_background()
         try:
             while not self._stop.is_set():
@@ -962,6 +986,58 @@ def _check_autopilot_nan() -> None:
             app.shutdown()
 
 
+def _check_watchdog_latch() -> None:
+    import tempfile
+    import numpy as np
+
+    frame = np.zeros((120, 160, 3), np.uint8)
+    with tempfile.TemporaryDirectory() as td:
+        app = TeleopApp(FakeUno(pack=protocol.PACK_OK, watchdog={3}), FakeCamera(),
+                        Recorder(td, session="wd", meta={}),
+                        Controller(30, False, False), _free_port(), _free_port(),
+                        Path(__file__).resolve().parent / "web")
+        c = app.controller
+        c.set_input(0.0, 0.0, time.monotonic())
+        app._control_step(frame, 0)                      # call 1: disarmed, learns the pack
+        app.handle_command("arm")
+        assert c.armed
+        app.handle_command("rec_toggle")
+        app._control_step(frame, 0)                      # call 2: armed, clean reply
+        assert c.armed and app.recorder.recording
+        app._control_step(frame, 0)                      # call 3: ST_WATCHDOG reply
+        assert not c.armed and "watchdog_disarm" in app.events, list(app.events)
+        assert not app.recorder.recording                # recording stopped like a deadman
+        for t in app._save_threads:
+            t.join(timeout=10.0)
+        c.set_input(0.0, 0.0, time.monotonic())
+        app.handle_command("arm")                        # a fresh arm works
+        assert c.armed
+
+
+def _check_signal_shutdown() -> None:
+    import tempfile
+    import numpy as np
+
+    frame = np.zeros((120, 160, 3), np.uint8)
+    with tempfile.TemporaryDirectory() as td:
+        app = TeleopApp(FakeUno(pack=protocol.PACK_OK), FakeCamera(),
+                        Recorder(td, session="sig", meta={}),
+                        Controller(30, False, False), _free_port(), _free_port(),
+                        Path(__file__).resolve().parent / "web")
+        app.controller.set_input(0.0, 0.0, time.monotonic())
+        app._control_step(frame, 0)
+        app.handle_command("arm")
+        app.handle_command("rec_toggle")
+        for k in range(5):
+            app._control_step(frame, k)
+        assert app.controller.armed and app.recorder.recording
+        app._on_signal(signal.SIGTERM)                   # direct call, no real signal
+        assert not app.controller.armed and app._stop.is_set()
+        for t in app._save_threads:
+            t.join(timeout=10.0)
+        assert len(list(Path(td).rglob("*.npz"))) == 1   # episode saved, not lost
+
+
 def _check_control_error() -> None:
     import tempfile
 
@@ -1041,6 +1117,8 @@ def self_check() -> None:
     _check_auto_end_to_end()
     _check_autopilot_nan()
     _check_control_error()
+    _check_watchdog_latch()
+    _check_signal_shutdown()
     _check_origin_and_host()
     assert _pick_hw(False, False) == ("real", "real")
     assert _pick_hw(True, False) == ("fake", "fake")
@@ -1066,7 +1144,8 @@ def _pick_hw(fake: bool, fake_uno: bool) -> tuple[str, str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--port", default="/dev/ttyACM0")
+    ap.add_argument("--port", default=None,
+                    help="serial device (default: auto - first /dev/ttyACM*, then /dev/ttyUSB*)")
     ap.add_argument("--fake", action="store_true", help="FakeUno + FakeCamera")
     ap.add_argument("--fake-uno", action="store_true",
                     help="FakeUno + real PiCamera (Pi off the car, no Uno attached)")
@@ -1093,8 +1172,16 @@ def main() -> int:
     uno_kind, cam_kind = _pick_hw(args.fake, args.fake_uno)
     if args.fake_uno:
         print("NOTE: fake Uno - episodes are flagged fake_uno and rejected by verify_real/bc_real.")
+    port = args.port
+    if uno_kind == "real":
+        if port is None:
+            port = find_port()
+            if port is None:
+                print("Uno open failed: no /dev/ttyACM* or /dev/ttyUSB* device")
+                return 2
+        print(f"Uno port: {port}")
     try:
-        uno = FakeUno() if uno_kind == "fake" else UnoLink(args.port)
+        uno = FakeUno() if uno_kind == "fake" else UnoLink(port)
         banner = uno.open()
     except Exception as e:
         print(f"Uno open failed: {e!r}")

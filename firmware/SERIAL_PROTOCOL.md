@@ -150,7 +150,10 @@ visible in driving, which it should not be.*
 
 1. **ARMED is opt-in every frame.** `flags` bit0 must be set in each command.
    Actuators are inert on boot, after a reset, and after any watchdog trip. Stray
-   bytes on a serial port cannot start the car.
+   bytes on a serial port cannot start the car. (2026-10-31, audit MB: the
+   FIRMWARE resumes on the first ARMED frame after a trip - see
+   uno_control.ino:744-749; the latch is on the Pi: teleop disarms on
+   ST_WATCHDOG and needs a fresh arm.)
 2. **Watchdog: 150 ms** (three missed frames at 20 Hz). On expiry the firmware
    **cuts throttle to zero, holds the last steering angle, and flashes both
    indicators as hazards.** Throttle-to-zero is the safety action; *holding*

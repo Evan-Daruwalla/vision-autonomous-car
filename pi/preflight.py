@@ -2,7 +2,7 @@
 
 WHY: a missing import, a dead camera or an Uno that fails its SELFTEST is
 cheaper to find here than mid-session. --fake swaps the camera and Uno for
-FakeCamera/FakeUno and drops the picamera2 and /dev/ttyACM* requirements so the
+FakeCamera/FakeUno and drops the picamera2 and serial-device requirements so the
 logic can be tested on a PC; a --fake pass says nothing about the real Pi.
 
     ~/car/venv/bin/python ~/car/pi/preflight.py [--port /dev/ttyACM0]
@@ -46,8 +46,9 @@ def import_check(module: str, required: bool = True, why: str = ""):
 
 
 def check_serial_device() -> tuple[str, str]:
-    devs = sorted(glob.glob("/dev/ttyACM*"))
-    return ("PASS", " ".join(devs)) if devs else ("FAIL", "no /dev/ttyACM* device")
+    devs = sorted(glob.glob("/dev/ttyACM*")) + sorted(glob.glob("/dev/ttyUSB*"))
+    return (("PASS", " ".join(devs)) if devs
+            else ("FAIL", "no /dev/ttyACM* or /dev/ttyUSB* device"))
 
 
 def check_disk() -> tuple[str, str]:
@@ -75,10 +76,15 @@ def check_camera(fake: bool):
     return run
 
 
-def check_uno(fake: bool, port: str):
+def check_uno(fake: bool, port: str | None):
     def run() -> tuple[str, str]:
-        from uno_link import FakeUno, UnoLink
-        link = FakeUno() if fake else UnoLink(port)
+        from uno_link import FakeUno, UnoLink, find_port
+        use = port
+        if not fake and use is None:
+            use = find_port()
+            if use is None:
+                return "FAIL", "no /dev/ttyACM* or /dev/ttyUSB* device"
+        link = FakeUno() if fake else UnoLink(use)
         try:
             banner = link.open()      # raises unless banner + SELFTEST PASS
         except Exception as e:
@@ -96,7 +102,7 @@ def skip_uno() -> tuple[str, str]:
     return "SKIP", "Uno not attached (--no-uno)"
 
 
-def build_checks(fake: bool, port: str, no_uno: bool = False) -> list:
+def build_checks(fake: bool, port: str | None, no_uno: bool = False) -> list:
     checks = [
         ("python version", check_python),
         ("import numpy", import_check("numpy")),
@@ -117,7 +123,7 @@ def build_checks(fake: bool, port: str, no_uno: bool = False) -> list:
     return checks
 
 
-def run_preflight(fake: bool, port: str = "/dev/ttyACM0", extra: list | None = None,
+def run_preflight(fake: bool, port: str | None = None, extra: list | None = None,
                   no_uno: bool = False) -> int:
     failed = 0
     for name, fn in build_checks(fake, port, no_uno) + (extra or []):
@@ -155,7 +161,8 @@ def self_check() -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--port", default="/dev/ttyACM0")
+    ap.add_argument("--port", default=None,
+                    help="serial device (default: auto - first /dev/ttyACM*, then /dev/ttyUSB*)")
     ap.add_argument("--fake", action="store_true", help="FakeCamera + FakeUno (PC)")
     ap.add_argument("--no-uno", action="store_true",
                     help="skip the serial device and Uno banner checks (Pi off the car)")

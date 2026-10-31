@@ -28,7 +28,7 @@ It deletes nothing on the Pi. It prints the next commands when done.
 
 One PASS/FAIL/WARN line per check, exit 1 on any FAIL: python version; numpy,
 serial, websockets, PIL, picamera2 imports (onnxruntime optional: WARN means
-autopilot unavailable); a `/dev/ttyACM*` device; >= 2 GB free under `~`; one
+autopilot unavailable); a `/dev/ttyACM*` or `/dev/ttyUSB*` device; >= 2 GB free under `~`; one
 120x160x3 camera frame; Uno banner + SELFTEST PASS (opening the port resets the
 Uno). `--fake` swaps in FakeCamera/FakeUno and drops the picamera2 and device
 requirements so it runs on the PC (sim-only: proves nothing about the Pi).
@@ -44,6 +44,7 @@ the port resets the Uno (~2.2 s plus banner), so no commands go out meanwhile.
 Events `reconnect_ok` / `reconnect_failed`. A successful reconnect does NOT
 re-arm: a new arm command is needed. A background save that raises surfaces as
 event `save_failed <error>` (the traceback also prints on the Pi console).
+A reply with the watchdog status bit while armed disarms (`watchdog_disarm`; the firmware itself resumes on the next ARMED frame): press A to re-arm.
 Tested with FakeUno only (`disconnect()`, `corrupt`); not tried on a real cable pull.
 
 ## Run
@@ -63,7 +64,7 @@ The websocket also rejects any browser Origin other than `http://localhost:<http
 `http://127.0.0.1:<http-port>`, so the tunnel's local port must equal `--http-port`.
 
 Other flags: `--steer-invert`, `--rotate180`, `--max-throttle N` (0..100, default 0),
-`--host` (bind address, default 127.0.0.1), `--data-dir`, `--port`, `--http-port N` (page, default 8000), `--ws-port N` (websocket, default 8765;
+`--host` (bind address, default 127.0.0.1), `--data-dir`, `--port` (default: auto-detect, first `/dev/ttyACM*` then `/dev/ttyUSB*`), `--http-port N` (page, default 8000), `--ws-port N` (websocket, default 8765;
 if you change either, change the ssh tunnel and the page URL to match), `--model <path.onnx>`,
 `--fake` (no hardware; pack reads FAULT, so use `--bench` to arm; uses a stub autopilot unless `--model` is given),
 `--fake-uno` (FakeUno + real PiCamera, for the Pi off the car; episodes are flagged `fake_uno` and rejected by verify_real/bc_real).
