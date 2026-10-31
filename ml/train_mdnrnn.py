@@ -32,7 +32,7 @@ import torch
 
 from models import MDNRNN, ConvVAE, count_params, mdn_loss
 from provenance import write_result
-from splits import (cache_key_matches, corpus_id, encoder_fingerprint,
+from splits import (cache_key_matches, check_corpus, corpus_id, encoder_fingerprint,
                     fit_val_episodes, load_ids, load_proc, split_seed_of,
                     write_cache_key)
 
@@ -176,6 +176,7 @@ def main():
     # episodes this model had trained on. Exactly the P5 >=3-seed workflow.
     split_seed = split_seed_of(vae_ckpt, Path(args.vae).name)
     tr_ids = load_ids("train")
+    check_corpus(vae_ckpt.get("corpus_id"), tr_ids)   # upstream VAE on this same split (audit MB / record MF)
     fit_eps, val_eps = fit_val_episodes(tr_tracks, seed=split_seed, ids=tr_ids)
     corpus = ({"corpus_id": corpus_id(tr_ids)}
               if tr_ids is not None else {})

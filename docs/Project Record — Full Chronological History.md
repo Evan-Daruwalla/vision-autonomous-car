@@ -379,6 +379,7 @@ the dated entry, not the digest.
 - [MD - Correction to MC: wires are on D7 (servo), D6, D5 (strips) - no clashes, only firmware pin constants differ](#appendix-md---correction-to-mc-wires-are-on-d7-servo-d6-d5-strips---no-clashes-only-firmware-pin-constants-differ-2026-10-31-1428-cdt) (10-31)
 - [ME - Option B done: firmware + docs on the as-built pins (servo D7, strips D6/D5); compiled, NOT flashed; no spare PWM pin left](#appendix-me---option-b-done-firmware--docs-on-the-as-built-pins-servo-d7-strips-d6d5-compiled-not-flashed-no-spare-pwm-pin-left-2026-10-31-1450-cdt) (10-31)
 - [MF - Audit MB fixes (high + listed meds) + landing check: legacy split restored, corpus guard, port auto-detect, Pi watchdog latch, signal-handler deadlock caught](#appendix-mf---audit-mb-fixes-high--listed-meds--landing-check-legacy-split-restored-corpus-guard-port-auto-detect-pi-watchdog-latch-signal-handler-deadlock-caught-2026-10-31-1514-cdt) (10-31)
+- [MG - Uno re-flashed with the D7/D6/D5 build (11658 B verified, SELFTEST 86/86); corpus guard in the trainers; batch_valid on every p5_eval](#appendix-mg---uno-re-flashed-with-the-d7d6d5-build-11658-b-verified-selftest-8686-corpus-guard-in-the-trainers-batch_valid-on-every-p5_eval-2026-10-31-1537-cdt) (10-31)
 
 ---
 
@@ -22073,3 +22074,40 @@ at here.
 - the re-flash (HANDOFF 0b);
 - `docs/shield_bottom_grid.jpg` public or local;
 - the 5 home-path strings in public history.
+
+# Appendix MG - Uno re-flashed with the D7/D6/D5 build (11658 B verified, SELFTEST 86/86); corpus guard in the trainers; batch_valid on every p5_eval (2026-10-31 ~15:37 CDT)
+**2026-10-31 ~15:37 CDT.** Re-flash done (HANDOFF item 0b) + two MF follow-ups.
+
+**Flash:**
+- Evan pulled the shield and plugged the bare Uno into the PC (COM3).
+- `arduino-cli upload` of firmware/uno_control (commit 18b4574 = servo D7, strips
+  D6/D5).
+  - First try: "programmer is not responding / not in sync" retries, then exit 0.
+    Not trusted.
+  - Re-flashed with read-back verify (`upload -v -t`): "11658 bytes of flash
+    verified" - the same size as the compile.
+- Boot banner read over COM3 (115200, opening resets the board):
+  `== UNO CONTROL == protocol v0.2, SERVO WIRED; MOTOR, ENCODER, LEDS, PACK UNWIRED` +
+  `SELFTEST PASS 86/86`.
+- The banner does not print pins, so the evidence that the D7/D6/D5 build is on the
+  board is the verified flash, not the banner.
+- important.md #3 is CURRENT again: the board runs the repo's uno_control.
+- Untested: the servo actually moving on D7. The shield and servo are not connected,
+  and the shield is still untested (meter checks first).
+
+**Follow-ups from MF:**
+- `check_corpus` added to the two trainers that load an upstream checkpoint and split:
+  - ml/train_controller.py checks the VAE + MDN-RNN checkpoints; the RNN checkpoint
+    is now kept in a variable;
+  - ml/train_mdnrnn.py checks the VAE.
+  - Both import, and `--help` runs. Behaviour is unchanged while ids are uninstalled
+    (ids None -> pass).
+- `batch_valid: true` + a note added to the 9 p5_eval.json that lacked the key and
+  pass eval_in_sim.py:333's criterion (cl_eval_aug, cl_eval_base, ev3_nh_aug,
+  ev_cl_aug, ev_cl_base, ev_rw15, ev_rw50, ev_rw5, p5_eval). The script asserted that
+  every original key and value is unchanged.
+- Now every one of the 38 p5_eval.json carries batch_valid.
+- Suite `34 passed, 0 failed, 0 skipped (of 34)`.
+
+**Not done (Evan's call):** the 5 home-path / username strings in public record
+history. Removing them needs a history rewrite + force push of the public repo.

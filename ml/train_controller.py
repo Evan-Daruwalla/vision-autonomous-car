@@ -52,7 +52,7 @@ import torch.nn as nn
 
 from models import ACTION_DIM, HIDDEN, MDNRNN, Z_DIM, ConvVAE, count_params
 from provenance import write_result
-from splits import (corpus_id, encoder_fingerprint, fit_val_episodes,
+from splits import (check_corpus, corpus_id, encoder_fingerprint, fit_val_episodes,
                     load_cached_mu, load_ids, load_proc, split_seed_of)
 
 REPO = Path(__file__).resolve().parent.parent
@@ -349,7 +349,8 @@ def main() -> int:
     vae = ConvVAE().to(args.device)
     vae.load_state_dict(vae_ckpt["model"])
     rnn = MDNRNN().to(args.device)
-    rnn.load_state_dict(torch.load(args.rnn, map_location=args.device)["model"])
+    rnn_ckpt = torch.load(args.rnn, map_location=args.device)
+    rnn.load_state_dict(rnn_ckpt["model"])
     vae.eval(); rnn.eval()
 
     proc = Path(args.proc)
@@ -403,6 +404,9 @@ def main() -> int:
     # so P5 can report >=3 seeds, and must not move the data split underneath.
     split_seed = split_seed_of(vae_ckpt)
     train_ids = load_ids("train", proc=proc)
+    # upstream models must have trained on this same split (audit MB / record MF)
+    check_corpus(vae_ckpt.get("corpus_id"), train_ids)
+    check_corpus(rnn_ckpt.get("corpus_id"), train_ids)
     fit_eps, val_eps = fit_val_episodes(tracks, seed=split_seed, ids=train_ids)
     corpus = ({"corpus_id": corpus_id(train_ids)}
               if train_ids is not None else {})
