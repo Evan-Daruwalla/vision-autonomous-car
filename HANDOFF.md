@@ -584,7 +584,7 @@ NEXT ACTIONS, highest value first:
 7. Small backlog: ~~host_test.py docstring + SERIAL_PROTOCOL.md:9 say nothing is~~ (those two and the servo_bench prompt are FIXED - a1156be, 400-2800; audit MB) remaining:
    wired; servo_bench prompt "400-2600" (US_MAX 2800); confirm the 12-tooth
    bevel gear; measure the USB-B plug (16 x 30 x 13 allowance).
-8. Evan's call: 98 tracked files carry the local path D:\ClaudeCode\... on the
+8. ~~Evan's call~~ DECIDED 2026-10-31 (Evan): LEAVE the home-path / username strings in public history - no rewrite, no force push. Was: 98 tracked files carry the local path D:\ClaudeCode\... on the
    PUBLIC remote; ~~2~~ ~~3~~ 5 home-path / username strings in the record (2026-10-31 landing check: lines 5986, 6705, 13704, 20824, and 21370 = `evan~1` that Claude wrote into LO; line numbers shift as the record grows).
 
 HARD CONSTRAINTS
