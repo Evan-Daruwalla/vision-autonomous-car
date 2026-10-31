@@ -376,6 +376,7 @@ the dated entry, not the digest.
 - [MA - Bare-board heat under real teleop: plateau 45-47 C (peak 47.2 C, 5 min, throttled 0x0) - bench without the case is fine](#appendix-ma---bare-board-heat-under-real-teleop-plateau-45-47-c-peak-472-c-5-min-throttled-0x0---bench-without-the-case-is-fine-2026-10-30-1639-cdt) (10-30)
 - [MB - Scheduled daily-audit: 60 findings, 1 high - prep_dreamer_corpus now splits by id while every other script uses the legacy split, so a re-run writes a P4 eval set P3 trained on](#appendix-mb---scheduled-daily-audit-60-findings-1-high---prep_dreamer_corpus-now-splits-by-id-while-every-other-script-uses-the-legacy-split-so-a-re-run-writes-a-p4-eval-set-p3-trained-on-2026-10-31-0731-cdt) (10-31)
 - [MC - Shield-to-Uno as built: servo on D6, strip data on D2 (encoder INT0) and D1 (serial TX) - 2 clashes; test card + bottom-grid map made](#appendix-mc---shield-to-uno-as-built-servo-on-d6-strip-data-on-d2-encoder-int0-and-d1-serial-tx---2-clashes-test-card--bottom-grid-map-made-2026-10-31-1404-cdt) (10-31)
+- [MD - Correction to MC: wires are on D7 (servo), D6, D5 (strips) - no clashes, only firmware pin constants differ](#appendix-md---correction-to-mc-wires-are-on-d7-servo-d6-d5-strips---no-clashes-only-firmware-pin-constants-differ-2026-10-31-1428-cdt) (10-31)
 
 ---
 
@@ -21923,3 +21924,30 @@ design for 3 wires. Also: two new reference images.
 Until the wires move, test card section C and the grid map's "wire->D4 / D7 / D9"
 labels describe the DESIGN, not this board. Nothing has been powered, and no
 firmware was changed.
+
+# Appendix MD - Correction to MC: wires are on D7 (servo), D6, D5 (strips) - no clashes, only firmware pin constants differ (2026-10-31 ~14:28 CDT)
+**2026-10-31 ~14:28 CDT. Correction to MC (append-only; MC stays as written).**
+
+Evan re-reported the three Dupont wire positions. MC's "servo D6, left strip D2,
+right strip D1" is replaced by:
+
+| Shield hole | Firmware expects (uno_control.ino:84-97) | As built (Evan) |
+|---|---|---|
+| L1/-2 (J2 SIG, servo) | D9 | D7 |
+| L3/12 (left strip data) | D4 | D6 |
+| L3/13 (right strip data) | D7 | D5 |
+
+**Verdict:** MC's two clashes are withdrawn - nothing now sits on the encoder
+interrupts (D2/D3) or the serial link (D0/D1). D5 and D6 are free in the firmware,
+and Servo and the NeoPixel library work on any digital pin. The only mismatch is
+the firmware's pin constants: the servo is on the firmware's right-strip pin D7.
+
+**Options given to Evan:**
+- A (recommended): re-plug the three male Dupont pins into D9 / D4 / D7, so
+  firmware, layout, test card and grid map stay true.
+- B: change PIN_SERVO / PIN_STRIP_L / PIN_STRIP_R to 7 / 6 / 5, re-flash + SELFTEST
+  + host_test, and update shield_layout.json, the test card, the grid map and the
+  wiring doc together.
+
+Evan's choice is pending. Until then, test card section C and the grid map's
+"->D9 / D4 / D7" labels are the design, not this board. Nothing has been powered.
