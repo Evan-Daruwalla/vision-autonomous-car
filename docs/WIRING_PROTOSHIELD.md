@@ -38,7 +38,7 @@ prices `docs/BOM.md` · light channels `docs/LIGHTING_SPEC.md` (rewritten for WS
 | 2 | LM2596 buck module @ ~~5.2 V~~ **5.0 V** (audit 2026-10-11) | module, wired in — has its own trim pot, set it BEFORE connecting anything, then **lock the pot** with a dab of glue or nail polish |
 | 3 | SPST rocker switch (or its leads to a panel mount) | switches the pack, not the Pi |
 | 4 | 470–1000 µF electrolytic + 0.1 µF ceramic | across VM/GND, physically at the TB6612. **Plus a second 470 µF across `+5V2`/GND at the strip feed point (added 2026-09-03)** — WS2812B pixels switch their drivers in step, and the strips sit at the end of a lead; without local bulk that step lands on the `+5V2` rail, which also feeds the Uno. **Electrolytics are polarised: the striped (-) leg goes to GND** (audit 2026-10-11) |
-| 5 | 2 × WS2812B data-line resistors, ~330–470 Ω | **2026-10-04: the kit has nothing in 330-470 ohm - use 2 x 200 ohm in series (400 ohm) for each.** one in series with each segment's `DIN`. **Superseded the 8 per-LED resistors 2026-09-03 (Appendix CX)** — every WS2812B pixel has its own constant-current driver, so per-LED ballast no longer exists as a concept |
+| 5 | 2 × WS2812B data-line resistors, ~330–470 Ω | **2026-10-04: the kit has nothing in 330-470 ohm - use 2 x 200 ohm in series (400 ohm) for each.** one in series with each segment's `DIN`. **Superseded the 8 per-LED resistors 2026-09-03 (Appendix CX)** — every WS2812B pixel has its own constant-current driver, so per-LED ballast no longer exists as a concept **2026-10-31 (record MI): NOT built - they go in each strip's off-board DIN jumper to D6 / D5, not on the shield.** |
 | 6 | Pack-sense divider: 100 kΩ + 12 kΩ | ratio 0.10714, per `firmware/uno_packguard/`. **2026-10-04: the kit (BOM row 19) has no 12 kohm - build it as 10 kohm + 2 kohm in series, exactly 12.0 kohm. Do NOT use 10 kohm alone: the ratio drops to 0.0909 and the firmware under-reads the pack by 15%.** |
 | 7 | Screw terminals or JST for every off-board lead | motor+encoder, servo, **2 × strip segment (3 conductors each: `+5V2`, `DIN`, GND)**, pack |
 | 8 | *(off the shield)* Pack assembly: 2S holder, 3 A fuse, 2S BMS, USB-C charger | added 2026-10-10. Lives with the pack and unplugs at the XT30 - section 2.1. Nothing on the shield connects to the BMS's B+ / MB / B- |
@@ -337,9 +337,12 @@ cost nothing to give up.
 2026-10-31 (record MD): the Dupont wires are physically on D7 (servo), D6 (left strip) and D5 (right strip), and the firmware now matches, so the D5/D6 reasoning above no longer holds; D9 and D4 are free. The paragraph above is the 2026-09-03 design rationale, kept as history.
 Consequence: the car now has NO spare PWM pin - D5/D6 carry the strips, D3 is the encoder, D11 the motor, and the Servo library's Timer1 kills PWM on D9/D10 wherever the servo sits. D4 and D9 are spare plain-digital pins.
 
-**Three conductors per segment**, both landing in screw terminals on the
+~~**Three conductors per segment**, both landing in screw terminals on the
 shield: `+5V2`, `DIN`, GND. The series resistor sits **on the shield at the pin
-end**, not at the strip.
+end**, not at the strip.~~ **2026-10-31 (record MI): three conductors per
+segment, but only `+5V2` and GND land on the shield (J3 / J4); the `DIN` lead
+plugs straight into the Uno (D6 left, D5 right) through 400 ohm (2 x 200) in
+series in that jumper, at the pin end. Those resistors are NOT built yet.**
 
 **Pixel layout and the rear jumper (audit 2026-10-11), Evan's decision C.** Each side is cut into TWO pieces: a 2-pixel FRONT piece (pixel 0 = head, white; pixel 1 = indicator, amber) at the front corner, and a 1-pixel REAR piece (pixel 2 = tail, red) at the rear corner, out of the camera's view. A 3-wire jumper, 22 AWG, runs front to rear on each side:
 

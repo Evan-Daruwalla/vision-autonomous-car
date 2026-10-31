@@ -236,7 +236,7 @@
 <rect x="291.1" y="415.05" width="120.9" height="88.35000000000001" rx="4" fill="#6B5B00" fill-opacity="0.13" stroke="#6B5B00" stroke-width="1.5"/>
 <text x="295.1" y="428.05" font-size="10.5" fill="#6B5B00" text-anchor="start" font-weight="bold">R1-R4</text>
 <text x="295.1" y="441.05" font-size="9" fill="#6B5B00" text-anchor="start">2 x 200 per strip</text>
-<text x="295.1" y="452.55" font-size="9" fill="#6B5B00" text-anchor="start">DIN (D6, D5)</text>
+<text x="295.1" y="452.55" font-size="9" fill="#6B5B00" text-anchor="start">NOT built (MI)</text>
 <rect x="416.65000000000003" y="415.05" width="55.800000000000004" height="88.35000000000001" rx="4" fill="#E07B00" fill-opacity="0.13" stroke="#E07B00" stroke-width="1.5"/>
 <text x="420.65000000000003" y="428.05" font-size="10.5" fill="#E07B00" text-anchor="start" font-weight="bold">+5V2</text>
 <text x="420.65000000000003" y="441.05" font-size="9" fill="#E07B00" text-anchor="start">own strip</text>
@@ -399,13 +399,13 @@
 <text x="1298" y="307" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">J3 / J4 strips (W17)</text>
 <text x="1298" y="323" font-size="10.5" fill="#4A4A46" text-anchor="start">3 pins each (left, right):</text>
 <text x="1298" y="337" font-size="10.5" fill="#4A4A46" text-anchor="start">  +5V2  &lt;- +5V2 pad</text>
-<text x="1298" y="351" font-size="10.5" fill="#4A4A46" text-anchor="start">  DIN   &lt;- D6 (J3) / D5 (J4)</text>
-<text x="1298" y="365" font-size="10.5" fill="#4A4A46" text-anchor="start">        via 200 + 200 ohm</text>
+<text x="1298" y="351" font-size="10.5" fill="#4A4A46" text-anchor="start">  DIN   unused: lead to D6 / D5</text>
+<text x="1298" y="365" font-size="10.5" fill="#4A4A46" text-anchor="start">        400 ohm, NOT built (MI)</text>
 <text x="1298" y="379" font-size="10.5" fill="#4A4A46" text-anchor="start">  GND   -&gt; STAR, own wire each</text>
 <path d="M990 352 L1270 352 L1270 320 L1290 320" fill="none" stroke="#E07B00" stroke-width="2"/>
 <rect x="1290" y="404" width="180" height="70" rx="6" fill="#E8F5E9" fill-opacity="1.0" stroke="#3E7D32" stroke-width="1"/>
 <text x="1298" y="421" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">J2 servo (MG90D-270)</text>
-<text x="1298" y="437" font-size="10.5" fill="#4A4A46" text-anchor="start">signal &lt;- D7</text>
+<text x="1298" y="437" font-size="10.5" fill="#4A4A46" text-anchor="start">signal: lead straight to D7</text>
 <text x="1298" y="451" font-size="10.5" fill="#4A4A46" text-anchor="start">V+ (red) &lt;- JP1 middle</text>
 <text x="1298" y="465" font-size="10.5" fill="#4A4A46" text-anchor="start">GND -&gt; STAR</text>
 <path d="M1105 604 L1260 604 L1260 440 L1290 440" fill="none" stroke="#AD1457" stroke-width="2"/>
@@ -448,7 +448,7 @@
 <text x="36" y="1020" font-size="11.5" fill="#2C2C2A" text-anchor="start">- TB6612FNG carrier, Pololu #713, on 0.1 in headers (not flying leads)</text>
 <text x="36" y="1040" font-size="11.5" fill="#2C2C2A" text-anchor="start">- C1 470-1000 uF electrolytic (mind + / -) and C2 0.1 uF ceramic, VM to GND, right at the carrier</text>
 <text x="36" y="1060" font-size="11.5" fill="#2C2C2A" text-anchor="start">- C3 470 uF across +5V2 / GND at the strip feed point</text>
-<text x="36" y="1080" font-size="11.5" fill="#2C2C2A" text-anchor="start">- R1-R4: 4 x 200 ohm - two in series in each strip's DIN line (400 ohm each)</text>
+<text x="36" y="1080" font-size="11.5" fill="#2C2C2A" text-anchor="start">- R1-R4: 4 x 200 ohm - two in series in each strip's DIN jumper to D6 / D5 (400 ohm each); NOT built yet (record MI)</text>
 <text x="36" y="1100" font-size="11.5" fill="#2C2C2A" text-anchor="start">- Divider: 100k (top), 10k + 2k in series (bottom = 12k) - NOT 10k alone</text>
 <text x="36" y="1120" font-size="11.5" fill="#2C2C2A" text-anchor="start">- J1 6-pin (motor + encoder), J2 3-pin (servo), JP1 3-pin + jumper cap, J3 / J4 3-pin (strips), J5 4-pin (power in): screw terminals or JST</text>
 <text x="36" y="1140" font-size="11.5" fill="#2C2C2A" text-anchor="start">- OFF the shield: the LM2596 and the rocker (deck -y wing), the 0.1 uF across the motor (at the motor)</text>

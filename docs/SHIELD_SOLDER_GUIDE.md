@@ -117,7 +117,7 @@ and solder both ends - more reliable than trying to blob solder across the gap.
 - [ ] VBAT strips: L2/9-L2/10.
 - [ ] Strip data: L3/12-P3/12, L3/13-P3/13.
 - [ ] Uno 5V to the left field: V/1-V/0, V/0-V/-1, V/-1-L1/-1.
-- [ ] Servo block: L3/-1-P3/-1, L2/-2-L2/-1, L1/-2-L1/-3, L3/-2-P3/-2.
+- [ ] Servo block: L3/-1-P3/-1, L2/-2-L2/-1, ~~L1/-2-L1/-3~~ (not built, record LC/MI), L3/-2-P3/-2.
 
 **DANGER pairs - they sit side by side and must NOT touch:**
 - P4/5 (GND) and P4/6 (+5V2).
@@ -179,9 +179,8 @@ plugs into the shield's own socket for that Uno pin. Digital pins are on the
 top header, A0 on the bottom header.
 
 - [ ] U1/1 -> D11, U1/2 -> D12, U1/3 -> D8, U1/4 -> D10.
-- [ ] U1/9 -> A0. L1/-3 -> ~~D9~~ D7 (2026-10-31, as built, record MD).
-- [ ] L3/12 -> ~~D4~~ D6 and L3/13 -> ~~D7~~ D5 (2026-10-31, as built, record MD), each with 200 + 200 ohm soldered in series
-      IN the wire, then heat-shrunk.
+- [ ] U1/9 -> A0. ~~L1/-3 -> D9 / D7 (2026-10-31, as built, record MD).~~ **2026-10-31 (record MI): servo signal lead straight into D7.**
+- [ ] ~~L3/12 -> D4 / D6 and L3/13 -> D7 / D5 (2026-10-31, as built, record MD), each with 200 + 200 ohm soldered in series IN the wire, then heat-shrunk.~~ **2026-10-31 (record MI): resistors never built; strip DIN leads go straight into D6 / D5 through 400 ohm in the jumper - not built yet, lights later.**
 - [ ] Encoder yellow -> D2 socket, white -> D3 socket (male pins on the cable,
       not through the shield).
 

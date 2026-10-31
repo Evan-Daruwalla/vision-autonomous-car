@@ -55,7 +55,7 @@ def parts_for(i: int, d: dict) -> list[str]:
         5: ["1x 100k", "1x 10k", "1x 2k"],
         6: [f"{nw}x insulated 22 AWG wire (w1-w5)"],
         7: [f"{ns}x male Dupont jumper, cut",
-            "4x 200 ohm (2 in series per strip wire)", "heat-shrink"],
+            "4x 200 ohm + heat-shrink: NOT built", "(strip DIN jumpers, record MI)"],
         8: ["1x jumper cap (JP1)", "multimeter"],
     }
     return table[i]

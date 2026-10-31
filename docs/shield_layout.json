@@ -10,7 +10,7 @@
   "Uno connections are Dupont male pins plugged into the shield's own sockets (Evan). Off-board cables use 0.1 in male headers (Evan).",
   "The 470 uF for the LED strips goes AT each strip's input pads (+5V / GND), not on the shield - that is where the WS2812B guidance puts it.",
   "The TB6612 VM bulk cap C1 (470 uF) and C2 (0.1 uF) are soldered across the carrier's VMOT and GND pin tips on top of the carrier.",
-  "DIN_L / DIN_R: the D6 (left strip) / D5 (right strip) Dupont wires each carry 200 + 200 ohm soldered in series inside the wire (heat-shrunk). KEY = J5's pulled pin, no connection."
+  "As built 2026-10-31 (record MI, Evan, final): the servo signal and both strip DIN leads plug STRAIGHT into Uno D7 / D6 / D5 (direct_uno), not through the shield. J2 SIG, J3 DIN and J4 DIN are unused. The 200 + 200 ohm DIN resistors were NEVER built: each strip DIN jumper needs 400 ohm in series before a strip is connected. The soldered L3/12 and L3/13 wires (no resistors) are unplugged from D6 / D5 and dangle - insulate their pins or desolder them. KEY = J5's pulled pin, no connection."
  ],
  "grid": {
   "rows": [
@@ -719,10 +719,6 @@
    "L2/-1"
   ],
   [
-   "L1/-2",
-   "L1/-3"
-  ],
-  [
    "L3/-2",
    "P3/-2"
   ]
@@ -787,18 +783,6 @@
   {
    "hole": "U1/9",
    "uno": "A0"
-  },
-  {
-   "hole": "L1/-3",
-   "uno": "D7"
-  },
-  {
-   "hole": "L3/12",
-   "uno": "D6"
-  },
-  {
-   "hole": "L3/13",
-   "uno": "D5"
   }
  ],
  "direct_uno": [
@@ -811,6 +795,21 @@
    "from": "encoder white (B)",
    "uno": "D3",
    "note": "male Dupont pin on the cable end, straight into the D3 socket"
+  },
+  {
+   "from": "servo signal lead (orange)",
+   "uno": "D7",
+   "note": "male-male jumper from the servo plug's signal pin straight into the D7 socket; the servo's V+ and GND go to J2 middle / bottom by male-female jumpers (record MI; V+/GND placement assumed, not confirmed by Evan)"
+  },
+  {
+   "from": "left strip DIN lead",
+   "uno": "D6",
+   "note": "straight into the D6 socket through 2 x 200 ohm (400 ohm) in series in the jumper - NOT BUILT; lights postponed (record MI)"
+  },
+  {
+   "from": "right strip DIN lead",
+   "uno": "D5",
+   "note": "straight into the D5 socket through 2 x 200 ohm (400 ohm) in series in the jumper - NOT BUILT; lights postponed (record MI)"
   }
  ],
  "nets": {
@@ -881,15 +880,12 @@
    "J2.V"
   ],
   "SERVO_SIG": [
-   "J2.SIG",
    "uno:D7"
   ],
   "DIN_L": [
-   "J3.DIN",
    "uno:D6"
   ],
   "DIN_R": [
-   "J4.DIN",
    "uno:D5"
   ],
   "A0": [
@@ -961,9 +957,9 @@
     "J1 GND: P3/5-P4/5 and P4/5-B/5.  J1 +5V2: P3/6-P4/6.",
     "+5V2 bus along row P4: P4/6-P4/7-P4/8-P4/9-P4/10-P4/11-P4/12-P4/13.",
     "DANGER: P4/5 (GND) and P4/6 (+5V2) are neighbours - they must NOT touch.",
-    "VBAT strips: L2/9-L2/10.  Strip data: L3/12-P3/12, L3/13-P3/13.",
+    "VBAT strips: L2/9-L2/10.  Strip data: L3/12-P3/12, L3/13-P3/13 (built, now unused - record MI).",
     "Uno 5V to the left field: V/1-V/0, V/0-V/-1, V/-1-L1/-1.",
-    "Servo block: L3/-1-P3/-1, L2/-2-L2/-1, L1/-2-L1/-3, L3/-2-P3/-2.",
+    "Servo block: L3/-1-P3/-1, L2/-2-L2/-1, L3/-2-P3/-2.  (L1/-2 to L1/-3 was never built - record LC - and is not needed: the servo signal goes straight to D7, record MI.)",
     "DANGER: P3/-1 (+5V2) and P3/-2 (GND) are neighbours - must NOT touch."
    ],
    "check": "P4/5 to P4/6 SILENT; P3/-1 to P3/-2 SILENT; P4/6 beeps to P4/13; V/12 beeps to L1/-1"
@@ -1001,10 +997,10 @@
    "title": "7. Dupont wires to the Uno sockets (cut a male-male jumper, solder the cut end in the hole)",
    "do": [
     "U1/1 -> D11, U1/2 -> D12, U1/3 -> D8, U1/4 -> D10.",
-    "U1/9 -> A0.  L1/-3 -> D7.",
-    "L3/12 -> D6 and L3/13 -> D5, each with 200 + 200 ohm soldered in series IN the wire, heat-shrunk.",
+    "U1/9 -> A0.",
+    "Servo signal lead straight into D7 (male-male jumper); servo V+ / GND on J2 middle / bottom (record MI).",
     "Encoder yellow -> D2 socket, white -> D3 socket (male pins on the cable, not through the shield).",
-    "As built 2026-10-31 (record MD): servo signal on D7, strip data on D6 (left) and D5 (right); the servo jumper's female end sits on J2's SIG pin, so the servo plug fix from record LC is still open."
+    "Strip DIN leads straight into D6 (left) / D5 (right), each through 400 ohm (2 x 200) in the jumper - NOT built, lights later (record MI). The soldered L3/12, L3/13 wires stay unplugged."
    ],
    "check": "with the shield on the Uno: each socket pin beeps to its hole; the Uno's 5V pin beeps to V/12"
   },

@@ -299,9 +299,6 @@ def build_scad(data: dict) -> tuple[tuple, list[str], tuple[float, float, float]
         sg = -1.0 if analog else 1.0
         s += poly([(x, y, 0), (x, y, zl), (x, ye, zl)], 1.5, "#8e44ad" if analog else "#e67e22")
         unet = pnet("uno:" + so["uno"])
-        if so["uno"] in ("D6", "D5"):              # 200 + 200 ohm in the wire, heat-shrunk
-            ym = (y + ye) / 2
-            s.append(seg((x, ym - 5, zl), (x, ym + 5, zl), 3.0, "#111111"))
         s.append(box(x - 1.27, ye, zl - 1.27, x + 1.27, ye + sg * 14.0, zl + 1.27, C_PLASTIC))
         lead_segs.append(((x, y), (x, ye)))
         housing_boxes.append((x - 1.27, min(ye, ye + sg * 20.0), x + 1.27, max(ye, ye + sg * 20.0)))

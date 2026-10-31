@@ -51,11 +51,11 @@ PHASES = [
      "supply (VCC), and JP1's cap on the top two pins passes it to the servo's V+ on J2."),
     ("Signals (the Uno's pins)",
      ["PWM", "DIR1", "DIR2", "STBY", "SERVO_SIG", "DIN_L", "DIN_R", "A0", "DIV_MID"],
-     ["D11 PWM, D8 + D12 direction, D10 enable -> TB6612", "D7 -> servo signal (J2)",
-      "D6 / D5 -> LED data (J3, J4), 400 ohm in each wire",
+     ["D11 PWM, D8 + D12 direction, D10 enable -> TB6612", "D7 -> servo signal (lead straight to the Uno)",
+      "D6 / D5 -> LED data, straight leads, 400 ohm each (not built)",
       "A0 <- divider (R100k over R10k + R2k)", "D2 / D3 <- encoder (straight to the Uno)"],
-     "The Uno runs the firmware: it reads the Pi's commands and drives the pins. Dupont leads carry "
-     "its signals: speed, direction and enable to the TB6612, the servo angle, the LED data. It "
+     "The Uno runs the firmware: it reads the Pi's commands and drives the pins. Dupont leads carry speed, "
+     "direction and enable to the TB6612; the servo signal and LED data leads plug straight into the Uno (record MI). It "
      "reads the pack voltage on A0 (VBAT / 9.33 from the divider) and the encoder on D2 / D3, "
      "which plug straight into the Uno."),
     ("Motor current", ["M1", "M2"],
@@ -102,7 +102,7 @@ def check_against_layout(data: dict) -> list[str]:
         for m in members:
             if m not in nets[net]:
                 errs.append(f"net {net}: {m} is not a member in the layout")
-    if {d.get("uno") for d in data.get("direct_uno", [])} != {"D2", "D3"}:
+    if {d.get("uno") for d in data.get("direct_uno", []) if str(d.get("from", "")).startswith("encoder")} != {"D2", "D3"}:
         errs.append("encoder: layout direct_uno is not D2 + D3")
     return errs
 

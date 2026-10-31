@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-31 ~15:43 CDT** (records LO-MH; MH: 2026-11-01 soft milestone (M3) NOT met - flagged; paste-ready prompt rewritten; MG: Uno re-flashed with the D7/D6/D5 build; MF: audit MB high + listed meds fixed, landing check caught a SIGTERM deadlock (fixed); ME: firmware + docs moved to the as-built pins servo D7 / strips D6, D5 - compiled, NOT flashed (item 0b); push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
+**Last updated: 2026-10-31 ~16:29 CDT** (records LO-MJ; MJ: shield layout / test card / guides / renders moved to the as-built direct-to-pin wiring, suite 34/34; meter checks A-D PASS per Evan (card version unconfirmed), E not done; MI: servo + strip data wired straight to Uno D7 / D6 / D5, J2 SIG path abandoned, C1 fixed, strip DIN resistors never built (Evan, final); MH: 2026-11-01 soft milestone (M3) NOT met - flagged; paste-ready prompt rewritten; MG: Uno re-flashed with the D7/D6/D5 build; MF: audit MB high + listed meds fixed, landing check caught a SIGTERM deadlock (fixed); ME: firmware + docs moved to the as-built pins servo D7 / strips D6, D5 - compiled, NOT flashed (item 0b); push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ ~~327 appendices A-LO~~ ~~328 appendices A-LP~~ ~~329 appendices A-LQ~~ ~~330 appendices A-LR~~ ~~331 appendices A-LS~~ ~~332 appendices A-LT~~ ~~333 appendices A-LU~~ ~~334 appendices A-LV~~ ~~335 appendices A-LW~~ ~~336 appendices A-LX~~ ~~337 appendices A-LY~~ ~~338 appendices A-LZ~~ ~~339 appendices A-MA~~ ~~341 appendices A-MC~~ ~~342 appendices A-MD~~ ~~343 appendices A-ME~~ ~~344 appendices A-MF~~ ~~345 appendices A-MG~~ 346 appendices A-MH (MB = the 2026-10-31 scheduled audit) as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -480,11 +480,21 @@ STATE (2026-10-31 ~15:43 CDT; record entries LO-MG cover 2026-10-30..31):
   left strip D6, right strip D5 (D4, D9 spare; NO spare PWM pin left). 11658 B,
   read-back verified, banner + SELFTEST PASS 86/86 (MG). Encoder D2/D3, motor
   D8/D10/D11/D12, pack sense A0 unchanged. Read the banner before trusting firmware.
-- SHIELD: soldered, UNTESTED (no meter checks, never powered). Two known fixes
+- SHIELD: soldered, UNTESTED (no meter checks, never powered). ~~Two known fixes
   before any power (record LC): (1) the servo jumper's female end sits on J2's SIG
   pin, so the servo has nowhere to plug - fix the signal path; (2) C1 hangs on bare
-  legs - re-seat it upright. The shield should be OFF the Uno (the flash procedure took it off -
-  confirm). Wiring as built: shield->Uno Dupont wires on D7 / D6 / D5 (MD).
+  legs - re-seat it upright.~~ **MI (Evan, FINAL): C1 fixed (method + height not
+  stated); servo signal goes STRAIGHT into Uno D7 (J2 SIG path abandoned; V+/GND
+  assumed on J2 middle/bottom, JP1 top = Uno 5V - unconfirmed); strip DIN goes
+  STRAIGHT into D6 (left) / D5 (right) when lights are wired. The 2 x 200 ohm DIN
+  resistors were NEVER built - add 400 ohm in each DIN jumper before any strip
+  is plugged in.** The shield should be OFF the Uno (the flash procedure took it off -
+  confirm). ~~Wiring as built: shield->Uno Dupont wires on D7 / D6 / D5 (MD).~~
+  ~~STALE vs as-built: test card section C rows D7->J2, L3/12->D6, L3/13->D5;
+  shield_layout.json DIN note + step 7; SHIELD_SOLDER_GUIDE step 7.~~ MJ: all
+  updated to as-built (only docs/shield_bottom_grid.jpg still shows old wires).
+  **MJ: meter checks A-D PASS (Evan); which card version he used is unconfirmed
+  (old section C rows cannot pass on MI wiring). Shield still never powered.**
 - PI 5: re-flashed 2026-10-30 (old password lost): Raspberry Pi OS Lite Bookworm,
   Python 3.11.2, `ssh ed@ed-pi5.local` with PUBLIC-KEY ONLY (PC key
   ~/.ssh/id_ed25519). apt python3-picamera2 (0.3.31) + python3-venv installed;
@@ -516,9 +526,13 @@ TEST SUITE: scripts/run_checks.py (34 on 2026-10-31) - re-run it, never quote it
 Push state: `git fetch` then `git status -sb`.
 
 NEXT ACTIONS, highest value first (all need Evan at the bench):
-1. Fix the servo signal path + re-seat C1 (record LC).
-2. Meter test card sections A-D (power OFF), then E (first power-up; write down
-   the J3 voltage - settles LM2596 4.95 vs 4.99 V).
+1. ~~Fix the servo signal path + re-seat C1 (record LC).~~ DONE/REPLACED by MI
+   (direct-to-pin wiring; C1 fixed). On the card, check D7 socket -> servo
+   signal lead (BEEP) instead of D7 -> J2; skip the two ~400 ohm strip rows.
+2. ~~Meter test card sections A-D (power OFF), then~~ A-D PASS (MJ). Next: wire
+   the power path (step 2b, W8-W14; read the rocker's DC rating first; meter the
+   LM2596 output alone before W14 reaches J5), then card section E (first
+   power-up; write down the J3 voltage - settles LM2596 4.95 vs 4.99 V).
 3. Power build checks: XT30 -> rocker -> VBAT (rocker OFF = 0 V; polarity +8.x V);
    charger board 2 no-load test (8.4 V OK, >= 8.6 V reject).
 4. Shield back on the Uno, Uno on the Pi's USB, then the on-car session:

@@ -73,7 +73,7 @@ zones = [
     (27, 5.5, 20, 15.5, "#1A56B0", "TB6612 carrier", ["Pololu #713, on headers", "control pins toward", "D8-D12 (top)"]),
     (47.5, 5.5, 9.5, 15.5, RED, "C1 C2", ["470-1000uF", "+ 0.1uF", "VM-GND", "at the carrier"]),
     (22, 5.5, 4.5, 15.5, BLK, "STAR", ["strip", "soldered", "to", "TB6612", "GND pin"]),
-    (27, 28.5, 13, 9.5, "#6B5B00", "R1-R4", ["2 x 200 per strip", "DIN (D6, D5)"]),
+    (27, 28.5, 13, 9.5, "#6B5B00", "R1-R4", ["2 x 200 per strip", "NOT built (MI)"]),
     (40.5, 28.5, 6, 9.5, ORG, "+5V2", ["own strip", "NOT the", "5V bus"]),
     (47, 28.5, 6, 9.5, ORG, "C3", ["470uF", "+5V2-GND"]),
     (53.5, 34, 11.5, 13, RED, "Divider", ["100k", "10k + 2k", "mid -> A0", "(near A0)"]),
@@ -200,9 +200,9 @@ for name, y, c, net in j1:
     t(CX + 176, y + 4, net, 10.5, c, bold=True, anchor="end")
 line([(TX + 215, 240), (TX + 262, 240), (TX + 262, 168), (CX, 168)], MOT, 2)
 line([(TX + 215, 262), (TX + 270, 262), (TX + 270, 186), (CX, 186)], MOT, 2)
-box(CX, 290, 180, 100, "J3 / J4 strips (W17)", ["3 pins each (left, right):", "  +5V2  <- +5V2 pad", "  DIN   <- D6 (J3) / D5 (J4)", "        via 200 + 200 ohm", "  GND   -> STAR, own wire each"], fill="#FFFDE7", stroke="#B59F00")
+box(CX, 290, 180, 100, "J3 / J4 strips (W17)", ["3 pins each (left, right):", "  +5V2  <- +5V2 pad", "  DIN   unused: lead to D6 / D5", "        400 ohm, NOT built (MI)", "  GND   -> STAR, own wire each"], fill="#FFFDE7", stroke="#B59F00")
 line([(X0 + 260, 352), (CX - 20, 352), (CX - 20, 320), (CX, 320)], ORG, 2)
-box(CX, 404, 180, 70, "J2 servo (MG90D-270)", ["signal <- D7", "V+ (red) <- JP1 middle", "GND -> STAR"], fill="#E8F5E9", stroke="#3E7D32")
+box(CX, 404, 180, 70, "J2 servo (MG90D-270)", ["signal: lead straight to D7", "V+ (red) <- JP1 middle", "GND -> STAR"], fill="#E8F5E9", stroke="#3E7D32")
 line([(X0 + 375, 604), (CX - 30, 604), (CX - 30, 440), (CX, 440)], MAG, 2)
 t(X0 + 384, 598, "JP1 middle -> servo V+", 9.5, MAG)
 box(CX, 488, 180, 70, "J5 power in", ["VBAT (W9) -> VBAT pad", "W12 + W13 -> STAR", "+5V2 (W14) -> +5V2 pad"], fill="#FDE8E8", stroke=RED)
@@ -232,7 +232,7 @@ parts = [
     "TB6612FNG carrier, Pololu #713, on 0.1 in headers (not flying leads)",
     "C1 470-1000 uF electrolytic (mind + / -) and C2 0.1 uF ceramic, VM to GND, right at the carrier",
     "C3 470 uF across +5V2 / GND at the strip feed point",
-    "R1-R4: 4 x 200 ohm - two in series in each strip's DIN line (400 ohm each)",
+    "R1-R4: 4 x 200 ohm - two in series in each strip's DIN jumper to D6 / D5 (400 ohm each); NOT built yet (record MI)",
     "Divider: 100k (top), 10k + 2k in series (bottom = 12k) - NOT 10k alone",
     "J1 6-pin (motor + encoder), J2 3-pin (servo), JP1 3-pin + jumper cap, J3 / J4 3-pin (strips), J5 4-pin (power in): screw terminals or JST",
     "OFF the shield: the LM2596 and the rocker (deck -y wing), the 0.1 uF across the motor (at the motor)",

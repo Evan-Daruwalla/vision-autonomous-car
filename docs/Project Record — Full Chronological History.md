@@ -381,6 +381,8 @@ the dated entry, not the digest.
 - [MF - Audit MB fixes (high + listed meds) + landing check: legacy split restored, corpus guard, port auto-detect, Pi watchdog latch, signal-handler deadlock caught](#appendix-mf---audit-mb-fixes-high--listed-meds--landing-check-legacy-split-restored-corpus-guard-port-auto-detect-pi-watchdog-latch-signal-handler-deadlock-caught-2026-10-31-1514-cdt) (10-31)
 - [MG - Uno re-flashed with the D7/D6/D5 build (11658 B verified, SELFTEST 86/86); corpus guard in the trainers; batch_valid on every p5_eval](#appendix-mg---uno-re-flashed-with-the-d7d6d5-build-11658-b-verified-selftest-8686-corpus-guard-in-the-trainers-batch_valid-on-every-p5_eval-2026-10-31-1537-cdt) (10-31)
 - [MH - End-of-session docs-sync: 2026-11-01 soft milestone (M3) NOT met - flagged; HANDOFF prompt replaced (old one kept here)](#appendix-mh---end-of-session-docs-sync-2026-11-01-soft-milestone-m3-not-met---flagged-handoff-prompt-replaced-old-one-kept-here-2026-10-31-1543-cdt) (10-31)
+- [MI - Servo and strip data wired straight to Uno D7 / D6 / D5 (J2 SIG path abandoned); C1 fixed; strip DIN resistors found never built](#appendix-mi---servo-and-strip-data-wired-straight-to-uno-d7--d6--d5-j2-sig-path-abandoned-c1-fixed-strip-din-resistors-found-never-built-2026-10-31-1606-cdt) (10-31)
+- [MJ - Shield docs to the as-built direct-to-pin wiring (layout, test card, guides, renders); meter checks A-D PASS per Evan](#appendix-mj---shield-docs-to-the-as-built-direct-to-pin-wiring-layout-test-card-guides-renders-meter-checks-a-d-pass-per-evan-2026-10-31-1629-cdt) (10-31)
 
 ---
 
@@ -22272,3 +22274,43 @@ HARD CONSTRAINTS
   firmware/uno_control/build/ out.
 - ASCII-only text in any .md you write.
 '''
+
+# Appendix MI - Servo and strip data wired straight to Uno D7 / D6 / D5 (J2 SIG path abandoned); C1 fixed; strip DIN resistors found never built (2026-10-31 ~16:06 CDT)
+**Ask (Evan):** "i mjust going to plug directly into the digital pin for the servo"; then "C1 is fixed, the lights will also go directly into their digial pins, the 3 changes are final"; then, asked whether the strip DIN resistors exist, "theyre not there but lights will come later".
+
+**Decisions (Evan, FINAL, 2026-10-31):**
+1. **Servo signal goes straight into Uno D7** with a male-male jumper. The shield's J2 SIG path is abandoned (this replaces both record LC fixes: no pin at L1/-3, no L1/-2-L1/-3 bridge). The old shield jumper in the D7 socket comes out - one socket holds one pin. Servo V+ and GND: assumed to stay on J2 middle / bottom (JP1 on the TOP two pins = Uno 5V), each by a male-female jumper - Claude's stated assumption, which Evan did not correct; not confirmed by him.
+2. **C1 is fixed** (Evan's word). How it was re-seated (upright as planned in KQ, or sleeved) was not stated; its height above the shield is NOT measured, so the C1 height in scripts/electronics_layout.py stays open.
+3. **LED strip DIN wires go straight into Uno D6 (left) / D5 (right)** when the lights are wired. The shield's L3/12 -> D6 and L3/13 -> D5 wires leave the path. Lights stay postponed (Evan: "lights will come later").
+
+**Finding - the strip data resistors were never built.** The plan (layout decisions, KG era; docs/shield_layout.json note + step 7; docs/SHIELD_SOLDER_GUIDE.md) put 200 + 200 ohm in series inside the L3/12 -> D6 and L3/13 -> D5 Dupont wires. Evan, 2026-10-31: they are not there. So no build of this shield ever had a DIN resistor. Consequence: before any strip is plugged in, each DIN jumper needs 2 x 200 ohm (400 ohm) in series. Without it, D6/D5 can drive current into an UNPOWERED strip's DIN (the Uno stays alive on the Pi's USB with the rocker off - docs/WIRING_PROTOSHIELD.md power note relies on this resistor) and the data line is undamped.
+
+**Firmware:** no change. The Uno already runs the MG build (servo D7, strips D6 / D5, SELFTEST 86/86).
+
+**Docs now STALE against the as-built board (not edited in this entry):**
+- docs/shield_test_card.png section C (scripts/shield_test_card_svg.py rows: D7 -> J2 top pin BEEP; L3/12 -> D6 ~400 ohm; L3/13 -> D5 ~400 ohm). With the new wiring, check instead: D7 socket -> servo signal lead (BEEP); the two strip rows are skipped until the lights are built.
+- docs/shield_layout.json (the DIN_L / DIN_R note and step 7 claim the resistors are in the wires; J2 SIG still drawn as the servo path), docs/SHIELD_SOLDER_GUIDE.md step 7, and the renders made from the JSON.
+
+**Status:** shield still UNTESTED - no meter checks, never powered. Nothing physically verified in this entry; every fact above is Evan's report.
+
+# Appendix MJ - Shield docs to the as-built direct-to-pin wiring (layout, test card, guides, renders); meter checks A-D PASS per Evan (2026-10-31 ~16:29 CDT)
+**Ask (Evan):** "Yes, update them" (bring the test card, layout and guides in line with record MI); then, mid-task, "A-D is done it checks out good".
+
+**Meter checks A-D: PASS (Evan's report, 2026-10-31).** First metered result on the soldered shield. Sections A (shorts), B (connections), C (to the Uno), D (divider) all passed, power OFF. Not recorded: the individual readings, and which card version was used - the reworked card (below) was finished about when Evan reported, so section C was most likely run from the OLD card, whose rows D7 -> J2 top pin and L3/12 / L3/13 -> D6 / D5 (~400 ohm) cannot pass on the MI wiring. Asked; open until Evan answers. Section E (first power-up) NOT done. The shield has still never been powered.
+
+**Docs brought to the as-built board (plan-split run: Opus did the layout JSON + decisions; 3 Sonnet agents on disjoint files; Opus re-ran every check and read every diff on disk).**
+- docs/shield_layout.json (as built): sockets 8 -> 5 (L1/-3 -> D7, L3/12 -> D6, L3/13 -> D5 removed); direct_uno 2 -> 5 (servo signal D7, strip DIN D6 / D5, the strip resistors marked NOT built); bridge L1/-2 - L1/-3 removed (never built, LC) - 22 -> 21 bridges; nets SERVO_SIG / DIN_L / DIN_R keep only uno:D7 / D6 / D5, so J2 SIG, J3 DIN, J4 DIN are unused; notes + steps 3 and 7 rewritten. ASSUMED (not confirmed by Evan): the soldered L3/12, L3/13 wires stay on the board, unplugged and dangling (insulate or desolder); servo V+ / GND and strip +5V / GND stay on J2 / J3 / J4.
+- Generators: shield_test_card_svg.py (section C: "D7 socket -> servo signal lead, BEEP" replaces the J2 row; the two ~400 ohm strip rows removed; 27 holes cross-checked), shield_wiring_svg.py (servo / strip / R1-R4 text), shield_flow_svg.py (signal text; the encoder check now filters direct_uno to the encoder leads, else the 3 new entries would fail it), shield_render3d.py (the in-wire resistor lump on the D6 / D5 leads removed), shield_guide_svg.py (step-7 parts: the 4 x 200 ohm marked NOT built; the J2 / J3 / J4 headers stay listed - they are physically fitted).
+- Regenerated: shield_holemap.svg, shield_test_card.svg + .png (1100 x 1480, headless Chrome), shield_wiring.svg, shield_how_it_works.svg, shield_build_guide.svg, shield_3d_{top,top_plain,bottom,bottom_plain,iso}.png, 23 docs/guide PNGs.
+- Prose, dated strikes: SHIELD_BUILD.md (DIN note, J2 / J3 / J4 lines, bridge list, sockets, steps 3 / 7), SHIELD_SOLDER_GUIDE.md (steps 3 / 7), WIRING_PROTOSHIELD.md (item 5 row; "three conductors per segment" paragraph - only +5V2 / GND land on the shield now).
+- Review catches: agent C's strike also struck the still-true "KEY = J5's pulled pin" sentence - restored. pack_wiring_svg.py needed no change ("via 400 ohm" stays true). docs/shield_bottom_grid.jpg (uncommitted) still labels the old wires.
+
+**Checks (re-run by Opus, 2026-10-31 ~16:28 CDT):**
+- `shield_holemap.py docs/shield_layout.json`: all checks passed (hazard WARNs only, pre-existing).
+- test card self_check: PASS (27 holes cross-checked); guide + flow self_check ok; render3d --scad-only PASS (1051 primitives; agent run).
+- svg_text_overlap: 0 overlaps on shield_build_guide, shield_how_it_works, shield_test_card, shield_wiring, shield_holemap.
+- check_artifacts: 40 checked, 0 drifted, 0 errored, 2 uncheckable.
+- Suite: `34 passed, 0 failed, 0 skipped  (of 34)`.
+- Card PNG and shield_3d_top.png viewed by eye: 5 leads drawn (4 digital, A0), no resistor lump.
+
+**Also given (chat, not yet done):** step lists for build step 2b (W8-W14 after the rocker: LM2596 output metered alone before W14 reaches J5; rocker OFF = 0 V; XT30 polarity) and step 5 (motor + encoder on J1, yellow / white straight to D2 / D3, blue to J1 +5V2 never VBAT; host_test --wired on a stand). Rocker DC rating still unrecorded - Evan to read it first.
