@@ -135,7 +135,7 @@ wire([(640, 392), (626, 392), (626, 428), (926, 428), (926, 452)], BLK, "W13 220
 wire([(1132, 370), (1132, 382), (992, 382), (992, 452)], BLK, "div. bottom", at=1, dx=0, dy=-4, width=1.6)
 # Uno
 box(882, 530, 296, 106, "Uno R3 (shield sits on it)", ["powered by the Pi's USB (JF), NOT the pack", "D11 D8 D12 D10 -> TB6612, D2 D3 <- encoder",
-                                                     "D4 D7 -> strips (via 400 ohm), A0 <- divider", "5V -> TB6612 VCC + servo V+ (JR, NOT the pack)", "+5V2 must NEVER touch the Uno 5V pin"])
+                                                     "D6 D5 -> strips (via 400 ohm), A0 <- divider", "5V -> TB6612 VCC + servo V+ (JR, NOT the pack)", "+5V2 must NEVER touch the Uno 5V pin"])
 wire([(946, 530), (946, 510), (946, 461)], BLK, "W15 40", at=0, dashed=True, dx=0, dy=6)
 # +5V2
 out.append(f'<circle cx="868" cy="292" r="4" fill="{ORG}"/>')
@@ -153,7 +153,7 @@ pin(1226, 362, "green (enc GND) -> STAR", "left")
 wire([(1226, 362), (1196, 362), (1196, 444), (1012, 444), (1012, 452)], BLK, "W16 green", at=2, dx=40, width=1.6)
 
 # ---- strips ----
-box(1226, 430, 236, 196, "WS2812B strips x2", ["left + right strip, each:", "+5V2 <- +5V2 pad (W17)", "DIN <- D4 (left) / D7 (right)",
+box(1226, 430, 236, 196, "WS2812B strips x2", ["left + right strip, each:", "+5V2 <- +5V2 pad (W17)", "DIN <- D6 (left) / D5 (right)",
                                                "  via 400 ohm (2 x 200)", "GND -> STAR, own wire (W17)", "470 uF +5V2-GND at the feed", "",
                                                "W17 lengths: measure on the car", "(strip positions not designed)"], fill="#FFFDE7", stroke="#B59F00")
 pin(1226, 600, "GND x2")

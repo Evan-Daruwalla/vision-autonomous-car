@@ -120,9 +120,9 @@ flowchart LR
   UNO -- "D12" --> TBB["TB6612 AIN2 + BIN2"]
   UNO -- "D10" --> TBS["TB6612 STBY"]
   UNO -- "5V" --> TBV["TB6612 VCC - logic supply"]
-  UNO -- "D9" --> SERVO["Servo signal"]
-  UNO -- "D4" --> RL["400 ohm = 2 x 200"] --> SL["LEFT strip DIN"]
-  UNO -- "D7" --> RR["400 ohm = 2 x 200"] --> SR["RIGHT strip DIN"]
+  UNO -- "D7 (was D9 until 2026-10-31, record MD)" --> SERVO["Servo signal"]
+  UNO -- "D6 (was D4 until 2026-10-31, record MD)" --> RL["400 ohm = 2 x 200"] --> SL["LEFT strip DIN"]
+  UNO -- "D5 (was D7 until 2026-10-31, record MD)" --> RR["400 ohm = 2 x 200"] --> SR["RIGHT strip DIN"]
   ENC["Encoder"] -- "A to D2" --> UNO
   ENC -- "B to D3" --> UNO
   DIV["Divider: 100k top, 10k + 2k bottom"] -- "A0" --> UNO
@@ -248,7 +248,7 @@ table below stands; the PART NAME does not. (propagated 2026-09-09, daily-audit 
 
 | Wire | To |
 |---|---|
-| signal (orange/white) | Uno **D9** |
+| signal (orange/white) | Uno **~~D9~~ D7 (2026-10-31, as built, record MD)** |
 | V+ (red) | ~~`+5V2`~~ **Uno `5V` pin = USB 5 V from the Pi (Evan's decision 2026-10-16, record JR).** Known cost (JP): with the servo here, 2 of 3 large swings (2600 -> 1500 us) lost serial bytes Uno -> Pi; 0 of 16 at rest; no resets, no USB over-current (dmesg). Fit the 3-pin jumper on the shield (Uno 5V \| servo + \| `+5V2`) so it can move to `+5V2` with one jumper |
 | GND (brown/black) | star ground |
 
@@ -325,14 +325,17 @@ BTF-LIGHTING reel (`BOM.md` row 18), one per side of the car.
 
 | Net | Uno pin | Load | Type |
 |---|---|---|---|
-| `L_DAT_L` | **D4** | left segment `DIN`, via ~330–470 Ω | plain digital, software-timed |
-| `L_DAT_R` | **D7** | right segment `DIN`, via ~330–470 Ω | plain digital, software-timed |
+| `L_DAT_L` | **~~D4~~ D6 (2026-10-31, as built, record MD)** | left segment `DIN`, via ~330–470 Ω | plain digital, software-timed |
+| `L_DAT_R` | **~~D7~~ D5 (2026-10-31, as built, record MD)** | right segment `DIN`, via ~330–470 Ω | plain digital, software-timed |
 
 **Why D4 and D7 and not D5/D6.** All four were freed when the discrete LEDs
 went away. NeoPixel bit-bangs its own timing on any digital pin, so it has no
 use for a PWM-capable one — spending D5 or D6 here would burn the only two
 Timer0 PWM pins the car has left for nothing. D4 and D7 are plain digital and
 cost nothing to give up.
+
+2026-10-31 (record MD): the Dupont wires are physically on D7 (servo), D6 (left strip) and D5 (right strip), and the firmware now matches, so the D5/D6 reasoning above no longer holds; D9 and D4 are free. The paragraph above is the 2026-09-03 design rationale, kept as history.
+Consequence: the car now has NO spare PWM pin - D5/D6 carry the strips, D3 is the encoder, D11 the motor, and the Servo library's Timer1 kills PWM on D9/D10 wherever the servo sits. D4 and D9 are spare plain-digital pins.
 
 **Three conductors per segment**, both landing in screw terminals on the
 shield: `+5V2`, `DIN`, GND. The series resistor sits **on the shield at the pin
@@ -360,7 +363,7 @@ needed.** WS2812B wants `DIN` above ~0.7 x VDD = 3.50 V on the 5.0 V rail (3.64 
 Uno's outputs swing to the same 5.0 V rail that powers the strips, so the
 margin is over a volt.
 
-The WS2812B's rated supply range is **not recorded in this repo** (read it off the listing). D4 and D7 float while the Uno resets - every time the Pi opens the port - which can flash random pixels; an optional 10 kohm from each `DIN` to GND holds them low (not required (audit 2026-10-11)). The usual 3.3 V-MCU problem does not exist here.
+The WS2812B's rated supply range is **not recorded in this repo** (read it off the listing). D6 and D5 (~~D4 and D7~~, 2026-10-31) float while the Uno resets - every time the Pi opens the port - which can flash random pixels; an optional 10 kohm from each `DIN` to GND holds them low (not required (audit 2026-10-11)). The usual 3.3 V-MCU problem does not exist here.
 
 **Zones are firmware, not wiring.** Headlights, tail lights and both
 indicators are now pixel indices inside each segment's array, not separate

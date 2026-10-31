@@ -137,19 +137,19 @@
 <text x="460" y="960" font-size="15" font-weight="700" fill="#1565c0">BEEP</text>
 <text x="640" y="960" font-size="13" fill="#555">battery divider (step 7)</text>
 <rect x="22" y="977" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
-<text x="46" y="990" font-size="15" font-weight="600" fill="#111">D9</text>
+<text x="46" y="990" font-size="15" font-weight="600" fill="#111">D7</text>
 <text x="210" y="990" font-size="15" font-weight="600" fill="#111">J2 top pin (L1/-2)</text>
 <text x="460" y="990" font-size="15" font-weight="700" fill="#1565c0">BEEP</text>
 <text x="640" y="990" font-size="13" fill="#555">servo signal - after the record LC fix</text>
 <rect x="16" y="1000" width="1068" height="30" fill="#f3f3f3"/>
 <rect x="22" y="1007" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
 <text x="46" y="1020" font-size="15" font-weight="600" fill="#111">L3/12</text>
-<text x="210" y="1020" font-size="15" font-weight="600" fill="#111">D4</text>
+<text x="210" y="1020" font-size="15" font-weight="600" fill="#111">D6</text>
 <text x="460" y="1020" font-size="15" font-weight="700" fill="#1565c0">~400 ohm</text>
 <text x="640" y="1020" font-size="13" fill="#555">200 + 200 in the wire - use ohms mode (step 7)</text>
 <rect x="22" y="1037" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
 <text x="46" y="1050" font-size="15" font-weight="600" fill="#111">L3/13</text>
-<text x="210" y="1050" font-size="15" font-weight="600" fill="#111">D7</text>
+<text x="210" y="1050" font-size="15" font-weight="600" fill="#111">D5</text>
 <text x="460" y="1050" font-size="15" font-weight="700" fill="#1565c0">~400 ohm</text>
 <text x="640" y="1050" font-size="13" fill="#555">200 + 200 in the wire - use ohms mode (step 7)</text>
 <rect x="16" y="1060" width="1068" height="30" fill="#f3f3f3"/>

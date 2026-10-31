@@ -20,7 +20,7 @@ In order: (1) top: straight down on the finished top side, every hole shown, par
 - Uno connections are Dupont male pins plugged into the shield's own sockets (Evan). Off-board cables use 0.1 in male headers (Evan).
 - The 470 uF for the LED strips goes AT each strip's input pads (+5V / GND), not on the shield - that is where the WS2812B guidance puts it.
 - The TB6612 VM bulk cap C1 (470 uF) and C2 (0.1 uF) are soldered across the carrier's VMOT and GND pin tips on top of the carrier.
-- DIN_L / DIN_R: the D4 (left strip) / D7 (right strip) Dupont wires each carry 200 + 200 ohm soldered in series inside the wire (heat-shrunk). KEY = J5's pulled pin, no connection.
+- DIN_L / DIN_R: the ~~D4~~ D6 (left strip) / ~~D7~~ D5 (right strip) (2026-10-31, as built, record MD) Dupont wires each carry 200 + 200 ohm soldered in series inside the wire (heat-shrunk). KEY = J5's pulled pin, no connection.
 
 ## Parts
 
@@ -28,8 +28,8 @@ In order: (1) top: straight down on the finished top side, every hole shown, par
 - **J1** (4-pin header: motor): M1 = P3/3, M2 = P3/4, GND = P3/5, 5V2 = P3/6 - Encoder yellow (A) and white (B) do NOT go here: give them male Dupont pins and plug them straight into the D2 / D3 sockets.
 - **J5** (4-pin header: power in): VBAT = L3/10, KEY = P3/10, 5V2 = P4/10, GND = B/10 - W9 VBAT, (key), W14 +5V2, W12 pack - (motor return).
 - **J6** (1-pin header: W13): GND = B/11 - W13: LM2596 IN- / OUT-.
-- **J3** (3-pin header: left strip (D4)): DIN = P3/12, 5V2 = P4/12, GND = B/12 - Cable order: DIN, +5V, GND.
-- **J4** (3-pin header: right strip (D7)): DIN = P3/13, 5V2 = P4/13, GND = B/13 - Cable order: DIN, +5V, GND.
+- **J3** (3-pin header: left strip (~~D4~~ D6 (2026-10-31, as built, record MD)): DIN = P3/12, 5V2 = P4/12, GND = B/12 - Cable order: DIN, +5V, GND.
+- **J4** (3-pin header: right strip (~~D7~~ D5 (2026-10-31, as built, record MD)): DIN = P3/13, 5V2 = P4/13, GND = B/13 - Cable order: DIN, +5V, GND.
 - **JP1** (3-pin header: servo-power jumper): UNO5V = L1/-1, SERVO_V = L2/-1, 5V2 = L3/-1 - Put the Dupont female-female jumper (or a jumper cap) on the TOP two pins (UNO5V + SERVO_V) = servo on the Uno 5V (Evan, JR). Move it to the bottom two = servo on +5V2 (fallback).
 - **J2** (3-pin header: servo): SIG = L1/-2, V = L2/-2, GND = L3/-2 - Servo plug: orange/white = SIG at the top, red in the middle, brown/black = GND at the bottom.
 - **R100k** (100k, lying flat): a = L1/9, b = U3/9 - Body lies over G/9 and V/9 - leads go ONLY into L1/9 and U3/9.
@@ -78,9 +78,9 @@ In order: (1) top: straight down on the finished top side, every hole shown, par
 - Dupont U1/3 -> Uno D8
 - Dupont U1/4 -> Uno D10
 - Dupont U1/9 -> Uno A0
-- Dupont L1/-3 -> Uno D9
-- Dupont L3/12 -> Uno D4
-- Dupont L3/13 -> Uno D7
+- Dupont L1/-3 -> Uno ~~D9~~ D7 (2026-10-31, as built, record MD)
+- Dupont L3/12 -> Uno ~~D4~~ D6 (2026-10-31, as built, record MD)
+- Dupont L3/13 -> Uno ~~D7~~ D5 (2026-10-31, as built, record MD)
 - direct: encoder yellow (A) -> Uno D2 - male Dupont pin on the cable end, straight into the D2 socket
 - direct: encoder white (B) -> Uno D3 - male Dupont pin on the cable end, straight into the D3 socket
 - join TB.PWMA <-> TB.PWMB - carrier-top wire bridge (logic)
@@ -137,8 +137,8 @@ In order: (1) top: straight down on the finished top side, every hole shown, par
    - Check: J5 top pin (L3/10) now beeps to VMOT (through w1); VBAT (L3/10) to B/10 SILENT; V/0 to B/2 SILENT; P4/7 to B/2 SILENT
 8. **7. Dupont wires to the Uno sockets (cut a male-male jumper, solder the cut end in the hole)**
    - U1/1 -> D11, U1/2 -> D12, U1/3 -> D8, U1/4 -> D10.
-   - U1/9 -> A0.  L1/-3 -> D9.
-   - L3/12 -> D4 and L3/13 -> D7, each with 200 + 200 ohm soldered in series IN the wire, heat-shrunk.
+   - U1/9 -> A0.  L1/-3 -> ~~D9~~ D7 (2026-10-31, as built, record MD).
+   - L3/12 -> ~~D4~~ D6 and L3/13 -> ~~D7~~ D5 (2026-10-31, as built, record MD), each with 200 + 200 ohm soldered in series IN the wire, heat-shrunk.
    - Encoder yellow -> D2 socket, white -> D3 socket (male pins on the cable, not through the shield).
    - Check: with the shield on the Uno: each socket pin beeps to its hole; the Uno's 5V pin beeps to V/12
 9. **8. Before the first power-up**

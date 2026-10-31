@@ -9,8 +9,8 @@ and PRD task 8e's firmware rewrite.** This doc was the last place in the repo
 still describing the superseded 4-channel discrete-LED scheme (8 LEDs across
 D4-D7, per-LED series resistors) — flagged stale in Appendices DA/DB, fixed
 here. The car now uses **two WS2812B strip segments, 3 pixels each** (white
-front / red rear / amber indicator, one per side), driven from D4 (left) and
-D7 (right) with no PWM and no series resistor per LED. **DRL folds into the
+front / red rear / amber indicator, one per side), driven from ~~D4~~ D6 (left) and
+~~D7~~ D5 (right) (2026-10-31, as built, record MD) with no PWM and no series resistor per LED. **DRL folds into the
 HEAD pixel only, at reduced brightness — never the tail** (Evan, 2026-09-03);
 the "headlights + tail lights at reduced brightness" framing above is the
 ORIGINAL request and is superseded by that decision. `firmware/uno_control/`
@@ -52,8 +52,8 @@ CX). Kept for the reasoning trail; nothing in it is current.
 
 | segment | pin | pixels | zones |
 |---|---|---|---|
-| left strip | D4 (`DIN`) | 3 | pixel 0 white head+DRL (front) · pixel 1 amber left indicator (front) · pixel 2 red tail (REAR, on a jumper) - reordered 2026-10-11 |
-| right strip | D7 (`DIN`) | 3 | pixel 0 white head+DRL (front) · pixel 1 amber right indicator (front) · pixel 2 red tail (REAR, on a jumper) - reordered 2026-10-11 |
+| left strip | ~~D4~~ D6 (2026-10-31, as built, record MD) (`DIN`) | 3 | pixel 0 white head+DRL (front) · pixel 1 amber left indicator (front) · pixel 2 red tail (REAR, on a jumper) - reordered 2026-10-11 |
+| right strip | ~~D7~~ D5 (2026-10-31, as built, record MD) (`DIN`) | 3 | pixel 0 white head+DRL (front) · pixel 1 amber right indicator (front) · pixel 2 red tail (REAR, on a jumper) - reordered 2026-10-11 |
 
 Cut **to pixel count, not to length** (Appendix DA) — 3 pixels at the chosen
 144 LED/m density spans 21 mm. **2026-10-11 (audit, Evan's decision C):** each side is cut 2 + 1 - a 2-pixel front piece (~14 mm, head + indicator) and a 1-pixel rear tail on a 3-wire jumper, so the tail sits at the back and out of camera view (`WIRING_PROTOSHIELD.md` section 2.5).

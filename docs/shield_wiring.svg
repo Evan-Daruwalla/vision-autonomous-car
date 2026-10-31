@@ -236,7 +236,7 @@
 <rect x="291.1" y="415.05" width="120.9" height="88.35000000000001" rx="4" fill="#6B5B00" fill-opacity="0.13" stroke="#6B5B00" stroke-width="1.5"/>
 <text x="295.1" y="428.05" font-size="10.5" fill="#6B5B00" text-anchor="start" font-weight="bold">R1-R4</text>
 <text x="295.1" y="441.05" font-size="9" fill="#6B5B00" text-anchor="start">2 x 200 per strip</text>
-<text x="295.1" y="452.55" font-size="9" fill="#6B5B00" text-anchor="start">DIN (D4, D7)</text>
+<text x="295.1" y="452.55" font-size="9" fill="#6B5B00" text-anchor="start">DIN (D6, D5)</text>
 <rect x="416.65000000000003" y="415.05" width="55.800000000000004" height="88.35000000000001" rx="4" fill="#E07B00" fill-opacity="0.13" stroke="#E07B00" stroke-width="1.5"/>
 <text x="420.65000000000003" y="428.05" font-size="10.5" fill="#E07B00" text-anchor="start" font-weight="bold">+5V2</text>
 <text x="420.65000000000003" y="441.05" font-size="9" fill="#E07B00" text-anchor="start">own strip</text>
@@ -399,13 +399,13 @@
 <text x="1298" y="307" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">J3 / J4 strips (W17)</text>
 <text x="1298" y="323" font-size="10.5" fill="#4A4A46" text-anchor="start">3 pins each (left, right):</text>
 <text x="1298" y="337" font-size="10.5" fill="#4A4A46" text-anchor="start">  +5V2  &lt;- +5V2 pad</text>
-<text x="1298" y="351" font-size="10.5" fill="#4A4A46" text-anchor="start">  DIN   &lt;- D4 (J3) / D7 (J4)</text>
+<text x="1298" y="351" font-size="10.5" fill="#4A4A46" text-anchor="start">  DIN   &lt;- D6 (J3) / D5 (J4)</text>
 <text x="1298" y="365" font-size="10.5" fill="#4A4A46" text-anchor="start">        via 200 + 200 ohm</text>
 <text x="1298" y="379" font-size="10.5" fill="#4A4A46" text-anchor="start">  GND   -&gt; STAR, own wire each</text>
 <path d="M990 352 L1270 352 L1270 320 L1290 320" fill="none" stroke="#E07B00" stroke-width="2"/>
 <rect x="1290" y="404" width="180" height="70" rx="6" fill="#E8F5E9" fill-opacity="1.0" stroke="#3E7D32" stroke-width="1"/>
 <text x="1298" y="421" font-size="12" fill="#2C2C2A" text-anchor="start" font-weight="bold">J2 servo (MG90D-270)</text>
-<text x="1298" y="437" font-size="10.5" fill="#4A4A46" text-anchor="start">signal &lt;- D9</text>
+<text x="1298" y="437" font-size="10.5" fill="#4A4A46" text-anchor="start">signal &lt;- D7</text>
 <text x="1298" y="451" font-size="10.5" fill="#4A4A46" text-anchor="start">V+ (red) &lt;- JP1 middle</text>
 <text x="1298" y="465" font-size="10.5" fill="#4A4A46" text-anchor="start">GND -&gt; STAR</text>
 <path d="M1105 604 L1260 604 L1260 440 L1290 440" fill="none" stroke="#AD1457" stroke-width="2"/>

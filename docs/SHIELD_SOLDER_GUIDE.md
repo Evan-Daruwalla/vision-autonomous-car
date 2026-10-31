@@ -179,8 +179,8 @@ plugs into the shield's own socket for that Uno pin. Digital pins are on the
 top header, A0 on the bottom header.
 
 - [ ] U1/1 -> D11, U1/2 -> D12, U1/3 -> D8, U1/4 -> D10.
-- [ ] U1/9 -> A0. L1/-3 -> D9.
-- [ ] L3/12 -> D4 and L3/13 -> D7, each with 200 + 200 ohm soldered in series
+- [ ] U1/9 -> A0. L1/-3 -> ~~D9~~ D7 (2026-10-31, as built, record MD).
+- [ ] L3/12 -> ~~D4~~ D6 and L3/13 -> ~~D7~~ D5 (2026-10-31, as built, record MD), each with 200 + 200 ohm soldered in series
       IN the wire, then heat-shrunk.
 - [ ] Encoder yellow -> D2 socket, white -> D3 socket (male pins on the cable,
       not through the shield).

@@ -53,9 +53,9 @@ SECTIONS = [
         ("U1/3", "D8", "BEEP", "(step 7)"),
         ("U1/4", "D10", "BEEP", "(step 7)"),
         ("U1/9", "A0", "BEEP", "battery divider (step 7)"),
-        ("D9", "J2 top pin (L1/-2)", "BEEP", "servo signal - after the record LC fix"),
-        ("L3/12", "D4", "~400 ohm", "200 + 200 in the wire - use ohms mode (step 7)"),
-        ("L3/13", "D7", "~400 ohm", "200 + 200 in the wire - use ohms mode (step 7)"),
+        ("D7", "J2 top pin (L1/-2)", "BEEP", "servo signal - after the record LC fix"),
+        ("L3/12", "D6", "~400 ohm", "200 + 200 in the wire - use ohms mode (step 7)"),
+        ("L3/13", "D5", "~400 ohm", "200 + 200 in the wire - use ohms mode (step 7)"),
         ("Uno 5V pin", "V/12", "BEEP", "(step 7)"),
     ]),
     ("D. DIVIDER - ohms mode, power OFF.", "#6a1b9a", [
@@ -114,12 +114,12 @@ def self_check() -> None:
     missing = sorted(h for h in holes if h not in layout)
     assert not missing, f"card cites holes not in shield_layout.json: {missing}"
     assert len(holes) >= 25, len(holes)
-    for pin in ("D11", "D12", "D8", "D10", "A0", "D9", "D4", "D7", "PWMA", "VMOT", "JP1", "J5"):
+    for pin in ("D11", "D12", "D8", "D10", "A0", "D7", "D6", "D5", "PWMA", "VMOT", "JP1", "J5"):
         assert pin in layout, pin
     svg = build_svg()
     assert svg.count('stroke-width="1.5"') == sum(len(r) for _, _, r in SECTIONS)   # one tick box per row
     assert all(ord(c) < 128 for c in svg), "non-ASCII in the card"
-    bad = [h for h in ("L1/-3",) if h in svg]   # D9 goes to J2's SIG pin, not the old L1/-3 route
+    bad = [h for h in ("L1/-3",) if h in svg]   # D7 goes to J2's SIG pin, not the old L1/-3 route
     assert not bad, bad
     print(f"shield_test_card self_check: PASS ({len(holes)} holes cross-checked)")
 

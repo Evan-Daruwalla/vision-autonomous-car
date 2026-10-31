@@ -10,7 +10,7 @@
   "Uno connections are Dupont male pins plugged into the shield's own sockets (Evan). Off-board cables use 0.1 in male headers (Evan).",
   "The 470 uF for the LED strips goes AT each strip's input pads (+5V / GND), not on the shield - that is where the WS2812B guidance puts it.",
   "The TB6612 VM bulk cap C1 (470 uF) and C2 (0.1 uF) are soldered across the carrier's VMOT and GND pin tips on top of the carrier.",
-  "DIN_L / DIN_R: the D4 (left strip) / D7 (right strip) Dupont wires each carry 200 + 200 ohm soldered in series inside the wire (heat-shrunk). KEY = J5's pulled pin, no connection."
+  "DIN_L / DIN_R: the D6 (left strip) / D5 (right strip) Dupont wires each carry 200 + 200 ohm soldered in series inside the wire (heat-shrunk). KEY = J5's pulled pin, no connection."
  ],
  "grid": {
   "rows": [
@@ -470,7 +470,7 @@
   },
   {
    "id": "J3",
-   "kind": "3-pin header: left strip (D4)",
+   "kind": "3-pin header: left strip (D6)",
    "pins": {
     "DIN": "P3/12",
     "5V2": "P4/12",
@@ -488,7 +488,7 @@
   },
   {
    "id": "J4",
-   "kind": "3-pin header: right strip (D7)",
+   "kind": "3-pin header: right strip (D5)",
    "pins": {
     "DIN": "P3/13",
     "5V2": "P4/13",
@@ -790,15 +790,15 @@
   },
   {
    "hole": "L1/-3",
-   "uno": "D9"
+   "uno": "D7"
   },
   {
    "hole": "L3/12",
-   "uno": "D4"
+   "uno": "D6"
   },
   {
    "hole": "L3/13",
-   "uno": "D7"
+   "uno": "D5"
   }
  ],
  "direct_uno": [
@@ -882,15 +882,15 @@
   ],
   "SERVO_SIG": [
    "J2.SIG",
-   "uno:D9"
+   "uno:D7"
   ],
   "DIN_L": [
    "J3.DIN",
-   "uno:D4"
+   "uno:D6"
   ],
   "DIN_R": [
    "J4.DIN",
-   "uno:D7"
+   "uno:D5"
   ],
   "A0": [
    "R100k.b",
@@ -1001,9 +1001,10 @@
    "title": "7. Dupont wires to the Uno sockets (cut a male-male jumper, solder the cut end in the hole)",
    "do": [
     "U1/1 -> D11, U1/2 -> D12, U1/3 -> D8, U1/4 -> D10.",
-    "U1/9 -> A0.  L1/-3 -> D9.",
-    "L3/12 -> D4 and L3/13 -> D7, each with 200 + 200 ohm soldered in series IN the wire, heat-shrunk.",
-    "Encoder yellow -> D2 socket, white -> D3 socket (male pins on the cable, not through the shield)."
+    "U1/9 -> A0.  L1/-3 -> D7.",
+    "L3/12 -> D6 and L3/13 -> D5, each with 200 + 200 ohm soldered in series IN the wire, heat-shrunk.",
+    "Encoder yellow -> D2 socket, white -> D3 socket (male pins on the cable, not through the shield).",
+    "As built 2026-10-31 (record MD): servo signal on D7, strip data on D6 (left) and D5 (right); the servo jumper's female end sits on J2's SIG pin, so the servo plug fix from record LC is still open."
    ],
    "check": "with the shield on the Uno: each socket pin beeps to its hole; the Uno's 5V pin beeps to V/12"
   },

@@ -96,3 +96,7 @@ level outward; Evan confirmed the frames under them are level.
 **Why:** fewer wires and holes on a crowded 0.1 in grid; the rail-B star differs from a true star by milliohms; the WS2812B cap belongs at the strip input.
 **Cost:** sockets can vibrate loose (Evan accepted); 31 solder-bridge hazard pairs to meter silent.
 **Source:** records KF, KG.
+## 2026-10-31 - Uno signal pins changed to the as-built wiring (Evan chose B, record MD)
+**What:** supersedes the servo signal on D9 (2026-10-16 entry) and the strip DIN wires on D4 / D7 (2026-10-20 entry): servo D7, left strip D6, right strip D5; D9 and D4 become free. Firmware and docs switched; compiled, NOT flashed - the Uno still runs the old map until re-flashed with the shield OFF.
+**Why:** the three shield-to-Uno Dupont wires are physically on those pins; matching the firmware to the wires avoids a re-plug.
+**Source:** record MD.

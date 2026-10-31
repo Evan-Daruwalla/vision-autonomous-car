@@ -199,7 +199,7 @@ by Evan 2026-07-23 ~17:21 CDT** (M1.1 gate item e).
   the MG996R fallback is now a **liability**, SF 0.12-0.19 at the steering
   coupler ·
   **Arduino Uno R3 clone (OWNED, $0) owns all real-time actuation**: motor
-  PWM on Timer2, servo, ~~4 light channels~~ **2 WS2812B strip data pins (D4/D7, no PWM — 2026-09-03, Appendix CX)**, quadrature encoder on D2/D3, pack
+  PWM on Timer2, servo, ~~4 light channels~~ **2 WS2812B strip data pins (~~D4/D7~~ D6/D5 (2026-10-31, as built, record MD), no PWM — 2026-09-03, Appendix CX)**, quadrature encoder on D2/D3, pack
   guard on A0, TB6612 `STBY` on D10 — **zero PWM spare, A1-A5 the only free
   pins**; Pi↔Uno over USB ~~with the 5 V conductor cut~~ **(a plain, uncut cable; the Pi powers the Uno - 2026-10-16, JF; struck 2026-10-21, audit KA)**, binary serial protocol
   v0.2 (7-byte command, 9-byte reply, CRC8, ARMED per frame, 150 ms
@@ -607,7 +607,7 @@ transfer gap) must not block the capstone.
     against the 9 new checks (58 total) on real hardware.
     **Remaining, now blocked on hardware alone, not on any decision:**
     **Done-check (unchanged, still not met):** both segments address
-    independently from D4/D7; the LAST pixel of each lights (not just the
+    independently from ~~D4/D7~~ D6/D5 (2026-10-31, as built, record MD); the LAST pixel of each lights (not just the
     first — a cold DIN joint looks like a working strip); `SELFTEST` still
     passes (pass count currently unknown); and `ticks` counts cleanly with
     the indicators blinking, which is the first real test of the interrupt

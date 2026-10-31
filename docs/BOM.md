@@ -302,6 +302,9 @@ not a discount — it is not paying $8 to ship a 75-cent switch.**
                        D11 motor PWM (Timer2)  D7  LED strip RIGHT DIN
                        D8/D12 motor DIR        D13 status LED
                        D10 TB6612 STBY         A0  pack sense divider
+                    2026-10-31 (record MD): the map above (and the D9 / D4 / D7
+                    labels in the box drawing higher up) is the pre-as-built design.
+                    As built: servo D7, LED strip LEFT D6, RIGHT D5; D9 and D4 free.
                     Motor PWM MUST be Timer2: Timer0 also drives millis(), so
                     its frequency cannot move, and motor PWM is the one channel
                     that may need raising above the audible band.
