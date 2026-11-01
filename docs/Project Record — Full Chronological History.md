@@ -394,6 +394,10 @@ the dated entry, not the digest.
 - [MS - Deck v14b revised: two 20 mm Uno velcro pads side by side (was three in a line)](#appendix-ms---deck-v14b-revised-two-20-mm-uno-velcro-pads-side-by-side-was-three-in-a-line-2026-11-01-0158-cdt) (11-01)
 - [MT - Scheduled daily-audit: 53 findings, 1 high - the shield test card never checks motor outputs M1/M2 against Uno 5V or GND before build step 5](#appendix-mt---scheduled-daily-audit-53-findings-1-high---the-shield-test-card-never-checks-motor-outputs-m1m2-against-uno-5v-or-gnd-before-build-step-5-2026-11-01-0733-cst) (11-01)
 - [MU - Deck v15: Pi USB-A clearance 100 mm, Uno turned 180 deg onto a new wing beside the LM2596, rocker passthroughs 8 x 6 - CAD untested, not printed](#appendix-mu---deck-v15-pi-usb-a-clearance-100-mm-uno-turned-180-deg-onto-a-new-wing-beside-the-lm2596-rocker-passthroughs-8-x-6---cad-untested-not-printed-2026-11-01-0859-cst) (11-01)
+- [MV - Build step 5 leads made, NOT connected (Evan) - A0 reading, J1 power-off checks and the MT M1/M2 short check still open](#appendix-mv---build-step-5-leads-made-not-connected-evan---a0-reading-j1-power-off-checks-and-the-mt-m1m2-short-check-still-open-2026-11-01-1324-cst) (11-01)
+- [MW - A0 to GND reads -0.883 V (Evan): magnitude PASS (expect 0.86-0.89), sign read as swapped probes](#appendix-mw---a0-to-gnd-reads--0883-v-evan-magnitude-pass-expect-086-089-sign-read-as-swapped-probes-2026-11-01-1328-cst) (11-01)
+- [MX - Correction to MV/MW: J5 VBAT is L3/10, not P3/10 (P3/10 is the KEY) - step-5 power-off check fixed](#appendix-mx---correction-to-mvmw-j5-vbat-is-l310-not-p310-p310-is-the-key---step-5-power-off-check-fixed-2026-11-01-1331-cst) (11-01)
+- [MY - Step-5 power-off checks PASS: P3/6 to L3/10 silent, M1/M2 to Uno 5V and GND silent (Evan)](#appendix-my---step-5-power-off-checks-pass-p36-to-l310-silent-m1m2-to-uno-5v-and-gnd-silent-evan-2026-11-01-1333-cst) (11-01)
 
 ---
 
@@ -22522,3 +22526,60 @@ Deck v15 (`cad/scad/electronics_deck.scad`), all on Evan's instructions this mor
 - The build-step 2b wires (W9 VBAT 250, W12, W13, W14) were cut for the Uno's old spot. The Uno now sits closer to the rocker and LM2596, and turned 180 deg its J5 header (column 10) is in a different place. The wires are likely too long rather than short; slack routing is not checked.
 - The step-5 motor and encoder cable routes to J1 change with the turn; `docs/step5_motor_encoder.*` and the wiring guides do not show the Uno's new place.
 - Scheduled audit MT (earlier today) found one HIGH item: the shield test card never checks motor outputs M1/M2 against Uno 5V or GND before build step 5. Still open.
+
+# Appendix MV - Build step 5 leads made, NOT connected (Evan) - A0 reading, J1 power-off checks and the MT M1/M2 short check still open (2026-11-01 ~13:24 CST)
+Evan, verbatim: "step 5 is done but not conencted".
+
+Read against the step-5 sheet (`docs/step5_motor_encoder.png`, record ML): the motor + encoder leads are made (sheet steps 1-3: the J1 housing from cut female-female jumpers - red, black, green, blue - and the yellow / white male-pin leads for the Uno). They are NOT plugged into J1 or D2 / D3, so sheet steps 4-7 are not done.
+- Not reported, so logged as missing: which sub-steps exactly, any continuity reading on the new leads, the order of the four J1 wires in the housing.
+
+Still open before plugging in:
+- The meter reading of A0 to GND (HANDOFF next action 2; expect ~0.88 V = 8.18 x 12k / 112k, range 0.86-0.89).
+- The step-5 power-off check, J1 +5V2 (P3/6) to J5 VBAT (P3/10) silent.
+- The audit MT HIGH item: M1 (P3/3) and M2 (P3/4) to Uno 5V and to GND, both silent, with the motor NOT plugged in (the card has no such check yet).
+
+The Uno is turned 180 deg in deck v15 (record MU); the J1 lead lengths were made before that move and are not checked against it.
+
+Nothing is powered or driven in this entry.
+
+# Appendix MW - A0 to GND reads -0.883 V (Evan): magnitude PASS (expect 0.86-0.89), sign read as swapped probes (2026-11-01 ~13:28 CST)
+Evan metered A0 to GND (HANDOFF next action 2) with the rocker on. Reading, verbatim: "-0.883".
+
+- **Magnitude 0.883 V: inside the expected 0.86-0.89 V** (8.18 x 12k / 112k = 0.876 V, from card E's J5 reading in record MO; the 12k leg is R10k + R2k in series, shield_layout.json step 5). This is the divider working as intended.
+  - Back-calculated VBAT = 0.883 x 112 / 12 = 8.24 V. The pack is ~0.06 V above card E's 8.18; the resistor tolerances (not recorded) are as large as that gap.
+- **The minus sign is read as the meter probes swapped** (red on GND, black on A0), NOT as a negative voltage on A0. Why:
+  - A truly negative A0 needs a negative VBAT, i.e. a reversed XT30.
+  - With its input reversed, the LM2596 could not have produced the +4.96 V recorded at its output (MN) and at J3 (MO), and the Uno 5V read ~5 V (MO).
+  - Not confirmed by a re-read with red on A0 and black on GND. Probe placement was not reported. Logged as an inference.
+- Verdict: **A0 check PASS on magnitude**; the sign rests on the inference above until Evan re-reads it as +0.88.
+
+Next per HANDOFF: power OFF, then the J1 checks (P3/6 to P3/10 silent; M1 P3/3 and M2 P3/4 to Uno 5V and to GND silent, audit MT), then step-5 sheet steps 4-7.
+
+# Appendix MX - Correction to MV/MW: J5 VBAT is L3/10, not P3/10 (P3/10 is the KEY) - step-5 power-off check fixed (2026-11-01 ~13:31 CST)
+Evan caught it: "isnt p3 10 the key".
+
+**Correction to records MV and MW:** both name the step-5 power-off check as "J1 +5V2 (P3/6) to J5 VBAT (P3/10)". **P3/10 is J5's KEY position** (pulled pin, no net). J5 VBAT is **L3/10**. This comes from docs/shield_layout.json: J5 pins VBAT L3/10, KEY P3/10, +5V2 P4/10, GND B/10. Record ML lists the same pins.
+
+- The error was Claude's, typing the pin from memory instead of from the layout. The step-5 sheet (scripts/step_wiring_svg.py) reads the pin from the layout and was never wrong.
+- A check run as written would probe an empty position and stay silent whatever the wiring, so it would pass with no meaning.
+- The correct check: **power off, J1 +5V2 (P3/6) to J5 VBAT (L3/10) SILENT**. A beep means the encoder would get VBAT: STOP.
+- HANDOFF next action 2 corrected. MV and MW stay as written (append-only).
+
+# Appendix MY - Step-5 power-off checks PASS: P3/6 to L3/10 silent, M1/M2 to Uno 5V and GND silent (Evan) (2026-11-01 ~13:33 CST)
+Evan, verbatim: "all 3 pass". These are the three power-off beep checks listed after record MX, run with the rocker OFF and the step-5 leads not plugged in:
+
+1. J1 +5V2 (P3/6) to J5 VBAT (L3/10): **silent - PASS.** The encoder will not get VBAT.
+2. M1 (P3/3) and M2 (P3/4) to Uno 5V: **silent - PASS.**
+3. M1 and M2 to GND: **silent - PASS.**
+
+Checks 2 and 3 are the ones the scheduled audit's HIGH item (record MT) said the shield test card lacks. They are now done by hand for this build. **The card itself still lacks them** (`scripts/shield_test_card_svg.py` not changed).
+
+Not reported, so logged as missing: whether checks 2 and 3 were each run on both M1 and M2. "all 3 pass" is taken as yes.
+
+Next: step-5 sheet steps 4-7:
+- push the housing onto J1 (blue on the pin nearest J5),
+- yellow into D2, white into D3,
+- car on a stand, Uno on the Pi's USB, then rocker ON,
+- `host_test.py --wired` at 20 % duty, both directions.
+
+The board runs the MG build (banner + SELFTEST PASS 86/86); read the banner before trusting the test.
