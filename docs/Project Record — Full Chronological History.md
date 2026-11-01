@@ -392,6 +392,8 @@ the dated entry, not the digest.
 - [MQ - Tray v12: 2S holder end walls back with 80% wire openings; charger corner brackets (untested)](#appendix-mq---tray-v12-2s-holder-end-walls-back-with-80-wire-openings-charger-corner-brackets-untested-2026-11-01-0038-cdt) (11-01)
 - [MR - Deck v14b: 20 mm velcro pads under the Uno; tray v12b: charger and XT30 swapped (untested)](#appendix-mr---deck-v14b-20-mm-velcro-pads-under-the-uno-tray-v12b-charger-and-xt30-swapped-untested-2026-11-01-0110-cdt) (11-01)
 - [MS - Deck v14b revised: two 20 mm Uno velcro pads side by side (was three in a line)](#appendix-ms---deck-v14b-revised-two-20-mm-uno-velcro-pads-side-by-side-was-three-in-a-line-2026-11-01-0158-cdt) (11-01)
+- [MT - Scheduled daily-audit: 53 findings, 1 high - the shield test card never checks motor outputs M1/M2 against Uno 5V or GND before build step 5](#appendix-mt---scheduled-daily-audit-53-findings-1-high---the-shield-test-card-never-checks-motor-outputs-m1m2-against-uno-5v-or-gnd-before-build-step-5-2026-11-01-0733-cst) (11-01)
+- [MU - Deck v15: Pi USB-A clearance 100 mm, Uno turned 180 deg onto a new wing beside the LM2596, rocker passthroughs 8 x 6 - CAD untested, not printed](#appendix-mu---deck-v15-pi-usb-a-clearance-100-mm-uno-turned-180-deg-onto-a-new-wing-beside-the-lm2596-rocker-passthroughs-8-x-6---cad-untested-not-printed-2026-11-01-0859-cst) (11-01)
 
 ---
 
@@ -22425,3 +22427,98 @@ HARD CONSTRAINTS
 **Deck v14b, revised (cad/electronics_deck.stl). UNTESTED - not printed.** The three 20 mm Uno pads in a line across the board (MR) are replaced by TWO, side by side along x between the two stiffening ribs: centres (-43, 0) and (-19, 0), 4 mm apart, 1 mm clear of each rib, clear of all four standoffs. Height unchanged: 2.5 mm (6 mm standoff - 3.5 mm velcro pair). MR's pad count and positions are superseded by this entry.
 
 **Checks (2026-11-01 ~01:58 CDT):** deck render probes 115/115 PASS (probe file: old pad points removed, new pad tops / gaps added); electronics_layout 36 entries, 0 checks failed; check_artifacts 40 checked, 0 drifted; suite `35 passed, 0 failed, 0 skipped  (of 35)`. Close-up render looked at.
+
+# Appendix MT - Scheduled daily-audit: 53 findings, 1 high - the shield test card never checks motor outputs M1/M2 against Uno 5V or GND before build step 5 (2026-11-01, ~07:33 CST)
+Audit run - 53 findings (1 high, 9 med, 43 low) + 1 policy item + 5 edge cases, 1 refuted. Top: the shield test card never checks the motor outputs M1/M2 against Uno 5V or GND, and build step 5 (motor + encoder) is next.
+
+Scheduled `daily-audit` (unattended, read-only; this entry is its only write). Classified ACTIVE by the churn override: audit MB (2026-10-31) was followed by 12 non-audit commits (`ededa5e..HEAD`) and entries MG-MS. Scope: whole repo, 400 tracked files (`git -c core.quotepath=false ls-files`), 4 Sonnet audit workers (W1 code churn M1/M2/M3/M13; W2 M7/M8/M9/M15/M12/G1-G4; W3 docs D1-D8; W4 hardware cross-domain X-series) + 1 landing-check agent on MO-MS (commit a78640a). HEAD a78640a, origin/main 0/0 (pushed).
+
+## Dynamic pass (session model)
+
+- `scripts/run_checks.py`: 35 passed, 0 failed, 0 skipped (of 35).
+- `scripts/check_artifacts.py`: 40 artifacts checked, 0 drifted, 0 errored, 2 uncheckable (by design).
+- `py_compile` over every tracked .py: exit 0.
+
+## High (1)
+
+1. HIGH (W4, raised from med by the session model) - `scripts/shield_test_card_svg.py:28-37` and `docs/shield_layout.json` step 3: the SHORTS section never tests M1 vs Uno 5V (L3/2-L3/3), M1 vs M2 (P3/3-P3/4) or M2 vs GND (P3/4-P3/5), although `shield_holemap.py` itself warns about all three adjacencies. A bridge at L3/2-L3/3 puts TB6612 motor drive (pack voltage, ~8.2 V) on the Uno 5V / Pi USB rail at build step 5. Re-verified: holemap prints `L3/2 (UNO5V) next to L3/3 (M1)`; `grep -c` for L3/3, P3/3, P3/4 in the card script and SVG = 0 and 0. Raised because the blast is a Pi + Uno and the step is next. Fix: add three SILENT rows to SECTIONS A, add the same pairs to step 3's check, regenerate the card, meter them before step 5.
+
+## Medium (9)
+
+2. `docs/ELECTRONICS_LAYOUT.md:1,47,50,51,60,62,81,82,143` still describes tray v11 / deck v12 (charger x 104..122.3, XT30 76..101, end walls removed, 3.2 pegs). The scad is v12b/v14b (CHG_POS [66.5,-85.5], XT30 at x 107). HANDOFF.md:473 says to read this file before ANY tray/deck work. W3 graded it high; lowered to med because the generated `docs/electronics_layout.svg` is current (check_artifacts OK) and the parts are on velcro. Last doc commit 1a4aea4, 2026-10-20.
+3. HANDOFF.md stale state, re-verified: :483 "SHIELD: soldered, UNTESTED (no meter checks, never powered)" vs MJ/MO (A-E PASS, J5 8.18 V); :519 lists "rocker; no meter checks" as not done; :547 "print tray v11 + deck v13"; :21, :27 and :411 carry unstruck D4/D7/D9 pin statements and "Nothing is bought" (the current block at :479-480 is right).
+4. `ml/splits.py:237,248`: an empty `fit` returns float64 `np.array([])`, so `tracks[fit]` / `fit_i[sub_fit]` raise IndexError and the clean SystemExit at `ml/bc_real.py:172` is unreachable. Re-verified (`IndexError arrays used as indices must be of integer (or boolean) type`). Fix: `dtype=np.int64`.
+5. `ml/bc_real.py:143-146,204-209`: if every val frame is dropped, `evaluate` returns loss None and training dies with TypeError mid-run (W1 reproduced).
+6. `ml/splits.py:184-187`: `check_corpus(ckpt_id, None)` returns silently when the checkpoint HAS a corpus_id but `{split}_ids.npy` is missing, so the legacy shuffle can put trained-on episodes into val. 9 calls in 7 files inherit it.
+7. `ml/bc_real.py` / `ml/verify_real.py` never read `log_bench` / `log_max_throttle` / `log_status`; `pi/teleop.py:1157` defaults `--max-throttle 0`, so a default or --bench recording trains throttle toward 0 without a warning.
+8. `firmware/uno_control/uno_control.ino:748-749`: `wd = false` on every frame, so the first ARMED frame after a trip drives for one 50 ms frame before the Pi disarms; a missed reply means no disarm. REPEAT of audit MB, already documented at SERIAL_PROTOCOL.md:151-155; the new detail is the one-frame leak.
+9. `pi/recorder.py:84-85`: no cap on in-memory frames; a long armed recording can OOM the Pi and lose the episode (W2, REPORTED).
+10. No mechanical guard ties the firmware `PIN_*` constants to `docs/shield_layout.json`; they agree today only by hand check, after three pin changes on 2026-10-31.
+
+## Low (43, one line each)
+
+W3 docs: HANDOFF:5 "346 appendices A-MH" (actual 357, A-MS); HANDOFF:525 "34" self_checks (35); HANDOFF:183-195 3dstreet "LIVE" (server removed); important.md source line cites no longer land; README:147 + pi/README:3 "untested on the Pi" (off-car run LR passed); INDEX/features.md "34 ml scripts" (37, 3+ missing rows); WIRING_PROTOSHIELD:82,113 cite ino:82-95 (now 84-97); uno_control.ino:10-16 header says unverified/no strip; hardware-shield-wiring.md:150 vs ME/MJ disagree on shield_bottom_grid.jpg; firmware/README:4, PRD:505-508, SERIAL_PROTOCOL:5 stale snapshots; INDEX/HANDOFF line counts off; record P->Q time regression with no note; WIRING:124-125 Mermaid shows 400 ohm resistors that were never built.
+W4 hardware: pack_wiring_svg.py:105,196 says 4.99 V citing JE (JE = 4.95 V); check_artifacts registers 1 of 10 generated SVGs; pack_wiring_svg.py and shield_wiring_svg.py hardcode pins; LIGHTING_SPEC:101-105 current budget still counts servo + motor on the LM2596 rail; cad/README:372 tray ~162 x 169 (probe 172 x 173), mast + gauge missing; shield_holemap.svg embedded rasters differ from docs/*.png; svg_text_overlap covers 6 SVGs, bms_wiring.svg fails 2 overlaps; BOM.md:48 row 17 pin text not marked superseded.
+W2 spec/security: index.html:59 hardcodes ws port 8765 while README offers --ws-port; teleop.py:396 misses OverflowError (one client drops, car disarms); Origin warning wording overstates browser exposure; record carries 3 live `C:\Users\<account>` paths (important.md #9 says 2); 9 of 115 run JSONs have provenance, all dirty; NeoPixel library unpinned; no lockfile/hashes; stale `enabledMcpjsonServers: 3dstreet` in settings.local.json; pre-commit gate is opt-in per clone.
+W1 code: diag_copycat.py lacks the mu/act length assert its siblings have; RX_BAD reply reuses stale status bits; loop_dt has 1 ms resolution in a 100 us field; uno_link.py:56 no write_timeout (a stalled write holds the lock); teleop exits 0 after a failed save; Dreamer checkpoint has no corpus stamp; pi/README:47 "press A to re-arm" (A = AUTO on keyboard); lights unreachable from UnoLink.
+Landing-check: hardware-print-mounts.md:236 "three 20 mm pads" unstruck; electronics_deck.scad:27 dates v14 2026-10-31 vs MP 2026-11-01; MQ's 1.45 mm bracket clearance silently superseded by MR.
+Session (cross-project): important.md #9 says `git add -A` / `git add .` are "hard-denied", but neither deny rule exists in either settings file today (daily-audit STEP 0e).
+
+## Policy item (Evan's call)
+
+Public repo with no LICENSE: outsiders get no reuse rights. Decision, not a defect.
+
+## Edge cases (5)
+
+find_port sorts ttyACM10 before ttyACM2; first-ACM-wins with two CDC devices (main returns 2); preflight ignores --port; exchange() counts a programmer ValueError as a link miss; an Origin-less local ws client can arm and drive (already documented in security.md).
+
+## Refuted (1)
+
+Landing-check claimed the record TOC stops at EW (153 lines). Re-measured: 357 headings, 357 TOC lines, MM-MS present (it grepped only the old em-dash form).
+
+## Landing-check verdict on MO-MS
+
+FIX FIRST (docs only). Deck STL, tray STL and electronics_layout.svg regenerate byte-identical; probes 115/115 and 270/270; no private identifier introduced by a78640a. Every MO-MS dimension re-derived TRUE from the scad.
+
+## Coverage and cost
+
+W1 34/34 files (4 bench sketches not swept); W2 55 + 116 data files; W3 60 .md (20 bins mechanical only); W4 92 (divider_xray and render3d not regenerated). Not run: firmware compile/flash, host_test.py (needs a serial port), teleop/uno_link self-checks by workers (the session model's run_checks covered them), pip-audit (absent). 5 agents, ~942K subagent tokens, ~25 min wall clock.
+
+# Appendix MU - Deck v15: Pi USB-A clearance 100 mm, Uno turned 180 deg onto a new wing beside the LM2596, rocker passthroughs 8 x 6 - CAD untested, not printed (2026-11-01 ~08:59 CST)
+Deck v15 (`cad/scad/electronics_deck.scad`), all on Evan's instructions this morning. CAD only - UNTESTED, NOT PRINTED.
+
+## What Evan asked
+
+1. "the clearence from the USB A side of the pi needs to be 100mm" - asked: measured from the case face, and it includes the cable bend.
+2. The Uno was in the way (it sat at x -58.18..-4.48, inside x -60..40 and in the same height band). After first answering "new +y wing", Evan redirected: "turn it 180 and put it by the converter", then "uno gets turned 180 and go like 50mm towards the buck and can go over one of the deck connecters holes".
+3. "make the wire passthroughs by the rocker at least 6mm x 6mm".
+
+## What changed
+
+- **USB-A / LAN clearance box**: x -2..39.7 -> x -60..39.7 (100 mm from the case face at x 40, minus the 0.25 pocket), y -28.2..28.2 and z unchanged. Renamed to say the Uno's USB-B jack, plug and cable now run inside it.
+- **Uno turned 180 deg** about its own centre and moved **-65.6 mm in y** (box now x -58.18..-4.48, y -100.6..-30.6). Its USB-B and DC jack now face +y, toward the Pi's USB-A ports.
+  - Why 65.6, not ~50: at 50 the Uno box would still reach 13.4 mm into the 100 mm zone (it must end below y -28.2; it ends at -30.6). The extra 2 mm moves the +x rear standoff (now at (-7.2, -46.55)) clear of the deck pin boss at (-12, -41.6): its 6.2 mm counterbore would otherwise cut 0.47 mm into the standoff. Margin now ~0.8 mm.
+  - Standoffs, pegs and the two 20 mm velcro pads all follow the same transform, (x, y) -> (-62.66 - x, -65.6 - y). The x span is unchanged, so the gap to the LM2596's -x terminal room (x 0..10) stays 4.48 mm.
+  - **The Uno now spans the boss at (-12, -41.6).** The boss top is z 62.3 and the Uno box underside is z 63.0: **0.7 mm**. The Uno's underside solder joints and pin ends are not modelled. If they hang more than ~0.7 mm below the board where the boss is, they hit it. UNMEASURED - check by eye before fitting.
+  - The separate USB-B plug clearance box is removed. Its route (jack overhang 7.3 + a 16 x 30 x 13 plug allowance) now lies inside the USB-A zone it was always heading for. The checker counts any two overlapping boxes as a failure, so the plug got folded into the zone.
+- **New Uno wing** `UNO_WING` x -64..0, y -103..-42 (the plate's -y edge now reaches y -103, was -86 under the LM2596 wing). Three 3 mm ribs on top:
+  - one between the velcro pads (x -32.66..-30.66),
+  - one along the -x edge,
+  - one along the -y edge.
+  The wing is supported along y -42 (plate) and x 0 (LM2596 wing) only; its far corner is a ~60 mm cantilever, unmeasured for sag.
+- The v11 ribs at y +/-12 stay on the plate's rear cantilever. They now sit under the USB-A zone, whose floor is 0.5 mm above them.
+- **Power slot** (VBAT / GND up from the rocker): 8 x 4 -> **8 x 6** (x 96..104, y -50.5..-44.5). Web to the rocker hole: 3.0 mm, 2.2 mm at the top-face chamfer.
+- **Encoder-cable slot**: 8 x 2.5 -> **8 x 6** (x 100..108, y -41.0..-35.0). It still starts over the tray's floor slot (y -41.0..-38.5). Web between the two slots: 3.5 mm.
+  - **The tray's own encoder slot is still 8 x 2.5 - NOT changed** (the request was "by the rocker", which is the deck).
+
+## Checks (real output)
+
+- `python scripts/render_scad.py cad/scad/electronics_deck.scad -o cad/electronics_deck.stl`: manifold PASS, volume 71841.5219 mm^3, bbox (-64, -103, 54.5)..(156, 45.6, 67.0) PASS, **probes 129/129 PASS** (probe file updated: Uno-tied probes moved with the transform; new probes on both slots, their webs, the old Uno spots now open, and the wing ribs).
+- `python scripts/electronics_layout.py`: **35 entries, 0 checks failed** (was 36: the USB-B plug box was folded into the zone). `docs/electronics_layout.svg` regenerated.
+- `.venv/Scripts/python.exe scripts/run_checks.py`: **35 passed, 0 failed, 0 skipped (of 35)**. Bare `python` now resolves to a 3.14 install with no packages: there the suite reads 23 passed, 1 failed (`pi/preflight.py`: no serial / websockets / PIL), 11 skipped. That is an environment change, not this edit; use `.venv`.
+
+## Knock-on effects, not handled here
+
+- The build-step 2b wires (W9 VBAT 250, W12, W13, W14) were cut for the Uno's old spot. The Uno now sits closer to the rocker and LM2596, and turned 180 deg its J5 header (column 10) is in a different place. The wires are likely too long rather than short; slack routing is not checked.
+- The step-5 motor and encoder cable routes to J1 change with the turn; `docs/step5_motor_encoder.*` and the wiring guides do not show the Uno's new place.
+- Scheduled audit MT (earlier today) found one HIGH item: the shield test card never checks motor outputs M1/M2 against Uno 5V or GND before build step 5. Still open.

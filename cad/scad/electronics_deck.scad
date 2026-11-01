@@ -31,6 +31,12 @@ VELCRO = 3.5;             // velcro pair thickness under the Pi case (Evan 2026-
 // stick to. Under the LM2596 and the Uno the plate was already flat (no slot or boss under either).
 // v14b (2026-11-01, Evan): two 20 mm round velcro pads side by side under the Uno, tops at the standoff top minus one
 // velcro pair (2.5 mm tall), placed clear of the ribs (y +/-12) and the four standoffs.
+// v15 (2026-11-01, Evan): the Pi's USB-A / LAN side needs 100 mm of clearance (case face x 40 -> x -60). The Uno
+// is turned 180 deg (USB-B and DC jack now face +y, toward the Pi's USB-A ports) and moved 65.6 mm in -y beside the
+// LM2596, onto a new rear wing (UNO_WING, x -64..0, y -103..-42) with three 3 mm ribs. 65.6, not ~50: the Uno box must
+// end outside the 100 mm zone (y -28.2) and its +x rear standoff must clear the boss at (-12, -41.6), which the Uno
+// now spans (boss top 62.3, Uno underside 63.0: 0.7 mm). Power slot 8 x 4 -> 8 x 6 and encoder slot 8 x 2.5 -> 8 x 6
+// (Evan: at least 6 x 6).
 //
 // FRAME: x along the car, x = 0 at the REAR corner pin hole, +x toward the front;
 // y across, pin rows at y = +/-24; z = 0 on the Lego frames' top face. The deck's
@@ -54,6 +60,8 @@ PLATE_X = [-64, 156];
 PLATE_Y = [-42, 42];
 WING_X = [0, 132];
 WING_Y = [-86, -42];
+UNO_WING_X = [-64, 0];    // v15: the Uno's wing, behind the LM2596
+UNO_WING_Y = [-103, -42];
 
 BOSS_XY = [[-12, 41.6], [-12, -41.6], [150, 41.6], [150, -41.6], [60, -82], [128, -82]];
 
@@ -69,13 +77,14 @@ BR_H = 10.0;              // bracket height above the deck (z 48.5..58.5); 6 -> 
 LEAD = 0.5;               // lead-in chamfer on the Pi bracket tops (Rule 5)
 
 // Arduino Uno standoffs and pegs
-UNO_XY = [[-55.46, -19.05], [-40.22, 31.75], [-12.28, 31.75], [-7.2, -20.32]];
+// v15: v14 holes turned 180 deg about the Uno centre and moved -65.6 in y: (x, y) -> (-62.66 - x, -65.6 - y)
+UNO_XY = [[-7.2, -46.55], [-22.44, -97.35], [-50.38, -97.35], [-55.46, -45.28]];
 UNO_SO_D = 6.0;
 UNO_SO_H = 6.0;           // z 48.5..54.5; was 4: the USB-B plug crosses the boss at (10, -41.6)
 UNO_PEG_D = 3.0;
 UNO_PAD_D = 20.0;                  // v14b: velcro pads under the Uno
 UNO_PAD_H = UNO_SO_H - VELCRO;     // 2.5: pad + mated velcro pair = standoff height
-UNO_PADS = [[-43, 0], [-19, 0]];   // v14b: two side by side between the ribs (Evan), 4 mm apart, clear of the standoffs
+UNO_PADS = [[-19.66, -65.6], [-43.66, -65.6]];   // v14b: two side by side (Evan), 4 mm apart, clear of the standoffs; v15: moved with the Uno
 UNO_PEG_H = 2.5;          // v14: 3 -> 2.5 (Evan)
 
 // LM2596 standoffs and pegs
@@ -116,6 +125,7 @@ difference() {
     // plate, wing
     box(PLATE_X, PLATE_Y, [DECK_BOT, DECK_TOP]);
     box(WING_X, WING_Y, [DECK_BOT, DECK_TOP]);
+    box(UNO_WING_X, UNO_WING_Y, [DECK_BOT, DECK_TOP]);
     // pin bosses
     for (p = BOSS_XY) translate([p[0] - BOSS / 2, p[1] - BOSS / 2, DECK_BOT]) cube([BOSS, BOSS, BOSS_H]);
     // Pi corner brackets, outside the case, two BR_LEG legs at each of the 4 corners
@@ -134,8 +144,13 @@ difference() {
     }
     // v14b: velcro pads under the Uno
     for (p = UNO_PADS) translate([p[0], p[1], DECK_TOP - EPS]) cylinder(d = UNO_PAD_D, h = UNO_PAD_H + EPS);
-    // v11: stiffening ribs under the Uno (cantilever past the rear posts)
+    // v11: stiffening ribs on the plate's rear cantilever past the rear posts (under the Uno until v15; now under
+    // the USB-A zone, whose floor is DECK_TOP + VELCRO, 0.5 above them)
     for (ry = [-12, 12]) box([-60, -6], [ry - 1, ry + 1], [DECK_TOP - EPS, DECK_TOP + 3]);
+    // v15: Uno wing ribs, 3 mm tall: one between the velcro pads and one along each free edge
+    box([-32.66, -30.66], UNO_WING_Y, [DECK_TOP - EPS, DECK_TOP + 3]);
+    box([-64, -62], UNO_WING_Y, [DECK_TOP - EPS, DECK_TOP + 3]);
+    box(UNO_WING_X, [-103, -101], [DECK_TOP - EPS, DECK_TOP + 3]);
     // LM2596 standoffs + pegs
     for (p = LM_XY) {
       translate([p[0], p[1], DECK_TOP]) cylinder(d = LM_SO_D, h = LM_SO_H);
@@ -156,11 +171,12 @@ difference() {
   translate([ROCKER_XY[0], ROCKER_XY[1], DECK_BOT - ROCK_CH]) chamfer_cone(ROCKER_D / 2 + 2 * ROCK_CH, ROCKER_D / 2 - EPS, 2 * ROCK_CH);
   translate([ROCKER_XY[0], ROCKER_XY[1], DECK_TOP - ROCK_CH]) chamfer_cone(ROCKER_D / 2 - EPS, ROCKER_D / 2 + 2 * ROCK_CH, 2 * ROCK_CH);
   // power slot: VBAT / GND from the rocker (below the wing) up to the shield
-  box([96, 104], [-49.5, -45.5], [DECK_BOT - EPS, DECK_TOP + EPS]);
+  // v15: 8 x 4 -> 8 x 6 (Evan: at least 6 x 6); 3.0 mm web to the rocker hole, 3.5 to the encoder slot
+  box([96, 104], [-50.5, -44.5], [DECK_BOT - EPS, DECK_TOP + EPS]);
   // lead-in on the Pi bracket tops (Rule 5)
   lead_in(PI_X0, PI_X1, PI_Y0, PI_Y1, DECK_TOP + BR_H, LEAD);
-  // encoder-cable slot (x 100..108, y -41.0..-38.5), above the tray's
-  translate([100, -41.0, DECK_BOT - EPS]) cube([8, 2.5, 2.5 + 2 * EPS]);
+  // encoder-cable slot (x 100..108, y -41.0..-35.0), above the tray's (y -41.0..-38.5); v15: 8 x 2.5 -> 8 x 6 (Evan)
+  translate([100, -41.0, DECK_BOT - EPS]) cube([8, 6, PLATE_T + 2 * EPS]);
 }
 
 // preview-only ghosts
@@ -168,16 +184,15 @@ difference() {
 LAYOUT = [
   ["velcro under the Pi case (3.5 mm pair)", [91.8, 64.4, VELCRO], [40.0, -32.2, DECK_TOP], "zone", "adhesive both sides", ""],
   ["Raspberry Pi 5 in Vilros case", [91.8, 64.4, 27.2], [40.0, -32.2, DECK_TOP + VELCRO], "part", "velcro (on the plate rim + 2 vent cross bars) + 2 mm L-brackets at all 4 corners (ports clear)", "+x: camera opening (mid-face); -y side: USB-C 7 mm from the +x end; -x: USB-A + LAN (4 mm from the sides)"],
-  ["Arduino Uno R3 + proto shield (TB6612, caps, divider)", [53.7, 70, 24], [-58.18, -35, DECK_TOP + UNO_SO_H], "part", "4 standoffs + pegs", "-y: USB-B (overhangs 7.3) + DC jack (4.1); jack positions NOT measured"],
-  ["USB-B plug clearance (16 x 30 x 13 allowance, plug NOT measured)", [16, 30, 13], [-53, -72.3, DECK_TOP + UNO_SO_H + 1.6 - 1.0], "clearance", "hangs from the Uno jack", "-y: to the Pi"],
+  ["Arduino Uno R3 + proto shield (TB6612, caps, divider)", [53.7, 70, 24], [-58.18, -100.6, DECK_TOP + UNO_SO_H], "part", "4 standoffs + pegs + 2 velcro pads; spans the boss at (-12, -41.6), 0.7 mm above it", "+y (turned 180, v15): USB-B (overhangs 7.3, into the USB-A zone) + DC jack (4.1); jack positions NOT measured"],
   ["LM2596 buck, 5.00 V (display)", [66, 36, 14], [10, -74, DECK_TOP + LM_SO_H], "part", "4 standoffs + pegs", "display up; trim pot locked"],
   ["rocker switch (20 mm round)", [20, 20, 0], [90, -74, DECK_TOP], "note", "snap-in 21 mm hole on the -y wing", "body hangs 23.8 below the wing (to z 30.7)"],
   ["rocker body below the -y wing (clips 22.9, depth 23.8)", [22.9, 22.9, 23.8], [88.55, -75.45, DECK_BOT - 23.8], "clearance", "snap-in 21 mm hole", ""],
-  ["Pi USB-A / LAN plugs (ports 4 mm in from the case sides, JW)", [41.7, 56.4, 27.2], [-2, -28.2, DECK_TOP + VELCRO], "clearance", "keep clear", ""],
+  ["Pi USB-A / LAN plugs + cables, 100 mm from the case face (Evan 2026-11-01; ports 4 mm in from the case sides, JW); the Uno USB-B jack + plug + cable (v15) run inside it", [99.7, 56.4, 27.2], [-60, -28.2, DECK_TOP + VELCRO], "clearance", "keep clear", ""],
   ["Pi front camera ribbon", [44.7, 56.8, 27.2], [132.1, -28.4, DECK_TOP + VELCRO], "clearance", "keep clear", ""],
   ["Pi USB-C plug (-y side, 7 mm from the +x end)", [15, 45, 27.2], [116.8, -77.2, DECK_TOP + VELCRO], "clearance", "keep clear", ""],
   ["Pi fan / top access", [91.8, 64.4, 15], [40.0, -32.2, DECK_TOP + VELCRO + 27.2], "clearance", "keep clear", ""],
-  ["Uno shield wiring", [53.7, 70, 20], [-58.18, -35, DECK_TOP + UNO_SO_H + 24], "clearance", "keep clear", ""],
+  ["Uno shield wiring", [53.7, 70, 20], [-58.18, -100.6, DECK_TOP + UNO_SO_H + 24], "clearance", "keep clear", ""],
   ["LM2596 terminals -x", [10, 36, 14], [0, -74, DECK_TOP + LM_SO_H], "clearance", "keep clear", ""],
   ["LM2596 terminals +x", [10, 36, 14], [76, -74, DECK_TOP + LM_SO_H], "clearance", "keep clear", ""],
   ["rocker terminals", [22.9, 22.9, 10], [88.55, -75.45, DECK_BOT - 23.8 - 10], "clearance", "keep clear", ""]
