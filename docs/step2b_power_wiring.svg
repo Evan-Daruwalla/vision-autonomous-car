@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="897" viewBox="0 0 1400 897" font-family="Arial, sans-serif">
+<rect width="1400" height="897" fill="#FFFFFF"/>
+<text x="30.0" y="40.0" font-size="24" fill="#222222" text-anchor="start" font-weight="bold">Build step 2b - power wiring after the rocker (W8-W14)</text>
+<text x="30.0" y="64.0" font-size="12" fill="#4A4A46" text-anchor="start" font-weight="normal">All 22 AWG. The pack side (cells, fuse, BMS, charger, XT30 pack half: W1-W7) is already done. Shield stays OFF the Uno for this whole step. Do the steps in the order of the list</text>
+<text x="30.0" y="80.0" font-size="12" fill="#4A4A46" text-anchor="start" font-weight="normal">below: W8 and its polarity check come BEFORE any other wire, so nothing is loaded when the polarity is first measured.</text>
+<rect x="40" y="140" width="190" height="170" rx="8" fill="#FDE8E8" stroke="#C62828" stroke-width="2"/>
+<text x="50.0" y="160.0" font-size="14" fill="#222222" text-anchor="start" font-weight="bold">XT30 car half</text>
+<text x="50.0" y="180.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">female, on the car</text>
+<text x="50.0" y="196.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal"></text>
+<text x="50.0" y="212.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">pack side (W1-W7)</text>
+<text x="50.0" y="228.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">is already done</text>
+<rect x="225" y="185" width="10" height="10" fill="#222222"/>
+<text x="220.0" y="194.0" font-size="11" fill="#222222" text-anchor="end" font-weight="bold">+</text>
+<rect x="225" y="265" width="10" height="10" fill="#222222"/>
+<text x="220.0" y="274.0" font-size="11" fill="#222222" text-anchor="end" font-weight="bold">-</text>
+<rect x="340" y="110" width="170" height="100" rx="8" fill="#FDE8E8" stroke="#C62828" stroke-width="2"/>
+<text x="350.0" y="130.0" font-size="14" fill="#222222" text-anchor="start" font-weight="bold">Rocker (SPST)</text>
+<text x="350.0" y="150.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">6A 250V AC marking,</text>
+<text x="350.0" y="166.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">no DC rating (MK)</text>
+<rect x="335" y="170" width="10" height="10" fill="#222222"/>
+<text x="350.0" y="179.0" font-size="11" fill="#222222" text-anchor="start" font-weight="bold">pin 1</text>
+<rect x="505" y="170" width="10" height="10" fill="#222222"/>
+<text x="500.0" y="179.0" font-size="11" fill="#222222" text-anchor="end" font-weight="bold">pin 2</text>
+<rect x="600" y="260" width="230" height="220" rx="8" fill="#FFF3E0" stroke="#E65100" stroke-width="2"/>
+<text x="610.0" y="280.0" font-size="14" fill="#222222" text-anchor="start" font-weight="bold">LM2596 buck</text>
+<text x="610.0" y="300.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">set 4.95 V unloaded (JE)</text>
+<text x="610.0" y="316.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">pot locked</text>
+<text x="610.0" y="332.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal"></text>
+<text x="610.0" y="348.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">IN- and OUT- are joined</text>
+<text x="610.0" y="364.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">inside: wire only IN-</text>
+<rect x="595" y="395" width="10" height="10" fill="#222222"/>
+<text x="610.0" y="404.0" font-size="11" fill="#222222" text-anchor="start" font-weight="bold">IN+</text>
+<rect x="595" y="445" width="10" height="10" fill="#222222"/>
+<text x="610.0" y="454.0" font-size="11" fill="#222222" text-anchor="start" font-weight="bold">IN-</text>
+<rect x="825" y="395" width="10" height="10" fill="#222222"/>
+<text x="820.0" y="404.0" font-size="11" fill="#222222" text-anchor="end" font-weight="bold">OUT+</text>
+<rect x="825" y="445" width="10" height="10" fill="#9E9E9E"/>
+<text x="820.0" y="454.0" font-size="11" fill="#222222" text-anchor="end" font-weight="bold">OUT- (no wire)</text>
+<rect x="1060" y="155" width="280" height="280" rx="8" fill="#E8F5E9" stroke="#6AA86F" stroke-width="2"/>
+<text x="1070.0" y="174.0" font-size="11" fill="#2E5E33" text-anchor="start" font-weight="bold">Top view (part), as shield_holemap.svg</text>
+<text x="1110.0" y="196.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">10</text>
+<text x="1170.0" y="196.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">11</text>
+<text x="1230.0" y="196.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">12</text>
+<text x="1290.0" y="196.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">13</text>
+<text x="1314.0" y="214.0" font-size="10" fill="#4A4A46" text-anchor="start" font-weight="normal">L3</text>
+<rect x="1101" y="201" width="18" height="18" fill="#C62828" stroke="#111" stroke-width="1.5"/>
+<circle cx="1170" cy="210" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<circle cx="1230" cy="210" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<circle cx="1290" cy="210" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<text x="1314.0" y="274.0" font-size="10" fill="#4A4A46" text-anchor="start" font-weight="normal">P3</text>
+<rect x="1101" y="261" width="18" height="18" fill="#FFFFFF" stroke="#111" stroke-width="1.5"/>
+<circle cx="1170" cy="270" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<rect x="1221" y="261" width="18" height="18" fill="#9E9E9E" stroke="#111" stroke-width="1.5"/>
+<rect x="1281" y="261" width="18" height="18" fill="#9E9E9E" stroke="#111" stroke-width="1.5"/>
+<text x="1314.0" y="334.0" font-size="10" fill="#4A4A46" text-anchor="start" font-weight="normal">P4</text>
+<rect x="1101" y="321" width="18" height="18" fill="#E65100" stroke="#111" stroke-width="1.5"/>
+<circle cx="1170" cy="330" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<rect x="1221" y="321" width="18" height="18" fill="#9E9E9E" stroke="#111" stroke-width="1.5"/>
+<rect x="1281" y="321" width="18" height="18" fill="#9E9E9E" stroke="#111" stroke-width="1.5"/>
+<text x="1314.0" y="394.0" font-size="10" fill="#4A4A46" text-anchor="start" font-weight="normal">B</text>
+<rect x="1101" y="381" width="18" height="18" fill="#222222" stroke="#111" stroke-width="1.5"/>
+<rect x="1161" y="381" width="18" height="18" fill="#222222" stroke="#111" stroke-width="1.5"/>
+<rect x="1221" y="381" width="18" height="18" fill="#9E9E9E" stroke="#111" stroke-width="1.5"/>
+<rect x="1281" y="381" width="18" height="18" fill="#9E9E9E" stroke="#111" stroke-width="1.5"/>
+<text x="1110.0" y="455.0" font-size="13" fill="#222222" text-anchor="middle" font-weight="bold">J5</text>
+<text x="1184.0" y="455.0" font-size="13" fill="#222222" text-anchor="start" font-weight="bold">J6</text>
+<text x="1230.0" y="455.0" font-size="11" fill="#9E9E9E" text-anchor="middle" font-weight="bold">J3</text>
+<text x="1290.0" y="455.0" font-size="11" fill="#9E9E9E" text-anchor="middle" font-weight="bold">J4</text>
+<text x="1094.0" y="274.0" font-size="10" fill="#4A4A46" text-anchor="end" font-weight="bold">KEY</text>
+<polyline points="230,190 290,190 290,175 340,175" fill="none" stroke="#C62828" stroke-width="4" stroke-linejoin="round"/>
+<rect x="255.3" y="221.0" width="69.4" height="16" rx="3" fill="#FFFFFF" stroke="#C62828"/>
+<text x="290.0" y="232.0" font-size="11" fill="#C62828" text-anchor="middle" font-weight="bold">W8 red 80</text>
+<polyline points="510,175 900,175 900,210 1110,210" fill="none" stroke="#C62828" stroke-width="4" stroke-linejoin="round"/>
+<rect x="623.9" y="157.0" width="192.1" height="16" rx="3" fill="#FFFFFF" stroke="#C62828"/>
+<text x="720.0" y="168.0" font-size="11" fill="#C62828" text-anchor="middle" font-weight="bold">W9 red 250 (twist with W12)</text>
+<polyline points="545,175 545,400 600,400" fill="none" stroke="#C62828" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="545" cy="175" r="6" fill="#C62828"/>
+<rect x="503.5" y="251.0" width="83.0" height="16" rx="3" fill="#FFFFFF" stroke="#C62828"/>
+<text x="545.0" y="262.0" font-size="11" fill="#C62828" text-anchor="middle" font-weight="bold">W10 red 100</text>
+<polyline points="230,270 270,270 270,530 920,530 920,390 1110,390" fill="none" stroke="#222222" stroke-width="4" stroke-linejoin="round"/>
+<rect x="371.7" y="523.0" width="96.7" height="16" rx="3" fill="#FFFFFF" stroke="#222222"/>
+<text x="420.0" y="534.0" font-size="11" fill="#222222" text-anchor="middle" font-weight="bold">W12 black 260</text>
+<polyline points="600,450 570,450 570,565 1170,565 1170,390" fill="none" stroke="#222222" stroke-width="4" stroke-linejoin="round"/>
+<rect x="711.7" y="558.0" width="96.7" height="16" rx="3" fill="#FFFFFF" stroke="#222222"/>
+<text x="760.0" y="569.0" font-size="11" fill="#222222" text-anchor="middle" font-weight="bold">W13 black 220</text>
+<polyline points="830,400 880,400 880,330 1110,330" fill="none" stroke="#E65100" stroke-width="4" stroke-linejoin="round" stroke-dasharray="10 6"/>
+<rect x="917.8" y="311.0" width="144.4" height="16" rx="3" fill="#FFFFFF" stroke="#E65100"/>
+<text x="990.0" y="322.0" font-size="11" fill="#E65100" text-anchor="middle" font-weight="bold">W14 orange 120, LAST</text>
+<rect x="30" y="615" width="800" height="227" rx="8" fill="#F4F6F8" stroke="#C9D1D9" stroke-width="2"/>
+<text x="42.0" y="637.0" font-size="14" fill="#222222" text-anchor="start" font-weight="bold">Do, in this order</text>
+<text x="42.0" y="659.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">1. Rocker OFF, pack unplugged at the XT30, shield OFF the Uno.</text>
+<text x="42.0" y="676.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">2. W8 red, cut 80 mm: XT30 car half + -&gt; rocker pin 1. (Either rocker pin works as pin 1.)</text>
+<text x="42.0" y="693.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">3. Polarity check now (see the right-hand box, first two lines). Unplug the pack again.</text>
+<text x="42.0" y="710.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">4. W9 red, cut 250: rocker pin 2 -&gt; J5 VBAT (L3/10). Twist it with W12.</text>
+<text x="42.0" y="727.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">5. W10 red, cut 100: rocker pin 2 -&gt; LM2596 IN+. Pin 2 now carries W9 and W10.</text>
+<text x="42.0" y="744.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">6. W12 black, cut 260: XT30 car half - -&gt; J5 GND (B/10, the star rail).</text>
+<text x="42.0" y="761.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">7. W13 black, cut 220: LM2596 IN- -&gt; J6 (B/11). OUT- gets no wire.</text>
+<text x="42.0" y="778.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">8. W14 orange, cut 120: LM2596 OUT+ -&gt; J5 +5V2 (P4/10).</text>
+<text x="42.0" y="795.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">9. Crimp W9 / W14 / W12 into one 4-way female housing in the J5 order VBAT, KEY, +5V2, GND; blank the</text>
+<text x="42.0" y="812.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   KEY position so it fits one way only. W13 gets a 1-way housing for J6. Do NOT push either onto the</text>
+<text x="42.0" y="829.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   shield yet.</text>
+<rect x="850" y="615" width="520" height="244" rx="8" fill="#E8F4EA" stroke="#6AA86F" stroke-width="2"/>
+<text x="862.0" y="637.0" font-size="14" fill="#222222" text-anchor="start" font-weight="bold">Check before going on</text>
+<text x="862.0" y="659.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">- After step 2, pack in: rocker OFF -&gt; rocker pin 2 to XT30 -</text>
+<text x="862.0" y="676.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   reads 0 V.</text>
+<text x="862.0" y="693.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">- Rocker ON -&gt; pin 2 reads +8.x V (+ on pin 2). A minus sign =</text>
+<text x="862.0" y="710.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   reversed XT30: STOP.</text>
+<text x="862.0" y="727.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">- After step 9, J5 housing OFF the shield, rocker ON: LM2596 OUT+</text>
+<text x="862.0" y="744.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   to OUT- reads about 5.0 V (4.95 V in JE). Over 5.2 V: STOP, do</text>
+<text x="862.0" y="761.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   not plug in.</text>
+<text x="862.0" y="778.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">- Rocker OFF. Push J5 + J6 on. Then test card section E: Uno on</text>
+<text x="862.0" y="795.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   the Pi's USB first, then rocker ON. Write down the J3</text>
+<text x="862.0" y="812.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   middle-pin voltage.</text>
+<text x="862.0" y="829.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">- Wire lengths are cut-list estimates: lay each wire on the car</text>
+<text x="862.0" y="846.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   before cutting.</text>
+<text x="30.0" y="883.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">Generated by scripts/step_wiring_svg.py from docs/shield_layout.json and the scripts/pack_wiring_svg.py cut list. A plan drawing, not a photo: nothing here has been powered.</text>
+</svg>

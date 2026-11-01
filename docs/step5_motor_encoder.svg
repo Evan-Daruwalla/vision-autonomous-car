@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="938" viewBox="0 0 1400 938" font-family="Arial, sans-serif">
+<rect width="1400" height="938" fill="#FFFFFF"/>
+<text x="30.0" y="40.0" font-size="24" fill="#222222" text-anchor="start" font-weight="bold">Build step 5 - motor + encoder (W16)</text>
+<text x="30.0" y="64.0" font-size="12" fill="#4A4A46" text-anchor="start" font-weight="normal">Cable: Pololu #4763 6-wire, 300 mm, still UNCUT (route about 220-270 mm). Colours and JST pins from WIRING_PROTOSHIELD.md section 2.3 (Pololu #5159). Four conductors go into one</text>
+<text x="30.0" y="80.0" font-size="12" fill="#4A4A46" text-anchor="start" font-weight="normal">4-way housing on J1; yellow and white get male Dupont pins and plug straight into the Uno.</text>
+<rect x="40" y="130" width="270" height="380" rx="8" fill="#F3E5F5" stroke="#6A1B9A" stroke-width="2"/>
+<text x="50.0" y="150.0" font-size="14" fill="#222222" text-anchor="start" font-weight="bold">N20 motor + encoder</text>
+<text x="50.0" y="170.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">Pololu #5159, 12 CPR</text>
+<text x="50.0" y="186.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">JST SH 6-pin, 1.0 mm</text>
+<rect x="300" y="194" width="20" height="12" fill="#C62828" stroke="#555"/>
+<text x="290.0" y="204.0" font-size="12" fill="#222222" text-anchor="end" font-weight="bold">6 red - motor M1</text>
+<rect x="300" y="244" width="20" height="12" fill="#222222" stroke="#555"/>
+<text x="290.0" y="254.0" font-size="12" fill="#222222" text-anchor="end" font-weight="bold">5 black - motor M2</text>
+<rect x="300" y="294" width="20" height="12" fill="#2E7D32" stroke="#555"/>
+<text x="290.0" y="304.0" font-size="12" fill="#222222" text-anchor="end" font-weight="bold">1 green - encoder GND</text>
+<rect x="300" y="344" width="20" height="12" fill="#1565C0" stroke="#555"/>
+<text x="290.0" y="354.0" font-size="12" fill="#222222" text-anchor="end" font-weight="bold">4 blue - encoder Vcc</text>
+<rect x="300" y="394" width="20" height="12" fill="#F9A825" stroke="#555"/>
+<text x="290.0" y="404.0" font-size="12" fill="#222222" text-anchor="end" font-weight="bold">3 yellow - channel A</text>
+<rect x="300" y="444" width="20" height="12" fill="#FFFFFF" stroke="#555"/>
+<text x="290.0" y="454.0" font-size="12" fill="#222222" text-anchor="end" font-weight="bold">2 white - channel B</text>
+<rect x="770" y="135" width="520" height="160" rx="8" fill="#E8F5E9" stroke="#6AA86F" stroke-width="2"/>
+<text x="780.0" y="154.0" font-size="11" fill="#2E5E33" text-anchor="start" font-weight="bold">Top view (part), as shield_holemap.svg; J5 / VBAT is col 10, off right</text>
+<text x="820.0" y="176.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">1</text>
+<text x="880.0" y="176.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">2</text>
+<text x="940.0" y="176.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">3</text>
+<text x="1000.0" y="176.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">4</text>
+<text x="1060.0" y="176.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">5</text>
+<text x="1120.0" y="176.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">6</text>
+<text x="1180.0" y="176.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">7</text>
+<text x="1240.0" y="176.0" font-size="10" fill="#4A4A46" text-anchor="middle" font-weight="normal">8</text>
+<text x="796.0" y="194.0" font-size="10" fill="#4A4A46" text-anchor="end" font-weight="normal">L3</text>
+<circle cx="820" cy="190" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<circle cx="880" cy="190" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<circle cx="940" cy="190" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<circle cx="1000" cy="190" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<circle cx="1060" cy="190" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<circle cx="1120" cy="190" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<circle cx="1180" cy="190" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<circle cx="1240" cy="190" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<text x="796.0" y="254.0" font-size="10" fill="#4A4A46" text-anchor="end" font-weight="normal">P3</text>
+<circle cx="820" cy="250" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<circle cx="880" cy="250" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<rect x="931" y="241" width="18" height="18" fill="#C62828" stroke="#111" stroke-width="1.5"/>
+<rect x="991" y="241" width="18" height="18" fill="#222222" stroke="#111" stroke-width="1.5"/>
+<rect x="1051" y="241" width="18" height="18" fill="#2E7D32" stroke="#111" stroke-width="1.5"/>
+<rect x="1111" y="241" width="18" height="18" fill="#1565C0" stroke="#111" stroke-width="1.5"/>
+<circle cx="1180" cy="250" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<circle cx="1240" cy="250" r="5" fill="#FFFFFF" stroke="#8A8A86"/>
+<text x="940.0" y="232.0" font-size="11" fill="#222222" text-anchor="middle" font-weight="bold">M1</text>
+<text x="1000.0" y="232.0" font-size="11" fill="#222222" text-anchor="middle" font-weight="bold">M2</text>
+<text x="1060.0" y="232.0" font-size="11" fill="#222222" text-anchor="middle" font-weight="bold">GND</text>
+<text x="1120.0" y="232.0" font-size="11" fill="#222222" text-anchor="middle" font-weight="bold">+5V2</text>
+<text x="1030.0" y="284.0" font-size="13" fill="#222222" text-anchor="middle" font-weight="bold">J1</text>
+<rect x="810" y="590" width="20" height="20" fill="#555" stroke="#111"/>
+<text x="820.0" y="632.0" font-size="11" fill="#9E9E9E" text-anchor="middle" font-weight="bold">D7</text>
+<rect x="865" y="590" width="20" height="20" fill="#555" stroke="#111"/>
+<text x="875.0" y="632.0" font-size="11" fill="#9E9E9E" text-anchor="middle" font-weight="bold">D6</text>
+<rect x="920" y="590" width="20" height="20" fill="#555" stroke="#111"/>
+<text x="930.0" y="632.0" font-size="11" fill="#9E9E9E" text-anchor="middle" font-weight="bold">D5</text>
+<rect x="975" y="590" width="20" height="20" fill="#555" stroke="#111"/>
+<text x="985.0" y="632.0" font-size="11" fill="#9E9E9E" text-anchor="middle" font-weight="bold">D4</text>
+<rect x="1030" y="590" width="20" height="20" fill="#111" stroke="#111"/>
+<text x="1040.0" y="632.0" font-size="11" fill="#222222" text-anchor="middle" font-weight="bold">D3</text>
+<rect x="1085" y="590" width="20" height="20" fill="#111" stroke="#111"/>
+<text x="1095.0" y="632.0" font-size="11" fill="#222222" text-anchor="middle" font-weight="bold">D2</text>
+<rect x="1140" y="590" width="20" height="20" fill="#555" stroke="#111"/>
+<text x="1150.0" y="632.0" font-size="11" fill="#9E9E9E" text-anchor="middle" font-weight="bold">D1</text>
+<rect x="1195" y="590" width="20" height="20" fill="#555" stroke="#111"/>
+<text x="1205.0" y="632.0" font-size="11" fill="#9E9E9E" text-anchor="middle" font-weight="bold">D0</text>
+<text x="800.0" y="605.0" font-size="13" fill="#222222" text-anchor="end" font-weight="bold">Uno</text>
+<text x="800.0" y="620.0" font-size="11" fill="#4A4A46" text-anchor="end" font-weight="normal">sockets</text>
+<text x="810.0" y="655.0" font-size="10" fill="#9E9E9E" text-anchor="start" font-weight="normal">D7 servo, D6 / D5 strips: leads of their own (record MI)</text>
+<polyline points="320,200 640,200 640,330 940,330 940,259" fill="none" stroke="#C62828" stroke-width="4" stroke-linejoin="round"/>
+<polyline points="320,250 620,250 620,360 1000,360 1000,259" fill="none" stroke="#222222" stroke-width="4" stroke-linejoin="round"/>
+<polyline points="320,300 600,300 600,390 1060,390 1060,259" fill="none" stroke="#2E7D32" stroke-width="4" stroke-linejoin="round"/>
+<polyline points="320,350 580,350 580,420 1120,420 1120,259" fill="none" stroke="#1565C0" stroke-width="4" stroke-linejoin="round"/>
+<polyline points="320,400 560,400 560,520 1095,520 1095,590" fill="none" stroke="#555" stroke-width="6" stroke-linejoin="round"/>
+<polyline points="320,400 560,400 560,520 1095,520 1095,590" fill="none" stroke="#F9A825" stroke-width="4" stroke-linejoin="round"/>
+<polyline points="320,450 540,450 540,550 1040,550 1040,590" fill="none" stroke="#555" stroke-width="6" stroke-linejoin="round"/>
+<polyline points="320,450 540,450 540,550 1040,550 1040,590" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/>
+<rect x="631.2" y="303.0" width="137.6" height="16" rx="3" fill="#FFFFFF" stroke="#C62828"/>
+<text x="700.0" y="314.0" font-size="11" fill="#C62828" text-anchor="middle" font-weight="bold">red -&gt; J1 M1 (P3/3)</text>
+<rect x="600.1" y="423.0" width="239.9" height="16" rx="3" fill="#FFFFFF" stroke="#1565C0"/>
+<text x="720.0" y="434.0" font-size="11" fill="#1565C0" text-anchor="middle" font-weight="bold">blue -&gt; J1 +5V2 (P3/6), NEVER VBAT</text>
+<rect x="675.1" y="495.0" width="89.8" height="16" rx="3" fill="#FFFFFF" stroke="#8D6E00"/>
+<text x="720.0" y="506.0" font-size="11" fill="#8D6E00" text-anchor="middle" font-weight="bold">yellow -&gt; D2</text>
+<rect x="678.5" y="555.0" width="83.0" height="16" rx="3" fill="#FFFFFF" stroke="#555555"/>
+<text x="720.0" y="566.0" font-size="11" fill="#555555" text-anchor="middle" font-weight="bold">white -&gt; D3</text>
+<rect x="30" y="690" width="800" height="193" rx="8" fill="#F4F6F8" stroke="#C9D1D9" stroke-width="2"/>
+<text x="42.0" y="712.0" font-size="14" fill="#222222" text-anchor="start" font-weight="bold">Do, in this order</text>
+<text x="42.0" y="734.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">1. Rocker OFF, XT30 unplugged.</text>
+<text x="42.0" y="751.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">2. Female Dupont crimps on red, black, green, blue; one 4-way housing in the order red M1 (P3/3), black</text>
+<text x="42.0" y="768.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   M2 (P3/4), green GND (P3/5), blue +5V2 (P3/6).</text>
+<text x="42.0" y="785.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">3. Male Dupont pins on yellow and white.</text>
+<text x="42.0" y="802.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">4. Push the housing onto J1. Look: blue sits on the pin nearest J5 (P3/6). A one-pin shift puts motor</text>
+<text x="42.0" y="819.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   voltage on the encoder.</text>
+<text x="42.0" y="836.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">5. Yellow into D2, white into D3.</text>
+<text x="42.0" y="853.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">6. Car on a stand, wheels off the ground. Uno on the Pi's USB, then rocker ON.</text>
+<text x="42.0" y="870.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">7. Run host_test.py --wired at 20 % duty, both directions.</text>
+<rect x="850" y="690" width="520" height="210" rx="8" fill="#E8F4EA" stroke="#6AA86F" stroke-width="2"/>
+<text x="862.0" y="712.0" font-size="14" fill="#222222" text-anchor="start" font-weight="bold">Check before going on</text>
+<text x="862.0" y="734.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">- Before step 6, power off: J1 +5V2 (P3/6) to J5 VBAT (L3/10) is</text>
+<text x="862.0" y="751.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   SILENT. A beep = STOP.</text>
+<text x="862.0" y="768.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">- ticks count up one way and down the other.</text>
+<text x="862.0" y="785.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">- About 358 counts per output-shaft turn by hand (12 CPR x</text>
+<text x="862.0" y="802.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   29.86:1).</text>
+<text x="862.0" y="819.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">- Wheels turn backwards for 'forward'? Swap red and black at J1</text>
+<text x="862.0" y="836.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   and tell Claude (a wiring fact for the record; or keep the</text>
+<text x="862.0" y="853.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   wires and flip it in firmware).</text>
+<text x="862.0" y="870.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">- Encoder Vcc on VBAT would drive 7.4 V into the Uno's 5 V-max</text>
+<text x="862.0" y="887.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   pins: silent board damage.</text>
+<text x="30.0" y="924.0" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="normal">Generated by scripts/step_wiring_svg.py from docs/shield_layout.json and the scripts/pack_wiring_svg.py cut list. A plan drawing, not a photo: nothing here has been powered.</text>
+</svg>

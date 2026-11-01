@@ -384,6 +384,7 @@ the dated entry, not the digest.
 - [MI - Servo and strip data wired straight to Uno D7 / D6 / D5 (J2 SIG path abandoned); C1 fixed; strip DIN resistors found never built](#appendix-mi---servo-and-strip-data-wired-straight-to-uno-d7--d6--d5-j2-sig-path-abandoned-c1-fixed-strip-din-resistors-found-never-built-2026-10-31-1606-cdt) (10-31)
 - [MJ - Shield docs to the as-built direct-to-pin wiring (layout, test card, guides, renders); meter checks A-D PASS per Evan](#appendix-mj---shield-docs-to-the-as-built-direct-to-pin-wiring-layout-test-card-guides-renders-meter-checks-a-d-pass-per-evan-2026-10-31-1629-cdt) (10-31)
 - [MK - Rocker switch rating read: 6A 250V / 10A 125V (AC marking); judged adequate behind the 3 A fuse](#appendix-mk---rocker-switch-rating-read-6a-250v--10a-125v-ac-marking-judged-adequate-behind-the-3-a-fuse-2026-10-31-1753-cdt) (10-31)
+- [ML - Wiring sheets for build steps 2b (power after the rocker) and 5 (motor + encoder)](#appendix-ml---wiring-sheets-for-build-steps-2b-power-after-the-rocker-and-5-motor--encoder-2026-10-31-2114-cdt) (10-31)
 
 ---
 
@@ -22324,3 +22325,16 @@ HARD CONSTRAINTS
 **Judgement (Claude, not tested):** adequate for this car. The 3 A ATO fuse sits upstream at the pack, so the switch cannot carry more than ~3 A for long; the worst-case estimate is 2.6-2.8 A (audit 2026-10-11 budget). The pack is at most 8.4 V DC. A DC contact rating is normally lower than the AC one because a DC arc does not self-extinguish at a zero crossing, but at 8.4 V and ~3 A the arc energy is small and 3 A is half the 6 A AC figure. Not a DC rating; nothing measured. Watch for: switch body warm after a run, or cut-outs when bumped. Inrush at switch-on (470 uF bulk caps) is brief and only wears the contacts.
 
 **Updated:** docs/WIRING_PROTOSHIELD.md (the "Ratings not recorded" line), .claude/project-memory/hardware-power.md. Step 2b (W8-W14) is unblocked; the shield is still never powered.
+
+# Appendix ML - Wiring sheets for build steps 2b (power after the rocker) and 5 (motor + encoder) (2026-10-31, ~21:14 CDT)
+**Ask (Evan):** "generate image for power wiring after the rocker (build step 2b) and one for motor + encoder (build step 5)".
+
+**Made:** `scripts/step_wiring_svg.py` (new, stdlib) draws two one-page sheets: `docs/step2b_power_wiring.svg` + `.png` and `docs/step5_motor_encoder.svg` + `.png` (PNGs by headless Chrome, 1400 px wide). Each is a wire diagram, a shield close-up in the holemap's orientation, a numbered do-list and a check box.
+- Header pins (J5 VBAT L3/10, KEY P3/10, +5V2 P4/10, GND B/10; J6 B/11; J1 M1 P3/3, M2 P3/4, GND P3/5, +5V2 P3/6) and the encoder's D2 / D3 are read from docs/shield_layout.json; wire cut lengths (W8 80, W9 250, W10 100, W12 260, W13 220, W14 120 mm) are checked against the scripts/pack_wiring_svg.py cut list. self_check() fails if either drifts; run_checks.py found it automatically.
+- Step 5 colours / JST pins from WIRING_PROTOSHIELD.md section 2.3 (Pololu #5159). The Uno digital header is drawn D7 ... D0 left to right (USB jack on the left) - from general Uno knowledge, not re-verified against this clone.
+
+**Changes from the step lists given in chat (record MJ, "Also given"):**
+- 2b: W8 first, then the polarity check (rocker OFF = 0 V at pin 2, rocker ON = +8.x V), BEFORE W9 / W10 / W12-W14 - so the polarity is metered with no load on the line, as the 2026-10-11 audit row asks. The old step "check the rocker's DC rating" is gone (record MK). J5's housing stays OFF the shield until the LM2596 output meters ~5.0 V.
+- 5: the "blue -> J1 5V2 beeps" check is replaced (a housing cannot be probed through the cable's JST end): look that blue sits on P3/6, the end nearest J5, and meter J1 +5V2 to J5 VBAT silent before power.
+
+**Checks (2026-10-31 ~21:13 CDT):** svg_text_overlap 0 overlaps on both (first render had 14, fixed: LM2596 pins moved below its text, close-up cut to the header columns, hole legend moved into step 9); both PNGs viewed by eye; suite `35 passed, 0 failed, 0 skipped  (of 35)`. Plan drawings only: nothing in them has been built or powered.
