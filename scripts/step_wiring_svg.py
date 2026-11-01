@@ -205,16 +205,20 @@ def build_2b(d: dict) -> str:
           f"6. W12 black, cut {CUTS['W12']}: XT30 car half - -> J5 GND ({j5['GND']}, the star rail).",
           f"7. W13 black, cut {CUTS['W13']}: LM2596 IN- -> J6 ({j6['GND']}). OUT- gets no wire.",
           f"8. W14 orange, cut {CUTS['W14']}: LM2596 OUT+ -> J5 +5V2 ({j5['5V2']}).",
-          "9. Crimp W9 / W14 / W12 into one 4-way female housing in the J5 order VBAT, KEY, +5V2, GND; "
-          "blank the KEY position so it fits one way only. W13 gets a 1-way housing for J6. Do NOT push either "
-          "onto the shield yet."]
+          "9. Ends for J5 / J6 (no crimper): cut 4 female-female jumpers about 30 mm from the housing, "
+          "solder W9 / W14 / W12 / W13 to the stubs, heat-shrink each joint. Superglue the W9, W14, W12 "
+          "housings side by side with one EMPTY housing (lift the latch, slide the contact out) in the J5 order "
+          "VBAT, KEY, +5V2, GND - the empty KEY means the block cannot go on shifted. W13 keeps its own housing "
+          "for J6. Do NOT push either onto the shield yet."]
     chk = ["- After step 2, pack in: rocker OFF -> rocker pin 2 to XT30 - reads 0 V.",
            "- Rocker ON -> pin 2 reads +8.x V (+ on pin 2). A minus sign = reversed XT30: STOP.",
            "- After step 9, J5 housing OFF the shield, rocker ON: LM2596 OUT+ to OUT- reads about 5.0 V "
            "(4.95 V in JE). Over 5.2 V: STOP, do not plug in.",
            "- Rocker OFF. Push J5 + J6 on. Then test card section E: Uno on the Pi's USB first, then rocker ON. "
            "Write down the J3 middle-pin voltage.",
-           "- Wire lengths are cut-list estimates: lay each wire on the car before cutting."]
+           "- Wire lengths are cut-list estimates: lay each wire on the car before cutting.",
+           "- Later, build step 8 (motor stalled): touch the J5 block after 60 s. Warm = the jumper contacts "
+           "(no published amp rating) are the limit: solder W9 and W12 straight to the board."]
     h1 = s.panel(30, y, 800, "Do, in this order", do, "#F4F6F8", "#C9D1D9")
     h2 = s.panel(850, y, 520, "Check before going on", chk, "#E8F4EA", "#6AA86F")
     yy = y + max(h1, h2) + 24
@@ -282,9 +286,10 @@ def build_5(d: dict) -> str:
 
     y = 690
     do = ["1. Rocker OFF, XT30 unplugged.",
-          f"2. Female Dupont crimps on red, black, green, blue; one 4-way housing in the order red M1 "
-          f"({j1['M1']}), black M2 ({j1['M2']}), green GND ({j1['GND']}), blue +5V2 ({j1['5V2']}).",
-          "3. Male Dupont pins on yellow and white.",
+          f"2. Cut 4 female-female jumpers about 30 mm from the housing; solder red, black, green, blue to "
+          f"the stubs, heat-shrink. Superglue the housings side by side in the J1 order red M1 ({j1['M1']}), "
+          f"black M2 ({j1['M2']}), green GND ({j1['GND']}), blue +5V2 ({j1['5V2']}).",
+          "3. Yellow and white: the same with the male end of 2 jumpers (male pin to plug into the Uno).",
           f"4. Push the housing onto J1. Look: blue sits on the pin nearest J5 ({j1['5V2']}). A one-pin shift "
           "puts motor voltage on the encoder.",
           f"5. Yellow into {enc['yellow']}, white into {enc['white']}.",

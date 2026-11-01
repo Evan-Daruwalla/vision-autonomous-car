@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-10-31 ~16:29 CDT** (records LO-MJ; MJ: shield layout / test card / guides / renders moved to the as-built direct-to-pin wiring, suite 34/34; meter checks A-D PASS per Evan (card version unconfirmed), E not done; MI: servo + strip data wired straight to Uno D7 / D6 / D5, J2 SIG path abandoned, C1 fixed, strip DIN resistors never built (Evan, final); MH: 2026-11-01 soft milestone (M3) NOT met - flagged; paste-ready prompt rewritten; MG: Uno re-flashed with the D7/D6/D5 build; MF: audit MB high + listed meds fixed, landing check caught a SIGTERM deadlock (fixed); ME: firmware + docs moved to the as-built pins servo D7 / strips D6, D5 - compiled, NOT flashed (item 0b); push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
+**Last updated: 2026-10-31 ~23:26 CDT** (records LO-MN; MN: build step 2b DONE, LM2596 output 4.96 V (Evan), card E next; MM: J5 / J6 / J1 ends from cut Dupont jumpers, glued block with empty KEY (listing has no amp rating); ML: wiring sheets docs/step2b_power_wiring.png + docs/step5_motor_encoder.png (scripts/step_wiring_svg.py); MK: rocker 6A 250V AC marking; MJ: shield layout / test card / guides / renders moved to the as-built direct-to-pin wiring, suite 34/34; meter checks A-D PASS per Evan (card version unconfirmed), E not done; MI: servo + strip data wired straight to Uno D7 / D6 / D5, J2 SIG path abandoned, C1 fixed, strip DIN resistors never built (Evan, final); MH: 2026-11-01 soft milestone (M3) NOT met - flagged; paste-ready prompt rewritten; MG: Uno re-flashed with the D7/D6/D5 build; MF: audit MB high + listed meds fixed, landing check caught a SIGTERM deadlock (fixed); ME: firmware + docs moved to the as-built pins servo D7 / strips D6, D5 - compiled, NOT flashed (item 0b); push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ ~~327 appendices A-LO~~ ~~328 appendices A-LP~~ ~~329 appendices A-LQ~~ ~~330 appendices A-LR~~ ~~331 appendices A-LS~~ ~~332 appendices A-LT~~ ~~333 appendices A-LU~~ ~~334 appendices A-LV~~ ~~335 appendices A-LW~~ ~~336 appendices A-LX~~ ~~337 appendices A-LY~~ ~~338 appendices A-LZ~~ ~~339 appendices A-MA~~ ~~341 appendices A-MC~~ ~~342 appendices A-MD~~ ~~343 appendices A-ME~~ ~~344 appendices A-MF~~ ~~345 appendices A-MG~~ 346 appendices A-MH (MB = the 2026-10-31 scheduled audit) as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -529,10 +529,11 @@ NEXT ACTIONS, highest value first (all need Evan at the bench):
 1. ~~Fix the servo signal path + re-seat C1 (record LC).~~ DONE/REPLACED by MI
    (direct-to-pin wiring; C1 fixed). On the card, check D7 socket -> servo
    signal lead (BEEP) instead of D7 -> J2; skip the two ~400 ohm strip rows.
-2. ~~Meter test card sections A-D (power OFF), then~~ A-D PASS (MJ). Next: wire
+2. ~~Meter test card sections A-D (power OFF), then~~ A-D PASS (MJ). ~~Next: wire
    the power path (step 2b, W8-W14; read the rocker's DC rating first; meter the
-   LM2596 output alone before W14 reaches J5), then card section E (first
-   power-up; write down the J3 voltage - settles LM2596 4.95 vs 4.99 V).
+   LM2596 output alone before W14 reaches J5), then~~ **2b DONE (MN): LM2596
+   output 4.96 V on the meter.** Next: card section E (first power-up; write down
+   the J3 voltage), then build step 5 (motor + encoder, docs/step5_motor_encoder.png).
 3. Power build checks: XT30 -> rocker -> VBAT (rocker OFF = 0 V; polarity +8.x V);
    charger board 2 no-load test (8.4 V OK, >= 8.6 V reject).
 4. Shield back on the Uno, Uno on the Pi's USB, then the on-car session:

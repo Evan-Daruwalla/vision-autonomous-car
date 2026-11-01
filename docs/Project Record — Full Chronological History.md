@@ -385,6 +385,8 @@ the dated entry, not the digest.
 - [MJ - Shield docs to the as-built direct-to-pin wiring (layout, test card, guides, renders); meter checks A-D PASS per Evan](#appendix-mj---shield-docs-to-the-as-built-direct-to-pin-wiring-layout-test-card-guides-renders-meter-checks-a-d-pass-per-evan-2026-10-31-1629-cdt) (10-31)
 - [MK - Rocker switch rating read: 6A 250V / 10A 125V (AC marking); judged adequate behind the 3 A fuse](#appendix-mk---rocker-switch-rating-read-6a-250v--10a-125v-ac-marking-judged-adequate-behind-the-3-a-fuse-2026-10-31-1753-cdt) (10-31)
 - [ML - Wiring sheets for build steps 2b (power after the rocker) and 5 (motor + encoder)](#appendix-ml---wiring-sheets-for-build-steps-2b-power-after-the-rocker-and-5-motor--encoder-2026-10-31-2114-cdt) (10-31)
+- [MM - J5 / J6 / J1 ends from cut Dupont jumpers (listing checked: no gauge, no amp rating); wiring sheets updated](#appendix-mm---j5--j6--j1-ends-from-cut-dupont-jumpers-listing-checked-no-gauge-no-amp-rating-wiring-sheets-updated-2026-10-31-2233-cdt) (10-31)
+- [MN - Build step 2b done (Evan): LM2596 output 4.96 V; card E next](#appendix-mn---build-step-2b-done-evan-lm2596-output-496-v-card-e-next-2026-10-31-2326-cdt) (10-31)
 
 ---
 
@@ -22338,3 +22340,27 @@ HARD CONSTRAINTS
 - 5: the "blue -> J1 5V2 beeps" check is replaced (a housing cannot be probed through the cable's JST end): look that blue sits on P3/6, the end nearest J5, and meter J1 +5V2 to J5 VBAT silent before power.
 
 **Checks (2026-10-31 ~21:13 CDT):** svg_text_overlap 0 overlaps on both (first render had 14, fixed: LM2596 pins moved below its text, close-up cut to the header columns, hole legend moved into step 9); both PNGs viewed by eye; suite `35 passed, 0 failed, 0 skipped  (of 35)`. Plan drawings only: nothing in them has been built or powered.
+
+# Appendix MM - J5 / J6 / J1 ends from cut Dupont jumpers (listing checked: no gauge, no amp rating); wiring sheets updated (2026-10-31, ~22:33 CDT)
+**Ask (Evan):** do the 4 shield-end wires in step 2b need female connectors -> yes (J5 / J6 are male headers); Evan: "i'd be using the jumpers so check the amazon"; then "yes" to updating the sheets.
+
+**Listing checked (2026-10-31, amazon.com/dp/B07GCZ52WF, EDGELEC 120 pcs, $6.98, the BOM jumper pack):** "12-core pure copper wire", "brass nickel plated terminals", 2.54 mm 1-pin housings, 10 cm, 40 each F-F / M-F / M-M. NO wire gauge and NO current rating on the listing; no Q&A or review on current loaded. Gauge estimated 26-28 AWG (typical for the type) - unverified.
+
+**Judgement (Claude, untested):** a 30 mm stub of 28 AWG at 2.8 A drops ~18 mV and makes ~50 mW - fine. The unrated contact is the weak point on W9 (VBAT) and W12 (GND), which carry the whole car's current (up to ~2.6-2.8 A estimated, 3 A fuse). Heat check added for build step 8: J5 block warm after 60 s at motor stall -> solder W9 / W12 straight to the board.
+
+**Sheets changed (scripts/step_wiring_svg.py, regenerated):**
+- step2b_power_wiring: step 9 is now the jumper method - cut 4 F-F jumpers ~30 mm from the housing, solder W9 / W14 / W12 / W13 on, heat-shrink; superglue the W9, W14, W12 housings with one EMPTY housing at KEY in the J5 order VBAT, KEY, +5V2, GND (the empty KEY stops a shifted fit); W13 keeps its own housing for J6. Check list gained the step-8 heat check.
+- step5_motor_encoder: steps 2-3 likewise - 4 F-F stubs glued in J1 order (red, black, green, blue); yellow / white on the male end of 2 jumpers. J1 has no key pin: the visual check (blue nearest J5) stays the guard.
+
+**Checks (2026-10-31 ~22:33 CDT):** svg_text_overlap 0 / 0 overlaps; both PNGs viewed by eye; suite `35 passed, 0 failed, 0 skipped  (of 35)`. Nothing built or powered.
+
+# Appendix MN - Build step 2b done (Evan): LM2596 output 4.96 V; card E next (2026-10-31, ~23:26 CDT)
+**Ask (Evan):** "2b is done converter reads 4.96 off multimeter".
+
+**Build step 2b (power wiring after the rocker, W8-W14): DONE, per Evan.** The LM2596 output metered **4.96 V** with Evan's multimeter, fed from the pack through the rocker. This lies inside the step-1 window (4.95-5.05 V) and between the earlier readings (4.95 V unloaded in JE; 4.99 V restated in JF / JR without its own measurement).
+
+**Not reported (asked-for checks, results not given):** the rocker-OFF 0 V reading at pin 2, the polarity reading (+8.x V), whether the 4.96 V was taken with the J5 housing off the shield (W14 unplugged) as the sheet says, the connector method actually used for J5 / J6 (MM's cut-jumper block assumed), and the wire lengths cut. Recorded as missing, not assumed passed.
+
+**Shield state:** still never powered through J5 - card section E (first power-up: Uno on the Pi's USB first, then rocker ON; J5 top pin ~8 V, J3 middle ~5.0 V written down, Uno 5V ~5 V) is next, then build step 5 (motor + encoder).
+
+**Updated:** HANDOFF next action 2, .claude/project-memory/hardware-power.md.

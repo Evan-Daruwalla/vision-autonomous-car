@@ -87,17 +87,18 @@
 <text x="720.0" y="506.0" font-size="11" fill="#8D6E00" text-anchor="middle" font-weight="bold">yellow -&gt; D2</text>
 <rect x="678.5" y="555.0" width="83.0" height="16" rx="3" fill="#FFFFFF" stroke="#555555"/>
 <text x="720.0" y="566.0" font-size="11" fill="#555555" text-anchor="middle" font-weight="bold">white -&gt; D3</text>
-<rect x="30" y="690" width="800" height="193" rx="8" fill="#F4F6F8" stroke="#C9D1D9" stroke-width="2"/>
+<rect x="30" y="690" width="800" height="210" rx="8" fill="#F4F6F8" stroke="#C9D1D9" stroke-width="2"/>
 <text x="42.0" y="712.0" font-size="14" fill="#222222" text-anchor="start" font-weight="bold">Do, in this order</text>
 <text x="42.0" y="734.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">1. Rocker OFF, XT30 unplugged.</text>
-<text x="42.0" y="751.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">2. Female Dupont crimps on red, black, green, blue; one 4-way housing in the order red M1 (P3/3), black</text>
-<text x="42.0" y="768.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   M2 (P3/4), green GND (P3/5), blue +5V2 (P3/6).</text>
-<text x="42.0" y="785.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">3. Male Dupont pins on yellow and white.</text>
-<text x="42.0" y="802.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">4. Push the housing onto J1. Look: blue sits on the pin nearest J5 (P3/6). A one-pin shift puts motor</text>
-<text x="42.0" y="819.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   voltage on the encoder.</text>
-<text x="42.0" y="836.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">5. Yellow into D2, white into D3.</text>
-<text x="42.0" y="853.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">6. Car on a stand, wheels off the ground. Uno on the Pi's USB, then rocker ON.</text>
-<text x="42.0" y="870.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">7. Run host_test.py --wired at 20 % duty, both directions.</text>
+<text x="42.0" y="751.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">2. Cut 4 female-female jumpers about 30 mm from the housing; solder red, black, green, blue to the</text>
+<text x="42.0" y="768.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   stubs, heat-shrink. Superglue the housings side by side in the J1 order red M1 (P3/3), black M2</text>
+<text x="42.0" y="785.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   (P3/4), green GND (P3/5), blue +5V2 (P3/6).</text>
+<text x="42.0" y="802.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">3. Yellow and white: the same with the male end of 2 jumpers (male pin to plug into the Uno).</text>
+<text x="42.0" y="819.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">4. Push the housing onto J1. Look: blue sits on the pin nearest J5 (P3/6). A one-pin shift puts motor</text>
+<text x="42.0" y="836.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">   voltage on the encoder.</text>
+<text x="42.0" y="853.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">5. Yellow into D2, white into D3.</text>
+<text x="42.0" y="870.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">6. Car on a stand, wheels off the ground. Uno on the Pi's USB, then rocker ON.</text>
+<text x="42.0" y="887.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">7. Run host_test.py --wired at 20 % duty, both directions.</text>
 <rect x="850" y="690" width="520" height="210" rx="8" fill="#E8F4EA" stroke="#6AA86F" stroke-width="2"/>
 <text x="862.0" y="712.0" font-size="14" fill="#222222" text-anchor="start" font-weight="bold">Check before going on</text>
 <text x="862.0" y="734.0" font-size="12" fill="#222222" text-anchor="start" font-weight="normal">- Before step 6, power off: J1 +5V2 (P3/6) to J5 VBAT (L3/10) is</text>
