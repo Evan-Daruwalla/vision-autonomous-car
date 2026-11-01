@@ -387,6 +387,11 @@ the dated entry, not the digest.
 - [ML - Wiring sheets for build steps 2b (power after the rocker) and 5 (motor + encoder)](#appendix-ml---wiring-sheets-for-build-steps-2b-power-after-the-rocker-and-5-motor--encoder-2026-10-31-2114-cdt) (10-31)
 - [MM - J5 / J6 / J1 ends from cut Dupont jumpers (listing checked: no gauge, no amp rating); wiring sheets updated](#appendix-mm---j5--j6--j1-ends-from-cut-dupont-jumpers-listing-checked-no-gauge-no-amp-rating-wiring-sheets-updated-2026-10-31-2233-cdt) (10-31)
 - [MN - Build step 2b done (Evan): LM2596 output 4.96 V; card E next](#appendix-mn---build-step-2b-done-evan-lm2596-output-496-v-card-e-next-2026-10-31-2326-cdt) (10-31)
+- [MO - Card section E PASS: first shield power-up (J5 8.18 V, J3 4.96 V, Uno 5V ~5 V)](#appendix-mo---card-section-e-pass-first-shield-power-up-j5-818-v-j3-496-v-uno-5v-5-v-2026-10-31-2350-cdt) (10-31)
+- [MP - Deck v14: 2 mm Pi corner brackets, Uno / LM2596 pegs 2.5 mm, two velcro bars across the Pi vent (untested)](#appendix-mp---deck-v14-2-mm-pi-corner-brackets-uno--lm2596-pegs-25-mm-two-velcro-bars-across-the-pi-vent-untested-2026-11-01-0018-cdt) (11-01)
+- [MQ - Tray v12: 2S holder end walls back with 80% wire openings; charger corner brackets (untested)](#appendix-mq---tray-v12-2s-holder-end-walls-back-with-80-wire-openings-charger-corner-brackets-untested-2026-11-01-0038-cdt) (11-01)
+- [MR - Deck v14b: 20 mm velcro pads under the Uno; tray v12b: charger and XT30 swapped (untested)](#appendix-mr---deck-v14b-20-mm-velcro-pads-under-the-uno-tray-v12b-charger-and-xt30-swapped-untested-2026-11-01-0110-cdt) (11-01)
+- [MS - Deck v14b revised: two 20 mm Uno velcro pads side by side (was three in a line)](#appendix-ms---deck-v14b-revised-two-20-mm-uno-velcro-pads-side-by-side-was-three-in-a-line-2026-11-01-0158-cdt) (11-01)
 
 ---
 
@@ -22364,3 +22369,59 @@ HARD CONSTRAINTS
 **Shield state:** still never powered through J5 - card section E (first power-up: Uno on the Pi's USB first, then rocker ON; J5 top pin ~8 V, J3 middle ~5.0 V written down, Uno 5V ~5 V) is next, then build step 5 (motor + encoder).
 
 **Updated:** HANDOFF next action 2, .claude/project-memory/hardware-power.md.
+
+# Appendix MO - Card section E PASS: first shield power-up (J5 8.18 V, J3 4.96 V, Uno 5V ~5 V) (2026-10-31, ~23:50 CDT)
+**Ask (Evan):** "J5 GND 8.18V / J3 Mid GND 4.96V / Pi 5V", then "Uno 5v".
+
+**Test card section E (first power-up of the shield): PASS, per Evan's readings.** Uno on the Pi's USB, rocker ON, J5 block + J6 plugged in:
+| Probe | Expect (card) | Read |
+|---|---|---|
+| J5 top pin (VBAT) to GND | ~8 V (pack) | **8.18 V** |
+| J3 middle (+5V2) to GND | ~5.0 V, write it down | **4.96 V** |
+| Uno 5V pin to GND | ~5 V (Pi USB) | **~5 V** (reported as "Uno 5v", no decimals) |
+
+- The +5V2 reading through the shield equals the LM2596 alone (4.96 V, MN): no measurable drop through W14 / J5 at this load (the encoder is not yet connected, so the rail is essentially unloaded). This settles the JE 4.95 V vs JF / JR 4.99 V question for this board at 4.96 V.
+- Pack at 8.18 V (charged to 8.29 V in JA; some days since).
+- Not reported: the JP1 jumper position (card row 1 - top two pins expected), anything hot or smelling (assumed none, not stated).
+
+**This is the first time the soldered shield has carried power.** Motor, encoder, strips and the servo on J2 are still unwired; nothing has driven.
+
+**Next:** meter A0 to GND - expect ~0.88 V (8.18 V x 12k / 112k; 1% resistors allow about +/-1.8%, 0.86-0.89 V) - a cheap check of the divider before build step 5 (motor + encoder, docs/step5_motor_encoder.png).
+
+# Appendix MP - Deck v14: 2 mm Pi corner brackets, Uno / LM2596 pegs 2.5 mm, two velcro bars across the Pi vent (untested) (2026-11-01, ~00:18 CDT)
+**Ask (Evan):** "for the deck recad so there are small 2mm corners supports in all corners for pi case and drop the pegs for the buck converter and pi by 1mm and make sure that there is a flat surface underneath all 3 things". Clarified by question: L-brackets with 2 mm legs; Uno + LM2596 pegs shorter, "and the Pi gets 2 cross bars 20mm in width which makes vent area smaller so that velcro can attach"; mid-task: "make the peg height for the buck and uno only 0.5mm shorter".
+
+**Deck v14 (cad/scad/electronics_deck.scad -> cad/electronics_deck.stl). UNTESTED - not printed.**
+- Pi case brackets: 2 mm legs (BR_LEG 10 -> 2; BR_LEG_END removed), 10 mm tall, 1.5 wall, at all 4 corners - 7 legs. The -y side leg at the +x corner stays out: the layout checker put it inside the USB-C plug zone (plug enters the -y side 7 mm from the +x end, JW; plug not measured). Evan chose: drop that leg, and narrow the USB-A / LAN clearance box to start 4 mm in from each case side (his JW measurement of the ports) - so the -x end 2 mm legs pass. Risk: the USB-A / LAN plug overmold may be wider than the port shell (unmeasured); margin ~2 mm.
+- Pegs: Uno and LM2596 3.0 -> 2.5 mm (Evan revised from 2.0 mid-task). Standoffs unchanged, so the boards sit at the same height.
+- Vent window (x 50..122, y -22..22): two 20 mm cross bars left in it (three 10.67 mm openings), so the velcro under the Pi case has plate to stick to.
+- "Flat surface underneath": under the LM2596 and the Uno the plate already had no slot, boss or hole; the two Uno stiffening ribs (3 mm) stay - they stand below the board, which sits on 6 mm standoffs. Not changed.
+
+**Checks (2026-11-01 ~00:18 CDT):** render_scad: manifold PASS, bbox unchanged, probes 107/107 PASS (probe file updated: vent bar centres solid, openings open, 2 mm leg ends, new peg tops); electronics_layout: 36 entries, 0 checks failed (3 failed before the leg / zone change); check_artifacts 40 checked, 0 drifted; suite `35 passed, 0 failed, 0 skipped  (of 35)`. Two OpenSCAD views looked at: 7 bracket legs, 3 vent openings, shorter pegs.
+
+# Appendix MQ - Tray v12: 2S holder end walls back with 80% wire openings; charger corner brackets (untested) (2026-11-01, ~00:38 CDT)
+**Ask (Evan):** "for the deck where the USB-C charger is add walls like the one for the Pi / also add openings on the battery pack walls for the 3 wires. On both short sides where there are the wires open walls 80%". The charger and the 2S holder are on the TRAY (cad/scad/electronics_tray.scad), not the deck. Asked: the holder fence has had NO end walls since v10 (JV) -> Evan chose "put short end walls back, 80% open"; charger bracket height -> 6.5 mm.
+
+**Tray v12 (cad/electronics_tray.stl). UNTESTED - not printed.**
+- 2S holder fence: both short END walls back (2 mm, 14 mm tall like the long walls), each split by a centred opening 80% of the holder width (32.4 of 40.5 mm, y 48.3..80.7) for the red / black leads (-x end) and the MB wire (+x rivet end). The lead-exit and MB-rivet clearance boxes in LAYOUT narrowed to that opening - ASSUMED the wires leave within the middle 80% of each end (cell centres sit there); where on the end they actually exit is not measured. The v10 reason for removing the walls (the +x wall pressed on the MB solder joint) is only avoided if the joint is inside the opening - check on the print.
+- Charger (Adeept p0374, 18.3 x 38.43, on velcro on the -y lobe): Pi-style L-brackets, 1.5 wall, 2 mm legs, 6.5 mm tall (z 3..9.5 = velcro 3.5 + half the 6.3 board, leaves the board's top and BAT / GND pads free). Both +y corners get both legs; the -y corners get only the x-side legs - no -y end legs, because the USB-C plug exits there and the lobe edge (y -86) is 0.25 mm past the charger pocket. The +x side leg at the -y corner touches the deck-post base at (128, -82) (pocket edge 1.45 mm from the post) - merged, no gap.
+
+**Checks (2026-11-01 ~00:38 CDT):** render_scad manifold PASS, bbox unchanged, probes 268/268 PASS (9 new solid + 7 new open points: wall stubs, openings, bracket legs, bracket mid-side gaps); electronics_layout 36 entries, 0 checks failed; check_artifacts 40 checked, 0 drifted; suite `35 passed, 0 failed, 0 skipped  (of 35)`. Three OpenSCAD views looked at.
+
+# Appendix MR - Deck v14b: 20 mm velcro pads under the Uno; tray v12b: charger and XT30 swapped (untested) (2026-11-01, ~01:10 CDT)
+**Ask (Evan):** "put it more central the charger holder"; "also make the platform under the uno have raised 20mm diameter parts for the velcro"; "swap xt30 and charger".
+
+**Deck v14b (cad/electronics_deck.stl). UNTESTED - not printed.** Three 20 mm round velcro pads under the Uno, 2.5 mm tall (= the 6 mm standoff minus one 3.5 mm mated velcro pair, so velcro on a pad meets the Uno underside at the standoff top). Centres (-31, 0), (-26, 24), (-31, -24): one between the two stiffening ribs, one each side, all clear of the ribs (1 mm) and the four standoffs. Count and positions are Claude's choice (Evan gave only the 20 mm diameter). The Uno's underside has through-hole solder joints, so the velcro sticks to an uneven surface - unmeasured.
+
+**Tray v12b (cad/electronics_tray.stl). UNTESTED - not printed.** Charger and XT30 swapped on the -y lobe (lobe x 56..132):
+- charger x 104 -> 66.5 (now x 66.5..84.8), 0.75 mm clear of the lobe deck-post at (60, -82); its corner brackets move with it; its USB-C still exits the -y lobe edge (plug zone x 70.65..80.65).
+- XT30 x 76 -> 107 (now x 107..132, y -58..-47.5, same y), its unplug room x 87..107 between the two. Its pack-half end now sits at the lobe end (x 132): the P+ / P- wires (4 x 190 mm, soldered) must bend up right at the lobe end - their reach to this spot is NOT measured on the car. The car-half wire (W8) to the rocker at (100, -64) gets shorter.
+
+**Checks (2026-11-01 ~01:10 CDT):** deck render probes 117/117 PASS (pad tops, pad-to-rib gaps); tray render probes 270/270 PASS (one new probe point of mine was wrong - (63.5, -84.5) is inside the post, which spans x 56..64 - moved to the real 0.75 mm gap at x 64.4); electronics_layout 36 entries, 0 checks failed; check_artifacts 40 checked, 0 drifted; suite `35 passed, 0 failed, 0 skipped  (of 35)`. Close-up renders of the pads and the swapped lobe looked at.
+
+# Appendix MS - Deck v14b revised: two 20 mm Uno velcro pads side by side (was three in a line) (2026-11-01, ~01:58 CDT)
+**Ask (Evan):** "put 2 side by side not 3 in a line" (the Uno velcro pads of record MR).
+
+**Deck v14b, revised (cad/electronics_deck.stl). UNTESTED - not printed.** The three 20 mm Uno pads in a line across the board (MR) are replaced by TWO, side by side along x between the two stiffening ribs: centres (-43, 0) and (-19, 0), 4 mm apart, 1 mm clear of each rib, clear of all four standoffs. Height unchanged: 2.5 mm (6 mm standoff - 3.5 mm velcro pair). MR's pad count and positions are superseded by this entry.
+
+**Checks (2026-11-01 ~01:58 CDT):** deck render probes 115/115 PASS (probe file: old pad points removed, new pad tops / gaps added); electronics_layout 36 entries, 0 checks failed; check_artifacts 40 checked, 0 drifted; suite `35 passed, 0 failed, 0 skipped  (of 35)`. Close-up render looked at.
