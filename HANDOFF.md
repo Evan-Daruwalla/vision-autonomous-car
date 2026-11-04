@@ -1,6 +1,6 @@
 # Handoff
 
-**Last updated: 2026-11-03 ~23:59 CST** (records LO-NM; NG-NK: motor diagnosis - D9 did not fix it; motor_sweep.py (pi/, new) found forward 0 ticks / reverse moving in the car; open J1 reads +2.10/-2.09 V (driver fine); motor freed from the drivetrain spins both ways ~1850 ticks/s at 40 % -> the forward stall is MECHANICAL (drivetrain binds forward); +throttle reads NEGATIVE ticks (sign to fix once the motor is back in). NEXT: Evan finds the forward bind by hand. NL/NM: Vilros kit returned, now a CanaKit Pi 5 8 GB (same hostname/SSH key); first stress run crashed the Pi (~30 s, EXT5V 4.849 V, 3 A, unexplained); re-run PASS: 300 s all-core 2400 MHz, peak 81.8 C, EXT5V min 5.008 V, 0x0, 6 GiB RAM 0 bad. Supply identity not reported. Nothing since c5ad04b committed; NF: D9 build FLASHED (11658 B verified, SELFTEST 86/86) - important #3 current; jumper move D12 -> D9 still Evan's; NE: first powered motor runs on the stand - D12 would not hold the forward direction, so DIR_B moved D12 -> D9 in firmware + docs (compiled 11658 B, NOT FLASHED - the board still runs the D12 build; important #3 STALE); NC/ND: host_test --wired passed on /dev/ttyUSB0, Pi re-deployed (teleop was pre-cf237dc); NB: motor + encoder CONNECTED (J1, D2, D3), not yet powered; step-5 sheet step 7 fixed - host_test.py --wired sends throttle 0 only, the motor test is teleop.py --max-throttle 20 with the pad; NA: JP1 bridged by a wire on its top two pins; MZ: servo plugged to the shield - signal D7 direct, V+ J2 middle, GND J2 bottom, JP1 top two pins (Uno 5V) - confirms MI's assumption; D7 to servo signal check done; MY: step-5 power-off checks PASS (P3/6-L3/10, M1/M2 vs Uno 5V and GND all silent); MX: corrects MV/MW - J5 VBAT is L3/10, not P3/10 (KEY); MW: A0 -0.883 V, magnitude PASS, sign inferred as swapped probes; MV: step 5 leads made, NOT connected (Evan); A0 reading + J1 / M1 / M2 power-off checks still open; MU: deck v15 - Pi USB-A clearance 100 mm, Uno turned 180 deg onto a new -y rear wing beside the LM2596 (0.7 mm over the boss at (-12, -41.6)), rocker power + encoder slots 8 x 6; UNTESTED, not printed; 2b wire lengths and step-5 routes not re-checked for the new Uno spot; MT: scheduled audit, 1 HIGH (test card never checks M1/M2 vs Uno 5V / GND before step 5) still open; MS: deck v14b Uno velcro pads now TWO side by side at (-43, 0) / (-19, 0); MR: deck v14b ~~three~~ 20 mm Uno velcro pads; tray v12b charger x 66.5 / XT30 x 107 swapped (P+/P- reach to the lobe end unmeasured); UNTESTED, not printed; MQ: tray v12 - 2S holder end walls back with centred 80% wire openings, charger L-brackets 2 mm legs 6.5 mm tall (no -y end legs); UNTESTED, not printed; MP: deck v14 - 2 mm Pi corner brackets (no -y leg at the +x corner, USB-C), Uno / LM2596 pegs 2.5 mm, two 20 mm velcro bars across the Pi vent; UNTESTED, not printed; MO: card section E PASS - first shield power-up: J5 VBAT 8.18 V, J3 +5V2 4.96 V, Uno 5V ~5 V (Evan); MN: build step 2b DONE, LM2596 output 4.96 V (Evan), card E next; MM: J5 / J6 / J1 ends from cut Dupont jumpers, glued block with empty KEY (listing has no amp rating); ML: wiring sheets docs/step2b_power_wiring.png + docs/step5_motor_encoder.png (scripts/step_wiring_svg.py); MK: rocker 6A 250V AC marking; MJ: shield layout / test card / guides / renders moved to the as-built direct-to-pin wiring, suite 34/34; meter checks A-D PASS per Evan (card version unconfirmed), E not done; MI: servo + strip data wired straight to Uno D7 / D6 / D5, J2 SIG path abandoned, C1 fixed, strip DIN resistors never built (Evan, final); MH: 2026-11-01 soft milestone (M3) NOT met - flagged; paste-ready prompt rewritten; MG: Uno re-flashed with the D7/D6/D5 build; MF: audit MB high + listed meds fixed, landing check caught a SIGTERM deadlock (fixed); ME: firmware + docs moved to the as-built pins servo D7 / strips D6, D5 - compiled, NOT flashed (item 0b); push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
+**Last updated: 2026-11-04 ~00:08 CST** (records LO-NM; paste-ready prompt STATE + NEXT ACTIONS rewritten for NE-NM; NG-NK: motor diagnosis - D9 did not fix it; motor_sweep.py (pi/, new) found forward 0 ticks / reverse moving in the car; open J1 reads +2.10/-2.09 V (driver fine); motor freed from the drivetrain spins both ways ~1850 ticks/s at 40 % -> the forward stall is MECHANICAL (drivetrain binds forward); +throttle reads NEGATIVE ticks (sign to fix once the motor is back in). NEXT: Evan finds the forward bind by hand. NL/NM: Vilros kit returned, now a CanaKit Pi 5 8 GB (same hostname/SSH key); first stress run crashed the Pi (~30 s, EXT5V 4.849 V, 3 A, unexplained); re-run PASS: 300 s all-core 2400 MHz, peak 81.8 C, EXT5V min 5.008 V, 0x0, 6 GiB RAM 0 bad. Supply identity not reported. Committed through NM in ab92045; NF: D9 build FLASHED (11658 B verified, SELFTEST 86/86) - important #3 current; jumper move D12 -> D9 still Evan's; NE: first powered motor runs on the stand - D12 would not hold the forward direction, so DIR_B moved D12 -> D9 in firmware + docs (compiled 11658 B, NOT FLASHED - the board still runs the D12 build; important #3 STALE); NC/ND: host_test --wired passed on /dev/ttyUSB0, Pi re-deployed (teleop was pre-cf237dc); NB: motor + encoder CONNECTED (J1, D2, D3), not yet powered; step-5 sheet step 7 fixed - host_test.py --wired sends throttle 0 only, the motor test is teleop.py --max-throttle 20 with the pad; NA: JP1 bridged by a wire on its top two pins; MZ: servo plugged to the shield - signal D7 direct, V+ J2 middle, GND J2 bottom, JP1 top two pins (Uno 5V) - confirms MI's assumption; D7 to servo signal check done; MY: step-5 power-off checks PASS (P3/6-L3/10, M1/M2 vs Uno 5V and GND all silent); MX: corrects MV/MW - J5 VBAT is L3/10, not P3/10 (KEY); MW: A0 -0.883 V, magnitude PASS, sign inferred as swapped probes; MV: step 5 leads made, NOT connected (Evan); A0 reading + J1 / M1 / M2 power-off checks still open; MU: deck v15 - Pi USB-A clearance 100 mm, Uno turned 180 deg onto a new -y rear wing beside the LM2596 (0.7 mm over the boss at (-12, -41.6)), rocker power + encoder slots 8 x 6; UNTESTED, not printed; 2b wire lengths and step-5 routes not re-checked for the new Uno spot; MT: scheduled audit, 1 HIGH (test card never checks M1/M2 vs Uno 5V / GND before step 5) still open; MS: deck v14b Uno velcro pads now TWO side by side at (-43, 0) / (-19, 0); MR: deck v14b ~~three~~ 20 mm Uno velcro pads; tray v12b charger x 66.5 / XT30 x 107 swapped (P+/P- reach to the lobe end unmeasured); UNTESTED, not printed; MQ: tray v12 - 2S holder end walls back with centred 80% wire openings, charger L-brackets 2 mm legs 6.5 mm tall (no -y end legs); UNTESTED, not printed; MP: deck v14 - 2 mm Pi corner brackets (no -y leg at the +x corner, USB-C), Uno / LM2596 pegs 2.5 mm, two 20 mm velcro bars across the Pi vent; UNTESTED, not printed; MO: card section E PASS - first shield power-up: J5 VBAT 8.18 V, J3 +5V2 4.96 V, Uno 5V ~5 V (Evan); MN: build step 2b DONE, LM2596 output 4.96 V (Evan), card E next; MM: J5 / J6 / J1 ends from cut Dupont jumpers, glued block with empty KEY (listing has no amp rating); ML: wiring sheets docs/step2b_power_wiring.png + docs/step5_motor_encoder.png (scripts/step_wiring_svg.py); MK: rocker 6A 250V AC marking; MJ: shield layout / test card / guides / renders moved to the as-built direct-to-pin wiring, suite 34/34; meter checks A-D PASS per Evan (card version unconfirmed), E not done; MI: servo + strip data wired straight to Uno D7 / D6 / D5, J2 SIG path abandoned, C1 fixed, strip DIN resistors never built (Evan, final); MH: 2026-11-01 soft milestone (M3) NOT met - flagged; paste-ready prompt rewritten; MG: Uno re-flashed with the D7/D6/D5 build; MF: audit MB high + listed meds fixed, landing check caught a SIGTERM deadlock (fixed); ME: firmware + docs moved to the as-built pins servo D7 / strips D6, D5 - compiled, NOT flashed (item 0b); push state: run `git fetch` then `git status -sb`) — this file is the ONLY live snapshot.
 History lives in `docs/Project Record — Full Chronological History.md`
 (append-only, ~~312 appendices A–KZ~~ ~~323 appendices A-LK as of 2026-10-29~~ ~~327 appendices A-LO~~ ~~328 appendices A-LP~~ ~~329 appendices A-LQ~~ ~~330 appendices A-LR~~ ~~331 appendices A-LS~~ ~~332 appendices A-LT~~ ~~333 appendices A-LU~~ ~~334 appendices A-LV~~ ~~335 appendices A-LW~~ ~~336 appendices A-LX~~ ~~337 appendices A-LY~~ ~~338 appendices A-LZ~~ ~~339 appendices A-MA~~ ~~341 appendices A-MC~~ ~~342 appendices A-MD~~ ~~343 appendices A-ME~~ ~~344 appendices A-MF~~ ~~345 appendices A-MG~~ 346 appendices A-MH (MB = the 2026-10-31 scheduled audit) as of 2026-10-30; BM/BN/BP/BU/CT/CY/DB/DE/DN/EL/EN/EO/ET/EU are corrections to earlier entries). When this file and the record disagree about
 a historical fact, **the record wins**.
@@ -475,81 +475,54 @@ Read, in order:
    touches (hardware-shield-wiring.md, firmware-traps.md, hardware-power.md,
    data.md, testing.md ...).
 
-STATE (2026-10-31 ~15:43 CDT; record entries LO-MG cover 2026-10-30..31):
-- UNO: re-flashed 2026-10-31 with uno_control at the AS-BUILT pin map - servo D7,
-  left strip D6, right strip D5 (D4, D9 spare; NO spare PWM pin left). 11658 B,
-  read-back verified, banner + SELFTEST PASS 86/86 (MG). Encoder D2/D3, motor
-  D8/D10/D11/D12, pack sense A0 unchanged. Read the banner before trusting firmware.
-- SHIELD: soldered, UNTESTED (no meter checks, never powered). ~~Two known fixes
-  before any power (record LC): (1) the servo jumper's female end sits on J2's SIG
-  pin, so the servo has nowhere to plug - fix the signal path; (2) C1 hangs on bare
-  legs - re-seat it upright.~~ **MI (Evan, FINAL): C1 fixed (method + height not
-  stated); servo signal goes STRAIGHT into Uno D7 (J2 SIG path abandoned; V+/GND
-  assumed on J2 middle/bottom, JP1 top = Uno 5V - unconfirmed); strip DIN goes
-  STRAIGHT into D6 (left) / D5 (right) when lights are wired. The 2 x 200 ohm DIN
-  resistors were NEVER built - add 400 ohm in each DIN jumper before any strip
-  is plugged in.** The shield should be OFF the Uno (the flash procedure took it off -
-  confirm). ~~Wiring as built: shield->Uno Dupont wires on D7 / D6 / D5 (MD).~~
-  ~~STALE vs as-built: test card section C rows D7->J2, L3/12->D6, L3/13->D5;
-  shield_layout.json DIN note + step 7; SHIELD_SOLDER_GUIDE step 7.~~ MJ: all
-  updated to as-built (only docs/shield_bottom_grid.jpg still shows old wires).
-  **MJ: meter checks A-D PASS (Evan); which card version he used is unconfirmed
-  (old section C rows cannot pass on MI wiring). Shield still never powered.**
-- PI 5: re-flashed 2026-10-30 (old password lost): Raspberry Pi OS Lite Bookworm,
-  Python 3.11.2, `ssh ed@ed-pi5.local` with PUBLIC-KEY ONLY (PC key
-  ~/.ssh/id_ed25519). apt python3-picamera2 (0.3.31) + python3-venv installed;
-  `bash pi/deploy.sh` done; onnxruntime 1.31.1 in ~/car/venv. A re-flash wipes all
-  of that. MEASURED ON THE PI (LR-MA): preflight --no-uno PASS; camera 20 fps,
-  full FOV (ScalerCrop 4608x2592); autopilot predict p95 1.40 ms (untrained BCNet,
-  upper bound); pad, arm/disarm and deadman work (Evan, by eye); real teleop on the
-  BARE board plateaus 45-47 C.
-- POWER (LS-LY): every under-voltage seen was a bad USB-C cable, not the supplies.
-  The Anker A1275 bank (the car's planned Pi supply, 3 A mode) holds 4.97-5.08 V
-  under full load on a good cable. The old cable must never be used on the Pi.
-  In 3 A mode the Pi caps USB peripherals at 600 mA total - the Uno + TB6612 logic
-  + servo all draw through it (JF/JR); UNTESTED until the Uno is connected.
-- COOLING: the Vilros kit fan case's ribbon slot fits the PCIe connector, not the
-  camera - Evan will cut the case. Bench runs bare (fine, MA); the car needs cooling.
-- SOFTWARE (all PC-side, synthetic data unless stated): teleop (fake/real camera,
-  --fake-uno, auto port detect ttyACM*/ttyUSB*, disarms on ST_WATCHDOG, SIGTERM
-  saves the episode), recorder, verify_real (FAILs fake-hardware episodes),
-  bc_real, export_onnx, autopilot --bench. Audit MB's high + listed meds fixed
-  (MF); the train/val split stays LEGACY until *_ids.npy is installed together
-  with a retrain - check_corpus refuses mismatches.
-- NOT WIRED / NOT DONE: motor, encoder, LED strips, rocker; no meter checks; no
-  laps; no trained real-car model. M2 in progress, M3 software-only.
-- DEADLINE: the 2026-11-01 soft milestone (SIM-POC + M3) is NOT met - M3 needs real
-  laps. Hard deadline: Regular Decision ~2027-01-01..15.
-- UNCOMMITTED BY CHOICE: docs/shield_bottom_grid.jpg (board photo with the ROW/COL
-  grid + pin labels; Evan has not said public or local).
-TEST SUITE: scripts/run_checks.py (34 on 2026-10-31) - re-run it, never quote it.
+STATE (2026-11-04 ~00:08 CST; records LO-NM cover 2026-10-30..11-03):
+- UNO: runs uno_control with DIR_B on D9 (moved from D12, NE; flashed NF: 11658 B,
+  read-back verified, banner + SELFTEST PASS 86/86). Pin map: servo D7, strips
+  D6/D5 (unwired), motor PWM D11 / DIR_A D8 / DIR_B D9 / STBY D10, encoder D2/D3,
+  pack sense A0. D4 + D12 free. The banner text "MOTOR, ENCODER, LEDS, PACK UNWIRED"
+  is stale (the motor + encoder are wired). Read the banner before trusting firmware.
+- SHIELD: meter cards A-E PASS (MJ, MO); powered from the pack through the rocker
+  (J5 8.18 V, LM2596 4.96 V). Servo on D7 (MZ). Motor leads + encoder power on J1 (P3/3-6), plugged in (NB).
+  The 2 x 200 ohm strip DIN resistors were NEVER built - add 400 ohm in each DIN
+  jumper before any strip is plugged in.
+- MOTOR FAULT (NG-NK): in the car, forward = 0 ticks at 20-80 %, reverse moves
+  (pi/motor_sweep.py, NI). Open J1 reads +2.10 / -2.09 V (NJ: driver fine). Motor
+  freed from the drivetrain spins both ways ~1850 ticks/s at 40 % (NK). So the
+  stall is MECHANICAL - the drivetrain binds when driven forward. Not found yet.
+  Also: +throttle gives NEGATIVE ticks - fix the sign in one place once the motor
+  is back in and "+throttle = car forward" is checked.
+- PI 5: now a CanaKit Pi 5 **8 GB** (Vilros 4 GB kit returned, NL); same hostname
+  ed-pi5.local, same key-only SSH (ed, ~/.ssh/id_ed25519); whether ~/car + venv
+  are on it (same SD card?) is NOT checked - run deploy.sh + preflight first. Uno on /dev/ttyUSB0. Stress (NL, NM): run 1 dropped off
+  within ~30 s (EXT5V 4.849 V, 3 A negotiated, cause unknown); run 2 PASS - 300 s
+  all-core at 2400 MHz, peak 81.8 C with the fan at max, EXT5V min 5.008 V, 0x0;
+  6 GiB RAM write+verify 0 bad. Supply identity not reported by Evan. Thermal
+  headroom to ~85 C is small. ed-pi5.local sometimes fails to resolve - the IP was
+  192.168.50.191 on 2026-11-03.
+- POWER (LS-LY): the old USB-C cable caused every earlier sag - never use it. In 3 A
+  mode the Pi caps USB at 600 mA total (Uno + TB6612 logic + servo).
+- SOFTWARE (PC-side, synthetic data unless stated): teleop (--max-throttle N; --bench
+  forces throttle 0), recorder, verify_real, bc_real, export_onnx, autopilot --bench,
+  motor_sweep.py (new, --steady THR / sweep, self_check in the suite).
+- NOT DONE: LED strips; no laps; no trained real-car model. M2 in progress, M3
+  software-only. The 2026-11-01 soft milestone was NOT met. Hard deadline: Regular
+  Decision ~2027-01-01..15.
+- UNCOMMITTED BY CHOICE: docs/shield_bottom_grid.jpg (Evan has not said public/local).
+TEST SUITE: scripts/run_checks.py (36 on 2026-11-04) - re-run it, never quote it.
 Push state: `git fetch` then `git status -sb`.
 
 NEXT ACTIONS, highest value first (all need Evan at the bench):
-1. ~~Fix the servo signal path + re-seat C1 (record LC).~~ DONE/REPLACED by MI
-   (direct-to-pin wiring; C1 fixed). On the card, check D7 socket -> servo
-   signal lead (BEEP) instead of D7 -> J2; skip the two ~400 ohm strip rows.
-2. ~~Meter test card sections A-D (power OFF), then~~ A-D PASS (MJ). ~~Next: wire
-   the power path (step 2b, W8-W14; read the rocker's DC rating first; meter the
-   LM2596 output alone before W14 reaches J5), then~~ **2b DONE (MN): LM2596
-   output 4.96 V on the meter.** ~~Next: card section E (first power-up; write down
-   the J3 voltage), then~~ **Card E PASS (MO): J5 8.18 V, J3 middle 4.96 V, Uno 5V
-   ~5 V.** **Step 5 leads made, NOT connected (MV).** A0 to GND read -0.883 V (MW: magnitude
-   PASS; sign = swapped probes, inferred). Power-off checks PASS (MY). Servo plugged + D7 check done (MZ). ~~Next, before plugging in: power off, J1 +5V2 (P3/6) to J5 VBAT (L3/10; P3/10 is KEY, MX)
-   silent; M1 (P3/3) and M2 (P3/4) to Uno 5V and to GND silent (audit MT); then~~ ~~Next: sheet
-   steps 4-7 of docs/step5_motor_encoder.png (plug in, car on a stand, host_test.py --wired at 20 %).~~ Plugged in (NB). **NE: ~~re-flash uno_control (DIR_B on D9) with the shield OFF,~~ (flashed, NF) move the U1/2 jumper from Uno D12 to D9, then** sheet steps 6-7 - car on a stand, Uno on USB then rocker ON, host_test.py --wired, then teleop.py --max-throttle 20 (NOT --bench), RT / LT, watch ticks.
-3. Power build checks: XT30 -> rocker -> VBAT (rocker OFF = 0 V; polarity +8.x V);
-   charger board 2 no-load test (8.4 V OK, >= 8.6 V reject).
-4. Shield back on the Uno, Uno on the Pi's USB, then the on-car session:
-   deploy -> preflight (must PASS) -> pi/README.md bench checklist (servo sign,
-   camera orientation, deadman with the real Uno; --bench, NO --max-throttle until
-   the motor is wired and the car is on a stand). Watch the 600 mA USB cap.
+1. Motor still out of the car: turn the drivetrain by hand at the motor coupler both
+   ways; find what binds forward (coupler, differential, gear mesh first). Fix it.
+2. Motor back in, car on a stand: `~/car/venv/bin/python ~/car/pi/motor_sweep.py`
+   (full sweep) - forward and reverse must both move. Then decide the tick sign.
+3. Teleop on the stand (`teleop.py --max-throttle 20`, RT forward / LT reverse).
+4. Pi cooling in the car (81.8 C bench peak with the fan at max); confirm the car's
+   Pi supply holds 5 V under load (run 1 of NL is unexplained).
 5. Laps per docs/DATA_COLLECTION.md -> verify_real -> bc_real -> export_onnx ->
    AUTO on the stand (M3 done-check).
-Alongside: print tray v11 + deck v13 (fit report + printer settings in the
-record); cut the case slot (photo + slot size); 12-tooth bevel gear; USB-B plug
-size. Claude, once unblocked: C1 height in scripts/electronics_layout.py; a 30 s+
-episode for the long-run frame-gap %.
+Alongside: print tray v12 + deck v15 (fit report + printer settings in the record);
+12-tooth bevel gear; fix the stale banner text; docs/BOM.md pin block is stale.
 
 HARD CONSTRAINTS
 - Start every reply with "Evan". Commit only when asked; push only when told;
