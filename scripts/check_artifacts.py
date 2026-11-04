@@ -33,7 +33,6 @@ bug survives. See the UNCHECKABLE list at the bottom of ARTIFACTS.
 from __future__ import annotations
 
 import argparse
-import filecmp
 import shutil
 import subprocess
 import sys
@@ -191,6 +190,22 @@ def _run(cmd_tpl: list[str], out: Path) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
 
 
+def same_content(fresh: Path, committed: Path) -> bool:
+    """Byte-equal, or equal after CRLF -> LF for text (no NUL byte in either).
+
+    Git stores these artifacts with LF, but core.autocrlf=true checks text out
+    as CRLF while most generators write LF. A plain byte compare then calls a
+    fresh clone DRIFT with no content change (audit C3-6, record NQ). Binary
+    files (STL, PNG) are never normalized.
+    """
+    a, b = fresh.read_bytes(), committed.read_bytes()
+    if a == b:
+        return True
+    if b"\0" in a or b"\0" in b:
+        return False
+    return a.replace(b"\r\n", b"\n") == b.replace(b"\r\n", b"\n")
+
+
 def check_one(entry: dict, tmp: Path) -> tuple[str, str]:
     """Return (verdict, detail). Verdict is OK | DRIFT | ERROR | UNCHECKABLE."""
     if entry["kind"] == "uncheckable":
@@ -206,7 +221,7 @@ def check_one(entry: dict, tmp: Path) -> tuple[str, str]:
         committed = REPO / entry["artifact"]
         if not committed.exists():
             return "ERROR", "tracked artifact is missing from the working tree"
-        same = filecmp.cmp(fresh, committed, shallow=False)
+        same = same_content(fresh, committed)
         return ("OK", "") if same else ("DRIFT", _regen_hint(entry))
 
     # kind == "dir"
@@ -220,7 +235,7 @@ def check_one(entry: dict, tmp: Path) -> tuple[str, str]:
         fresh, committed = outdir / name, REPO / entry["artifact"] / name
         if not fresh.exists():
             return "ERROR", f"generator did not write {name}"
-        if not committed.exists() or not filecmp.cmp(fresh, committed, shallow=False):
+        if not committed.exists() or not same_content(fresh, committed):
             drifted.append(name)
     if drifted:
         return "DRIFT", f"{', '.join(drifted)} -- {_regen_hint(entry)}"
@@ -267,7 +282,16 @@ def staged_paths() -> set[str]:
 
 
 def self_check() -> None:
-    """Staging only a generator or its input must select the entry; no git call."""
+    """Staging only a generator or its input must select the entry; no git call.
+    Plus same_content(): line endings alone are not drift, content is."""
+    with tempfile.TemporaryDirectory() as td:
+        f, g = Path(td) / "f", Path(td) / "g"
+        f.write_bytes(b"a\nb\n"); g.write_bytes(b"a\r\nb\r\n")
+        assert same_content(f, g), "CRLF vs LF of the same text must not be DRIFT"
+        g.write_bytes(b"a\r\nc\r\n")
+        assert not same_content(f, g), "a real content change must still be DRIFT"
+        f.write_bytes(b"\0a\nb\n"); g.write_bytes(b"\0a\r\nb\r\n")
+        assert not same_content(f, g), "binary files must never be normalized"
     scad = [e for e in ARTIFACTS if e["artifact"] == "cad/motor_mount.stl"]
     assert len(scad) == 1, "registry no longer has cad/motor_mount.stl"
     for src in ("scripts/render_scad.py", "cad/scad/motor_mount.scad"):

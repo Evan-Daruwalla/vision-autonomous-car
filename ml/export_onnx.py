@@ -147,7 +147,12 @@ def main() -> int:
         {"parity": err, "timing": timing, "opset": OPSET,
          "input_shape": list(shape),
          "ckpt": None if a.untrained else str(a.ckpt),
-         "weights": "untrained (latency only)" if a.untrained else "trained"})
+         "weights": "untrained (latency only)" if a.untrained else "trained",
+         # Audit C2-5, record NQ: the checkpoint was picked on val MSE alone
+         # and has never driven. pi/teleop.py warns on AUTO while this is
+         # False; set it to true by hand only after a supervised stand pass.
+         "selected_by": None if a.untrained else "val_mse (bc_real best checkpoint)",
+         "stand_tested": False})
     if err > PARITY_TOL:
         print(f"FAIL: parity {err:.3e} > {PARITY_TOL}")
         return 1

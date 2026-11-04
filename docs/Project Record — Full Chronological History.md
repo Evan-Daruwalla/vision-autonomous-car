@@ -415,6 +415,7 @@ the dated entry, not the digest.
 - [NN - CanaKit Pi 5 8 GB stress re-run PASSES: 300 s all-core at 2400 MHz, peak 81.8 C, EXT5V min 5.008 V, 0x0; 6 GiB RAM write+verify 0 bad; NL crash still unexplained](#appendix-nn---canakit-pi-5-8-gb-stress-re-run-passes-300-s-all-core-at-2400-mhz-peak-818-c-ext5v-min-5008-v-0x0-6-gib-ram-writeverify-0-bad-nl-crash-still-unexplained-2026-11-03-2358-cst) (11-03)
 - [NO - Six-worker code + docs audit (0 crit, 2 high): run_checks SystemExit hole FIXED; sim action/frame off-by-one CONFIRMED, not fixed (needs Evan); ~25 mediums fixed; corrects NM/NN letters](#appendix-no---six-worker-code--docs-audit-0-crit-2-high-run_checks-systemexit-hole-fixed-sim-actionframe-off-by-one-confirmed-not-fixed-needs-evan-25-mediums-fixed-corrects-nmnn-letters-2026-11-04-0040-cst) (11-04)
 - [NP - C2-1 fixed: World Models consumers pair frame t with the action decided on it; retrain + paired eval (steps null, cte lead post-hoc)](#appendix-np---c2-1-fixed-world-models-consumers-pair-frame-t-with-the-action-decided-on-it-retrain--paired-eval-steps-null-cte-lead-post-hoc-2026-11-04-1607-cst) (11-04)
+- [NQ - Audit NO decisions: servo deadband, --strict, export label, CRLF-tolerant artifact compare, motor_mount probes 30/30, arm rotation, MIT LICENSE](#appendix-nq---audit-no-decisions-servo-deadband---strict-export-label-crlf-tolerant-artifact-compare-motor_mount-probes-3030-arm-rotation-mit-license-2026-11-04-1731-cst) (11-04)
 
 ---
 
@@ -22990,3 +22991,54 @@ Evan picked "Off-by-one (C2-1)", then "1 plus retrain".
 **Conclusion:** the fix is correct and stays, because consumers now match the data contract and the drive-time loop. It does NOT explain the sim World Models wall: survival is unchanged within noise. Every MDN-RNN and controller checkpoint without `action_pairing` was trained on the old pairing. train_controller and diag_copycat now refuse them; eval_paired and eval_in_sim still run them.
 
 Open: re-test the cte lead with a pre-registered primary metric (more launches); retrain cl_aug / nh_* arms on the new pairing only if the sim track is resumed. PM-cadence record reminders fired during this task; this entry covers them.
+
+# Appendix NQ - Audit NO decisions: servo deadband, --strict, export label, CRLF-tolerant artifact compare, motor_mount probes 30/30, arm rotation, MIT LICENSE (2026-11-04 ~17:31 CST)
+Evan answered the 8 remaining audit-NO decisions (two AskUserQuestion rounds; he picked the recommended option on all 8), then said "Start all 7". The eighth (D2-4, CanaKit case vs the deck Pi pocket) waits on his caliper measurements.
+
+**Two of Claude's own recommendations were wrong. Both were corrected before any code was written:**
+- **C3-6 (line endings), factual error.** The premise was "generators write mixed CRLF/LF, so renormalize the repo". `git ls-files --eol` shows every text file is already LF in the index (208 i/lf w/crlf, 111 i/lf w/lf, 86 -text, 2 w/mixed in the working tree only). A renormalize commit would change nothing. The real cause: `check_artifacts.py` byte-compared a fresh LF generator output against an autocrlf=true CRLF checkout. Fixed there instead (below). The scoped `.gitattributes` (`*.sh`, `pre-commit` eol=lf) is unchanged.
+- **C2-5 (export gate), logical flaw.** "Require a stand test before export" is circular, because the stand test runs the exported ONNX on the Pi. Evan re-chose "Label + warn".
+
+**Changes** (plan-split: 3 Sonnet agents on disjoint files; Claude did the rest and read every agent diff):
+- **C1-2 servo deadband** (`firmware/uno_control/uno_control.ino`, agent):
+  - Adds `SERVO_REVERSE_DEADBAND_US = 10`, NOT measured; re-tune on the bench. A reversal of 10 us or less holds the pulse; a larger one flips the overshoot side. Rack error is at most 10 us. 10 us is just over 2 steer steps of 4.5 us.
+  - SELFTEST:
+    - "reversal switches" is split into hold (1495 after 1490) and switch (1490 + 11).
+    - New dither check: 1500, then 1495/1500 x 4, holds p0.
+    - New slow-drift check: 1495 and 1490 hold, 1489 switches.
+    - Safe-limit checks hand-traced unchanged.
+  - CHECK( count 87 -> 92 occurrences, so 86 -> 91 checks: expect "SELFTEST PASS 91/91".
+  - Compiled (arduino-cli, arduino:avr:uno): 12268 bytes (was 11658), 390 B RAM.
+  - NOT flashed. The SELFTEST runs only on the board, and there is no host C++ compiler here, so the new checks are hand-traced only. **important #3 is STALE again**: the board runs the NF build.
+- **C3-3 --strict** (`CLAUDE.md`): on Evan's PC the done-check is `.venv/Scripts/python.exe scripts/run_checks.py --strict`. A bare clone or the Pi may run it without the flag.
+- **C2-5 label + warn** (`ml/export_onnx.py`, `pi/teleop.py`, Claude):
+  - The export sidecar `<model>.onnx.json` now records `selected_by` ("val_mse (bc_real best checkpoint)") and `stand_tested: false`. Set it to true by hand only after a supervised stand pass.
+  - `teleop.model_warning()` returns a note when the sidecar is missing, unreadable, or not `stand_tested: true`. teleop prints it at startup and on every `auto_on`, and adds it to the events list.
+  - Self-check covers all four sidecar states and the auto_on path. Two mutants killed: no note on auto_on, and "always trusted".
+- **C3-6 compare** (`scripts/check_artifacts.py`, Claude): `same_content()` is byte-equal, or equal after CRLF -> LF when neither file has a NUL byte; binary files (STL, PNG) are never normalized. Self-check: CRLF vs LF of the same text is OK, a content change is DRIFT, binary is never normalized.
+  - **Real-file repro:** `cad/probe_spawn_k010.xodr` was converted to CRLF, as a fresh clone checks it out.
+    - New code: `40 artifacts checked, 0 drifted`.
+    - Old code (stashed back in): `DRIFT cad/probe_spawn_k010.xodr` (1 drifted).
+    - The file was restored byte-for-byte afterwards.
+- **C3-7 motor_mount probes** (`cad/scad/motor_mount.probe.json`, agent):
+  - Mutation harness: each of 30 top-level dimension constants in motor_mount.scad gets one mutant, v + max(0.5, 0.1|v|).
+  - 15 of 30 survived before; 0 after. Claude re-ran the harness: 30 KILLED.
+  - +17 solid / +16 open points, 134 -> 167 probe checks, 167/167 PASS on the real part.
+  - Limit: kills rely on 0.1-0.3 mm margins to faces, so a change smaller than that can still pass.
+  - Not mutated: EPS (overlap fudge); vectors PIN_X / ZIP_X; derived ARM_TOP / PIN_D / BACK_X.
+  - The audit had said "6 of 12"; this harness used its own 30 mutants.
+- **C2-6 arm order** (`ml/eval_paired.py`, agent): `arm_order(names, launch)` rotates the learned arms by one per launch, and the expert stays first. The order is printed per launch and stored as `arm_order` in the result JSON. Statistics key by arm name; confirmed by reading. Self-check plus a mutant (no rotation) killed. The main loop is untested until the next sim run.
+- **C3-9 LICENSE** (Claude): MIT, "Copyright (c) 2026 Evan Daruwalla". New README "License" section. New `cad/reference/README.md`:
+  - 1122.xodr was exported by Evan from LaneMaker on 2026-09-07 (record EF).
+  - figure8.xodr is named in record ER; its author and tool are NOT recorded.
+  - LaneMaker's terms for exported files were not checked.
+
+**Checks:** `scripts/run_checks.py --strict` gives 39 passed, 0 failed, 0 skipped (of 39). `check_artifacts.py` gives 40 checked, 0 drifted, 0 errored, 2 uncheckable.
+
+**Still Evan's:**
+1. Reflash uno_control with the shield OFF the Uno, then read the banner and "SELFTEST PASS 91/91".
+2. Bench-check that steering holds still under a 1-step dither, and re-tune SERVO_REVERSE_DEADBAND_US.
+3. Measure the CanaKit case (outer L/W/H, port and fan positions) for the deck pocket (D2-4).
+4. Set `stand_tested: true` in a model's sidecar only after a supervised stand pass.
+
+Cadence note: several record and handoff reminders fired during this task; this entry and the same-session HANDOFF update cover them.

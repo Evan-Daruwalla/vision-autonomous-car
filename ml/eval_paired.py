@@ -24,6 +24,10 @@ distribution, so the arms bunch at the floor and the comparison measures
 nothing. The generated track is the only in-distribution option, and pairing is
 what makes it usable.
 
+The learned-arm order is rotated by one each launch (`arm_order`), so a sim
+that degrades during a launch does not always penalise the same late arms
+(audit C2-6, record NQ).
+
 Reads the same checkpoints as `eval_in_sim.py` and reuses its episode loop and
 policy wrapper, so nothing about how a policy is driven changes.
 
@@ -71,6 +75,12 @@ def parse_arm_rnns(specs: list[str], names: list[str], default: str) -> dict[str
         seen.add(name)
         out[name] = path
     return out
+
+
+def arm_order(names: list[str], launch: int) -> list[str]:
+    """Rotate the arm order by one per launch (0-based) so no arm is always last."""
+    k = launch % len(names)
+    return names[k:] + names[:k]
 
 
 def main() -> int:
@@ -164,11 +174,15 @@ def main() -> int:
     import gymnasium as gym
 
     records = []
+    arm_orders: dict[str, list[str]] = {}
     for L in range(args.launches):
+        order = arm_order(names, L)
+        arm_orders[str(L)] = order
         conf = base_sim_conf(str(SIM_EXE), args.port, "pair", max_cte=4.0)
         env = gym.make(args.track, conf=conf)
         print(f"=== launch {L+1}/{args.launches} "
-              f"(one generated track, shared by every arm) ===")
+              f"(one generated track, shared by every arm) ===  "
+              f"arm order: {order}")
         try:
             for s in args.seeds:
                 torch.manual_seed(s)
@@ -178,7 +192,7 @@ def main() -> int:
                     r = run_episode(env, PIDDriver(), args.max_steps, True)
                     r.update(launch=L, seed=s, episode=ep, arm="expert")
                     records.append(r)
-                for name in names:
+                for name in order:
                     c, nh = ctrls[name][s]
                     pol = LatentPolicy(vae, rnns[arm_rnn[name]], c, args.device,
                                        no_history=nh)
@@ -255,7 +269,8 @@ def main() -> int:
               f"degraded during this run. Do not compare these controller "
               f"numbers against another batch. Re-run. ***")
     write_result(out / "eval_paired.json",
-        {"args": vars(args), "arm_rnn": arm_rnn, "per_episode": records,
+        {"args": vars(args), "arm_rnn": arm_rnn,
+         "arm_order": arm_orders, "per_episode": records,
          "per_launch": {str(k): v for k, v in per_launch.items()},
          "paired_vs_" + base: summary,
          "batch_valid": batch_valid})
@@ -274,6 +289,12 @@ def self_check() -> None:
         except ValueError:
             continue
         raise AssertionError(f"parse_arm_rnns accepted {bad}")
+    assert arm_order(names, 0) == ["a", "b", "c"]
+    assert arm_order(names, 1) == ["b", "c", "a"]
+    assert arm_order(names, 3) == ["a", "b", "c"]
+    assert sorted(arm_order(names, L)[0] for L in range(3)) == names
+    for L in range(5):
+        assert arm_order(["only"], L) == ["only"]
     print("eval_paired self_check: PASS")
 
 

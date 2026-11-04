@@ -25,6 +25,10 @@ FIRST, then `PRD_ROADMAP.md`.
   portfolio material).
 - Definition of done for code tasks: task's own done-check passes + real
   output pasted + record entry exists (global standard applies).
+  On Evan's PC the suite is `.venv/Scripts/python.exe scripts/run_checks.py
+  --strict`: a SKIP fails it there (Chrome, OpenSCAD and the corpus are all
+  present). A bare clone or the Pi may run it without --strict. (Evan,
+  2026-11-04, audit C3-3, record NQ.)
 
 Never include "Co-Authored-By: Claude Opus 5.5 (or any other model) <noreply@anthropic.com>" in any commits or pushes
 

@@ -188,8 +188,10 @@ class _QuietHandler(SimpleHTTPRequestHandler):
 class TeleopApp:
     def __init__(self, uno, cam, recorder: Recorder, controller: Controller,
                  http_port: int, ws_port: int, web_dir: str | Path,
-                 host: str = "127.0.0.1", autopilot=None) -> None:
+                 host: str = "127.0.0.1", autopilot=None,
+                 model_note: str | None = None) -> None:
         self.autopilot = autopilot            # None = AUTO feature off
+        self.model_note = model_note          # model_warning(); repeated on auto_on
         self.uno = uno
         self.cam = cam
         self.recorder = recorder
@@ -372,6 +374,9 @@ class TeleopApp:
                 return
             events = self.controller.command(name, self.last_pack, self.uno.link_ok)
             self.events.extend(events)
+            if "auto_on" in events and self.model_note:
+                print("WARNING: " + self.model_note)
+                self.events.append(self.model_note)
             if name == "rec_toggle":
                 if self.recorder.recording:
                     self._stop_recording(crash=False)
@@ -1177,7 +1182,57 @@ def self_check() -> None:
     assert _pick_hw(False, True) == ("fake", "real")
     assert _pick_hw(True, True) == ("fake", "fake")
     assert time.monotonic() - t0 < 40.0
+    _check_model_warning()
     print("teleop self_check: PASS")
+
+
+def model_warning(model_path: str) -> str | None:
+    """Why this ONNX model has not earned trust, or None (audit C2-5, record NQ).
+
+    export_onnx.py writes `<model>.json` beside the model with
+    `stand_tested: false`: bc_real picks the checkpoint on val MSE alone, which
+    this project has found unreliable for picking driving models. A model
+    with no sidecar is unknown, so it is warned about too.
+    """
+    side = Path(str(model_path) + ".json")
+    if not side.exists():
+        return f"model_untested: {side.name} missing - provenance unknown"
+    try:
+        meta = json.loads(side.read_text(encoding="utf-8"))
+    except ValueError as e:
+        return f"model_untested: {side.name} unreadable ({e})"
+    if meta.get("stand_tested") is True:
+        return None
+    return (f"model_untested: picked by {meta.get('selected_by') or 'unknown'}, "
+            f"never stand-tested - supervise every AUTO run")
+
+
+def _check_model_warning() -> None:
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        m = Path(td) / "policy.onnx"
+        assert "missing" in model_warning(str(m))
+        side = Path(str(m) + ".json")
+        side.write_text(json.dumps({"stand_tested": False,
+                                    "selected_by": "val_mse"}), encoding="utf-8")
+        assert "val_mse" in model_warning(str(m))
+        side.write_text("{not json", encoding="utf-8")
+        assert "unreadable" in model_warning(str(m))
+        side.write_text(json.dumps({"stand_tested": True}), encoding="utf-8")
+        assert model_warning(str(m)) is None
+    # the note reaches the operator on auto_on, and only then
+    ctl = Controller(max_throttle=30, bench=False, steer_invert=False)
+    with tempfile.TemporaryDirectory() as td:
+        app = TeleopApp(FakeUno(pack=protocol.PACK_OK), FakeCamera(),
+                        Recorder(td, session="mw", meta={"fake": True}), ctl,
+                        _free_port(), _free_port(),
+                        Path(__file__).resolve().parent / "web",
+                        autopilot=object(), model_note="model_untested: test")
+        app.handle_command("auto_toggle")         # not armed: refused
+        assert "model_untested: test" not in app.events
+        ctl.armed = True
+        app.handle_command("auto_toggle")
+        assert "auto_on" in app.events and "model_untested: test" in app.events
 
 
 # ---------------------------------------------------------------------- main
@@ -1249,15 +1304,19 @@ def main() -> int:
     rec = Recorder(args.data_dir, meta=meta)
     ctl = Controller(args.max_throttle, args.bench, args.steer_invert)
     autopilot = None
+    model_note = None
     if args.model:
         from autopilot import Autopilot
         autopilot = Autopilot(args.model)
+        model_note = model_warning(args.model)
+        if model_note:
+            print("WARNING: " + model_note)
     elif args.fake:
         from autopilot import StubAutopilot
         autopilot = StubAutopilot()
     app = TeleopApp(uno, cam, rec, ctl, args.http_port, args.ws_port,
                     Path(__file__).resolve().parent / "web", host=args.host,
-                    autopilot=autopilot)
+                    autopilot=autopilot, model_note=model_note)
     if args.max_throttle > 0 and args.bench:
         print("NOTE: --bench forces throttle 0 (max-throttle ignored).")
     print(f"Data dir: {rec.directory}")

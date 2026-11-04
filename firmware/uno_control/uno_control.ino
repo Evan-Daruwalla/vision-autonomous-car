@@ -175,8 +175,19 @@ const uint16_t SERVO_US_SPAN_GEOMETRIC = 500;  // 100% of lock, for SELFTEST
  * Evan's choice: overshoot every target by the half-gap in the direction of
  * the last move and HOLD it (no return). The servo then sits at
  * target +/- 75, the rack exactly at the target, and the gear teeth stay
- * pressed. A reversal crosses the whole gap before the rack moves. */
+ * pressed. A reversal crosses the whole gap before the rack moves.
+ * Reversal deadband (audit C1-2, record NQ): without it, a command dithering
+ * by one steer step (4.5 us) flipped the overshoot side and the servo jumped
+ * about 154 us back and forth across the gap. Now a reversal of
+ * SERVO_REVERSE_DEADBAND_US or less HOLDS the current pulse: no servo motion,
+ * the rack stays at the last target (error at most the deadband). The value is
+ * NOT measured; re-tune it on the bench. */
 const uint16_t SERVO_BACKLASH_US = 75;       // half the gear gap (measured, HX)
+// A reversal of this size or less HOLDS the current pulse: no servo motion, and
+// the rack stays at the last target, so the rack error is at most this value.
+// 10 us is just over 2 steer steps (4.5 us each). It is NOT measured; re-tune
+// it on the bench. Source: audit C1-2, record NQ.
+const uint16_t SERVO_REVERSE_DEADBAND_US = 10;
 // Hard limits for the commanded pulse, overshoot included. The LEFT lock is the
 // rack's own stop (record HP): its first-contact pulse is NOT measured yet, so
 // the left limit sits 100 us inside the 450 us lock seen on the bench. The right
@@ -323,14 +334,27 @@ uint16_t steerToUs(int8_t steer) {
 }
 
 /* Pure: returns the pulse to write for a requested target, updating `b`.
- * The direction only changes when the target does, so repeated calls with the
- * same target (the watchdog path calls this thousands of times a second) keep
- * the same overshoot. The very first call approaches from below (dir +1) so
- * the start is deterministic. */
+ * The direction only changes on a reversal larger than SERVO_REVERSE_DEADBAND_US;
+ * smaller reversals hold the pulse. Repeated calls with the same target (the
+ * watchdog path calls this thousands of times a second) keep the same
+ * overshoot. The very first call approaches from below (dir +1) so the start
+ * is deterministic. */
 uint16_t backlashCommand(Backlash &b, uint16_t target) {
-  if (b.target == 0 || target != b.target) {
-    b.dir = (b.target == 0 || target > b.target) ? 1 : -1;
+  if (b.target == 0) {
+    b.dir = 1;
     b.target = target;
+  } else if (target != b.target) {
+    int8_t d = target > b.target ? 1 : -1;
+    if (d == b.dir) {
+      b.target = target;
+    } else {
+      uint16_t delta = d > 0 ? target - b.target : b.target - target;
+      if (delta > SERVO_REVERSE_DEADBAND_US) {
+        b.dir = d;
+        b.target = target;
+      }
+      // else: hold. The pulse does not change, so the servo does not move.
+    }
   }
   int32_t us = (int32_t)b.target + b.dir * (int32_t)SERVO_BACKLASH_US;
   if (us < SERVO_US_MIN_SAFE) us = SERVO_US_MIN_SAFE;
@@ -694,7 +718,21 @@ void selftest() {
     CHECK(backlashCommand(b, 2000) == 2000 + SERVO_BACKLASH_US, "moving up overshoots above");
     CHECK(backlashCommand(b, 1500) == 1500 - SERVO_BACKLASH_US, "moving down overshoots below");
     CHECK(backlashCommand(b, 1490) == 1490 - SERVO_BACKLASH_US, "a further step down keeps the low side");
-    CHECK(backlashCommand(b, 1495) == 1495 + SERVO_BACKLASH_US, "a reversal up switches to the high side");
+    CHECK(backlashCommand(b, 1495) == 1490 - SERVO_BACKLASH_US, "a reversal inside the deadband holds the pulse");
+    CHECK(backlashCommand(b, 1490 + SERVO_REVERSE_DEADBAND_US + 1) ==
+          1490 + SERVO_REVERSE_DEADBAND_US + 1 + SERVO_BACKLASH_US,
+          "a reversal past the deadband switches to the high side");
+    Backlash dd = {0, 0};
+    uint16_t p0 = backlashCommand(dd, 1500);
+    bool ditherHeld = true;
+    for (uint8_t i = 0; i < 4; i++)
+      if (backlashCommand(dd, (i & 1) ? 1500 : 1495) != p0) ditherHeld = false;
+    CHECK(ditherHeld, "one-step dither does not move the servo (audit C1-2)");
+    Backlash sd = {1500, 1};
+    CHECK(backlashCommand(sd, 1495) == 1575, "slow drift: first small reversal holds");
+    CHECK(backlashCommand(sd, 1490) == 1575, "slow drift: delta 10 is not past the deadband, holds");
+    CHECK(backlashCommand(sd, 1489) == 1489 - SERVO_BACKLASH_US,
+          "cumulative reversal past the deadband switches");
     Backlash e = {600, 1};
     CHECK(backlashCommand(e, 560) == SERVO_US_MIN_SAFE, "overshoot never goes past the left safe limit");
     Backlash g = {2500, -1};

@@ -188,3 +188,8 @@ than deploying these weights.
 Built as a college-application engineering portfolio project. The
 documentation trail is deliberate: `docs/Project Record — Full Chronological
 History.md` is append-only, and it keeps the wrong turns.
+
+## License
+
+MIT - see `LICENSE`. The two vendored OpenDRIVE files in `cad/reference/` are
+not this repo's work; their provenance is in `cad/reference/README.md`.

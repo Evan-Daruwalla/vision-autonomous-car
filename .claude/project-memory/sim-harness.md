@@ -132,3 +132,7 @@ Related bins: `ml-training.md` (world-model training facts measured on this
   can use its own MDN-RNN, needed when comparing controllers trained against
   different world models. Unlisted arms use `--rnn`. The arm -> RNN map is
   in the result JSON (`arm_rnn`).
+- **eval_paired rotates the learned-arm order each launch** (2026-11-04, record
+  NQ, audit C2-6): `arm_order(names, L)`; the expert still runs first; the order
+  is printed and stored as `arm_order` in the result JSON. Supersedes NP's
+  "put the arm under test last by hand".

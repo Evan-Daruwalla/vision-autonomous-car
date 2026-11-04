@@ -533,3 +533,10 @@ MDN-RNN and 3 mlp controllers were retrained with the old args
   Not pre-registered - re-test with it as the primary metric before claiming.
 - So the pairing bug is NOT the cause of the sim wall. train_controller and
   diag_copycat refuse unstamped (pre-fix) checkpoints.
+
+## Export sidecar: stand_tested (2026-11-04, record NQ, audit C2-5)
+
+`export_onnx.py` writes `selected_by` ("val_mse (bc_real best checkpoint)") and
+`stand_tested: false` into `<model>.onnx.json`. `pi/teleop.py` warns at start-up
+and on every `auto_on` until a human sets `stand_tested: true` after a supervised
+stand pass. A gate on export itself was rejected: the stand test needs the ONNX.
