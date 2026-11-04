@@ -103,12 +103,19 @@ def run_one(path: Path, verbose: bool) -> tuple[str, str, str]:
         return "FAIL", f"AssertionError: {e}".strip(), buf.getvalue()
     except MISSING_RESOURCE as e:
         return "SKIP", f"{type(e).__name__}: {e}", buf.getvalue()
+    except SystemExit as e:
+        # A sys.exit() in an import or in self_check() would otherwise unwind
+        # through run_one and end the whole suite with no summary.
+        # KeyboardInterrupt is deliberately not caught.
+        return "FAIL", f"self_check raised SystemExit({e.code!r})", buf.getvalue()
     except Exception:
         return "FAIL", traceback.format_exc(limit=3).strip(), buf.getvalue()
 
     # ml/exp_aux_head.py's self_check returns an int exit code rather than None.
-    if isinstance(result, int) and result != 0:
-        return "FAIL", f"self_check() returned {result}", buf.getvalue()
+    # Only None or exactly int 0 passes: `return False` or `return "broken"` used
+    # to slip through as PASS. type() is int (not isinstance) so False is not 0.
+    if result is not None and not (type(result) is int and result == 0):
+        return "FAIL", f"self_check() returned {result!r}", buf.getvalue()
     return "PASS", "", buf.getvalue()
 
 

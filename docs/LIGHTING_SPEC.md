@@ -1,6 +1,6 @@
 # Vehicle lighting — spec and consequences
 
-**Status: SPEC ONLY. ~~Nothing ordered, nothing wired, nothing built.~~** **(2026-10-29) Everything ordered has arrived (records FI-FL, IX); the LED strips are NOT wired and nothing lighting-related is built; the proto shield is soldered but UNTESTED (records LB, LC).**
+**Status: SPEC ONLY. ~~Nothing ordered, nothing wired, nothing built.~~** **(2026-10-29) Everything ordered has arrived (records FI-FL, IX); the LED strips are NOT wired and nothing lighting-related is built; the proto shield is soldered but UNTESTED (records LB, LC).** (2026-11-04 audit fix: the shield is powered and metered, MJ / MO; the strips are owned but still NOT wired.)
 Requested by Evan 2026-09-01: headlights, tail lights, daytime running lights,
 and turn signals.
 
@@ -212,7 +212,7 @@ defensible. Passing a rule off as a learned behaviour is not.
 - **Firmware: written, not hardware-verified.** `firmware/uno_control/`
   implements the 3-pixel-per-segment layout and the head-only DRL decision
   (PRD task 8e, 2026-09-03) — compiled clean with `arduino-cli`, flash 9680 B
-  / SRAM 371 B. **Not flashed, not run on a real board**; no strip is owned.
+  / SRAM 371 B. ~~**Not flashed, not run on a real board**; no strip is owned.~~ (2026-11-04 audit fix: the lighting code is in the build flashed 2026-11-01, 11658 B, SELFTEST PASS 86/86, record NF; the strips arrived 2026-10-10 but are NOT wired, so no lighting output has run.)
   SELFTEST has 9 new checks (58 total) whose pass/fail is unknown until Evan
   flashes it.
 - **The Appendix CZ interrupt estimate (~0.03% encoder tick loss per pixel

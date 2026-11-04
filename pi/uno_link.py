@@ -253,6 +253,45 @@ def self_check() -> None:
     assert link._ser is None and link.link_ok
     assert link.exchange(0, 0, False) is None and link.missed_in_row == 1  # no port: a miss
     assert link.reopen() is False                                          # no such port
+
+    # real-bytes path of exchange(): stub serial queues raw reply frames
+    class StubSer:
+        timeout = 0.005
+
+        def __init__(self) -> None:
+            self.buf = bytearray()
+
+        @property
+        def in_waiting(self) -> int:
+            return len(self.buf)
+
+        def write(self, data: bytes) -> int:
+            return len(data)
+
+        def read(self, n: int = 1) -> bytes:
+            out = bytes(self.buf[:n])
+            del self.buf[:n]
+            return out
+
+        def reset_input_buffer(self) -> None:
+            self.buf.clear()
+
+        def close(self) -> None:
+            pass
+
+    link = UnoLink("COM_X", reply_timeout=0.02)
+    link._ser = StubSer()
+    link.missed_in_row = 2
+    link._ser.buf += protocol.encode_reply(99, 5, 0x00, 12)    # stale seq, then the right one
+    link._ser.buf += protocol.encode_reply(1, 7, 0x00, 12)
+    r = link.exchange(0, 0, False)
+    assert r is not None and r.seq == 1 and r.ticks == 7, r
+    assert link.missed_in_row == 0
+    assert link.exchange(0, 0, False) is None and link.missed_in_row == 1  # silence: a miss
+    link._ser.buf += protocol.encode_reply(3, 0, ST_CRC_BAD, 12)           # CRC-bad status bit
+    r = link.exchange(0, 0, False)
+    assert r is not None and r.crc_bad and link.crc_bad_in_row == 1 and link.link_ok
+    assert link.missed_in_row == 0
     print("uno_link self_check: PASS")
 
 

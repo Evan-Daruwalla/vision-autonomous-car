@@ -97,7 +97,7 @@ level outward; Evan confirmed the frames under them are level.
 **Cost:** sockets can vibrate loose (Evan accepted); 31 solder-bridge hazard pairs to meter silent.
 **Source:** records KF, KG.
 ## 2026-10-31 - Uno signal pins changed to the as-built wiring (Evan chose B, record MD)
-**What:** supersedes the servo signal on D9 (2026-10-16 entry) and the strip DIN wires on D4 / D7 (2026-10-20 entry): servo D7, left strip D6, right strip D5; D9 and D4 become free. Firmware and docs switched; compiled, NOT flashed - the Uno still runs the old map until re-flashed with the shield OFF.
+**What:** supersedes the servo signal on D9 (2026-10-16 entry) and the strip DIN wires on D4 / D7 (2026-10-20 entry): servo D7, left strip D6, right strip D5; D9 and D4 become free. Firmware and docs switched; compiled, NOT flashed - the Uno still runs the old map until re-flashed with the shield OFF. (2026-11-04 audit fix: D9 is motor DIR_B since 2026-11-01, record NE; the free pins are D4 and D12.)
 **Why:** the three shield-to-Uno Dupont wires are physically on those pins; matching the firmware to the wires avoids a re-plug.
 **Source:** record MD.
 - 2026-10-31 (Evan, record MG follow-up): the 5 home-path / username strings already in public record history stay (option A) - no history rewrite or force push; low sensitivity, high cost. Do not write new ones.

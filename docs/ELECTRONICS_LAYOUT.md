@@ -1,5 +1,7 @@
 # Electronics layout - where every part goes (2026-10-16, tray v11 / deck v12)
 
+**(2026-11-04 audit fix) STALE TABLES:** the position tables below are tray v11 / deck v12. The current design is deck v15 / tray v12b: the Uno is turned 180 deg onto a -y rear wing, the Pi USB-A clearance is ~100 mm, and the charger and XT30 are swapped (records MO-MU). The authority is the `LAYOUT` lists in the two .scad files and `docs/electronics_layout.svg` (regenerated from them). The deck's Pi pocket is still modelled on the Vilros case; the Pi is now a CanaKit Pi 5 8 GB (NM), whose case is not measured.
+
 **Status: PLAN, UNTESTED.** Nothing here has been printed or fitted. Parts
 and positions come from the `LAYOUT` lists in
 `cad/scad/electronics_tray.scad` (layer 1) and `cad/scad/electronics_deck.scad`

@@ -1095,6 +1095,14 @@ def self_check() -> None:
     assert r5["status"] == "PASS" and r5["warns"], "floating component should WARN only"
     print("self-check (5) a floating component warns without failing: ok")
 
+    # the committed layout itself, through the same analyze() main() runs; the
+    # checks above only prove the checker, not the real shield
+    real = Path(__file__).resolve().parent.parent / "docs" / "shield_layout.json"
+    R = analyze(json.loads(real.read_text(encoding="utf-8")))
+    bad = [f"({r['n']}) {r['details']}" for r in R["results"] if r["status"] == "FAIL"]
+    assert R["ok"], f"docs/shield_layout.json fails: {bad}"
+    print("self-check docs/shield_layout.json passes all checks: ok")
+
 
 # ---- main -------------------------------------------------------------------------
 def main(argv=None) -> int:

@@ -114,10 +114,12 @@ record is append-only; earlier entries are never edited to look smarter.
 
 ## The hardware, which is two printed parts and a shopping list
 
+(2026-11-04 audit fix: out of date. Printed so far: the two tolerance coupons, servo couplers v1-v3, motor couplers v1-v3, the PLA fit coupon and the pocket gauge. Tray, deck and camera mast are designed but NOT printed. Every ordered part arrived; the car runs teleop on a stand.)
+
 Design decisions are settled and costed. ~~Nothing is bought.~~ **(2026-10-29) Everything ordered has arrived (records FI-FL, IX).** Two printed parts
 now exist; everything else is a drawing and a price.
 
-- **Compute:** Raspberry Pi 5 (4 GB), Camera Module 3 Wide. Inference only.
+- **Compute:** Raspberry Pi 5 ~~(4 GB)~~ **8 GB** (CanaKit, since 2026-11-03; the 4 GB Vilros kit was returned), Camera Module 3 Wide. Inference only.
 - **Drive:** Pololu N20 30:1 HP through a Lego differential. Every Lego motor
   was rejected on physics, not price — the fastest option tops out at
   0.88 m/s against a 1.0 m/s floor.
@@ -144,7 +146,7 @@ drifts across a five-hole span, has not been run.
 
 ```
 ml/            world-model pipeline: collection, verification, training, eval
-pi/            car-side teleop + recorder for the Pi 5 (added 2026-10-25, untested on the Pi)
+pi/            car-side teleop + recorder for the Pi 5 (added 2026-10-25; run on the Pi off-car 2026-10-30, on the car with the motor 2026-11-01)
 cad/           tolerance coupons v1+v2 (printed and tested 2026-09-05), servo coupler STL
 scripts/       parametric STL generation
 docs/          research briefs, BOM, and the append-only project record

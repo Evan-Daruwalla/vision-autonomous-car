@@ -48,6 +48,7 @@ DISARM_EVENTS = ("deadman", "link_lost", "watchdog_disarm")
 AUTO_STEER_OVERRIDE = 0.15      # pad steer magnitude that hands control back
 AUTO_THROTTLE_OVERRIDE = 0.05   # pad throttle magnitude that hands control back
 REOPEN_INTERVAL_S = 2.0         # min gap between serial reopen attempts
+LINK_DOWN_BEFORE_REOPEN_S = 0.7  # > firmware 150 ms watchdog + 500 ms BRAKE_MS: a reset never cuts the brake short
 
 
 def _is_disarm_event(ev: str) -> bool:
@@ -212,6 +213,7 @@ class TeleopApp:
         self.malformed = 0
         self._save_threads: list[threading.Thread] = []
         self._last_reopen = -1e9              # monotonic time of the last reopen attempt
+        self._link_down_since: float | None = None  # monotonic time a tick first saw the link down
         self._reopen_lock = threading.Lock()  # held while the port is being reopened
         # shared state (under lock)
         self.last_pack: int | None = None
@@ -344,8 +346,15 @@ class TeleopApp:
         # already disarmed), outside the lock, at most once per 2.0 s.
         # Opening the real port resets the Uno (2.2 s + banner), so no
         # exchange happens meanwhile; re-arming needs a new arm command.
+        # Also wait until the link has been down 0.7 s: a reset cuts the
+        # firmware's watchdog brake (150 ms + 500 ms), so let it finish first.
+        if link_ok_tick:
+            self._link_down_since = None
+        elif self._link_down_since is None:
+            self._link_down_since = time.monotonic()
         if (not link_ok_tick and not self._stop.is_set()
-                and time.monotonic() - self._last_reopen >= REOPEN_INTERVAL_S):
+                and time.monotonic() - self._last_reopen >= REOPEN_INTERVAL_S
+                and time.monotonic() - self._link_down_since >= LINK_DOWN_BEFORE_REOPEN_S):
             with self._reopen_lock:
                 try:
                     ok = bool(self.uno.reopen())
@@ -1041,6 +1050,43 @@ def _check_signal_shutdown() -> None:
             assert time.monotonic() - t0 < 1.0
         app.shutdown()                                   # what run() does after the handler
         assert len(list(Path(td).rglob("*.npz"))) == 1   # episode saved, not lost
+        last = app.uno.sent[-1]                          # shutdown frame: disarmed, thr 0
+        assert last[1] == 0 and last[2] is False, last
+
+
+def _check_reopen_wait() -> None:
+    import tempfile
+    import numpy as np
+
+    frame = np.zeros((120, 160, 3), np.uint8)
+    with tempfile.TemporaryDirectory() as td:
+        uno = FakeUno(pack=protocol.PACK_OK)
+        app = TeleopApp(uno, FakeCamera(), Recorder(td, session="rw", meta={}),
+                        Controller(30, False, False), _free_port(), _free_port(),
+                        Path(__file__).resolve().parent / "web")
+        reopens: list[float] = []
+
+        def counting_reopen() -> bool:
+            reopens.append(time.monotonic())
+            return False                                 # port stays down
+        uno.reopen = counting_reopen
+        app.controller.set_input(0.0, 0.0, time.monotonic())
+        app._control_step(frame, 0)                      # healthy tick
+        assert app._link_down_since is None and not reopens
+        uno.disconnect()
+        for k in range(3):                               # 3 misses -> link_ok False
+            app._control_step(frame, k)
+        assert not uno.link_ok
+        app._control_step(frame, 3)                      # first tick that sees it down
+        app._control_step(frame, 4)
+        assert app._link_down_since is not None and not reopens, reopens
+        time.sleep(LINK_DOWN_BEFORE_REOPEN_S + 0.05)
+        app._control_step(frame, 5)                      # down > 0.7 s: reopen now
+        assert len(reopens) == 1, reopens
+        del uno.reopen
+        uno.reopen()                                     # real FakeUno.reopen: link back
+        app._control_step(frame, 6)
+        assert app._link_down_since is None              # recovery clears the timer
 
 
 def _check_control_error() -> None:
@@ -1124,6 +1170,7 @@ def self_check() -> None:
     _check_control_error()
     _check_watchdog_latch()
     _check_signal_shutdown()
+    _check_reopen_wait()
     _check_origin_and_host()
     assert _pick_hw(False, False) == ("real", "real")
     assert _pick_hw(True, False) == ("fake", "fake")

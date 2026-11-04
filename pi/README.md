@@ -1,10 +1,11 @@
 # pi/ - teleop + recording on the Raspberry Pi
 
-Status: sim-only (FakeUno/FakeCamera) until the on-Pi checklist below is done.
+Status: ~~sim-only (FakeUno/FakeCamera) until the on-Pi checklist below is done.~~ (2026-11-04 audit fix) Run on the Pi off-car (record LR) and on the car with the Uno on /dev/ttyUSB0: host_test --wired passed (NC), teleop drove the motor on the stand (NE).
 
 ## Files
 - `protocol.py` - byte codec for firmware/SERIAL_PROTOCOL.md v0.2.
 - `uno_link.py` - serial link to the Uno (banner + SELFTEST gate) and `FakeUno`.
+- `motor_sweep.py` - motor diagnosis on the stand (added 2026-11-01, records NG-NI): interleaved +/- throttle steps with braked rests, encoder ticks/s per step, a verdict and a JSON log in `~/car_data/`. Flags: `--levels --repeats --hold --rest --out`, or `--steady THR --seconds N` to hold one throttle; `--self-check`.
 - `camera.py` - `PiCamera` (picamera2), `FakeCamera`, JPEG encode.
 - `recorder.py` - buffers one episode, writes an npz via `ml/episode_writer.py`.
 - `preprocess_frame.py` - the one frame -> model-input function (64x64 float32 CHW), shared with training.
@@ -122,7 +123,7 @@ Episodes land in `~/car_data/<session>/` (session = start time). Copy back:
    `~/car/venv/bin/python ~/car/pi/autopilot.py --bench ~/car/bcnet_untrained.onnx`. The weights are
    random: the timing is real, the outputs mean nothing. Budget: 50 ms per 20 Hz tick.
 
-Never plug the car's Uno into the Pi until the shield fixes (record LC) and meter checks are done; never
+Never plug the car's Uno into the Pi until the shield fixes (record LC) and meter checks are done (done: MI, MJ, MO); never
 pass --max-throttle off the car.
 
 ## On-Pi bench checklist (UNVERIFIED until done)
@@ -135,4 +136,4 @@ pass --max-throttle off the car.
 - [ ] Record 30 s, `scp` the npz back, load it:
       `./.venv/Scripts/python.exe -c "import sys; sys.path.insert(0,'ml'); from episode_writer import load_episode as L; e=L(sys.argv[1]); print({k:v.shape for k,v in e.items() if hasattr(v,'shape')})" <file.npz>`
 
-The motor is unwired: never pass `--max-throttle` until the motor is wired and the car is on a stand.
+~~The motor is unwired:~~ (2026-11-01: the motor is wired, record NB.) Never pass `--max-throttle` unless the car is on a stand.

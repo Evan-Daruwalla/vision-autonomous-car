@@ -806,8 +806,8 @@ Appendix L.
 **SUPERSEDED IN PART, 2026-09-01/02 (Appendices AM/AX/BO/BX):** the floor is
 **3.0 × 3.0 m** (Evan, 2026-09-01), not 1.6 × 2.8; the layout is
 `cad/track_layout_v2.py` — a 3×3 city grid **driven as** a figure-8 through
-the centre intersection, 8.31 m route, **171 mm spare at R = 500 mm** — not a
-plain figure-8; the lane is **230 mm** on the measured 114.75 mm car, not
+the centre intersection, ~~8.31 m route, **171 mm spare at R = 500 mm**~~ (2026-11-04 audit fix: live output is 7.51 m, 100 mm spare, lane 250 mm on the 155 mm front track, 122 tiles ~627 g, 32.40 m of street lines) — not a
+plain figure-8; the lane is ~~**230 mm** on the measured 114.75 mm car~~, not
 261 mm on an estimated 130. The figure-8 rule and print-markings-not-surface
 both stand, the latter now as a **hybrid**: ~73 printed tiles for corner arcs
 and intersection boxes (~902 g), tape for ~31.5 m of straights (Appendix AX).

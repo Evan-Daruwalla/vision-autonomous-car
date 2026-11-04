@@ -40,7 +40,7 @@
     Full evidence: `docs/research/2026-07-23_power-system.md`.
   - Sensing: single wide mono camera (Pi Camera Module 3 Wide, 120° diag).
     No depth, no LiDAR (chassis reserves an RPLIDAR C1 footprint only).
-  - Compute: **Raspberry Pi 5 4GB** onboard (chosen 2026-07-23 ~20:46;
+  - Compute: **Raspberry Pi 5 ~~4GB~~ 8GB (CanaKit, 2026-11-03, NM)** onboard (chosen 2026-07-23 ~20:46;
     supersedes the ~17:21 8GB choice — downgraded for budget, and 4GB is
     DonkeyCar's stated minimum), running inference only. All training happens on Evan's desktop — **RTX 3060 Ti,
     8GB VRAM** (confirmed 2026-07-23; the "16GB shared" is host-RAM
@@ -76,7 +76,7 @@
   - **Channel budget, checked:** the Servo library claims Timer1, killing PWM
     on pins 9/10 and leaving PWM on **3, 5, 6, 11**. ⚠️ **Stale 2026-09-03
     (Appendix CX): lighting is now two WS2812B strips on D4/D7, needing NO PWM
-    at all — D5 and D6 are FREE, the first PWM headroom this design has had.** (2026-10-31, record ME: SUPERSEDED - strips now on D6 (left) / D5 (right), servo on D7, D4 and D9 spare, no spare PWM pin left.)
+    at all — D5 and D6 are FREE, the first PWM headroom this design has had.** (2026-10-31, record ME: SUPERSEDED - strips now on D6 (left) / D5 (right), servo on D7, D4 and D9 spare, no spare PWM pin left.) (2026-11-04 audit fix: D9 is motor DIR_B since 2026-11-01, record NE; the free pins are D4 and D12.)
     Superseded: ~~motor + headlights
     + tail = 3 PWM, servo on its own library, and the two indicators are on/off
     so plain digital pins serve. **Fits with ZERO PWM spare.** (Corrected 2026-09-02, Appendix BH — the D3 pin fix put the encoder on D3, so usable PWM is {5, 6, 11} and all three are used. There is NO headroom: another PWM channel needs a pin freed or a timer reconfigured.)

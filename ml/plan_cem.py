@@ -272,15 +272,32 @@ def main() -> int:
         print(f"{name:<8} {len(rows):>4} {steps.mean():>12.1f} +-{steps.std():<5.1f} "
               f"{np.nanmean(ctes):>10.3f} {rev.mean():>9.2f} {surv:>7}/{len(rows)}")
 
-    write_result(out / "p5_cem.json", 
+    # Batch validity gate, same definition as eval_in_sim.py: the PID expert
+    # must survive every episode it ran, else the sim was degraded for this
+    # batch. Only checkable when the expert was run (--with-expert); without
+    # it there is no reference, so batch_valid is None (NOT True).
+    exp = summary.get("expert")
+    if exp is None:
+        batch_valid = None           # expert not run: validity unknown
+    else:
+        batch_valid = bool(exp["episodes"] > 0
+                           and exp["survived"] == exp["episodes"])
+        if not batch_valid:
+            print(f"\n*** BATCH INVALID: the expert survived only "
+                  f"{exp['survived']}/{exp['episodes']}. The expert is fixed "
+                  f"code and completes 9/9 on a healthy sim, so the SIMULATOR "
+                  f"was degraded during this run. Do not compare these "
+                  f"numbers against another batch. Re-run. ***")
+    write_result(out / "p5_cem.json",
         {"args": vars(args), "probe_val_r2": probe_r2,
          "per_episode": results, "summary": summary,
+         "batch_valid": batch_valid,
          "no_transfer_claim": (
              "Simulated only. Nothing here is evidence about the physical "
              "car.")})
     print(f"\n-> {out / 'p5_cem.json'}")
     print("NOTE: simulated only. No transfer claim is made or implied.")
-    return 0
+    return 2 if batch_valid is False else 0
 
 
 if __name__ == "__main__":

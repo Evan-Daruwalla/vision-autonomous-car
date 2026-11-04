@@ -56,7 +56,7 @@ Remaining planned stack from the 2026-07-23 research brief:
   `~/AppData/Local/Programs/Arduino IDE`, bundling `arduino-cli` 1.5.1 and core
   `arduino:avr` 1.8.8. Firmware includes `Arduino.h`, `avr/io.h`, `avr/boot.h`
   and `stdlib.h` *(`Arduino.h` added by `uno_packguard` 2026-09-02; the earlier
-  "only" list was a universal falsified three commits later — Appendix BK)* — **no third-party Arduino libraries**, so there is nothing to
+  "only" list was a universal falsified three commits later — Appendix BK)* — ~~**no third-party Arduino libraries**, so there is nothing to~~ (2026-11-04 audit fix: FALSE now - uno_control.ino includes `Adafruit_NeoPixel.h`, installed with `arduino-cli lib install "Adafruit NeoPixel@1.15.5"`, plus the bundled `Servo.h`) so there is nothing to
   vendor or pin beyond the core version above. *(Corrected 2026-09-02, Appendix
   BH: the earlier wording claimed the bundled `Servo` library was in use. It is
   NOT — no `.ino` includes `Servo.h` yet. `Servo` is PLANNED for the steering

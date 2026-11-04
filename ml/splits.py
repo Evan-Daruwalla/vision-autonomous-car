@@ -42,13 +42,42 @@ def encoder_fingerprint(ckpt) -> str:
     same answer: train_mdnrnn.py writes the cache, rollout_eval.py decodes
     through it, and a mismatch between them is silent. One helper at the shared
     chokepoint beats two copies that can drift. (Cold audit finding 5.)
+
+    Hashes the file's BYTES, not its stat(): an earlier version hashed
+    st_mtime_ns, which a git checkout or a plain copy rewrites, so the same
+    weights got a new fingerprint and every stamped cache looked stale.
     """
     if ckpt is None or not Path(ckpt).exists():
         return "unknown"
-    st = Path(ckpt).stat()
-    return hashlib.sha1(
-        f"{Path(ckpt).name}:{st.st_size}:{st.st_mtime_ns}".encode()
-    ).hexdigest()[:12]
+    h = hashlib.sha256()
+    with open(ckpt, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()[:12]
+
+
+def check_fingerprints(ckpt: dict, vae_path, rnn_path,
+                       name: str = "controller checkpoint") -> list[str]:
+    """Mismatch messages between a controller checkpoint's stamped V/M
+    fingerprints and the VAE/RNN files actually being used. Empty list = OK.
+
+    The stamps are written by train_controller.py. A stamp that is None means
+    the checkpoint PREDATES fingerprints: UNVERIFIABLE, printed, not refused.
+    Callers (eval_in_sim.py, eval_paired.py) refuse to run the sim on a
+    non-empty result.
+    """
+    problems = []
+    if ckpt.get("vae_fingerprint") is None or ckpt.get("rnn_fingerprint") is None:
+        print(f"  UNVERIFIABLE: {name} predates fingerprints")
+    for key, path in (("vae_fingerprint", vae_path), ("rnn_fingerprint", rnn_path)):
+        want = ckpt.get(key)
+        if want is None:
+            continue
+        have = encoder_fingerprint(path)
+        if want != have:
+            problems.append(f"{name}: {key} {want} != {have} = "
+                            f"encoder_fingerprint({path})")
+    return problems
 
 
 def cache_key_matches(split: str, want: str, proc: Path = PROC) -> bool:
@@ -310,7 +339,7 @@ def self_check() -> None:
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
         ck = d / "vae_best.pt"
-        ck.write_bytes(b"not a real checkpoint - only its stat() is fingerprinted")
+        ck.write_bytes(b"not a real checkpoint - only its bytes are fingerprinted")
         # 1. no cache file at all -> None
         assert load_cached_mu("train", ck, proc=d) is None, "missing cache != None"
         np.save(d / "train_mu.npy", np.arange(6, dtype=np.float32).reshape(3, 2))
@@ -323,6 +352,33 @@ def self_check() -> None:
         # 4. sidecar present and DIFFERENT -> stale, None
         write_cache_key("train", "deadbeef0000", proc=d)
         assert load_cached_mu("train", ck, proc=d) is None, "mismatched key accepted"
+
+    # encoder_fingerprint hashes BYTES: same bytes + different mtime => equal,
+    # different bytes => different. check_fingerprints: pure, three states.
+    import os
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        f1, f2, f3 = d / "a.pt", d / "b.pt", d / "c.pt"
+        f1.write_bytes(b"weights-A")
+        f2.write_bytes(b"weights-A")
+        f3.write_bytes(b"weights-B")
+        os.utime(f2, ns=(1_000_000_000, 1_000_000_000))
+        assert encoder_fingerprint(f1) == encoder_fingerprint(f2), "mtime leaked in"
+        assert encoder_fingerprint(f1) != encoder_fingerprint(f3), "bytes ignored"
+        assert len(encoder_fingerprint(f1)) == 12
+        assert encoder_fingerprint(d / "missing.pt") == "unknown"
+        fa, fb = encoder_fingerprint(f1), encoder_fingerprint(f3)
+        assert check_fingerprints({"vae_fingerprint": fa, "rnn_fingerprint": fb},
+                                  f1, f3) == [], "matching stamps refused"
+        assert check_fingerprints({}, f1, f3) == [], "legacy ckpt must pass"
+        assert check_fingerprints({"vae_fingerprint": None,
+                                   "rnn_fingerprint": None}, f1, f3) == []
+        bad = check_fingerprints({"vae_fingerprint": fb, "rnn_fingerprint": fb},
+                                 f1, f3)
+        assert len(bad) == 1 and "vae_fingerprint" in bad[0], bad
+        bad = check_fingerprints({"vae_fingerprint": fa, "rnn_fingerprint": fa},
+                                 f1, f3)
+        assert len(bad) == 1 and "rnn_fingerprint" in bad[0], bad
 
     # Hash split keyed on episode id (audit HJ): inserting an id anywhere must
     # not move any EXISTING episode between fit and val.

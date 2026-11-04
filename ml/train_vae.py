@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import time
 from pathlib import Path
 
@@ -166,9 +167,12 @@ def main():
         # cover, and would pick an underfit model.
         if va_rec < best:
             best = va_rec
+            # atomic: an interrupted save must not leave a torn vae_best.pt
+            tmp = out / "vae_best.pt.tmp"
             torch.save({"model": model.state_dict(), "epoch": epoch,
                         "val_indomain_rec": va_rec, "holdout_rec": ho_rec,
-                        "args": vars(args), **corpus}, out / "vae_best.pt")
+                        "args": vars(args), **corpus}, tmp)
+            os.replace(tmp, out / "vae_best.pt")
 
     torch.save({"model": model.state_dict(), "epoch": args.epochs,
                 "args": vars(args), **corpus}, out / "vae_last.pt")

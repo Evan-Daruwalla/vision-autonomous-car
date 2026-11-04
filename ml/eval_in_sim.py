@@ -62,6 +62,7 @@ from models import HIDDEN, MDNRNN, ConvVAE
 from preprocess import SIZE
 from provenance import write_result
 from sim_conf import base_sim_conf
+from splits import check_fingerprints
 from train_controller import Controller
 
 REPO = Path(__file__).resolve().parent.parent
@@ -250,6 +251,22 @@ def main() -> int:
     rnn = MDNRNN().to(args.device)
     rnn.load_state_dict(torch.load(args.rnn, map_location=args.device)["model"])
     vae.eval(); rnn.eval()
+
+    # Refuse a controller trained against a different V or M BEFORE the sim
+    # launches. A missing checkpoint is left to the in-loop FAIL below.
+    bad_fp = []
+    for seed in args.seeds:
+        for arch in args.archs:
+            p = Path(args.ctrl_dir) / f"controller_{arch}_seed{seed}.pt"
+            if p.exists():
+                bad_fp += check_fingerprints(
+                    torch.load(p, map_location=args.device),
+                    args.vae, args.rnn, name=p.name)
+    if bad_fp:
+        print("REFUSING: controller/encoder fingerprint mismatch:")
+        for m in bad_fp:
+            print(f"  {m}")
+        return 2
 
     import gym_donkeycar  # noqa: F401  registers the envs
     import gymnasium as gym

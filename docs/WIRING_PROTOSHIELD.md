@@ -1,6 +1,6 @@
 # Proto-shield wiring — the buildable schematic
 
-~~**Status: DESIGN, nothing is built and nothing is ordered.**~~ **Status 2026-10-11: parts ARRIVED 2026-10-10 (record Appendices FI-FW); ~~nothing is wired or metered yet.~~ **(2026-10-29) the servo is wired on the car (record HY); the proto shield is SOLDERED but UNTESTED (records LB, LC); motor, encoder and LED strips are NOT wired.** Audited 2026-10-11; every fix is marked "audit 2026-10-11".** Written
+~~**Status: DESIGN, nothing is built and nothing is ordered.**~~ **Status 2026-10-11: parts ARRIVED 2026-10-10 (record Appendices FI-FW); ~~nothing is wired or metered yet.~~ **(2026-10-29) the servo is wired on the car (record HY); the proto shield is SOLDERED but UNTESTED (records LB, LC); motor, encoder and LED strips are NOT wired.** **(2026-11-04 audit fix: SUPERSEDED - meter cards A-E PASS, shield powered (MJ, MO); motor + encoder wired (NB) and driven on the stand (NE); LED strips still NOT wired.)** Audited 2026-10-11; every fix is marked "audit 2026-10-11".** Written
 2026-09-02 ~17:30 CDT. **Vetted end-to-end and rewritten 2026-09-03 ~20:30 CDT
 (Appendix DA)** — the lighting scheme changed from 8 discrete LEDs to two
 WS2812B strip segments, which invalidated §2.5 outright and touched §1, §2.1,
@@ -13,7 +13,7 @@ the TB6612, the motor/encoder, the servo, the lights and the pack.
 **2026-10-10: the pack path is redrawn with the BMS in the circuit (section 2.1), and three diagrams now sit at the top of section 2.** Until this date the net list wired the holder straight to the fuse, bypassing the over-discharge cutoff (Appendix FA).
 
 **It is deliberately not a PCB.** ~~Not one component in this document has ever
-been in Evan's hands — no TB6612, no LM2596, no MG90S, no N20, no encoder.~~ ~~(Parts in hand since 2026-10-10; none wired.)~~ **(2026-10-29) Parts in hand since 2026-10-10 (records FI-FL, IX); servo wired (HY); shield soldered, UNTESTED (LB, LC); motor, encoder, LED strips not wired.** A
+been in Evan's hands — no TB6612, no LM2596, no MG90S, no N20, no encoder.~~ ~~(Parts in hand since 2026-10-10; none wired.)~~ **(2026-10-29) Parts in hand since 2026-10-10 (records FI-FL, IX); servo wired (HY); shield soldered, UNTESTED (LB, LC); motor, encoder, LED strips not wired.** (2026-11-04 audit fix: shield powered (MO); motor + encoder wired (NB); strips not wired.) A
 board laid out now is a board laid out against datasheet drawings. Writing the
 net list first cost nothing and **found four defects** (§4), any one of which
 would have shipped into a PCB rev-1 and cost a two-week respin. When this
@@ -79,7 +79,7 @@ to the BMS is part of the redraw. Redrawing these nets is an OPEN task.~~ **RESO
 
 ![Pack wiring](pack_wiring_full.svg)
 
-Three small diagrams, one question each - one combined drawing was tried first and was unreadable (20 nodes, ~35 crossing lines). **The tables below stay the authority on pins and wire;** these are the map. Every Uno pin NUMBER matches `firmware/uno_control/uno_control.ino:82-95` (and A0 at `packguard.h:23`). The 2026-10-10 script compared pin numbers only; the 2026-10-11 audit checked each pin's FUNCTION by hand - all agree. Not re-rendered after the 2026-10-11 edits.
+Three small diagrams, one question each - one combined drawing was tried first and was unreadable (20 nodes, ~35 crossing lines). **The tables below stay the authority on pins and wire;** these are the map. Every Uno pin NUMBER matches `firmware/uno_control/uno_control.ino:83-99` (line range updated 2026-11-04) (and A0 at `packguard.h:23`). The 2026-10-10 script compared pin numbers only; the 2026-10-11 audit checked each pin's FUNCTION by hand - all agree. Not re-rendered after the 2026-10-11 edits.
 
 #### Power - where every volt comes from
 
@@ -110,7 +110,7 @@ flowchart TB
   class FUSE,BMS,XT30 safety
 ```
 
-#### Signals - every Uno pin (matches `uno_control.ino:82-95`)
+#### Signals - every Uno pin (matches `uno_control.ino:83-99`)
 
 ```mermaid
 flowchart LR
@@ -334,8 +334,8 @@ use for a PWM-capable one — spending D5 or D6 here would burn the only two
 Timer0 PWM pins the car has left for nothing. D4 and D7 are plain digital and
 cost nothing to give up.
 
-2026-10-31 (record MD): the Dupont wires are physically on D7 (servo), D6 (left strip) and D5 (right strip), and the firmware now matches, so the D5/D6 reasoning above no longer holds; D9 and D4 are free. The paragraph above is the 2026-09-03 design rationale, kept as history.
-Consequence: the car now has NO spare PWM pin - D5/D6 carry the strips, D3 is the encoder, D11 the motor, and the Servo library's Timer1 kills PWM on D9/D10 wherever the servo sits. D4 and D9 are spare plain-digital pins.
+2026-10-31 (record MD): the Dupont wires are physically on D7 (servo), D6 (left strip) and D5 (right strip), and the firmware now matches, so the D5/D6 reasoning above no longer holds; D9 and D4 are free. (2026-11-04 audit fix: D9 is motor DIR_B since 2026-11-01, record NE; the free pins are D4 and D12.) The paragraph above is the 2026-09-03 design rationale, kept as history.
+Consequence: the car now has NO spare PWM pin - D5/D6 carry the strips, D3 is the encoder, D11 the motor, and the Servo library's Timer1 kills PWM on D9/D10 wherever the servo sits. D4 and D9 are spare plain-digital pins. (2026-11-04 audit fix: D9 is motor DIR_B since 2026-11-01, record NE; the free pins are D4 and D12.)
 
 ~~**Three conductors per segment**, both landing in screw terminals on the
 shield: `+5V2`, `DIN`, GND. The series resistor sits **on the shield at the pin

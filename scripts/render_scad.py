@@ -259,6 +259,22 @@ def inside(tris: np.ndarray, point) -> bool:
     return odd >= 2
 
 
+# Top-level probe keys the code reads (probe_checks, bbox_failures). Any other
+# key was silently ignored, so a typo like "hole" dropped checks with no error.
+PROBE_KEYS = {"holes", "open_points", "solid_points", "bbox"}
+
+
+def probe_problems(probe: dict) -> list[str]:
+    """Why a probe file cannot be trusted: unknown keys, or no checks at all."""
+    problems = []
+    unknown = sorted(set(probe) - PROBE_KEYS)
+    if unknown:
+        problems.append(f"unknown top-level key(s) {unknown}; allowed: {sorted(PROBE_KEYS)}")
+    if not probe_checks(probe) and probe.get("bbox") is None:
+        problems.append("defines 0 checks (no holes, open_points, solid_points or bbox)")
+    return problems
+
+
 def probe_checks(probe: dict) -> list[tuple[str, str, tuple, bool]]:
     """Every point test a probe asks for: (label, kind, (x, y, z), expect_solid)."""
     checks = []
@@ -367,6 +383,10 @@ def main(argv=None) -> int:
     elif not probe_path.exists():
         ap.error(f"no such probe file: {probe_path}")
     probe = json.loads(probe_path.read_text(encoding="utf-8")) if probe_path else None
+    if probe is not None:
+        problems = probe_problems(probe)
+        if problems:
+            ap.error(f"bad probe file {probe_path}: " + "; ".join(problems))
 
     out = args.out
     print(f"scad       : {args.scad}")

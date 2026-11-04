@@ -20,6 +20,7 @@ this module imports (and self-checks) without it.
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import tempfile
 import time
@@ -117,7 +118,7 @@ def main() -> int:
     if not a.out or not (a.ckpt or a.untrained):
         ap.error("--out and one of --ckpt / --untrained are required (or use --self-check)")
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from models import BCNet            # not defined until the BC step lands
+    from models import BCNet            # imported here, not at module top (see docstring)
     import provenance
     shape = (1, 3, 64, 64)
     if a.untrained:
@@ -127,9 +128,18 @@ def main() -> int:
         model = BCNet()
         ck = torch.load(a.ckpt, map_location="cpu")
         model.load_state_dict(ck["model"])
-    out = export(model, a.out, shape)
-    err = parity(model, out, input_shape=shape)
-    timing = time_cpu(out, input_shape=shape)
+    out = Path(a.out)
+    # Export beside the target and only os.replace() it into place once parity
+    # passes, so a model that failed parity is never left at --out.
+    tmp = out.with_suffix(".onnx.tmp")
+    try:
+        export(model, tmp, shape)
+        err = parity(model, tmp, input_shape=shape)
+        timing = time_cpu(tmp, input_shape=shape)
+        if err <= PARITY_TOL:
+            os.replace(tmp, out)
+    finally:
+        tmp.unlink(missing_ok=True)      # no-op after a successful replace
     prefix = "UNTRAINED (latency only): " if a.untrained else ""
     print(f"{prefix}parity max abs diff {err:.3e}; timing {timing}")
     provenance.write_result(

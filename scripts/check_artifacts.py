@@ -244,10 +244,38 @@ def entry_paths(entry: dict) -> list[str]:
     return [entry["artifact"]]
 
 
+def entry_sources(entry: dict) -> list[str]:
+    """The generator script (cmd[0]) plus every cmd token that is an existing
+    repo file (e.g. the .scad input), so staging either one selects the entry."""
+    found = [entry["cmd"][0]] if "cmd" in entry else []
+    for tok in entry.get("cmd", []):
+        if tok not in found and (REPO / tok).is_file():
+            found.append(tok)
+    return found
+
+
+def select_entries(entries: list[dict], staged: set[str]) -> list[dict]:
+    """Entries whose output OR any source path is staged. Pure: no git call."""
+    return [e for e in entries
+            if staged.intersection(entry_paths(e)) or staged.intersection(entry_sources(e))]
+
+
 def staged_paths() -> set[str]:
     proc = subprocess.run(["git", "diff", "--cached", "--name-only"],
                           cwd=REPO, capture_output=True, text=True)
     return {line.strip() for line in proc.stdout.splitlines() if line.strip()}
+
+
+def self_check() -> None:
+    """Staging only a generator or its input must select the entry; no git call."""
+    scad = [e for e in ARTIFACTS if e["artifact"] == "cad/motor_mount.stl"]
+    assert len(scad) == 1, "registry no longer has cad/motor_mount.stl"
+    for src in ("scripts/render_scad.py", "cad/scad/motor_mount.scad"):
+        assert select_entries(ARTIFACTS, {src}) and scad[0] in select_entries(ARTIFACTS, {src}), \
+            f"staging only {src} did not select cad/motor_mount.stl"
+    assert scad[0] in select_entries(ARTIFACTS, {"cad/motor_mount.stl"}), "output path no longer selects"
+    assert select_entries(ARTIFACTS, {"README.md"}) == [], "unrelated path selected something"
+    print("self-check select_entries: generator, input and output select; unrelated does not: ok")
 
 
 def main() -> int:
@@ -269,8 +297,7 @@ def main() -> int:
     entries = ARTIFACTS
     if args.staged:
         staged = staged_paths()
-        entries = [e for e in ARTIFACTS
-                   if staged.intersection(entry_paths(e))]
+        entries = select_entries(ARTIFACTS, staged)
         if not entries:
             print("check_artifacts: no registered artifact is staged -- nothing to do")
             return 0

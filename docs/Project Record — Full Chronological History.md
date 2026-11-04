@@ -413,6 +413,7 @@ the dated entry, not the digest.
 - [NL - Scheduled daily-audit: 50 findings, 1 high - SERIAL_PROTOCOL.md lists D9 as both FREE and motor DIR_B; HANDOFF stops at NF](#appendix-nl---scheduled-daily-audit-50-findings-1-high---serial_protocolmd-lists-d9-as-both-free-and-motor-dir_b-handoff-stops-at-nf-2026-11-02-0732-cst) (11-02)
 - [NM - New CanaKit Pi 5 8 GB stress test FAILS: the Pi dropped off within ~30 s of all-core load; EXT5V 4.849 V at start, 0x50000 after reboot, supply negotiated 3 A not 5 A](#appendix-nm---new-canakit-pi-5-8-gb-stress-test-fails-the-pi-dropped-off-within-30-s-of-all-core-load-ext5v-4849-v-at-start-0x50000-after-reboot-supply-negotiated-3-a-not-5-a-2026-11-03-2352-cst) (11-03)
 - [NN - CanaKit Pi 5 8 GB stress re-run PASSES: 300 s all-core at 2400 MHz, peak 81.8 C, EXT5V min 5.008 V, 0x0; 6 GiB RAM write+verify 0 bad; NL crash still unexplained](#appendix-nn---canakit-pi-5-8-gb-stress-re-run-passes-300-s-all-core-at-2400-mhz-peak-818-c-ext5v-min-5008-v-0x0-6-gib-ram-writeverify-0-bad-nl-crash-still-unexplained-2026-11-03-2358-cst) (11-03)
+- [NO - Six-worker code + docs audit (0 crit, 2 high): run_checks SystemExit hole FIXED; sim action/frame off-by-one CONFIRMED, not fixed (needs Evan); ~25 mediums fixed; corrects NM/NN letters](#appendix-no---six-worker-code--docs-audit-0-crit-2-high-run_checks-systemexit-hole-fixed-sim-actionframe-off-by-one-confirmed-not-fixed-needs-evan-25-mediums-fixed-corrects-nmnn-letters-2026-11-04-0040-cst) (11-04)
 
 ---
 
@@ -22885,3 +22886,59 @@ Evan: the supply is "neither" (not the CanaKit PSU, not the old 27 W charger); "
 - One oddity: `uptime -s` read 23:51:45 right after the NL reboot and 23:53:33 after this run, so the clock was probably corrected (NTP) during or just before the run. The 300 s stage timer is wall-clock, so the CPU stage may have been slightly shorter than 300 s. No reboot happened: the log runs without a gap to "== end 23:58:24".
 
 **NL's crash is still unexplained.** This run held 5.10 V under load against NL's 4.849 V before the load ramped up, which fits a supply or cable change, but Evan says it is neither of the two known supplies and did not say whether anything changed. NL also ran CPU + RAM at the same time; this run did them one after the other. Not separated.
+
+# Appendix NO - Six-worker code + docs audit (0 crit, 2 high): run_checks SystemExit hole FIXED; sim action/frame off-by-one CONFIRMED, not fixed (needs Evan); ~25 mediums fixed; corrects NM/NN letters (2026-11-04 ~00:40 CST)
+Evan: "/docs-sync and push then audit code and audit docs 3 agents each", then "fix all mediums through crits that don't need my input", once all audits were done.
+
+**Correction first (NM / NN letters).** A scheduled daily audit appended NL on 2026-11-02 before the Pi stress entries, so the crash is **NM** and the passing re-run is **NN**. HANDOFF, hardware-power.md and NN's own text called them NL / NM, and so did the ab92045 commit message ("MZ-NM"). Found by audit worker D3 (and D1). HANDOFF and hardware-power.md are fixed. NN's body stays as written (append-only); read its "NL" as NM.
+
+**Audit.**
+- 402 tracked files (`git -c core.quotepath=false ls-files`), split into 6 disjoint shards: C1 pi + firmware (21), C2 ml (180), C3 scripts + cad + .claude + root config (83), D1 root docs + bins (37), D2 docs/ (76), D3 the record + code READMEs (5).
+- 6 Sonnet workers, one per shard, with no delegates.
+- Totals: 0 crit, 2 high, about 25 med, about 40 low.
+- Claude re-ran both highs:
+  - **C3-1 HIGH, CONFIRMED.** `scripts/run_checks.py` let a `SystemExit` from any check end the whole suite with that exit code and no summary. Claude's repro (after the fix): a module whose self_check calls `sys.exit(0)` now returns `('FAIL', 'self_check raised SystemExit(0)')`.
+  - **C2-1 HIGH, CONFIRMED, NOT FIXED (needs Evan).** In the sim corpus, `action[i]` is the PID's output on frame i-1. Claude replayed the PID on `generated-roads-0772d461...-1201.npz`: max |action[i] - PID(cte[i])| = 0.611, max |action[i] - PID(cte[i-1])| = 5.96e-08. ml/train_mdnrnn.py:115 feeds (z_t, action[t]) to predict z_{t+1}, so the action that causes z_{t+1} is never given. train_controller, rollout_eval and plan_cem pair the same way; bc_real (the real car) is correct. The effect on driving is NOT measured, since no retrain was done. It is a candidate cause of the sim world-model failures, unproven.
+
+**Fixed (code), by 3 Sonnet agents on disjoint files.** Claude read each diff and re-ran its checks.
+- `scripts/run_checks.py`: catches SystemExit as FAIL; PASS only for a result of None or int 0 (`return False` used to pass).
+- `scripts/shield_holemap.py`: self_check now analyzes the REAL docs/shield_layout.json. An injected M1-M2 bridge is caught: "nets M1 + M2 are SHORTED together".
+- `scripts/check_artifacts.py`: `--staged` also triggers on a staged generator or input file (`select_entries`, with a new self_check). Known limit: files pulled in by a .scad `use`/`include` still do not trigger.
+- `scripts/render_scad.py`: unknown probe keys and 0-check probes are errors. check_artifacts after the change: 40 checked, 0 drifted, 0 errored, 2 uncheckable.
+- `pi/teleop.py`: the serial reopen (which resets the Uno) waits until the link has been down 0.7 s, so it no longer cuts the firmware's 150 ms watchdog + 500 ms brake. Tests now cover the reopen wait and the shutdown frame (disarmed, throttle 0); mutants `armed=True` and throttle 50 are killed.
+- `pi/uno_link.py`: a stub-serial test of `exchange` covers wrong-seq skip, timeout and CRC-bad counting. The `if True` seq mutant is killed.
+- `ml/provenance.py`: `git status --porcelain -z` plus utf-8 decoding, so non-ASCII dirty paths are no longer octal-escaped.
+- `ml/export_onnx.py`: exports to a temp file and moves it to --out only after parity passes.
+- `ml/eval_paired.py`: batch-validity gate (exit 2), refuses to overwrite without `--force`, and rejects arm-name collisions.
+- `ml/plan_cem.py`: batch gate when `--with-expert` is given.
+- `ml/splits.py`: `encoder_fingerprint` hashes file bytes (sha256), not mtime. New `check_fingerprints`, called by eval_in_sim and eval_paired before the sim; all 40 checkpoints on disk have None stamps and only print UNVERIFIABLE. Any old-scheme latent `.key` sidecar now mismatches and re-encodes (none exist on disk).
+- `ml/train_controller.py`, `train_vae.py`, `train_mdnrnn.py`: best checkpoints are saved atomically (tmp + os.replace); train_controller writes its history JSON at each new best.
+
+**Fixed (docs), by Claude.**
+- D9 is no longer called "free" anywhere: SERIAL_PROTOCOL.md, WIRING_PROTOSHIELD.md, BOM.md (also the D8/D12 to D8/D9 block), and the architecture / decisions / firmware-traps / hardware-shield-wiring bins.
+- Stale status lines updated with dated notes: SERIAL_PROTOCOL (Pi runs, SELFTEST 86/86), pi/README (status line, motor wired, `motor_sweep.py` added to the file list), WIRING_PROTOSHIELD, LIGHTING_SPEC.
+- docs/ELECTRONICS_LAYOUT.md has a stale-tables banner (tables are tray v11 / deck v12; current is v15 / v12b).
+- Pi 8 GB recorded in README, BOM row 1, HANDOFF and architecture.md.
+- BOM servo constants point to the live firmware values (1525, +/-450).
+- dependencies.md: Adafruit NeoPixel@1.15.5 is a third-party Arduino library.
+- README: printed-parts list and pi/ status.
+- HANDOFF: appendix count is 378 A-NN; the track row is now lane 250 mm / 100 mm spare / 155 mm (live `track_layout_v2.py`).
+- PRD track numbers are now 7.51 m / 100 mm / 250 mm / 122 tiles.
+
+**Checks (real output):**
+- `.venv/Scripts/python.exe scripts/run_checks.py`: 37 passed, 0 failed, 0 skipped (of 37). The new 37th is check_artifacts' self_check.
+- `scripts/check_artifacts.py`: 40 checked, 0 drifted, 0 errored, 2 uncheckable.
+- `pi/teleop.py --self-check` and `pi/uno_link.py --self-check`: PASS (re-run by Claude).
+
+**Not fixed: needs Evan.**
+1. C2-1: pick the action convention, then retrain the sim world model to measure.
+2. C1-2: the servo backlash compensation flips on any 1-step command change (about 154 us dither across the gear gap, Python model of the firmware). Needs hysteresis plus a reflash and a bench test.
+3. C3-3: whether `--strict` (SKIP fails) becomes the default done-check.
+4. C2-5: bc_real picks the checkpoint on val MSE and exports it with no closed-loop or on-car gate.
+5. C3-6: generators write mixed CRLF/LF; a fresh autocrlf=true clone shows 6 .xodr as DRIFT. Needs a .gitattributes + renormalize commit.
+6. C3-7: motor_mount probes miss 6 of 12 single-constant mutants. New probes are a CAD call.
+7. C2-6: eval_paired runs arms in a fixed order, so a sim that degrades over a launch biases later arms.
+8. C3-9: the public repo has no LICENSE; cad/reference/*.xodr has no provenance.
+9. D2-4: the CanaKit case dimensions vs the deck's Vilros-sized Pi pocket.
+
+Not swept, or low and left: the D2-5 SHIELD_BUILD.md "generated" claim, the C1 lows (banner text, servo comment range, loop_dt units), the C2 lows, and C3-8 / 10 / 11 / 12. Their full lists are in the worker reports this session (not saved in the repo).

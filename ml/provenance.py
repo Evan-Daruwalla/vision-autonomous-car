@@ -48,8 +48,11 @@ MAX_DIRTY_LISTED = 20
 def _git(args: list[str], repo: Path) -> str | None:
     """Run a git command, returning stripped stdout or None if it cannot."""
     try:
+        # utf-8 explicitly: `status -z` emits raw UTF-8 paths, and text=True
+        # alone decodes with the Windows locale codepage (em dash -> mojibake).
         p = subprocess.run(["git", *args], cwd=str(repo), capture_output=True,
-                           text=True, timeout=10)
+                           text=True, encoding="utf-8", errors="replace",
+                           timeout=10)
     except (FileNotFoundError, OSError, subprocess.SubprocessError):
         return None          # no git on PATH, or it failed to launch
     if p.returncode != 0:
@@ -63,16 +66,26 @@ def _git(args: list[str], repo: Path) -> str | None:
 
 
 def _parse_porcelain(text: str) -> list[str]:
-    """Paths from `git status --porcelain` output.
+    """Paths from `git status --porcelain -z` output.
 
-    Format is XY<space>path: two status columns then one space, so the path
-    starts at index 3 -- and column 1 is a SPACE for anything modified in the
-    worktree but not staged, which is most of them. Whitespace here is data.
+    Format is XY<space>path, NUL-separated: two status columns then one space,
+    so the path starts at index 3 -- and column 1 is a SPACE for anything
+    modified in the worktree but not staged, which is most of them. Whitespace
+    here is data. -z (not the default output) because git C-quotes and
+    octal-escapes non-ASCII paths otherwise ("Record \\342\\200\\224 ...").
+    A rename/copy (R or C) record is followed by one extra NUL-separated
+    record, the ORIGINAL path: keep the new path, skip the original.
     """
     out = []
-    for ln in text.split("\n"):
-        if len(ln) > 3:
-            out.append(ln[3:])
+    recs = text.split("\0")
+    i = 0
+    while i < len(recs):
+        rec = recs[i]
+        i += 1
+        if len(rec) > 3:
+            out.append(rec[3:])
+            if rec[0] in "RC" or rec[1] in "RC":
+                i += 1               # skip the original path
     return out
 
 
@@ -94,7 +107,7 @@ def stamp(repo: Path = REPO) -> dict:
     honest rather than noise.
     """
     commit = _git(["rev-parse", "HEAD"], repo)
-    porcelain = _git(["status", "--porcelain"], repo)
+    porcelain = _git(["status", "--porcelain", "-z"], repo)
     if porcelain is None:
         dirty, dirty_files = None, None
     else:
@@ -149,9 +162,14 @@ def self_check() -> None:
     # this module shipped with: _git stripped the whole output, eating the
     # leading space of the FIRST line, so the first path lost its first
     # character (".claude/x" -> "claude/x"). Pure, no filesystem.
-    got = _parse_porcelain(" M .claude/a.md\nMM docs/b.md\n?? c.txt")
+    got = _parse_porcelain(" M .claude/a.md\0MM docs/b.md\0?? c.txt")
     assert got == [".claude/a.md", "docs/b.md", "c.txt"], got
     assert _parse_porcelain("") == []
+    # -z: non-ASCII + spaces come through literally, and a rename's extra
+    # ORIGINAL-path record is skipped.
+    got = _parse_porcelain(
+        " M docs/Project Record — X.md\0?? a b.txt\0R  new.py\0old.py\0")
+    assert got == ["docs/Project Record — X.md", "a b.txt", "new.py"], got
 
     st = stamp()
     head = _git(["rev-parse", "HEAD"], REPO)

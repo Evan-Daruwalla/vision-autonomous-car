@@ -1,14 +1,14 @@
 # Pi ↔ Uno serial protocol — DRAFT v0.1 (2026-09-02)
 
 **Status: IMPLEMENTED 2026-09-02 (Appendix BO) — `firmware/uno_control/`, with
-`firmware/host_test.py` as the Pi-side exerciser (2026-10-29, record LD: the driving Pi-side client is now `pi/uno_link.py` + `pi/teleop.py`, with `pi/protocol.py` as the codec - fake-hardware verified only, nothing run on the Pi yet; host_test.py stays the bench exerciser). Verified ON THE REAL BOARD:
-firmware ~~SELFTEST 39/39~~ **SELFTEST 49/49** (count struck 2026-09-09: it was pinned at the pre-watchdog-fix build), host_test 13/13, exit 0 (2026-09-02 ~19:55 CDT, after
+`firmware/host_test.py` as the Pi-side exerciser (2026-10-29, record LD: the driving Pi-side client is now `pi/uno_link.py` + `pi/teleop.py`, with `pi/protocol.py` as the codec - ~~fake-hardware verified only, nothing run on the Pi yet~~ (2026-11-04 audit fix: host_test --wired passed on the Pi, record NC; teleop drove the motor on the stand, NE); host_test.py stays the bench exerciser). Verified ON THE REAL BOARD:
+firmware ~~SELFTEST 39/39~~ **SELFTEST 49/49** (count struck 2026-09-09: it was pinned at the pre-watchdog-fix build; 2026-11-04 audit fix: the current build reports SELFTEST PASS 86/86, record NF), host_test 13/13, exit 0 (2026-09-02 ~19:55 CDT, after
 the watchdog fix: the daily-audit, Appendix BY, found `loop()` taking two
 `millis()` samples per iteration so the watchdog tripped in the same iteration
 as every good frame — invisible in any reply byte; fixed and re-verified in
 Appendix CA). ~~ACTUATORS ARE UNWIRED — the
 link and the state machine are tested; no motor, servo, encoder, LED or pack
-exists.~~ (2026-10-29: the servo is wired on the car, record HY; the proto shield is soldered but UNTESTED, records LB, LC; motor, encoder and LED strips are NOT wired.) Bumped to v0.2 by the status-bit extension in §2.**
+exists.~~ (2026-10-29: the servo is wired on the car, record HY; the proto shield is soldered but UNTESTED, records LB, LC; ~~motor, encoder and~~ LED strips are NOT wired. 2026-11-04 audit fix: meter cards A-E PASS and the shield is powered, MJ / MO; motor + encoder wired, NB, and driven on the stand, NE.) Bumped to v0.2 by the status-bit extension in §2.**
 ~~Status: DESIGN ONLY. No firmware implements this yet.~~ Drafted after the link
 was measured (Appendix BF: p50 0.869 ms, p99 1.069 ms round trip at 20 Hz), so
 the sizing below is against real numbers rather than guesses.
@@ -31,7 +31,7 @@ The map below is the corrected one. **`docs/BOM.md`'s diagram used to double-boo
 | D6 | ~~FREE~~ **LED strip, LEFT segment `DIN`** since 2026-10-31 (as built, record MD; was on D4) | ~~tail lights (PWM), Timer0~~ — released 2026-09-03, same change. Timer0 PWM, frequency-locked to `millis()`; now spent on the strip (2026-10-31) |
 | D7 | ~~LED strip, RIGHT segment `DIN`~~ **steering servo** since 2026-10-31 (as built, record MD; was on D9). Servo library, claims Timer1 on any pin | ~~plain digital. Two pins, not one: WS2812B data is `DIN`→`DOUT` only, so a cut strip's two halves cannot share a feed (Appendix CY)~~ (that note belonged to the right strip, now on D5) |
 | D8 | motor DIR A | → TB6612 AIN1 **and BIN1, bridged** (both channels paralleled; added 2026-10-11) |
-| D9 | ~~steering servo~~ **FREE** since 2026-10-31 (servo moved to D7, record MD) | plain digital spare; its PWM stays dead while Servo owns Timer1 |
+| D9 | ~~steering servo~~ ~~**FREE** since 2026-10-31 (servo moved to D7, record MD)~~ **motor DIR B since 2026-11-01** - see the DIR B row below (record NE) | ~~plain digital spare;~~ its PWM stays dead while Servo owns Timer1 |
 | D10 | **TB6612 `STBY`** — master driver enable | added 2026-09-02, Appendix BL. Its PWM is already dead (Servo owns Timer1), so it is the cheapest free pin; spending it here keeps A1–A5 for future analog (motor current sense) |
 | D11 | motor PWM | **Timer2** — see below. Drives PWMA **and PWMB, bridged** |
 | ~~D12~~ **D9** | motor DIR B | → TB6612 AIN2 **and BIN2, bridged**. Moved D12 -> D9 on 2026-11-01 (record NE): D12 did not hold LOW in forward on the car. D9's PWM is lost to Servo (Timer1); DIR only needs digitalWrite |
@@ -50,7 +50,7 @@ Free after this: ~~A0–A5~~ **A1–A5** ~~and D10~~ **plus D5 and D6**, and D0/
 (the USB UART — **do not use**). **D10 became `STBY` on 2026-09-02**, so ~~the
 only free pins left are the five analog ones~~ **the free pins are A1–A5 plus
 D5/D6 as of 2026-09-03** — the LED-strip swap handed back two Timer0 PWM pins,
-the first PWM headroom this pin map has ever had. (2026-10-31, record ME: SUPERSEDED - D5/D6 now carry the strips, D4 and D9 are the spare pins, and no spare PWM pin is left.) **A0 is the pack-sense divider input** as of 2026-09-02
+the first PWM headroom this pin map has ever had. (2026-10-31, record ME: SUPERSEDED - D5/D6 now carry the strips, D4 and D9 are the spare pins, and no spare PWM pin is left. (2026-11-04 audit fix: D9 is motor DIR_B since 2026-11-01, record NE; the free pins are D4 and D12.)) **A0 is the pack-sense divider input** as of 2026-09-02
 (`firmware/uno_packguard/`, Appendix BJ) — corrected in BK.
 
 ### 1a. `STBY` — the gap this map had until 2026-09-02
@@ -229,7 +229,7 @@ do the same (~~no Pi client exists yet~~ 2026-10-29, record LD: `pi/protocol.py`
 
 - ~~**Not implemented.** No firmware, no Pi-side client.~~ **Both exist as of
   2026-09-02** — `firmware/uno_control/` and `firmware/host_test.py` **(2026-10-29: plus the driving client `pi/uno_link.py` + `pi/teleop.py`, record LD)**.
-- ~~**Nothing is wired.**~~ **(2026-10-29) The servo is wired (record HY); the shield is soldered, UNTESTED (LB, LC); motor, encoder and LED strips are NOT wired.** The link and state machine are verified on the board;
+- ~~**Nothing is wired.**~~ **(2026-10-29) The servo is wired (record HY); the shield is soldered, UNTESTED (LB, LC); ~~motor, encoder and~~ LED strips are NOT wired.** (2026-11-04 audit fix: shield powered, MO; motor + encoder wired, NB, driven on the stand, NE.) The link and state machine are verified on the board;
   every actuator path is verified only as a DECISION the firmware made.
 - **The encoder SIGN is unresolved.** `ENCODER_SIGN` in `uno_control.ino` is a
   convention, not a measurement — flip it when the car rolls forward and

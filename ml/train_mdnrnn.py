@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import time
 from pathlib import Path
 
@@ -228,10 +229,12 @@ def main():
             best = va_nll
             # split_seed is stamped so a consumer can ASSERT it was selected
             # against the same split, rather than merely note a mismatch.
+            # atomic: an interrupted save must not leave a torn mdnrnn_best.pt
+            tmp = out / "mdnrnn_best.pt.tmp"
             torch.save({"model": model.state_dict(), "epoch": epoch,
                         "val_indomain_nll": va_nll, "args": vars(args),
-                        "split_seed": split_seed, **corpus},
-                       out / "mdnrnn_best.pt")
+                        "split_seed": split_seed, **corpus}, tmp)
+            os.replace(tmp, out / "mdnrnn_best.pt")
 
     write_result(out / "history.json", {"args": vars(args), "history": history})
     print(f"\nbest val_indomain nll: {best:.2f}  ({out / 'mdnrnn_best.pt'})")

@@ -46,6 +46,7 @@ from collect_sim_data import PIDDriver, SIM_EXE
 from eval_in_sim import LatentPolicy, run_episode
 from provenance import write_result
 from sim_conf import base_sim_conf
+from splits import check_fingerprints
 from models import MDNRNN, ConvVAE
 from train_controller import Controller
 
@@ -70,12 +71,26 @@ def main() -> int:
     ap.add_argument("--rnn", default=str(RUNS / "mdnrnn" / "mdnrnn_best.pt"))
     ap.add_argument("--out", default=str(RUNS / "eval_paired"))
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--force", action="store_true",
+                    help="overwrite an existing eval_paired.json in --out")
     args = ap.parse_args()
 
-    out = Path(args.out)
-    out.mkdir(parents=True, exist_ok=True)
     arms = [Path(d) if Path(d).is_absolute() else RUNS / d for d in args.ctrl_dirs]
     names = [d.name for d in arms]
+    # Arms are keyed by directory NAME; two dirs with one name would silently
+    # share a key in ctrls / per_launch and overwrite each other.
+    dupes = sorted({n for n in names if names.count(n) > 1})
+    if dupes:
+        print(f"FAIL: --ctrl-dirs map to the same arm name {dupes}; arms are "
+              f"keyed by directory name, so rename or pick distinct dirs.")
+        return 1
+
+    out = Path(args.out)
+    if (out / "eval_paired.json").exists() and not args.force:
+        print(f"REFUSING: {out / 'eval_paired.json'} already exists. "
+              f"Pass --force to overwrite it.")
+        return 1
+    out.mkdir(parents=True, exist_ok=True)
 
     vae = ConvVAE().to(args.device)
     vae.load_state_dict(torch.load(args.vae, map_location=args.device)["model"])
@@ -86,6 +101,7 @@ def main() -> int:
     # Load every arm's controllers up front so a missing checkpoint fails
     # before a sim is launched rather than half way through a 20-minute run.
     ctrls: dict[str, dict[int, tuple[Controller, bool]]] = {}
+    bad_fp = []
     for d, name in zip(arms, names):
         ctrls[name] = {}
         for s in args.seeds:
@@ -94,10 +110,17 @@ def main() -> int:
                 print(f"FAIL: {p} missing")
                 return 1
             ck = torch.load(p, map_location=args.device)
+            bad_fp += check_fingerprints(ck, args.vae, args.rnn,
+                                         name=f"{name}/{p.name}")
             c = Controller(arch=args.arch).to(args.device)
             c.load_state_dict(ck["model"])
             c.eval()
             ctrls[name][s] = (c, bool(ck.get("args", {}).get("no_history", False)))
+    if bad_fp:
+        print("REFUSING: controller/encoder fingerprint mismatch:")
+        for m in bad_fp:
+            print(f"  {m}")
+        return 2
     print(f"{len(names)} arms x {len(args.seeds)} seeds loaded: {names}\n")
 
     import gym_donkeycar  # noqa: F401
@@ -180,13 +203,27 @@ def main() -> int:
             print(f"  {a:<12} mean {v.mean():7.1f}  sd {v.std(ddof=1):6.1f}  "
                   f"range {v.min():.0f}-{v.max():.0f}")
 
-    write_result(out / "eval_paired.json", 
+    # **Batch validity gate**, same definition as eval_in_sim.py: the PID expert
+    # is fixed code and must survive EVERY episode it ran (all seeds, all
+    # launches); if it did not, the sim was degraded for this batch and every
+    # arm number in it is untrustworthy.
+    exp_rows = [r for r in records if r["arm"] == "expert"]
+    exp_survived = sum(r["survived"] for r in exp_rows)
+    batch_valid = bool(exp_rows and exp_survived == len(exp_rows))
+    if exp_rows and not batch_valid:
+        print(f"\n*** BATCH INVALID: the expert survived only "
+              f"{exp_survived}/{len(exp_rows)}. The expert is fixed code "
+              f"and completes 9/9 on a healthy sim, so the SIMULATOR was "
+              f"degraded during this run. Do not compare these controller "
+              f"numbers against another batch. Re-run. ***")
+    write_result(out / "eval_paired.json",
         {"args": vars(args), "per_episode": records,
          "per_launch": {str(k): v for k, v in per_launch.items()},
-         "paired_vs_" + base: summary})
+         "paired_vs_" + base: summary,
+         "batch_valid": batch_valid})
     print(f"\n-> {out / 'eval_paired.json'}")
     print("NOTE: simulated only. No transfer claim is made or implied.")
-    return 0
+    return 0 if batch_valid or not exp_rows else 2
 
 
 if __name__ == "__main__":

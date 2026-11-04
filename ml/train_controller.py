@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import time
 from pathlib import Path
 
@@ -490,18 +491,23 @@ def main() -> int:
                   f"(unweighted {va_plain:.5f})")
         if va < best:
             best = va
+            ck_path = out / f"controller_{args.arch}_seed{args.seed}.pt"
+            tmp = ck_path.with_name(ck_path.name + ".tmp")   # atomic save
             torch.save({"model": model.state_dict(), "epoch": epoch,
                         "val_mse": va, "val_mse_unweighted": va_plain,
                         "args": vars(args),
                         # Appendix FD #7: which frozen V and M this C was
-                        # trained against. encoder_fingerprint() is a plain
-                        # file-stat hash, so it serves the RNN too. Nothing
-                        # CHECKS these yet - eval_in_sim / eval_paired /
-                        # plan_cem verifying them is the open follow-up.
+                        # trained against. encoder_fingerprint() hashes the
+                        # file's bytes, so it serves the RNN too. CHECKED by
+                        # splits.check_fingerprints, called from eval_in_sim
+                        # and eval_paired (plan_cem loads no controller).
                         "vae_fingerprint": encoder_fingerprint(args.vae),
                         "rnn_fingerprint": encoder_fingerprint(args.rnn),
-                        **corpus},
-                       out / f"controller_{args.arch}_seed{args.seed}.pt")
+                        **corpus}, tmp)
+            os.replace(tmp, ck_path)
+            # History written with every new best so the .pt and the JSON
+            # always describe the same run, even if this run is interrupted.
+            write_result(out / f"history_{args.arch}_seed{args.seed}.json", {"args": vars(args), "history": history})
 
     write_result(out / f"history_{args.arch}_seed{args.seed}.json", {"args": vars(args), "history": history})
     print(f"\nbest val_indomain MSE {best:.5f} -> "
