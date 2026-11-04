@@ -1,0 +1,253 @@
+{
+  "args": {
+    "epochs": 30,
+    "batch": 1024,
+    "lr": 0.001,
+    "seed": 1,
+    "vae": "D:\\ClaudeCode\\Autonomous Car Project\\ml\\runs\\vae\\vae_best.pt",
+    "rnn": "ml/runs/mdnrnn_next/mdnrnn_best.pt",
+    "arch": "mlp",
+    "proc": "ml/data/proc",
+    "no_history": false,
+    "recovery_weight": 1.0,
+    "out": "ml/runs/cl_next",
+    "device": "cuda",
+    "allow_noisy_labels": false,
+    "self_check": false
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "fit_mse": 0.02559885716686646,
+      "val_mse": 0.007084394958284166,
+      "val_mse_unweighted": 0.007084394958284166,
+      "seconds": 0.3
+    },
+    {
+      "epoch": 2,
+      "fit_mse": 0.00539362320676446,
+      "val_mse": 0.004847619401084052,
+      "val_mse_unweighted": 0.004847619401084052,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 3,
+      "fit_mse": 0.0041508861444890495,
+      "val_mse": 0.00399787425994873,
+      "val_mse_unweighted": 0.00399787425994873,
+      "seconds": 0.1
+    },
+    {
+      "epoch": 4,
+      "fit_mse": 0.0035706976987421512,
+      "val_mse": 0.003569483094745212,
+      "val_mse_unweighted": 0.003569483094745212,
+      "seconds": 0.1
+    },
+    {
+      "epoch": 5,
+      "fit_mse": 0.0031701502638558548,
+      "val_mse": 0.0033280968997213578,
+      "val_mse_unweighted": 0.0033280968997213578,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 6,
+      "fit_mse": 0.0029058600496500732,
+      "val_mse": 0.003103500637743208,
+      "val_mse_unweighted": 0.003103500637743208,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 7,
+      "fit_mse": 0.0026789398211985826,
+      "val_mse": 0.0029354713360468547,
+      "val_mse_unweighted": 0.0029354713360468547,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 8,
+      "fit_mse": 0.002501152033607165,
+      "val_mse": 0.0027712365653779773,
+      "val_mse_unweighted": 0.0027712365653779773,
+      "seconds": 0.1
+    },
+    {
+      "epoch": 9,
+      "fit_mse": 0.002371843825094402,
+      "val_mse": 0.0026263920466105145,
+      "val_mse_unweighted": 0.0026263920466105145,
+      "seconds": 0.1
+    },
+    {
+      "epoch": 10,
+      "fit_mse": 0.00228249777884533,
+      "val_mse": 0.0025700171126259697,
+      "val_mse_unweighted": 0.0025700171126259697,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 11,
+      "fit_mse": 0.002153844436009725,
+      "val_mse": 0.0024629055791431003,
+      "val_mse_unweighted": 0.0024629055791431003,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 12,
+      "fit_mse": 0.0020789841997126738,
+      "val_mse": 0.0023651760816574097,
+      "val_mse_unweighted": 0.0023651760816574097,
+      "seconds": 0.1
+    },
+    {
+      "epoch": 13,
+      "fit_mse": 0.0019932461762800814,
+      "val_mse": 0.0023701720767551,
+      "val_mse_unweighted": 0.0023701720767551,
+      "seconds": 0.1
+    },
+    {
+      "epoch": 14,
+      "fit_mse": 0.001946535836905241,
+      "val_mse": 0.0021920508477422927,
+      "val_mse_unweighted": 0.0021920508477422927,
+      "seconds": 0.1
+    },
+    {
+      "epoch": 15,
+      "fit_mse": 0.001797525727500518,
+      "val_mse": 0.002140925758414798,
+      "val_mse_unweighted": 0.002140925758414798,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 16,
+      "fit_mse": 0.0017785342425728837,
+      "val_mse": 0.002104287412431505,
+      "val_mse_unweighted": 0.002104287412431505,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 17,
+      "fit_mse": 0.0016851471100623409,
+      "val_mse": 0.002016226516829597,
+      "val_mse_unweighted": 0.002016226516829597,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 18,
+      "fit_mse": 0.0016332052710155646,
+      "val_mse": 0.002030211587746938,
+      "val_mse_unweighted": 0.002030211587746938,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 19,
+      "fit_mse": 0.0016138288378715515,
+      "val_mse": 0.001977612707349989,
+      "val_mse_unweighted": 0.001977612707349989,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 20,
+      "fit_mse": 0.0015047005703672767,
+      "val_mse": 0.0019187097748120626,
+      "val_mse_unweighted": 0.0019187097748120626,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 21,
+      "fit_mse": 0.0015389811418329675,
+      "val_mse": 0.001904202103614807,
+      "val_mse_unweighted": 0.001904202103614807,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 22,
+      "fit_mse": 0.00146549541503191,
+      "val_mse": 0.001884802844789293,
+      "val_mse_unweighted": 0.001884802844789293,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 23,
+      "fit_mse": 0.0014587489950160185,
+      "val_mse": 0.001833892994456821,
+      "val_mse_unweighted": 0.001833892994456821,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 24,
+      "fit_mse": 0.0013994916155934333,
+      "val_mse": 0.00179770161708196,
+      "val_mse_unweighted": 0.00179770161708196,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 25,
+      "fit_mse": 0.0013339244682962696,
+      "val_mse": 0.0018532006276978387,
+      "val_mse_unweighted": 0.0018532006276978387,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 26,
+      "fit_mse": 0.0013309809534500043,
+      "val_mse": 0.0017811795406871371,
+      "val_mse_unweighted": 0.0017811795406871371,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 27,
+      "fit_mse": 0.0012919777212664484,
+      "val_mse": 0.0017704612182246314,
+      "val_mse_unweighted": 0.0017704612182246314,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 28,
+      "fit_mse": 0.0012563819818509122,
+      "val_mse": 0.0017352853549851312,
+      "val_mse_unweighted": 0.0017352853549851312,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 29,
+      "fit_mse": 0.0012577763797404866,
+      "val_mse": 0.0016987537013159859,
+      "val_mse_unweighted": 0.0016987537013159859,
+      "seconds": 0.2
+    },
+    {
+      "epoch": 30,
+      "fit_mse": 0.0012281647968726854,
+      "val_mse": 0.0017490879363483852,
+      "val_mse_unweighted": 0.0017490879363483852,
+      "seconds": 0.2
+    }
+  ],
+  "provenance": {
+    "commit": "4853b167c4038d6ced3699565b88c1bc45433d4f",
+    "dirty": true,
+    "dirty_files": [
+      ".claude/pm-cadence.json",
+      "docs/shield_bottom_grid.jpg",
+      "ml/diag_copycat.py",
+      "ml/eval_paired.py",
+      "ml/rollout_eval.py",
+      "ml/runs/cl_next/",
+      "ml/runs/cl_next_seed0.log",
+      "ml/runs/cl_next_seed1.log",
+      "ml/runs/mdnrnn_next.log",
+      "ml/runs/mdnrnn_next/",
+      "ml/splits.py",
+      "ml/train_controller.py",
+      "ml/train_mdnrnn.py"
+    ],
+    "ts_utc": "2026-11-04T21:34:37+00:00",
+    "python": "3.12.10",
+    "torch": "2.13.0+cu126",
+    "numpy": "2.5.1"
+  }
+}

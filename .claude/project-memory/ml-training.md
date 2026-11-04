@@ -515,3 +515,21 @@ distinguish "simulator degraded" from "track harder than the expert's tuning".
   looking like it works. Always run with `--cap-gb` so over-budget configs
   fail in seconds instead of hanging for 20+ minutes.
 - 2026-10-31 (records MF, MG): the train/val split stays LEGACY (position-based) until ml/data/proc/*_ids.npy is installed TOGETHER with a retrain; prep_dreamer_corpus was put back on it (its 12 val episodes = ml/data/dreamer/eval). splits.check_corpus refuses a checkpoint whose corpus_id does not match the split in use - wired into 5 evaluators and train_controller / train_mdnrnn. Every ml/runs/**/p5_eval.json now carries batch_valid (eval_in_sim.py:333 criterion).
+
+## C2-1: World Models pairing fixed; survival unchanged (2026-11-04, record NP)
+
+The World Models consumers paired z_t with action[t] (the decision made on
+frame t-1) instead of `splits.decided_on` = action[t+1]. Fixed, then the
+MDN-RNN and 3 mlp controllers were retrained with the old args
+(`ml/runs/mdnrnn_next`, `ml/runs/cl_next`); old checkpoints are untouched.
+
+- MDN-RNN best val_indomain NLL 12.82 vs old 12.845 (one seed each):
+  being given the causing action barely helps (steering sets heading RATE,
+  so the scene lags the command ~1 step).
+- `eval_paired` (6 launches x 3 seeds x 2 eps, cl_next run LAST, expert
+  600/600, batch_valid): cl_next - cl_base_ei = **+15.4 steps, sd 54.5,
+  t ~0.69, 3/6 signs - NULL**. No learned completion (max 484).
+- POST-HOC only: paired mean|cte| -0.341 (sd 0.432), lower in 6/6 launches.
+  Not pre-registered - re-test with it as the primary metric before claiming.
+- So the pairing bug is NOT the cause of the sim wall. train_controller and
+  diag_copycat refuse unstamped (pre-fix) checkpoints.

@@ -54,6 +54,25 @@ REPO = Path(__file__).resolve().parent.parent
 RUNS = REPO / "ml" / "runs"
 
 
+def parse_arm_rnns(specs: list[str], names: list[str], default: str) -> dict[str, str]:
+    """Map every arm name to an MDN-RNN path: `default` unless a NAME=PATH spec overrides it."""
+    out = {n: default for n in names}
+    seen: set[str] = set()
+    for spec in specs:
+        if "=" not in spec:
+            raise ValueError(f"{spec!r} is not NAME=PATH")
+        name, path = spec.split("=", 1)
+        if not name or not path:
+            raise ValueError(f"{spec!r} has an empty name or path")
+        if name not in names:
+            raise ValueError(f"{name!r} is not an arm name; arms are {names}")
+        if name in seen:
+            raise ValueError(f"{name!r} given twice")
+        seen.add(name)
+        out[name] = path
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--track", default="donkey-generated-track-v0")
@@ -69,6 +88,9 @@ def main() -> int:
     ap.add_argument("--port", type=int, default=9091)
     ap.add_argument("--vae", default=str(RUNS / "vae" / "vae_best.pt"))
     ap.add_argument("--rnn", default=str(RUNS / "mdnrnn" / "mdnrnn_best.pt"))
+    ap.add_argument("--arm-rnn", action="append", default=[], metavar="NAME=PATH",
+                    help="use this MDN-RNN checkpoint for arm NAME (repeatable); "
+                         "other arms use --rnn")
     ap.add_argument("--out", default=str(RUNS / "eval_paired"))
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     ap.add_argument("--force", action="store_true",
@@ -84,6 +106,11 @@ def main() -> int:
         print(f"FAIL: --ctrl-dirs map to the same arm name {dupes}; arms are "
               f"keyed by directory name, so rename or pick distinct dirs.")
         return 1
+    try:
+        arm_rnn = parse_arm_rnns(args.arm_rnn, names, args.rnn)
+    except ValueError as e:
+        print(f"FAIL: --arm-rnn: {e}")
+        return 1
 
     out = Path(args.out)
     if (out / "eval_paired.json").exists() and not args.force:
@@ -94,9 +121,19 @@ def main() -> int:
 
     vae = ConvVAE().to(args.device)
     vae.load_state_dict(torch.load(args.vae, map_location=args.device)["model"])
-    rnn = MDNRNN().to(args.device)
-    rnn.load_state_dict(torch.load(args.rnn, map_location=args.device)["model"])
-    vae.eval(); rnn.eval()
+    vae.eval()
+    rnns: dict[str, MDNRNN] = {}
+    pairing: dict[str, str] = {}
+    for path in dict.fromkeys(arm_rnn.values()):
+        rck = torch.load(path, map_location=args.device)
+        m = MDNRNN().to(args.device)
+        m.load_state_dict(rck["model"])
+        m.eval()
+        rnns[path] = m
+        pairing[path] = rck.get("action_pairing", "legacy")
+    for name in names:
+        print(f"  {name}: rnn {arm_rnn[name]} "
+              f"(action_pairing={pairing[arm_rnn[name]]})")
 
     # Load every arm's controllers up front so a missing checkpoint fails
     # before a sim is launched rather than half way through a 20-minute run.
@@ -110,7 +147,7 @@ def main() -> int:
                 print(f"FAIL: {p} missing")
                 return 1
             ck = torch.load(p, map_location=args.device)
-            bad_fp += check_fingerprints(ck, args.vae, args.rnn,
+            bad_fp += check_fingerprints(ck, args.vae, arm_rnn[name],
                                          name=f"{name}/{p.name}")
             c = Controller(arch=args.arch).to(args.device)
             c.load_state_dict(ck["model"])
@@ -143,7 +180,8 @@ def main() -> int:
                     records.append(r)
                 for name in names:
                     c, nh = ctrls[name][s]
-                    pol = LatentPolicy(vae, rnn, c, args.device, no_history=nh)
+                    pol = LatentPolicy(vae, rnns[arm_rnn[name]], c, args.device,
+                                       no_history=nh)
                     for ep in range(args.episodes):
                         r = run_episode(env, pol, args.max_steps, False)
                         r.update(launch=L, seed=s, episode=ep, arm=name)
@@ -217,13 +255,26 @@ def main() -> int:
               f"degraded during this run. Do not compare these controller "
               f"numbers against another batch. Re-run. ***")
     write_result(out / "eval_paired.json",
-        {"args": vars(args), "per_episode": records,
+        {"args": vars(args), "arm_rnn": arm_rnn, "per_episode": records,
          "per_launch": {str(k): v for k, v in per_launch.items()},
          "paired_vs_" + base: summary,
          "batch_valid": batch_valid})
     print(f"\n-> {out / 'eval_paired.json'}")
     print("NOTE: simulated only. No transfer claim is made or implied.")
     return 0 if batch_valid or not exp_rows else 2
+
+
+def self_check() -> None:
+    names = ["a", "b", "c"]
+    assert parse_arm_rnns([], names, "D") == {"a": "D", "b": "D", "c": "D"}
+    assert parse_arm_rnns(["b=X.pt"], names, "D") == {"a": "D", "b": "X.pt", "c": "D"}
+    for bad in (["noequals"], ["=p"], ["a="], ["zzz=p"], ["a=p", "a=q"]):
+        try:
+            parse_arm_rnns(bad, names, "D")
+        except ValueError:
+            continue
+        raise AssertionError(f"parse_arm_rnns accepted {bad}")
+    print("eval_paired self_check: PASS")
 
 
 if __name__ == "__main__":

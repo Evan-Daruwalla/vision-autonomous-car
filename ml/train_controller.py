@@ -33,6 +33,13 @@ a_t -- the action the controller is being asked to predict. Using it directly
 would leak the label and produce a policy that looks excellent offline and
 cannot drive. h is therefore shifted by one: h_0 = 0, h_t = out[t-1].
 
+THE ACTION PAIRING (audit C2-1, record NO): the data contract is that
+`action[i]` PRODUCED `image[i]`, so it was decided on frame i-1. The
+controller acts on frame t, so its BC target and the MDN-RNN input paired with
+z_t are the action DECIDED ON frame t, which is `action[t+1]`
+(splits.decided_on). Each episode's last frame has no recorded decision and is
+dropped. Checkpoints carry `action_pairing` so a pre-fix MDN-RNN is refused.
+
 Usage:
   python ml/train_controller.py                 # 30 epochs
   python ml/train_controller.py --seed 1        # a different init
@@ -53,8 +60,9 @@ import torch.nn as nn
 
 from models import ACTION_DIM, HIDDEN, MDNRNN, Z_DIM, ConvVAE, count_params
 from provenance import write_result
-from splits import (check_corpus, corpus_id, encoder_fingerprint, fit_val_episodes,
-                    load_cached_mu, load_ids, load_proc, split_seed_of)
+from splits import (ACTION_PAIRING, check_corpus, corpus_id, decided_on,
+                    encoder_fingerprint, fit_val_episodes, load_cached_mu, load_ids,
+                    load_proc, split_seed_of)
 
 REPO = Path(__file__).resolve().parent.parent
 PROC = REPO / "ml" / "data" / "proc"
@@ -100,22 +108,30 @@ class Controller(nn.Module):
 @torch.no_grad()
 def rnn_states(rnn: MDNRNN, mu: np.ndarray, act: np.ndarray,
                episodes: np.ndarray, ep_idx: np.ndarray, device: str):
-    """h_t for every frame of the given episodes, causally shifted.
+    """h_t for every frame that has a recorded decision, causally shifted.
 
-    Returns (flat_indices, h) so callers can index the shared mu/act arrays.
+    a_t is the action DECIDED ON frame t (= act[t+1], audit C2-1), so each
+    episode's LAST frame is dropped (no decision was recorded after it) and
+    episodes shorter than 2 frames are skipped.
+
+    Returns (flat_indices, h) so callers can index the shared mu array (frame-
+    indexed) and, via splits.decided_on, the action arrays.
     """
     idx_all, h_all = [], []
     for i in ep_idx:
         s, n = episodes[i]
-        z = torch.from_numpy(mu[s:s + n]).to(device).unsqueeze(0)
-        a = torch.from_numpy(act[s:s + n]).to(device).unsqueeze(0)
+        if n < 2:
+            continue
+        fr = np.arange(s, s + n - 1)
+        z = torch.from_numpy(mu[s:s + n - 1]).to(device).unsqueeze(0)
+        a = torch.from_numpy(decided_on(act, fr)).to(device).unsqueeze(0)
         # Only the LSTM output is needed -- the mixture head predicts z_{t+1}
         # and is irrelevant to the controller, so it is not run.
         out, _ = rnn.lstm(torch.cat([z, a], dim=-1))     # (1, n, HIDDEN)
         out = out.squeeze(0)
         # h_t = state BEFORE consuming (z_t, a_t). See the module docstring.
         h = torch.cat([torch.zeros(1, out.shape[1], device=device), out[:-1]], 0)
-        idx_all.append(np.arange(s, s + n))
+        idx_all.append(fr)
         h_all.append(h.cpu().numpy())
     return np.concatenate(idx_all), np.concatenate(h_all)
 
@@ -144,12 +160,15 @@ def build_training_arrays(rnn, mu, act, expert, eps, fit_eps, val_eps, device):
     -- handing the expert array to rnn_states() -- still passed self_check.
     main() now does nothing on this path but call this function, and
     self_check() runs it end to end.
+
+    Indexing (audit C2-1): `mu[idx]` is frame-indexed; the BC target is the
+    action decided ON frame idx, `decided_on(target, idx)` = target[idx + 1].
     """
     lstm_in, target = select_actions(act, expert)
     out = []
     for ep_idx in (fit_eps, val_eps):
         idx, h = rnn_states(rnn, mu, lstm_in, eps, ep_idx, device)
-        out.append((idx, mu[idx], h, target[idx]))
+        out.append((idx, mu[idx], h, decided_on(target, idx)))
     return out[0], out[1]
 
 
@@ -169,6 +188,14 @@ def check_labels(tracks, expert, allow_noisy: bool) -> None:
             f"BC target would be the noise-injected executed actions. Run "
             f"ml/build_expert_labels.py, or pass --allow-noisy-labels to train "
             f"on them deliberately.")
+
+
+def check_rnn_pairing(rnn_ckpt: dict) -> None:
+    """Refuse an MDN-RNN trained with the pre-C2-1 action pairing."""
+    if rnn_ckpt.get("action_pairing") != ACTION_PAIRING:
+        raise SystemExit(
+            "the MDN-RNN was trained with the pre-C2-1 action pairing (frame t "
+            "with action[t]); retrain it with ml/train_mdnrnn.py")
 
 
 def self_check() -> None:
@@ -205,29 +232,36 @@ def self_check() -> None:
 
         # 2. The invariant is not vacuous: which array goes in changes h.
         #    Two episodes: frames 0-5 (actions 3-5 differ) and 6-10 (identical).
+        #    Each episode's last frame (5, 10) has no decision and is dropped,
+        #    so rows are frames [0, 1, 2, 3, 4, 6, 7, 8, 9] (audit C2-1).
         rnn = MDNRNN().eval()
         mu = rng.standard_normal((11, Z_DIM)).astype(np.float32)
         eps = np.array([[0, 6], [6, 5]])
         ep_idx = np.array([0, 1])
         idx, h_exec = rnn_states(rnn, mu, executed, eps, ep_idx, "cpu")
         _, h_exp = rnn_states(rnn, mu, expert, eps, ep_idx, "cpu")
-        assert idx.tolist() == list(range(11)), idx
-        assert h_exec.shape == (11, HIDDEN), h_exec.shape
-        assert not np.allclose(h_exec[4], h_exp[4]), (
+        assert idx.tolist() == [0, 1, 2, 3, 4, 6, 7, 8, 9], idx
+        assert h_exec.shape == (9, HIDDEN), h_exec.shape
+        # row 3 = frame 3: h_3 consumed the decisions on frames 0-2 = act[1..3],
+        # and the expert differs at index 3.
+        assert not np.allclose(h_exec[3], h_exp[3]), (
             "feeding expert vs executed actions left h unchanged -- then the "
             "DART invariant above would be guarding nothing")
 
         # 3. Causality (THE CAUSAL INDEXING in the module docstring): h_t is
-        #    the state BEFORE consuming (z_t, a_t). Frame 3's own action
-        #    differs between the two runs, so h_3 matching proves h_t does not
-        #    see a_t -- the label leak that makes a policy look perfect offline
-        #    and unable to drive.
-        assert np.allclose(h_exec[:4], h_exp[:4]), (
-            "h_t depends on a_t: the one-step causal shift is broken and the "
-            "label leaks into the controller's input")
-        assert np.all(h_exec[0] == 0) and np.all(h_exec[6] == 0), (
+        #    the state BEFORE consuming (z_t, a_t), where a_t is the decision
+        #    made on frame t = act[t+1]. The expert differs at indices 3-5, so
+        #    the decision on frame 2 (act[3]) differs between the two runs;
+        #    rows 0-2 (frames 0-2) matching proves h_t does not see the
+        #    decision made on frame t -- the label leak that makes a policy
+        #    look perfect offline and unable to drive.
+        assert np.allclose(h_exec[:3], h_exp[:3]), (
+            "h_t depends on the decision made on frame t: the one-step causal "
+            "shift is broken and the label leaks into the controller's input")
+        # row 5 = frame 6, the start of episode 1
+        assert np.all(h_exec[0] == 0) and np.all(h_exec[5] == 0), (
             "h must start at zero in every episode")
-        assert np.allclose(h_exec[6:], h_exp[6:]), (
+        assert np.allclose(h_exec[5:], h_exp[5:]), (
             "state leaked across an episode boundary")
 
         # 4. The controller's output is bounded to the simulator's range.
@@ -243,14 +277,16 @@ def self_check() -> None:
             refused = True
         assert refused, "an unknown arch must be refused"
 
-        # 5. main()'s data-prep path end to end. fit = episode 0 (frames 0-5,
-        #    where the arrays differ at 3-5); val = episode 1 (identical).
+        # 5. main()'s data-prep path end to end. fit = episode 0 (frames 0-4
+        #    kept; the arrays differ at 3-5); val = episode 1 (frames 6-9,
+        #    identical). h_exec is indexed by ROW: fit rows 0-4, val rows 5-8.
         (fit_i, fit_z, fit_h, fit_a), (val_i, _, val_h, val_a) = build_training_arrays(
             rnn, mu, executed, expert, eps, np.array([0]), np.array([1]), "cpu")
-        assert fit_i.tolist() == list(range(6)) and val_i.tolist() == list(range(6, 11))
-        assert np.array_equal(fit_a, expert[fit_i]), "BC target must be the expert relabel"
+        assert fit_i.tolist() == [0, 1, 2, 3, 4] and val_i.tolist() == [6, 7, 8, 9]
+        assert np.array_equal(fit_a, expert[fit_i + 1]), (
+            "BC target must be the expert relabel, decided on frame t = expert[t+1]")
         assert np.array_equal(fit_z, mu[fit_i])
-        assert np.allclose(fit_h, h_exec[fit_i]) and np.allclose(val_h, h_exec[val_i]), (
+        assert np.allclose(fit_h, h_exec[:5]) and np.allclose(val_h, h_exec[5:]), (
             "the LSTM was fed something other than the EXECUTED actions -- the "
             "2026-09-07 DART contamination, now inside main()'s path")
         assert not np.allclose(fit_h[4], h_exp[4])
@@ -266,6 +302,30 @@ def self_check() -> None:
         check_labels(recov, None, allow_noisy=True)      # deliberate: allowed
         check_labels(recov, expert, allow_noisy=False)   # labelled: fine
         check_labels(["generated-track"], None, allow_noisy=False)  # no recovery: fine
+
+        # 7. The data contract (audit C2-1, record NO): action[i] PRODUCED
+        #    image[i], so the decision made ON frame t is action[t+1]. Build
+        #    actions per the contract (the decision on frame k is mu[k, :A]);
+        #    the BC target for frame t must be exactly that decision.
+        act7 = np.zeros((11, ACTION_DIM), np.float32)
+        for s0, n0 in eps:
+            act7[s0] = 0.0
+            for k in range(1, n0):
+                act7[s0 + k] = mu[s0 + k - 1, :ACTION_DIM]
+        (fit_i7, _, _, fit_a7), _ = build_training_arrays(
+            rnn, mu, act7, None, eps, np.array([0]), np.array([1]), "cpu")
+        assert np.array_equal(fit_a7, mu[fit_i7, :ACTION_DIM]), (
+            "the BC target for frame t must be the decision made ON frame t "
+            "(audit C2-1)")
+
+        # 8. A pre-C2-1 MDN-RNN checkpoint is refused.
+        check_rnn_pairing({"action_pairing": ACTION_PAIRING})
+        refused = False
+        try:
+            check_rnn_pairing({})
+        except SystemExit:
+            refused = True
+        assert refused, "an MDN-RNN checkpoint without action_pairing must be refused"
     print("train_controller self_check: PASS")
 
 
@@ -351,6 +411,7 @@ def main() -> int:
     vae.load_state_dict(vae_ckpt["model"])
     rnn = MDNRNN().to(args.device)
     rnn_ckpt = torch.load(args.rnn, map_location=args.device)
+    check_rnn_pairing(rnn_ckpt)
     rnn.load_state_dict(rnn_ckpt["model"])
     vae.eval(); rnn.eval()
 
@@ -496,6 +557,7 @@ def main() -> int:
             torch.save({"model": model.state_dict(), "epoch": epoch,
                         "val_mse": va, "val_mse_unweighted": va_plain,
                         "args": vars(args),
+                        "action_pairing": ACTION_PAIRING,
                         # Appendix FD #7: which frozen V and M this C was
                         # trained against. encoder_fingerprint() hashes the
                         # file's bytes, so it serves the RNN too. CHECKED by

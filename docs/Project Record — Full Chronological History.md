@@ -414,6 +414,7 @@ the dated entry, not the digest.
 - [NM - New CanaKit Pi 5 8 GB stress test FAILS: the Pi dropped off within ~30 s of all-core load; EXT5V 4.849 V at start, 0x50000 after reboot, supply negotiated 3 A not 5 A](#appendix-nm---new-canakit-pi-5-8-gb-stress-test-fails-the-pi-dropped-off-within-30-s-of-all-core-load-ext5v-4849-v-at-start-0x50000-after-reboot-supply-negotiated-3-a-not-5-a-2026-11-03-2352-cst) (11-03)
 - [NN - CanaKit Pi 5 8 GB stress re-run PASSES: 300 s all-core at 2400 MHz, peak 81.8 C, EXT5V min 5.008 V, 0x0; 6 GiB RAM write+verify 0 bad; NL crash still unexplained](#appendix-nn---canakit-pi-5-8-gb-stress-re-run-passes-300-s-all-core-at-2400-mhz-peak-818-c-ext5v-min-5008-v-0x0-6-gib-ram-writeverify-0-bad-nl-crash-still-unexplained-2026-11-03-2358-cst) (11-03)
 - [NO - Six-worker code + docs audit (0 crit, 2 high): run_checks SystemExit hole FIXED; sim action/frame off-by-one CONFIRMED, not fixed (needs Evan); ~25 mediums fixed; corrects NM/NN letters](#appendix-no---six-worker-code--docs-audit-0-crit-2-high-run_checks-systemexit-hole-fixed-sim-actionframe-off-by-one-confirmed-not-fixed-needs-evan-25-mediums-fixed-corrects-nmnn-letters-2026-11-04-0040-cst) (11-04)
+- [NP - C2-1 fixed: World Models consumers pair frame t with the action decided on it; retrain + paired eval (steps null, cte lead post-hoc)](#appendix-np---c2-1-fixed-world-models-consumers-pair-frame-t-with-the-action-decided-on-it-retrain--paired-eval-steps-null-cte-lead-post-hoc-2026-11-04-1607-cst) (11-04)
 
 ---
 
@@ -22942,3 +22943,50 @@ Evan: "/docs-sync and push then audit code and audit docs 3 agents each", then "
 9. D2-4: the CanaKit case dimensions vs the deck's Vilros-sized Pi pocket.
 
 Not swept, or low and left: the D2-5 SHIELD_BUILD.md "generated" claim, the C1 lows (banner text, servo comment range, loop_dt units), the C2 lows, and C3-8 / 10 / 11 / 12. Their full lists are in the worker reports this session (not saved in the repo).
+
+# Appendix NP - C2-1 fixed: World Models consumers pair frame t with the action decided on it; retrain + paired eval (steps null, cte lead post-hoc) (2026-11-04 ~16:07 CST)
+Evan picked "Off-by-one (C2-1)", then "1 plus retrain".
+
+**Correction to record NO.** NO called C2-1 a sim "action/frame off-by-one" that needed a convention choice. That was wrong. The storage convention ("action[i] PRODUCED image[i]", episode_writer.py, data.md) is deliberate, documented and gated by verify_corpus. The bug was in the World Models CONSUMERS. They paired z_t with action[t], which is the decision made on frame t-1. The action decided on frame t (the one that produces z_{t+1}, and the one the controller outputs at drive time) is action[t+1]. Dreamer (run_dreamer_p4, compare_encoders) and bc_real were already correct and are unchanged.
+
+**How big the lag was** (78 train episodes, 91,600 steps): mean |a[t+1] - a[t]| for steer is 0.178 (p95 0.478) against a steer std of 0.680. The previous action alone explains R^2 0.869 of steer. Throttle barely moves (mean step 0.012).
+
+**Code** (plan-split: Opus wrote splits.py; 3 Sonnet agents on disjoint files; Opus read every diff and re-ran every check):
+- `ml/splits.py`: `ACTION_PAIRING = "decided_on"` and `decided_on(arr, idx)` = arr[idx + 1]. self_check covers the contract.
+- `ml/train_mdnrnn.py`: `batch_from` feeds decided_on(actions, idx[:, :-1]). Checkpoints are stamped `action_pairing`. A new self_check (contract-built synthetic actions) fails when the old indexing is restored.
+- `ml/train_controller.py`: `rnn_states` replays decided actions and drops each episode's last frame (no decision recorded after it). The BC target is decided_on(target, idx). `check_rnn_pairing` refuses an unstamped MDN-RNN. Self-check checks 2/3/5 are re-indexed, plus new checks 7 (contract) and 8 (refusal). Both mutants are killed: old target indexing, and old LSTM input.
+- `ml/diag_copycat.py`: a[t] = decided_on(act_target, t), a[t-1] = act_target[t]. Episode-start frames are dropped. Unstamped controller or RNN checkpoints are refused. Known wart: a pre-fix controller gets the MDN-RNN-worded message.
+- `ml/rollout_eval.py`: the pairing is chosen from the checkpoint stamp. A legacy RNN is replayed in its own convention, so old and new imagination stay comparable.
+- `ml/eval_paired.py`: `--arm-rnn NAME=PATH`, so each arm uses its own MDN-RNN. New self_check; mutant killed.
+- Unchanged (already consistent with the fix): eval_in_sim LatentPolicy, plan_cem.
+
+**Checks:** `scripts/run_checks.py` gives 39 passed, 0 failed, 0 skipped (of 39). The two new checks are train_mdnrnn and eval_paired.
+
+**Retrain** (old checkpoints untouched; new ones in new dirs):
+- `ml/train_mdnrnn.py --out ml/runs/mdnrnn_next` (default args, the same as the old run: 60 epochs, batch 128, seq 64, seed 0, 300 steps/epoch, about 3 s/epoch).
+
+  | MDN-RNN | best val_indomain NLL | final fit NLL | final holdout NLL |
+  |---|---|---|---|
+  | old (ml/runs/mdnrnn) | 12.845 (ep 60) | 27.517 | 64.24 |
+  | new (ml/runs/mdnrnn_next) | 12.82 (ep 56) | 27.52 | 63.13 |
+
+  Near-null: being given the causing action barely improves next-latent prediction. It is one seed each, so the noise floor is unknown. This fits verify_corpus's 2026-08-05 note that steering sets heading RATE, so the scene shift lags the command by about a step.
+- `ml/train_controller.py --arch mlp --seed {0,1,2} --rnn ml/runs/mdnrnn_next/mdnrnn_best.pt --proc ml/data/proc --out ml/runs/cl_next`: best val MSE 0.00173 / 0.00170 / 0.00171 (cl_base_ei: 0.001754 / 0.001764 / 0.001785). The targets differ, so these are NOT comparable.
+
+**Paired closed-loop eval (sim-only)**: `ml/eval_paired.py --ctrl-dirs cl_base_ei cl_next --arch mlp --arm-rnn cl_next=ml/runs/mdnrnn_next/mdnrnn_best.pt --launches 6 --seeds 0 1 2 --episodes 2 --max-steps 600 --out ml/runs/eval_paired_c21`. cl_next ran last in every launch, so any within-launch sim degradation works against it. batch_valid True; expert 600/600 in all 36 episodes. control_hz: expert 20.0, cl_base_ei 19.99, cl_next 20.0.
+
+| launch | expert | cl_base_ei | cl_next |
+|---|---|---|---|
+| 1 | 600 | 89.5 | 117.8 |
+| 2 | 600 | 161.8 | 134.3 |
+| 3 | 600 | 53.0 | 87.0 |
+| 4 | 600 | 209.7 | 186.0 |
+| 5 | 600 | 173.3 | 283.5 |
+| 6 | 600 | 212.8 | 183.7 |
+
+- **Primary (steps survived): NULL.** Paired diff cl_next - cl_base_ei = +15.4, sd 54.5, n 6, t ~0.69. Signs 3/6; per launch [28, -28, 34, -24, 110, -29]. No learned episode completed (max 484 of 600).
+- **Secondary, POST-HOC (not pre-registered):** paired mean|cte| diff = -0.341, sd 0.432, t -1.94. cl_next is lower in 6/6 launches, per launch [-0.151, -1.218, -0.166, -0.205, -0.085, -0.224]. A sign test on 6/6 gives p = 0.031 two-sided, but this metric was picked after seeing the data. Treat it as a lead to re-test, not a result.
+
+**Conclusion:** the fix is correct and stays, because consumers now match the data contract and the drive-time loop. It does NOT explain the sim World Models wall: survival is unchanged within noise. Every MDN-RNN and controller checkpoint without `action_pairing` was trained on the old pairing. train_controller and diag_copycat now refuse them; eval_paired and eval_in_sim still run them.
+
+Open: re-test the cte lead with a pre-registered primary metric (more launches); retrain cl_aug / nh_* arms on the new pairing only if the sim track is resumed. PM-cadence record reminders fired during this task; this entry covers them.

@@ -284,6 +284,24 @@ def frame_indices(episodes: np.ndarray, ep_idx: np.ndarray) -> np.ndarray:
     return np.concatenate([np.arange(s, s + n) for s, n in episodes[ep_idx]])
 
 
+# Stamped into MDN-RNN and controller checkpoints trained with decided_on().
+# Checkpoints without it paired frame t with a[t], the action decided on frame
+# t-1 (audit C2-1, record NO).
+ACTION_PAIRING = "decided_on"
+
+
+def decided_on(arr: np.ndarray, idx):
+    """The action decided ON frame idx: arr[idx + 1].
+
+    The data contract (episode_writer.py, data.md) is that action[i] PRODUCED
+    image[i], so it was decided on frame i-1. A model that acts on z_t, or
+    predicts z_{t+1} from (z_t, a), needs action[t+1]. Pairing z_t with
+    action[t] gives it the previous decision instead (audit C2-1). idx must not
+    be an episode's last frame: no decision was recorded after it.
+    """
+    return arr[np.asarray(idx) + 1]
+
+
 def describe(tracks, episodes, fit, val) -> str:
     def summary(idx):
         if len(idx) == 0:
@@ -327,6 +345,13 @@ def self_check() -> None:
     # and it is why the helper exists rather than seven copies of one line.
     leaked = sorted(set(a_val.tolist()) & set(fit_val_episodes(tracks, seed=0, ids=None)[0].tolist()))
     assert leaked == [9, 15], f"expected the seed-3/seed-0 leak on [9, 15], got {leaked}"
+
+    # decided_on: under the data contract action[i] = f(frame i-1), the
+    # decision made on frame t must come back as f(frame t).
+    frames = np.arange(10, 20, dtype=np.float32)
+    act = np.concatenate([[0.0], 2 * frames[:-1]]).astype(np.float32)
+    t = np.arange(9)
+    assert np.array_equal(decided_on(act, t), 2 * frames[t]), "decided_on is not act[t+1]"
 
     eps = np.array([[0, 5], [5, 7], [12, 3]])
     fr = frame_indices(eps, np.array([0, 2]))

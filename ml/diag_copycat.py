@@ -45,9 +45,9 @@ import torch
 
 from models import MDNRNN, ConvVAE, Z_DIM
 from provenance import write_result
-from splits import (check_corpus, fit_val_episodes, load_cached_mu, load_ids, load_proc,
-                    split_seed_of)
-from train_controller import Controller, rnn_states
+from splits import (check_corpus, decided_on, fit_val_episodes,
+                    load_cached_mu, load_ids, load_proc, split_seed_of)
+from train_controller import Controller, check_rnn_pairing, rnn_states
 
 REPO = Path(__file__).resolve().parent.parent
 RUNS = REPO / "ml" / "runs"
@@ -80,6 +80,9 @@ def main() -> int:
     vae_ckpt = torch.load(args.vae, map_location=args.device)
     rnn = MDNRNN().to(args.device)
     rnn_ckpt = torch.load(args.rnn, map_location=args.device)
+    # audit C2-1: refuse checkpoints trained with the pre-fix action pairing
+    check_rnn_pairing(rnn_ckpt)
+    check_rnn_pairing(ck)
     rnn.load_state_dict(rnn_ckpt["model"])
     rnn.eval()
 
@@ -123,17 +126,20 @@ def main() -> int:
     _, val_eps = fit_val_episodes(tracks, seed=split_seed, ids=ids)
     val_i, val_h = rnn_states(rnn, mu, act, eps, val_eps, args.device)
 
-    # a[t-1], built per EPISODE so no frame is paired with the last action of
-    # the previous episode -- that transition never happened.
-    prev_of = np.full(len(act), -1, np.int64)
-    for s0, n0 in eps:
-        idx = np.arange(s0, s0 + n0)
-        prev_of[idx[1:]] = idx[:-1]
-    has_prev = prev_of[val_i] >= 0
+    # Indices follow decided_on (audit C2-1): action[i] PRODUCED frame i, so the
+    # decision made ON frame t is act_target[t+1] (a[t]) and the previous
+    # decision, which produced frame t, is act_target[t] (a[t-1]).
+    # rnn_states() already dropped each episode's last frame (no decision).
+    # At an episode START act_target[t] is the zero reset action, not a
+    # decision, so those frames have no valid a[t-1] and are dropped.
+    is_start = np.zeros(len(act), bool)
+    for s0, _n0 in eps:
+        is_start[s0] = True
+    has_prev = ~is_start[val_i]
     vi = val_i[has_prev]
     hh = val_h[has_prev]
-    a_t = act_target[vi]
-    a_prev = act_target[prev_of[vi]]
+    a_t = decided_on(act_target, vi)
+    a_prev = act_target[vi]
     print(f"held-out frames with a valid previous action: {len(vi):,} "
           f"(dropped {int((~has_prev).sum())} episode-start frames)")
 
@@ -143,7 +149,7 @@ def main() -> int:
         pred = model(z, h).cpu().numpy()
         pred_h0 = model(z, torch.zeros_like(h)).cpu().numpy()
 
-    var = float(act_target[vi].var(axis=0).mean())
+    var = float(a_t.var(axis=0).mean())
     rows = [
         ("controller -> a[t]      (the reported val MSE)", mse(pred, a_t)),
         ("a[t-1]     -> a[t]      (TRIVIAL COPY BASELINE)", mse(a_prev, a_t)),

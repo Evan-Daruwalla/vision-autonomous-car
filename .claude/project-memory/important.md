@@ -43,7 +43,7 @@
 **Source:** HANDOFF.md:148, :317; detail in decisions.md (when migrated).
 
 ## 7. ML evaluation discipline (2026-09-30)
-**What:** never compare closed-loop sim numbers across launches (`donkey-generated-track-v0` regenerates the track) - use `ml/eval_paired.py`; never select controllers on open-loop MSE; never split episodes randomly by frame (three splits; seed from the checkpoint); every result JSON goes through `provenance.write_result`.
+**What:** never compare closed-loop sim numbers across launches (`donkey-generated-track-v0` regenerates the track) - use `ml/eval_paired.py`; never select controllers on open-loop MSE; never split episodes randomly by frame (three splits; seed from the checkpoint); every result JSON goes through `provenance.write_result`. **2026-11-04 (record NP):** World Models code pairs z_t with the action decided ON frame t, `splits.decided_on` = action[t+1]; never action[t].
 **Constrains:** every ML result reported.
 **Why:** each of these produced a wrong conclusion before.
 **Source:** HANDOFF.md:61-75; data.md:83-106; conventions.md:29-39.

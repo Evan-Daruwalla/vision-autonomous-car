@@ -37,8 +37,9 @@ from PIL import Image
 
 from models import ConvVAE, MDNRNN, mdn_sample
 from provenance import write_result
-from splits import (cache_key_matches, check_corpus, encoder_fingerprint,
-                    fit_val_episodes, load_ids, load_proc, split_seed_of)
+from splits import (ACTION_PAIRING, cache_key_matches, check_corpus, decided_on,
+                    encoder_fingerprint, fit_val_episodes, load_ids, load_proc,
+                    split_seed_of)
 
 REPO = Path(__file__).resolve().parent.parent
 RUNS = REPO / "ml" / "runs"
@@ -51,7 +52,7 @@ MIN_BEAT_FRACTION = 0.9
 
 @torch.no_grad()
 def rollout(vae, rnn, mu_all, act_all, start, warmup, horizon, device,
-            temperature=1.0, seed=0):
+            temperature=1.0, seed=0, pairing=ACTION_PAIRING):
     """Imagine `horizon` steps after `warmup` teacher-forced steps.
 
     Returns (imagined_z, true_z, actions_used).
@@ -63,7 +64,14 @@ def rollout(vae, rnn, mu_all, act_all, start, warmup, horizon, device,
 
     total = warmup + horizon
     z_true = torch.from_numpy(mu_all[start:start + total + 1]).to(device)
-    a = torch.from_numpy(act_all[start:start + total]).to(device)
+    # Step t (frame start+t) is fed the action decided on that frame. A legacy
+    # checkpoint (trained before audit C2-1) is replayed with its own
+    # convention, action[t] with z_t.
+    if pairing == ACTION_PAIRING:
+        a_np = decided_on(act_all, np.arange(start, start + total))
+    else:
+        a_np = act_all[start:start + total]
+    a = torch.from_numpy(a_np).to(device)
 
     # teacher forcing: real latents in, LSTM state carried forward
     state = None
@@ -91,7 +99,8 @@ def strip(frames: np.ndarray, every: int) -> np.ndarray:
 
 
 @torch.no_grad()
-def run_split(tag, imgs, mu_all, act_all, episodes, ep_idx, vae, rnn, args, out):
+def run_split(tag, imgs, mu_all, act_all, episodes, ep_idx, vae, rnn, args, out,
+              pairing=ACTION_PAIRING):
     device = args.device
     rng = np.random.default_rng(args.seed)
 
@@ -116,7 +125,8 @@ def run_split(tag, imgs, mu_all, act_all, episodes, ep_idx, vae, rnn, args, out)
         start = int(s) + int(rng.integers(0, n - need))
         imag, true, _ = rollout(vae, rnn, mu_all, act_all, start,
                                 args.warmup, args.horizon, device,
-                                args.temperature, seed=args.seed + k)
+                                args.temperature, seed=args.seed + k,
+                                pairing=pairing)
 
         lat_err.append(torch.linalg.norm(imag - true, dim=-1).cpu().numpy())
 
@@ -180,6 +190,11 @@ def main():
     rnn_ckpt = torch.load(args.rnn, map_location=args.device)
     rnn.load_state_dict(rnn_ckpt["model"])
     rnn.eval()
+    pairing = rnn_ckpt.get("action_pairing", "legacy")
+    print(f"rnn action pairing: {pairing}" +
+          ("" if pairing == ACTION_PAIRING else
+           " (trained before audit C2-1; replaying its own convention, "
+           "action[t] with z_t)"))
 
     tr_imgs, tr_act, tr_eps, tr_tracks = load_proc("train")
     ho_imgs, ho_act, ho_eps, _ = load_proc("holdout")
@@ -249,10 +264,10 @@ def main():
     results = {}
     results["val_indomain"] = run_split(
         "val_indomain", tr_imgs, tr_mu, tr_act, tr_eps, val_eps,
-        vae, rnn, args, out)
+        vae, rnn, args, out, pairing=pairing)
     results["holdout"] = run_split(
         "holdout", ho_imgs, ho_mu, ho_act, ho_eps, np.arange(len(ho_eps)),
-        vae, rnn, args, out)
+        vae, rnn, args, out, pairing=pairing)
 
     beats = {}
     for tag, r in results.items():
@@ -271,7 +286,7 @@ def main():
         print(f"  beats the frozen-frame baseline on {better}/{len(mse)} steps\n")
 
     write_result(out / "rollout_metrics.json", 
-        {"args": vars(args), "results": results})
+        {"args": vars(args), "action_pairing": pairing, "results": results})
     print(f"panels : {out}/rollout_{{val_indomain,holdout}}.png")
     print(f"metrics: {out / 'rollout_metrics.json'}")
 

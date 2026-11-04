@@ -1,7 +1,9 @@
 """SIM-POC P3 step 2: train the MDN-RNN (M) on VAE latents.
 
 Learns p(z_{t+1} | z_t, a_t, h_t) as a mixture of Gaussians -- the dynamics
-half of the world model.
+half of the world model. a_t is the action DECIDED on frame t, i.e. action[t+1]
+under the data contract (action[i] produced image[i]); see splits.decided_on
+(audit C2-1, record NO). Earlier checkpoints paired z_t with action[t].
 
 Two things this script is careful about:
 
@@ -31,11 +33,11 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from models import MDNRNN, ConvVAE, count_params, mdn_loss
+from models import ACTION_DIM, Z_DIM, MDNRNN, ConvVAE, count_params, mdn_loss
 from provenance import write_result
-from splits import (cache_key_matches, check_corpus, corpus_id, encoder_fingerprint,
-                    fit_val_episodes, load_ids, load_proc, split_seed_of,
-                    write_cache_key)
+from splits import (ACTION_PAIRING, cache_key_matches, check_corpus, corpus_id,
+                    decided_on, encoder_fingerprint, fit_val_episodes, load_ids,
+                    load_proc, split_seed_of, write_cache_key)
 
 REPO = Path(__file__).resolve().parent.parent
 PROC = REPO / "ml" / "data" / "proc"
@@ -104,7 +106,12 @@ def make_windows(episodes: np.ndarray, ep_idx: np.ndarray, seq: int) -> np.ndarr
 
 
 def batch_from(starts, mus, lvs, actions, seq, device, rng, sample=True):
-    """Assemble (z_in, a_in, z_target) for a batch of window starts."""
+    """Assemble (z_in, a_in, z_target) for a batch of window starts.
+
+    a_in[t] is the action decided on frame t (action[t+1] under the data
+    contract, audit C2-1, record NO). make_windows keeps idx[:, -1] inside the
+    episode, so idx[:, :-1] + 1 is too.
+    """
     idx = starts[:, None] + np.arange(seq + 1)[None, :]      # (B, seq+1)
     mu = torch.from_numpy(mus[idx]).to(device)
     if sample:
@@ -112,8 +119,8 @@ def batch_from(starts, mus, lvs, actions, seq, device, rng, sample=True):
         z = mu + torch.exp(0.5 * lv) * torch.randn_like(mu)
     else:
         z = mu
-    a = torch.from_numpy(actions[idx]).to(device)
-    return z[:, :-1], a[:, :-1], z[:, 1:]
+    a = torch.from_numpy(decided_on(actions, idx[:, :-1])).to(device)
+    return z[:, :-1], a, z[:, 1:]
 
 
 @torch.no_grad()
@@ -134,6 +141,36 @@ def evaluate(model, starts, mus, lvs, actions, seq, device, batch, rng,
     return total / n
 
 
+def self_check() -> None:
+    """Pins the action pairing: a_in[t] is the action decided ON frame t.
+
+    CPU only, no corpus or checkpoint. fork_rng keeps it from reseeding the
+    global RNG, because scripts/run_checks.py runs every self-check in one
+    process. (Audit C2-1, record NO.)
+    """
+    with torch.random.fork_rng(devices=[]):
+        torch.manual_seed(0)
+        rng = np.random.default_rng(0)
+        episodes = np.array([[0, 8], [8, 8]])
+        mus = rng.standard_normal((16, Z_DIM)).astype(np.float32)
+        lvs = np.zeros_like(mus)
+        # data contract: action[s] = 0, action[s+k] produced frame s+k, so it
+        # was decided on frame s+k-1; here it is encoded in mus[s+k-1]
+        actions = np.zeros((16, ACTION_DIM), np.float32)
+        for s, n in episodes:
+            for k in range(1, n):
+                actions[s + k] = mus[s + k - 1, :ACTION_DIM]
+        starts = make_windows(episodes, np.arange(len(episodes)), 4)
+        z_in, a_in, z_tgt = batch_from(starts, mus, lvs, actions, 4, "cpu", rng,
+                                       sample=False)
+        z_np, a_np, t_np = z_in.numpy(), a_in.numpy(), z_tgt.numpy()
+        assert np.array_equal(a_np, z_np[..., :ACTION_DIM]), \
+            "a_in[t] must be the action decided ON frame t (audit C2-1)"
+        assert np.array_equal(t_np[:, :-1], z_np[:, 1:]), \
+            "z_tgt must be the next frame's latent"
+    print("train_mdnrnn self_check: PASS")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--epochs", type=int, default=60)
@@ -145,7 +182,13 @@ def main():
     ap.add_argument("--out", default=str(RUNS / "mdnrnn"))
     ap.add_argument("--steps-per-epoch", type=int, default=300)
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--self-check", action="store_true",
+                    help="run the action-pairing invariant on CPU and exit; "
+                         "needs no corpus or checkpoint")
     args = ap.parse_args()
+    if args.self_check:
+        self_check()
+        return
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
@@ -233,7 +276,8 @@ def main():
             tmp = out / "mdnrnn_best.pt.tmp"
             torch.save({"model": model.state_dict(), "epoch": epoch,
                         "val_indomain_nll": va_nll, "args": vars(args),
-                        "split_seed": split_seed, **corpus}, tmp)
+                        "split_seed": split_seed,
+                        "action_pairing": ACTION_PAIRING, **corpus}, tmp)
             os.replace(tmp, out / "mdnrnn_best.pt")
 
     write_result(out / "history.json", {"args": vars(args), "history": history})

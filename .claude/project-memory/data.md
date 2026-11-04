@@ -51,6 +51,13 @@ verified on a 102,888-frame corpus 2026-08-06.
   preceding action, so `action[0]` is zeros and `reward[0]` is 0.0. An
   off-by-one here still trains happily and silently learns to predict the
   wrong action — which is why alignment has two independent gates (below).
+  **CONSUMERS (2026-11-04, record NP, audit C2-1):** a model that acts on
+  z_t, or predicts z_{t+1} from (z_t, a), needs the action DECIDED ON frame t,
+  which is `action[t+1]` - use `splits.decided_on(arr, t)`. The World Models
+  code (train_mdnrnn, train_controller, diag_copycat, rollout_eval) paired
+  z_t with action[t] until NP. MDN-RNN / controller checkpoints carry
+  `action_pairing`; unstamped ones are pre-fix. Dreamer's RSSM (previous
+  action + observation) and bc_real were already right.
 - **`discount == 0` exactly where `is_terminal`.** A crash means "no future
   exists"; hitting a step limit means "the future exists, we stopped
   looking". Conflating them teaches the model that time-limit boundaries are

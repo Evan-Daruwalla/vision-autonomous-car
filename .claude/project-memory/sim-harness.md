@@ -128,4 +128,7 @@ Related bins: `ml-training.md` (world-model training facts measured on this
   at** — a real portability trap for the physical car, whose loop will not run
   at the sim's 18.87 Hz. Also means any throttled-expert number confounds rate
   with silent gain re-tuning.
-
+- **`eval_paired --arm-rnn NAME=PATH`** (2026-11-04, record NP): each arm
+  can use its own MDN-RNN, needed when comparing controllers trained against
+  different world models. Unlisted arms use `--rnn`. The arm -> RNN map is
+  in the result JSON (`arm_rnn`).
