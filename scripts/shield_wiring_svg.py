@@ -154,7 +154,7 @@ box(TX, 124, 215, 206, "TB6612FNG (Pololu #713)", ["", "", "", "", "", "", "", "
 dot(TX, 150, RED); t(TX + 8, 154, "VM", 11, RED, bold=True)
 dot(TX, 176, MAG); t(TX + 8, 180, "VCC <- Uno 5V bus", 10.5, MAG, bold=True)
 line([(X0 + 240, 150), (TX, 150)], RED, 2.2)
-pins_r = [("PWMA + PWMB", 150, "D11"), ("AIN1 + BIN1", 172, "D8"), ("AIN2 + BIN2", 194, "D12"), ("STBY", 216, "D10")]
+pins_r = [("PWMA + PWMB", 150, "D11"), ("AIN1 + BIN1", 172, "D8"), ("AIN2 + BIN2", 194, "D9"), ("STBY", 216, "D10")]
 for name, y, net in pins_r:
     dot(TX + 215, y, SIG)
     t(TX + 207, y + 4, name, 10.5, SIG, anchor="end")

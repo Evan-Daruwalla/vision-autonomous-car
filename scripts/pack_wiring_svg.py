@@ -111,7 +111,7 @@ t(732, 236, "(W9 + W12 go up)", 10, "#4A4A46")
 wire([(712, 162), (726, 162), (726, 245), (624, 245), (624, 292), (640, 292)], RED, "W10 100", at=2, dashed=True, dy=-6)
 
 # ---- shield: TB6612, star bar, divider, Uno ----
-box(882, 128, 172, 262, "TB6612FNG", ["", "VCC <- Uno 5V", "PWMA+B <- D11", "AIN1+BIN1 <- D8", "AIN2+BIN2 <- D12", "STBY <- D10",
+box(882, 128, 172, 262, "TB6612FNG", ["", "VCC <- Uno 5V", "PWMA+B <- D11", "AIN1+BIN1 <- D8", "AIN2+BIN2 <- D9", "STBY <- D10",
                                        "470-1000 uF", " VM-GND, at board", "AO1+BO1 bridged", "AO2+BO2 bridged"], fill="#E8F0FE", stroke="#1A56B0")
 pin(882, 150, "VM", ly=14)
 out.append('<circle cx="1054" cy="200" r="3" fill="#2C2C2A"/><circle cx="1054" cy="240" r="3" fill="#2C2C2A"/>')
@@ -134,7 +134,7 @@ wire([(574, 430), (590, 430), (590, 440), (906, 440), (906, 452)], BLK, "W12 260
 wire([(640, 392), (626, 392), (626, 428), (926, 428), (926, 452)], BLK, "W13 220", at=2, dashed=True, dx=-100)
 wire([(1132, 370), (1132, 382), (992, 382), (992, 452)], BLK, "div. bottom", at=1, dx=0, dy=-4, width=1.6)
 # Uno
-box(882, 530, 296, 106, "Uno R3 (shield sits on it)", ["powered by the Pi's USB (JF), NOT the pack", "D11 D8 D12 D10 -> TB6612, D2 D3 <- encoder",
+box(882, 530, 296, 106, "Uno R3 (shield sits on it)", ["powered by the Pi's USB (JF), NOT the pack", "D11 D8 D9 D10 -> TB6612, D2 D3 <- encoder",
                                                      "D6 D5 -> strips (via 400 ohm), A0 <- divider", "5V -> TB6612 VCC + servo V+ (JR, NOT the pack)", "+5V2 must NEVER touch the Uno 5V pin"])
 wire([(946, 530), (946, 510), (946, 461)], BLK, "W15 40", at=0, dashed=True, dx=0, dy=6)
 # +5V2

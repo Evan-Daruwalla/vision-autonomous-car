@@ -49,7 +49,7 @@ SECTIONS = [
     ]),
     ("C. TO THE UNO - shield ON the Uno, power OFF.", "#1565c0", [
         ("U1/1", "D11", "BEEP", "(step 7)"),
-        ("U1/2", "D12", "BEEP", "(step 7)"),
+        ("U1/2", "D9", "BEEP", "(step 7; was D12 until 2026-11-01)"),
         ("U1/3", "D8", "BEEP", "(step 7)"),
         ("U1/4", "D10", "BEEP", "(step 7)"),
         ("U1/9", "A0", "BEEP", "battery divider (step 7)"),
@@ -112,7 +112,7 @@ def self_check() -> None:
     missing = sorted(h for h in holes if h not in layout)
     assert not missing, f"card cites holes not in shield_layout.json: {missing}"
     assert len(holes) >= 25, len(holes)
-    for pin in ("D11", "D12", "D8", "D10", "A0", "D7", "D6", "D5", "PWMA", "VMOT", "JP1", "J5"):
+    for pin in ("D11", "D9", "D8", "D10", "A0", "D7", "D6", "D5", "PWMA", "VMOT", "JP1", "J5"):
         assert pin in layout, pin
     svg = build_svg()
     assert svg.count('stroke-width="1.5"') == sum(len(r) for _, _, r in SECTIONS)   # one tick box per row

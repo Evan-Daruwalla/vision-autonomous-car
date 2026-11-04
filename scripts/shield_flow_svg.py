@@ -51,7 +51,7 @@ PHASES = [
      "supply (VCC), and JP1's cap on the top two pins passes it to the servo's V+ on J2."),
     ("Signals (the Uno's pins)",
      ["PWM", "DIR1", "DIR2", "STBY", "SERVO_SIG", "DIN_L", "DIN_R", "A0", "DIV_MID"],
-     ["D11 PWM, D8 + D12 direction, D10 enable -> TB6612", "D7 -> servo signal (lead straight to the Uno)",
+     ["D11 PWM, D8 + D9 direction, D10 enable -> TB6612", "D7 -> servo signal (lead straight to the Uno)",
       "D6 / D5 -> LED data, straight leads, 400 ohm each (not built)",
       "A0 <- divider (R100k over R10k + R2k)", "D2 / D3 <- encoder (straight to the Uno)"],
      "The Uno runs the firmware: it reads the Pi's commands and drives the pins. Dupont leads carry speed, "

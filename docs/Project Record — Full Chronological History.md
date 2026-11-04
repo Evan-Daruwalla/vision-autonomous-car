@@ -398,6 +398,21 @@ the dated entry, not the digest.
 - [MW - A0 to GND reads -0.883 V (Evan): magnitude PASS (expect 0.86-0.89), sign read as swapped probes](#appendix-mw---a0-to-gnd-reads--0883-v-evan-magnitude-pass-expect-086-089-sign-read-as-swapped-probes-2026-11-01-1328-cst) (11-01)
 - [MX - Correction to MV/MW: J5 VBAT is L3/10, not P3/10 (P3/10 is the KEY) - step-5 power-off check fixed](#appendix-mx---correction-to-mvmw-j5-vbat-is-l310-not-p310-p310-is-the-key---step-5-power-off-check-fixed-2026-11-01-1331-cst) (11-01)
 - [MY - Step-5 power-off checks PASS: P3/6 to L3/10 silent, M1/M2 to Uno 5V and GND silent (Evan)](#appendix-my---step-5-power-off-checks-pass-p36-to-l310-silent-m1m2-to-uno-5v-and-gnd-silent-evan-2026-11-01-1333-cst) (11-01)
+- [MZ - Servo plugged: signal straight to D7, V+ / GND on J2 middle / bottom, JP1 on Uno 5V (confirms MI); D7 check done (Evan)](#appendix-mz---servo-plugged-signal-straight-to-d7-v--gnd-on-j2-middle--bottom-jp1-on-uno-5v-confirms-mi-d7-check-done-evan-2026-11-01-1345-cst) (11-01)
+- [NA - JP1 bridged by a wire on its top two pins (Uno 5V to servo V), not a cap (Evan)](#appendix-na---jp1-bridged-by-a-wire-on-its-top-two-pins-uno-5v-to-servo-v-not-a-cap-evan-2026-11-01-1349-cst) (11-01)
+- [NB - Motor + encoder connected, not powered (Evan); step-5 sheet step 7 fixed - host_test.py --wired never turns the motor, teleop.py --max-throttle 20 does](#appendix-nb---motor--encoder-connected-not-powered-evan-step-5-sheet-step-7-fixed---host_testpy---wired-never-turns-the-motor-teleoppy---max-throttle-20-does-2026-11-01-1351-cst) (11-01)
+- [NC - host_test --wired passed on /dev/ttyUSB0 (Evan); teleop failed on /dev/ttyACM0 - the Pi runs a pre-cf237dc teleop, re-deploy needed](#appendix-nc---host_test---wired-passed-on-devttyusb0-evan-teleop-failed-on-devttyacm0---the-pi-runs-a-pre-cf237dc-teleop-re-deploy-needed-2026-11-01-1358-cst) (11-01)
+- [ND - Correction: record NC's timestamp is ~14:25 CST, not ~13:58](#appendix-nd---correction-record-ncs-timestamp-is-1425-cst-not-1358-2026-11-01-1426-cst) (11-01)
+- [NE - First powered motor runs: D12 would not hold forward; DIR_B moved D12 -> D9 (Evan) - compiled, NOT flashed](#appendix-ne---first-powered-motor-runs-d12-would-not-hold-forward-dir_b-moved-d12---d9-evan---compiled-not-flashed-2026-11-01-1540-cst) (11-01)
+- [NF - Uno flashed with the D9 build (11658 B verified, SELFTEST 86/86)](#appendix-nf---uno-flashed-with-the-d9-build-11658-b-verified-selftest-8686-2026-11-01-1545-cst) (11-01)
+- [NG - D9 did not fix it (forward dead, reverse half): the fault is downstream of the Uno; new pi/motor_sweep.py ticks/s test (sim-checked, not run on the car)](#appendix-ng---d9-did-not-fix-it-forward-dead-reverse-half-the-fault-is-downstream-of-the-uno-new-pimotor_sweeppy-tickss-test-sim-checked-not-run-on-the-car-2026-11-01-1600-cst) (11-01)
+- [NH - Correction: record NG's timestamp is ~15:54 CST, not ~16:00](#appendix-nh---correction-record-ngs-timestamp-is-1554-cst-not-1600-2026-11-01-1555-cst) (11-01)
+- [NI - Motor sweep on the car: forward exactly 0 ticks at 20-80 %, reverse peaks at 40 % then falls; leading hypothesis a TB6612 channel fight (unconfirmed)](#appendix-ni---motor-sweep-on-the-car-forward-exactly-0-ticks-at-20-80--reverse-peaks-at-40--then-falls-leading-hypothesis-a-tb6612-channel-fight-unconfirmed-2026-11-01-1557-cst) (11-01)
+- [NJ - J1 with no motor reads +2.10 / -2.09 V: the driver is fine both ways; the fault is on the motor side (motor, gearbox, drivetrain or J1 cable)](#appendix-nj---j1-with-no-motor-reads-210---209-v-the-driver-is-fine-both-ways-the-fault-is-on-the-motor-side-motor-gearbox-drivetrain-or-j1-cable-2026-11-01-1608-cst) (11-01)
+- [NK - Motor freed from the drivetrain spins both ways (+40: -1850 ticks/s, -40: +1850): the forward stall is mechanical; +throttle reads negative ticks](#appendix-nk---motor-freed-from-the-drivetrain-spins-both-ways-40--1850-tickss--40-1850-the-forward-stall-is-mechanical-throttle-reads-negative-ticks-2026-11-01-1838-cst) (11-01)
+- [NL - Scheduled daily-audit: 50 findings, 1 high - SERIAL_PROTOCOL.md lists D9 as both FREE and motor DIR_B; HANDOFF stops at NF](#appendix-nl---scheduled-daily-audit-50-findings-1-high---serial_protocolmd-lists-d9-as-both-free-and-motor-dir_b-handoff-stops-at-nf-2026-11-02-0732-cst) (11-02)
+- [NM - New CanaKit Pi 5 8 GB stress test FAILS: the Pi dropped off within ~30 s of all-core load; EXT5V 4.849 V at start, 0x50000 after reboot, supply negotiated 3 A not 5 A](#appendix-nm---new-canakit-pi-5-8-gb-stress-test-fails-the-pi-dropped-off-within-30-s-of-all-core-load-ext5v-4849-v-at-start-0x50000-after-reboot-supply-negotiated-3-a-not-5-a-2026-11-03-2352-cst) (11-03)
+- [NN - CanaKit Pi 5 8 GB stress re-run PASSES: 300 s all-core at 2400 MHz, peak 81.8 C, EXT5V min 5.008 V, 0x0; 6 GiB RAM write+verify 0 bad; NL crash still unexplained](#appendix-nn---canakit-pi-5-8-gb-stress-re-run-passes-300-s-all-core-at-2400-mhz-peak-818-c-ext5v-min-5008-v-0x0-6-gib-ram-writeverify-0-bad-nl-crash-still-unexplained-2026-11-03-2358-cst) (11-03)
 
 ---
 
@@ -22583,3 +22598,290 @@ Next: step-5 sheet steps 4-7:
 - `host_test.py --wired` at 20 % duty, both directions.
 
 The board runs the MG build (banner + SELFTEST PASS 86/86); read the banner before trusting the test.
+
+# Appendix MZ - Servo plugged: signal straight to D7, V+ / GND on J2 middle / bottom, JP1 on Uno 5V (confirms MI); D7 check done (Evan) (2026-11-01 ~13:45 CST)
+Evan, verbatim: "both done". This answers the two things in Claude's servo-plug answer: plug the servo as listed, and the power-off check.
+
+**Servo as plugged (Evan confirms):**
+- the servo's own 3-pin female plug left whole, with a jumper's male end in each socket;
+- signal (orange): male-male jumper **straight into the Uno D7 socket**;
+- V+ (red): male-female jumper on **J2 middle (L2/-2)**;
+- GND (brown): male-female jumper on **J2 bottom (L3/-2)**, to the star through w5;
+- J2 top (L1/-2) empty; **JP1 jumper cap on its TOP two pins** = servo V+ on the Uno 5V (the Pi's USB; record JR, cost JP).
+
+This **confirms the assumption in record MI** (V+ / GND on J2 middle / bottom), which Evan had not confirmed until now.
+
+**Check, rocker OFF:** D7 socket to the servo signal lead - reported "done". The result is taken as BEEP (PASS); the word "beep" was not reported.
+- The JP1 position and the "pull any old jumper out of D7" step are taken as done from the same "both done".
+- docs/shield_test_card.png section C still shows the old D7 -> J2-top row (scripts/shield_test_card_svg.py not changed).
+
+Next: step-5 sheet steps 4-7 (J1 housing on, yellow D2, white D3, car on a stand, Uno on the Pi's USB then rocker ON, `host_test.py --wired` at 20 %).
+
+# Appendix NA - JP1 bridged by a wire on its top two pins (Uno 5V to servo V), not a cap (Evan) (2026-11-01 ~13:49 CST)
+Evan, verbatim: "i have a wire doing the jumping and its connected to the top right and middle right when looking at it top down with the ground rail and A0 on the bottom".
+
+- **JP1 is bridged by a short wire, not a jumper cap.**
+- Mapped against docs/shield_layout.json, top view (as shield_holemap.svg, B ground rail at the bottom; columns increase to the right):
+  - J2 is column -2 (SIG L1/-2, V L2/-2, GND L3/-2).
+  - JP1 is column -1, the right-hand column of the pair (UNO5V L1/-1, SERVO_V L2/-1, 5V2 L3/-1).
+  - "Top right + middle right" = **JP1 L1/-1 (Uno 5V) to L2/-1 (servo V)**. That is the same as the cap on the top two pins: the servo runs on the Uno 5V (record JR).
+- The mapping is Claude's reading of his description, not a meter result. Check, rocker OFF: the V rail (Uno 5V) to J2 middle (L2/-2) must BEEP, and J2 middle to J3 middle (+5V2) must be SILENT.
+- A wire can't be moved to +5V2 with one push the way a cap can. Re-solder or re-plug it if the servo ever moves to +5V2 (record JP's serial-byte loss is the reason that move exists).
+
+# Appendix NB - Motor + encoder connected, not powered (Evan); step-5 sheet step 7 fixed - host_test.py --wired never turns the motor, teleop.py --max-throttle 20 does (2026-11-01 ~13:51 CST)
+Evan, verbatim: "motor is connected".
+
+Taken as step-5 sheet steps 4-5 done: the J1 housing is on J1, yellow is in D2 and white in D3. Nothing is powered yet; steps 6-7 are not done.
+- Not reported, so logged as missing: whether blue was seen sitting on P3/6, the pin nearest J5 (sheet step 4's look check).
+
+**Error found in the step-5 sheet (Claude's, record ML): step 7 said "Run host_test.py --wired at 20 % duty, both directions".** `firmware/host_test.py` cannot do that.
+- With `--wired` it streams steer 0 / throttle 0 only (line 135: `(0, 0) if args.wired else (20, 30)`).
+- Without `--wired` it refuses to stream once a real pack is sensed.
+- So it checks the boot banner, SELFTEST, the link and the state machine, and never turns the motor.
+- The motor test is the driving client, `pi/teleop.py --max-throttle 20`, run without `--bench` (bench forces throttle 0), driven by the pad: RT forward, LT reverse.
+  - The page's telemetry table includes a `ticks` row (teleop.py telem key "ticks"), which is where the encoder check is read.
+  - Arming needs pack OK: A0 read 0.883 V in record MW, about 8.24 V, so the pack should read OK.
+
+**Fixed:** `scripts/step_wiring_svg.py` step 7 now says: host_test.py --wired (banner, SELFTEST, link; throttle 0 only), then teleop.py --max-throttle 20 (not --bench), pad RT forward / LT reverse, watch the ticks row. docs/step5_motor_encoder.svg + .png regenerated (PNG via Chrome headless at 1400 x 972).
+
+Checks (real output):
+- `scripts/svg_text_overlap.py docs/step5_motor_encoder.svg`: PASS, 0 overlaps.
+- `.venv/Scripts/python.exe scripts/run_checks.py`: 35 passed, 0 failed, 0 skipped (of 35).
+- `scripts/check_artifacts.py`: 40 checked, 0 drifted, 0 errored, 2 uncheckable.
+- step2b_power_wiring.svg was rewritten byte-identical (no diff).
+
+# Appendix NC - host_test --wired passed on /dev/ttyUSB0 (Evan); teleop failed on /dev/ttyACM0 - the Pi runs a pre-cf237dc teleop, re-deploy needed (2026-11-01 ~13:58 CST)
+Evan, after correcting the port to `/dev/ttyUSB0` (the first try used Claude's wrong `/dev/ttyACM0` and failed to open):
+- `host_test.py --port /dev/ttyUSB0 --wired` on the Pi: reported "test passed". The full output was not pasted, so the banner text, the SELFTEST count and each assertion line are **missing**.
+  - This checks the link and the state machine with throttle 0 only. It never turned the motor.
+
+Then `~/car/venv/bin/python ~/car/pi/teleop.py --max-throttle 20` printed `Uno open failed: SerialException(2, "could not open port /dev/ttyACM0: ...")`.
+- **Diagnosis: the Pi runs a teleop.py OLDER than commit cf237dc (2026-10-31, audit MB fixes 4-6).**
+  - The current teleop.py prints `Uno port: <dev>` from auto-detect (`pi/uno_link.py` find_port: ttyACM* then ttyUSB*) before it opens the port; Evan's output has no such line.
+  - It also tried `/dev/ttyACM0`, which does not exist; the old default was that fixed path.
+- The same commit has two safety fixes the stale copy lacks:
+  - teleop disarms on the Uno's watchdog status bit (ST_WATCHDOG);
+  - SIGTERM / SIGHUP saves the episode and disarms.
+  Both matter once the motor can turn. So the fix is to re-deploy (`bash pi/deploy.sh` from the PC), not just to pass `--port`.
+- Not verified: what else on the Pi is stale. deploy.sh copies the Pi-side code wholesale.
+
+# Appendix ND - Correction: record NC's timestamp is ~14:25 CST, not ~13:58 (2026-11-01 ~14:26 CST)
+Correction to record NC: its heading time "~13:58 CST" is wrong. Claude typed it before reading the clock, against the standing rule. `date`, run in the same command, printed 2026-11-01 14:25 -0600, so **NC was written at ~14:25 CST**. NC stays as written (append-only); nothing else in it changes.
+
+# Appendix NE - First powered motor runs: D12 would not hold forward; DIR_B moved D12 -> D9 (Evan) - compiled, NOT flashed (2026-11-01 ~15:40 CST)
+First powered motor runs, car on the stand, after the Pi re-deploy (NC). Teleop `--max-throttle 20` at first, raised later; the exact caps used were not all reported. Evan's observations, in order:
+
+1. "it turns but no forward" at a 20 % cap: the servo steered, the motor did not drive.
+   - Claude's arithmetic: 20 % -> duty 20 x 181 / 100 = 36 of 255 (MOTOR_DUTY_MAX 181), about 1.2 V mean at the 8.24 V pack, probably below the N20 + gearbox start voltage. Advice: raise the cap.
+2. "reverse doesnt work but forward does".
+3. "now when i press reverse it spins but forward i only here slight motor wine".
+4. "now they both spin but forward has a lot of speed and backwards doesn't".
+5. After moving the car (Evan: "no like i moved the car"): "now theyre both fast".
+6. Controlled test, LT / RT both at max: **"when D12 is plugged in it twitched forward and full speed reverse. When D12 is unplugged no reverse and like 70% forward."**
+7. Evan: the jumper is in the right socket ("its not in wrong slot").
+
+**Claude's wrong turns, kept for the record:**
+- After 3, Claude proposed a solder short between the D11 and D12 strips. Observation 5 (nothing re-wired, behaviour changed) did not fit it, and Claude retracted it.
+- Claude then proposed mechanical drag on the stand, or a loose connection.
+- After 6, Claude proposed the jumper sitting in D13 (the status LED pin, which blinks while armed). Evan says the socket is right.
+- None of these was confirmed by a measurement.
+
+**What 6 does establish:**
+- Unplugged, the TB6612's input pull-downs hold AIN2/BIN2 LOW: forward (H/L) drives, reverse (L/L) is "stop". So the shield's strip 2 is not shorted to a driven line.
+- Plugged in, forward (D12 should be LOW) only twitches, while reverse (D12 HIGH) is full. So the line arriving through the D12 socket is not a clean LOW in forward.
+- Root cause **NOT identified**: no meter reading of the D12 pin under drive was taken. Candidates: a damaged Uno D12 output, a bad socket contact, the jumper itself.
+
+**Decision (Evan): move DIR_B from D12 to D9.** Claude first refused Evan's full shift (D10 -> D9, D11 -> D10, D12 -> D11): the Servo library takes Timer1, which kills analogWrite on D9 and D10, so the motor PWM must stay on D11 (Timer2; D3 is the encoder, D5/D6 the strips). D9 is free since record MI and is only ever digitalWrite here.
+
+**Changed:**
+- `firmware/uno_control/uno_control.ino`: `PIN_DIR_B` 12 -> 9 (with the reason), and the free-pin note.
+  - `arduino-cli compile --fqbn arduino:avr:uno firmware/uno_control`: 11658 bytes (36 %), 388 B globals.
+  - **NOT flashed.** important.md #3 is STALE again: the board runs the MG build with DIR_B on D12.
+- `docs/shield_layout.json`: socket U1/2 uno D12 -> D9, net DIR2 uno:D9, step-7 text.
+- `docs/SHIELD_BUILD.md`, `SHIELD_SOLDER_GUIDE.md`, `WIRING_PROTOSHIELD.md`, `firmware/SERIAL_PROTOCOL.md`: dated strike-throughs to D9.
+- Scripts relabelled: shield_test_card_svg.py, pack_wiring_svg.py, shield_flow_svg.py, shield_wiring_svg.py.
+- Regenerated:
+  - shield_test_card.svg/.png (PNG via Chrome headless 1100 x 1480),
+  - pack_wiring_full.svg, shield_wiring.svg, shield_how_it_works.svg,
+  - shield_holemap.svg/.md ("holemap: all checks passed"),
+  - shield_build_guide.svg, step5_motor_encoder.svg.
+- **Not regenerated:** the 3D shield renders (shield_render3d.py). Whether they label socket pins was not checked.
+- **Left stale, not touched:** docs/BOM.md's pin block (line ~300). It already predates MI (servo D9, strips D4/D7), so it was stale before this change.
+
+**Checks (real output):**
+- svg_text_overlap: PASS 0 overlaps on shield_test_card, step5_motor_encoder, shield_build_guide, shield_holemap.
+- `.venv/Scripts/python.exe scripts/run_checks.py`: 35 passed, 0 failed, 0 skipped (of 35).
+- check_artifacts: 40 checked, 0 drifted, 0 errored, 2 uncheckable.
+
+**Next (Evan):**
+1. Shield OFF the Uno, bare Uno to the PC, then flash with read-back verify.
+2. Shield back on. Move the U1/2 jumper's Uno end from D12 to D9.
+3. Card section C row: U1/2 to D9 BEEP.
+4. Teleop on the stand again: RT, LT, ticks.
+
+# Appendix NF - Uno flashed with the D9 build (11658 B verified, SELFTEST 86/86) (2026-11-01 ~15:45 CST)
+Evan: "Plugged in, flash" (shield off, bare Uno on the PC).
+
+- `arduino-cli board list`: COM3, "Serial Port (USB)", board Unknown (normal for this FTDI clone, firmware/README.md).
+- `arduino-cli compile --fqbn arduino:avr:uno firmware/uno_control`: 11658 bytes (36 %), 388 B globals. This is the working tree with `PIN_DIR_B = 9` (record NE; uncommitted at flash time).
+- `arduino-cli upload -v -t -p COM3 --fqbn arduino:avr:uno firmware/uno_control`:
+  - the same first-try "programmer is not responding / attempt 1 of 10: not in sync" seen in MG;
+  - then "Writing 11658 bytes to flash ... 100%" and **"11658 bytes of flash verified"**, exit 0.
+- Boot output read over COM3 at 115200 (opening resets the board): `== UNO CONTROL == protocol v0.2, SERVO WIRED; MOTOR, ENCODER, LEDS, PACK UNWIRED` and **`SELFTEST PASS 86/86`**.
+- The D12 and D9 builds are the same size (one pin constant), and the banner prints no pins. **The evidence that the D9 build is on the board is the verified upload of the sketch just compiled from the D9 source**, not the size or the banner.
+- important.md #3: CURRENT again.
+- The banner's "MOTOR, ENCODER, LEDS, PACK UNWIRED" is stale text (the motor and encoder are wired since NB). The firmware string is not changed here.
+
+Next (Evan): shield back on, move the U1/2 jumper's Uno end D12 -> D9, rocker OFF beep U1/2 to D9, then on the car: `host_test.py --port /dev/ttyUSB0 --wired`, then teleop RT / LT on the stand.
+
+# Appendix NG - D9 did not fix it (forward dead, reverse half): the fault is downstream of the Uno; new pi/motor_sweep.py ticks/s test (sim-checked, not run on the car) (2026-11-01 ~16:00 CST)
+After the D9 flash (NF) Evan reported: "reverse is like 1/2 speed and there's no movement on forward".
+- So D12 and D9 give the same fault: **the Uno pin was never the cause.** NE's D12 -> D9 move did not fix it. It stays in place (harmless; D9 is a fine DIR pin) unless Evan wants it reverted.
+- Claude stopped proposing causes after three wrong ones (NE) and asked for meter readings (J1 M1-M2 both ways; U2/1-U2/6 in forward). None were taken yet.
+
+Evan asked for a test built on the ticks and the throttle command. **New `pi/motor_sweep.py`:**
+- Opens the Uno like teleop (auto port, banner gate; teleop must be stopped).
+- Streams armed steer-0 frames at 20 Hz: +L then -L for each level (default 20 40 60 80 %), 1.5 s per step, a 0.8 s braked rest between steps, the whole set repeated (default 2).
+- Measures encoder ticks/s per step after a 0.4 s settle, plus missed replies, watchdog and CRC flags. It aborts on a lost link or a CUTOFF/FAULT pack, and ends with disarmed zero frames.
+- Prints a verdict, each finding naming the meter reading that tells electrical from mechanical:
+  - FORWARD/REVERSE DEAD,
+  - ASYMMETRIC (slower way below 70 % of the other),
+  - SAME SIGN (encoder),
+  - UNSTABLE (repeats differ by more than 30 %: loose contact or drag),
+  - COASTS WHILE BRAKED,
+  - LINK trouble,
+  - NO MOTION.
+- Writes the numbers to `~/car_data/motor_sweep_<time>.json`.
+- **Limit, stated in the script:** zero ticks means "the shaft did not turn" for either an electrical or a mechanical reason. The verdict says which meter reading separates them.
+
+Checks:
+- `pi/motor_sweep.py --self-check`: PASS. A fake link with a per-direction speed model on a fake clock covers: healthy -> no fault (60 % -> ~600 ticks/s), forward dead, reverse at half speed, the same sign both ways, a repeat at 20 % speed -> UNSTABLE, no motion, a CUTOFF pack -> abort.
+- `run_checks.py`: 36 passed, 0 failed, 0 skipped (of 36; the new module is found automatically).
+- Sim-only: **not yet run on the car.** It reaches the Pi through `bash pi/deploy.sh` (copies pi/*.py).
+
+# Appendix NH - Correction: record NG's timestamp is ~15:54 CST, not ~16:00 (2026-11-01 ~15:55 CST)
+Correction to record NG: its heading time "~16:00 CST" is wrong. Claude typed it before the clock was read. `date`, run in the same command, printed 2026-11-01 15:54 -0600, so **NG was written at ~15:54 CST**. NG stays as written (append-only).
+
+# Appendix NI - Motor sweep on the car: forward exactly 0 ticks at 20-80 %, reverse peaks at 40 % then falls; leading hypothesis a TB6612 channel fight (unconfirmed) (2026-11-01 ~15:57 CST)
+First run of `pi/motor_sweep.py` on the car (on the stand, D9 build, defaults: levels 20/40/60/80, 2 repeats, 1.5 s holds). Output pasted by Evan; ticks/s per step:
+
+| level | fwd rep1 | fwd rep2 | rev rep1 | rev rep2 |
+|---|---|---|---|---|
+| 20 % | +0.0 | +0.0 | +341.7 | +352.5 |
+| 40 % | +0.0 | +0.0 | +1182.9 | +1058.8 |
+| 60 % | +0.0 | +0.0 | +999.2 | +894.7 |
+| 80 % | +0.0 | +0.0 | +577.7 | +668.9 |
+
+Link: missed 0, CRC 0, watchdog 1 (on the very first step, right after the open/reset). Script findings: FORWARD DEAD; ASYMMETRIC at every level; reverse starts at 20 %.
+
+**What the numbers establish (Claude's reading):**
+- **Forward is exactly 0 ticks at every level up to 80 %, in both repeats.** Not a stall threshold: the same at 20 % and 80 %. This is not intermittent. The earlier pad tests that "worked forward" (NE) are not reproduced.
+- **Reverse speed is NOT monotonic in throttle.** It peaks at 40 % (~1100 ticks/s) and falls at 60 % (~950) and 80 % (~620). A healthy driver gives more speed for more duty. Something takes more of the drive as the duty rises.
+- **Repeats agree within about 15 %.** So this run is not a loose-contact story.
+- Positive ticks in reverse: an encoder sign fact (ENCODER_SIGN is flipped once forward is known), not a fault.
+
+**Leading hypothesis (NOT confirmed):** one TB6612 channel (A or B, paralleled on the carrier) is fighting the other.
+- Forward: a channel sitting in brake (IN1 = IN2 = HIGH) shorts the motor terminals while the other drives, so 0 V across the motor. Pattern: that channel's IN2 effectively HIGH. Reverse: both channels agree.
+- A fight's current grows with duty, which would also explain reverse falling off above 40 % (sag or the driver's thermal protection).
+- It does not explain the 70 % forward seen with D12 unplugged (NE). Hand tests are weaker evidence than this sweep.
+
+**Added:** `motor_sweep.py --steady THR --seconds N` holds one throttle and prints ticks every second, so a meter can be put on pins. `--self-check` still PASS.
+
+Next measurements (Evan):
+1. Motor unplugged at J1, `--steady 40` then `--steady -40`, meter J1 P3/3 to P3/4. With no motor, no drivetrain question: about 2 V either way = the driver is fine and the problem is the motor or the drivetrain; about 0 V forward = an electrical fight.
+2. During `--steady 40`, meter U2/2, U2/3, U2/5, U2/6 to GND.
+3. Feel the TB6612 carrier after a forward hold.
+
+# Appendix NJ - J1 with no motor reads +2.10 / -2.09 V: the driver is fine both ways; the fault is on the motor side (motor, gearbox, drivetrain or J1 cable) (2026-11-01 ~16:08 CST)
+Test 1 from record NI. J1 housing pulled, so the motor and encoder are disconnected. `motor_sweep.py --steady 40` then `--steady -40`; meter on the bare J1 pins P3/3 (M1) to P3/4 (M2). Evan: **"it read 2.10V and -2.09V"**.
+
+- Expected about 40 % x 181/255 x ~8.2 V = ~2.3 V mean. Claude's arithmetic; the pack voltage at that moment was not measured. Read 2.10 / -2.09 V: the same size, opposite sign.
+- **The TB6612 drives both directions equally with no load. NI's channel-fight hypothesis is WRONG**: a fight shows ~0 V across the outputs with or without a motor. The Uno pins (D8, D9, D10, D11), strip 2, the carrier bridges and the driver are cleared, at least unloaded.
+- Not covered by this test: behaviour under motor current. For example, a high-resistance contact that only drops volts under load, or a driver half that fails only at current. Both would normally hurt both directions, so they fit forward-only poorly.
+- **The fault is now on the motor side of J1:** the J1 housing and its jumper wiring, the motor or its gearbox, or the drivetrain. The encoder counts the motor shaft (12 CPR x 29.86:1 = 358 per output turn), so the sweep's forward 0 ticks means the motor itself did not turn.
+
+Next (Evan):
+1. Rocker OFF: turn the drive wheels by hand both ways and feel for a lock in one direction.
+2. Free the motor from the drivetrain (out of its mount or coupler off), J1 back on, then `--steady 40` / `--steady -40`. Motor runs both ways = the drivetrain jams forward. Still dead forward = the motor/gearbox or the J1 cable under load. Then meter M1-M2 with the motor connected during `--steady 40`.
+
+# Appendix NK - Motor freed from the drivetrain spins both ways (+40: -1850 ticks/s, -40: +1850): the forward stall is mechanical; +throttle reads negative ticks (2026-11-01 ~18:38 CST)
+Motor freed from the drivetrain (Evan), J1 reconnected, `pi/motor_sweep.py --steady +-40 --seconds 8` on the Pi (/dev/ttyUSB0, banner + SELFTEST PASS 86/86, missed 0 frames in both runs).
+
+| throttle | ticks after 8 s | ticks/s, seconds 2-8 |
+|---|---|---|
+| +40 | -15236 | 1790-1882 |
+| -40 | +15371 | 1811-1861 |
+
+- Free-running, the motor turns both ways at the same speed (ratio ~0.99). About 1850 ticks/s / 358 counts per output turn = ~5.2 output rev/s (~310 rpm) at 40 %.
+- **So the motor, its gearbox, the J1 cable and the driver all work in both directions with no load.** Together with NJ (open-circuit +2.10 / -2.09 V), the forward stall in NI (exactly 0 ticks at 20-80 %) is **mechanical: the drivetrain jams when driven forward.** Confidence: high. Not fully excluded: a cable or contact that only fails at stall current, but that would hurt both directions, not one.
+- Free speed at 40 % (~1850) is well above the loaded reverse at 40 % in NI (~1121), which is consistent with real drag in the drivetrain even in the direction that turns.
+- **Second finding: the sign.** Positive throttle gives NEGATIVE ticks. Whether that is wrong for the car depends on which way the motor drives the wheels once it is back in the drivetrain. Not fixed here: decide it once "+throttle = car forward" is checked on the stand, then fix it in one place (swap encoder A/B in firmware or flip the motor leads).
+- Not checked yet: Evan's hand-turn of the wheels with the rocker OFF (asked in NJ).
+
+Next (Evan): with the motor still out, turn the drivetrain by hand both ways at the motor coupler, and find what binds in the forward direction (the coupler, the differential and the gear mesh are the first suspects).
+
+# Appendix NL - Scheduled daily-audit: 50 findings, 1 high - SERIAL_PROTOCOL.md lists D9 as both FREE and motor DIR_B; HANDOFF stops at NF (2026-11-02, ~07:32 CST)
+Audit run - 50 findings (1 high, 15 med, 34 low) + 3 extra edge cases, top: firmware/SERIAL_PROTOCOL.md lists D9 as both FREE (:34, :53) and motor DIR_B (:37).
+
+Scheduled daily-audit, unattended, read-only. Classified ACTIVE by the churn override: audit MT (2026-11-01) had only 1 non-audit commit after it (c5ad04b), but 16 non-audit record entries (MV-NK) sit uncommitted in the dirty tree (25 modified, 3 untracked). Scope: whole repo, 403 files (git ls-files + untracked; 28,630 ignored files reconcile the find count; ml/vendor is a nested clone). 4 Sonnet audit workers (firmware+pi code, ml/scripts/cad code, docs, cross-domain) + 1 landing-check worker. Suite: scripts/run_checks.py -> 36 passed, 0 failed, 0 skipped (of 36), tree unchanged after. Nothing was fixed.
+
+## Architecture / decisions for Evan
+- A1. "Forward" is undefined. Firmware ENCODER_SIGN=+1 (uno_control.ino:387) gives NEGATIVE ticks for +throttle on the car (NK). The Pi fakes (pi/uno_link.py:157-158, motor_sweep _ModelUno) assume +throttle -> +ticks, so every fake-hardware check passes under a convention the real board breaks. NK's "forward stall is mechanical" is about throttle>0, which nobody has measured as car-forward. Decide one convention after a stand test, then set the sign in one place.
+- A2. The Uno pin map has no single source. Pins are retyped in the .ino, shield_layout.json and 5 svg generators, and the D12->D9 move needed about 12 hand edits. scripts/check_artifacts.py covers none of the 9 wiring/shield generators. A ~15-line pin-contract self_check plus registering the generators would make the next move checkable.
+
+## Top findings
+1. HIGH CONFIRMED - firmware/SERIAL_PROTOCOL.md:34 says D9 FREE, :37 says D9 = motor DIR_B, :53 says "D4 and D9 are the spare pins". Same stale "D9 spare" in WIRING_PROTOSHIELD.md:337-338, BOM.md:303/307, architecture.md:79, HANDOFF.md:480/482, uno_control.ino:86. Code truth: PIN_DIR_B = 9 (uno_control.ino:96). D12 is the real spare.
+2. MED CONFIRMED - HANDOFF.md stops at NF (:3), the record ends at NK. :540 next action is still "move the U1/2 jumper". :5 says 346 appendices A-MH; there are 375, A-NK. :40/:483/:497/:519 still say unwired / never powered.
+3. MED CONFIRMED - the disproved "D12 did not hold LOW" cause (NG, NK) is still stated at SERIAL_PROTOCOL.md:37, uno_control.ino:96-98, hardware-shield-wiring.md:158, HANDOFF.md:3/:540.
+4. MED CONFIRMED - pi/motor_sweep.py: --hold <= ~0.45 s or --repeats 0 gives the verdict "NO MOTION" for a healthy motor (rate() needs 2 samples after SETTLE_S=0.4). --rest <= ~0.45 silently skips the coast check. No argument validation (:172).
+5. MED CONSTRUCTED - pi/teleop.py:347-354 reopens the port right after link loss. Reopen resets the Uno (STBY low = coast), which cancels the firmware brake (BRAKE_MS 500).
+6. MED CONFIRMED - .claude/project-memory/important.md #9 says git add -A / git add . are hard-denied. Neither settings file carries those deny rules (daily-audit STEP 0e, 2026-11-02).
+7. MED CONFIRMED - SHIELD_BUILD.md:187-188 says 22 bridges / 61 holes; shield_layout.json has 21, and the generated shield_holemap.md says 58 / 21. SHIELD_SOLDER_GUIDE.md:4 and WIRING_PROTOSHIELD.md:31 call SHIELD_BUILD.md generated; it is hand-edited.
+8. MED - also: ELECTRONICS_LAYOUT.md stale vs deck v15; important.md Source line numbers point past EOF or at unrelated text; ml writers are not atomic (provenance.py:139, torch.save sites); train_vae and siblings overwrite seeded runs without a guard; prep_dreamer_corpus.py:131-133 deletes and rebuilds with no count check downstream; bc_real.py:206-208 crashes on an empty val split; check_artifacts misses the wiring generators; the public repo has no LICENSE and cad/reference/*.xodr has no provenance note.
+9. LOW (34) - stale banner and docs that say "MOTOR, ENCODER UNWIRED"; NK's tick table does not add up as written (-15236 in 8 s vs 1790-1882 ticks/s for seconds 2-8; raw output not on disk); motor_sweep prints "+-1850", never aborts on a CRC_BAD stream, and loses the JSON on Abort; hardcoded ws port 8765; unused imports in 22 files; INDEX.md / PRD / HANDOFF counts stale (suite now 36); non-ASCII added at HANDOFF.md:3 and SERIAL_PROTOCOL.md:37; 3 untracked files to stage by name; graphify-out last built 2026-09-07; others in the report.
+
+## Landing check (record NK)
+FIX FIRST: NK's arithmetic mostly re-derives (0.991 ratio, 5.2 rev/s, 358 counts/turn, loaded reverse ~1121), but HANDOFF and the bins carry no NG-NK facts, and pi/motor_sweep.py is untracked. Publication-leak sweep of the diff and the untracked files: 0 hits. Live remote: origin/main = a78640ab, HEAD c5ad04b, ahead 2.
+
+## Verified true
+- Firmware pins unique; frame layout + CRC8 agree across protocol.py, host_test.py and the firmware (500 random cases).
+- 9 regenerated wiring files are byte-identical to the working tree. check_artifacts: 40 checked, 0 drifted.
+- pm-secretscan --history and --worktree: clean.
+- Record structure: 375 headings = 375 TOC lines, letters unique and in order, 0 non-ASCII since 2026-09-23.
+- J5 VBAT = L3/10, KEY = P3/10 agree across layout, holemap, build and solder guides.
+
+# Appendix NM - New CanaKit Pi 5 8 GB stress test FAILS: the Pi dropped off within ~30 s of all-core load; EXT5V 4.849 V at start, 0x50000 after reboot, supply negotiated 3 A not 5 A (2026-11-03 ~23:52 CST)
+Evan returned the Vilros kit and got a CanaKit Raspberry Pi 5, 8 GB. Stress test run from the PC over SSH.
+
+**Before the test (ssh ed@ed-pi5.local, uptime 12 min):** "Raspberry Pi 5 Model B Rev 1.1", RAM 7.9 GiB, throttled=0x0, 48.3 C idle, fan cooling_device0 state 1 (the fan was running). stress-ng is not installed; nothing was installed.
+
+**Test:** a scratchpad script (not in the repo) ran 4 busy-loop processes for 300 s and wrote then verified 6 GiB of RAM in 256 MiB chunks. Every 2 s it sampled temp, ARM clock, get_throttled, EXT5V and fan state.
+
+**Result: FAIL. The Pi went off the network within ~30 s.**
+- Only the t = 0 sample came back: 47.7 C, 1900 MHz, thr 0x0, **EXT5V 4.849 V** (already low before the load ramped up). The next print, due at ~30 s, never arrived.
+- ed-pi5.local stopped resolving; ping to 192.168.50.191 failed, then answered while SSH timed out (booting).
+- It came back with **boot time 23:51:45 CST**, about 9 min after the test started (~23:42). Only one boot is in the journal (it is not persistent), so the previous boot's log is gone: **the cause is not in any log.**
+- After the reboot, idle: **throttled=0x50000** (under-voltage AND throttling have happened since boot, not now). EXT5V 5.05 V, then 5.006 V. `/proc/device-tree/chosen/power/max_current` = **3000 mA**, usb_max_current_enable=0: **the supply did NOT negotiate 5 V / 5 A** (the old charger did, LW).
+- The memory test never reported, so 8 GB RAM health is UNTESTED.
+
+**Reading (Claude: I think, verify):** a supply or cable that cannot hold 5 V. Evidence: 4.85 V at the start, an under-voltage flag set during the next boot at idle, and a 3 A limit. The ~9 min gap fits a hang that needed a replug better than an instant brownout reboot. Not known: whether Evan power-cycled it. Not excluded: the RAM fill, though running out of memory kills a process and would not take the network down.
+
+Next (Evan): say which supply and cable are on the Pi now and whether he replugged it. Then re-run on a 5 V / 5 A USB-PD supply (the CanaKit's own PSU if it has one, or the earlier 27 W) with a short cable. Do not re-run on this supply.
+
+# Appendix NN - CanaKit Pi 5 8 GB stress re-run PASSES: 300 s all-core at 2400 MHz, peak 81.8 C, EXT5V min 5.008 V, 0x0; 6 GiB RAM write+verify 0 bad; NL crash still unexplained (2026-11-03 ~23:58 CST)
+Evan: the supply is "neither" (not the CanaKit PSU, not the old 27 W charger); "try again". Identity of the supply: not reported.
+
+**Re-run, changed so a crash would leave evidence:** the script runs detached (nohup) and fsyncs every 1 s sample to `~/stress.log` on the Pi. The stages are split so a failure points at one cause: (1) 4 busy-loop processes for 300 s, then (2) write + verify 6 GiB of RAM with the CPU otherwise idle. Script: session scratchpad `pi_stress.py` (not in the repo).
+
+**Result: PASS, no reboot (log complete, exit 0).**
+
+| stage | samples | temp peak | ARM clock | EXT5V min | throttled (OR of all samples) | fan state |
+|---|---|---|---|---|---|---|
+| CPU, 4 cores, 300 s | 236 | **81.8 C** | 2400 MHz throughout | 5.008 V (5.10-5.11 V under load) | 0x0 | 0 -> 4 (max) |
+| RAM, 6 GiB write + verify | 10 | 74.1 C | 2400 MHz | 5.088 V | 0x0 | 3-4 |
+
+- RAM: 6.00 GiB written, **0 bad chunks**. dmesg err/crit lines: 0. Final throttled=0x0.
+- Temperature: 47 C -> 72.5 C at 88 s -> ~79-80 C from ~200 s; peak 81.8 C, with the fan at its top state and no clock drop. **Headroom to the Pi 5's throttle point is small** (it is around 85 C; the exact firmware limit was not read here). The car's enclosure and the real load (camera + autopilot, lighter than all-core per MA) will change this; not measured.
+- One oddity: `uptime -s` read 23:51:45 right after the NL reboot and 23:53:33 after this run, so the clock was probably corrected (NTP) during or just before the run. The 300 s stage timer is wall-clock, so the CPU stage may have been slightly shorter than 300 s. No reboot happened: the log runs without a gap to "== end 23:58:24".
+
+**NL's crash is still unexplained.** This run held 5.10 V under load against NL's 4.849 V before the load ramped up, which fits a supply or cable change, but Evan says it is neither of the two known supplies and did not say whether anything changed. NL also ran CPU + RAM at the same time; this run did them one after the other. Not separated.

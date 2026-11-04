@@ -83,7 +83,7 @@
 // ---- pin map: firmware/SERIAL_PROTOCOL.md section 1 ------------------------
 const uint8_t PIN_ENC_A   = 2;    // INT0
 const uint8_t PIN_ENC_B   = 3;    // INT1 — nothing else may use D3
-const uint8_t PIN_STRIP_L = 6;    // LEFT strip DIN (Appendix DA). Was D4 until 2026-10-31 (as-built wiring, record MD); D4 and D9 are now FREE.
+const uint8_t PIN_STRIP_L = 6;    // LEFT strip DIN (Appendix DA). Was D4 until 2026-10-31 (as-built wiring, record MD); D4 and D9 are now FREE. (2026-11-01: D9 is DIR_B; D4 and D12 are free.)
 const uint8_t PIN_STRIP_R = 5;    // RIGHT strip DIN (was D7 until 2026-10-31) — its own pin: WS2812B data
                                   // is DIN->DOUT only, a cut segment cannot
                                   // share a feed (Appendix CY)
@@ -93,7 +93,9 @@ const uint8_t PIN_DIR_A  = 8;    // TB6612 AIN1+BIN1 (bridged; the "zero spare
 const uint8_t PIN_SERVO  = 7;    // Servo claims Timer1 (any pin works); was D9 until 2026-10-31
 const uint8_t PIN_STBY   = 10;   // TB6612 STBY — master enable
 const uint8_t PIN_MOTOR  = 11;   // Timer2 PWM
-const uint8_t PIN_DIR_B  = 12;   // TB6612 AIN2+BIN2
+const uint8_t PIN_DIR_B  = 9;    // TB6612 AIN2+BIN2. Was D12 until 2026-11-01: on the car, D12 did not hold
+                                 // LOW in forward (twitch) with its jumper in the right socket (Evan); D9 is
+                                 // free and only ever digitalWrite here (Timer1's PWM on D9/D10 is lost to Servo)
 const uint8_t PIN_STATUS = 13;
 
 // ---- protocol --------------------------------------------------------------

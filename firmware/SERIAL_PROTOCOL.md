@@ -34,7 +34,7 @@ The map below is the corrected one. **`docs/BOM.md`'s diagram used to double-boo
 | D9 | ~~steering servo~~ **FREE** since 2026-10-31 (servo moved to D7, record MD) | plain digital spare; its PWM stays dead while Servo owns Timer1 |
 | D10 | **TB6612 `STBY`** — master driver enable | added 2026-09-02, Appendix BL. Its PWM is already dead (Servo owns Timer1), so it is the cheapest free pin; spending it here keeps A1–A5 for future analog (motor current sense) |
 | D11 | motor PWM | **Timer2** — see below. Drives PWMA **and PWMB, bridged** |
-| D12 | motor DIR B | → TB6612 AIN2 **and BIN2, bridged** |
+| ~~D12~~ **D9** | motor DIR B | → TB6612 AIN2 **and BIN2, bridged**. Moved D12 -> D9 on 2026-11-01 (record NE): D12 did not hold LOW in forward on the car. D9's PWM is lost to Servo (Timer1); DIR only needs digitalWrite |
 | D13 | status LED | onboard; heartbeat + fault code |
 
 **Motor PWM must be on Timer2 (D11), not Timer0 (D5/D6).** Timer0 also drives

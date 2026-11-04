@@ -116,9 +116,9 @@
 <text x="640" y="840" font-size="13" fill="#555">(step 7)</text>
 <rect x="22" y="857" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
 <text x="46" y="870" font-size="15" font-weight="600" fill="#111">U1/2</text>
-<text x="210" y="870" font-size="15" font-weight="600" fill="#111">D12</text>
+<text x="210" y="870" font-size="15" font-weight="600" fill="#111">D9</text>
 <text x="460" y="870" font-size="15" font-weight="700" fill="#1565c0">BEEP</text>
-<text x="640" y="870" font-size="13" fill="#555">(step 7)</text>
+<text x="640" y="870" font-size="13" fill="#555">(step 7; was D12 until 2026-11-01)</text>
 <rect x="16" y="880" width="1068" height="30" fill="#f3f3f3"/>
 <rect x="22" y="887" width="13" height="13" fill="none" stroke="#333" stroke-width="1.5"/>
 <text x="46" y="900" font-size="15" font-weight="600" fill="#111">U1/3</text>

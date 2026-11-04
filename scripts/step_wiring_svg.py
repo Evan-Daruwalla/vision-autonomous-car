@@ -294,7 +294,9 @@ def build_5(d: dict) -> str:
           "puts motor voltage on the encoder.",
           f"5. Yellow into {enc['yellow']}, white into {enc['white']}.",
           "6. Car on a stand, wheels off the ground. Uno on the Pi's USB, then rocker ON.",
-          "7. Run host_test.py --wired at 20 % duty, both directions."]
+          "7. On the Pi: host_test.py --wired (banner, SELFTEST, link; it sends throttle 0 only). Then "
+          "teleop.py --max-throttle 20 (not --bench: bench forces throttle 0), pad RT forward, LT reverse; "
+          "watch the ticks row on the page."]
     chk = [f"- Before step 6, power off: J1 +5V2 ({j1['5V2']}) to J5 VBAT ({j5['VBAT']}) is SILENT. A beep = STOP.",
            "- ticks count up one way and down the other.",
            "- About 358 counts per output-shaft turn by hand (12 CPR x 29.86:1).",

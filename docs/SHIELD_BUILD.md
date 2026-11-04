@@ -74,7 +74,7 @@ In order: (1) top: straight down on the finished top side, every hole shown, par
 ## Uno sockets and joins
 
 - Dupont U1/1 -> Uno D11
-- Dupont U1/2 -> Uno D12
+- Dupont U1/2 -> Uno ~~D12~~ **D9 (2026-11-01, record NE)**
 - Dupont U1/3 -> Uno D8
 - Dupont U1/4 -> Uno D10
 - Dupont U1/9 -> Uno A0
@@ -136,7 +136,7 @@ In order: (1) top: straight down on the finished top side, every hole shown, par
    - w5 B/2 -> P3/-2 (servo GND to the star).
    - Check: J5 top pin (L3/10) now beeps to VMOT (through w1); VBAT (L3/10) to B/10 SILENT; V/0 to B/2 SILENT; P4/7 to B/2 SILENT
 8. **7. Dupont wires to the Uno sockets (cut a male-male jumper, solder the cut end in the hole)**
-   - U1/1 -> D11, U1/2 -> D12, U1/3 -> D8, U1/4 -> D10.
+   - U1/1 -> D11, U1/2 -> ~~D12~~ **D9 (2026-11-01, record NE)**, U1/3 -> D8, U1/4 -> D10.
    - U1/9 -> A0.  ~~L1/-3 -> D9 / D7 (2026-10-31, as built, record MD).~~ **2026-10-31 (record MI): servo signal lead straight into D7.**
    - ~~L3/12 -> D4 / D6 and L3/13 -> D7 / D5 (2026-10-31, as built, record MD), each with 200 + 200 ohm soldered in series IN the wire, heat-shrunk.~~ **2026-10-31 (record MI): the resistors were never built; the strip DIN leads go straight into D6 / D5 through 400 ohm (2 x 200) in the jumper - not built yet, lights later.**
    - Encoder yellow -> D2 socket, white -> D3 socket (male pins on the cable, not through the shield).

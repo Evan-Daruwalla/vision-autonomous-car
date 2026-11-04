@@ -117,7 +117,7 @@ flowchart LR
   UNO["Arduino Uno"]
   UNO -- "D11 PWM" --> TBP["TB6612 PWMA + PWMB"]
   UNO -- "D8" --> TBA["TB6612 AIN1 + BIN1"]
-  UNO -- "D12" --> TBB["TB6612 AIN2 + BIN2"]
+  UNO -- "D9 (was D12 until 2026-11-01, record NE)" --> TBB["TB6612 AIN2 + BIN2"]
   UNO -- "D10" --> TBS["TB6612 STBY"]
   UNO -- "5V" --> TBV["TB6612 VCC - logic supply"]
   UNO -- "D7 (was D9 until 2026-10-31, record MD)" --> SERVO["Servo signal"]
@@ -191,7 +191,7 @@ flowchart LR
 |---|---|---|---|
 | `M_PWM` | **D11** | `PWMA` **and** `PWMB` bridged | Timer2. One pin drives both channels |
 | `M_DIR1` | **D8** | `AIN1` **and** `BIN1` bridged | |
-| `M_DIR2` | **D12** | `AIN2` **and** `BIN2` bridged | |
+| `M_DIR2` | ~~**D12**~~ **D9 (2026-11-01, record NE)** | `AIN2` **and** `BIN2` bridged | |
 | `M_STBY` | **D10** | `STBY` | **§4.1 — this net did not exist until 2026-09-02** |
 | `VCC` | Uno `5V` | `VCC` | logic supply, 2.7–5.5 V |
 | — | — | `AO1` + `BO1` bridged → motor M1 | output side of the parallel |

@@ -770,7 +770,7 @@
   },
   {
    "hole": "U1/2",
-   "uno": "D12"
+   "uno": "D9"
   },
   {
    "hole": "U1/3",
@@ -826,7 +826,7 @@
   "DIR2": [
    "TB.AIN2",
    "TB.BIN2",
-   "uno:D12"
+   "uno:D9"
   ],
   "STBY": [
    "TB.STBY",
@@ -996,7 +996,7 @@
   {
    "title": "7. Dupont wires to the Uno sockets (cut a male-male jumper, solder the cut end in the hole)",
    "do": [
-    "U1/1 -> D11, U1/2 -> D12, U1/3 -> D8, U1/4 -> D10.",
+    "U1/1 -> D11, U1/2 -> D9 (was D12 until 2026-11-01, record NE), U1/3 -> D8, U1/4 -> D10.",
     "U1/9 -> A0.",
     "Servo signal lead straight into D7 (male-male jumper); servo V+ / GND on J2 middle / bottom (record MI).",
     "Encoder yellow -> D2 socket, white -> D3 socket (male pins on the cable, not through the shield).",

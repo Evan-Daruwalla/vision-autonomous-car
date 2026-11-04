@@ -308,7 +308,7 @@
 <circle cx="1225" cy="194" r="3" fill="#555555"/>
 <text x="1217" y="198" font-size="10.5" fill="#555555" text-anchor="end">AIN2 + BIN2</text>
 <path d="M1225 194 L1248 194" fill="none" stroke="#555555" stroke-width="1.5"/>
-<text x="1251" y="198" font-size="11" fill="#C62828" text-anchor="start" font-weight="bold">D12</text>
+<text x="1251" y="198" font-size="11" fill="#C62828" text-anchor="start" font-weight="bold">D9</text>
 <circle cx="1225" cy="216" r="3" fill="#555555"/>
 <text x="1217" y="220" font-size="10.5" fill="#555555" text-anchor="end">STBY</text>
 <path d="M1225 216 L1248 216" fill="none" stroke="#555555" stroke-width="1.5"/>

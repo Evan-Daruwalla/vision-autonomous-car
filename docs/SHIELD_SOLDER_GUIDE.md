@@ -178,7 +178,7 @@ Cut a male-male jumper, strip the cut end, solder it in the hole; the male pin
 plugs into the shield's own socket for that Uno pin. Digital pins are on the
 top header, A0 on the bottom header.
 
-- [ ] U1/1 -> D11, U1/2 -> D12, U1/3 -> D8, U1/4 -> D10.
+- [ ] U1/1 -> D11, U1/2 -> ~~D12~~ **D9 (2026-11-01, record NE)**, U1/3 -> D8, U1/4 -> D10.
 - [ ] U1/9 -> A0. ~~L1/-3 -> D9 / D7 (2026-10-31, as built, record MD).~~ **2026-10-31 (record MI): servo signal lead straight into D7.**
 - [ ] ~~L3/12 -> D4 / D6 and L3/13 -> D7 / D5 (2026-10-31, as built, record MD), each with 200 + 200 ohm soldered in series IN the wire, then heat-shrunk.~~ **2026-10-31 (record MI): resistors never built; strip DIN leads go straight into D6 / D5 through 400 ohm in the jumper - not built yet, lights later.**
 - [ ] Encoder yellow -> D2 socket, white -> D3 socket (male pins on the cable,

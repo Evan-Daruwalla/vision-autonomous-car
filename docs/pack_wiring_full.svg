@@ -138,7 +138,7 @@
 <text x="890" y="179" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">VCC &lt;- Uno 5V</text>
 <text x="890" y="194" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">PWMA+B &lt;- D11</text>
 <text x="890" y="209" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">AIN1+BIN1 &lt;- D8</text>
-<text x="890" y="224" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">AIN2+BIN2 &lt;- D12</text>
+<text x="890" y="224" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">AIN2+BIN2 &lt;- D9</text>
 <text x="890" y="239" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">STBY &lt;- D10</text>
 <text x="890" y="254" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">470-1000 uF</text>
 <text x="890" y="269" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold"> VM-GND, at board</text>
@@ -182,7 +182,7 @@
 <rect x="882" y="530" width="296" height="106" rx="6" fill="#F5F5F2" stroke="#5F5E5A" stroke-width="1"/>
 <text x="890" y="548" font-size="13" fill="#2C2C2A" text-anchor="start" font-weight="bold">Uno R3 (shield sits on it)</text>
 <text x="890" y="566" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">powered by the Pi's USB (JF), NOT the pack</text>
-<text x="890" y="581" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">D11 D8 D12 D10 -&gt; TB6612, D2 D3 &lt;- encoder</text>
+<text x="890" y="581" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">D11 D8 D9 D10 -&gt; TB6612, D2 D3 &lt;- encoder</text>
 <text x="890" y="596" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">D6 D5 -&gt; strips (via 400 ohm), A0 &lt;- divider</text>
 <text x="890" y="611" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">5V -&gt; TB6612 VCC + servo V+ (JR, NOT the pack)</text>
 <text x="890" y="626" font-size="11" fill="#4A4A46" text-anchor="start" font-weight="bold">+5V2 must NEVER touch the Uno 5V pin</text>

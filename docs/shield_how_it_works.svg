@@ -72,7 +72,7 @@
 <text x="784.0" y="1085.9" font-size="14">Signals (the Uno's pins)</text>
 <rect x="720" y="1117.4464944649446" width="650" height="96" rx="6" fill="#fffbe6" stroke="#e0c060"/>
 <text x="728.0" y="1136.4" font-size="11">Involved</text>
-<text x="728.0" y="1150.4" font-size="11">D11 PWM, D8 + D12 direction, D10 enable -&gt; TB6612</text>
+<text x="728.0" y="1150.4" font-size="11">D11 PWM, D8 + D9 direction, D10 enable -&gt; TB6612</text>
 <text x="728.0" y="1164.4" font-size="11">D7 -&gt; servo signal (lead straight to the Uno)</text>
 <text x="728.0" y="1178.4" font-size="11">D6 / D5 -&gt; LED data, straight leads, 400 ohm each (not built)</text>
 <text x="728.0" y="1192.4" font-size="11">A0 &lt;- divider (R100k over R10k + R2k)</text>
